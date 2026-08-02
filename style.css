@@ -1,0 +1,262 @@
+/* ============================================================
+   Kurvenjagd - Aussehen der App
+   CSS beschreibt nur, WIE die Elemente aus index.html aussehen.
+   ============================================================ */
+
+:root {
+  --bg:        #14161a;
+  --panel:     #1c1f26;
+  --panel-2:   #23272f;
+  --line:      #333842;
+  --text:      #e8eaed;
+  --muted:     #9aa2ae;
+  --accent:    #ff7a1a;   /* Orange - die Signalfarbe der App */
+  --accent-dk: #d9620c;
+  --good:      #4ade80;
+  --radius:    10px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+}
+
+/* Zwei Spalten: Bedienfeld links, Karte rechts */
+body {
+  display: flex;
+}
+
+/* ---------- Bedienfeld ---------- */
+#panel {
+  width: 330px;
+  flex: 0 0 330px;
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+  padding: 18px 18px 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+#panel header h1 {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: -0.3px;
+}
+#panel header h1::before {
+  content: "";
+  display: inline-block;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-right: 8px;
+  vertical-align: middle;
+}
+.sub { margin: 2px 0 0; color: var(--muted); font-size: 12px; }
+
+.block h2 {
+  margin: 0 0 8px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.hint  { color: var(--muted); font-size: 12px; margin: 8px 0 0; line-height: 1.45; }
+.tiny  { color: #6b727d; font-size: 11px; line-height: 1.5; }
+.tiny a, .hint a { color: var(--muted); }
+
+/* ---------- Umschalter Kurvig / Schnell ---------- */
+.segmented {
+  display: flex;
+  background: var(--panel-2);
+  border-radius: var(--radius);
+  padding: 3px;
+  gap: 3px;
+}
+.seg {
+  flex: 1;
+  padding: 9px 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.seg.active { background: var(--accent); color: #1a1206; }
+
+/* ---------- Buttons ---------- */
+.row { display: flex; gap: 8px; margin-top: 10px; }
+.btn {
+  flex: 1;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: #1a1206;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn:hover { background: var(--accent-dk); }
+.btn.ghost {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-weight: 500;
+}
+.btn.ghost:hover { border-color: var(--muted); color: var(--text); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ---------- Listen ---------- */
+.badge {
+  display: inline-block;
+  min-width: 18px;
+  padding: 1px 6px;
+  border-radius: 9px;
+  background: var(--panel-2);
+  color: var(--text);
+  font-size: 11px;
+  text-align: center;
+}
+
+.wp-list, .saved-list { list-style: none; margin: 0; padding: 0; }
+
+.wp-list li, .saved-list li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 9px;
+  background: var(--panel-2);
+  border-radius: 8px;
+  margin-bottom: 5px;
+  font-size: 13px;
+}
+.wp-list li.empty, .saved-list li.empty {
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  padding: 4px 0;
+}
+.wp-num {
+  width: 20px; height: 20px;
+  flex: 0 0 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #1a1206;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.wp-coord { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.saved-list li { cursor: pointer; justify-content: space-between; }
+.saved-list li:hover { background: #2b303a; }
+.saved-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.saved-meta { color: var(--muted); font-size: 11px; }
+.del {
+  border: 0; background: transparent; color: var(--muted);
+  cursor: pointer; font-size: 16px; line-height: 1; padding: 0 2px;
+}
+.del:hover { color: #ff6b6b; }
+
+/* ---------- Statistik ---------- */
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.stat {
+  background: var(--panel-2);
+  border-radius: 8px;
+  padding: 9px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.stat .k { font-size: 11px; color: var(--muted); }
+.stat .v { font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.stat.highlight { grid-column: 1 / -1; border: 1px solid var(--accent); }
+.stat.highlight .v { color: var(--accent); }
+
+.curvebar {
+  height: 6px;
+  background: var(--panel-2);
+  border-radius: 3px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+.curvebar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #4ade80, #facc15, var(--accent));
+  transition: width 0.4s ease;
+}
+
+/* ---------- Karte ---------- */
+#mapWrap { flex: 1; position: relative; }
+#map { position: absolute; inset: 0; background: #202329; }
+
+/* Leaflet-Bedienelemente etwas dunkler einfaerben */
+.leaflet-control-attribution { display: none; }  /* wir zeigen die Quellen links im Panel */
+
+/* Nummerierte Wegpunkt-Marker */
+.wp-marker {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #1a1206;
+  border: 2px solid #1a1206;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 12px;
+  font-family: -apple-system, sans-serif;
+}
+
+/* ---------- Overlays ---------- */
+.toast {
+  position: absolute;
+  top: 16px; left: 50%;
+  transform: translateX(-50%);
+  background: #2b2018;
+  border: 1px solid var(--accent);
+  color: var(--text);
+  padding: 10px 16px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  z-index: 1000;
+  max-width: 70%;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+}
+
+.busy {
+  position: absolute;
+  inset: 0;
+  background: rgba(20,22,26,0.55);
+  display: flex; align-items: center; justify-content: center;
+  gap: 12px;
+  z-index: 999;
+  color: var(--text);
+  font-size: 14px;
+}
+.spinner {
+  width: 22px; height: 22px;
+  border: 3px solid rgba(255,255,255,0.15);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- Schmale Fenster ---------- */
+@media (max-width: 760px) {
+  body { flex-direction: column; }
+  #panel { width: 100%; flex: 0 0 auto; max-height: 45vh; border-right: 0; border-bottom: 1px solid var(--line); }
+  #mapWrap { flex: 1; min-height: 55vh; }
+}

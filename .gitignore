@@ -1,0 +1,8 @@
+# macOS legt diese Datei in jedem Ordner an - gehoert nicht ins Projekt
+.DS_Store
+
+# Falls spaeter Pakete dazukommen
+node_modules/
+
+# Heruntergeladene Routen
+*.gpx

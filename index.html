@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<!--
+  Kurvenjagd - Motorrad-Routenplaner, Version 0.1
+
+  Diese Datei ist das "Skelett" der Seite: sie sagt, WELCHE Elemente es gibt.
+  Das Aussehen steckt in style.css, die Logik in app.js.
+-->
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kurvenjagd - Motorrad-Routenplaner</title>
+
+  <!-- Leaflet ist die Kartenbibliothek. Wir laden sie von einem CDN,
+       damit wir nichts installieren muessen. -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ===== Linke Spalte: Bedienfeld ===== -->
+  <aside id="panel">
+    <header>
+      <h1>Kurvenjagd</h1>
+      <p class="sub">Routenplaner v0.1</p>
+    </header>
+
+    <!-- Fahrstil: bestimmt, wie die Route berechnet wird -->
+    <section class="block">
+      <h2>Fahrstil</h2>
+      <div class="segmented" id="modeSwitch">
+        <button class="seg active" data-mode="kurvig">Kurvig</button>
+        <button class="seg" data-mode="schnell">Schnell</button>
+      </div>
+      <p class="hint" id="modeHint">
+        Sucht mehrere Varianten und waehlt die kurvigste.
+      </p>
+    </section>
+
+    <!-- Wegpunkte -->
+    <section class="block">
+      <h2>Wegpunkte <span class="badge" id="wpCount">0</span></h2>
+      <ol id="wpList" class="wp-list">
+        <li class="empty">Klick auf die Karte, um zu starten.</li>
+      </ol>
+      <div class="row">
+        <button class="btn ghost" id="btnUndo">Letzten entfernen</button>
+        <button class="btn ghost" id="btnClear">Alles loeschen</button>
+      </div>
+    </section>
+
+    <!-- Ergebnis der Berechnung -->
+    <section class="block" id="statsBlock" hidden>
+      <h2>Route</h2>
+      <div class="stats">
+        <div class="stat"><span class="k">Distanz</span><span class="v" id="statDist">-</span></div>
+        <div class="stat"><span class="k">Fahrzeit</span><span class="v" id="statTime">-</span></div>
+        <div class="stat"><span class="k">Hoehenmeter</span><span class="v" id="statAsc">-</span></div>
+        <div class="stat highlight"><span class="k">Kurven-Score</span><span class="v" id="statCurve">-</span></div>
+      </div>
+      <div class="curvebar"><div class="curvebar-fill" id="curveFill"></div></div>
+      <p class="hint" id="curveWord"></p>
+      <div class="row">
+        <button class="btn" id="btnSave">Route speichern</button>
+        <button class="btn ghost" id="btnGpx">GPX export</button>
+      </div>
+    </section>
+
+    <!-- Gespeicherte Routen -->
+    <section class="block">
+      <h2>Meine Routen</h2>
+      <ul id="savedList" class="saved-list">
+        <li class="empty">Noch nichts gespeichert.</li>
+      </ul>
+    </section>
+
+    <footer>
+      <p class="tiny">
+        Karte &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>-Mitwirkende &middot;
+        Routing <a href="https://brouter.de" target="_blank">BRouter</a>
+      </p>
+    </footer>
+  </aside>
+
+  <!-- ===== Rechts: die Karte ===== -->
+  <main id="mapWrap">
+    <div id="map"></div>
+    <div id="toast" class="toast" hidden></div>
+    <div id="busy" class="busy" hidden><div class="spinner"></div><span>Route wird berechnet...</span></div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
