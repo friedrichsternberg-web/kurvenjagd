@@ -126,7 +126,11 @@ function renderWaypointList() {
 
 function brouterUrl(points, profile, altIdx) {
   const pts = points.map(w => `${w.lon.toFixed(6)},${w.lat.toFixed(6)}`).join('|');
-  return `${BROUTER}?lonlats=${pts}&profile=${profile}&alternativeidx=${altIdx}&format=geojson`;
+  // consider_town ist ein Profil-Parameter von BRouter (Bestaetigt live
+  // getestet), der Ortsdurchfahrten meidet, wo es eine Alternative gibt -
+  // genau das, was eine Motorrad-App mit Landstrassen-Fokus will, statt
+  // durch enge Stadtstrassen mit vielen Abbiegungen geschickt zu werden.
+  return `${BROUTER}?lonlats=${pts}&profile=${profile}&alternativeidx=${altIdx}&format=geojson&profile:consider_town=1`;
 }
 
 async function fetchRoute(points, profile, altIdx) {
@@ -391,8 +395,9 @@ async function generateRoundTrip() {
   // WIRKLICH angezeigt wird (also nach der Kurvigkeits-Auswahl) - nicht nur
   // gegen eine einzelne Testvariante. Sonst wuerde bei ganz rechts stehendem
   // Regler (Umwege spielen keine Rolle) die Distanz-Pruefung ins Leere laufen.
-  let bester = null;
-  const MAX_VERSUCHE = 4;
+  let bester = null;         // beste Variante ganz OHNE erkannte Sackgasse
+  let naechstbester = null;  // Rueckfalloption, falls jeder Versuch eine Sackgasse hat
+  const MAX_VERSUCHE = 5;
 
   for (let versuch = 0; versuch < MAX_VERSUCHE; versuch++) {
     const zufallspunkte = randomLoopPoints(start, radius, zielKm);
@@ -411,12 +416,25 @@ async function generateRoundTrip() {
 
     routes.forEach(r => { r.curviness = curviness(r.coords); });
     const kandidatBest = pickBestRoute(routes, t);
-    const abweichung = Math.abs(kandidatBest.distance - zielKm * 1000) / (zielKm * 1000);
 
-    if (!bester || abweichung < bester.abweichung) {
-      bester = { routes, best: kandidatBest, abweichung };
+    // Ein zufaelliger Punkt kann in einer Sackgasse landen (Feldweg,
+    // Wohnstrasse ohne Durchfahrt) - BRouter faehrt dann hin und muss auf
+    // demselben Weg zurueck. Bei mehreren Zufallspunkten pro Versuch reicht
+    // schon einer davon, um den ganzen Versuch zu verwerfen - deshalb hier
+    // nur zaehlen statt sofort aufzugeben, und als Rueckfall den Versuch
+    // mit den wenigsten Sackgassen merken.
+    const sackgassenAnzahl = zufallspunkte.filter(p => isDeadEndApproach(kandidatBest.coords, p)).length;
+    const abweichung = Math.abs(kandidatBest.distance - zielKm * 1000) / (zielKm * 1000);
+    const eintrag = { routes, best: kandidatBest, abweichung, sackgassenAnzahl };
+
+    if (sackgassenAnzahl === 0) {
+      if (!bester || abweichung < bester.abweichung) bester = eintrag;
+      if (abweichung < 0.15) break; // sauberer Versuch, nah an der Wunschdistanz - fertig
+    } else if (!naechstbester
+        || sackgassenAnzahl < naechstbester.sackgassenAnzahl
+        || (sackgassenAnzahl === naechstbester.sackgassenAnzahl && abweichung < naechstbester.abweichung)) {
+      naechstbester = eintrag;
     }
-    if (abweichung < 0.15) break; // nah genug an der Wunschdistanz - fertig
 
     // Radius im Verhaeltnis zur Abweichung nachjustieren und nochmal versuchen.
     radius *= (zielKm * 1000) / kandidatBest.distance;
@@ -424,14 +442,46 @@ async function generateRoundTrip() {
 
   setBusy(false);
 
-  if (!bester) {
+  const ergebnis = bester || naechstbester;
+  if (!ergebnis) {
     showToast('Rundtour fehlgeschlagen - anderen Startpunkt oder andere Distanz probieren.');
     return;
   }
 
-  state.route = bester.best;
-  drawRoutes(bester.routes, bester.best);
-  showStats(bester.best);
+  state.route = ergebnis.best;
+  drawRoutes(ergebnis.routes, ergebnis.best);
+  showStats(ergebnis.best);
+}
+
+// Prueft, ob die Route einen Punkt nur als Sackgasse anfaehrt: hin und auf
+// demselben Weg sofort wieder zurueck. Wichtig: eine Kehrtwende in der
+// Fahrtrichtung ALLEIN reicht als Erkennungsmerkmal nicht, denn genau das
+// passiert auch bei einer enge Haarnadelkurve - und die wollen wir ja.
+// Der eigentliche Unterschied: bei einer Sackgasse liegen die Koordinaten
+// kurz VOR und kurz NACH der Umkehrstelle raeumlich fast am selben Ort
+// (man faehrt buchstaeblich dieselbe Strecke zurueck). Bei einer
+// Haarnadelkurve liegen Hin- und Rueckweg dagegen einige Meter auseinander.
+function isDeadEndApproach(coords, punkt) {
+  let naechsterIdx = 0, kleinsterAbstand = Infinity;
+  for (let i = 0; i < coords.length; i++) {
+    const abstand = haversine(punkt.lat, punkt.lon, coords[i][1], coords[i][0]);
+    if (abstand < kleinsterAbstand) { kleinsterAbstand = abstand; naechsterIdx = i; }
+  }
+
+  const PRUEF_ABSTAND = 8; // wie viele Streckenpunkte vor/nach verglichen werden
+  let uebereinstimmend = 0, geprueft = 0;
+
+  for (let k = 1; k <= PRUEF_ABSTAND; k++) {
+    const vor = coords[naechsterIdx - k];
+    const nach = coords[naechsterIdx + k];
+    if (!vor || !nach) break;
+    geprueft++;
+    if (haversine(vor[1], vor[0], nach[1], nach[0]) < 15) uebereinstimmend++;
+  }
+
+  // Wenn der Grossteil der verglichenen Punktepaare praktisch deckungsgleich
+  // ist, wurde derselbe Weg zurueckgefahren -> Sackgasse.
+  return geprueft > 0 && uebereinstimmend / geprueft > 0.7;
 }
 
 // Verteilt Zufallspunkte im Kreis um den Startpunkt - je laenger die
