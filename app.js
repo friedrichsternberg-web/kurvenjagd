@@ -306,16 +306,23 @@ function hideSearchResults() {
    Aendert sich diese Richtung staendig stark, ist die Strasse kurvig.
    Ergebnis: Grad Richtungsaenderung pro Kilometer.                          */
 
-function curviness(coords) {
-  // Sehr dicht liegende Punkte erzeugen Rauschen -> auf ~30 m ausduennen.
+// Sehr dicht liegende Streckenpunkte erzeugen Rauschen (und kosten unnoetig
+// Rechenzeit) - deshalb duennen wir auf einen Mindestabstand aus, bevor wir
+// Kurvigkeit oder Ueberlappung berechnen.
+function thinCoords(coords, mindestabstandMeter) {
   const pts = [];
   let last = null;
   for (const c of coords) {
-    if (!last || haversine(last[1], last[0], c[1], c[0]) > 30) {
+    if (!last || haversine(last[1], last[0], c[1], c[0]) > mindestabstandMeter) {
       pts.push(c);
       last = c;
     }
   }
+  return pts;
+}
+
+function curviness(coords) {
+  const pts = thinCoords(coords, 30);
   if (pts.length < 3) return 0;
 
   let turned = 0;   // Summe aller Richtungsaenderungen in Grad
@@ -345,6 +352,51 @@ function bearing(a, b) {
   const y = Math.sin(dLon) * Math.cos(la2);
   const x = Math.cos(la1) * Math.sin(la2) - Math.sin(la1) * Math.cos(la2) * Math.cos(dLon);
   return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+}
+
+// Schaetzt, welcher Anteil der Strecke an anderer Stelle derselben Route
+// noch einmal (fast) genauso abgefahren wird - also Hin- und Rueckweg auf
+// derselben Strasse. Das ist das Kennzeichen einer echten Sackgasse und
+// passiert in den Alpen oft ueber ganze Taeler (10+ km), nicht nur auf
+// kurzen Stichstrassen - ein enger lokaler Vergleich wie bei einer
+// Haarnadelkurve reicht da nicht, wir muessen die GANZE Route miteinander
+// vergleichen.
+function overlapAnteil(coords) {
+  const pts = thinCoords(coords, 60);
+  if (pts.length < 20) return 0;
+
+  // Punkte in ein grobes Gitter einsortieren (Zellen von ca. 200m), damit
+  // wir nicht jeden Punkt mit jedem anderen vergleichen muessen - das waere
+  // bei einer langen Rundtour zu langsam.
+  const zellSchluessel = (lat, lon) => `${Math.round(lat * 500)}:${Math.round(lon * 500)}`;
+  const gitter = new Map();
+  pts.forEach((p, i) => {
+    const k = zellSchluessel(p[1], p[0]);
+    if (!gitter.has(k)) gitter.set(k, []);
+    gitter.get(k).push(i);
+  });
+
+  const MINDEST_INDEXABSTAND = 15; // "weit auseinander im Streckenverlauf" (~900m bei 60m-Ausduennung)
+
+  // Prueft fuer einen Punkt, ob irgendwo weit entfernt im Streckenverlauf
+  // ein raeumlich fast identischer Punkt liegt (Hin-/Rueckweg auf derselben
+  // Strasse).
+  function hatDeckungsgleichenPunkt(p, i) {
+    const latZelle = Math.round(p[1] * 500), lonZelle = Math.round(p[0] * 500);
+    for (let dz = -1; dz <= 1; dz++) {
+      for (let dw = -1; dw <= 1; dw++) {
+        const nachbarn = gitter.get(`${latZelle + dz}:${lonZelle + dw}`) || [];
+        for (const j of nachbarn) {
+          if (Math.abs(j - i) < MINDEST_INDEXABSTAND) continue;
+          if (haversine(p[1], p[0], pts[j][1], pts[j][0]) < 25) return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  const ueberlappend = pts.filter((p, i) => hatDeckungsgleichenPunkt(p, i)).length;
+  return ueberlappend / pts.length;
 }
 
 // Luftlinie zwischen zwei Koordinaten in Metern
@@ -395,9 +447,8 @@ async function generateRoundTrip() {
   // WIRKLICH angezeigt wird (also nach der Kurvigkeits-Auswahl) - nicht nur
   // gegen eine einzelne Testvariante. Sonst wuerde bei ganz rechts stehendem
   // Regler (Umwege spielen keine Rolle) die Distanz-Pruefung ins Leere laufen.
-  let bester = null;         // beste Variante ganz OHNE erkannte Sackgasse
-  let naechstbester = null;  // Rueckfalloption, falls jeder Versuch eine Sackgasse hat
-  const MAX_VERSUCHE = 5;
+  let bester = null;
+  const MAX_VERSUCHE = 6;
 
   for (let versuch = 0; versuch < MAX_VERSUCHE; versuch++) {
     const zufallspunkte = randomLoopPoints(start, radius, zielKm);
@@ -417,24 +468,21 @@ async function generateRoundTrip() {
     routes.forEach(r => { r.curviness = curviness(r.coords); });
     const kandidatBest = pickBestRoute(routes, t);
 
-    // Ein zufaelliger Punkt kann in einer Sackgasse landen (Feldweg,
-    // Wohnstrasse ohne Durchfahrt) - BRouter faehrt dann hin und muss auf
-    // demselben Weg zurueck. Bei mehreren Zufallspunkten pro Versuch reicht
-    // schon einer davon, um den ganzen Versuch zu verwerfen - deshalb hier
-    // nur zaehlen statt sofort aufzugeben, und als Rueckfall den Versuch
-    // mit den wenigsten Sackgassen merken.
-    const sackgassenAnzahl = zufallspunkte.filter(p => isDeadEndApproach(kandidatBest.coords, p)).length;
     const abweichung = Math.abs(kandidatBest.distance - zielKm * 1000) / (zielKm * 1000);
-    const eintrag = { routes, best: kandidatBest, abweichung, sackgassenAnzahl };
 
-    if (sackgassenAnzahl === 0) {
-      if (!bester || abweichung < bester.abweichung) bester = eintrag;
-      if (abweichung < 0.15) break; // sauberer Versuch, nah an der Wunschdistanz - fertig
-    } else if (!naechstbester
-        || sackgassenAnzahl < naechstbester.sackgassenAnzahl
-        || (sackgassenAnzahl === naechstbester.sackgassenAnzahl && abweichung < naechstbester.abweichung)) {
-      naechstbester = eintrag;
+    // Anteil der Strecke, der andernorts auf der Route noch einmal (fast)
+    // deckungsgleich abgefahren wird - das Kennzeichen einer Sackgasse,
+    // egal ob kurzer Feldweg oder ganzes Alpental. Beides zusammen ergibt
+    // eine Gesamtnote: eine Variante, die in EINEM der beiden Punkte
+    // schlecht ist, kann trotzdem gewinnen, wenn sie im anderen sehr gut
+    // ist - nur wenn beides schlecht ist, verliert sie sicher.
+    const overlap = overlapAnteil(kandidatBest.coords);
+    const bewertung = abweichung + overlap * 2;
+
+    if (!bester || bewertung < bester.bewertung) {
+      bester = { routes, best: kandidatBest, bewertung, abweichung, overlap };
     }
+    if (abweichung < 0.15 && overlap < 0.08) break; // nah an der Wunschdistanz und praktisch ueberlappungsfrei - fertig
 
     // Radius im Verhaeltnis zur Abweichung nachjustieren und nochmal versuchen.
     radius *= (zielKm * 1000) / kandidatBest.distance;
@@ -442,52 +490,23 @@ async function generateRoundTrip() {
 
   setBusy(false);
 
-  const ergebnis = bester || naechstbester;
-  if (!ergebnis) {
+  if (!bester) {
     showToast('Rundtour fehlgeschlagen - anderen Startpunkt oder andere Distanz probieren.');
     return;
   }
 
-  state.route = ergebnis.best;
-  drawRoutes(ergebnis.routes, ergebnis.best);
-  showStats(ergebnis.best);
-}
-
-// Prueft, ob die Route einen Punkt nur als Sackgasse anfaehrt: hin und auf
-// demselben Weg sofort wieder zurueck. Wichtig: eine Kehrtwende in der
-// Fahrtrichtung ALLEIN reicht als Erkennungsmerkmal nicht, denn genau das
-// passiert auch bei einer enge Haarnadelkurve - und die wollen wir ja.
-// Der eigentliche Unterschied: bei einer Sackgasse liegen die Koordinaten
-// kurz VOR und kurz NACH der Umkehrstelle raeumlich fast am selben Ort
-// (man faehrt buchstaeblich dieselbe Strecke zurueck). Bei einer
-// Haarnadelkurve liegen Hin- und Rueckweg dagegen einige Meter auseinander.
-function isDeadEndApproach(coords, punkt) {
-  let naechsterIdx = 0, kleinsterAbstand = Infinity;
-  for (let i = 0; i < coords.length; i++) {
-    const abstand = haversine(punkt.lat, punkt.lon, coords[i][1], coords[i][0]);
-    if (abstand < kleinsterAbstand) { kleinsterAbstand = abstand; naechsterIdx = i; }
-  }
-
-  const PRUEF_ABSTAND = 8; // wie viele Streckenpunkte vor/nach verglichen werden
-  let uebereinstimmend = 0, geprueft = 0;
-
-  for (let k = 1; k <= PRUEF_ABSTAND; k++) {
-    const vor = coords[naechsterIdx - k];
-    const nach = coords[naechsterIdx + k];
-    if (!vor || !nach) break;
-    geprueft++;
-    if (haversine(vor[1], vor[0], nach[1], nach[0]) < 15) uebereinstimmend++;
-  }
-
-  // Wenn der Grossteil der verglichenen Punktepaare praktisch deckungsgleich
-  // ist, wurde derselbe Weg zurueckgefahren -> Sackgasse.
-  return geprueft > 0 && uebereinstimmend / geprueft > 0.7;
+  state.route = bester.best;
+  drawRoutes(bester.routes, bester.best);
+  showStats(bester.best);
 }
 
 // Verteilt Zufallspunkte im Kreis um den Startpunkt - je laenger die
 // gewuenschte Tour, desto mehr Punkte fuer eine abwechslungsreichere Form.
 function randomLoopPoints(start, radius, zielKm) {
-  const anzahl = Math.min(6, Math.max(2, Math.round(zielKm / 40)));
+  // Weniger Punkte als man denken wuerde: jeder zusaetzliche Zufallspunkt
+  // ist ein weiterer "Wuerfelwurf", der in einer Sackgasse landen kann -
+  // besonders im Gebirge, wo Taeler oft nur eine einzige Zufahrt haben.
+  const anzahl = Math.min(4, Math.max(2, Math.round(zielKm / 60)));
   const scheibenWinkel = 360 / anzahl;
 
   const punkte = [];
