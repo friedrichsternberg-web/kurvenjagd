@@ -16,14 +16,12 @@
 
 const state = {
   waypoints: [],      // [{lat, lon}, ...] - was der Nutzer geklickt hat
-  mode: 'kurvig',     // 'kurvig' oder 'schnell'
+  planMode: 'punkt',  // 'punkt' (Punkt-zu-Punkt) oder 'rundtour'
+  curveLevel: 100,    // 0-100, vom Kurvigkeits-Regler - 100 = maximal kurvig
   route: null,        // die aktuell angezeigte Route
   markers: [],        // Leaflet-Marker der Wegpunkte
   lines: [],          // Leaflet-Linien (Hauptroute + blasse Alternativen)
 };
-
-// BRouter-Profile. 'car-eco' meidet grosse Strassen, 'car-fast' will schnell sein.
-const PROFILE = { kurvig: 'car-eco', schnell: 'car-fast' };
 
 const BROUTER = 'https://brouter.de/brouter';
 
@@ -37,14 +35,33 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 // Jeder Klick auf die Karte setzt einen Wegpunkt.
-map.on('click', (e) => {
-  state.waypoints.push({ lat: e.latlng.lat, lon: e.latlng.lng });
-  refreshWaypoints();
-  if (state.waypoints.length >= 2) calculateRoute();
-});
+map.on('click', (e) => addWaypoint(e.latlng.lat, e.latlng.lng));
 
 
 /* --- 3. Wegpunkte zeichnen und auflisten --------------------------------- */
+
+// Gemeinsamer Weg, einen Wegpunkt hinzuzufuegen - genutzt vom Kartenklick
+// UND von der Ortssuche weiter unten, damit beide sich gleich verhalten.
+function addWaypoint(lat, lon) {
+  const istErster = state.waypoints.length === 0;
+  state.waypoints.push({ lat, lon });
+  refreshWaypoints();
+
+  // Beim allerersten Wegpunkt gibt es noch keine Route, auf die die Karte
+  // zentrieren koennte - also fahren wir manuell dorthin.
+  if (istErster) map.setView([lat, lon], 12);
+
+  // Im Rundtour-Modus wird nicht automatisch geroutet - das passiert erst,
+  // wenn der Nutzer explizit auf "Rundtour generieren" klickt.
+  if (state.planMode === 'punkt' && state.waypoints.length >= 2) calculateRoute();
+}
+
+// Beschriftung eines Wegpunkt-Markers: im Rundtour-Modus ist der erste
+// Punkt "S" (Start), alles danach ein durchnummerierter Zwischenstopp.
+function waypointLabel(i) {
+  if (state.planMode === 'rundtour') return i === 0 ? 'S' : String(i);
+  return String(i + 1);
+}
 
 function refreshWaypoints() {
   // Alte Marker entfernen ...
@@ -55,7 +72,7 @@ function refreshWaypoints() {
   state.waypoints.forEach((wp, i) => {
     const icon = L.divIcon({
       className: '',
-      html: `<div class="wp-marker">${i + 1}</div>`,
+      html: `<div class="wp-marker">${waypointLabel(i)}</div>`,
       iconSize: [26, 26],
       iconAnchor: [13, 13],
     });
@@ -66,8 +83,16 @@ function refreshWaypoints() {
     marker.on('dragend', (ev) => {
       const p = ev.target.getLatLng();
       state.waypoints[i] = { lat: p.lat, lon: p.lng };
-      if (state.waypoints.length >= 2) calculateRoute();
       renderWaypointList();
+
+      if (state.planMode === 'rundtour') {
+        // Nur neu generieren, wenn schon einmal eine Rundtour berechnet
+        // wurde - sonst wuerde jeder Klick auf die Karte sofort eine
+        // BRouter-Anfrage ausloesen.
+        if (state.route) generateRoundTrip();
+      } else if (state.waypoints.length >= 2) {
+        calculateRoute();
+      }
     });
 
     state.markers.push(marker);
@@ -81,13 +106,15 @@ function renderWaypointList() {
   document.getElementById('wpCount').textContent = state.waypoints.length;
 
   if (state.waypoints.length === 0) {
-    list.innerHTML = '<li class="empty">Klick auf die Karte, um zu starten.</li>';
+    list.innerHTML = state.planMode === 'rundtour'
+      ? '<li class="empty">Klick auf die Karte fuer den Startpunkt.</li>'
+      : '<li class="empty">Klick auf die Karte, um zu starten.</li>';
     return;
   }
 
   list.innerHTML = state.waypoints.map((wp, i) => `
     <li>
-      <span class="wp-num">${i + 1}</span>
+      <span class="wp-num">${waypointLabel(i)}</span>
       <span class="wp-coord">${wp.lat.toFixed(4)}, ${wp.lon.toFixed(4)}</span>
     </li>`).join('');
 }
@@ -97,13 +124,13 @@ function renderWaypointList() {
    BRouter ist ein kostenloser Routing-Dienst auf OpenStreetMap-Basis.
    Wir bauen eine URL, holen GeoJSON und lesen Laenge, Zeit und Hoehe aus.   */
 
-function brouterUrl(profile, altIdx) {
-  const pts = state.waypoints.map(w => `${w.lon.toFixed(6)},${w.lat.toFixed(6)}`).join('|');
+function brouterUrl(points, profile, altIdx) {
+  const pts = points.map(w => `${w.lon.toFixed(6)},${w.lat.toFixed(6)}`).join('|');
   return `${BROUTER}?lonlats=${pts}&profile=${profile}&alternativeidx=${altIdx}&format=geojson`;
 }
 
-async function fetchRoute(profile, altIdx) {
-  const res = await fetch(brouterUrl(profile, altIdx));
+async function fetchRoute(points, profile, altIdx) {
+  const res = await fetch(brouterUrl(points, profile, altIdx));
   const text = await res.text();
 
   // BRouter meldet Fehler als reinen Text, nicht als JSON.
@@ -130,14 +157,17 @@ async function calculateRoute() {
   setBusy(true);
   hideToast();
 
-  const profile = PROFILE[state.mode];
+  const t = state.curveLevel / 100; // 0 = ganz links (schnell), 1 = ganz rechts (maximal kurvig)
 
-  // Im Kurvig-Modus holen wir mehrere Varianten und vergleichen sie.
-  // Im Schnell-Modus reicht die Standardroute.
-  const indices = state.mode === 'kurvig' ? [0, 1, 2, 3] : [0];
+  // Unter 15% Reglerstellung reicht die direkte Route auf groesseren
+  // Strassen (Profil 'car-fast'). Darueber holen wir vier Varianten auf
+  // kleineren Strassen (Profil 'car-eco') und waehlen anhand der
+  // Kurvigkeit aus - BRouter liefert nicht mehr als vier Alternativen.
+  const profile = t < 0.15 ? 'car-fast' : 'car-eco';
+  const indices = profile === 'car-fast' ? [0] : [0, 1, 2, 3];
 
   // Promise.allSettled = alle Anfragen parallel, einzelne Fehler sind ok.
-  const results = await Promise.allSettled(indices.map(i => fetchRoute(profile, i)));
+  const results = await Promise.allSettled(indices.map(i => fetchRoute(state.waypoints, profile, i)));
   const routes = results.filter(r => r.status === 'fulfilled').map(r => r.value);
 
   setBusy(false);
@@ -151,14 +181,119 @@ async function calculateRoute() {
   // Kurvigkeit fuer jede Variante berechnen ...
   routes.forEach(r => { r.curviness = curviness(r.coords); });
 
-  // ... und die beste auswaehlen.
-  const best = state.mode === 'kurvig'
-    ? routes.reduce((a, b) => (b.curviness > a.curviness ? b : a))
-    : routes[0];
+  // ... und anhand des Reglers die beste auswaehlen.
+  const best = pickBestRoute(routes, t);
 
   state.route = best;
   drawRoutes(routes, best);
   showStats(best);
+}
+
+// Waehlt aus mehreren Routenvarianten die beste aus - abhaengig vom
+// Kurvigkeits-Regler. Bei t=1 (Regler ganz rechts) gewinnt IMMER die
+// kurvigste Variante, egal wie viel laenger sie ist - genau das macht
+// die Einstellung "extrem": Umwege werden dann komplett in Kauf genommen.
+// Bei kleinerem t kostet jeder Kilometer Umweg (gegenueber der kuerzesten
+// Variante) Punkte vom Kurven-Score, sodass moderatere Routen gewinnen.
+function pickBestRoute(routes, t) {
+  if (routes.length === 1) return routes[0];
+
+  // Nur der Bereich oberhalb von 15% steuert hier die Auswahl (darunter
+  // greift schon das 'car-fast'-Profil in calculateRoute) - auf 0..1 neu
+  // skalieren, damit 1 wieder "maximal kurvig" bedeutet.
+  const intensitaet = Math.min(1, Math.max(0, (t - 0.15) / 0.85));
+
+  const minDistance = Math.min(...routes.map(r => r.distance));
+  const UMWEG_KOSTEN_PRO_KM = 6; // Punkte Kurven-Score, die ein Kilometer Umweg kostet
+  const strafeProKm = (1 - intensitaet) * UMWEG_KOSTEN_PRO_KM;
+
+  const score = r => r.curviness - strafeProKm * ((r.distance - minDistance) / 1000);
+
+  return routes.reduce((beste, r) => (score(r) > score(beste) ? r : beste));
+}
+
+
+/* --- 4b. Ortssuche --------------------------------------------------------
+   Nominatim ist der kostenlose Geocoding-Dienst von OpenStreetMap: man
+   schickt einen Ortsnamen und bekommt Koordinaten zurueck. Kein API-Key
+   noetig - passt damit zu BRouter, das ebenfalls auf OSM-Daten aufbaut.   */
+
+const NOMINATIM = 'https://nominatim.openstreetmap.org/search';
+
+async function searchPlace(query) {
+  const url = `${NOMINATIM}?format=json&q=${encodeURIComponent(query)}&limit=5`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('Suche fehlgeschlagen');
+  return res.json();
+}
+
+let searchTimer = null;
+let searchRequestId = 0; // zaehlt Anfragen durch, damit veraltete Antworten ignoriert werden
+
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  const query = e.target.value.trim();
+  clearTimeout(searchTimer);
+
+  if (query.length < 3) {
+    hideSearchResults();
+    return;
+  }
+
+  // Erst 400ms nach der letzten Eingabe suchen, sonst laufen bei jedem
+  // Tastendruck einzelne Anfragen los - unnoetig und unhoeflich dem
+  // kostenlosen Dienst gegenueber.
+  searchTimer = setTimeout(() => runSearch(query), 400);
+});
+
+document.getElementById('searchInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') hideSearchResults();
+});
+
+// Klick ausserhalb der Suche schliesst die Vorschlagsliste wieder.
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.search-wrap')) hideSearchResults();
+});
+
+async function runSearch(query) {
+  const eigeneId = ++searchRequestId;
+  let results;
+  try {
+    results = await searchPlace(query);
+  } catch {
+    return; // Netzwerkfehler bei der Live-Suche einfach ignorieren
+  }
+  // Waehrend die Anfrage unterwegs war, wurde weitergetippt -> Antwort verwerfen.
+  if (eigeneId !== searchRequestId) return;
+  renderSearchResults(results);
+}
+
+function renderSearchResults(results) {
+  const list = document.getElementById('searchResults');
+
+  if (results.length === 0) {
+    list.innerHTML = '<li class="empty">Nichts gefunden.</li>';
+    list.hidden = false;
+    return;
+  }
+
+  list.innerHTML = results.map((r, i) =>
+    `<li data-idx="${i}">${escapeHtml(r.display_name)}</li>`).join('');
+  list.hidden = false;
+
+  list.querySelectorAll('li[data-idx]').forEach(li => {
+    li.addEventListener('click', () => {
+      const r = results[Number(li.dataset.idx)];
+      addWaypoint(Number(r.lat), Number(r.lon));
+      hideSearchResults();
+      document.getElementById('searchInput').value = '';
+    });
+  });
+}
+
+function hideSearchResults() {
+  const list = document.getElementById('searchResults');
+  list.hidden = true;
+  list.innerHTML = '';
 }
 
 
@@ -215,6 +350,134 @@ function haversine(lat1, lon1, lat2, lon2) {
   const a = Math.sin(dLat / 2) ** 2 +
             Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+
+/* --- 5b. Rundtour generieren -----------------------------------------------
+   Es gibt keinen kostenlosen Dienst, der auf Zuruf eine Rundtour ab einem
+   Punkt liefert - das bauen wir uns selbst: Zufallspunkte im Kreis um den
+   Start verteilen, nach Himmelsrichtung sortieren (sonst kreuzt sich die
+   Route selbst), als eine zusammenhaengende Route bei BRouter anfragen und
+   die Laenge mit der Wunschdistanz vergleichen. Passt es nicht gut genug,
+   wird der Radius nachjustiert und nochmal versucht.                       */
+
+async function generateRoundTrip() {
+  if (state.waypoints.length === 0) {
+    showToast('Erst einen Startpunkt setzen.');
+    return;
+  }
+
+  const start = state.waypoints[0];
+  const fixeZwischenstopps = state.waypoints.slice(1);
+  const zielKm = Number(document.getElementById('roundtripKm').value);
+
+  if (!zielKm || zielKm < 10) {
+    showToast('Bitte eine Distanz von mindestens 10 km eingeben.');
+    return;
+  }
+
+  setBusy(true);
+  hideToast();
+
+  const t = state.curveLevel / 100;
+  const profile = t < 0.15 ? 'car-fast' : 'car-eco';
+
+  // Grobe erste Schaetzung: der Kreisumfang um diesen Radius soll etwa der
+  // Zieldistanz entsprechen. Strassen sind aber nie schnurgerade, deshalb
+  // ein Aufschlag - und ein groesserer, je kurviger die Route werden soll.
+  let radius = (zielKm * 1000) / (2 * Math.PI * (1.3 + t * 0.6));
+
+  // Wichtig: Wir pruefen die Zieldistanz gegen die Route, die am Ende
+  // WIRKLICH angezeigt wird (also nach der Kurvigkeits-Auswahl) - nicht nur
+  // gegen eine einzelne Testvariante. Sonst wuerde bei ganz rechts stehendem
+  // Regler (Umwege spielen keine Rolle) die Distanz-Pruefung ins Leere laufen.
+  let bester = null;
+  const MAX_VERSUCHE = 4;
+
+  for (let versuch = 0; versuch < MAX_VERSUCHE; versuch++) {
+    const zufallspunkte = randomLoopPoints(start, radius, zielKm);
+    const kandidat = [start, ...sortByBearing(start, [...fixeZwischenstopps, ...zufallspunkte]), start];
+
+    let routes;
+    try {
+      routes = profile === 'car-fast'
+        ? [await fetchRoute(kandidat, profile, 0)]
+        : (await Promise.allSettled([0, 1, 2, 3].map(i => fetchRoute(kandidat, profile, i))))
+            .filter(r => r.status === 'fulfilled').map(r => r.value);
+    } catch {
+      continue; // dieser Versuch hat keine Route ergeben - naechster Versuch mit neuen Zufallspunkten
+    }
+    if (routes.length === 0) continue;
+
+    routes.forEach(r => { r.curviness = curviness(r.coords); });
+    const kandidatBest = pickBestRoute(routes, t);
+    const abweichung = Math.abs(kandidatBest.distance - zielKm * 1000) / (zielKm * 1000);
+
+    if (!bester || abweichung < bester.abweichung) {
+      bester = { routes, best: kandidatBest, abweichung };
+    }
+    if (abweichung < 0.15) break; // nah genug an der Wunschdistanz - fertig
+
+    // Radius im Verhaeltnis zur Abweichung nachjustieren und nochmal versuchen.
+    radius *= (zielKm * 1000) / kandidatBest.distance;
+  }
+
+  setBusy(false);
+
+  if (!bester) {
+    showToast('Rundtour fehlgeschlagen - anderen Startpunkt oder andere Distanz probieren.');
+    return;
+  }
+
+  state.route = bester.best;
+  drawRoutes(bester.routes, bester.best);
+  showStats(bester.best);
+}
+
+// Verteilt Zufallspunkte im Kreis um den Startpunkt - je laenger die
+// gewuenschte Tour, desto mehr Punkte fuer eine abwechslungsreichere Form.
+function randomLoopPoints(start, radius, zielKm) {
+  const anzahl = Math.min(6, Math.max(2, Math.round(zielKm / 40)));
+  const scheibenWinkel = 360 / anzahl;
+
+  const punkte = [];
+  for (let i = 0; i < anzahl; i++) {
+    // Jeder Punkt bekommt eine eigene Himmelsrichtungs-"Scheibe" mit
+    // zufaelligem Winkel darin, damit sie sich gleichmaessig verteilen
+    // statt sich zufaellig auf einer Seite zu haeufen.
+    const winkel = i * scheibenWinkel + Math.random() * scheibenWinkel;
+    const eigenerRadius = radius * (0.7 + Math.random() * 0.6); // 70-130% Streuung
+    punkte.push(destinationPoint(start.lat, start.lon, winkel, eigenerRadius));
+  }
+  return punkte;
+}
+
+// Punkt, der von (lat, lon) aus in eine Richtung (Grad) und Entfernung
+// (Meter) liegt - die Umkehrung von bearing() oben, Standardformel fuer
+// Navigation auf einer Kugel.
+function destinationPoint(lat, lon, bearingDeg, distanceMeters) {
+  const R = 6371000;
+  const toRad = x => x * Math.PI / 180, toDeg = x => x * 180 / Math.PI;
+  const delta = distanceMeters / R;
+  const theta = toRad(bearingDeg);
+  const phi1 = toRad(lat), lambda1 = toRad(lon);
+
+  const phi2 = Math.asin(Math.sin(phi1) * Math.cos(delta) +
+                          Math.cos(phi1) * Math.sin(delta) * Math.cos(theta));
+  const lambda2 = lambda1 + Math.atan2(
+    Math.sin(theta) * Math.sin(delta) * Math.cos(phi1),
+    Math.cos(delta) - Math.sin(phi1) * Math.sin(phi2));
+
+  return { lat: toDeg(phi2), lon: toDeg(lambda2) };
+}
+
+// Sortiert Punkte nach Himmelsrichtung vom Startpunkt aus, damit die
+// Rundtour einmal im Kreis herumfaehrt statt sich selbst zu kreuzen.
+function sortByBearing(start, points) {
+  return points
+    .map(p => ({ p, winkel: bearing([start.lon, start.lat], [p.lon, p.lat]) }))
+    .sort((a, b) => a.winkel - b.winkel)
+    .map(x => x.p);
 }
 
 
@@ -281,12 +544,19 @@ function saveRoute() {
   const name = prompt('Name der Route:', 'Tour vom ' + new Date().toLocaleDateString('de-DE'));
   if (!name) return;
 
+  const istRundtour = state.planMode === 'rundtour';
+
   const all = loadSaved();
   all.unshift({
     id: Date.now(),
     name,
     waypoints: state.waypoints,
-    mode: state.mode,
+    curveLevel: state.curveLevel,
+    roundtrip: istRundtour,
+    // Zufallspunkte einer Rundtour werden nicht gespeichert (nur Start und
+    // feste Zwischenstopps) - beim Laden wird deshalb neu gewuerfelt, mit
+    // dieser Zieldistanz.
+    roundtripKm: istRundtour ? Number(document.getElementById('roundtripKm').value) : undefined,
     distance: state.route.distance,
     curviness: state.route.curviness,
   });
@@ -322,9 +592,20 @@ function renderSaved() {
       const r = loadSaved().find(x => String(x.id) === li.dataset.id);
       if (!r) return;
       state.waypoints = r.waypoints;
-      setMode(r.mode || 'kurvig');
-      refreshWaypoints();
-      calculateRoute();
+      // Aeltere gespeicherte Routen kennen noch 'mode' statt 'curveLevel' -
+      // dafuer hier ein sinnvoller Ersatzwert.
+      const level = r.curveLevel !== undefined ? r.curveLevel : (r.mode === 'schnell' ? 0 : 100);
+      setCurveLevel(level);
+      setPlanMode(r.roundtrip ? 'rundtour' : 'punkt'); // ruft refreshWaypoints() bereits mit auf
+
+      if (r.roundtrip) {
+        // Die Zufallspunkte von damals sind nicht gespeichert - wir
+        // wuerfeln bei derselben Zieldistanz einfach eine neue Variante.
+        document.getElementById('roundtripKm').value = r.roundtripKm || 150;
+        generateRoundTrip();
+      } else {
+        calculateRoute();
+      }
     });
   });
 }
@@ -379,34 +660,68 @@ function showToast(msg) {
 }
 function hideToast() { document.getElementById('toast').hidden = true; }
 
-function setMode(mode) {
-  state.mode = mode;
-  document.querySelectorAll('.seg').forEach(b =>
-    b.classList.toggle('active', b.dataset.mode === mode));
-  document.getElementById('modeHint').textContent = mode === 'kurvig'
-    ? 'Sucht mehrere Varianten und waehlt die kurvigste.'
-    : 'Direkter Weg, groessere Strassen erlaubt.';
+function setCurveLevel(level) {
+  state.curveLevel = level;
+  document.getElementById('curveSlider').value = level;
+  document.getElementById('modeHint').textContent = curveLevelHint(level);
+}
+
+function setPlanMode(mode) {
+  state.planMode = mode;
+  document.querySelectorAll('#planModeSwitch .seg').forEach(b =>
+    b.classList.toggle('active', b.dataset.planMode === mode));
+  document.getElementById('roundtripBlock').hidden = mode !== 'rundtour';
+  refreshWaypoints(); // Hinweistext und Marker-Beschriftung ("S" vs. "1") aktualisieren
+}
+
+function curveLevelHint(level) {
+  if (level < 15)  return 'Direkter Weg, groessere Strassen erlaubt.';
+  if (level < 40)  return 'Leichte Umwege fuer mehr Kurven.';
+  if (level < 70)  return 'Deutliche Umwege fuer spuerbar mehr Kurven.';
+  if (level < 100) return 'Grosse Umwege werden in Kauf genommen.';
+  return 'Maximal kurvig - Umwege spielen keine Rolle.';
 }
 
 
 /* --- 10. Alles verkabeln ------------------------------------------------- */
 
-document.querySelectorAll('.seg').forEach(b => {
-  b.addEventListener('click', () => {
-    setMode(b.dataset.mode);
-    if (state.waypoints.length >= 2) calculateRoute();
-  });
+document.querySelectorAll('#planModeSwitch .seg').forEach(b => {
+  b.addEventListener('click', () => setPlanMode(b.dataset.planMode));
+});
+
+document.getElementById('btnRoundtrip').addEventListener('click', generateRoundTrip);
+
+// Der Regler feuert bei jedem Pixel Bewegung ein 'input'-Event - die Route
+// erst 400ms nach der letzten Bewegung neu berechnen, sonst haemmern wir
+// BRouter mit Anfragen waehrend des Ziehens.
+let curveSliderTimer = null;
+document.getElementById('curveSlider').addEventListener('input', (e) => {
+  setCurveLevel(Number(e.target.value));
+  clearTimeout(curveSliderTimer);
+  curveSliderTimer = setTimeout(() => {
+    if (state.planMode === 'rundtour') {
+      if (state.route) generateRoundTrip();
+    } else if (state.waypoints.length >= 2) {
+      calculateRoute();
+    }
+  }, 400);
 });
 
 document.getElementById('btnUndo').addEventListener('click', () => {
   state.waypoints.pop();
   refreshWaypoints();
-  if (state.waypoints.length >= 2) calculateRoute();
-  else {
-    state.lines.forEach(l => map.removeLayer(l));
-    state.lines = [];
-    document.getElementById('statsBlock').hidden = true;
+
+  if (state.planMode === 'punkt' && state.waypoints.length >= 2) {
+    calculateRoute();
+    return;
   }
+
+  // Eine Rundtour-Route ist nach dem Entfernen eines Punkts nicht mehr
+  // gueltig - erst nach erneutem Klick auf "Rundtour generieren" wieder
+  // anzeigen, statt eine falsche Route stehen zu lassen.
+  state.lines.forEach(l => map.removeLayer(l));
+  state.lines = [];
+  document.getElementById('statsBlock').hidden = true;
 });
 
 document.getElementById('btnClear').addEventListener('click', () => {

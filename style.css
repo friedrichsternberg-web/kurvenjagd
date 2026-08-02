@@ -74,7 +74,44 @@ body {
 .tiny  { color: #6b727d; font-size: 11px; line-height: 1.5; }
 .tiny a, .hint a { color: var(--muted); }
 
-/* ---------- Umschalter Kurvig / Schnell ---------- */
+/* ---------- Ortssuche ---------- */
+.search-wrap { position: relative; }
+.search-input {
+  width: 100%;
+  padding: 9px 11px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--text);
+  font: inherit;
+}
+.search-input:focus { outline: none; border-color: var(--accent); }
+.search-results {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0; right: 0;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  max-height: 220px;
+  overflow-y: auto;
+  z-index: 500;
+}
+.search-results li {
+  padding: 8px 9px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1.35;
+}
+.search-results li:hover { background: #333842; }
+.search-results li.empty { cursor: default; color: var(--muted); }
+.search-results li.empty:hover { background: transparent; }
+
+/* ---------- Umschalter (Planungsart) ---------- */
 .segmented {
   display: flex;
   background: var(--panel-2);
@@ -94,6 +131,44 @@ body {
   cursor: pointer;
 }
 .seg.active { background: var(--accent); color: #1a1206; }
+
+/* ---------- Kurvigkeits-Regler ---------- */
+/* -webkit-appearance/appearance entfernen die Browser-Standardoptik, damit
+   wir Schiene und Griff selbst gestalten koennen - keine Raster-Markierungen,
+   der Regler ist stufenlos bedienbar. */
+.slider {
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #4ade80, #facc15, var(--accent));
+  outline: none;
+  cursor: pointer;
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--text);
+  border: 3px solid var(--accent);
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+.slider::-moz-range-thumb {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--text);
+  border: 3px solid var(--accent);
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+.slider::-moz-range-track {
+  height: 6px;
+  border-radius: 3px;
+  background: transparent; /* Farbe kommt schon vom Element selbst */
+}
 
 /* ---------- Buttons ---------- */
 .row { display: flex; gap: 8px; margin-top: 10px; }

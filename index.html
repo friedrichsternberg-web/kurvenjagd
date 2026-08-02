@@ -27,16 +27,35 @@
       <p class="sub">Routenplaner v0.1</p>
     </header>
 
-    <!-- Fahrstil: bestimmt, wie die Route berechnet wird -->
+    <!-- Planungsart: normale Route zwischen Punkten, oder Rundtour ab
+         einem Startpunkt zurueck zu sich selbst -->
     <section class="block">
-      <h2>Fahrstil</h2>
-      <div class="segmented" id="modeSwitch">
-        <button class="seg active" data-mode="kurvig">Kurvig</button>
-        <button class="seg" data-mode="schnell">Schnell</button>
+      <h2>Planungsart</h2>
+      <div class="segmented" id="planModeSwitch">
+        <button class="seg active" data-plan-mode="punkt">Punkt zu Punkt</button>
+        <button class="seg" data-plan-mode="rundtour">Rundtour</button>
       </div>
+    </section>
+
+    <!-- Kurvigkeit: steuert, wie stark Umwege fuer mehr Kurven in Kauf
+         genommen werden. Ganz rechts (100) gewinnt immer die kurvigste
+         Variante, egal wie viel Umweg das bedeutet. -->
+    <section class="block">
+      <h2>Kurvigkeit</h2>
+      <input type="range" id="curveSlider" class="slider" min="0" max="100" value="100" step="1">
       <p class="hint" id="modeHint">
-        Sucht mehrere Varianten und waehlt die kurvigste.
+        Maximal kurvig - Umwege spielen keine Rolle.
       </p>
+    </section>
+
+    <!-- Ortssuche: Alternative zum Klicken auf die Karte -->
+    <section class="block">
+      <h2>Ort suchen</h2>
+      <div class="search-wrap">
+        <input type="text" id="searchInput" class="search-input"
+               placeholder="Ort oder Adresse eingeben..." autocomplete="off">
+        <ul id="searchResults" class="search-results" hidden></ul>
+      </div>
     </section>
 
     <!-- Wegpunkte -->
@@ -49,6 +68,21 @@
         <button class="btn ghost" id="btnUndo">Letzten entfernen</button>
         <button class="btn ghost" id="btnClear">Alles loeschen</button>
       </div>
+    </section>
+
+    <!-- Rundtour: nur im Rundtour-Modus sichtbar -->
+    <section class="block" id="roundtripBlock" hidden>
+      <h2>Rundtour</h2>
+      <input type="number" id="roundtripKm" class="search-input" min="10" step="5" value="150"
+             placeholder="Ziel-Distanz in km">
+      <div class="row">
+        <button class="btn" id="btnRoundtrip">Rundtour generieren</button>
+      </div>
+      <p class="hint">
+        Erzeugt ab dem Startpunkt (und optionalen Zwischenstopps oben) eine
+        zufaellige Rundtour mit ungefaehr dieser Laenge. Nochmal klicken
+        gibt eine neue Variante.
+      </p>
     </section>
 
     <!-- Ergebnis der Berechnung -->
