@@ -13,6 +13,7 @@
   --accent:    #ff7a1a;   /* Orange - die Signalfarbe der App */
   --accent-dk: #d9620c;
   --good:      #4ade80;
+  --gps:       #4a9eff;   /* Blau - eigener Standort, damit er sich von der orangen Route abhebt */
   --radius:    10px;
 }
 
@@ -272,6 +273,43 @@ body {
   width: 0%;
   background: linear-gradient(90deg, #4ade80, #facc15, var(--accent));
   transition: width 0.4s ease;
+}
+
+/* ---------- Live-Navigation ---------- */
+.nav-btn { background: var(--gps); }
+.nav-btn:hover { background: #3a87e0; }
+
+.nav-panel {
+  margin-top: 10px;
+  background: var(--panel-2);
+  border: 1px solid var(--gps);
+  border-radius: var(--radius);
+  padding: 12px;
+}
+.nav-instruction {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.nav-arrow {
+  font-size: 28px;
+  color: var(--gps);
+  line-height: 1;
+  flex: 0 0 auto;
+}
+.nav-distance { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.nav-detail { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+/* Eigener Standort auf der Karte: ein Pfeil, der sich per CSS-Transform
+   (in app.js gesetzt) in die Fahrtrichtung dreht. */
+.you-are-here {
+  width: 22px; height: 22px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gps);
+  font-size: 22px;
+  text-shadow: 0 0 3px #14161a, 0 0 3px #14161a, 0 0 3px #14161a;
+  transition: transform 0.3s ease;
 }
 
 /* ---------- Karte ---------- */

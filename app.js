@@ -25,6 +25,20 @@ const state = {
 
 const BROUTER = 'https://brouter.de/brouter';
 
+// Eigener Zustand fuer die Live-Navigation, getrennt vom Rest, weil er nur
+// waehrend einer aktiven Fahrt gebraucht wird.
+const nav = {
+  aktiv: false,
+  watchId: null,             // ID von navigator.geolocation.watchPosition, zum spaeteren Stoppen
+  marker: null,               // Leaflet-Marker fuer die eigene Position
+  genauigkeitskreis: null,    // Leaflet-Kreis, zeigt die GPS-Ungenauigkeit
+  manoever: [],                // aus der Route berechnete Abbiegepunkte
+  naechsterIndex: 0,
+  ersteZentrierungErledigt: false,
+  letzteRohPosition: null,    // fuer die Kurs-Schaetzung, falls das Geraet keinen Kurs liefert
+  abweichungSeit: null,       // Zeitpunkt, seit dem die Position von der Route abweicht
+};
+
 
 /* --- 2. Karte aufbauen --------------------------------------------------- */
 
@@ -598,6 +612,241 @@ function formatTime(sec) {
 }
 
 
+/* --- 6b. Live-Navigation ----------------------------------------------------
+   Nutzt zwei im Browser eingebaute APIs, keine Zusatz-Bibliotheken noetig:
+     - Geolocation API   fuer den Live-Standort per GPS
+     - SpeechSynthesis   fuer gesprochene Abbiegehinweise
+   Ablauf: Position live verfolgen -> eigenen Marker auf der Karte bewegen
+   -> pruefen, wie weit der naechste Abbiegepunkt noch weg ist und das ggf.
+   ansagen -> pruefen, ob wir noch auf der Route sind, sonst neu berechnen.
+   BRouter liefert keine fertigen Abbiegehinweise mit, deshalb berechnen wir
+   sie selbst aus der Routen-Linie (aehnlich wie bei der Kurvigkeit).        */
+
+function startNavigation() {
+  if (!state.route) return;
+
+  if (!navigator.geolocation) {
+    showToast('Dieses Geraet oder dieser Browser unterstuetzt keine Standortermittlung.');
+    return;
+  }
+
+  nav.manoever = berechneManoever(state.route.coords);
+  nav.naechsterIndex = 0;
+  nav.ersteZentrierungErledigt = false;
+  nav.letzteRohPosition = null;
+  nav.abweichungSeit = null;
+  nav.aktiv = true;
+
+  nav.watchId = navigator.geolocation.watchPosition(aufPositionsUpdate, aufPositionsFehler, {
+    enableHighAccuracy: true,
+    maximumAge: 2000,
+    timeout: 15000,
+  });
+
+  document.getElementById('navPanel').hidden = false;
+  document.getElementById('btnNavStart').hidden = true;
+}
+
+function stopNavigation() {
+  if (nav.watchId !== null) navigator.geolocation.clearWatch(nav.watchId);
+  nav.watchId = null;
+  nav.aktiv = false;
+
+  if (nav.marker) { map.removeLayer(nav.marker); nav.marker = null; }
+  if (nav.genauigkeitskreis) { map.removeLayer(nav.genauigkeitskreis); nav.genauigkeitskreis = null; }
+
+  document.getElementById('navPanel').hidden = true;
+  document.getElementById('btnNavStart').hidden = false;
+}
+
+function aufPositionsFehler(err) {
+  showToast('Standort nicht verfuegbar: ' + err.message);
+}
+
+function aufPositionsUpdate(pos) {
+  const { latitude, longitude, heading, accuracy } = pos.coords;
+
+  // Manche Geraete liefern nur dann einen Kurs (heading), wenn man sich
+  // gerade bewegt - sonst schaetzen wir ihn aus den letzten zwei Punkten.
+  const kurs = (heading !== null && heading !== undefined && !Number.isNaN(heading))
+    ? heading
+    : geschaetzterKurs(latitude, longitude);
+
+  zeichnePositionsMarker(latitude, longitude, kurs, accuracy || 20);
+
+  if (!nav.ersteZentrierungErledigt) {
+    map.setView([latitude, longitude], 16);
+    nav.ersteZentrierungErledigt = true;
+  } else {
+    map.panTo([latitude, longitude], { animate: true, duration: 0.5 });
+  }
+
+  pruefeManoever(latitude, longitude);
+  pruefeAbweichungVonRoute(latitude, longitude);
+}
+
+function geschaetzterKurs(lat, lon) {
+  if (!nav.letzteRohPosition) {
+    nav.letzteRohPosition = { lat, lon };
+    return 0;
+  }
+  const kurs = bearing([nav.letzteRohPosition.lon, nav.letzteRohPosition.lat], [lon, lat]);
+  nav.letzteRohPosition = { lat, lon };
+  return kurs;
+}
+
+function zeichnePositionsMarker(lat, lon, kurs, accuracy) {
+  if (!nav.marker) {
+    const icon = L.divIcon({
+      className: '',
+      html: `<div class="you-are-here" id="youAreHereArrow">&#9650;</div>`,
+      iconSize: [22, 22],
+      iconAnchor: [11, 11],
+    });
+    nav.marker = L.marker([lat, lon], { icon, zIndexOffset: 1000 }).addTo(map);
+    nav.genauigkeitskreis = L.circle([lat, lon], {
+      radius: accuracy, color: '#4a9eff', weight: 1, fillOpacity: 0.15,
+    }).addTo(map);
+  } else {
+    nav.marker.setLatLng([lat, lon]);
+    nav.genauigkeitskreis.setLatLng([lat, lon]);
+    nav.genauigkeitskreis.setRadius(accuracy);
+  }
+
+  const pfeil = document.getElementById('youAreHereArrow');
+  if (pfeil) pfeil.style.transform = `rotate(${kurs}deg)`;
+}
+
+// Berechnet aus der reinen Routen-Linie eigene Abbiegepunkte: an jedem
+// Streckenpunkt schauen, wie stark sich die Richtung aendert. Wichtig fuer
+// eine Motorrad-App auf kurvigen Strassen: eine normale Kurve, der man
+// einfach folgt, ist KEIN Abbiegehinweis - sonst wuerde bei jeder Kurve
+// "abbiegen" angesagt. Deshalb liegt die Schwelle bewusst hoch (70 Grad),
+// das trifft eher echte Abzweigungen/Kreuzungen als flie ssende Kurven.
+// Ohne echte Kreuzungsdaten (BRouter liefert die in unserem Format nicht
+// mit) ist das eine Naeherung - auf sehr scharfen Haarnadelkurven kann
+// gelegentlich trotzdem ein Hinweis kommen, obwohl es nur eine Kurve ist.
+function berechneManoever(coords) {
+  const pts = thinCoords(coords, 25);
+  const manoever = [];
+  let distanzSeitLetztem = Infinity;
+
+  for (let i = 1; i < pts.length - 1; i++) {
+    const b1 = bearing(pts[i - 1], pts[i]);
+    const b2 = bearing(pts[i], pts[i + 1]);
+    let diff = b2 - b1;
+    while (diff > 180) diff -= 360;
+    while (diff < -180) diff += 360;
+
+    distanzSeitLetztem += haversine(pts[i - 1][1], pts[i - 1][0], pts[i][1], pts[i][0]);
+
+    if (Math.abs(diff) > 70 && distanzSeitLetztem > 300) {
+      manoever.push({
+        lat: pts[i][1],
+        lon: pts[i][0],
+        richtung: diff > 0 ? 'rechts' : 'links',
+        scharf: Math.abs(diff) > 130,
+        angesagt300: false,
+        angesagt100: false,
+        angesagtJetzt: false,
+      });
+      distanzSeitLetztem = 0;
+    }
+  }
+  return manoever;
+}
+
+function formatNavDistanz(meter) {
+  return meter >= 1000 ? (meter / 1000).toFixed(1) + ' km' : Math.round(meter) + ' m';
+}
+
+function pruefeManoever(lat, lon) {
+  if (nav.naechsterIndex >= nav.manoever.length) {
+    document.getElementById('navDetail').textContent = 'Letzter Abbiegepunkt erreicht.';
+    return;
+  }
+
+  const m = nav.manoever[nav.naechsterIndex];
+  const distanz = haversine(lat, lon, m.lat, m.lon);
+  const richtungswort = m.richtung === 'rechts' ? 'rechts' : 'links';
+  const schaerfewort = m.scharf ? 'scharf ' : '';
+
+  document.getElementById('navArrow').innerHTML = m.richtung === 'rechts' ? '&#8594;' : '&#8592;';
+  document.getElementById('navDistance').textContent = formatNavDistanz(distanz);
+  document.getElementById('navDetail').textContent =
+    `${schaerfewort}${richtungswort === 'rechts' ? 'Rechts' : 'Links'} abbiegen`.trim();
+
+  if (distanz < 300 && !m.angesagt300) { sprich(`In 300 Metern ${schaerfewort}${richtungswort} abbiegen.`); m.angesagt300 = true; }
+  if (distanz < 100 && !m.angesagt100) { sprich(`In 100 Metern ${schaerfewort}${richtungswort} abbiegen.`); m.angesagt100 = true; }
+  if (distanz < 25 && !m.angesagtJetzt) {
+    sprich(`Jetzt ${schaerfewort}${richtungswort} abbiegen.`);
+    m.angesagtJetzt = true;
+    nav.naechsterIndex++; // dieser Abbiegepunkt ist erledigt, weiter zum naechsten
+  }
+}
+
+function sprich(text) {
+  if (!window.speechSynthesis) return;
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'de-DE';
+  window.speechSynthesis.speak(utterance);
+}
+
+// Prueft, ob die aktuelle Position noch nah genug an der geplanten Route
+// liegt. Weicht man laenger als 8 Sekunden staerker als 60m ab (z.B. eine
+// falsche Abzweigung genommen), wird die Route neu berechnet - kurze,
+// einzelne GPS-Ausreisser loesen dagegen noch keine Neuberechnung aus.
+function pruefeAbweichungVonRoute(lat, lon) {
+  const streckenpunkte = thinCoords(state.route.coords, 25);
+  const minAbstand = Math.min(...streckenpunkte.map(c => haversine(lat, lon, c[1], c[0])));
+
+  if (minAbstand < 60) {
+    nav.abweichungSeit = null;
+    return;
+  }
+
+  if (!nav.abweichungSeit) {
+    nav.abweichungSeit = Date.now();
+    return;
+  }
+
+  if (Date.now() - nav.abweichungSeit > 8000) {
+    nav.abweichungSeit = null;
+    routeNeuBerechnenAbPosition(lat, lon);
+  }
+}
+
+// Berechnet die Route ab der aktuellen Position neu - zum Ziel (bzw. bei
+// einer Rundtour zurueck zum Startpunkt) ueber die restlichen, noch nicht
+// abgehakten Wegpunkte. Anders als bei der ersten Berechnung nehmen wir
+// hier nur EINE Variante (keine vier Kurvigkeits-Alternativen), damit die
+// Neuberechnung waehrend der Fahrt schnell geht.
+async function routeNeuBerechnenAbPosition(lat, lon) {
+  const t = state.curveLevel / 100;
+  const profile = t < 0.15 ? 'car-fast' : 'car-eco';
+  const restpunkte = state.waypoints.slice(1);
+  const punkte = state.planMode === 'rundtour'
+    ? [{ lat, lon }, ...restpunkte, state.waypoints[0]]
+    : [{ lat, lon }, ...restpunkte];
+
+  if (punkte.length < 2) return;
+
+  showToast('Von der Route abgekommen - Route wird neu berechnet...');
+
+  try {
+    const route = await fetchRoute(punkte, profile, 0);
+    route.curviness = curviness(route.coords);
+    state.route = route;
+    drawRoutes([route], route);
+    showStats(route);
+    nav.manoever = berechneManoever(route.coords);
+    nav.naechsterIndex = 0;
+  } catch (err) {
+    showToast('Neuberechnung fehlgeschlagen: ' + err.message);
+  }
+}
+
+
 /* --- 7. Speichern (im Browser) ------------------------------------------- */
 
 const STORE = 'kurvenjagd.routen';
@@ -777,6 +1026,7 @@ document.getElementById('curveSlider').addEventListener('input', (e) => {
 });
 
 document.getElementById('btnUndo').addEventListener('click', () => {
+  if (nav.aktiv) stopNavigation(); // Route aendert sich gleich - laufende Navigation waere sonst inkonsistent
   state.waypoints.pop();
   refreshWaypoints();
 
@@ -794,6 +1044,7 @@ document.getElementById('btnUndo').addEventListener('click', () => {
 });
 
 document.getElementById('btnClear').addEventListener('click', () => {
+  if (nav.aktiv) stopNavigation();
   state.waypoints = [];
   state.route = null;
   state.lines.forEach(l => map.removeLayer(l));
@@ -804,5 +1055,7 @@ document.getElementById('btnClear').addEventListener('click', () => {
 
 document.getElementById('btnSave').addEventListener('click', saveRoute);
 document.getElementById('btnGpx').addEventListener('click', exportGpx);
+document.getElementById('btnNavStart').addEventListener('click', startNavigation);
+document.getElementById('btnNavStop').addEventListener('click', stopNavigation);
 
 renderSaved();

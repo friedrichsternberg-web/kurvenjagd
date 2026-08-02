@@ -100,6 +100,21 @@
         <button class="btn" id="btnSave">Route speichern</button>
         <button class="btn ghost" id="btnGpx">GPX export</button>
       </div>
+
+      <!-- Live-Navigation: Standort per GPS, Abbiegehinweise, Neuberechnung -->
+      <div class="row">
+        <button class="btn nav-btn" id="btnNavStart">Navigation starten</button>
+      </div>
+      <div id="navPanel" class="nav-panel" hidden>
+        <div class="nav-instruction">
+          <span class="nav-arrow" id="navArrow">&#8594;</span>
+          <div class="nav-texte">
+            <div class="nav-distance" id="navDistance">-</div>
+            <div class="nav-detail" id="navDetail">Warte auf GPS-Signal...</div>
+          </div>
+        </div>
+        <button class="btn ghost" id="btnNavStop">Navigation beenden</button>
+      </div>
     </section>
 
     <!-- Gespeicherte Routen -->
