@@ -111,6 +111,14 @@ body {
 .search-results li:hover { background: #333842; }
 .search-results li.empty { cursor: default; color: var(--muted); }
 .search-results li.empty:hover { background: transparent; }
+.search-results li.standort-option {
+  color: var(--gps);
+  font-weight: 600;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 10px;
+  margin-bottom: 4px;
+}
+.search-results li.standort-option:hover { background: #1c2c3d; }
 
 /* ---------- Umschalter (Planungsart) ---------- */
 .segmented {

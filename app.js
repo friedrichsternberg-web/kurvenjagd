@@ -260,7 +260,9 @@ document.getElementById('searchInput').addEventListener('input', (e) => {
   clearTimeout(searchTimer);
 
   if (query.length < 3) {
-    hideSearchResults();
+    // Noch zu kurz zum Suchen, aber "Aktueller Standort" bleibt trotzdem
+    // waehlbar - das ist ja keine Textsuche.
+    renderNurStandortOption();
     return;
   }
 
@@ -268,6 +270,12 @@ document.getElementById('searchInput').addEventListener('input', (e) => {
   // Tastendruck einzelne Anfragen los - unnoetig und unhoeflich dem
   // kostenlosen Dienst gegenueber.
   searchTimer = setTimeout(() => runSearch(query), 400);
+});
+
+// Auch ohne Eingabe soll "Aktueller Standort" beim Klick ins Suchfeld
+// gleich zur Auswahl stehen.
+document.getElementById('searchInput').addEventListener('focus', (e) => {
+  if (e.target.value.trim().length < 3) renderNurStandortOption();
 });
 
 document.getElementById('searchInput').addEventListener('keydown', (e) => {
@@ -292,18 +300,20 @@ async function runSearch(query) {
   renderSearchResults(results);
 }
 
+// Steht immer ganz oben in der Vorschlagsliste, auch waehrend einer Suche -
+// so wie bei Google Maps "Ihr Standort" immer als erste Option auftaucht.
+const STANDORT_OPTION_HTML = '<li class="standort-option" data-standort="1">&#128205; Aktueller Standort</li>';
+
 function renderSearchResults(results) {
   const list = document.getElementById('searchResults');
 
-  if (results.length === 0) {
-    list.innerHTML = '<li class="empty">Nichts gefunden.</li>';
-    list.hidden = false;
-    return;
-  }
+  const ergebnisseHtml = results.length === 0
+    ? '<li class="empty">Nichts gefunden.</li>'
+    : results.map((r, i) => `<li data-idx="${i}">${escapeHtml(r.display_name)}</li>`).join('');
 
-  list.innerHTML = results.map((r, i) =>
-    `<li data-idx="${i}">${escapeHtml(r.display_name)}</li>`).join('');
+  list.innerHTML = STANDORT_OPTION_HTML + ergebnisseHtml;
   list.hidden = false;
+  wireStandortOption();
 
   list.querySelectorAll('li[data-idx]').forEach(li => {
     li.addEventListener('click', () => {
@@ -313,6 +323,45 @@ function renderSearchResults(results) {
       document.getElementById('searchInput').value = '';
     });
   });
+}
+
+// Zeigt NUR die Standort-Option an - fuer den Fall, dass noch nichts
+// Sinnvolles zum Suchen eingegeben wurde.
+function renderNurStandortOption() {
+  const list = document.getElementById('searchResults');
+  list.innerHTML = STANDORT_OPTION_HTML;
+  list.hidden = false;
+  wireStandortOption();
+}
+
+function wireStandortOption() {
+  const el = document.querySelector('.standort-option');
+  if (el) el.addEventListener('click', aktuellenStandortVerwenden);
+}
+
+// Einmalige Standortabfrage (anders als bei der Live-Navigation, die
+// dauerhaft verfolgt) - fuer den Fall "ich will einfach von hier losfahren".
+function aktuellenStandortVerwenden() {
+  if (!navigator.geolocation) {
+    showToast('Dieses Geraet oder dieser Browser unterstuetzt keine Standortermittlung.');
+    return;
+  }
+
+  hideSearchResults();
+  document.getElementById('searchInput').value = '';
+  setBusy(true);
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      setBusy(false);
+      addWaypoint(pos.coords.latitude, pos.coords.longitude);
+    },
+    (err) => {
+      setBusy(false);
+      showToast('Standort nicht verfuegbar: ' + err.message);
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
 }
 
 function hideSearchResults() {
