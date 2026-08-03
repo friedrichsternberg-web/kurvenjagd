@@ -32,6 +32,8 @@ const nav = {
   watchId: null,             // ID von navigator.geolocation.watchPosition, zum spaeteren Stoppen
   marker: null,               // Leaflet-Marker fuer die eigene Position
   genauigkeitskreis: null,    // Leaflet-Kreis, zeigt die GPS-Ungenauigkeit
+  gefahrenLinie: null,        // Leaflet-Linie: bereits gefahrener Streckenteil (grau)
+  restLinie: null,             // Leaflet-Linie: noch verbleibender Streckenteil (orange)
   manoever: [],                // aus der Route berechnete Abbiegepunkte
   naechsterIndex: 0,
   ersteZentrierungErledigt: false,
@@ -42,7 +44,12 @@ const nav = {
 
 /* --- 2. Karte aufbauen --------------------------------------------------- */
 
-const map = L.map('map', { zoomControl: true }).setView([49.8, 9.9], 8); // Spessart/Franken
+const map = L.map('map', {
+  zoomControl: true,
+  rotate: true,          // vom Leaflet.Rotate-Plugin - erlaubt map.setBearing() fuer die Navigation
+  rotateControl: false,  // keinen manuellen Dreh-Knopf noetig, wir drehen per GPS-Kurs
+  touchRotate: false,    // bei der Routenplanung soll man die Karte nicht aus Versehen verdrehen
+}).setView([49.8, 9.9], 8); // Spessart/Franken
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
@@ -643,8 +650,21 @@ function startNavigation() {
     timeout: 15000,
   });
 
-  document.getElementById('navPanel').hidden = false;
+  // Waehrend der Fahrt sind die verworfenen Routen-Alternativen nur
+  // Ablenkung - stattdessen zeigen wir gleich gefahrene/verbleibende
+  // Strecke getrennt an (siehe aktualisiereRoutenfortschritt).
+  state.lines.forEach(l => map.removeLayer(l));
+  state.lines = [];
+
+  document.body.classList.add('nav-modus');
+  document.getElementById('navBanner').hidden = false;
+  document.getElementById('btnNavStop').hidden = false;
   document.getElementById('btnNavStart').hidden = true;
+
+  // Leaflet merkt selbst nicht, dass die Karte durch das einklappende
+  // Seitenpanel breiter wird - nach Ende der CSS-Animation (300ms) Bescheid
+  // geben, sonst bleiben Teile der Karte leer/grau.
+  setTimeout(() => map.invalidateSize(), 320);
 }
 
 function stopNavigation() {
@@ -654,9 +674,20 @@ function stopNavigation() {
 
   if (nav.marker) { map.removeLayer(nav.marker); nav.marker = null; }
   if (nav.genauigkeitskreis) { map.removeLayer(nav.genauigkeitskreis); nav.genauigkeitskreis = null; }
+  if (nav.gefahrenLinie) { map.removeLayer(nav.gefahrenLinie); nav.gefahrenLinie = null; }
+  if (nav.restLinie) { map.removeLayer(nav.restLinie); nav.restLinie = null; }
 
-  document.getElementById('navPanel').hidden = true;
+  map.setBearing(0); // zurueck zu Nord-oben fuer die normale Routenplanung
+
+  document.body.classList.remove('nav-modus');
+  document.getElementById('navBanner').hidden = true;
+  document.getElementById('btnNavStop').hidden = true;
   document.getElementById('btnNavStart').hidden = false;
+
+  // Normale Routenansicht (Haupt- + Alternativlinien) wiederherstellen.
+  if (state.route) drawRoutes([state.route], state.route);
+
+  setTimeout(() => map.invalidateSize(), 320);
 }
 
 function aufPositionsFehler(err) {
@@ -672,17 +703,23 @@ function aufPositionsUpdate(pos) {
     ? heading
     : geschaetzterKurs(latitude, longitude);
 
-  zeichnePositionsMarker(latitude, longitude, kurs, accuracy || 20);
+  zeichnePositionsMarker(latitude, longitude, accuracy || 20);
+  map.setBearing(kurs); // die ganze Karte dreht sich, nicht nur der Marker
 
   if (!nav.ersteZentrierungErledigt) {
-    map.setView([latitude, longitude], 16);
+    map.setView([latitude, longitude], 17);
     nav.ersteZentrierungErledigt = true;
   } else {
     map.panTo([latitude, longitude], { animate: true, duration: 0.5 });
   }
+  // Eigene Position etwas unterhalb der Bildschirmmitte anzeigen, damit man
+  // mehr von der Strecke VORAUS sieht als von der bereits gefahrenen Strecke
+  // - "vorne" ist dank der Kartendrehung ja immer Richtung Bildschirm-oben.
+  map.panBy([0, -map.getSize().y * 0.15], { animate: false });
 
   pruefeManoever(latitude, longitude);
   pruefeAbweichungVonRoute(latitude, longitude);
+  aktualisiereRoutenfortschritt(latitude, longitude);
 }
 
 function geschaetzterKurs(lat, lon) {
@@ -695,11 +732,14 @@ function geschaetzterKurs(lat, lon) {
   return kurs;
 }
 
-function zeichnePositionsMarker(lat, lon, kurs, accuracy) {
+// Zeichnet den eigenen Standort als Spitze, die IMMER nach oben zeigt - denn
+// nicht der Marker dreht sich in Fahrtrichtung, sondern die ganze Karte
+// (siehe map.setBearing() in aufPositionsUpdate).
+function zeichnePositionsMarker(lat, lon, accuracy) {
   if (!nav.marker) {
     const icon = L.divIcon({
       className: '',
-      html: `<div class="you-are-here" id="youAreHereArrow">&#9650;</div>`,
+      html: `<div class="you-are-here">&#9650;</div>`,
       iconSize: [22, 22],
       iconAnchor: [11, 11],
     });
@@ -712,9 +752,32 @@ function zeichnePositionsMarker(lat, lon, kurs, accuracy) {
     nav.genauigkeitskreis.setLatLng([lat, lon]);
     nav.genauigkeitskreis.setRadius(accuracy);
   }
+}
 
-  const pfeil = document.getElementById('youAreHereArrow');
-  if (pfeil) pfeil.style.transform = `rotate(${kurs}deg)`;
+// Zeigt an, wie weit man auf der Route schon gekommen ist: der bereits
+// gefahrene Teil wird grau, der Rest bleibt farbig - dafuer suchen wir den
+// Streckenpunkt, der der aktuellen Position am naechsten liegt, und teilen
+// die Linie dort in zwei Stuecke.
+function aktualisiereRoutenfortschritt(lat, lon) {
+  const pts = thinCoords(state.route.coords, 25);
+  let naechsterIdx = 0, kleinsterAbstand = Infinity;
+  for (let i = 0; i < pts.length; i++) {
+    const d = haversine(lat, lon, pts[i][1], pts[i][0]);
+    if (d < kleinsterAbstand) { kleinsterAbstand = d; naechsterIdx = i; }
+  }
+
+  if (nav.gefahrenLinie) map.removeLayer(nav.gefahrenLinie);
+  if (nav.restLinie) map.removeLayer(nav.restLinie);
+
+  const gefahren = pts.slice(0, naechsterIdx + 1).map(c => [c[1], c[0]]);
+  const rest = pts.slice(naechsterIdx).map(c => [c[1], c[0]]);
+
+  if (gefahren.length > 1) {
+    nav.gefahrenLinie = L.polyline(gefahren, { color: '#6b727d', weight: 5, opacity: 0.7 }).addTo(map);
+  }
+  if (rest.length > 1) {
+    nav.restLinie = L.polyline(rest, { color: '#ff7a1a', weight: 5, opacity: 0.95 }).addTo(map);
+  }
 }
 
 // Berechnet aus der reinen Routen-Linie eigene Abbiegepunkte: an jedem

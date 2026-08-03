@@ -279,37 +279,71 @@ body {
 .nav-btn { background: var(--gps); }
 .nav-btn:hover { background: #3a87e0; }
 
-.nav-panel {
-  margin-top: 10px;
-  background: var(--panel-2);
+/* Waehrend die Navigation laeuft, faehrt das Seitenpanel weg und die Karte
+   nutzt den vollen Platz - wie bei einem eigenstaendigen Navi-Geraet. */
+#panel { transition: flex-basis 0.3s ease, width 0.3s ease, padding 0.3s ease; }
+body.nav-modus #panel {
+  flex-basis: 0;
+  width: 0;
+  padding-left: 0;
+  padding-right: 0;
+  overflow: hidden;
+  border-right: 0;
+}
+
+/* Das Banner liegt direkt auf der Karte (wie bei Google Maps/Waze), nicht
+   im Seitenpanel - deutlich groesser und beim Fahren besser ablesbar. */
+.nav-banner {
+  position: absolute;
+  top: 16px; left: 16px; right: 16px;
+  z-index: 900;
+  background: var(--panel);
   border: 1px solid var(--gps);
   border-radius: var(--radius);
-  padding: 12px;
-}
-.nav-instruction {
+  padding: 14px 16px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 10px;
+  gap: 14px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
 }
+/* Ohne diese Regel gewinnt "display: flex" oben gegen das hidden-Attribut -
+   derselbe Fehler wie bei .busy weiter unten, also gleich mitgeloest. */
+.nav-banner[hidden] { display: none; }
 .nav-arrow {
-  font-size: 28px;
+  font-size: 32px;
   color: var(--gps);
   line-height: 1;
   flex: 0 0 auto;
 }
-.nav-distance { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.nav-detail { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.nav-distance { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.nav-detail { font-size: 13px; color: var(--muted); margin-top: 2px; }
 
-/* Eigener Standort auf der Karte: ein Pfeil, der sich per CSS-Transform
-   (in app.js gesetzt) in die Fahrtrichtung dreht. */
+.nav-stop-btn {
+  position: absolute;
+  bottom: 20px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 900;
+  background: #2b2018;
+  border: 1px solid var(--accent);
+  color: var(--text);
+  padding: 10px 20px;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+}
+.nav-stop-btn:hover { border-color: var(--text); }
+
+/* Eigener Standort auf der Karte: eine Spitze, die IMMER nach oben zeigt -
+   weil sich waehrend der Navigation ja die ganze Karte mit der Fahrtrichtung
+   mitdreht (siehe map.setBearing() in app.js), nicht der Marker selbst. */
 .you-are-here {
   width: 22px; height: 22px;
   display: flex; align-items: center; justify-content: center;
   color: var(--gps);
   font-size: 22px;
   text-shadow: 0 0 3px #14161a, 0 0 3px #14161a, 0 0 3px #14161a;
-  transition: transform 0.3s ease;
 }
 
 /* ---------- Karte ---------- */
