@@ -249,7 +249,7 @@ function pickBestRoute(routes, t) {
   const minDistance = Math.min(...routes.map(r => r.distance));
   const UMWEG_KOSTEN_PRO_KM = 6; // Punkte Kurven-Score, die ein Kilometer Umweg kostet
   const strafeProKm = (1 - intensitaet) * UMWEG_KOSTEN_PRO_KM;
-  const UEBERLAPPUNGS_KOSTEN = 400; // Punkte Kurven-Score bei 100% Ueberlappung
+  const UEBERLAPPUNGS_KOSTEN = 700; // Punkte Kurven-Score bei 100% Ueberlappung
 
   const score = r => r.curviness
     - strafeProKm * ((r.distance - minDistance) / 1000)
@@ -575,11 +575,38 @@ async function generateRoundTrip() {
   const profile = t < 0.15 ? 'car-fast' : 'car-eco';
 
   // Feste Zwischenstopps "verbrauchen" selbst schon einen Teil der
-  // Zieldistanz (Hin- und wieder Zurueckfahren) - wird das ignoriert, wird
-  // die Rundtour bei einem weit entfernten Zwischenstopp systematisch viel
-  // zu lang, weil der Zufallskreis dann faelschlich mit der vollen
-  // Zieldistanz geplant wird, obendrauf statt abzueglich dieser Kosten.
-  const fixkostenKm = geschaetzteFixkostenKm(start, fixeZwischenstopps);
+  // Zieldistanz (Hin- und wieder Zurueckfahren). Statt das nur grob zu
+  // schaetzen, fragen wir die echte Strecke dorthin bei BRouter ab - das
+  // liefert gleich zwei Dinge: die genaue Distanz fuers Budget, UND ob
+  // dieser Abschnitt selbst schon eine Sackgasse ist (nur eine Strasse
+  // dorthin). Letzteres kann die App nicht reparieren (der Nutzer hat den
+  // Punkt bewusst gesetzt) - aber sie kann es VORHER sagen, statt es den
+  // Nutzer erst auf der fertigen Karte entdecken zu lassen.
+  let fixkostenKm = 0;
+  let basisOverlap = 0;
+  if (fixeZwischenstopps.length > 0) {
+    try {
+      const basisRoute = await fetchRoute([start, ...fixeZwischenstopps, start], profile, 0);
+      fixkostenKm = basisRoute.distance / 1000;
+      basisOverlap = overlapAnteil(basisRoute.coords);
+      if (basisOverlap >= 0.3) {
+        showToast(`Hinweis: Der Weg zu deinem Zwischenstopp (ca. ${Math.round(fixkostenKm)} km) fuehrt grossteils ueber dieselbe Strasse hin und zurueck - das ist keine Fehlplanung, dort gibt es schlicht keine zweite Strasse.`);
+      }
+    } catch {
+      fixkostenKm = geschaetzteFixkostenKm(start, fixeZwischenstopps); // Rueckfall auf grobe Schaetzung
+    }
+  }
+
+  // "Sauber genug" heisst: nicht wesentlich mehr Ueberlappung, als der feste
+  // Zwischenstopp allein schon unvermeidbar mitbringt (siehe basisOverlap
+  // oben) - plus etwas Spielraum. Ohne festen Zwischenstopp reicht ein
+  // schlichter, niedriger Schwellwert. Eine reine "0 Schuldige"-Regel (siehe
+  // problematischePunkte) hat sich als zu empfindlich erwiesen: bei einem
+  // laengeren Rundweg findet die Attributs-Logik so gut wie immer IRGENDeinen
+  // Punkt in der Naehe irgendeiner kleinen Ueberschneidung, auch wenn die
+  // Route insgesamt schon sauber ist.
+  const overlapSchwelle = fixeZwischenstopps.length > 0 ? Math.min(0.6, basisOverlap + 0.1) : 0.1;
+
   const budgetFuerZufallspunkteKm = Math.max(zielKm * 0.25, zielKm - fixkostenKm);
 
   // Grobe erste Schaetzung: der Kreisumfang um diesen Radius soll etwa dem
@@ -588,105 +615,103 @@ async function generateRoundTrip() {
   // werden soll.
   let radius = (budgetFuerZufallspunkteKm * 1000) / (2 * Math.PI * (1.3 + t * 0.6));
 
-  // Wichtig: Wir pruefen die Zieldistanz gegen die Route, die am Ende
-  // WIRKLICH angezeigt wird (also nach der Kurvigkeits-Auswahl) - nicht nur
-  // gegen eine einzelne Testvariante. Sonst wuerde bei ganz rechts stehendem
-  // Regler (Umwege spielen keine Rolle) die Distanz-Pruefung ins Leere laufen.
+  // Anders als man denken wuerde, HILFT eine hoehere Punktzahl hier eher als
+  // sie zu schaden - mit mehr Punkten findet BRouter eher Verbindungswege
+  // zwischen den Himmelsrichtungen, die nicht jedes Mal zum Zentrum
+  // zurueckfuehren. Deshalb bleibt die Anzahl an der vollen Zieldistanz
+  // orientiert, nicht am kleineren Restbudget nach Abzug fester Stopps
+  // (empirisch getestet: mit nur 2 statt 4 Punkten wurde die Ueberlappung
+  // bei einem teuren Zwischenstopp systematisch schlechter, nicht besser).
+  const anzahlPunkte = Math.min(4, Math.max(2, Math.round(zielKm / 60)));
+
+  // "bester" ist immer die bislang beste gefundene Konfiguration (nach
+  // bewertung), unabhaengig davon, ob sie schon "sauber genug" ist. Jeder
+  // naechste Versuch baut auf DIESER Basis auf, nie auf einem Versuch, der
+  // sich gerade als schlechter herausgestellt hat - sonst "verirrt" sich
+  // die Suche und wird eher schlechter statt besser (das ist in einer
+  // frueheren Version genau schiefgegangen).
   let bester = null;
-  let zufallspunkte = randomLoopPoints(start, radius, zielKm);
-  const MAX_VERSUCHE = 9;
+  let zufallspunkte = randomLoopPoints(start, radius, anzahlPunkte);
+  const MAX_VERSUCHE = 10;
 
   for (let versuch = 0; versuch < MAX_VERSUCHE; versuch++) {
     const kandidat = [start, ...sortByBearing(start, [...fixeZwischenstopps, ...zufallspunkte]), start];
 
     let routes;
     try {
-      routes = profile === 'car-fast'
+      routes = (zufallspunkte.length === 0 || profile === 'car-fast')
         ? [await fetchRoute(kandidat, profile, 0)]
         : (await Promise.allSettled([0, 1, 2, 3].map(i => fetchRoute(kandidat, profile, i))))
             .filter(r => r.status === 'fulfilled').map(r => r.value);
     } catch {
-      zufallspunkte = bester ? zufallEinenPunktErsetzen(start, bester.punkte, radius) : randomLoopPoints(start, radius, zielKm);
-      continue;
-    }
-    if (routes.length === 0) {
-      zufallspunkte = bester ? zufallEinenPunktErsetzen(start, bester.punkte, radius) : randomLoopPoints(start, radius, zielKm);
-      continue;
+      routes = [];
     }
 
-    routes.forEach(r => { r.curviness = curviness(r.coords); });
-    const kandidatBest = pickBestRoute(routes, t);
+    if (routes.length > 0) {
+      routes.forEach(r => { r.curviness = curviness(r.coords); });
+      const kandidatBest = pickBestRoute(routes, t);
+      const abweichung = Math.abs(kandidatBest.distance - zielKm * 1000) / (zielKm * 1000);
+      const overlap = overlapAnteil(kandidatBest.coords);
+      const bewertung = abweichung + overlap * 2;
 
-    const abweichung = Math.abs(kandidatBest.distance - zielKm * 1000) / (zielKm * 1000);
-
-    // Anteil der Strecke, der andernorts auf der Route noch einmal (fast)
-    // deckungsgleich abgefahren wird - das Kennzeichen einer Sackgasse,
-    // egal ob kurzer Feldweg oder ganzes Alpental. Beides zusammen ergibt
-    // eine Gesamtnote: eine Variante, die in EINEM der beiden Punkte
-    // schlecht ist, kann trotzdem gewinnen, wenn sie im anderen sehr gut
-    // ist - nur wenn beides schlecht ist, verliert sie sicher.
-    const overlap = overlapAnteil(kandidatBest.coords);
-    const bewertung = abweichung + overlap * 2;
-
-    const istBesser = !bester || bewertung < bester.bewertung;
-    if (istBesser) {
-      bester = { routes, best: kandidatBest, bewertung, abweichung, overlap, punkte: zufallspunkte };
-    }
-    if (abweichung < 0.15 && overlap < 0.05) break; // nah an der Wunschdistanz und praktisch ueberlappungsfrei - fertig
-
-    if (istBesser) {
-      // Selbstpruefung: WELCHER Zufallspunkt verursacht die Ueberlappung?
-      // Nur der wird neu gewuerfelt (in aehnlicher Richtung, aber mit
-      // anderem Winkel/Radius) - die unproblematischen Punkte bleiben
-      // erhalten, statt bei jedem Versuch bei null anzufangen.
-      const schlechtePunkte = problematischePunkte(kandidatBest.coords, zufallspunkte);
-      if (schlechtePunkte.length > 0) {
-        zufallspunkte = zufallspunkte.map(p =>
-          schlechtePunkte.includes(p) ? ersatzpunkt(start, p, radius) : p);
-      } else {
-        // Die Ueberlappung liegt an keinem einzelnen Punkt (z.B. weil der
-        // Startort selbst nur eine Ausfahrt hat) - Radius nachjustieren und
-        // komplett neu wuerfeln.
-        radius *= (zielKm * 1000) / kandidatBest.distance;
-        zufallspunkte = randomLoopPoints(start, radius, zielKm);
+      if (!bester || bewertung < bester.bewertung) {
+        bester = { routes, best: kandidatBest, bewertung, abweichung, overlap, punkte: zufallspunkte };
       }
+    }
+
+    if (bester && bester.overlap <= overlapSchwelle && bester.abweichung < 0.15) break; // gut genug - fertig
+
+    // Naechste Punktkonfiguration IMMER von der bislang BESTEN Basis aus
+    // ableiten (Bergsteiger-Prinzip), nicht vom zuletzt probierten Versuch.
+    const basisPunkte = bester ? bester.punkte : zufallspunkte;
+    const schlechtePunkte = bester ? problematischePunkte(bester.best.coords, basisPunkte) : [];
+
+    if (bester && bester.overlap > overlapSchwelle && versuch >= MAX_VERSUCHE - 4 && basisPunkte.length > 0) {
+      // Spaete Versuche, immer noch nicht sauber genug: einen Punkt ganz
+      // STREICHEN statt weiter zu ersetzen. Eine Rundtour mit einer
+      // Schleife weniger, aber deutlich weniger Ueberlappung, ist besser
+      // als eine mit mehr Schleifen und einem Ausreisser.
+      const zielPunkt = schlechtePunkte[0] || basisPunkte[0];
+      zufallspunkte = basisPunkte.filter(p => p !== zielPunkt);
+    } else if (schlechtePunkte.length > 0) {
+      zufallspunkte = basisPunkte.map(p => schlechtePunkte.includes(p) ? ersatzpunkt(start, p, radius) : p);
+    } else if (bester && bester.abweichung >= 0.15) {
+      // Ueberlappung ok, aber Distanz noch nicht gut genug - Radius anpassen.
+      radius *= (zielKm * 1000) / bester.best.distance;
+      zufallspunkte = randomLoopPoints(start, radius, basisPunkte.length || anzahlPunkte);
     } else {
-      // Dieser Versuch war schlechter als der bisher beste - zurueck zur
-      // besten bekannten Punktkonfiguration und dort EINEN zufaelligen
-      // Punkt neu wuerfeln. Ohne dieses Zurueckspringen "verirrt" sich die
-      // Suche: ein einzelner schlechter Versuch wuerde sonst zur Basis fuer
-      // alle weiteren Versuche werden und es wird eher schlechter als besser.
-      zufallspunkte = zufallEinenPunktErsetzen(start, bester.punkte, radius);
+      // Kein einzelner Punkt eindeutig schuld (oder noch kein Treffer
+      // ueberhaupt) - einen zufaelligen Punkt der Basis neu wuerfeln.
+      const quellPunkte = basisPunkte.length > 0 ? basisPunkte : randomLoopPoints(start, radius, anzahlPunkte);
+      const index = Math.floor(Math.random() * quellPunkte.length);
+      zufallspunkte = quellPunkte.map((p, i) => i === index ? ersatzpunkt(start, p, radius) : p);
     }
   }
 
   setBusy(false);
 
-  if (!bester) {
+  const ergebnis = bester;
+  if (!ergebnis) {
     showToast('Rundtour fehlgeschlagen - anderen Startpunkt oder andere Distanz probieren.');
     return;
   }
 
-  // Je nachdem, wie viel der Strecke doppelt gefahren wird, unterschiedlich
-  // deutlich formulieren - "kleinere" waere bei 40% schlicht falsch.
-  if (bester.overlap >= 0.25) {
-    showToast('Ein Teil der Strecke wird zwangslaeufig doppelt gefahren - Start oder ein Zwischenstopp liegt vermutlich in einem Tal mit nur einer durchgehenden Strasse.');
-  } else if (bester.overlap >= 0.05) {
-    showToast('Kleinerer Streckenabschnitt nicht vermeidbar - Start oder ein Zwischenstopp hat vermutlich nur eine Zufahrt.');
+  // Nur noch relevant, wenn selbst das Streichen aller Zufallspunkte nicht
+  // unter die Schwelle kam (seltener Grenzfall) - der Sackgassen-Hinweis
+  // fuer feste Zwischenstopps kommt schon weiter oben, bevor ueberhaupt
+  // Zufallspunkte ins Spiel kommen.
+  if (ergebnis.overlap > overlapSchwelle) {
+    showToast('Trotz mehrerer Versuche bleibt ein Streckenabschnitt doppelt - anderen Startpunkt oder andere Distanz probieren.');
   }
 
-  state.route = bester.best;
-  drawRoutes(bester.routes, bester.best);
-  showStats(bester.best);
+  state.route = ergebnis.best;
+  drawRoutes(ergebnis.routes, ergebnis.best);
+  showStats(ergebnis.best);
 }
 
 // Verteilt Zufallspunkte im Kreis um den Startpunkt - je laenger die
 // gewuenschte Tour, desto mehr Punkte fuer eine abwechslungsreichere Form.
-function randomLoopPoints(start, radius, zielKm) {
-  // Weniger Punkte als man denken wuerde: jeder zusaetzliche Zufallspunkt
-  // ist ein weiterer "Wuerfelwurf", der in einer Sackgasse landen kann -
-  // besonders im Gebirge, wo Taeler oft nur eine einzige Zufahrt haben.
-  const anzahl = Math.min(4, Math.max(2, Math.round(zielKm / 60)));
+function randomLoopPoints(start, radius, anzahl) {
   const scheibenWinkel = 360 / anzahl;
 
   const punkte = [];
@@ -711,15 +736,6 @@ function ersatzpunkt(start, alterPunkt, radius) {
   const neuerWinkel = ausgangswinkel + (Math.random() * 60 - 30);
   const neuerRadius = radius * (0.6 + Math.random() * 0.8); // 60-140% Streuung
   return destinationPoint(start.lat, start.lon, neuerWinkel, neuerRadius);
-}
-
-// Nimmt eine bekannte Punktkonfiguration und wuerfelt darin EINEN
-// zufaelligen Punkt neu - genutzt, um nach einem misslungenen Versuch zur
-// bisher besten Konfiguration zurueckzuspringen, statt von dort weiter zu
-// suchen, wo es gerade schlechter wurde.
-function zufallEinenPunktErsetzen(start, punkte, radius) {
-  const index = Math.floor(Math.random() * punkte.length);
-  return punkte.map((p, i) => i === index ? ersatzpunkt(start, p, radius) : p);
 }
 
 // Punkt, der von (lat, lon) aus in eine Richtung (Grad) und Entfernung
