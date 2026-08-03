@@ -1106,6 +1106,124 @@ async function routeNeuBerechnenAbPosition(lat, lon) {
 }
 
 
+/* --- 6c. Sehenswertes: Gebirgspaesse & Aussichtspunkte ---------------------
+   Die Overpass API ist der freie Abfragedienst fuer OpenStreetMap-Daten
+   (derselbe Datentopf, aus dem auch unsere Kartenkacheln stammen) - man
+   schickt eine Abfrage nach Kartenelementen mit bestimmten Eigenschaften
+   (hier: mountain_pass=yes bzw. tourism=viewpoint) innerhalb eines
+   Kartenausschnitts und bekommt sie als JSON zurueck. Kein API-Key noetig.
+   Es gibt in OSM kein Tag fuer "bekannter Bikertreff" - Aussichtspunkte
+   sind die naechstbeste, verlaessliche Naeherung, da dort ohnehin oft
+   angehalten wird.                                                         */
+
+const OVERPASS = 'https://overpass-api.de/api/interpreter';
+const POI_MIN_ZOOM = 10; // darunter waere der Kartenausschnitt zu gross - zu viele Treffer, zu langsam
+
+const poi = {
+  aktiv: false,
+  marker: [],
+  letzteBounds: null, // um beim Weiterzoomen im selben Bereich nicht doppelt abzufragen
+  timer: null,
+  anfrageId: 0, // zaehlt Abfragen durch, damit eine aeltere Antwort, die erst spaeter eintrifft, nicht eine neuere ueberschreibt
+};
+
+function setPoiAktiv(aktiv) {
+  poi.aktiv = aktiv;
+  if (aktiv) {
+    ladePois();
+  } else {
+    poi.marker.forEach(m => map.removeLayer(m));
+    poi.marker = [];
+    poi.letzteBounds = null;
+  }
+}
+
+// Nach jeder Kartenbewegung neu laden, aber erst 600ms nach dem Anhalten -
+// sonst wuerde jedes Ziehen der Karte einzelne Abfragen ausloesen.
+map.on('moveend', () => {
+  if (!poi.aktiv) return;
+  clearTimeout(poi.timer);
+  poi.timer = setTimeout(ladePois, 600);
+});
+
+async function ladePois() {
+  const zoom = map.getZoom();
+  if (zoom < POI_MIN_ZOOM) {
+    // Alte Marker vom vorherigen (naeheren) Ausschnitt wegraeumen - sonst
+    // stehen sie noch auf der Karte, obwohl der Hinweistext sagt, man
+    // muesse erst noch naeher heranzoomen.
+    poi.marker.forEach(m => map.removeLayer(m));
+    poi.marker = [];
+    poi.letzteBounds = null;
+    document.getElementById('poiHint').textContent = 'Noch etwas naeher heranzoomen, um sie zu laden.';
+    return;
+  }
+
+  const bounds = map.getBounds();
+
+  // Liegt der neue Ausschnitt schon komplett im zuletzt abgefragten Bereich?
+  // Dann gibt es nichts Neues zu laden - schont den freien Dienst.
+  if (poi.letzteBounds && poi.letzteBounds.contains(bounds)) return;
+
+  // Etwas groesser als der sichtbare Ausschnitt abfragen (25% Rand), damit
+  // nicht bei jedem kleinen Schwenk sofort nachgeladen werden muss.
+  const gepolstert = bounds.pad(0.25);
+  poi.letzteBounds = gepolstert;
+
+  const sw = gepolstert.getSouthWest(), ne = gepolstert.getNorthEast();
+  const bbox = `${sw.lat},${sw.lng},${ne.lat},${ne.lng}`;
+  const query = `[out:json][timeout:20];(node["mountain_pass"="yes"](${bbox});node["tourism"="viewpoint"](${bbox}););out body;`;
+
+  document.getElementById('poiHint').textContent = 'Laedt...';
+
+  // Eigene Anfragenummer merken - trifft waehrenddessen (z.B. durch
+  // schnelles Weiterzoomen) schon eine NEUERE Anfrage ein, verwerfen wir
+  // unser eigenes, dann veraltetes Ergebnis unten wieder.
+  const eigeneId = ++poi.anfrageId;
+
+  let daten;
+  try {
+    const res = await fetch(`${OVERPASS}?data=${encodeURIComponent(query)}`);
+    if (!res.ok) throw new Error('Abfrage fehlgeschlagen');
+    daten = await res.json();
+  } catch {
+    if (eigeneId === poi.anfrageId) {
+      document.getElementById('poiHint').textContent = 'Laden fehlgeschlagen - Overpass-Dienst gerade nicht erreichbar.';
+    }
+    return;
+  }
+
+  if (!poi.aktiv || eigeneId !== poi.anfrageId) return; // ausgeschaltet oder durch neuere Anfrage ueberholt
+
+  poi.marker.forEach(m => map.removeLayer(m));
+  poi.marker = daten.elements.map(zeichnePoiMarker).filter(Boolean);
+
+  document.getElementById('poiHint').textContent =
+    poi.marker.length > 0 ? `${poi.marker.length} gefunden.` : 'Nichts in diesem Ausschnitt gefunden.';
+}
+
+function zeichnePoiMarker(element) {
+  const name = element.tags.name || (element.tags.mountain_pass ? 'Pass ohne Namen' : 'Aussichtspunkt ohne Namen');
+  const istPass = element.tags.mountain_pass === 'yes';
+  const symbol = istPass ? '⛰' : '📷'; // Berg-Symbol bzw. Kamera-Symbol
+
+  const icon = L.divIcon({
+    className: '',
+    html: `<div class="poi-marker ${istPass ? 'pass' : 'viewpoint'}">${symbol}</div>`,
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+  });
+
+  const popupText = istPass && element.tags.ele
+    ? `<div class="poi-popup"><span class="poi-popup-titel">${escapeHtml(name)}</span><br>${Math.round(element.tags.ele)} m</div>`
+    : `<div class="poi-popup"><span class="poi-popup-titel">${escapeHtml(name)}</span></div>`;
+
+  return L.marker([element.lat, element.lon], { icon })
+    .bindPopup(popupText)
+    .addTo(map);
+}
+
+
 /* --- 7. Speichern (im Browser) ------------------------------------------- */
 
 const STORE = 'kurvenjagd.routen';
@@ -1313,6 +1431,7 @@ document.getElementById('optMaut').addEventListener('change', (e) => {
   state.optionen.mautVermeiden = e.target.checked;
   routeBeiBedarfNeuBerechnen();
 });
+document.getElementById('optPoi').addEventListener('change', (e) => setPoiAktiv(e.target.checked));
 
 document.getElementById('btnUndo').addEventListener('click', () => {
   if (nav.aktiv) stopNavigation(); // Route aendert sich gleich - laufende Navigation waere sonst inkonsistent
