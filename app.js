@@ -220,6 +220,13 @@ async function calculateRoute() {
 // die Einstellung "extrem": Umwege werden dann komplett in Kauf genommen.
 // Bei kleinerem t kostet jeder Kilometer Umweg (gegenueber der kuerzesten
 // Variante) Punkte vom Kurven-Score, sodass moderatere Routen gewinnen.
+//
+// Die Ueberlappung (Sackgassen-Anteil, siehe overlapAnteil weiter unten)
+// wird dagegen IMMER bestraft, unabhaengig vom Regler - sonst waere die
+// "kurvigste" Variante in den Alpen fast immer eine Sackgassen-Passstrasse
+// (die haben besonders viele Haarnadelkurven), egal welche Wegpunkte man
+// waehlt. Eine Route, die nur durch stures Hin-und-Zurueckfahren kurvig
+// wirkt, soll nicht gewinnen.
 function pickBestRoute(routes, t) {
   if (routes.length === 1) return routes[0];
 
@@ -231,8 +238,11 @@ function pickBestRoute(routes, t) {
   const minDistance = Math.min(...routes.map(r => r.distance));
   const UMWEG_KOSTEN_PRO_KM = 6; // Punkte Kurven-Score, die ein Kilometer Umweg kostet
   const strafeProKm = (1 - intensitaet) * UMWEG_KOSTEN_PRO_KM;
+  const UEBERLAPPUNGS_KOSTEN = 400; // Punkte Kurven-Score bei 100% Ueberlappung
 
-  const score = r => r.curviness - strafeProKm * ((r.distance - minDistance) / 1000);
+  const score = r => r.curviness
+    - strafeProKm * ((r.distance - minDistance) / 1000)
+    - overlapAnteil(r.coords) * UEBERLAPPUNGS_KOSTEN;
 
   return routes.reduce((beste, r) => (score(r) > score(beste) ? r : beste));
 }
@@ -424,16 +434,17 @@ function bearing(a, b) {
   return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
 }
 
-// Schaetzt, welcher Anteil der Strecke an anderer Stelle derselben Route
-// noch einmal (fast) genauso abgefahren wird - also Hin- und Rueckweg auf
-// derselben Strasse. Das ist das Kennzeichen einer echten Sackgasse und
+// Findet Streckenpunkte, an denen die Route an anderer Stelle derselben
+// Route noch einmal (fast) genauso abgefahren wird - also Hin- und Rueckweg
+// auf derselben Strasse. Das ist das Kennzeichen einer echten Sackgasse und
 // passiert in den Alpen oft ueber ganze Taeler (10+ km), nicht nur auf
 // kurzen Stichstrassen - ein enger lokaler Vergleich wie bei einer
 // Haarnadelkurve reicht da nicht, wir muessen die GANZE Route miteinander
-// vergleichen.
-function overlapAnteil(coords) {
-  const pts = thinCoords(coords, 60);
-  if (pts.length < 20) return 0;
+// vergleichen. Gibt die Indizes (in den ausgeduennten Punkten "pts") zurueck,
+// an denen das der Fall ist - wird sowohl fuer die Kennzahl overlapAnteil()
+// als auch dafuer gebraucht, herauszufinden, WELCHER Zufallspunkt schuld ist.
+function findeUeberlappendeIndizes(pts) {
+  if (pts.length < 20) return new Set();
 
   // Punkte in ein grobes Gitter einsortieren (Zellen von ca. 200m), damit
   // wir nicht jeden Punkt mit jedem anderen vergleichen muessen - das waere
@@ -447,26 +458,54 @@ function overlapAnteil(coords) {
   });
 
   const MINDEST_INDEXABSTAND = 15; // "weit auseinander im Streckenverlauf" (~900m bei 60m-Ausduennung)
+  const treffer = new Set();
 
-  // Prueft fuer einen Punkt, ob irgendwo weit entfernt im Streckenverlauf
-  // ein raeumlich fast identischer Punkt liegt (Hin-/Rueckweg auf derselben
-  // Strasse).
-  function hatDeckungsgleichenPunkt(p, i) {
+  pts.forEach((p, i) => {
     const latZelle = Math.round(p[1] * 500), lonZelle = Math.round(p[0] * 500);
     for (let dz = -1; dz <= 1; dz++) {
       for (let dw = -1; dw <= 1; dw++) {
         const nachbarn = gitter.get(`${latZelle + dz}:${lonZelle + dw}`) || [];
         for (const j of nachbarn) {
           if (Math.abs(j - i) < MINDEST_INDEXABSTAND) continue;
-          if (haversine(p[1], p[0], pts[j][1], pts[j][0]) < 25) return true;
+          if (haversine(p[1], p[0], pts[j][1], pts[j][0]) < 25) { treffer.add(i); break; }
         }
       }
     }
-    return false;
-  }
+  });
 
-  const ueberlappend = pts.filter((p, i) => hatDeckungsgleichenPunkt(p, i)).length;
-  return ueberlappend / pts.length;
+  return treffer;
+}
+
+// Anteil der Strecke, der sich selbst ueberlappt (0 = keine Ueberlappung).
+function overlapAnteil(coords) {
+  const pts = thinCoords(coords, 60);
+  if (pts.length < 20) return 0;
+  return findeUeberlappendeIndizes(pts).size / pts.length;
+}
+
+// Welche der uebergebenen Zufallspunkte sind schuld an einer Ueberlappung?
+// Fuer jeden ueberlappenden Streckenpunkt wird der raeumlich naechstgelegene
+// Zufallspunkt "verurteilt" - kein fester Abstands-Schwellwert, sonst findet
+// sich bei einem langen Alpental (die Ueberlappung kann sich ueber mehrere
+// Kilometer erstrecken, weit weg vom eigentlichen Zufallspunkt an der
+// Talspitze) manchmal ueberhaupt kein Schuldiger und die Selbstkorrektur
+// laeuft ins Leere.
+function problematischePunkte(coords, kandidatenPunkte) {
+  const pts = thinCoords(coords, 60);
+  const indizes = findeUeberlappendeIndizes(pts);
+  if (indizes.size === 0 || kandidatenPunkte.length === 0) return [];
+
+  const schuldige = new Set();
+  indizes.forEach(idx => {
+    let naechster = null, kleinsterAbstand = Infinity;
+    kandidatenPunkte.forEach(punkt => {
+      const d = haversine(punkt.lat, punkt.lon, pts[idx][1], pts[idx][0]);
+      if (d < kleinsterAbstand) { kleinsterAbstand = d; naechster = punkt; }
+    });
+    if (naechster) schuldige.add(naechster);
+  });
+
+  return [...schuldige];
 }
 
 // Luftlinie zwischen zwei Koordinaten in Metern
@@ -518,10 +557,10 @@ async function generateRoundTrip() {
   // gegen eine einzelne Testvariante. Sonst wuerde bei ganz rechts stehendem
   // Regler (Umwege spielen keine Rolle) die Distanz-Pruefung ins Leere laufen.
   let bester = null;
-  const MAX_VERSUCHE = 6;
+  let zufallspunkte = randomLoopPoints(start, radius, zielKm);
+  const MAX_VERSUCHE = 9;
 
   for (let versuch = 0; versuch < MAX_VERSUCHE; versuch++) {
-    const zufallspunkte = randomLoopPoints(start, radius, zielKm);
     const kandidat = [start, ...sortByBearing(start, [...fixeZwischenstopps, ...zufallspunkte]), start];
 
     let routes;
@@ -531,9 +570,13 @@ async function generateRoundTrip() {
         : (await Promise.allSettled([0, 1, 2, 3].map(i => fetchRoute(kandidat, profile, i))))
             .filter(r => r.status === 'fulfilled').map(r => r.value);
     } catch {
-      continue; // dieser Versuch hat keine Route ergeben - naechster Versuch mit neuen Zufallspunkten
+      zufallspunkte = bester ? zufallEinenPunktErsetzen(start, bester.punkte, radius) : randomLoopPoints(start, radius, zielKm);
+      continue;
     }
-    if (routes.length === 0) continue;
+    if (routes.length === 0) {
+      zufallspunkte = bester ? zufallEinenPunktErsetzen(start, bester.punkte, radius) : randomLoopPoints(start, radius, zielKm);
+      continue;
+    }
 
     routes.forEach(r => { r.curviness = curviness(r.coords); });
     const kandidatBest = pickBestRoute(routes, t);
@@ -549,13 +592,36 @@ async function generateRoundTrip() {
     const overlap = overlapAnteil(kandidatBest.coords);
     const bewertung = abweichung + overlap * 2;
 
-    if (!bester || bewertung < bester.bewertung) {
-      bester = { routes, best: kandidatBest, bewertung, abweichung, overlap };
+    const istBesser = !bester || bewertung < bester.bewertung;
+    if (istBesser) {
+      bester = { routes, best: kandidatBest, bewertung, abweichung, overlap, punkte: zufallspunkte };
     }
-    if (abweichung < 0.15 && overlap < 0.08) break; // nah an der Wunschdistanz und praktisch ueberlappungsfrei - fertig
+    if (abweichung < 0.15 && overlap < 0.05) break; // nah an der Wunschdistanz und praktisch ueberlappungsfrei - fertig
 
-    // Radius im Verhaeltnis zur Abweichung nachjustieren und nochmal versuchen.
-    radius *= (zielKm * 1000) / kandidatBest.distance;
+    if (istBesser) {
+      // Selbstpruefung: WELCHER Zufallspunkt verursacht die Ueberlappung?
+      // Nur der wird neu gewuerfelt (in aehnlicher Richtung, aber mit
+      // anderem Winkel/Radius) - die unproblematischen Punkte bleiben
+      // erhalten, statt bei jedem Versuch bei null anzufangen.
+      const schlechtePunkte = problematischePunkte(kandidatBest.coords, zufallspunkte);
+      if (schlechtePunkte.length > 0) {
+        zufallspunkte = zufallspunkte.map(p =>
+          schlechtePunkte.includes(p) ? ersatzpunkt(start, p, radius) : p);
+      } else {
+        // Die Ueberlappung liegt an keinem einzelnen Punkt (z.B. weil der
+        // Startort selbst nur eine Ausfahrt hat) - Radius nachjustieren und
+        // komplett neu wuerfeln.
+        radius *= (zielKm * 1000) / kandidatBest.distance;
+        zufallspunkte = randomLoopPoints(start, radius, zielKm);
+      }
+    } else {
+      // Dieser Versuch war schlechter als der bisher beste - zurueck zur
+      // besten bekannten Punktkonfiguration und dort EINEN zufaelligen
+      // Punkt neu wuerfeln. Ohne dieses Zurueckspringen "verirrt" sich die
+      // Suche: ein einzelner schlechter Versuch wuerde sonst zur Basis fuer
+      // alle weiteren Versuche werden und es wird eher schlechter als besser.
+      zufallspunkte = zufallEinenPunktErsetzen(start, bester.punkte, radius);
+    }
   }
 
   setBusy(false);
@@ -563,6 +629,10 @@ async function generateRoundTrip() {
   if (!bester) {
     showToast('Rundtour fehlgeschlagen - anderen Startpunkt oder andere Distanz probieren.');
     return;
+  }
+
+  if (bester.overlap >= 0.05) {
+    showToast('Kleinere Sackgasse in der Rundtour nicht vermeidbar - vermutlich hat der Startort nur eine Zufahrt.');
   }
 
   state.route = bester.best;
@@ -589,6 +659,27 @@ function randomLoopPoints(start, radius, zielKm) {
     punkte.push(destinationPoint(start.lat, start.lon, winkel, eigenerRadius));
   }
   return punkte;
+}
+
+// Ersetzt EINEN als problematisch erkannten Zufallspunkt durch einen neuen -
+// bewusst in aehnlicher Himmelsrichtung (nur +-30 Grad Streuung), damit die
+// grobe Form der Rundtour erhalten bleibt und nicht bei jedem Versuch neu
+// gewuerfelt wird, sondern gezielt an genau dieser Stelle ein Ausweg gesucht
+// wird.
+function ersatzpunkt(start, alterPunkt, radius) {
+  const ausgangswinkel = bearing([start.lon, start.lat], [alterPunkt.lon, alterPunkt.lat]);
+  const neuerWinkel = ausgangswinkel + (Math.random() * 60 - 30);
+  const neuerRadius = radius * (0.6 + Math.random() * 0.8); // 60-140% Streuung
+  return destinationPoint(start.lat, start.lon, neuerWinkel, neuerRadius);
+}
+
+// Nimmt eine bekannte Punktkonfiguration und wuerfelt darin EINEN
+// zufaelligen Punkt neu - genutzt, um nach einem misslungenen Versuch zur
+// bisher besten Konfiguration zurueckzuspringen, statt von dort weiter zu
+// suchen, wo es gerade schlechter wurde.
+function zufallEinenPunktErsetzen(start, punkte, radius) {
+  const index = Math.floor(Math.random() * punkte.length);
+  return punkte.map((p, i) => i === index ? ersatzpunkt(start, p, radius) : p);
 }
 
 // Punkt, der von (lat, lon) aus in eine Richtung (Grad) und Entfernung
