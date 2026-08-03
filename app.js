@@ -18,6 +18,11 @@ const state = {
   waypoints: [],      // [{lat, lon}, ...] - was der Nutzer geklickt hat
   planMode: 'punkt',  // 'punkt' (Punkt-zu-Punkt) oder 'rundtour'
   curveLevel: 100,    // 0-100, vom Kurvigkeits-Regler - 100 = maximal kurvig
+  optionen: {          // zusaetzliche Routing-Einschraenkungen, direkt an BRouter weitergereicht
+    staedteVermeiden: true,
+    autobahnenVermeiden: false,
+    mautVermeiden: false,
+  },
   route: null,        // die aktuell angezeigte Route
   markers: [],        // Leaflet-Marker der Wegpunkte
   lines: [],          // Leaflet-Linien (Hauptroute + blasse Alternativen)
@@ -147,11 +152,17 @@ function renderWaypointList() {
 
 function brouterUrl(points, profile, altIdx) {
   const pts = points.map(w => `${w.lon.toFixed(6)},${w.lat.toFixed(6)}`).join('|');
-  // consider_town ist ein Profil-Parameter von BRouter (Bestaetigt live
-  // getestet), der Ortsdurchfahrten meidet, wo es eine Alternative gibt -
-  // genau das, was eine Motorrad-App mit Landstrassen-Fokus will, statt
-  // durch enge Stadtstrassen mit vielen Abbiegungen geschickt zu werden.
-  return `${BROUTER}?lonlats=${pts}&profile=${profile}&alternativeidx=${altIdx}&format=geojson&profile:consider_town=1`;
+
+  // consider_town/avoid_motorways/avoid_toll sind Profil-Parameter von
+  // BRouter (live getestet, siehe Git-Historie) - direkt an das jeweilige
+  // Fahrprofil weitergereicht, ohne dass wir sie selbst nachbauen muessen.
+  const einschraenkungen = [];
+  if (state.optionen.staedteVermeiden) einschraenkungen.push('profile:consider_town=1');
+  if (state.optionen.autobahnenVermeiden) einschraenkungen.push('profile:avoid_motorways=1');
+  if (state.optionen.mautVermeiden) einschraenkungen.push('profile:avoid_toll=1');
+
+  return `${BROUTER}?lonlats=${pts}&profile=${profile}&alternativeidx=${altIdx}&format=geojson`
+    + einschraenkungen.map(e => `&${e}`).join('');
 }
 
 async function fetchRoute(points, profile, altIdx) {
@@ -1073,6 +1084,7 @@ function saveRoute() {
     name,
     waypoints: state.waypoints,
     curveLevel: state.curveLevel,
+    optionen: { ...state.optionen },
     roundtrip: istRundtour,
     // Zufallspunkte einer Rundtour werden nicht gespeichert (nur Start und
     // feste Zwischenstopps) - beim Laden wird deshalb neu gewuerfelt, mit
@@ -1117,6 +1129,7 @@ function renderSaved() {
       // dafuer hier ein sinnvoller Ersatzwert.
       const level = r.curveLevel !== undefined ? r.curveLevel : (r.mode === 'schnell' ? 0 : 100);
       setCurveLevel(level);
+      if (r.optionen) setOptionen(r.optionen); // aeltere gespeicherte Routen kennen das Feld noch nicht
       setPlanMode(r.roundtrip ? 'rundtour' : 'punkt'); // ruft refreshWaypoints() bereits mit auf
 
       if (r.roundtrip) {
@@ -1203,6 +1216,25 @@ function curveLevelHint(level) {
   return 'Maximal kurvig - Umwege spielen keine Rolle.';
 }
 
+function setOptionen(optionen) {
+  state.optionen = { ...state.optionen, ...optionen };
+  document.getElementById('optStaedte').checked = state.optionen.staedteVermeiden;
+  document.getElementById('optAutobahn').checked = state.optionen.autobahnenVermeiden;
+  document.getElementById('optMaut').checked = state.optionen.mautVermeiden;
+}
+
+// Berechnet die aktuell sichtbare Route neu, falls es ueberhaupt schon eine
+// zu berechnen gibt - genutzt vom Kurvigkeits-Regler und den Optionen-
+// Checkboxen, die beide je nach Planungsart unterschiedlich reagieren
+// muessen (Rundtour vs. Punkt-zu-Punkt).
+function routeBeiBedarfNeuBerechnen() {
+  if (state.planMode === 'rundtour') {
+    if (state.route) generateRoundTrip();
+  } else if (state.waypoints.length >= 2) {
+    calculateRoute();
+  }
+}
+
 
 /* --- 10. Alles verkabeln ------------------------------------------------- */
 
@@ -1219,13 +1251,22 @@ let curveSliderTimer = null;
 document.getElementById('curveSlider').addEventListener('input', (e) => {
   setCurveLevel(Number(e.target.value));
   clearTimeout(curveSliderTimer);
-  curveSliderTimer = setTimeout(() => {
-    if (state.planMode === 'rundtour') {
-      if (state.route) generateRoundTrip();
-    } else if (state.waypoints.length >= 2) {
-      calculateRoute();
-    }
-  }, 400);
+  curveSliderTimer = setTimeout(routeBeiBedarfNeuBerechnen, 400);
+});
+
+// Checkboxen loesen sofort eine Neuberechnung aus - anders als beim Regler
+// gibt es hier kein staendiges "Ziehen", das man abwarten muesste.
+document.getElementById('optStaedte').addEventListener('change', (e) => {
+  state.optionen.staedteVermeiden = e.target.checked;
+  routeBeiBedarfNeuBerechnen();
+});
+document.getElementById('optAutobahn').addEventListener('change', (e) => {
+  state.optionen.autobahnenVermeiden = e.target.checked;
+  routeBeiBedarfNeuBerechnen();
+});
+document.getElementById('optMaut').addEventListener('change', (e) => {
+  state.optionen.mautVermeiden = e.target.checked;
+  routeBeiBedarfNeuBerechnen();
 });
 
 document.getElementById('btnUndo').addEventListener('click', () => {

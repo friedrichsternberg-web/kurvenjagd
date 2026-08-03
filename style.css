@@ -179,6 +179,21 @@ body {
   background: transparent; /* Farbe kommt schon vom Element selbst */
 }
 
+/* ---------- Optionen (Checkboxen) ---------- */
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 0;
+  font-size: 13px;
+  cursor: pointer;
+}
+.checkbox-row input[type="checkbox"] {
+  width: 17px; height: 17px;
+  accent-color: var(--accent); /* faerbt die native Checkbox in Orange ein */
+  cursor: pointer;
+}
+
 /* ---------- Buttons ---------- */
 .row { display: flex; gap: 8px; margin-top: 10px; }
 .btn {
