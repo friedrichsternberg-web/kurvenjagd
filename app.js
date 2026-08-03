@@ -519,6 +519,22 @@ function problematischePunkte(coords, kandidatenPunkte) {
   return [...schuldige];
 }
 
+// Schaetzt grob, wie viele Kilometer allein das Abfahren der festen
+// Zwischenstopps kostet (Start -> Stopp 1 -> Stopp 2 -> ... -> zurueck zum
+// Start) - als Luftlinie mit Aufschlag, weil Strassen nie schnurgerade
+// sind. Wird von der Zieldistanz abgezogen, bevor der Radius fuer die
+// Zufallspunkte berechnet wird (siehe generateRoundTrip).
+function geschaetzteFixkostenKm(start, fixeZwischenstopps) {
+  if (fixeZwischenstopps.length === 0) return 0;
+
+  const punkte = [start, ...fixeZwischenstopps, start];
+  let summeMeter = 0;
+  for (let i = 1; i < punkte.length; i++) {
+    summeMeter += haversine(punkte[i - 1].lat, punkte[i - 1].lon, punkte[i].lat, punkte[i].lon);
+  }
+  return (summeMeter / 1000) * 1.4;
+}
+
 // Luftlinie zwischen zwei Koordinaten in Metern
 function haversine(lat1, lon1, lat2, lon2) {
   const R = 6371000, toRad = x => x * Math.PI / 180;
@@ -558,10 +574,19 @@ async function generateRoundTrip() {
   const t = state.curveLevel / 100;
   const profile = t < 0.15 ? 'car-fast' : 'car-eco';
 
-  // Grobe erste Schaetzung: der Kreisumfang um diesen Radius soll etwa der
-  // Zieldistanz entsprechen. Strassen sind aber nie schnurgerade, deshalb
-  // ein Aufschlag - und ein groesserer, je kurviger die Route werden soll.
-  let radius = (zielKm * 1000) / (2 * Math.PI * (1.3 + t * 0.6));
+  // Feste Zwischenstopps "verbrauchen" selbst schon einen Teil der
+  // Zieldistanz (Hin- und wieder Zurueckfahren) - wird das ignoriert, wird
+  // die Rundtour bei einem weit entfernten Zwischenstopp systematisch viel
+  // zu lang, weil der Zufallskreis dann faelschlich mit der vollen
+  // Zieldistanz geplant wird, obendrauf statt abzueglich dieser Kosten.
+  const fixkostenKm = geschaetzteFixkostenKm(start, fixeZwischenstopps);
+  const budgetFuerZufallspunkteKm = Math.max(zielKm * 0.25, zielKm - fixkostenKm);
+
+  // Grobe erste Schaetzung: der Kreisumfang um diesen Radius soll etwa dem
+  // verbleibenden Budget entsprechen. Strassen sind aber nie schnurgerade,
+  // deshalb ein Aufschlag - und ein groesserer, je kurviger die Route
+  // werden soll.
+  let radius = (budgetFuerZufallspunkteKm * 1000) / (2 * Math.PI * (1.3 + t * 0.6));
 
   // Wichtig: Wir pruefen die Zieldistanz gegen die Route, die am Ende
   // WIRKLICH angezeigt wird (also nach der Kurvigkeits-Auswahl) - nicht nur
@@ -642,8 +667,12 @@ async function generateRoundTrip() {
     return;
   }
 
-  if (bester.overlap >= 0.05) {
-    showToast('Kleinere Sackgasse in der Rundtour nicht vermeidbar - vermutlich hat der Startort nur eine Zufahrt.');
+  // Je nachdem, wie viel der Strecke doppelt gefahren wird, unterschiedlich
+  // deutlich formulieren - "kleinere" waere bei 40% schlicht falsch.
+  if (bester.overlap >= 0.25) {
+    showToast('Ein Teil der Strecke wird zwangslaeufig doppelt gefahren - Start oder ein Zwischenstopp liegt vermutlich in einem Tal mit nur einer durchgehenden Strasse.');
+  } else if (bester.overlap >= 0.05) {
+    showToast('Kleinerer Streckenabschnitt nicht vermeidbar - Start oder ein Zwischenstopp hat vermutlich nur eine Zufahrt.');
   }
 
   state.route = bester.best;
