@@ -562,6 +562,7 @@ async function generateRoundTrip() {
   const start = state.waypoints[0];
   const fixeZwischenstopps = state.waypoints.slice(1);
   const zielKm = Number(document.getElementById('roundtripKm').value);
+  const richtung = document.getElementById('roundtripRichtung').value || null; // '' -> alle Richtungen
 
   if (!zielKm || zielKm < 10) {
     showToast('Bitte eine Distanz von mindestens 10 km eingeben.');
@@ -631,7 +632,7 @@ async function generateRoundTrip() {
   // die Suche und wird eher schlechter statt besser (das ist in einer
   // frueheren Version genau schiefgegangen).
   let bester = null;
-  let zufallspunkte = randomLoopPoints(start, radius, anzahlPunkte);
+  let zufallspunkte = randomLoopPoints(start, radius, anzahlPunkte, richtung);
   const MAX_VERSUCHE = 10;
 
   for (let versuch = 0; versuch < MAX_VERSUCHE; versuch++) {
@@ -678,11 +679,11 @@ async function generateRoundTrip() {
     } else if (bester && bester.abweichung >= 0.15) {
       // Ueberlappung ok, aber Distanz noch nicht gut genug - Radius anpassen.
       radius *= (zielKm * 1000) / bester.best.distance;
-      zufallspunkte = randomLoopPoints(start, radius, basisPunkte.length || anzahlPunkte);
+      zufallspunkte = randomLoopPoints(start, radius, basisPunkte.length || anzahlPunkte, richtung);
     } else {
       // Kein einzelner Punkt eindeutig schuld (oder noch kein Treffer
       // ueberhaupt) - einen zufaelligen Punkt der Basis neu wuerfeln.
-      const quellPunkte = basisPunkte.length > 0 ? basisPunkte : randomLoopPoints(start, radius, anzahlPunkte);
+      const quellPunkte = basisPunkte.length > 0 ? basisPunkte : randomLoopPoints(start, radius, anzahlPunkte, richtung);
       const index = Math.floor(Math.random() * quellPunkte.length);
       zufallspunkte = quellPunkte.map((p, i) => i === index ? ersatzpunkt(start, p, radius) : p);
     }
@@ -709,17 +710,30 @@ async function generateRoundTrip() {
   showStats(ergebnis.best);
 }
 
+// Mittelwinkel je Himmelsrichtung (0 Grad = Norden, im Uhrzeigersinn).
+const RICHTUNGS_WINKEL = { nord: 0, ost: 90, sued: 180, west: 270 };
+
 // Verteilt Zufallspunkte im Kreis um den Startpunkt - je laenger die
 // gewuenschte Tour, desto mehr Punkte fuer eine abwechslungsreichere Form.
-function randomLoopPoints(start, radius, anzahl) {
-  const scheibenWinkel = 360 / anzahl;
+// Ist eine Himmelsrichtung vorgegeben, werden die Punkte statt auf dem
+// vollen Kreis (360 Grad) nur in einem Sektor um diese Richtung verteilt -
+// die Rundtour bekommt dann einen klaren Schwerpunkt in diese Richtung,
+// statt gleichmaessig ringsum zu streuen.
+function randomLoopPoints(start, radius, anzahl, richtung) {
+  const SEKTOR_OHNE_RICHTUNG = 360;
+  const SEKTOR_MIT_RICHTUNG = 140; // Grad - breit genug fuer Abwechslung, aber klar eine Seite betont
+
+  const mitteWinkel = richtung ? RICHTUNGS_WINKEL[richtung] : 0;
+  const sektorBreite = richtung ? SEKTOR_MIT_RICHTUNG : SEKTOR_OHNE_RICHTUNG;
+  const sektorStart = mitteWinkel - sektorBreite / 2;
+  const scheibenWinkel = sektorBreite / anzahl;
 
   const punkte = [];
   for (let i = 0; i < anzahl; i++) {
     // Jeder Punkt bekommt eine eigene Himmelsrichtungs-"Scheibe" mit
     // zufaelligem Winkel darin, damit sie sich gleichmaessig verteilen
     // statt sich zufaellig auf einer Seite zu haeufen.
-    const winkel = i * scheibenWinkel + Math.random() * scheibenWinkel;
+    const winkel = sektorStart + i * scheibenWinkel + Math.random() * scheibenWinkel;
     const eigenerRadius = radius * (0.7 + Math.random() * 0.6); // 70-130% Streuung
     punkte.push(destinationPoint(start.lat, start.lon, winkel, eigenerRadius));
   }
@@ -1253,6 +1267,7 @@ function saveRoute() {
     // feste Zwischenstopps) - beim Laden wird deshalb neu gewuerfelt, mit
     // dieser Zieldistanz.
     roundtripKm: istRundtour ? Number(document.getElementById('roundtripKm').value) : undefined,
+    roundtripRichtung: istRundtour ? document.getElementById('roundtripRichtung').value : undefined,
     distance: state.route.distance,
     curviness: state.route.curviness,
   });
@@ -1297,8 +1312,10 @@ function renderSaved() {
 
       if (r.roundtrip) {
         // Die Zufallspunkte von damals sind nicht gespeichert - wir
-        // wuerfeln bei derselben Zieldistanz einfach eine neue Variante.
+        // wuerfeln bei derselben Zieldistanz und Richtung einfach eine
+        // neue Variante.
         document.getElementById('roundtripKm').value = r.roundtripKm || 150;
+        document.getElementById('roundtripRichtung').value = r.roundtripRichtung || '';
         generateRoundTrip();
       } else {
         calculateRoute();

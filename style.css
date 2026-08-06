@@ -87,6 +87,7 @@ body {
   font: inherit;
 }
 .search-input:focus { outline: none; border-color: var(--accent); }
+.richtung-select { margin-top: 8px; cursor: pointer; }
 .search-results {
   position: absolute;
   top: calc(100% + 4px);

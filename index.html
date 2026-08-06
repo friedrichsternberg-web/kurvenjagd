@@ -113,13 +113,21 @@
       <h2>Rundtour</h2>
       <input type="number" id="roundtripKm" class="search-input" min="10" step="5" value="150"
              placeholder="Ziel-Distanz in km">
+      <select id="roundtripRichtung" class="search-input richtung-select">
+        <option value="">Alle Richtungen</option>
+        <option value="nord">Richtung Norden</option>
+        <option value="ost">Richtung Osten</option>
+        <option value="sued">Richtung Sueden</option>
+        <option value="west">Richtung Westen</option>
+      </select>
       <div class="row">
         <button class="btn" id="btnRoundtrip">Rundtour generieren</button>
       </div>
       <p class="hint">
         Erzeugt ab dem Startpunkt (und optionalen Zwischenstopps oben) eine
-        zufaellige Rundtour mit ungefaehr dieser Laenge. Nochmal klicken
-        gibt eine neue Variante.
+        zufaellige Rundtour mit ungefaehr dieser Laenge, wahlweise mit
+        Schwerpunkt in eine Himmelsrichtung. Nochmal klicken gibt eine neue
+        Variante.
       </p>
     </section>
 
