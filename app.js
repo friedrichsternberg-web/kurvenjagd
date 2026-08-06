@@ -1130,14 +1130,18 @@ async function routeNeuBerechnenAbPosition(lat, lon) {
    sind die naechstbeste, verlaessliche Naeherung, da dort ohnehin oft
    angehalten wird.                                                         */
 
-// Zwei oeffentliche Overpass-Server statt nur einem: die kostenlosen
-// Instanzen sind manchmal ueberlastet (HTTP 504) - dann probieren wir
-// automatisch den zweiten, bevor wir aufgeben.
+// Mehrere oeffentliche Overpass-Server statt nur einem: die kostenlosen
+// Instanzen sind immer wieder mal ueberlastet oder gar nicht erreichbar -
+// dann probieren wir automatisch den naechsten, bevor wir aufgeben. Beide
+// hier live getestet (Antwortzeit auf dieselbe Beispielabfrage): osm.ch
+// ~0.25s, openstreetmap.fr ~0.6s. Bewusst NICHT mehr in der Liste:
+// overpass-api.de (der "offizielle" Server) und overpass.kumi.systems -
+// beide waren beim Testen ueberlastet bzw. gar nicht erreichbar.
 const OVERPASS_SERVER = [
-  'https://overpass-api.de/api/interpreter',
-  'https://overpass.kumi.systems/api/interpreter',
+  'https://overpass.osm.ch/api/interpreter',
+  'https://overpass.openstreetmap.fr/api/interpreter',
 ];
-const OVERPASS_TIMEOUT_MS = 12000; // pro Server - danach zum naechsten wechseln statt endlos zu warten
+const OVERPASS_TIMEOUT_MS = 9000; // pro Server - danach zum naechsten wechseln statt endlos zu warten
 const POI_MIN_ZOOM = 10; // darunter waere der Kartenausschnitt zu gross - zu viele Treffer, zu langsam
 
 const poi = {
