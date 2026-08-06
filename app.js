@@ -1130,7 +1130,14 @@ async function routeNeuBerechnenAbPosition(lat, lon) {
    sind die naechstbeste, verlaessliche Naeherung, da dort ohnehin oft
    angehalten wird.                                                         */
 
-const OVERPASS = 'https://overpass-api.de/api/interpreter';
+// Zwei oeffentliche Overpass-Server statt nur einem: die kostenlosen
+// Instanzen sind manchmal ueberlastet (HTTP 504) - dann probieren wir
+// automatisch den zweiten, bevor wir aufgeben.
+const OVERPASS_SERVER = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+];
+const OVERPASS_TIMEOUT_MS = 12000; // pro Server - danach zum naechsten wechseln statt endlos zu warten
 const POI_MIN_ZOOM = 10; // darunter waere der Kartenausschnitt zu gross - zu viele Treffer, zu langsam
 
 const poi = {
@@ -1159,6 +1166,32 @@ map.on('moveend', () => {
   clearTimeout(poi.timer);
   poi.timer = setTimeout(ladePois, 600);
 });
+
+// Fragt die Server der Reihe nach ab - jeder bekommt hoechstens
+// OVERPASS_TIMEOUT_MS Zeit (per AbortController abgebrochen), dann ist der
+// naechste Server dran. Erst wenn wirklich ALLE fehlschlagen, wird der
+// Fehler nach oben weitergereicht.
+async function holeOverpassDaten(query) {
+  let letzterFehler = new Error('Kein Overpass-Server konfiguriert');
+
+  for (const server of OVERPASS_SERVER) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), OVERPASS_TIMEOUT_MS);
+
+    try {
+      const res = await fetch(`${server}?data=${encodeURIComponent(query)}`, { signal: controller.signal });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      letzterFehler = err;
+      // ... und mit dem naechsten Server in der Liste weiterprobieren.
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  throw letzterFehler;
+}
 
 async function ladePois() {
   const zoom = map.getZoom();
@@ -1197,12 +1230,10 @@ async function ladePois() {
 
   let daten;
   try {
-    const res = await fetch(`${OVERPASS}?data=${encodeURIComponent(query)}`);
-    if (!res.ok) throw new Error('Abfrage fehlgeschlagen');
-    daten = await res.json();
+    daten = await holeOverpassDaten(query);
   } catch {
     if (eigeneId === poi.anfrageId) {
-      document.getElementById('poiHint').textContent = 'Laden fehlgeschlagen - Overpass-Dienst gerade nicht erreichbar.';
+      document.getElementById('poiHint').textContent = 'Laden fehlgeschlagen - Overpass-Server gerade ueberlastet, spaeter nochmal versuchen.';
     }
     return;
   }
