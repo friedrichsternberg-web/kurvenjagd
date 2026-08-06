@@ -73,17 +73,17 @@
       </label>
     </section>
 
-    <!-- Sehenswertes: Gebirgspaesse und Aussichtspunkte aus OpenStreetMap,
-         ueber die Overpass API (denselben freien Dienst, der auch die
-         Kartendaten liefert). Kein Tag fuer "bekannter Bikertreff" -
-         Aussichtspunkte sind die naechstbeste, verlaessliche Naeherung. -->
+    <!-- Sehenswertes: von Hand zusammengestellte Liste bekannter
+         Passstrassen (siehe PASS_DATEN in app.js). Frueher kamen die Daten
+         live von der Overpass API, das war aber zu unzuverlaessig - jetzt
+         eine feste Liste ohne Netzwerk-Abfrage. -->
     <section class="block">
       <h2>Sehenswertes</h2>
       <label class="checkbox-row">
         <input type="checkbox" id="optPoi">
-        <span>Gebirgspaesse &amp; Aussichtspunkte anzeigen</span>
+        <span>Bekannte Passstrassen anzeigen</span>
       </label>
-      <p class="hint" id="poiHint">Beim Reinzoomen werden sie automatisch geladen.</p>
+      <p class="hint" id="poiHint">Rund 60 bekannte Alpen- und Mittelgebirgspaesse.</p>
     </section>
 
     <!-- Ortssuche: Alternative zum Klicken auf die Karte -->
@@ -94,13 +94,20 @@
                placeholder="Ort oder Adresse eingeben..." autocomplete="off">
         <ul id="searchResults" class="search-results" hidden></ul>
       </div>
+
+      <!-- Kartenklicks setzen erst dann Wegpunkte, wenn dieser Modus an ist -
+           sonst wuerde jeder Klick zum Erkunden der Karte (z.B. auf einen
+           Pass-Marker) versehentlich einen Wegpunkt anlegen. -->
+      <button class="btn ghost klick-modus-btn" id="btnKlickModus">
+        Beliebigen Punkt auf der Karte anklicken
+      </button>
     </section>
 
     <!-- Wegpunkte -->
     <section class="block">
       <h2>Wegpunkte <span class="badge" id="wpCount">0</span></h2>
       <ol id="wpList" class="wp-list">
-        <li class="empty">Klick auf die Karte, um zu starten.</li>
+        <li class="empty">Ort suchen oder Klick-Modus einschalten und auf die Karte klicken.</li>
       </ol>
       <div class="row">
         <button class="btn ghost" id="btnUndo">Letzten entfernen</button>

@@ -218,6 +218,14 @@ body {
 .btn.ghost:hover { border-color: var(--muted); color: var(--text); }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
+.klick-modus-btn { width: 100%; margin-top: 8px; font-size: 12.5px; }
+.klick-modus-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #1a1206;
+  font-weight: 600;
+}
+
 /* ---------- Listen ---------- */
 .badge {
   display: inline-block;
@@ -390,7 +398,7 @@ body.nav-modus #panel {
   font-family: -apple-system, sans-serif;
 }
 
-/* Sehenswertes: Gebirgspaesse und Aussichtspunkte */
+/* Sehenswertes: Gebirgspaesse */
 .poi-marker {
   width: 24px; height: 24px;
   border-radius: 50%;
@@ -399,8 +407,7 @@ body.nav-modus #panel {
   box-shadow: 0 2px 6px rgba(0,0,0,0.5);
   border: 2px solid #1a1206;
 }
-.poi-marker.pass { background: #d8d2c4; }       /* helles Steingrau fuer Passhoehen */
-.poi-marker.viewpoint { background: #9fd8e8; }  /* Himmelblau fuer Aussichtspunkte */
+.poi-marker.pass { background: #d8d2c4; }  /* helles Steingrau fuer Passhoehen */
 
 .poi-popup { font-size: 13px; line-height: 1.5; }
 .poi-popup .poi-popup-titel { font-weight: 700; }

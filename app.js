@@ -60,8 +60,23 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
 }).addTo(map);
 
-// Jeder Klick auf die Karte setzt einen Wegpunkt.
-map.on('click', (e) => addWaypoint(e.latlng.lat, e.latlng.lng));
+// Ein Klick auf die Karte setzt nur dann einen Wegpunkt, wenn der
+// Klick-Modus ueber den Button "Beliebigen Punkt auf der Karte anklicken"
+// eingeschaltet wurde. Sonst wuerde jeder Klick zum Erkunden der Karte
+// (z.B. auf einen Pass-Marker in der Naehe) versehentlich einen Wegpunkt
+// anlegen. Der Modus bleibt an, bis man ihn wieder ausschaltet - so lassen
+// sich mehrere Wegpunkte hintereinander setzen.
+let kartenKlickModusAktiv = false;
+
+map.on('click', (e) => {
+  if (!kartenKlickModusAktiv) return;
+  addWaypoint(e.latlng.lat, e.latlng.lng);
+});
+
+document.getElementById('btnKlickModus').addEventListener('click', () => {
+  kartenKlickModusAktiv = !kartenKlickModusAktiv;
+  document.getElementById('btnKlickModus').classList.toggle('active', kartenKlickModusAktiv);
+});
 
 
 /* --- 3. Wegpunkte zeichnen und auflisten --------------------------------- */
@@ -133,8 +148,8 @@ function renderWaypointList() {
 
   if (state.waypoints.length === 0) {
     list.innerHTML = state.planMode === 'rundtour'
-      ? '<li class="empty">Klick auf die Karte fuer den Startpunkt.</li>'
-      : '<li class="empty">Klick auf die Karte, um zu starten.</li>';
+      ? '<li class="empty">Ort suchen oder Klick-Modus einschalten fuer den Startpunkt.</li>'
+      : '<li class="empty">Ort suchen oder Klick-Modus einschalten und auf die Karte klicken.</li>';
     return;
   }
 
@@ -1120,154 +1135,122 @@ async function routeNeuBerechnenAbPosition(lat, lon) {
 }
 
 
-/* --- 6c. Sehenswertes: Gebirgspaesse & Aussichtspunkte ---------------------
-   Die Overpass API ist der freie Abfragedienst fuer OpenStreetMap-Daten
-   (derselbe Datentopf, aus dem auch unsere Kartenkacheln stammen) - man
-   schickt eine Abfrage nach Kartenelementen mit bestimmten Eigenschaften
-   (hier: mountain_pass=yes bzw. tourism=viewpoint) innerhalb eines
-   Kartenausschnitts und bekommt sie als JSON zurueck. Kein API-Key noetig.
-   Es gibt in OSM kein Tag fuer "bekannter Bikertreff" - Aussichtspunkte
-   sind die naechstbeste, verlaessliche Naeherung, da dort ohnehin oft
-   angehalten wird.                                                         */
+/* --- 6c. Sehenswertes: Gebirgspaesse ---------------------------------------
+   Frueher wurden Paesse live ueber die Overpass API (den freien Abfrage-
+   dienst fuer OpenStreetMap-Daten) geladen. Das war auf Dauer nicht
+   zuverlaessig genug - die kostenlosen Overpass-Server waren immer wieder
+   ueberlastet oder nicht erreichbar. Deswegen jetzt der einfachere, robustere
+   Weg: eine von Hand zusammengestellte Liste bekannter Motorrad-Passstrassen
+   direkt im Code (PASS_DATEN unten), ohne Netzwerk-Abfrage zur Laufzeit.
+   Die Koordinaten wurden einmalig ueber Nominatim ermittelt (die App-eigene
+   Ortssuche nutzt denselben Dienst), Hoehe/Charakter/Maut/Saison stammen aus
+   Friedrichs eigener Recherche - keine Live-Daten, koennen sich also mit der
+   Zeit veraendern (z.B. neue Mautpreise, geaenderte Oeffnungszeiten).       */
 
-// Mehrere oeffentliche Overpass-Server statt nur einem: die kostenlosen
-// Instanzen sind immer wieder mal ueberlastet oder gar nicht erreichbar -
-// dann probieren wir automatisch den naechsten, bevor wir aufgeben. Beide
-// hier live getestet (Antwortzeit auf dieselbe Beispielabfrage): osm.ch
-// ~0.25s, openstreetmap.fr ~0.6s. Bewusst NICHT mehr in der Liste:
-// overpass-api.de (der "offizielle" Server) und overpass.kumi.systems -
-// beide waren beim Testen ueberlastet bzw. gar nicht erreichbar.
-const OVERPASS_SERVER = [
-  'https://overpass.osm.ch/api/interpreter',
-  'https://overpass.openstreetmap.fr/api/interpreter',
+const PASS_DATEN = [
+  // -- Deutschland --
+  { name: 'Riedbergpass', lat: 47.4373, lon: 10.1769, hoehe: 1420, land: 'Deutschland', charakter: 'Alpenpass, viele Kehren, hoechste Passstrasse Deutschlands', maut: false, saison: 'ganzjaehrig, winterglatt' },
+  { name: 'Oberjochpass', lat: 47.5268, lon: 10.4329, hoehe: 1180, land: 'Deutschland', charakter: 'gute Strecke bis Alpenpass', maut: false, saison: 'ganzjaehrig' },
+  { name: 'Jochstrasse/Hochgratstrasse', lat: 47.5529, lon: 10.0224, hoehe: 1100, land: 'Deutschland', charakter: 'kurvig, Aussicht', maut: true, saison: 'ganzjaehrig' },
+  { name: 'Kesselbergstrasse', lat: 47.6212, lon: 11.3491, hoehe: 858, land: 'Deutschland', charakter: 'kurz, aber sehr kurvig', maut: false, saison: 'ganzjaehrig' },
+  { name: 'Schwarzwaldhochstrasse (B500)', lat: 48.6569, lon: 8.2382, hoehe: 1150, land: 'Deutschland', charakter: 'Landstrasse, sehr kurvig', maut: false, saison: 'ganzjaehrig' },
+  { name: 'Wutachschlucht-Panoramastrasse', lat: 47.8609, lon: 8.2835, hoehe: 900, land: 'Deutschland', charakter: 'kurvig, schmal', maut: false, saison: 'ganzjaehrig' },
+  // -- Oesterreich --
+  { name: 'Grossglockner Hochalpenstrasse', lat: 47.0568, lon: 12.8322, hoehe: 2504, land: 'Oesterreich', charakter: 'Ikone, 36 Kehren, Nationalpark Hohe Tauern', maut: true, saison: 'Mai-Okt/Nov' },
+  { name: 'Timmelsjoch', lat: 46.9065, lon: 11.0957, hoehe: 2509, land: 'Oesterreich', charakter: 'verbindet Oetztal - Suedtirol, sehr kurvig', maut: true, saison: 'Juni-Okt' },
+  { name: 'Silvretta Hochalpenstrasse', lat: 46.9180, lon: 10.0951, hoehe: 2032, land: 'Oesterreich', charakter: '34 Kehren, spektakulaer', maut: true, saison: 'Mai/Juni-Okt' },
+  { name: 'Nockalmstrasse', lat: 46.9316, lon: 13.7606, hoehe: 2040, land: 'Oesterreich', charakter: '51 km, sehr kurvenreich, Panorama', maut: true, saison: 'Mai-Okt' },
+  { name: 'Felbertauernstrasse', lat: 46.8341, lon: 12.7486, hoehe: 1650, land: 'Oesterreich', charakter: 'verbindet Salzburg - Osttirol', maut: true, saison: 'ganzjaehrig' },
+  { name: 'Gerlos Alpenstrasse', lat: 47.2256, lon: 12.0346, hoehe: 1628, land: 'Oesterreich', charakter: 'Zillertal - Krimml, Wasserfaelle', maut: true, saison: 'ganzjaehrig' },
+  { name: 'Turracher Hoehe', lat: 46.9155, lon: 13.8747, hoehe: 1795, land: 'Oesterreich', charakter: 'steilste Passstrasse Oesterreichs (bis 23%)', maut: false, saison: 'ganzjaehrig' },
+  { name: 'Katschberg (alte Strasse)', lat: 47.0592, lon: 13.6157, hoehe: 1641, land: 'Oesterreich', charakter: 'kurvig, parallel zur Tauernautobahn', maut: false, saison: 'ganzjaehrig' },
+  { name: 'Loiblpass', lat: 46.4392, lon: 14.2667, hoehe: 1068, land: 'Oesterreich', charakter: 'Grenze zu Slowenien, alte Kehrenstrasse + Tunnel', maut: false, saison: 'ganzjaehrig' },
+  { name: 'Hahntennjoch', lat: 47.2873, lon: 10.6555, hoehe: 1894, land: 'Oesterreich', charakter: 'schmal, sehr kurvig, wenig Verkehr', maut: false, saison: 'Mai-Okt' },
+  { name: 'Fernpass', lat: 47.3639, lon: 10.8349, hoehe: 1216, land: 'Oesterreich', charakter: 'Tirol - Bayern, stark befahren', maut: false, saison: 'ganzjaehrig' },
+  { name: 'Ploeckenpass', lat: 46.6036, lon: 12.9451, hoehe: 1360, land: 'Oesterreich', charakter: 'Grenze zu Italien, Karnische Alpen', maut: false, saison: 'ganzjaehrig' },
+  { name: 'Soelkpass', lat: 47.2717, lon: 14.0797, hoehe: 1788, land: 'Oesterreich', charakter: 'Schladming - Murtal, wenig Verkehr', maut: false, saison: 'Mai-Okt' },
+  { name: 'Radstaedter Tauernpass', lat: 47.2494, lon: 13.5570, hoehe: 1738, land: 'Oesterreich', charakter: 'alte Route parallel zur Autobahn', maut: false, saison: 'ganzjaehrig' },
+  { name: 'Arlbergpass', lat: 47.1298, lon: 10.2106, hoehe: 1793, land: 'Oesterreich', charakter: 'Vorarlberg - Tirol, alte Passstrasse', maut: false, saison: 'ganzjaehrig' },
+  { name: 'Oetztaler Hoehenstrasse', lat: 46.9321, lon: 10.9324, hoehe: 2090, land: 'Oesterreich', charakter: 'Sackgasse, sehr kurvig, Ausblick auf Oetztaler Alpen', maut: false, saison: 'Mai-Okt' },
+  { name: 'Iselsbergstrasse', lat: 46.8699, lon: 12.8408, hoehe: 1204, land: 'Oesterreich', charakter: 'Osttirol - Kaernten', maut: false, saison: 'ganzjaehrig' },
+  // -- Schweiz --
+  { name: 'Furkapass', lat: 46.5727, lon: 8.4152, hoehe: 2429, land: 'Schweiz', charakter: 'Kultstrecke (James Bond), Rhonegletscher', maut: false, saison: 'Juni-Okt' },
+  { name: 'Grimselpass', lat: 46.5615, lon: 8.3377, hoehe: 2164, land: 'Schweiz', charakter: 'direkt mit Furka kombinierbar', maut: false, saison: 'Juni-Okt' },
+  { name: 'Sustenpass', lat: 46.7291, lon: 8.4465, hoehe: 2224, land: 'Schweiz', charakter: 'sehr elegante Linienfuehrung', maut: false, saison: 'Juni-Okt' },
+  { name: 'Nufenenpass', lat: 46.4729, lon: 8.3893, hoehe: 2478, land: 'Schweiz', charakter: 'hoechste vollstaendig auf Schweizer Boden liegende Passstrasse', maut: false, saison: 'Juni-Okt' },
+  { name: 'Gotthardpass (alte Tremola)', lat: 46.5593, lon: 8.5612, hoehe: 2106, land: 'Schweiz', charakter: 'Kopfsteinpflaster-Serpentinen, historisch', maut: false, saison: 'Juni-Okt' },
+  { name: 'Umbrailpass', lat: 46.5416, lon: 10.4332, hoehe: 2501, land: 'Schweiz', charakter: 'hoechster Strassenpass der Schweiz, fuehrt zum Stilfser Joch', maut: true, saison: 'Juni-Okt' },
+  { name: 'San Bernardino Pass', lat: 46.4971, lon: 9.1711, hoehe: 2065, land: 'Schweiz', charakter: 'Tessin - Graubuenden', maut: false, saison: 'Mai-Nov' },
+  { name: 'Spluegenpass', lat: 46.5056, lon: 9.3303, hoehe: 2113, land: 'Schweiz', charakter: 'Grenze zu Italien, wilde Kehren', maut: false, saison: 'Juni-Okt' },
+  { name: 'Julierpass', lat: 46.4722, lon: 9.7281, hoehe: 2284, land: 'Schweiz', charakter: 'ganzjaehrig meist offen, roemische Geschichte', maut: false, saison: 'ganzjaehrig' },
+  { name: 'Albulapass', lat: 46.5823, lon: 9.8377, hoehe: 2312, land: 'Schweiz', charakter: 'parallel zur Bahnstrecke Berguen-St. Moritz', maut: false, saison: 'Juni-Okt' },
+  { name: 'Flueelapass', lat: 46.7475, lon: 9.9503, hoehe: 2383, land: 'Schweiz', charakter: 'Davos - Graubuenden Sued', maut: false, saison: 'Mai-Nov' },
+  { name: 'Ofenpass', lat: 46.6398, lon: 10.2922, hoehe: 2149, land: 'Schweiz', charakter: 'Nationalpark, oft ganzjaehrig offen', maut: false, saison: 'ganzjaehrig' },
+  { name: 'Malojapass', lat: 46.3999, lon: 9.6958, hoehe: 1815, land: 'Schweiz', charakter: 'Engadin - Bergell, markante Serpentinen', maut: false, saison: 'ganzjaehrig' },
+  { name: 'Grosser St. Bernhard', lat: 45.8691, lon: 7.1704, hoehe: 2469, land: 'Schweiz', charakter: 'Wallis - Italien', maut: false, saison: 'Juni-Okt' },
+  { name: 'Simplonpass', lat: 46.2502, lon: 8.0317, hoehe: 2005, land: 'Schweiz', charakter: 'ganzjaehrig meist offen, sehr breit ausgebaut', maut: false, saison: 'ganzjaehrig' },
+  { name: 'Klausenpass', lat: 46.8682, lon: 8.8554, hoehe: 1948, land: 'Schweiz', charakter: 'Uri - Glarus, klassische Route', maut: false, saison: 'Juni-Okt' },
+  { name: 'Pragelpass', lat: 46.9994, lon: 8.8695, hoehe: 1548, land: 'Schweiz', charakter: 'schmal, wenig Verkehr', maut: false, saison: 'Mai-Nov' },
+  // -- Italien --
+  { name: 'Stilfser Joch (Passo dello Stelvio)', lat: 46.5286, lon: 10.4532, hoehe: 2757, land: 'Italien', charakter: 'hoechster Pass der Ostalpen, 48 Kehren (Nordseite), absolute Ikone', maut: false, saison: 'Juni-Okt' },
+  { name: 'Gaviapass', lat: 46.3435, lon: 10.4873, hoehe: 2621, land: 'Italien', charakter: 'schmal, teils einspurig, sehr anspruchsvoll', maut: false, saison: 'Juni-Okt' },
+  { name: 'Mortirolopass', lat: 46.2479, lon: 10.2983, hoehe: 1852, land: 'Italien', charakter: 'steil, eng, aus dem Radsport bekannt', maut: false, saison: 'Mai-Okt' },
+  { name: 'Passo Sella', lat: 46.5081, lon: 11.7673, hoehe: 2244, land: 'Italien', charakter: 'Teil der Sellaronda, Dolomiten pur', maut: false, saison: 'Juni-Okt' },
+  { name: 'Passo Pordoi', lat: 46.4876, lon: 11.8122, hoehe: 2239, land: 'Italien', charakter: 'Teil der Sellaronda', maut: false, saison: 'Mai-Okt' },
+  { name: 'Passo Falzarego', lat: 46.5188, lon: 12.0084, hoehe: 2105, land: 'Italien', charakter: 'Cortina-Gegend, mit Passo Valparola kombinierbar', maut: false, saison: 'Mai-Okt' },
+  { name: 'Passo Giau', lat: 46.4828, lon: 12.0535, hoehe: 2236, land: 'Italien', charakter: '29 Kehren, gilt als einer der schoensten Dolomitenpaesse', maut: false, saison: 'Mai-Okt' },
+  { name: 'Passo Campolongo', lat: 46.5139, lon: 11.8724, hoehe: 1875, land: 'Italien', charakter: 'Teil der Sellaronda', maut: false, saison: 'Mai-Okt' },
+  { name: 'Passo Fedaia', lat: 46.4640, lon: 11.8626, hoehe: 2057, land: 'Italien', charakter: 'Blick auf Marmolada-Gletscher', maut: false, saison: 'Mai-Okt' },
+  { name: 'Passo Rolle', lat: 46.2964, lon: 11.7851, hoehe: 1970, land: 'Italien', charakter: 'San Martino di Castrozza - Predazzo', maut: false, saison: 'ganzjaehrig meist offen' },
+  { name: 'Passo di San Boldo', lat: 45.9982, lon: 12.1612, hoehe: 706, land: 'Italien', charakter: 'kurz, aber spektakulaer: 5 Kehren durch Felstunnel gestapelt', maut: false, saison: 'ganzjaehrig' },
+  { name: 'Passo Manghen', lat: 46.1733, lon: 11.4415, hoehe: 2047, land: 'Italien', charakter: 'einspurig, sehr ruhig, Fahrradpass', maut: false, saison: 'Juni-Okt' },
+  { name: 'Passo del Tonale', lat: 46.2580, lon: 10.5818, hoehe: 1883, land: 'Italien', charakter: 'breiter ausgebaut, viel Verkehr', maut: false, saison: 'ganzjaehrig' },
+  { name: 'Jaufenpass', lat: 46.8396, lon: 11.3215, hoehe: 2094, land: 'Italien', charakter: 'Sterzing - Meran, oft mit Timmelsjoch kombiniert', maut: false, saison: 'Mai-Okt' },
+  { name: 'Penserjoch', lat: 46.8856, lon: 11.4289, hoehe: 2211, land: 'Italien', charakter: 'Sarntal - Sterzing, wenig Verkehr', maut: false, saison: 'Mai-Okt' },
+  { name: 'Passo di Valparola', lat: 46.5251, lon: 11.9974, hoehe: 2192, land: 'Italien', charakter: 'Weltkriegsrelikte, mit Falzarego kombinierbar', maut: false, saison: 'Mai-Okt' },
+  { name: 'Wuerzjoch (Passo delle Erbe)', lat: 46.6751, lon: 11.8143, hoehe: 1987, land: 'Italien', charakter: 'Villnoess - Gadertal', maut: false, saison: 'Mai-Okt' },
+  // -- Slowenien --
+  { name: 'Vrsic-Pass', lat: 46.4348, lon: 13.7437, hoehe: 1611, land: 'Slowenien', charakter: '50 Kehren, Julische Alpen, Triglav-Nationalpark, Ikone', maut: false, saison: 'Mai-Okt (wetterabhaengig)' },
+  { name: 'Predilpass', lat: 46.4210, lon: 13.5877, hoehe: 1156, land: 'Slowenien', charakter: 'Grenze zu Italien, fuehrt am Raibler See vorbei', maut: false, saison: 'ganzjaehrig' },
+  { name: 'Mangartstrasse', lat: 46.4395, lon: 13.6547, hoehe: 2055, land: 'Slowenien', charakter: 'hoechste asphaltierte Strasse Sloweniens, Sackgasse; Sperrungen moeglich - vorab pruefen', maut: true, saison: 'meist nur Juli-Sept offiziell offen' },
+  { name: 'Solcava Panoramastrasse', lat: 46.4196, lon: 14.6920, hoehe: 1100, land: 'Slowenien', charakter: 'Logarska dolina, sehr kurvig, wenig Verkehr', maut: false, saison: 'ganzjaehrig' },
+  { name: 'Crnivec', lat: 46.2607, lon: 14.7023, hoehe: 970, land: 'Slowenien', charakter: 'zwischen Kamniker Alpen und Save-Tal', maut: false, saison: 'ganzjaehrig' },
 ];
-const OVERPASS_TIMEOUT_MS = 9000; // pro Server - danach zum naechsten wechseln statt endlos zu warten
-const POI_MIN_ZOOM = 10; // darunter waere der Kartenausschnitt zu gross - zu viele Treffer, zu langsam
 
 const poi = {
   aktiv: false,
   marker: [],
-  letzteBounds: null, // um beim Weiterzoomen im selben Bereich nicht doppelt abzufragen
-  timer: null,
-  anfrageId: 0, // zaehlt Abfragen durch, damit eine aeltere Antwort, die erst spaeter eintrifft, nicht eine neuere ueberschreibt
 };
 
 function setPoiAktiv(aktiv) {
   poi.aktiv = aktiv;
   if (aktiv) {
-    ladePois();
+    poi.marker = PASS_DATEN.map(zeichnePassMarker);
+    document.getElementById('poiHint').textContent = `${poi.marker.length} bekannte Passstrassen auf der Karte.`;
   } else {
     poi.marker.forEach(m => map.removeLayer(m));
     poi.marker = [];
-    poi.letzteBounds = null;
   }
 }
 
-// Nach jeder Kartenbewegung neu laden, aber erst 600ms nach dem Anhalten -
-// sonst wuerde jedes Ziehen der Karte einzelne Abfragen ausloesen.
-map.on('moveend', () => {
-  if (!poi.aktiv) return;
-  clearTimeout(poi.timer);
-  poi.timer = setTimeout(ladePois, 600);
-});
-
-// Fragt die Server der Reihe nach ab - jeder bekommt hoechstens
-// OVERPASS_TIMEOUT_MS Zeit (per AbortController abgebrochen), dann ist der
-// naechste Server dran. Erst wenn wirklich ALLE fehlschlagen, wird der
-// Fehler nach oben weitergereicht.
-async function holeOverpassDaten(query) {
-  let letzterFehler = new Error('Kein Overpass-Server konfiguriert');
-
-  for (const server of OVERPASS_SERVER) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), OVERPASS_TIMEOUT_MS);
-
-    try {
-      const res = await fetch(`${server}?data=${encodeURIComponent(query)}`, { signal: controller.signal });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return await res.json();
-    } catch (err) {
-      letzterFehler = err;
-      // ... und mit dem naechsten Server in der Liste weiterprobieren.
-    } finally {
-      clearTimeout(timeoutId);
-    }
-  }
-
-  throw letzterFehler;
-}
-
-async function ladePois() {
-  const zoom = map.getZoom();
-  if (zoom < POI_MIN_ZOOM) {
-    // Alte Marker vom vorherigen (naeheren) Ausschnitt wegraeumen - sonst
-    // stehen sie noch auf der Karte, obwohl der Hinweistext sagt, man
-    // muesse erst noch naeher heranzoomen.
-    poi.marker.forEach(m => map.removeLayer(m));
-    poi.marker = [];
-    poi.letzteBounds = null;
-    document.getElementById('poiHint').textContent = 'Noch etwas naeher heranzoomen, um sie zu laden.';
-    return;
-  }
-
-  const bounds = map.getBounds();
-
-  // Liegt der neue Ausschnitt schon komplett im zuletzt abgefragten Bereich?
-  // Dann gibt es nichts Neues zu laden - schont den freien Dienst.
-  if (poi.letzteBounds && poi.letzteBounds.contains(bounds)) return;
-
-  // Etwas groesser als der sichtbare Ausschnitt abfragen (25% Rand), damit
-  // nicht bei jedem kleinen Schwenk sofort nachgeladen werden muss.
-  const gepolstert = bounds.pad(0.25);
-  poi.letzteBounds = gepolstert;
-
-  const sw = gepolstert.getSouthWest(), ne = gepolstert.getNorthEast();
-  const bbox = `${sw.lat},${sw.lng},${ne.lat},${ne.lng}`;
-  const query = `[out:json][timeout:20];(node["mountain_pass"="yes"](${bbox});node["tourism"="viewpoint"](${bbox}););out body;`;
-
-  document.getElementById('poiHint').textContent = 'Laedt...';
-
-  // Eigene Anfragenummer merken - trifft waehrenddessen (z.B. durch
-  // schnelles Weiterzoomen) schon eine NEUERE Anfrage ein, verwerfen wir
-  // unser eigenes, dann veraltetes Ergebnis unten wieder.
-  const eigeneId = ++poi.anfrageId;
-
-  let daten;
-  try {
-    daten = await holeOverpassDaten(query);
-  } catch {
-    if (eigeneId === poi.anfrageId) {
-      document.getElementById('poiHint').textContent = 'Laden fehlgeschlagen - Overpass-Server gerade ueberlastet, spaeter nochmal versuchen.';
-    }
-    return;
-  }
-
-  if (!poi.aktiv || eigeneId !== poi.anfrageId) return; // ausgeschaltet oder durch neuere Anfrage ueberholt
-
-  poi.marker.forEach(m => map.removeLayer(m));
-  poi.marker = daten.elements.map(zeichnePoiMarker).filter(Boolean);
-
-  document.getElementById('poiHint').textContent =
-    poi.marker.length > 0 ? `${poi.marker.length} gefunden.` : 'Nichts in diesem Ausschnitt gefunden.';
-}
-
-function zeichnePoiMarker(element) {
-  const name = element.tags.name || (element.tags.mountain_pass ? 'Pass ohne Namen' : 'Aussichtspunkt ohne Namen');
-  const istPass = element.tags.mountain_pass === 'yes';
-  const symbol = istPass ? '⛰' : '📷'; // Berg-Symbol bzw. Kamera-Symbol
-
+function zeichnePassMarker(pass) {
   const icon = L.divIcon({
     className: '',
-    html: `<div class="poi-marker ${istPass ? 'pass' : 'viewpoint'}">${symbol}</div>`,
+    html: `<div class="poi-marker pass">⛰</div>`,
     iconSize: [24, 24],
     iconAnchor: [12, 12],
   });
 
-  const popupText = istPass && element.tags.ele
-    ? `<div class="poi-popup"><span class="poi-popup-titel">${escapeHtml(name)}</span><br>${Math.round(element.tags.ele)} m</div>`
-    : `<div class="poi-popup"><span class="poi-popup-titel">${escapeHtml(name)}</span></div>`;
+  const mautText = pass.maut ? 'mautpflichtig' : 'keine Maut';
+  const popupText = `
+    <div class="poi-popup">
+      <span class="poi-popup-titel">${escapeHtml(pass.name)}</span><br>
+      ${pass.hoehe} m &middot; ${escapeHtml(pass.land)}<br>
+      ${escapeHtml(pass.charakter)}<br>
+      ${mautText} &middot; Saison: ${escapeHtml(pass.saison)}
+    </div>`;
 
-  return L.marker([element.lat, element.lon], { icon })
+  return L.marker([pass.lat, pass.lon], { icon })
     .bindPopup(popupText)
     .addTo(map);
 }
