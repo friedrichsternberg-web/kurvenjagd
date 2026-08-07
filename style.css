@@ -29,10 +29,52 @@ html, body {
   font-size: 15px;
 }
 
-/* Zwei Spalten: Bedienfeld links, Karte rechts */
-body {
+/* ---------- Startmenü & "Meine Touren" ----------
+   Beide sind einfache, zentrierte Vollbild-Ansichten - der Einstieg vor
+   dem eigentlichen Routenplaner (siehe .app-layout weiter unten), der
+   anfangs per [hidden] versteckt ist. */
+.start-screen {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.start-screen[hidden] { display: none; }
+
+.start-screen-inner { width: 320px; }
+.start-screen-inner .sub { margin: 0 0 32px; }
+.start-screen-inner h2 { margin: 0 0 16px; font-size: 20px; }
+.start-screen-inner .saved-list { text-align: left; }
+
+.start-screen-buttons { display: flex; flex-direction: column; gap: 10px; }
+.start-screen-buttons .btn { padding: 14px; font-size: 16px; }
+
+.back-btn { margin-bottom: 20px; }
+
+/* ---------- Routenplaner: zwei Spalten, Bedienfeld links, Karte rechts ---------- */
+.app-layout {
+  height: 100%;
   display: flex;
 }
+.app-layout[hidden] { display: none; }
+
+.panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.back-to-start {
+  flex: 0 0 auto;
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font-size: 15px;
+  cursor: pointer;
+}
+.back-to-start:hover { border-color: var(--muted); color: var(--text); }
 
 /* ---------- Bedienfeld ---------- */
 #panel {
@@ -47,12 +89,14 @@ body {
   gap: 20px;
 }
 
-#panel header h1 {
+/* .brand-title: der Name "Kurvenjagd" mit dem orangen Punkt davor - wird
+   sowohl im Bedienfeld-Header als auch auf dem Startbildschirm genutzt. */
+.brand-title {
   margin: 0;
   font-size: 22px;
   letter-spacing: -0.3px;
 }
-#panel header h1::before {
+.brand-title::before {
   content: "";
   display: inline-block;
   width: 10px; height: 10px;
@@ -61,6 +105,7 @@ body {
   margin-right: 8px;
   vertical-align: middle;
 }
+.start-screen-inner .brand-title { font-size: 32px; }
 .sub { margin: 2px 0 0; color: var(--muted); font-size: 12px; }
 
 .block h2 {

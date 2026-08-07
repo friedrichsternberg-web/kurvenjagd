@@ -1751,52 +1751,79 @@ function saveRoute() {
   showToast('Gespeichert: ' + name);
 }
 
-function renderSaved() {
-  const list = document.getElementById('savedList');
-  const all = loadSaved();
-
-  if (all.length === 0) {
-    list.innerHTML = '<li class="empty">Noch nichts gespeichert.</li>';
-    return;
-  }
-
-  list.innerHTML = all.map(r => `
+// HTML für eine Zeile in einer Liste gespeicherter Routen - genutzt sowohl
+// im Bedienfeld des Planers (#savedList) als auch auf dem Startbildschirm
+// "Meine Touren" (#tourenList), damit beide gleich aussehen.
+function gespeicherteRouteHtml(r) {
+  return `
     <li data-id="${r.id}">
       <span class="saved-name">${escapeHtml(r.name)}</span>
       <span class="saved-meta">${(r.distance / 1000).toFixed(0)} km &middot; ${Math.round(r.curviness)}</span>
       <button class="del" data-del="${r.id}" title="Löschen">&times;</button>
-    </li>`).join('');
+    </li>`;
+}
 
+// Lädt eine gespeicherte Route in den aktuellen Zustand und berechnet sie
+// neu. Bei einer Rundtour sind die damaligen Zufallspunkte nicht
+// gespeichert (siehe saveRoute) - es wird bei derselben Zieldistanz und
+// Richtung einfach eine neue Variante gewürfelt.
+function ladeGespeicherteRoute(r) {
+  state.waypoints = r.waypoints;
+  // Ältere gespeicherte Routen kennen noch 'mode' statt 'curveLevel' -
+  // dafür hier ein sinnvoller Ersatzwert.
+  const level = r.curveLevel !== undefined ? r.curveLevel : (r.mode === 'schnell' ? 0 : 100);
+  setCurveLevel(level);
+  if (r.optionen) setOptionen(r.optionen); // ältere gespeicherte Routen kennen das Feld noch nicht
+  setPlanMode(r.roundtrip ? 'rundtour' : 'punkt'); // ruft refreshWaypoints() bereits mit auf
+
+  if (r.roundtrip) {
+    document.getElementById('roundtripKm').value = r.roundtripKm || 150;
+    document.getElementById('roundtripRichtung').value = r.roundtripRichtung || '';
+    generateRoundTrip();
+  } else {
+    calculateRoute();
+  }
+}
+
+// Verkabelt eine Liste gespeicherter Routen: Klick auf das Kreuz löscht die
+// Zeile, Klick auf den Rest lädt die Route. Vom Startbildschirm aus soll
+// dabei zusätzlich zum Planer gewechselt werden - deshalb der Parameter.
+function verkabeleGespeicherteListe(list, { zeigePlanerBeimLaden }) {
   list.querySelectorAll('li').forEach(li => {
     li.addEventListener('click', (e) => {
       if (e.target.dataset.del) {
         const rest = loadSaved().filter(x => String(x.id) !== e.target.dataset.del);
         localStorage.setItem(STORE, JSON.stringify(rest));
         renderSaved();
+        renderTourenListe();
         return;
       }
       const r = loadSaved().find(x => String(x.id) === li.dataset.id);
       if (!r) return;
-      state.waypoints = r.waypoints;
-      // Ältere gespeicherte Routen kennen noch 'mode' statt 'curveLevel' -
-      // dafür hier ein sinnvoller Ersatzwert.
-      const level = r.curveLevel !== undefined ? r.curveLevel : (r.mode === 'schnell' ? 0 : 100);
-      setCurveLevel(level);
-      if (r.optionen) setOptionen(r.optionen); // ältere gespeicherte Routen kennen das Feld noch nicht
-      setPlanMode(r.roundtrip ? 'rundtour' : 'punkt'); // ruft refreshWaypoints() bereits mit auf
-
-      if (r.roundtrip) {
-        // Die Zufallspunkte von damals sind nicht gespeichert - wir
-        // würfeln bei derselben Zieldistanz und Richtung einfach eine
-        // neue Variante.
-        document.getElementById('roundtripKm').value = r.roundtripKm || 150;
-        document.getElementById('roundtripRichtung').value = r.roundtripRichtung || '';
-        generateRoundTrip();
-      } else {
-        calculateRoute();
-      }
+      if (zeigePlanerBeimLaden) zeigePlaner(); // Karte muss sichtbar sein, bevor gezeichnet wird
+      ladeGespeicherteRoute(r);
     });
   });
+}
+
+function renderSaved() {
+  const list = document.getElementById('savedList');
+  const all = loadSaved();
+  list.innerHTML = all.length === 0
+    ? '<li class="empty">Noch nichts gespeichert.</li>'
+    : all.map(gespeicherteRouteHtml).join('');
+  verkabeleGespeicherteListe(list, { zeigePlanerBeimLaden: false });
+}
+
+// Dieselbe Liste wie renderSaved(), nur für den Startbildschirm "Meine
+// Touren" - von dort führt ein Klick zusätzlich in den Planer.
+function renderTourenListe() {
+  const list = document.getElementById('tourenList');
+  const all = loadSaved();
+  list.innerHTML = all.length === 0
+    ? '<li class="empty">Noch nichts gespeichert.</li>'
+    : all.map(gespeicherteRouteHtml).join('');
+  verkabeleGespeicherteListe(list, { zeigePlanerBeimLaden: true });
 }
 
 function escapeHtml(s) {
@@ -1861,6 +1888,37 @@ function setCurveLevel(level) {
   state.curveLevel = level;
   document.getElementById('curveSlider').value = level;
   document.getElementById('modeHint').textContent = curveLevelHint(level);
+}
+
+/* --- 9b. Startmenü ---------------------------------------------------------
+   Drei Bildschirme, immer ist genau einer sichtbar: Startmenü, "Meine
+   Touren" oder der eigentliche Planer (Bedienfeld + Karte). Die Karte wird
+   beim Programmstart einmalig erzeugt (siehe Abschnitt 2), bleibt dabei
+   aber unsichtbar, bis der Planer zum ersten Mal gezeigt wird - deshalb
+   kennt Leaflet ihre Größe noch nicht und muss dann per invalidateSize()
+   einmal nachfragen. */
+
+function zeigeStartmenü() {
+  document.getElementById('startMenu').hidden = false;
+  document.getElementById('tourenScreen').hidden = true;
+  document.getElementById('app').hidden = true;
+}
+
+function zeigeMeineTouren() {
+  renderTourenListe();
+  document.getElementById('startMenu').hidden = true;
+  document.getElementById('tourenScreen').hidden = false;
+  document.getElementById('app').hidden = true;
+}
+
+function zeigePlaner() {
+  document.getElementById('startMenu').hidden = true;
+  document.getElementById('tourenScreen').hidden = true;
+  document.getElementById('app').hidden = false;
+  // Erst NACH dem Einblenden ruft Leaflet die tatsächliche Größe des
+  // Kartenbereichs ab - ohne diesen Aufruf bliebe die Karte auf die
+  // Größe von vor dem Verstecken "eingefroren".
+  map.invalidateSize();
 }
 
 function setPlanMode(mode) {
@@ -1965,5 +2023,13 @@ document.getElementById('btnSave').addEventListener('click', saveRoute);
 document.getElementById('btnGpx').addEventListener('click', exportGpx);
 document.getElementById('btnNavStart').addEventListener('click', startNavigation);
 document.getElementById('btnNavStop').addEventListener('click', stopNavigation);
+
+document.getElementById('btnStartPlaner').addEventListener('click', zeigePlaner);
+document.getElementById('btnStartTouren').addEventListener('click', zeigeMeineTouren);
+document.getElementById('btnTourenZurueck').addEventListener('click', zeigeStartmenü);
+document.getElementById('btnZumStartmenü').addEventListener('click', () => {
+  if (nav.aktiv) stopNavigation(); // laufende Navigation nicht einfach im Hintergrund weiterlaufen lassen
+  zeigeStartmenü();
+});
 
 renderSaved();

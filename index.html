@@ -28,11 +28,45 @@
 </head>
 <body>
 
+  <!-- ===== Startmenü: einfacher Einstiegsbildschirm vor dem eigentlichen
+       Routenplaner. Fürs Erste nur zwei Wege: neue Route planen, oder eine
+       gespeicherte Tour wieder aufrufen. ===== -->
+  <div id="startMenu" class="start-screen">
+    <div class="start-screen-inner">
+      <h1 class="brand-title">Kurvenjagd</h1>
+      <p class="sub">Routenplaner v0.1</p>
+      <div class="start-screen-buttons">
+        <button class="btn" id="btnStartPlaner">Routenplaner</button>
+        <button class="btn ghost" id="btnStartTouren">Meine Touren</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Meine Touren: eigener Bildschirm mit der Liste gespeicherter
+       Routen, direkt vom Startmenü aus erreichbar. Dieselben Routen sind
+       auch im Bedienfeld des Planers unten zu sehen (siehe #savedList) -
+       diese Liste hier ist nur ein schnellerer Weg dorthin, ohne erst den
+       Planer öffnen zu müssen. ===== -->
+  <div id="tourenScreen" class="start-screen" hidden>
+    <div class="start-screen-inner">
+      <button class="btn ghost back-btn" id="btnTourenZurueck">&larr; Zurück</button>
+      <h2>Meine Touren</h2>
+      <ul id="tourenList" class="saved-list"></ul>
+    </div>
+  </div>
+
+  <!-- ===== Der eigentliche Routenplaner: Bedienfeld + Karte. Anfangs
+       versteckt, bis im Startmenü "Routenplaner" gewählt wird. ===== -->
+  <div id="app" class="app-layout" hidden>
+
   <!-- ===== Linke Spalte: Bedienfeld ===== -->
   <aside id="panel">
-    <header>
-      <h1>Kurvenjagd</h1>
-      <p class="sub">Routenplaner v0.1</p>
+    <header class="panel-header">
+      <div>
+        <h1 class="brand-title">Kurvenjagd</h1>
+        <p class="sub">Routenplaner v0.1</p>
+      </div>
+      <button class="back-to-start" id="btnZumStartmenü" title="Zurück zum Startmenü">&larr;</button>
     </header>
 
     <!-- Planungsart: normale Route zwischen Punkten, oder Rundtour ab
@@ -203,6 +237,8 @@
     </div>
     <button class="nav-stop-btn" id="btnNavStop" hidden>Navigation beenden</button>
   </main>
+
+  </div>
 
   <script src="app.js"></script>
 </body>
