@@ -39,6 +39,7 @@
       <p class="sub">Routenplaner v0.1</p>
       <div class="start-screen-buttons">
         <button class="btn" id="btnStartPlaner">Routenplaner</button>
+        <button class="btn ghost" id="btnStartRide">Meinen Ride aufzeichnen</button>
         <button class="btn ghost" id="btnStartTouren">Meine Touren</button>
       </div>
     </div>
@@ -54,6 +55,69 @@
       <button class="btn ghost back-btn" id="btnTourenZurueck">&larr; Zurück</button>
       <h2>Meine Touren</h2>
       <ul id="tourenList" class="saved-list"></ul>
+    </div>
+  </div>
+
+  <!-- ===== "Meinen Ride aufzeichnen": zeichnet die tatsächlich gefahrene
+       Strecke per GPS auf. Oben die Karte mit der gefahrenen Linie, unten
+       ein Feld, das während der Fahrt die laufenden Werte zeigt und nach
+       dem Beenden zur Zusammenfassung wird. Eigene Karte (#rideMap), damit
+       der Routenplaner davon völlig unberührt bleibt. ===== -->
+  <div id="rideScreen" class="ride-screen" hidden>
+    <div id="rideMap" class="ride-map"></div>
+
+    <div class="ride-panel" id="ridePanel">
+
+      <!-- Während der Fahrt: großes Tempo, laufende Werte, Pause/Beenden -->
+      <div id="rideLive">
+        <div class="ride-tempo">
+          <span class="ride-tempo-wert" id="rideTempo">0</span>
+          <span class="ride-tempo-einheit">km/h</span>
+        </div>
+        <p class="hint ride-status" id="rideStatus">Warte auf GPS-Signal...</p>
+
+        <div class="stats">
+          <div class="stat"><span class="k">Distanz</span><span class="v" id="rideDist">0,0 km</span></div>
+          <div class="stat"><span class="k">Fahrzeit</span><span class="v" id="rideZeit">0 min</span></div>
+          <div class="stat"><span class="k">&Oslash; Tempo</span><span class="v" id="rideSchnitt">0 km/h</span></div>
+          <div class="stat"><span class="k">Max. Tempo</span><span class="v" id="rideMax">0 km/h</span></div>
+          <div class="stat"><span class="k">H&ouml;henmeter</span><span class="v" id="rideAufstieg">0 hm</span></div>
+          <div class="stat"><span class="k">Kurven-Score</span><span class="v" id="rideKurven">-</span></div>
+        </div>
+
+        <div class="row">
+          <button class="btn" id="btnRidePause">Pause</button>
+          <button class="btn ghost" id="btnRideStop">Beenden</button>
+        </div>
+      </div>
+
+      <!-- Nach dem Beenden: dieselbe Fläche zeigt die volle Auswertung -->
+      <div id="rideZusammenfassung" hidden>
+        <h2 class="ride-titel">Deine Ausfahrt</h2>
+
+        <div class="stats">
+          <div class="stat"><span class="k">Distanz</span><span class="v" id="rideEndDist">-</span></div>
+          <div class="stat"><span class="k">Fahrzeit</span><span class="v" id="rideEndZeit">-</span></div>
+          <div class="stat"><span class="k">&Oslash; Tempo</span><span class="v" id="rideEndSchnitt">-</span></div>
+          <div class="stat"><span class="k">Max. Tempo</span><span class="v" id="rideEndMax">-</span></div>
+          <div class="stat"><span class="k">H&ouml;henmeter</span><span class="v" id="rideEndAufstieg">-</span></div>
+          <div class="stat highlight"><span class="k">Kurven-Score</span><span class="v" id="rideEndKurven">-</span></div>
+        </div>
+        <div class="curvebar"><div class="curvebar-fill" id="rideCurveFill"></div></div>
+        <p class="hint" id="rideCurveWord"></p>
+
+        <div class="hoehenprofil-kopf">
+          <span class="hint">H&ouml;henprofil</span>
+          <span class="hoehenprofil-spanne" id="rideHoehenprofilSpanne"></span>
+        </div>
+        <svg id="rideHoehenprofil" class="hoehenprofil" viewBox="0 0 300 90" preserveAspectRatio="none"></svg>
+
+        <div class="row">
+          <button class="btn" id="btnRideSpeichern">Tour speichern</button>
+          <button class="btn ghost" id="btnRideVerwerfen">Verwerfen</button>
+        </div>
+      </div>
+
     </div>
   </div>
 

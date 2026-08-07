@@ -1286,15 +1286,20 @@ function showStats(r) {
   const pct = Math.min(100, (r.curviness / 500) * 100);
   document.getElementById('curveFill').style.width = pct + '%';
 
-  const c = r.curviness;
-  const word = c < 60  ? 'Eher geradeaus - viel Landstraße.'
-             : c < 150 ? 'Leicht geschwungen.'
-             : c < 280 ? 'Solide kurvig. Macht Laune.'
-             : c < 420 ? 'Richtig kurvig.'
-             :           'Kurvenparadies.';
-  document.getElementById('curveWord').textContent = word;
+  document.getElementById('curveWord').textContent = kurvigkeitsWort(r.curviness);
 
   zeichneHöhenprofil(r.coords);
+}
+
+// Der Kurven-Score in Worten - genutzt von der Routenplanung UND von der
+// Auswertung einer aufgezeichneten Ausfahrt, damit dieselbe Zahl überall
+// gleich beschrieben wird.
+function kurvigkeitsWort(c) {
+  return c < 60  ? 'Eher geradeaus - viel Landstraße.'
+       : c < 150 ? 'Leicht geschwungen.'
+       : c < 280 ? 'Solide kurvig. Macht Laune.'
+       : c < 420 ? 'Richtig kurvig.'
+       :           'Kurvenparadies.';
 }
 
 /* --- 6d. Höhenprofil -------------------------------------------------------
@@ -1323,9 +1328,11 @@ function steigungsFarbe(prozent) {
   return mischeFarben([250, 204, 21], [255, 122, 26], (p - 8) / 8);
 }
 
-function zeichneHöhenprofil(coords) {
-  const svg = document.getElementById('hoehenprofil');
-  const spanne = document.getElementById('hoehenprofilSpanne');
+// svgId/spanneId sind angebbar, weil es das Profil an zwei Stellen gibt:
+// im Routenplaner und in der Auswertung einer aufgezeichneten Ausfahrt.
+function zeichneHöhenprofil(coords, svgId = 'hoehenprofil', spanneId = 'hoehenprofilSpanne') {
+  const svg = document.getElementById(svgId);
+  const spanne = document.getElementById(spanneId);
 
   // Stark ausdünnen (alle ~80m ein Punkt) - für einen Graph über die ganze
   // Route reicht das locker und hält das SVG klein und flüssig.
@@ -1371,14 +1378,34 @@ function zeichneHöhenprofil(coords) {
   // "streifig" statt glatt wirken. Stattdessen eine feste, überschaubare
   // Anzahl gleichmäßig verteilter Stützstellen, jede mit der Steigung
   // seit der vorherigen - das glättet kleine Messschwankungen gleich mit.
-  const gradientId = 'hoehenGradient';
+  // Eindeutig je SVG - haetten beide Profile dieselbe Gradient-ID, wuerde
+  // das zweite dem ersten die Farben klauen (IDs gelten seitenweit).
+  const gradientId = svgId + 'Gradient';
   const ZIEL_STOPS = 40;
+
+  // Höhe an einer beliebigen Kilometermarke, linear zwischen den beiden
+  // benachbarten Messpunkten interpoliert. Das ist wichtig: würde man
+  // stattdessen einfach den nächstgelegenen Messpunkt nehmen, fielen bei
+  // kurzen Strecken (weniger Messpunkte als Stützstellen) mehrere
+  // Stützstellen auf denselben Punkt - die Steigung dazwischen wäre 0,
+  // danach ein Sprung. Im Bild ergäbe das grün-orange Streifen statt eines
+  // gleichmäßigen Verlaufs. Der Suchindex wandert nur vorwärts, weil die
+  // Stützstellen von links nach rechts abgefragt werden.
+  let suchIndex = 0;
+  const höheBeiKm = (km) => {
+    while (suchIndex < punkte.length - 2 && kmProPunkt[suchIndex + 1] < km) suchIndex++;
+    const kmA = kmProPunkt[suchIndex], kmB = kmProPunkt[suchIndex + 1];
+    const höheA = punkte[suchIndex][2], höheB = punkte[suchIndex + 1][2];
+    if (!(kmB > kmA)) return höheA;
+    const anteil = Math.min(1, Math.max(0, (km - kmA) / (kmB - kmA)));
+    return höheA + (höheB - höheA) * anteil;
+  };
+
   const stops = [];
-  let vorherHöhe = punkte[0][2], vorherKm = 0, punktIndex = 0;
+  let vorherHöhe = punkte[0][2], vorherKm = 0;
   for (let s = 0; s <= ZIEL_STOPS; s++) {
     const kmZiel = (s / ZIEL_STOPS) * gesamtKm;
-    while (punktIndex < punkte.length - 1 && kmProPunkt[punktIndex] < kmZiel) punktIndex++;
-    const höheHier = punkte[punktIndex][2];
+    const höheHier = höheBeiKm(kmZiel);
     const deltaMeter = (kmZiel - vorherKm) * 1000;
     const steigungProzent = deltaMeter > 1 ? ((höheHier - vorherHöhe) / deltaMeter) * 100 : 0;
     stops.push(`<stop offset="${(kmZiel / gesamtKm).toFixed(4)}" stop-color="${steigungsFarbe(steigungProzent)}" />`);
@@ -1406,6 +1433,18 @@ function zeichneHöhenprofil(coords) {
 function formatTime(sec) {
   const h = Math.floor(sec / 3600), m = Math.round((sec % 3600) / 60);
   return h > 0 ? `${h} h ${m} min` : `${m} min`;
+}
+
+// Für eine laufende Aufzeichnung zählt auch die Sekunde - mit formatTime()
+// stünde am Anfang minutenlang "0 min" da, was wie ein Fehler aussieht.
+// Deshalb hier mm:ss bzw. h:mm:ss, wie man es von einer Stoppuhr kennt.
+function formatRideZeit(sec) {
+  const gesamt = Math.max(0, Math.floor(sec));
+  const h = Math.floor(gesamt / 3600);
+  const m = Math.floor((gesamt % 3600) / 60);
+  const s = gesamt % 60;
+  const zwei = n => String(n).padStart(2, '0');
+  return h > 0 ? `${h}:${zwei(m)}:${zwei(s)}` : `${m}:${zwei(s)}`;
 }
 
 
@@ -1821,6 +1860,346 @@ function zeichnePassMarker(pass) {
 }
 
 
+/* --- 6f. Eigene Ausfahrt aufzeichnen ("Meinen Ride aufzeichnen") ------------
+   Zeichnet die TATSÄCHLICH gefahrene Strecke per GPS auf - im Unterschied
+   zum Routenplaner, der eine Strecke im Voraus berechnet. Während der Fahrt
+   laufen alle Werte live mit, am Ende gibt es die volle Auswertung und die
+   Möglichkeit, die Tour zu speichern.
+
+   Die aufgezeichneten Punkte werden bewusst im GLEICHEN Format wie eine
+   BRouter-Route abgelegt ([lon, lat, höhe]) - dadurch funktionieren
+   curviness() und zeichneHöhenprofil() ohne jede Änderung damit.
+
+   Drei Dinge, die man bei echten GPS-Daten beachten muss (anders als bei
+   den sauberen Routendaten von BRouter):
+     - Die Genauigkeit schwankt. Sehr ungenaue Messungen werden verworfen,
+       sonst "zappelt" die Linie und die Distanz wird zu groß.
+     - Die HÖHE vom GPS ist deutlich ungenauer als die Position (±10m sind
+       normal). Ohne Glättung kämen auf ebener Strecke hunderte Höhenmeter
+       zusammen - deshalb zählt nur, was eine Schwelle überschreitet.
+     - Im Stand liefert GPS trotzdem leicht wandernde Positionen. Punkte
+       unter einem Mindestabstand werden deshalb gar nicht erst übernommen. */
+
+const RIDE_MAX_UNGENAUIGKEIT = 40;   // Meter - schlechtere Messungen ignorieren
+const RIDE_MIN_ABSTAND = 8;          // Meter - darunter gilt es als Stillstand
+const RIDE_HÖHEN_SCHWELLE = 6;       // Meter - erst darüber zählt es als Anstieg
+const RIDE_MAX_PLAUSIBEL_KMH = 300;  // alles darüber ist ein GPS-Ausreißer
+
+const ride = {
+  aktiv: false,
+  pausiert: false,
+  watchId: null,
+  punkte: [],              // [[lon, lat, höhe], ...] - wie eine BRouter-Route
+  distanzM: 0,
+  aufstiegM: 0,
+  letzteBestätigteHöhe: null,
+  maxKmh: 0,
+  aktuellKmh: 0,
+  letzterZeitstempel: null,   // nur als Rückfall, falls das Gerät kein Tempo liefert
+  // Fahrzeit wird abschnittsweise gezählt: was vor der letzten Pause schon
+  // zusammengekommen ist, plus die Zeit seit dem letzten Fortsetzen.
+  fahrzeitGesammeltMs: 0,
+  laufSeit: null,
+  gestartetAm: null,
+  linie: null,
+  marker: null,
+  uhr: null,
+  wakeLock: null,
+  profilZähler: 0,
+};
+
+// Die Karte des Aufzeichnungs-Bildschirms ist eine EIGENE Leaflet-Karte,
+// getrennt von der des Routenplaners. Erst beim ersten Öffnen erzeugt,
+// damit der Programmstart nicht unnötig langsamer wird.
+let rideKarteInstanz = null;
+function rideKarte() {
+  if (rideKarteInstanz) return rideKarteInstanz;
+
+  rideKarteInstanz = L.map('rideMap', { zoomControl: true }).setView([49.8, 9.9], 8);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 })
+    .addTo(rideKarteInstanz);
+  return rideKarteInstanz;
+}
+
+function rideFahrzeitMs() {
+  const laufend = ride.laufSeit ? Date.now() - ride.laufSeit : 0;
+  return ride.fahrzeitGesammeltMs + laufend;
+}
+
+function starteRide() {
+  if (!navigator.geolocation) {
+    showToast('Dieses Gerät oder dieser Browser unterstützt keine Standortermittlung.');
+    return;
+  }
+
+  // Sauber bei null anfangen - auch wenn vorher schon eine Ausfahrt lief.
+  const karte = rideKarte();
+  if (ride.linie) { karte.removeLayer(ride.linie); ride.linie = null; }
+  if (ride.marker) { karte.removeLayer(ride.marker); ride.marker = null; }
+
+  Object.assign(ride, {
+    aktiv: true, pausiert: false,
+    punkte: [], distanzM: 0, aufstiegM: 0, letzteBestätigteHöhe: null,
+    maxKmh: 0, aktuellKmh: 0, letzterZeitstempel: null,
+    fahrzeitGesammeltMs: 0, laufSeit: Date.now(), gestartetAm: new Date(),
+    profilZähler: 0,
+  });
+
+  document.getElementById('rideLive').hidden = false;
+  document.getElementById('rideZusammenfassung').hidden = true;
+  document.getElementById('ridePanel').classList.remove('zusammenfassung', 'pausiert');
+  document.getElementById('btnRidePause').textContent = 'Pause';
+  document.getElementById('rideStatus').textContent = 'Warte auf GPS-Signal...';
+
+  ride.watchId = navigator.geolocation.watchPosition(aufRidePosition, aufRideFehler, {
+    enableHighAccuracy: true,
+    maximumAge: 1000,
+    timeout: 20000,
+  });
+
+  // Die Uhr läuft unabhängig vom GPS weiter, sonst würde die Fahrzeit bei
+  // schlechtem Empfang stehenbleiben.
+  ride.uhr = setInterval(aktualisiereRideAnzeige, 1000);
+  aktualisiereRideAnzeige();
+  bildschirmWachHalten();
+}
+
+function aufRideFehler(err) {
+  document.getElementById('rideStatus').textContent = 'Kein GPS-Signal: ' + err.message;
+}
+
+function aufRidePosition(pos) {
+  if (!ride.aktiv || ride.pausiert) return;
+
+  const { latitude, longitude, altitude, accuracy, speed } = pos.coords;
+
+  if (Number.isFinite(accuracy) && accuracy > RIDE_MAX_UNGENAUIGKEIT) {
+    document.getElementById('rideStatus').textContent =
+      `GPS ungenau (±${Math.round(accuracy)} m) - warte auf besseres Signal...`;
+    return;
+  }
+
+  // Tempo: das Gerät liefert es meist selbst mit (in m/s) und misst es
+  // genauer, als wir es aus zwei Positionen ausrechnen könnten. Nur wenn
+  // es fehlt, rechnen wir selbst.
+  let kmh = Number.isFinite(speed) && speed >= 0 ? speed * 3.6 : null;
+
+  const letzter = ride.punkte[ride.punkte.length - 1];
+  const abstand = letzter ? haversine(letzter[1], letzter[0], latitude, longitude) : Infinity;
+
+  if (kmh === null && letzter && ride.letzterZeitstempel) {
+    const sekunden = (pos.timestamp - ride.letzterZeitstempel) / 1000;
+    if (sekunden > 0.5) kmh = (abstand / sekunden) * 3.6;
+  }
+  if (kmh !== null && kmh >= 0 && kmh < RIDE_MAX_PLAUSIBEL_KMH) {
+    ride.aktuellKmh = kmh;
+    if (kmh > ride.maxKmh) ride.maxKmh = kmh;
+  }
+
+  // Im Stand wandert die GPS-Position leicht - solche Punkte würden die
+  // Strecke künstlich verlängern, deshalb erst ab einem Mindestabstand.
+  if (letzter && abstand < RIDE_MIN_ABSTAND) {
+    aktualisiereRideAnzeige();
+    return;
+  }
+
+  if (letzter) ride.distanzM += abstand;
+  ride.letzterZeitstempel = pos.timestamp;
+  ride.punkte.push([longitude, latitude, Number.isFinite(altitude) ? altitude : undefined]);
+
+  // Höhenmeter mit Schwelle, siehe Erklärung im Abschnittskopf.
+  if (Number.isFinite(altitude)) {
+    if (ride.letzteBestätigteHöhe === null) {
+      ride.letzteBestätigteHöhe = altitude;
+    } else {
+      const unterschied = altitude - ride.letzteBestätigteHöhe;
+      if (Math.abs(unterschied) >= RIDE_HÖHEN_SCHWELLE) {
+        if (unterschied > 0) ride.aufstiegM += unterschied;
+        ride.letzteBestätigteHöhe = altitude;
+      }
+    }
+  }
+
+  document.getElementById('rideStatus').textContent =
+    `Aufzeichnung läuft · ${ride.punkte.length} Punkte · GPS ±${Math.round(accuracy)} m`;
+
+  zeichneRideAufKarte(latitude, longitude);
+  aktualisiereRideAnzeige();
+}
+
+function zeichneRideAufKarte(lat, lon) {
+  const karte = rideKarte();
+  const linienPunkte = ride.punkte.map(p => [p[1], p[0]]);
+
+  if (!ride.linie) {
+    ride.linie = L.polyline(linienPunkte, { color: '#ff7a1a', weight: 5, opacity: 0.95 }).addTo(karte);
+  } else {
+    ride.linie.setLatLngs(linienPunkte);
+  }
+
+  if (!ride.marker) {
+    ride.marker = L.marker([lat, lon], {
+      icon: L.divIcon({ className: '', html: '<div class="standort-marker"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }),
+      zIndexOffset: 1000,
+    }).addTo(karte);
+    karte.setView([lat, lon], 15);
+  } else {
+    ride.marker.setLatLng([lat, lon]);
+    karte.panTo([lat, lon], { animate: true, duration: 0.5 });
+  }
+}
+
+// Aktuelle Werte der laufenden Ausfahrt - auch für die Auswertung am Ende.
+function rideStats() {
+  const fahrzeitSek = rideFahrzeitMs() / 1000;
+  const schnittKmh = fahrzeitSek > 5 ? (ride.distanzM / fahrzeitSek) * 3.6 : 0;
+  return {
+    distanzM: ride.distanzM,
+    fahrzeitSek,
+    schnittKmh,
+    maxKmh: ride.maxKmh,
+    aufstiegM: ride.aufstiegM,
+    kurvigkeit: curviness(ride.punkte.filter(p => Number.isFinite(p[0]))),
+  };
+}
+
+function aktualisiereRideAnzeige() {
+  const s = rideStats();
+  document.getElementById('rideTempo').textContent = Math.round(ride.aktuellKmh);
+  document.getElementById('rideDist').textContent = (s.distanzM / 1000).toFixed(1) + ' km';
+  document.getElementById('rideZeit').textContent = formatRideZeit(s.fahrzeitSek);
+  document.getElementById('rideSchnitt').textContent = Math.round(s.schnittKmh) + ' km/h';
+  document.getElementById('rideMax').textContent = Math.round(s.maxKmh) + ' km/h';
+  document.getElementById('rideAufstieg').textContent = Math.round(s.aufstiegM) + ' hm';
+  document.getElementById('rideKurven').textContent =
+    s.kurvigkeit > 0 ? Math.round(s.kurvigkeit) + ' Grad/km' : '-';
+}
+
+function pausiereRideUmschalten() {
+  if (!ride.aktiv) return;
+
+  const knopf = document.getElementById('btnRidePause');
+  const panel = document.getElementById('ridePanel');
+
+  if (ride.pausiert) {
+    ride.pausiert = false;
+    ride.laufSeit = Date.now();
+    knopf.textContent = 'Pause';
+    panel.classList.remove('pausiert');
+    document.getElementById('rideStatus').textContent = 'Aufzeichnung läuft weiter...';
+    bildschirmWachHalten();
+  } else {
+    ride.pausiert = true;
+    // Bisherige Zeit sichern, damit die Pause nicht als Fahrzeit zählt.
+    ride.fahrzeitGesammeltMs += Date.now() - ride.laufSeit;
+    ride.laufSeit = null;
+    ride.aktuellKmh = 0;
+    knopf.textContent = 'Weiter';
+    panel.classList.add('pausiert');
+    document.getElementById('rideStatus').textContent = 'Pausiert - Zeit und Strecke laufen nicht weiter.';
+    aktualisiereRideAnzeige();
+  }
+}
+
+function beendeRide() {
+  if (!ride.aktiv) return;
+
+  if (ride.watchId !== null) navigator.geolocation.clearWatch(ride.watchId);
+  ride.watchId = null;
+  clearInterval(ride.uhr);
+  ride.uhr = null;
+  if (!ride.pausiert && ride.laufSeit) ride.fahrzeitGesammeltMs += Date.now() - ride.laufSeit;
+  ride.laufSeit = null;
+  ride.aktiv = false;
+  bildschirmWachLassen();
+
+  const s = rideStats();
+
+  document.getElementById('rideLive').hidden = true;
+  document.getElementById('rideZusammenfassung').hidden = false;
+  document.getElementById('ridePanel').classList.add('zusammenfassung');
+  document.getElementById('ridePanel').classList.remove('pausiert');
+
+  document.getElementById('rideEndDist').textContent = (s.distanzM / 1000).toFixed(1) + ' km';
+  document.getElementById('rideEndZeit').textContent = formatRideZeit(s.fahrzeitSek);
+  document.getElementById('rideEndSchnitt').textContent = Math.round(s.schnittKmh) + ' km/h';
+  document.getElementById('rideEndMax').textContent = Math.round(s.maxKmh) + ' km/h';
+  document.getElementById('rideEndAufstieg').textContent = Math.round(s.aufstiegM) + ' hm';
+  document.getElementById('rideEndKurven').textContent = Math.round(s.kurvigkeit) + ' Grad/km';
+
+  document.getElementById('rideCurveFill').style.width = Math.min(100, (s.kurvigkeit / 500) * 100) + '%';
+  document.getElementById('rideCurveWord').textContent =
+    ride.punkte.length < 5
+      ? 'Zu wenig aufgezeichnet für eine Auswertung.'
+      : kurvigkeitsWort(s.kurvigkeit);
+
+  zeichneHöhenprofil(ride.punkte, 'rideHoehenprofil', 'rideHoehenprofilSpanne');
+
+  // Die ganze gefahrene Strecke ins Bild rücken.
+  if (ride.linie && ride.punkte.length > 1) {
+    rideKarte().fitBounds(ride.linie.getBounds(), { padding: [40, 40] });
+  }
+
+  // Speichern ergibt nur Sinn, wenn überhaupt etwas zusammengekommen ist.
+  document.getElementById('btnRideSpeichern').disabled = ride.punkte.length < 5;
+}
+
+function speichereRide() {
+  const s = rideStats();
+  const datum = (ride.gestartetAm || new Date()).toLocaleDateString('de-DE');
+  const name = prompt('Name der Ausfahrt:', 'Ausfahrt vom ' + datum);
+  if (!name) return;
+
+  const alle = loadSaved();
+  alle.unshift({
+    id: Date.now(),
+    name,
+    aufgezeichnet: true,          // unterscheidet sie von geplanten Routen
+    track: ride.punkte,           // die echte gefahrene Linie
+    waypoints: [],
+    distance: s.distanzM,
+    time: s.fahrzeitSek,
+    ascend: s.aufstiegM,
+    curviness: s.kurvigkeit,
+    schnittKmh: s.schnittKmh,
+    maxKmh: s.maxKmh,
+    gefahrenAm: (ride.gestartetAm || new Date()).toISOString(),
+  });
+  localStorage.setItem(STORE, JSON.stringify(alle));
+
+  renderSaved();
+  renderTourenListe();
+  showToast('Gespeichert: ' + name);
+  zeigeStartmenü();
+}
+
+function verwerfeRide() {
+  if (!confirm('Diese Aufzeichnung wirklich verwerfen?')) return;
+  zeigeStartmenü();
+}
+
+/* Bildschirm während der Fahrt anlassen. Die Wake-Lock-API ist genau dafür
+   da und in Safari ab iOS 16.4 verfügbar - fehlt sie, ist das kein Beinbruch,
+   dann geht der Bildschirm eben wie gewohnt aus (die Aufzeichnung läuft im
+   Vordergrund trotzdem weiter). */
+async function bildschirmWachHalten() {
+  try {
+    if ('wakeLock' in navigator) ride.wakeLock = await navigator.wakeLock.request('screen');
+  } catch { /* nicht kritisch, bewusst still */ }
+}
+
+function bildschirmWachLassen() {
+  if (ride.wakeLock) { ride.wakeLock.release().catch(() => {}); ride.wakeLock = null; }
+}
+
+// iOS gibt den Wake Lock ab, sobald die App in den Hintergrund geht - beim
+// Zurückkommen also erneut anfordern, sonst geht der Bildschirm mitten in
+// der Fahrt doch aus.
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && ride.aktiv && !ride.pausiert) bildschirmWachHalten();
+});
+
+
 /* --- 7. Speichern (im Browser) ------------------------------------------- */
 
 const STORE = 'kurvenjagd.routen';
@@ -1863,8 +2242,13 @@ function saveRoute() {
 // im Bedienfeld des Planers (#savedList) als auch auf dem Startbildschirm
 // "Meine Touren" (#tourenList), damit beide gleich aussehen.
 function gespeicherteRouteHtml(r) {
+  // Aufgezeichnete Ausfahrten stehen in derselben Liste wie geplante
+  // Routen - das kleine Motorrad-Zeichen macht auf einen Blick klar,
+  // welche davon wirklich gefahren wurde.
+  const marke = r.aufgezeichnet ? '<span class="saved-marke" title="Aufgezeichnete Ausfahrt">🏍</span>' : '';
   return `
     <li data-id="${r.id}">
+      ${marke}
       <span class="saved-name">${escapeHtml(r.name)}</span>
       <span class="saved-meta">${(r.distance / 1000).toFixed(0)} km &middot; ${Math.round(r.curviness)}</span>
       <button class="del" data-del="${r.id}" title="Löschen">&times;</button>
@@ -1876,6 +2260,24 @@ function gespeicherteRouteHtml(r) {
 // gespeichert (siehe saveRoute) - es wird bei derselben Zieldistanz und
 // Richtung einfach eine neue Variante gewürfelt.
 function ladeGespeicherteRoute(r) {
+  // Eine aufgezeichnete Ausfahrt wird NICHT neu berechnet - sie ist ja
+  // bereits gefahren. Stattdessen wird die echte Linie direkt angezeigt.
+  if (r.aufgezeichnet && r.track && r.track.length > 1) {
+    state.waypoints = [];
+    refreshWaypoints();
+    const alsRoute = {
+      coords: r.track,
+      distance: r.distance,
+      time: r.time || 0,
+      ascend: r.ascend || 0,
+      curviness: r.curviness || 0,
+    };
+    state.route = alsRoute;
+    drawRoutes([alsRoute], alsRoute);
+    showStats(alsRoute);
+    return;
+  }
+
   state.waypoints = r.waypoints;
   // Ältere gespeicherte Routen kennen noch 'mode' statt 'curveLevel' -
   // dafür hier ein sinnvoller Ersatzwert.
@@ -1999,34 +2401,39 @@ function setCurveLevel(level) {
 }
 
 /* --- 9b. Startmenü ---------------------------------------------------------
-   Drei Bildschirme, immer ist genau einer sichtbar: Startmenü, "Meine
-   Touren" oder der eigentliche Planer (Bedienfeld + Karte). Die Karte wird
-   beim Programmstart einmalig erzeugt (siehe Abschnitt 2), bleibt dabei
-   aber unsichtbar, bis der Planer zum ersten Mal gezeigt wird - deshalb
-   kennt Leaflet ihre Größe noch nicht und muss dann per invalidateSize()
-   einmal nachfragen. */
+   Vier Bildschirme, immer ist genau einer sichtbar: Startmenü, "Meine
+   Touren", der Routenplaner (Bedienfeld + Karte) oder die Aufzeichnung
+   einer eigenen Ausfahrt. Beide Karten werden nur einmal erzeugt, bleiben
+   dabei aber zunächst unsichtbar - deshalb kennt Leaflet ihre Größe noch
+   nicht und muss beim Einblenden per invalidateSize() nachfragen. */
+
+// Blendet genau einen der vier Bildschirme ein und alle anderen aus.
+function zeigeBildschirm(sichtbareId) {
+  ['startMenu', 'tourenScreen', 'app', 'rideScreen'].forEach(id => {
+    document.getElementById(id).hidden = id !== sichtbareId;
+  });
+}
 
 function zeigeStartmenü() {
-  document.getElementById('startMenu').hidden = false;
-  document.getElementById('tourenScreen').hidden = true;
-  document.getElementById('app').hidden = true;
+  zeigeBildschirm('startMenu');
 }
 
 function zeigeMeineTouren() {
   renderTourenListe();
-  document.getElementById('startMenu').hidden = true;
-  document.getElementById('tourenScreen').hidden = false;
-  document.getElementById('app').hidden = true;
+  zeigeBildschirm('tourenScreen');
 }
 
 function zeigePlaner() {
-  document.getElementById('startMenu').hidden = true;
-  document.getElementById('tourenScreen').hidden = true;
-  document.getElementById('app').hidden = false;
+  zeigeBildschirm('app');
   // Erst NACH dem Einblenden ruft Leaflet die tatsächliche Größe des
   // Kartenbereichs ab - ohne diesen Aufruf bliebe die Karte auf die
   // Größe von vor dem Verstecken "eingefroren".
   map.invalidateSize();
+}
+
+function zeigeRideScreen() {
+  zeigeBildschirm('rideScreen');
+  rideKarte().invalidateSize(); // gleiche Begründung wie beim Planer oben
 }
 
 
@@ -2230,6 +2637,17 @@ document.getElementById('btnZumStartmenü').addEventListener('click', () => {
   if (nav.aktiv) stopNavigation(); // laufende Navigation nicht einfach im Hintergrund weiterlaufen lassen
   zeigeStartmenü();
 });
+
+// "Meinen Ride aufzeichnen": Bildschirm zeigen und sofort loslegen - wer
+// draufdrückt, will fahren und nicht erst noch einen zweiten Knopf suchen.
+document.getElementById('btnStartRide').addEventListener('click', () => {
+  zeigeRideScreen();
+  starteRide();
+});
+document.getElementById('btnRidePause').addEventListener('click', pausiereRideUmschalten);
+document.getElementById('btnRideStop').addEventListener('click', beendeRide);
+document.getElementById('btnRideSpeichern').addEventListener('click', speichereRide);
+document.getElementById('btnRideVerwerfen').addEventListener('click', verwerfeRide);
 
 verkabelePanelSchublade();
 renderSaved();

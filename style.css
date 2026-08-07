@@ -414,6 +414,7 @@ html, body {
 .saved-list li { cursor: pointer; justify-content: space-between; }
 .saved-list li:hover { background: #2b303a; }
 .saved-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.saved-marke { flex: 0 0 auto; font-size: 13px; }
 .saved-meta { color: var(--muted); font-size: 11px; }
 .del {
   border: 0; background: transparent; color: var(--muted);
@@ -469,6 +470,55 @@ html, body {
 .hoehenprofil-fläche { opacity: 0.28; }
 .hoehenprofil-linie { fill: none; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
 .hoehenprofil-marke { font-size: 8px; fill: var(--muted); font-family: inherit; }
+
+/* ---------- Ride aufzeichnen ----------
+   Eigener Vollbild-Aufbau: Karte oben, Werte-Feld unten. Bewusst mit
+   grossen Zahlen - das muss man im Zweifel mit Handschuhen und einem
+   kurzen Blick an der Ampel erfassen koennen. */
+.ride-screen {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.ride-screen[hidden] { display: none; }
+
+.ride-map { flex: 1; min-height: 0; background: #202329; }
+
+.ride-panel {
+  flex: 0 0 auto;
+  max-height: 62dvh;
+  overflow-y: auto;
+  background: var(--panel);
+  border-top: 1px solid var(--line);
+  border-radius: 16px 16px 0 0;
+  padding: 16px 18px;
+  /* Abstand zur Home-Leiste des iPhones, sonst liegen die Knoepfe darunter */
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+/* Nach dem Beenden darf das Feld mehr Platz nehmen - dann ist die
+   Auswertung wichtiger als die Karte. */
+.ride-panel.zusammenfassung { max-height: 88dvh; }
+
+.ride-tempo {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+.ride-tempo-wert {
+  font-size: 56px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+}
+.ride-tempo-einheit { font-size: 15px; color: var(--muted); }
+.ride-status { text-align: center; margin: 0 0 12px; }
+.ride-titel { margin: 0 0 12px; font-size: 18px; }
+
+/* Laeuft die Aufzeichnung gerade nicht, soll das auf einen Blick klar sein. */
+.ride-panel.pausiert .ride-tempo-wert { color: var(--muted); }
 
 /* ---------- Live-Navigation ---------- */
 .nav-btn { background: var(--gps); }
