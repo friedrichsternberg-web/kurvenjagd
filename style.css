@@ -52,6 +52,43 @@ html, body {
 
 .back-btn { margin-bottom: 20px; }
 
+/* Startmenü mit eigenem Foto als Hintergrund: die Karte mit den Buttons
+   sitzt oben links in der freien Fläche über dem Bild, statt wie sonst
+   mittig - deshalb align-items/justify-content hier auf den Anfang
+   umgestellt und etwas Abstand zum Rand ergänzt. */
+.start-screen--hero {
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 5vh 5vw;
+  background: url('img/start-hintergrund.jpg') center 32% / cover no-repeat;
+}
+
+/* Die Karte selbst: derselbe dunkle Ton wie das restliche Bedienfeld
+   (var(--panel)), aber leicht transparent mit Weichzeichner dahinter -
+   das lässt das Foto durchscheinen, ohne dass der Text darauf schwerer
+   zu lesen wird. */
+.start-card {
+  background: rgba(28, 31, 38, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 28px 26px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+}
+
+@media (max-width: 480px) {
+  .start-screen--hero {
+    padding: 24px;
+    /* Im hohen Hochformat zeigt "cover" die volle Bildhöhe, schneidet
+       dafür aber stark seitlich zu - hier zählt also die HORIZONTALE
+       Position. Weiter links ansetzen, damit die Karte auf dem ruhigeren
+       Fels-Teil landet statt mitten auf dem Helm. */
+    background-position: 20% center;
+  }
+  .start-card { padding: 22px 20px; }
+}
+
 /* ---------- Routenplaner: zwei Spalten, Bedienfeld links, Karte rechts ---------- */
 .app-layout {
   height: 100%;

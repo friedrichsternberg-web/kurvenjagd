@@ -6,3 +6,7 @@ node_modules/
 
 # Heruntergeladene Routen
 *.gpx
+
+# Unbearbeitete Kamera-Originale - viel zu gross fuers Repo, die
+# schlanke Version fuers Web liegt direkt daneben (start-hintergrund.jpg)
+img/IMG_*.JPG
