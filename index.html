@@ -8,7 +8,7 @@
 <html lang="de">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Kurvenjagd - Motorrad-Routenplaner</title>
 
   <!-- Leaflet ist die Kartenbibliothek. Wir laden sie von einem CDN,
@@ -64,10 +64,20 @@
   <!-- ===== Linke Spalte: Bedienfeld ===== -->
   <aside id="panel">
     <!-- Nur auf schmalen Bildschirmen sichtbar (siehe Media Query in
-         style.css): dort wird das Bedienfeld zu einer Art Schublade unter
-         der Karte, dieser Griff klappt sie auf/zu (siehe app.js). Am
-         Desktop unsichtbar und ohne Funktion. -->
-    <button class="panel-grip" id="btnPanelGrip" aria-label="Bedienfeld auf- und zuklappen"></button>
+         style.css): dort wird das Bedienfeld zu einer Schublade unter der
+         Karte, an diesem Griff laesst sie sich stufenlos aufziehen (siehe
+         app.js, Abschnitt 9c). Bewusst AUSSERHALB von #panelScroll (dem
+         scrollenden Bereich) platziert, nicht z.B. per position:sticky
+         darin - sticky+abgerundete-Ecken+Scroll auf demselben Element
+         verursacht in Safari doppelt gezeichnete Inhalte beim Scrollen.
+         Am Desktop unsichtbar und ohne Funktion. -->
+    <button class="panel-grip" id="panelGrip" aria-label="Bedienfeld aufziehen">
+      <span class="panel-grip-strich"></span>
+    </button>
+
+    <!-- Alles ausser dem Griff steckt in diesem eigenen scrollenden Bereich -
+         der Griff bleibt dadurch immer sichtbar, ganz ohne sticky. -->
+    <div class="panel-scroll" id="panelScroll">
 
     <header class="panel-header">
       <div>
@@ -226,6 +236,8 @@
         Routing <a href="https://brouter.de" target="_blank">BRouter</a>
       </p>
     </footer>
+
+    </div>
   </aside>
 
   <!-- ===== Rechts: die Karte ===== -->

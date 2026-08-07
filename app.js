@@ -1921,6 +1921,97 @@ function zeigePlaner() {
   map.invalidateSize();
 }
 
+
+/* --- 9c. Bedienfeld als Schublade (nur schmale Bildschirme) ----------------
+   Auf schmalen Bildschirmen (siehe Media Query in style.css) ist das
+   Bedienfeld eine Schublade unter der Karte. Am Griff lässt sie sich
+   STUFENLOS ziehen - von "nur der Griff ist sichtbar, die Karte hat den
+   ganzen Bildschirm" bis fast volle Höhe. Anders als bei einem einfachen
+   Auf-/Zuklapp-Knopf gibt es hier keine festen Zwischenstufen: die Höhe
+   folgt während des Ziehens direkt dem Finger (per style.height, nicht
+   über eine CSS-Klasse mit fester Zielgröße). Am Desktop ist der Griff
+   unsichtbar (display:none) und bekommt dadurch nie Zeigerereignisse -
+   der ganze Abschnitt hier ist dort automatisch wirkungslos. */
+
+const PANEL_MIN_HÖHE = 48; // px - so viel bleibt vom Griff sichtbar, wenn ganz zugezogen
+
+function panelMaxHöhe() { return Math.round(window.innerHeight * 0.85); }
+function panelStandardHöhe() { return Math.round(window.innerHeight * 0.45); }
+
+// Setzt die Panel-Höhe (in px), automatisch auf den erlaubten Bereich
+// begrenzt. animiert=true nutzt die CSS-Übergangsanimation (für Tipp-Klicks
+// auf den Griff) - während des Ziehens selbst ist sie aus (animiert=false,
+// Voreinstellung), sonst würde die Karte dem Finger sichtbar hinterherhinken.
+function setzePanelHöhe(px, { animiert = false } = {}) {
+  const panelElement = document.getElementById('panel');
+  const begrenzt = Math.min(panelMaxHöhe(), Math.max(PANEL_MIN_HÖHE, px));
+  panelElement.classList.toggle('panel-dragging', !animiert);
+  panelElement.style.height = begrenzt + 'px';
+  planeKartenAbgleich();
+}
+
+// Leaflet merkt selbst nicht, wenn sich #mapWrap durch die Schublade
+// verändert - ruft während des Ziehens aber pro Bildwiederholung (nicht
+// öfter, das wäre unnötig teuer) map.invalidateSize() auf, damit die Karte
+// in Echtzeit mitwächst/-schrumpft statt erst am Ende sichtbar "einzurasten".
+let kartenAbgleichGeplant = false;
+function planeKartenAbgleich() {
+  if (kartenAbgleichGeplant) return;
+  kartenAbgleichGeplant = true;
+  requestAnimationFrame(() => { kartenAbgleichGeplant = false; map.invalidateSize(); });
+}
+
+function verkabelePanelSchublade() {
+  const griff = document.getElementById('panelGrip');
+  const panelElement = document.getElementById('panel');
+  let ziehStart = null; // { startY, startHöhe, bewegt }
+
+  griff.addEventListener('pointerdown', (e) => {
+    ziehStart = { startY: e.clientY, startHöhe: panelElement.getBoundingClientRect().height, bewegt: false };
+    griff.setPointerCapture(e.pointerId);
+  });
+
+  griff.addEventListener('pointermove', (e) => {
+    if (!ziehStart) return;
+    const deltaY = e.clientY - ziehStart.startY;
+    if (Math.abs(deltaY) > 4) ziehStart.bewegt = true; // ab hier zaehlt es als Ziehen, nicht mehr als Tipp
+    // Nach OBEN ziehen (deltaY negativ) macht die Schublade GROESSER.
+    setzePanelHöhe(ziehStart.startHöhe - deltaY);
+  });
+
+  const ziehEnde = (e) => {
+    if (!ziehStart) return;
+    const warEinTipp = !ziehStart.bewegt;
+    ziehStart = null;
+
+    if (warEinTipp) {
+      // Kurzer Tipp auf den Griff, ohne zu ziehen: zwischen "ganz zu" und
+      // einer sinnvollen Standardhöhe umschalten - schneller Weg für alle,
+      // denen das feine Ziehen zu umständlich ist.
+      const aktuelleHöhe = panelElement.getBoundingClientRect().height;
+      const ziel = aktuelleHöhe <= PANEL_MIN_HÖHE + 4 ? panelStandardHöhe() : PANEL_MIN_HÖHE;
+      setzePanelHöhe(ziel, { animiert: true });
+    } else {
+      panelElement.classList.remove('panel-dragging'); // Animation fuer die naechste programmatische Aenderung wieder an
+    }
+
+    // Letzte, verlaessliche Korrektur: nach Ende einer moeglichen
+    // Tipp-Animation (300ms) noch einmal Bescheid geben, falls die
+    // laufend-throttlten Aufrufe waehrend des Ziehens etwas verpasst haben.
+    setTimeout(() => map.invalidateSize(), 320);
+  };
+  griff.addEventListener('pointerup', ziehEnde);
+  griff.addEventListener('pointercancel', ziehEnde);
+
+  // Dreht sich das Handy (oder aendert sich sonst die Fenstergroesse), kann
+  // die zuvor gezogene Hoehe ausserhalb des neuen erlaubten Bereichs liegen -
+  // dann neu einklemmen, ohne dass es wie ein Sprung aussieht.
+  window.addEventListener('resize', () => {
+    if (!panelElement.style.height) return; // Hoehe kommt noch von der CSS-Vorgabe, nichts zu tun
+    setzePanelHöhe(panelElement.getBoundingClientRect().height, { animiert: true });
+  });
+}
+
 function setPlanMode(mode) {
   state.planMode = mode;
   document.querySelectorAll('#planModeSwitch .seg').forEach(b =>
@@ -2032,27 +2123,5 @@ document.getElementById('btnZumStartmenü').addEventListener('click', () => {
   zeigeStartmenü();
 });
 
-// Nur auf schmalen Bildschirmen sichtbar (siehe Media Query in style.css) -
-// dort ist das Bedienfeld eine Schublade unter der Karte, dieser Griff
-// klappt sie auf/zu.
-document.getElementById('btnPanelGrip').addEventListener('click', () => {
-  const panelElement = document.getElementById('panel');
-  panelElement.classList.toggle('expanded');
-
-  // Beim Auf-/Zuklappen aendert #mapWrap ueber flex:1 seine Groesse -
-  // Leaflet merkt das nicht von selbst. Wird die Karte dabei GROESSER,
-  // faellt es besonders auf: ohne Bescheid bleibt der neu hinzugekommene
-  // Bereich einfach leer/grau, weil Leaflet dort keine Kacheln nachlaedt.
-  // transitionend ist der zuverlaessigste Zeitpunkt (genau dann, wenn die
-  // CSS-Animation wirklich fertig ist) - der setTimeout daneben ist nur
-  // ein Sicherheitsnetz, falls das Event ausnahmsweise nicht feuert.
-  const aufAnimationsende = (e) => {
-    if (e.propertyName !== 'max-height') return;
-    map.invalidateSize();
-    panelElement.removeEventListener('transitionend', aufAnimationsende);
-  };
-  panelElement.addEventListener('transitionend', aufAnimationsende);
-  setTimeout(() => map.invalidateSize(), 350);
-});
-
+verkabelePanelSchublade();
 renderSaved();
