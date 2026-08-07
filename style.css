@@ -1,3 +1,4 @@
+@charset "UTF-8";
 /* ============================================================
    Kurvenjagd - Aussehen der App
    CSS beschreibt nur, WIE die Elemente aus index.html aussehen.
@@ -70,6 +71,36 @@ body {
   color: var(--muted);
   font-weight: 600;
 }
+
+/* ---------- Einklappbare Abschnitte (Optionen, Sehenswertes, ...) ----------
+   <details>/<summary> ist ein eingebautes HTML-Element für genau diesen
+   Zweck - auf-/zuklappen - ganz ohne eigenes JavaScript. Wir entfernen nur
+   das Standard-Dreieck davor und ersetzen es durch einen eigenen Pfeil,
+   damit es zum Rest des Bedienfelds passt. */
+.accordion summary {
+  margin: 0;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;             /* Chrome/Safari: eigenes Dreieck ausblenden */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.accordion summary::-webkit-details-marker { display: none; } /* Chrome/Safari */
+.accordion summary::marker { content: ""; }                    /* Firefox */
+.accordion summary::after {
+  content: "▸";
+  color: var(--muted);
+  font-size: 11px;
+  transition: transform 0.15s ease;
+}
+.accordion[open] summary::after { transform: rotate(90deg); }
+.accordion summary:hover { color: var(--text); }
+.accordion-body { margin-top: 10px; }
 
 .hint  { color: var(--muted); font-size: 12px; margin: 8px 0 0; line-height: 1.45; }
 .tiny  { color: #6b727d; font-size: 11px; line-height: 1.5; }
@@ -144,7 +175,7 @@ body {
 
 /* ---------- Kurvigkeits-Regler ---------- */
 /* -webkit-appearance/appearance entfernen die Browser-Standardoptik, damit
-   wir Schiene und Griff selbst gestalten koennen - keine Raster-Markierungen,
+   wir Schiene und Griff selbst gestalten können - keine Raster-Markierungen,
    der Regler ist stufenlos bedienbar. */
 .slider {
   width: 100%;
@@ -191,12 +222,13 @@ body {
 }
 .checkbox-row input[type="checkbox"] {
   width: 17px; height: 17px;
-  accent-color: var(--accent); /* faerbt die native Checkbox in Orange ein */
+  accent-color: var(--accent); /* färbt die native Checkbox in Orange ein */
   cursor: pointer;
 }
 
 /* ---------- Buttons ---------- */
 .row { display: flex; gap: 8px; margin-top: 10px; }
+.row[hidden] { display: none; }
 .btn {
   flex: 1;
   padding: 10px 12px;
@@ -311,8 +343,8 @@ body {
 .nav-btn { background: var(--gps); }
 .nav-btn:hover { background: #3a87e0; }
 
-/* Waehrend die Navigation laeuft, faehrt das Seitenpanel weg und die Karte
-   nutzt den vollen Platz - wie bei einem eigenstaendigen Navi-Geraet. */
+/* Während die Navigation läuft, fährt das Seitenpanel weg und die Karte
+   nutzt den vollen Platz - wie bei einem eigenständigen Navi-Gerät. */
 #panel { transition: flex-basis 0.3s ease, width 0.3s ease, padding 0.3s ease; }
 body.nav-modus #panel {
   flex-basis: 0;
@@ -324,7 +356,7 @@ body.nav-modus #panel {
 }
 
 /* Das Banner liegt direkt auf der Karte (wie bei Google Maps/Waze), nicht
-   im Seitenpanel - deutlich groesser und beim Fahren besser ablesbar. */
+   im Seitenpanel - deutlich größer und beim Fahren besser ablesbar. */
 .nav-banner {
   position: absolute;
   top: 16px; left: 16px; right: 16px;
@@ -339,7 +371,7 @@ body.nav-modus #panel {
   box-shadow: 0 6px 20px rgba(0,0,0,0.5);
 }
 /* Ohne diese Regel gewinnt "display: flex" oben gegen das hidden-Attribut -
-   derselbe Fehler wie bei .busy weiter unten, also gleich mitgeloest. */
+   derselbe Fehler wie bei .busy weiter unten, also gleich mitgelöst. */
 .nav-banner[hidden] { display: none; }
 .nav-arrow {
   font-size: 32px;
@@ -368,7 +400,7 @@ body.nav-modus #panel {
 .nav-stop-btn:hover { border-color: var(--text); }
 
 /* Eigener Standort auf der Karte: eine Spitze, die IMMER nach oben zeigt -
-   weil sich waehrend der Navigation ja die ganze Karte mit der Fahrtrichtung
+   weil sich während der Navigation ja die ganze Karte mit der Fahrtrichtung
    mitdreht (siehe map.setBearing() in app.js), nicht der Marker selbst. */
 .you-are-here {
   width: 22px; height: 22px;
@@ -378,11 +410,21 @@ body.nav-modus #panel {
   text-shadow: 0 0 3px #14161a, 0 0 3px #14161a, 0 0 3px #14161a;
 }
 
+/* Eigener Standort beim Start: schlichter blauer Punkt, ohne Blickrichtung -
+   im Unterschied zur Spitze (.you-are-here) während der Navigation. */
+.standort-marker {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--gps);
+  border: 3px solid #14161a;
+  box-shadow: 0 0 0 2px var(--gps);
+}
+
 /* ---------- Karte ---------- */
 #mapWrap { flex: 1; position: relative; }
 #map { position: absolute; inset: 0; background: #202329; }
 
-/* Leaflet-Bedienelemente etwas dunkler einfaerben */
+/* Leaflet-Bedienelemente etwas dunkler einfärben */
 .leaflet-control-attribution { display: none; }  /* wir zeigen die Quellen links im Panel */
 
 /* Nummerierte Wegpunkt-Marker */
@@ -398,7 +440,7 @@ body.nav-modus #panel {
   font-family: -apple-system, sans-serif;
 }
 
-/* Sehenswertes: Gebirgspaesse */
+/* Sehenswertes: Gebirgspässe */
 .poi-marker {
   width: 24px; height: 24px;
   border-radius: 50%;
@@ -407,7 +449,7 @@ body.nav-modus #panel {
   box-shadow: 0 2px 6px rgba(0,0,0,0.5);
   border: 2px solid #1a1206;
 }
-.poi-marker.pass { background: #d8d2c4; }  /* helles Steingrau fuer Passhoehen */
+.poi-marker.pass { background: #d8d2c4; }  /* helles Steingrau für Passhöhen */
 
 .poi-popup { font-size: 13px; line-height: 1.5; }
 .poi-popup .poi-popup-titel { font-weight: 700; }

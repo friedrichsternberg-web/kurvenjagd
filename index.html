@@ -12,14 +12,14 @@
   <title>Kurvenjagd - Motorrad-Routenplaner</title>
 
   <!-- Leaflet ist die Kartenbibliothek. Wir laden sie von einem CDN,
-       damit wir nichts installieren muessen. Die unminifizierte "-src"-
+       damit wir nichts installieren müssen. Die unminifizierte "-src"-
        Datei (statt der kleineren leaflet.js) ist hier absichtlich, weil
        das Rotations-Plugin direkt in Leaflet-Kernklassen eingreift und
-       das laut Plugin-Dokumentation damit zuverlaessiger funktioniert. -->
+       das laut Plugin-Dokumentation damit zuverlässiger funktioniert. -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet-src.js"></script>
 
-  <!-- Leaflet.Rotate: laesst die Karte sich mit der Fahrtrichtung mitdrehen
+  <!-- Leaflet.Rotate: lässt die Karte sich mit der Fahrtrichtung mitdrehen
        (Live-Navigation). Achtung, andere Lizenz als der Rest der App: GPL-3.0
        statt der lockeren BSD-Lizenz von Leaflet selbst. -->
   <script src="https://unpkg.com/leaflet-rotate@0.2.8/dist/leaflet-rotate-src.js"></script>
@@ -36,7 +36,7 @@
     </header>
 
     <!-- Planungsart: normale Route zwischen Punkten, oder Rundtour ab
-         einem Startpunkt zurueck zu sich selbst -->
+         einem Startpunkt zurück zu sich selbst -->
     <section class="block">
       <h2>Planungsart</h2>
       <div class="segmented" id="planModeSwitch">
@@ -45,7 +45,7 @@
       </div>
     </section>
 
-    <!-- Kurvigkeit: steuert, wie stark Umwege fuer mehr Kurven in Kauf
+    <!-- Kurvigkeit: steuert, wie stark Umwege für mehr Kurven in Kauf
          genommen werden. Ganz rechts (100) gewinnt immer die kurvigste
          Variante, egal wie viel Umweg das bedeutet. -->
     <section class="block">
@@ -56,35 +56,42 @@
       </p>
     </section>
 
-    <!-- Zusaetzliche Routing-Einschraenkungen, direkt an BRouter weitergereicht -->
-    <section class="block">
-      <h2>Optionen</h2>
-      <label class="checkbox-row">
-        <input type="checkbox" id="optStaedte" checked>
-        <span>Staedte vermeiden</span>
-      </label>
-      <label class="checkbox-row">
-        <input type="checkbox" id="optAutobahn">
-        <span>Autobahnen vermeiden</span>
-      </label>
-      <label class="checkbox-row">
-        <input type="checkbox" id="optMaut">
-        <span>Mautstrassen vermeiden</span>
-      </label>
-    </section>
+    <!-- Zusätzliche Routing-Einschränkungen, direkt an BRouter weitergereicht.
+         Als <details> statt <section>, damit der Abschnitt eingeklappt werden
+         kann - er ist zu selten in Benutzung, um dauerhaft Platz zu belegen. -->
+    <details class="block accordion">
+      <summary>Optionen</summary>
+      <div class="accordion-body">
+        <label class="checkbox-row">
+          <input type="checkbox" id="optStädte" checked>
+          <span>Städte vermeiden</span>
+        </label>
+        <label class="checkbox-row">
+          <input type="checkbox" id="optAutobahn">
+          <span>Autobahnen vermeiden</span>
+        </label>
+        <label class="checkbox-row">
+          <input type="checkbox" id="optMaut">
+          <span>Mautstraßen vermeiden</span>
+        </label>
+      </div>
+    </details>
 
     <!-- Sehenswertes: von Hand zusammengestellte Liste bekannter
-         Passstrassen (siehe PASS_DATEN in app.js). Frueher kamen die Daten
-         live von der Overpass API, das war aber zu unzuverlaessig - jetzt
-         eine feste Liste ohne Netzwerk-Abfrage. -->
-    <section class="block">
-      <h2>Sehenswertes</h2>
-      <label class="checkbox-row">
-        <input type="checkbox" id="optPoi">
-        <span>Bekannte Passstrassen anzeigen</span>
-      </label>
-      <p class="hint" id="poiHint">Rund 60 bekannte Alpen- und Mittelgebirgspaesse.</p>
-    </section>
+         Passstraßen (siehe PASS_DATEN in app.js). Früher kamen die Daten
+         live von der Overpass API, das war aber zu unzuverlässig - jetzt
+         eine feste Liste ohne Netzwerk-Abfrage. Ebenfalls einklappbar, weil
+         hier mit der Zeit noch mehr Kategorien dazukommen sollen. -->
+    <details class="block accordion">
+      <summary>Sehenswertes</summary>
+      <div class="accordion-body">
+        <label class="checkbox-row">
+          <input type="checkbox" id="optPoi">
+          <span>Bekannte Passstraßen anzeigen</span>
+        </label>
+        <p class="hint" id="poiHint">Rund 60 bekannte Alpen- und Mittelgebirgspässe.</p>
+      </div>
+    </details>
 
     <!-- Ortssuche: Alternative zum Klicken auf die Karte -->
     <section class="block">
@@ -96,7 +103,7 @@
       </div>
 
       <!-- Kartenklicks setzen erst dann Wegpunkte, wenn dieser Modus an ist -
-           sonst wuerde jeder Klick zum Erkunden der Karte (z.B. auf einen
+           sonst würde jeder Klick zum Erkunden der Karte (z.B. auf einen
            Pass-Marker) versehentlich einen Wegpunkt anlegen. -->
       <button class="btn ghost klick-modus-btn" id="btnKlickModus">
         Beliebigen Punkt auf der Karte anklicken
@@ -109,9 +116,9 @@
       <ol id="wpList" class="wp-list">
         <li class="empty">Ort suchen oder Klick-Modus einschalten und auf die Karte klicken.</li>
       </ol>
-      <div class="row">
+      <div class="row" id="wpButtons" hidden>
         <button class="btn ghost" id="btnUndo">Letzten entfernen</button>
-        <button class="btn ghost" id="btnClear">Alles loeschen</button>
+        <button class="btn ghost" id="btnClear">Alles löschen</button>
       </div>
     </section>
 
@@ -124,7 +131,7 @@
         <option value="">Alle Richtungen</option>
         <option value="nord">Richtung Norden</option>
         <option value="ost">Richtung Osten</option>
-        <option value="sued">Richtung Sueden</option>
+        <option value="süd">Richtung Süden</option>
         <option value="west">Richtung Westen</option>
       </select>
       <div class="row">
@@ -132,7 +139,7 @@
       </div>
       <p class="hint">
         Erzeugt ab dem Startpunkt (und optionalen Zwischenstopps oben) eine
-        zufaellige Rundtour mit ungefaehr dieser Laenge, wahlweise mit
+        zufällige Rundtour mit ungefähr dieser Länge, wahlweise mit
         Schwerpunkt in eine Himmelsrichtung. Nochmal klicken gibt eine neue
         Variante.
       </p>
@@ -144,7 +151,7 @@
       <div class="stats">
         <div class="stat"><span class="k">Distanz</span><span class="v" id="statDist">-</span></div>
         <div class="stat"><span class="k">Fahrzeit</span><span class="v" id="statTime">-</span></div>
-        <div class="stat"><span class="k">Hoehenmeter</span><span class="v" id="statAsc">-</span></div>
+        <div class="stat"><span class="k">Höhenmeter</span><span class="v" id="statAsc">-</span></div>
         <div class="stat highlight"><span class="k">Kurven-Score</span><span class="v" id="statCurve">-</span></div>
       </div>
       <div class="curvebar"><div class="curvebar-fill" id="curveFill"></div></div>
@@ -155,7 +162,7 @@
       </div>
 
       <!-- Live-Navigation: Standort per GPS, Abbiegehinweise, Neuberechnung.
-           Waehrend die Navigation laeuft, uebernimmt ein Overlay ueber der
+           Während die Navigation läuft, übernimmt ein Overlay über der
            Karte die Anzeige (siehe #navBanner unten) - hier bleibt nur der
            Start-Knopf. -->
       <div class="row">
@@ -185,8 +192,8 @@
     <div id="toast" class="toast" hidden></div>
     <div id="busy" class="busy" hidden><div class="spinner"></div><span>Route wird berechnet...</span></div>
 
-    <!-- Navigations-Overlay: erscheint waehrend einer laufenden Navigation
-         direkt auf der Karte, wie bei einem typischen Navi-Geraet. -->
+    <!-- Navigations-Overlay: erscheint während einer laufenden Navigation
+         direkt auf der Karte, wie bei einem typischen Navi-Gerät. -->
     <div id="navBanner" class="nav-banner" hidden>
       <span class="nav-arrow" id="navArrow">&#8594;</span>
       <div class="nav-texte">
