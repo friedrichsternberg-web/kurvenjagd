@@ -450,6 +450,26 @@ html, body {
   transition: width 0.4s ease;
 }
 
+/* ---------- Höhenprofil ---------- */
+.hoehenprofil-kopf {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 14px;
+}
+.hoehenprofil-spanne { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.hoehenprofil {
+  display: block;
+  width: 100%;
+  height: 90px;
+  margin-top: 6px;
+  background: var(--panel-2);
+  border-radius: 8px;
+}
+.hoehenprofil-fläche { opacity: 0.28; }
+.hoehenprofil-linie { fill: none; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.hoehenprofil-marke { font-size: 8px; fill: var(--muted); font-family: inherit; }
+
 /* ---------- Live-Navigation ---------- */
 .nav-btn { background: var(--gps); }
 .nav-btn:hover { background: #3a87e0; }

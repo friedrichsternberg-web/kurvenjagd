@@ -1293,6 +1293,114 @@ function showStats(r) {
              : c < 420 ? 'Richtig kurvig.'
              :           'Kurvenparadies.';
   document.getElementById('curveWord').textContent = word;
+
+  zeichneHöhenprofil(r.coords);
+}
+
+/* --- 6d. Höhenprofil -------------------------------------------------------
+   BRouter liefert die Höhe schon pro Streckenpunkt mit (coords[i][2], siehe
+   fetchRoute) - wir müssen sie nur noch als Graph zeichnen. Statt einer
+   Chart-Bibliothek reicht dafür simples SVG: eine gefüllte Fläche unter der
+   Höhenlinie, die Linie selbst nach Steigung eingefärbt (grün flach, gelb/
+   orange steil) - dieselbe Farbskala wie beim Kurvigkeits-Regler und der
+   Kurven-Leiste darüber, damit es sich wie ein Teil derselben App anfühlt. */
+
+// Rot/Gelb/Grün-Zwischenfarbe für einen Prozentsatz zwischen 0 und 1.
+function mischeFarben(a, b, t) {
+  const r = Math.round(a[0] + (b[0] - a[0]) * t);
+  const g = Math.round(a[1] + (b[1] - a[1]) * t);
+  const b2 = Math.round(a[2] + (b[2] - a[2]) * t);
+  return `rgb(${r},${g},${b2})`;
+}
+
+// Steigung in Prozent (Betrag, Richtung ist für die Farbe egal - eine steile
+// Abfahrt braucht genauso viel Aufmerksamkeit wie ein steiler Anstieg) ->
+// Farbe. 0% grün, ab 8% gelb, ab 16% (schon eine sehr steile Passstraße) das
+// App-eigene Orange.
+function steigungsFarbe(prozent) {
+  const p = Math.min(16, Math.abs(prozent));
+  if (p <= 8) return mischeFarben([74, 222, 128], [250, 204, 21], p / 8);
+  return mischeFarben([250, 204, 21], [255, 122, 26], (p - 8) / 8);
+}
+
+function zeichneHöhenprofil(coords) {
+  const svg = document.getElementById('hoehenprofil');
+  const spanne = document.getElementById('hoehenprofilSpanne');
+
+  // Stark ausdünnen (alle ~80m ein Punkt) - für einen Graph über die ganze
+  // Route reicht das locker und hält das SVG klein und flüssig.
+  const punkte = thinCoords(coords, 80).filter(p => Number.isFinite(p[2]));
+
+  if (punkte.length < 2) {
+    // Manche Routen liefern keine Höhe (seltene BRouter-Antworten) - dann
+    // lieber ehrlich nichts zeigen als einen falschen flachen Strich.
+    svg.innerHTML = '';
+    spanne.textContent = 'keine Höhendaten';
+    return;
+  }
+
+  // Kilometer entlang der Strecke (x-Achse) und Höhe (y-Achse) je Punkt.
+  let distanzMeter = 0;
+  const kmProPunkt = [0];
+  for (let i = 1; i < punkte.length; i++) {
+    distanzMeter += haversine(punkte[i - 1][1], punkte[i - 1][0], punkte[i][1], punkte[i][0]);
+    kmProPunkt.push(distanzMeter / 1000);
+  }
+  const gesamtKm = kmProPunkt[kmProPunkt.length - 1] || 1;
+
+  const höhen = punkte.map(p => p[2]);
+  const minHöhe = Math.min(...höhen);
+  const maxHöhe = Math.max(...höhen);
+  // Etwas Luft nach oben/unten, sonst kleben Gipfel und Täler am Rand -
+  // und ein Mindest-Spielraum, falls die Strecke fast eben ist (sonst
+  // würde eine winzige Schwankung riesig aufgeblasen wirken).
+  const spielraum = Math.max(20, (maxHöhe - minHöhe) * 0.12);
+  const yUnten = minHöhe - spielraum, yOben = maxHöhe + spielraum;
+
+  const BREITE = 300, HÖHE = 90, GRUNDLINIE = 88;
+  const x = km => (km / gesamtKm) * BREITE;
+  const y = h => GRUNDLINIE - ((h - yUnten) / (yOben - yUnten)) * (GRUNDLINIE - 6);
+
+  const linienPunkte = punkte.map((p, i) => [x(kmProPunkt[i]), y(p[2])]);
+
+  // Farbverlauf entlang der x-Achse, Farbe nach der Steigung im jeweiligen
+  // Abschnitt - dafür userSpaceOnUse, damit die Stopps direkt in denselben
+  // Koordinaten wie der Pfad liegen (0..BREITE) statt in Prozent. Bewusst
+  // NICHT ein Stopp pro Streckenpunkt (bei einer langen Route schnell
+  // hunderte) - zu viele, eng benachbarte Stopps lassen den Verlauf
+  // "streifig" statt glatt wirken. Stattdessen eine feste, überschaubare
+  // Anzahl gleichmäßig verteilter Stützstellen, jede mit der Steigung
+  // seit der vorherigen - das glättet kleine Messschwankungen gleich mit.
+  const gradientId = 'hoehenGradient';
+  const ZIEL_STOPS = 40;
+  const stops = [];
+  let vorherHöhe = punkte[0][2], vorherKm = 0, punktIndex = 0;
+  for (let s = 0; s <= ZIEL_STOPS; s++) {
+    const kmZiel = (s / ZIEL_STOPS) * gesamtKm;
+    while (punktIndex < punkte.length - 1 && kmProPunkt[punktIndex] < kmZiel) punktIndex++;
+    const höheHier = punkte[punktIndex][2];
+    const deltaMeter = (kmZiel - vorherKm) * 1000;
+    const steigungProzent = deltaMeter > 1 ? ((höheHier - vorherHöhe) / deltaMeter) * 100 : 0;
+    stops.push(`<stop offset="${(kmZiel / gesamtKm).toFixed(4)}" stop-color="${steigungsFarbe(steigungProzent)}" />`);
+    vorherHöhe = höheHier;
+    vorherKm = kmZiel;
+  }
+
+  const linienPfad = linienPunkte.map((p, i) => `${i === 0 ? 'M' : 'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
+  const flächenPfad = `${linienPfad} L${BREITE},${GRUNDLINIE} L0,${GRUNDLINIE} Z`;
+
+  svg.setAttribute('viewBox', `0 0 ${BREITE} ${HÖHE}`);
+  svg.innerHTML = `
+    <defs>
+      <linearGradient id="${gradientId}" x1="0" x2="${BREITE}" y1="0" y2="0" gradientUnits="userSpaceOnUse">
+        ${stops.join('')}
+      </linearGradient>
+    </defs>
+    <path class="hoehenprofil-fläche" d="${flächenPfad}" fill="url(#${gradientId})" />
+    <path class="hoehenprofil-linie" d="${linienPfad}" stroke="url(#${gradientId})" />
+  `;
+
+  spanne.textContent = `${Math.round(minHöhe)}–${Math.round(maxHöhe)} m`;
 }
 
 function formatTime(sec) {

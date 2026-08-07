@@ -208,6 +208,17 @@
       </div>
       <div class="curvebar"><div class="curvebar-fill" id="curveFill"></div></div>
       <p class="hint" id="curveWord"></p>
+
+      <!-- Höhenprofil: aus denselben Streckenpunkten berechnet, die auch
+           für die Karte genutzt werden (siehe zeichneHöhenprofil in app.js).
+           Die Linie ist nach Steigung eingefärbt (grün flach, gelb/orange
+           steil) - dieselbe Farbskala wie beim Kurvigkeits-Regler. -->
+      <div class="hoehenprofil-kopf">
+        <span class="hint">Höhenprofil</span>
+        <span class="hoehenprofil-spanne" id="hoehenprofilSpanne"></span>
+      </div>
+      <svg id="hoehenprofil" class="hoehenprofil" viewBox="0 0 300 90" preserveAspectRatio="none"></svg>
+
       <div class="row">
         <button class="btn" id="btnSave">Route speichern</button>
         <button class="btn ghost" id="btnGpx">GPX export</button>
