@@ -63,6 +63,12 @@
 
   <!-- ===== Linke Spalte: Bedienfeld ===== -->
   <aside id="panel">
+    <!-- Nur auf schmalen Bildschirmen sichtbar (siehe Media Query in
+         style.css): dort wird das Bedienfeld zu einer Art Schublade unter
+         der Karte, dieser Griff klappt sie auf/zu (siehe app.js). Am
+         Desktop unsichtbar und ohne Funktion. -->
+    <button class="panel-grip" id="btnPanelGrip" aria-label="Bedienfeld auf- und zuklappen"></button>
+
     <header class="panel-header">
       <div>
         <h1 class="brand-title">Kurvenjagd</h1>

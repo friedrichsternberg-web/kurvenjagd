@@ -2032,4 +2032,27 @@ document.getElementById('btnZumStartmenü').addEventListener('click', () => {
   zeigeStartmenü();
 });
 
+// Nur auf schmalen Bildschirmen sichtbar (siehe Media Query in style.css) -
+// dort ist das Bedienfeld eine Schublade unter der Karte, dieser Griff
+// klappt sie auf/zu.
+document.getElementById('btnPanelGrip').addEventListener('click', () => {
+  const panelElement = document.getElementById('panel');
+  panelElement.classList.toggle('expanded');
+
+  // Beim Auf-/Zuklappen aendert #mapWrap ueber flex:1 seine Groesse -
+  // Leaflet merkt das nicht von selbst. Wird die Karte dabei GROESSER,
+  // faellt es besonders auf: ohne Bescheid bleibt der neu hinzugekommene
+  // Bereich einfach leer/grau, weil Leaflet dort keine Kacheln nachlaedt.
+  // transitionend ist der zuverlaessigste Zeitpunkt (genau dann, wenn die
+  // CSS-Animation wirklich fertig ist) - der setTimeout daneben ist nur
+  // ein Sicherheitsnetz, falls das Event ausnahmsweise nicht feuert.
+  const aufAnimationsende = (e) => {
+    if (e.propertyName !== 'max-height') return;
+    map.invalidateSize();
+    panelElement.removeEventListener('transitionend', aufAnimationsende);
+  };
+  panelElement.addEventListener('transitionend', aufAnimationsende);
+  setTimeout(() => map.invalidateSize(), 350);
+});
+
 renderSaved();

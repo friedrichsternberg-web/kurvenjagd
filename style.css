@@ -113,6 +113,27 @@ html, body {
 }
 .back-to-start:hover { border-color: var(--muted); color: var(--text); }
 
+/* Griff zum Auf-/Zuklappen des Bedienfelds - nur auf schmalen Bildschirmen
+   sichtbar (display:block kommt erst aus der Media Query weiter unten). */
+.panel-grip {
+  display: none;
+  width: 100%;
+  padding: 8px 0 4px;
+  margin: -18px 0 0;   /* gleicht das Padding von #panel aus, Griff sitzt ganz oben */
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.panel-grip::before {
+  content: "";
+  display: block;
+  width: 36px; height: 4px;
+  margin: 0 auto;
+  border-radius: 2px;
+  background: var(--line);
+}
+.panel-grip:hover::before { background: var(--muted); }
+
 /* ---------- Bedienfeld ---------- */
 #panel {
   width: 330px;
@@ -427,7 +448,7 @@ html, body {
 
 /* Während die Navigation läuft, fährt das Seitenpanel weg und die Karte
    nutzt den vollen Platz - wie bei einem eigenständigen Navi-Gerät. */
-#panel { transition: flex-basis 0.3s ease, width 0.3s ease, padding 0.3s ease; }
+#panel { transition: flex-basis 0.3s ease, width 0.3s ease, padding 0.3s ease, max-height 0.3s ease; }
 body.nav-modus #panel {
   flex-basis: 0;
   width: 0;
@@ -574,9 +595,45 @@ body.nav-modus #panel {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ---------- Schmale Fenster ---------- */
+/* ---------- Schmale Bildschirme / Hochformat ----------
+   Hauptzielgruppe ist irgendwann eine Handy-App (siehe CLAUDE.md) - hier
+   wird aus "Bedienfeld links, Karte rechts" ein senkrechter Aufbau:
+   die Karte oben und dominant (per order VISUELL vor dem Bedienfeld,
+   an der Reihenfolge im HTML aendert das nichts), das Bedienfeld darunter
+   wie eine Schublade - kompakt per Vorgabe (45vh), ueber den Griff oben
+   am Panel (#btnPanelGrip, siehe app.js) auf 82vh aufziehbar, wenn mehr
+   Platz fuer die Einstellungen gebraucht wird. */
 @media (max-width: 760px) {
-  body { flex-direction: column; }
-  #panel { width: 100%; flex: 0 0 auto; max-height: 45vh; border-right: 0; border-bottom: 1px solid var(--line); }
-  #mapWrap { flex: 1; min-height: 55vh; }
+  .app-layout { flex-direction: column; }
+
+  #mapWrap { order: 1; flex: 1; }
+
+  #panel {
+    order: 2;
+    width: 100%;
+    flex: 0 0 auto;
+    max-height: 45vh;
+    max-height: 45dvh;   /* dvh beruecksichtigt ein-/ausblendende Browser-Leisten auf dem Handy korrekt */
+    border-right: 0;
+    border-top: 1px solid var(--line);
+    border-radius: 16px 16px 0 0;
+  }
+  #panel.expanded {
+    max-height: 82vh;
+    max-height: 82dvh;
+  }
+
+  .panel-grip { display: block; position: sticky; top: 0; z-index: 5; background: var(--panel); }
+
+  /* Waehrend der Navigation soll die Karte wie bei einem echten Navi-Geraet
+     den ganzen Bildschirm bekommen - anders als am Desktop (dort schrumpft
+     die BREITE auf 0, siehe body.nav-modus #panel weiter oben) schrumpft
+     hier die HOEHE auf 0. */
+  body.nav-modus #panel {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    overflow: hidden;
+    border-top: 0;
+  }
 }
