@@ -13,3 +13,12 @@ img/IMG_*.JPG
 
 # iPhone-Screenshots zum Debuggen, kein Teil der App
 img/Kurvenjagd - Motorrad-Routenplaner*.png
+
+# Persoenliche Projektnotizen - bleiben absichtlich nur lokal, weil das
+# GitHub-Repository oeffentlich ist (noetig fuer die kostenlose Auslieferung
+# ueber GitHub Pages).
+CLAUDE.md
+
+# Quellmaterial und Ueberbleibsel, gehoeren nicht in die App
+PÄSSE.pdf
+_git_muell/
