@@ -68,8 +68,26 @@
 
     <div class="ride-panel" id="ridePanel">
 
+      <!-- Vor dem Start: es passiert erst etwas, wenn man wirklich losfahren
+           will. Sonst liefe das GPS schon, während man noch am Parkplatz
+           steht, und die Fahrzeit würde mitzählen. -->
+      <div id="rideBereit">
+        <h2 class="ride-titel">Ausfahrt aufzeichnen</h2>
+        <p class="hint">
+          Zeichnet deine tatsächlich gefahrene Strecke per GPS auf. Während
+          der Fahrt siehst du alle Werte live, Fotos kannst du unterwegs
+          hinzufügen. Notizen schreibst du am Ende dazu.
+        </p>
+        <div class="row">
+          <button class="btn" id="btnRideStart">Aufzeichnung starten</button>
+        </div>
+        <div class="row">
+          <button class="btn ghost" id="btnRideZurueck">Zur&uuml;ck zum Start</button>
+        </div>
+      </div>
+
       <!-- Während der Fahrt: großes Tempo, laufende Werte, Pause/Beenden -->
-      <div id="rideLive">
+      <div id="rideLive" hidden>
         <div class="ride-tempo">
           <span class="ride-tempo-wert" id="rideTempo">0</span>
           <span class="ride-tempo-einheit">km/h</span>
@@ -88,6 +106,9 @@
         <div class="row">
           <button class="btn" id="btnRidePause">Pause</button>
           <button class="btn ghost" id="btnRideStop">Beenden</button>
+        </div>
+        <div class="row">
+          <button class="btn ghost" id="btnRideFoto">&#128247; Foto hinzuf&uuml;gen</button>
         </div>
       </div>
 
@@ -112,6 +133,19 @@
         </div>
         <svg id="rideHoehenprofil" class="hoehenprofil" viewBox="0 0 300 90" preserveAspectRatio="none"></svg>
 
+        <!-- Eigene Notizen zur Tour -->
+        <p class="hint ride-abschnitt">Notizen zur Tour</p>
+        <textarea id="rideNotizen" class="search-input ride-notizen" rows="3"
+                  placeholder="Wie war die Strecke? Was ist dir aufgefallen?"></textarea>
+
+        <!-- Fotos: unterwegs aufgenommene erscheinen hier automatisch,
+             weitere lassen sich nachträglich hinzufügen. -->
+        <div class="hoehenprofil-kopf">
+          <span class="hint">Fotos</span>
+          <button class="btn ghost foto-hinzu-btn" id="btnRideFotoSpaeter">+ Foto</button>
+        </div>
+        <div id="rideFotos" class="foto-galerie"></div>
+
         <div class="row">
           <button class="btn" id="btnRideSpeichern">Tour speichern</button>
           <button class="btn ghost" id="btnRideVerwerfen">Verwerfen</button>
@@ -119,6 +153,17 @@
       </div>
 
     </div>
+  </div>
+
+  <!-- Unsichtbares Dateifeld für die Fotos. Ohne "capture"-Angabe fragt das
+       iPhone selbst, ob die Kamera oder die Mediathek genutzt werden soll -
+       so lassen sich auch später noch Bilder von der Fahrt nachtragen. -->
+  <input type="file" id="fotoEingabe" accept="image/*" multiple hidden>
+
+  <!-- Vollbild-Ansicht für ein angetipptes Foto -->
+  <div id="fotoAnsicht" class="foto-ansicht" hidden>
+    <img id="fotoAnsichtBild" alt="Foto der Ausfahrt">
+    <button class="foto-ansicht-zu" id="btnFotoAnsichtZu" aria-label="Schlie&szlig;en">&times;</button>
   </div>
 
   <!-- ===== Der eigentliche Routenplaner: Bedienfeld + Karte. Anfangs
@@ -282,6 +327,15 @@
         <span class="hoehenprofil-spanne" id="hoehenprofilSpanne"></span>
       </div>
       <svg id="hoehenprofil" class="hoehenprofil" viewBox="0 0 300 90" preserveAspectRatio="none"></svg>
+
+      <!-- Nur bei einer aufgezeichneten Ausfahrt: die damals notierten
+           Gedanken und Fotos. Bei einer geplanten Route bleibt das leer. -->
+      <div id="aufzeichnungBlock" hidden>
+        <p class="hint ride-abschnitt">Notizen</p>
+        <p class="aufzeichnung-notizen" id="aufzeichnungNotizen"></p>
+        <p class="hint ride-abschnitt" id="aufzeichnungFotosTitel">Fotos</p>
+        <div id="aufzeichnungFotos" class="foto-galerie"></div>
+      </div>
 
       <div class="row">
         <button class="btn" id="btnSave">Route speichern</button>

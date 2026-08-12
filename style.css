@@ -520,6 +520,94 @@ html, body {
 /* Laeuft die Aufzeichnung gerade nicht, soll das auf einen Blick klar sein. */
 .ride-panel.pausiert .ride-tempo-wert { color: var(--muted); }
 
+/* Vor dem Start darf das Feld ruhig etwas mehr Platz nehmen - da steht
+   erklaerender Text, und die Karte ist noch nicht wichtig. */
+.ride-panel.bereit { max-height: 70dvh; }
+
+.ride-abschnitt { margin-top: 16px; margin-bottom: 6px; }
+.ride-notizen { resize: vertical; min-height: 70px; font-family: inherit; line-height: 1.45; }
+
+/* ---------- Fotos ---------- */
+.foto-hinzu-btn { flex: 0 0 auto; padding: 4px 10px; font-size: 12px; }
+
+.foto-galerie {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 6px;
+  margin-top: 6px;
+}
+.foto-galerie:empty { display: none; }
+
+.foto-kachel { position: relative; }
+.foto-kachel img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+  cursor: pointer;
+  background: var(--panel-2);
+}
+/* Kleines Kreuz zum Entfernen - nur dort, wo Fotos noch bearbeitbar sind. */
+.foto-loeschen {
+  position: absolute;
+  top: 3px; right: 3px;
+  width: 22px; height: 22px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(20, 22, 26, 0.75);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+.foto-loeschen:hover { background: #a03028; }
+
+/* Vollbild-Ansicht eines angetippten Fotos */
+.foto-ansicht {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(10, 11, 13, 0.94);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.foto-ansicht[hidden] { display: none; }
+.foto-ansicht img { max-width: 100%; max-height: 100%; border-radius: 10px; }
+.foto-ansicht-zu {
+  position: absolute;
+  top: max(16px, env(safe-area-inset-top));
+  right: 16px;
+  width: 40px; height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: rgba(28, 31, 38, 0.9);
+  color: var(--text);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* Marker fuer ein unterwegs aufgenommenes Foto auf der Karte */
+.foto-marker {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--text);
+  border: 2px solid #1a1206;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+}
+
+.aufzeichnung-notizen {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;   /* eigene Zeilenumbrueche des Nutzers erhalten */
+}
+
 /* ---------- Live-Navigation ---------- */
 .nav-btn { background: var(--gps); }
 .nav-btn:hover { background: #3a87e0; }

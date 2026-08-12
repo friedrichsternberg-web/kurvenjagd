@@ -1289,6 +1289,13 @@ function showStats(r) {
   document.getElementById('curveWord').textContent = kurvigkeitsWort(r.curviness);
 
   zeichneHöhenprofil(r.coords);
+
+  // Notizen/Fotos gehören immer zu EINER bestimmten aufgezeichneten
+  // Ausfahrt. Hier standardmäßig ausblenden, weil showStats() bei jeder
+  // Routenanzeige durchläuft - sonst blieben sie beim Berechnen einer neuen
+  // Route sichtbar. Beim Laden einer Aufzeichnung werden sie direkt danach
+  // wieder eingeblendet (siehe ladeGespeicherteRoute).
+  zeigeAufzeichnungsExtras(null);
 }
 
 // Der Kurven-Score in Worten - genutzt von der Routenplanung UND von der
@@ -1906,6 +1913,9 @@ const ride = {
   uhr: null,
   wakeLock: null,
   profilZähler: 0,
+  notizen: '',
+  fotos: [],               // [{ id, bild (Daten-URL), lat, lon }]
+  fotoMarker: [],          // Leaflet-Marker der unterwegs gemachten Fotos
 };
 
 // Die Karte des Aufzeichnungs-Bildschirms ist eine EIGENE Leaflet-Karte,
@@ -1926,28 +1936,55 @@ function rideFahrzeitMs() {
   return ride.fahrzeitGesammeltMs + laufend;
 }
 
+// Der Aufzeichnungs-Bildschirm hat drei Zustände: bereit (noch nichts
+// läuft), live (Aufzeichnung läuft) und zusammenfassung (danach). Immer
+// genau einer ist sichtbar.
+function zeigeRideZustand(zustand) {
+  document.getElementById('rideBereit').hidden = zustand !== 'bereit';
+  document.getElementById('rideLive').hidden = zustand !== 'live';
+  document.getElementById('rideZusammenfassung').hidden = zustand !== 'zusammenfassung';
+
+  const panel = document.getElementById('ridePanel');
+  panel.classList.toggle('bereit', zustand === 'bereit');
+  panel.classList.toggle('zusammenfassung', zustand === 'zusammenfassung');
+  if (zustand !== 'live') panel.classList.remove('pausiert');
+}
+
+// Setzt den Bildschirm auf "bereit" zurück und räumt eine eventuell noch
+// angezeigte vorherige Ausfahrt von der Karte.
+function rideZurücksetzen() {
+  const karte = rideKarte();
+  if (ride.linie) { karte.removeLayer(ride.linie); ride.linie = null; }
+  if (ride.marker) { karte.removeLayer(ride.marker); ride.marker = null; }
+  ride.fotoMarker.forEach(m => karte.removeLayer(m));
+  ride.fotoMarker = [];
+
+  Object.assign(ride, {
+    aktiv: false, pausiert: false,
+    punkte: [], distanzM: 0, aufstiegM: 0, letzteBestätigteHöhe: null,
+    maxKmh: 0, aktuellKmh: 0, letzterZeitstempel: null,
+    fahrzeitGesammeltMs: 0, laufSeit: null, gestartetAm: null,
+    profilZähler: 0, notizen: '', fotos: [],
+  });
+
+  document.getElementById('rideNotizen').value = '';
+  zeichneFotoGalerie();
+  zeigeRideZustand('bereit');
+}
+
 function starteRide() {
   if (!navigator.geolocation) {
     showToast('Dieses Gerät oder dieser Browser unterstützt keine Standortermittlung.');
     return;
   }
 
-  // Sauber bei null anfangen - auch wenn vorher schon eine Ausfahrt lief.
-  const karte = rideKarte();
-  if (ride.linie) { karte.removeLayer(ride.linie); ride.linie = null; }
-  if (ride.marker) { karte.removeLayer(ride.marker); ride.marker = null; }
+  rideZurücksetzen(); // sauber bei null anfangen, auch nach einer vorherigen Fahrt
 
-  Object.assign(ride, {
-    aktiv: true, pausiert: false,
-    punkte: [], distanzM: 0, aufstiegM: 0, letzteBestätigteHöhe: null,
-    maxKmh: 0, aktuellKmh: 0, letzterZeitstempel: null,
-    fahrzeitGesammeltMs: 0, laufSeit: Date.now(), gestartetAm: new Date(),
-    profilZähler: 0,
-  });
+  ride.aktiv = true;
+  ride.laufSeit = Date.now();
+  ride.gestartetAm = new Date();
 
-  document.getElementById('rideLive').hidden = false;
-  document.getElementById('rideZusammenfassung').hidden = true;
-  document.getElementById('ridePanel').classList.remove('zusammenfassung', 'pausiert');
+  zeigeRideZustand('live');
   document.getElementById('btnRidePause').textContent = 'Pause';
   document.getElementById('rideStatus').textContent = 'Warte auf GPS-Signal...';
 
@@ -2115,10 +2152,7 @@ function beendeRide() {
 
   const s = rideStats();
 
-  document.getElementById('rideLive').hidden = true;
-  document.getElementById('rideZusammenfassung').hidden = false;
-  document.getElementById('ridePanel').classList.add('zusammenfassung');
-  document.getElementById('ridePanel').classList.remove('pausiert');
+  zeigeRideZustand('zusammenfassung');
 
   document.getElementById('rideEndDist').textContent = (s.distanzM / 1000).toFixed(1) + ' km';
   document.getElementById('rideEndZeit').textContent = formatRideZeit(s.fahrzeitSek);
@@ -2163,19 +2197,183 @@ function speichereRide() {
     curviness: s.kurvigkeit,
     schnittKmh: s.schnittKmh,
     maxKmh: s.maxKmh,
+    notizen: document.getElementById('rideNotizen').value.trim(),
+    fotos: ride.fotos,
     gefahrenAm: (ride.gestartetAm || new Date()).toISOString(),
   });
-  localStorage.setItem(STORE, JSON.stringify(alle));
+
+  // Fotos sind mit Abstand das Größte, was hier gespeichert wird - der
+  // Browser-Speicher ist begrenzt (meist ~5 MB). Läuft er voll, geht die
+  // Ausfahrt NICHT verloren: der Nutzer bekommt es gesagt und kann Fotos
+  // entfernen oder alte Touren löschen und es erneut versuchen.
+  try {
+    localStorage.setItem(STORE, JSON.stringify(alle));
+  } catch {
+    showToast('Speicher voll - bitte ein paar Fotos entfernen oder alte Touren löschen, dann nochmal speichern.');
+    return;
+  }
 
   renderSaved();
   renderTourenListe();
   showToast('Gespeichert: ' + name);
+  rideZurücksetzen();
   zeigeStartmenü();
 }
 
 function verwerfeRide() {
   if (!confirm('Diese Aufzeichnung wirklich verwerfen?')) return;
+  rideZurücksetzen();
   zeigeStartmenü();
+}
+
+
+/* --- 6g. Fotos zur Ausfahrt -------------------------------------------------
+   Fotos werden absichtlich verkleinert gespeichert, nicht im Original: ein
+   iPhone-Bild hat schnell 4 MB, der Browser-Speicher fasst aber insgesamt
+   nur etwa 5 MB. Mit ~1000 Pixel Kantenlänge bleibt ein Foto scharf genug
+   fürs Ansehen auf dem Handy und braucht nur noch gut ein Zehntel davon.  */
+
+const FOTO_MAX_KANTE = 1000;   // Pixel - längere Seite wird darauf verkleinert
+const FOTO_QUALITÄT = 0.72;    // JPEG-Qualität, sichtbar gut und deutlich kleiner
+const FOTO_MAX_ANZAHL = 12;    // pro Ausfahrt, damit der Speicher nicht überläuft
+
+// Verkleinert ein ausgewähltes Bild und gibt es als Daten-URL zurück.
+// Der Umweg über ein <img>-Element ist Absicht: der Browser dreht das Bild
+// dabei automatisch richtig herum (iPhone-Fotos tragen die Drehung nur als
+// Vermerk in der Datei, nicht in den Bilddaten selbst).
+function verkleinereFoto(datei) {
+  return new Promise((fertig, fehler) => {
+    const url = URL.createObjectURL(datei);
+    const bild = new Image();
+
+    bild.onload = () => {
+      const faktor = Math.min(1, FOTO_MAX_KANTE / Math.max(bild.naturalWidth, bild.naturalHeight));
+      const leinwand = document.createElement('canvas');
+      leinwand.width = Math.round(bild.naturalWidth * faktor);
+      leinwand.height = Math.round(bild.naturalHeight * faktor);
+      leinwand.getContext('2d').drawImage(bild, 0, 0, leinwand.width, leinwand.height);
+      URL.revokeObjectURL(url);
+      fertig(leinwand.toDataURL('image/jpeg', FOTO_QUALITÄT));
+    };
+    bild.onerror = () => { URL.revokeObjectURL(url); fehler(new Error('Bild konnte nicht gelesen werden')); };
+    bild.src = url;
+  });
+}
+
+// Merkt sich, wohin das Ergebnis der Dateiauswahl gehen soll: Fotos während
+// der Fahrt bekommen zusätzlich die aktuelle Position, damit sie später als
+// Marker auf der Karte erscheinen.
+let fotoMitPosition = false;
+
+function fotoAuswahlÖffnen(mitPosition) {
+  fotoMitPosition = mitPosition;
+  const eingabe = document.getElementById('fotoEingabe');
+  eingabe.value = ''; // sonst löst dieselbe Datei beim zweiten Mal kein Ereignis aus
+  eingabe.click();
+}
+
+async function fotosÜbernehmen(dateien) {
+  for (const datei of dateien) {
+    if (ride.fotos.length >= FOTO_MAX_ANZAHL) {
+      showToast(`Mehr als ${FOTO_MAX_ANZAHL} Fotos passen nicht in den Speicher.`);
+      break;
+    }
+    try {
+      const bild = await verkleinereFoto(datei);
+      const letzter = ride.punkte[ride.punkte.length - 1];
+      ride.fotos.push({
+        id: Date.now() + Math.round(Math.random() * 1000),
+        bild,
+        lat: fotoMitPosition && letzter ? letzter[1] : undefined,
+        lon: fotoMitPosition && letzter ? letzter[0] : undefined,
+      });
+    } catch {
+      showToast('Ein Bild konnte nicht gelesen werden.');
+    }
+  }
+  zeichneFotoGalerie();
+  zeichneFotoMarker();
+}
+
+function fotoEntfernen(id) {
+  ride.fotos = ride.fotos.filter(f => String(f.id) !== String(id));
+  zeichneFotoGalerie();
+  zeichneFotoMarker();
+}
+
+// Galerie in der Auswertung - mit Kreuz zum Entfernen, weil die Fotos dort
+// noch bearbeitbar sind.
+function zeichneFotoGalerie() {
+  const galerie = document.getElementById('rideFotos');
+  galerie.innerHTML = ride.fotos.map(f => `
+    <div class="foto-kachel">
+      <img src="${f.bild}" alt="Foto der Ausfahrt" data-bild="${f.id}">
+      <button class="foto-loeschen" data-loeschen="${f.id}" title="Foto entfernen">&times;</button>
+    </div>`).join('');
+
+  galerie.querySelectorAll('[data-bild]').forEach(el => {
+    el.addEventListener('click', () => zeigeFotoGross(el.getAttribute('src')));
+  });
+  galerie.querySelectorAll('[data-loeschen]').forEach(el => {
+    el.addEventListener('click', () => fotoEntfernen(el.dataset.loeschen));
+  });
+}
+
+// Kleine Kamera-Marker für die unterwegs aufgenommenen Fotos.
+function zeichneFotoMarker() {
+  const karte = rideKarte();
+  ride.fotoMarker.forEach(m => karte.removeLayer(m));
+  ride.fotoMarker = [];
+
+  ride.fotos.filter(f => Number.isFinite(f.lat)).forEach(f => {
+    const marker = L.marker([f.lat, f.lon], {
+      icon: L.divIcon({ className: '', html: '<div class="foto-marker">📷</div>', iconSize: [26, 26], iconAnchor: [13, 13] }),
+    }).addTo(karte);
+    marker.on('click', () => zeigeFotoGross(f.bild));
+    ride.fotoMarker.push(marker);
+  });
+}
+
+// Notizen und Fotos einer GESPEICHERTEN Ausfahrt im Routenplaner zeigen.
+// Hier ohne Lösch-Kreuze: die Tour ist abgeschlossen, das ist eine
+// Rückschau und keine Bearbeitung. Bei einer geplanten Route (oder ohne
+// Notizen und Fotos) bleibt der ganze Bereich unsichtbar.
+function zeigeAufzeichnungsExtras(r) {
+  const block = document.getElementById('aufzeichnungBlock');
+  const notizenFeld = document.getElementById('aufzeichnungNotizen');
+  const fotosTitel = document.getElementById('aufzeichnungFotosTitel');
+  const galerie = document.getElementById('aufzeichnungFotos');
+
+  const notizen = r && r.notizen ? r.notizen : '';
+  const fotos = r && Array.isArray(r.fotos) ? r.fotos : [];
+
+  if (!notizen && fotos.length === 0) {
+    block.hidden = true;
+    galerie.innerHTML = '';
+    return;
+  }
+
+  block.hidden = false;
+  notizenFeld.textContent = notizen;
+  notizenFeld.hidden = !notizen;
+  notizenFeld.previousElementSibling.hidden = !notizen; // die Überschrift "Notizen"
+
+  fotosTitel.hidden = fotos.length === 0;
+  galerie.innerHTML = fotos.map(f =>
+    `<div class="foto-kachel"><img src="${f.bild}" alt="Foto der Ausfahrt"></div>`).join('');
+  galerie.querySelectorAll('img').forEach(el => {
+    el.addEventListener('click', () => zeigeFotoGross(el.getAttribute('src')));
+  });
+}
+
+function zeigeFotoGross(quelle) {
+  document.getElementById('fotoAnsichtBild').src = quelle;
+  document.getElementById('fotoAnsicht').hidden = false;
+}
+
+function schließeFotoAnsicht() {
+  document.getElementById('fotoAnsicht').hidden = true;
+  document.getElementById('fotoAnsichtBild').src = '';
 }
 
 /* Bildschirm während der Fahrt anlassen. Die Wake-Lock-API ist genau dafür
@@ -2275,6 +2473,7 @@ function ladeGespeicherteRoute(r) {
     state.route = alsRoute;
     drawRoutes([alsRoute], alsRoute);
     showStats(alsRoute);
+    zeigeAufzeichnungsExtras(r);
     return;
   }
 
@@ -2638,16 +2837,34 @@ document.getElementById('btnZumStartmenü').addEventListener('click', () => {
   zeigeStartmenü();
 });
 
-// "Meinen Ride aufzeichnen": Bildschirm zeigen und sofort loslegen - wer
-// draufdrückt, will fahren und nicht erst noch einen zweiten Knopf suchen.
+// "Meinen Ride aufzeichnen": zeigt zunächst nur den Bildschirm. Die
+// Aufzeichnung startet erst auf ausdrücklichen Knopfdruck - sonst liefe das
+// GPS schon, während man noch am Parkplatz steht.
 document.getElementById('btnStartRide').addEventListener('click', () => {
   zeigeRideScreen();
-  starteRide();
+  rideZurücksetzen();
 });
+document.getElementById('btnRideStart').addEventListener('click', starteRide);
+document.getElementById('btnRideZurueck').addEventListener('click', zeigeStartmenü);
 document.getElementById('btnRidePause').addEventListener('click', pausiereRideUmschalten);
 document.getElementById('btnRideStop').addEventListener('click', beendeRide);
 document.getElementById('btnRideSpeichern').addEventListener('click', speichereRide);
 document.getElementById('btnRideVerwerfen').addEventListener('click', verwerfeRide);
+
+// Fotos: unterwegs mit Position (für den Marker auf der Karte), in der
+// Auswertung ohne.
+document.getElementById('btnRideFoto').addEventListener('click', () => fotoAuswahlÖffnen(true));
+document.getElementById('btnRideFotoSpaeter').addEventListener('click', () => fotoAuswahlÖffnen(false));
+document.getElementById('fotoEingabe').addEventListener('change', (e) => {
+  if (e.target.files && e.target.files.length) fotosÜbernehmen([...e.target.files]);
+});
+
+document.getElementById('btnFotoAnsichtZu').addEventListener('click', schließeFotoAnsicht);
+// Tippen neben das Bild schließt die Ansicht ebenfalls - so verhält sich
+// jede Bildansicht auf dem Handy.
+document.getElementById('fotoAnsicht').addEventListener('click', (e) => {
+  if (e.target.id === 'fotoAnsicht') schließeFotoAnsicht();
+});
 
 verkabelePanelSchublade();
 renderSaved();
