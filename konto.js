@@ -68,6 +68,10 @@ const FEHLER_ÜBERSETZUNG = {
   'Unable to validate email address: invalid format': 'Das sieht nicht nach einer E-Mail-Adresse aus.',
   'For security purposes, you can only request this after 60 seconds.':
     'Zu viele Versuche. Bitte eine Minute warten.',
+  'New password should be different from the old password.':
+    'Das neue Passwort muss sich vom alten unterscheiden.',
+  'Auth session missing!':
+    'Der Link ist abgelaufen. Fordere das Zurücksetzen bitte noch einmal an.',
 };
 
 function übersetzeFehler(meldung) {
@@ -115,6 +119,25 @@ async function passwortVergessen(email) {
   return { ok: true, meldung: 'Wir haben dir eine E-Mail zum Zurücksetzen geschickt.' };
 }
 
+// Schickt die Bestätigungsmail nach der Registrierung noch einmal. Ohne
+// diesen Weg säße jemand fest, dessen erste Mail im Spam gelandet oder
+// verlorengegangen ist: anmelden geht nicht (unbestätigt), und ein zweites
+// Mal registrieren geht auch nicht (Adresse schon vergeben).
+async function bestätigungErneutSenden(email) {
+  const { error } = await backend.auth.resend({ type: 'signup', email });
+  if (error) return { ok: false, meldung: übersetzeFehler(error.message) };
+  return { ok: true, meldung: 'Bestätigungsmail ist unterwegs. Schau auch im Spam-Ordner nach.' };
+}
+
+// Setzt das Passwort des gerade angemeldeten Nutzers neu. Das alte wird
+// nicht abgefragt, denn wer über den "Passwort vergessen"-Link hereinkommt,
+// kennt es ja gerade nicht - der Link selbst ist hier der Nachweis.
+async function setzeNeuesPasswort(neuesPasswort) {
+  const { error } = await backend.auth.updateUser({ password: neuesPasswort });
+  if (error) return { ok: false, meldung: übersetzeFehler(error.message) };
+  return { ok: true, meldung: 'Passwort geändert.' };
+}
+
 
 /* --- 5. Oberfläche ------------------------------------------------------- */
 
@@ -122,6 +145,13 @@ async function passwortVergessen(email) {
 // dieselben zwei Felder. Diese Variable merkt sich, welcher der beiden
 // Fälle gerade gemeint ist.
 let kontoModus = 'anmelden';
+
+// Wahr, solange jemand über den "Passwort vergessen"-Link hereingekommen
+// ist und noch kein neues Passwort gesetzt hat. Ohne diese Unterscheidung
+// wäre so ein Besuch nicht von einer normalen Anmeldung zu trennen - und
+// genau das war der Fehler: der Link meldete still an und ließ den Nutzer
+// im Startmenü stehen, ohne je nach einem neuen Passwort zu fragen.
+let imPasswortWechsel = false;
 
 function setzeKontoModus(modus) {
   kontoModus = modus;
@@ -136,6 +166,7 @@ function setzeKontoModus(modus) {
   // Das Zurücksetzen des Passworts ergibt nur beim Anmelden Sinn.
   document.getElementById('btnPasswortVergessen').hidden = modus !== 'anmelden';
   zeigeKontoMeldung('');
+  zeigeMailErneutKnopf(false);
 }
 
 function zeigeKontoMeldung(text, istFehler = false) {
@@ -143,6 +174,13 @@ function zeigeKontoMeldung(text, istFehler = false) {
   feld.textContent = text;
   feld.hidden = !text;
   feld.classList.toggle('fehler', istFehler);
+}
+
+// Der Knopf zum erneuten Senden soll nicht dauerhaft herumstehen, sondern
+// genau dann auftauchen, wenn er gebraucht wird: nachdem der Server eine
+// unbestätigte Adresse gemeldet hat.
+function zeigeMailErneutKnopf(sichtbar) {
+  document.getElementById('btnMailErneut').hidden = !sichtbar;
 }
 
 // Hält die Anzeige im Startmenü aktuell: entweder "Nicht angemeldet" mit
@@ -183,10 +221,48 @@ async function kontoFormularAbsenden() {
   knopf.disabled = false;
   zeigeKontoMeldung(ergebnis.meldung, !ergebnis.ok);
 
+  // Genau ein Fall bekommt einen Ausweg angeboten: die Adresse ist noch
+  // nicht bestätigt. Dann hilft nur eine neue Mail.
+  zeigeMailErneutKnopf(ergebnis.meldung === FEHLER_ÜBERSETZUNG['Email not confirmed']);
+
   // Bei Erfolg MIT Sitzung schließt onAuthStateChange den Bildschirm von
   // selbst. Wartet der Nutzer dagegen noch auf die Bestätigungsmail, soll
   // die Meldung stehen bleiben.
   if (ergebnis.ok) document.getElementById('kontoPasswortEingabe').value = '';
+}
+
+// Neues Passwort speichern. Beide Felder müssen übereinstimmen - ein
+// Tippfehler wäre hier besonders ärgerlich, weil man ihn erst beim
+// nächsten Anmelden bemerken würde.
+async function passwortNeuAbsenden() {
+  const passwort = document.getElementById('passwortNeuEingabe').value;
+  const wiederholung = document.getElementById('passwortNeuWiederholung').value;
+  const feld = document.getElementById('passwortNeuMeldung');
+
+  const meldung = (text, istFehler = false) => {
+    feld.textContent = text;
+    feld.hidden = !text;
+    feld.classList.toggle('fehler', istFehler);
+  };
+
+  if (passwort.length < 6) { meldung('Das Passwort braucht mindestens 6 Zeichen.', true); return; }
+  if (passwort !== wiederholung) { meldung('Die beiden Eingaben sind nicht gleich.', true); return; }
+
+  const knopf = document.getElementById('btnPasswortNeuSpeichern');
+  knopf.disabled = true;
+  meldung('Einen Moment...');
+
+  const ergebnis = await setzeNeuesPasswort(passwort);
+  knopf.disabled = false;
+
+  if (!ergebnis.ok) { meldung(ergebnis.meldung, true); return; }
+
+  document.getElementById('passwortNeuEingabe').value = '';
+  document.getElementById('passwortNeuWiederholung').value = '';
+  meldung('');
+  imPasswortWechsel = false;
+  zeigeStartmenü();
+  showToast('Passwort geändert. Du bist angemeldet.');
 }
 
 
@@ -208,13 +284,20 @@ document.getElementById('btnKontoWechseln').addEventListener('click', () => {
   setzeKontoModus(kontoModus === 'anmelden' ? 'registrieren' : 'anmelden');
 });
 
-document.getElementById('btnKontoAbsenden').addEventListener('click', kontoFormularAbsenden);
-
-// Mit der Eingabetaste im Passwortfeld abschicken - auf dem Handy zeigt die
-// Tastatur dann "Los" statt einer Zeilenschaltung.
+// Nur der submit-Zuhörer, KEIN zusätzlicher click-Zuhörer auf dem Knopf:
+// der Knopf ist type="submit" und löst das Formular ohnehin aus. Beides
+// zusammen hat die Anmeldung doppelt abgeschickt, was beim Registrieren
+// als "zu viele Versuche" vom Server zurückkam. Der Weg über submit ist
+// der richtige, weil er auch die Eingabetaste abdeckt - auf dem Handy
+// zeigt die Tastatur dann "Los" statt einer Zeilenschaltung.
 document.getElementById('kontoFormular').addEventListener('submit', (e) => {
   e.preventDefault();
   kontoFormularAbsenden();
+});
+
+document.getElementById('passwortNeuFormular').addEventListener('submit', (e) => {
+  e.preventDefault();
+  passwortNeuAbsenden();
 });
 
 document.getElementById('btnPasswortVergessen').addEventListener('click', async () => {
@@ -225,7 +308,33 @@ document.getElementById('btnPasswortVergessen').addEventListener('click', async 
   }
   const ergebnis = await passwortVergessen(email);
   zeigeKontoMeldung(ergebnis.meldung, !ergebnis.ok);
+  zeigeMailErneutKnopf(false);
 });
+
+document.getElementById('btnMailErneut').addEventListener('click', async () => {
+  const email = document.getElementById('kontoEmailEingabe').value.trim();
+  if (!email) {
+    zeigeKontoMeldung('Bitte zuerst die E-Mail-Adresse eintragen.', true);
+    return;
+  }
+  const ergebnis = await bestätigungErneutSenden(email);
+  zeigeKontoMeldung(ergebnis.meldung, !ergebnis.ok);
+});
+
+
+/* --- 6b. Passwort-Link schon an der Adresszeile erkennen -------------------
+   Supabase hängt beim Klick auf den "Passwort vergessen"-Link Angaben
+   hinter das Rautezeichen der Adresse, darunter type=recovery. Die
+   Bibliothek liest das aus und meldet es als Ereignis (siehe unten). Wir
+   schauen zusätzlich selbst nach, bevor sie die Adresse aufräumt: Wenn
+   dieses eine Ereignis aus irgendeinem Grund ausbleibt, landet der Nutzer
+   sonst wieder still im Startmenü, ohne je nach einem neuen Passwort
+   gefragt zu werden. Genau dieser Fehler ist aufgetreten. */
+
+if (backendVerfügbar() && window.location.hash.includes('type=recovery')) {
+  imPasswortWechsel = true;
+  zeigeBildschirm('passwortNeuScreen');
+}
 
 
 /* --- 7. Auf Anmeldung reagieren -------------------------------------------
@@ -241,11 +350,27 @@ if (backendVerfügbar()) {
     angemeldeterNutzer = sitzung ? sitzung.user : null;
     aktualisiereKontoAnzeige();
 
-    // Frisch angemeldet: den Anmeldebildschirm schließen, aber nur wenn er
-    // gerade offen ist. Sonst würde ein Token-Erneuern im Hintergrund den
-    // Nutzer mitten in der Navigation aus der Karte werfen.
-    if (!warAngemeldet && angemeldeterNutzer && !document.getElementById('kontoScreen').hidden) {
-      zeigeStartmenü();
+    // Wer über den "Passwort vergessen"-Link hereinkommt, ist zwar
+    // angemeldet, will aber etwas anderes. Deshalb muss dieser Fall VOR
+    // allem anderen abgefangen werden.
+    if (ereignis === 'PASSWORD_RECOVERY') {
+      imPasswortWechsel = true;
+      zeigeBildschirm('passwortNeuScreen');
+      return;
+    }
+
+    // Solange das neue Passwort noch nicht gesetzt ist, darf kein anderes
+    // Ereignis den Bildschirm wegschalten. Das Erneuern des Zugangs-Tokens
+    // läuft im Hintergrund und würde den Nutzer sonst mitten in der
+    // Eingabe hinauswerfen.
+    if (imPasswortWechsel) return;
+
+    if (!warAngemeldet && angemeldeterNutzer) {
+      // Zwei Wege führen hierher: das Anmeldeformular, oder der Klick auf
+      // den Bestätigungslink aus der Registrierungsmail. Im zweiten Fall
+      // ist der Anmeldebildschirm gar nicht offen, und ohne Rückmeldung
+      // stünde der Nutzer ratlos im Startmenü.
+      if (!document.getElementById('kontoScreen').hidden) zeigeStartmenü();
       showToast('Angemeldet als ' + angemeldeterNutzer.email);
     }
   });

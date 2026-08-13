@@ -2600,16 +2600,16 @@ function setCurveLevel(level) {
 }
 
 /* --- 9b. Startmenü ---------------------------------------------------------
-   Fünf Bildschirme, immer ist genau einer sichtbar: Startmenü, "Meine
+   Sechs Bildschirme, immer ist genau einer sichtbar: Startmenü, "Meine
    Touren", der Routenplaner (Bedienfeld + Karte), die Aufzeichnung einer
-   eigenen Ausfahrt und die Anmeldung. Beide Karten werden nur einmal
-   erzeugt, bleiben dabei aber zunächst unsichtbar - deshalb kennt Leaflet
-   ihre Größe noch nicht und muss beim Einblenden per invalidateSize()
-   nachfragen. */
+   eigenen Ausfahrt, die Anmeldung und das Setzen eines neuen Passworts.
+   Beide Karten werden nur einmal erzeugt, bleiben dabei aber zunächst
+   unsichtbar - deshalb kennt Leaflet ihre Größe noch nicht und muss beim
+   Einblenden per invalidateSize() nachfragen. */
 
-// Blendet genau einen der fünf Bildschirme ein und alle anderen aus.
+// Blendet genau einen der sechs Bildschirme ein und alle anderen aus.
 function zeigeBildschirm(sichtbareId) {
-  ['startMenu', 'tourenScreen', 'app', 'rideScreen', 'kontoScreen'].forEach(id => {
+  ['startMenu', 'tourenScreen', 'app', 'rideScreen', 'kontoScreen', 'passwortNeuScreen'].forEach(id => {
     document.getElementById(id).hidden = id !== sichtbareId;
   });
 }

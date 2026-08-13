@@ -89,12 +89,41 @@
         <button type="submit" class="btn" id="btnKontoAbsenden">Anmelden</button>
       </form>
 
+      <!-- Erscheint nur, wenn der Server "E-Mail noch nicht bestätigt"
+           gemeldet hat. Ohne diesen Weg säße jemand fest, dessen
+           Bestätigungsmail verlorengegangen ist. -->
+      <button class="linkbtn" id="btnMailErneut" hidden>Bestätigungsmail erneut senden</button>
+
       <button class="linkbtn" id="btnPasswortVergessen">Passwort vergessen</button>
 
       <p class="konto-wechsel">
         <span id="kontoWechselText">Noch kein Konto?</span>
         <button class="linkbtn" id="btnKontoWechseln">Konto anlegen</button>
       </p>
+    </div>
+  </div>
+
+  <!-- ===== Neues Passwort setzen. Dieser Bildschirm erscheint NUR, wenn
+       jemand über den Link aus der "Passwort vergessen"-Mail hereinkommt.
+       Supabase meldet denjenigen dabei bereits an, deshalb reicht es, das
+       Passwort zu ändern - ein altes Passwort wird nicht abgefragt, er
+       kennt es ja gerade nicht. ===== -->
+  <div id="passwortNeuScreen" class="start-screen" hidden>
+    <div class="start-screen-inner">
+      <h2>Neues Passwort setzen</h2>
+      <p class="sub">Du bist über den Link aus deiner E-Mail hier gelandet. Wähle jetzt ein neues Passwort.</p>
+
+      <form id="passwortNeuFormular" class="konto-formular">
+        <label for="passwortNeuEingabe">Neues Passwort</label>
+        <input type="password" id="passwortNeuEingabe" autocomplete="new-password" placeholder="mindestens 6 Zeichen">
+
+        <label for="passwortNeuWiederholung">Zur Sicherheit nochmal</label>
+        <input type="password" id="passwortNeuWiederholung" autocomplete="new-password" placeholder="dasselbe nochmal">
+
+        <p id="passwortNeuMeldung" class="konto-meldung" hidden></p>
+
+        <button type="submit" class="btn" id="btnPasswortNeuSpeichern">Passwort speichern</button>
+      </form>
     </div>
   </div>
 
