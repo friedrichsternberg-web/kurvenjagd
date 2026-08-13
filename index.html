@@ -30,7 +30,18 @@
        "@2", damit eine neue Fassung die App nicht über Nacht verändert. -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/dist/umd/supabase.js"></script>
 
-  <link rel="stylesheet" href="style.css">
+  <!-- Das "?v=" hinter den eigenen Dateien ist eine Versionsnummer und hat
+       einen handfesten Grund: GitHub Pages lässt Browser jede Datei zehn
+       Minuten lang zwischenspeichern. Nach einem Push kann es deshalb
+       passieren, dass das neue index.html schon da ist, app.js aber noch
+       die alte Fassung - und diese Mischung ist schlimmer als eine
+       durchgehend alte Version, weil die Seite dann Elemente enthält, die
+       das Skript noch gar nicht kennt.
+
+       Für den Browser ist "app.js?v=4" eine andere Adresse als "app.js?v=3",
+       er holt sie also frisch. Wichtig: BEI JEDER VERÖFFENTLICHUNG die Zahl
+       an allen drei Stellen um eins erhöhen. -->
+  <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
 
@@ -477,9 +488,9 @@
 
   </div>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=4"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js"></script>
+  <script src="konto.js?v=4"></script>
 </body>
 </html>
