@@ -2185,7 +2185,7 @@ function speichereRide() {
   if (!name) return;
 
   const alle = loadSaved();
-  alle.unshift({
+  const neueAusfahrt = {
     id: Date.now(),
     name,
     aufgezeichnet: true,          // unterscheidet sie von geplanten Routen
@@ -2200,19 +2200,19 @@ function speichereRide() {
     notizen: document.getElementById('rideNotizen').value.trim(),
     fotos: ride.fotos,
     gefahrenAm: (ride.gestartetAm || new Date()).toISOString(),
-  });
+  };
+  alle.unshift(neueAusfahrt);
 
   // Fotos sind mit Abstand das Größte, was hier gespeichert wird - der
   // Browser-Speicher ist begrenzt (meist ~5 MB). Läuft er voll, geht die
   // Ausfahrt NICHT verloren: der Nutzer bekommt es gesagt und kann Fotos
   // entfernen oder alte Touren löschen und es erneut versuchen.
-  try {
-    localStorage.setItem(STORE, JSON.stringify(alle));
-  } catch {
+  if (!speichereListe(alle)) {
     showToast('Speicher voll - bitte ein paar Fotos entfernen oder alte Touren löschen, dann nochmal speichern.');
     return;
   }
 
+  meldeTourAnServer(neueAusfahrt);
   renderSaved();
   renderTourenListe();
   showToast('Gespeichert: ' + name);
@@ -2407,6 +2407,32 @@ function loadSaved() {
   catch { return []; }
 }
 
+// Die einzige Stelle, an der die Liste in den Browser-Speicher geschrieben
+// wird. Vorher stand localStorage.setItem an drei Stellen verstreut - mit
+// dem Server als zweiter Ablage wäre daraus schnell ein Durcheinander
+// geworden, bei dem eine Stelle den Abgleich vergisst.
+// Gibt false zurück, wenn der Speicher voll ist (siehe speichereRide).
+function speichereListe(liste) {
+  try {
+    localStorage.setItem(STORE, JSON.stringify(liste));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Die folgenden zwei Helfer reichen eine Änderung an den Server weiter,
+// falls es ihn gibt. Die Prüfung auf "typeof ... === 'function'" ist
+// Absicht: konto.js wird nach app.js geladen und könnte fehlen. Der
+// Routenplaner soll auch dann laufen.
+function meldeTourAnServer(tour) {
+  if (typeof tourHochladen === 'function') tourHochladen(tour);
+}
+
+function meldeTourLöschungAnServer(id) {
+  if (typeof tourInCloudLöschen === 'function') tourInCloudLöschen(id);
+}
+
 function saveRoute() {
   if (!state.route) return;
 
@@ -2416,7 +2442,7 @@ function saveRoute() {
   const istRundtour = state.planMode === 'rundtour';
 
   const all = loadSaved();
-  all.unshift({
+  const neueTour = {
     id: Date.now(),
     name,
     waypoints: state.waypoints,
@@ -2430,9 +2456,12 @@ function saveRoute() {
     roundtripRichtung: istRundtour ? document.getElementById('roundtripRichtung').value : undefined,
     distance: state.route.distance,
     curviness: state.route.curviness,
-  });
-  localStorage.setItem(STORE, JSON.stringify(all));
+  };
+  all.unshift(neueTour);
+  speichereListe(all);
+  meldeTourAnServer(neueTour);
   renderSaved();
+  renderTourenListe();
   showToast('Gespeichert: ' + name);
 }
 
@@ -2502,7 +2531,8 @@ function verkabeleGespeicherteListe(list, { zeigePlanerBeimLaden }) {
     li.addEventListener('click', (e) => {
       if (e.target.dataset.del) {
         const rest = loadSaved().filter(x => String(x.id) !== e.target.dataset.del);
-        localStorage.setItem(STORE, JSON.stringify(rest));
+        speichereListe(rest);
+        meldeTourLöschungAnServer(e.target.dataset.del);
         renderSaved();
         renderTourenListe();
         return;

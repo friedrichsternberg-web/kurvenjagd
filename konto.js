@@ -366,14 +366,108 @@ if (backendVerfügbar()) {
     if (imPasswortWechsel) return;
 
     if (!warAngemeldet && angemeldeterNutzer) {
-      // Zwei Wege führen hierher: das Anmeldeformular, oder der Klick auf
-      // den Bestätigungslink aus der Registrierungsmail. Im zweiten Fall
-      // ist der Anmeldebildschirm gar nicht offen, und ohne Rückmeldung
-      // stünde der Nutzer ratlos im Startmenü.
-      if (!document.getElementById('kontoScreen').hidden) zeigeStartmenü();
-      showToast('Angemeldet als ' + angemeldeterNutzer.email);
+      // SIGNED_IN heißt: gerade eben angemeldet, entweder über das Formular
+      // oder über den Bestätigungslink aus der Mail. Beim bloßen Öffnen der
+      // Seite mit einer noch gültigen Anmeldung kommt dagegen
+      // INITIAL_SESSION - da wäre eine Begrüßung bei jedem Start lästig.
+      if (ereignis === 'SIGNED_IN') {
+        // Beim Weg über die Mail ist der Anmeldebildschirm gar nicht offen,
+        // und ohne Rückmeldung stünde der Nutzer ratlos im Startmenü.
+        if (!document.getElementById('kontoScreen').hidden) zeigeStartmenü();
+        showToast('Angemeldet als ' + angemeldeterNutzer.email);
+      }
+      // Abgeglichen wird in beiden Fällen. Erst jetzt macht das Sinn -
+      // vorher wüsste die Datenbank nicht, wessen Touren gemeint sind.
+      synchronisiereTouren();
     }
   });
 } else {
   aktualisiereKontoAnzeige();
+}
+
+
+/* --- 8. Touren in der Cloud ------------------------------------------------
+   Ab hier wandern gespeicherte Touren auf den Server. Der localStorage
+   bleibt trotzdem, und zwar als ZWISCHENSPEICHER: Die App liest weiter von
+   dort und funktioniert deshalb unverändert ohne Konto und ohne Netz. Der
+   Server ist die zweite Ablage, nicht die einzige.
+
+   Warum überhaupt zwei Ablagen? Weil die Alternative wäre, dass die Liste
+   "Meine Touren" beim Öffnen erst auf eine Antwort aus dem Netz wartet.
+   Auf dem Motorrad mit einem Balken Empfang ist das keine gute Idee.
+
+   NOCH NICHT dabei: die Fotos. Die bleiben vorerst nur auf dem Gerät. Sie
+   gehören in den Dateispeicher von Supabase und nicht als Base64-Text in
+   die Datenbank - das ist der nächste Schritt. Bis dahin siehst du eine
+   Tour auf einem zweiten Gerät ohne ihre Bilder. */
+
+// Übersetzt eine Tour aus der App in eine Zeile der Tabelle.
+function tourAlsZeile(tour) {
+  // Die Fotos werden hier bewusst herausgeschnitten (siehe oben). Der Rest
+  // wandert als Ganzes ins JSON-Feld.
+  const { fotos, ...ohneFotos } = tour;
+  return {
+    id: String(tour.id),
+    nutzer_id: angemeldeterNutzer.id,
+    name: tour.name,
+    daten: ohneFotos,
+    entfernung_m: Math.round(tour.distance || 0),
+    kurvigkeit: Math.round(tour.curviness || 0),
+    aufgezeichnet: !!tour.aufgezeichnet,
+  };
+}
+
+// Legt eine Tour auf dem Server an oder überschreibt sie, falls es sie dort
+// schon gibt ("upsert"). onConflict nennt die Spalten des Primärschlüssels,
+// damit die Datenbank weiß, woran sie "schon vorhanden" erkennt.
+async function tourHochladen(tour) {
+  if (!backendVerfügbar() || !angemeldeterNutzer) return;
+  const { error } = await backend.from('touren')
+    .upsert(tourAlsZeile(tour), { onConflict: 'nutzer_id,id' });
+  // Kein Abbruch bei einem Fehler: Die Tour liegt bereits im localStorage,
+  // sie ist also nicht verloren. Nur der Abgleich hat nicht geklappt.
+  if (error) showToast('Tour ist gespeichert, aber noch nicht auf dem Server.');
+}
+
+async function tourInCloudLöschen(id) {
+  if (!backendVerfügbar() || !angemeldeterNutzer) return;
+  await backend.from('touren').delete().eq('id', String(id));
+}
+
+// Holt die Touren vom Server und führt sie mit den lokalen zusammen.
+// Läuft nach jeder Anmeldung, damit ein zweites Gerät die Touren sieht.
+async function synchronisiereTouren() {
+  if (!backendVerfügbar() || !angemeldeterNutzer) return;
+
+  const { data, error } = await backend.from('touren')
+    .select('id, daten')
+    .order('erstellt_am', { ascending: false });
+  if (error) { showToast('Touren konnten nicht abgeglichen werden.'); return; }
+
+  const lokal = loadSaved();
+  const lokaleKennungen = new Set(lokal.map(t => String(t.id)));
+  const serverKennungen = new Set(data.map(z => z.id));
+
+  // Was nur auf dem Server liegt, kommt dazu. Bei Touren, die es auf
+  // beiden Seiten gibt, gewinnt die lokale Fassung - nur sie hat die Fotos.
+  const neuVomServer = data.filter(z => !lokaleKennungen.has(z.id)).map(z => z.daten);
+
+  // Was nur lokal liegt, wandert hoch. Das ist zugleich der Umzug der
+  // Touren, die vor dem ersten Anmelden entstanden sind.
+  const nurLokal = lokal.filter(t => !serverKennungen.has(String(t.id)));
+  for (const tour of nurLokal) await tourHochladen(tour);
+
+  if (neuVomServer.length > 0) {
+    if (!speichereListe([...neuVomServer, ...lokal])) {
+      showToast('Kein Platz mehr auf dem Gerät - bitte ein paar alte Touren löschen.');
+      return;
+    }
+    renderSaved();
+    renderTourenListe();
+  }
+
+  const teile = [];
+  if (neuVomServer.length) teile.push(neuVomServer.length + ' geladen');
+  if (nurLokal.length) teile.push(nurLokal.length + ' hochgeladen');
+  if (teile.length) showToast('Touren abgeglichen: ' + teile.join(', ') + '.');
 }
