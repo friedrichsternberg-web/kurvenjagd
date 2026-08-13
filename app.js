@@ -30,6 +30,13 @@ const state = {
 
 const BROUTER = 'https://brouter.de/brouter';
 
+/* Ab wie vielen aufgezeichneten Punkten eine Ausfahrt als aussagekräftig
+   gilt. Früher war das eine harte Sperre: unter fünf Punkten ließ sich gar
+   nicht speichern. Das steht jetzt nicht mehr im Weg - speichern darf man
+   immer, auch eine Fahrt über 0 Meter. Stattdessen gibt es nur noch einen
+   kurzen Hinweis, dass die Auswertung dann wenig aussagt. */
+const RIDE_KURZ_GRENZE = 5;
+
 // Eigener Zustand für die Live-Navigation, getrennt vom Rest, weil er nur
 // während einer aktiven Fahrt gebraucht wird.
 const nav = {
@@ -1255,9 +1262,16 @@ function sortByBearing(start, points) {
 
 /* --- 6. Zeichnen und Zahlen anzeigen ------------------------------------- */
 
-function drawRoutes(all, best) {
+// Nimmt alle gezeichneten Linien wieder von der Karte. Eigene Funktion,
+// weil das an zwei Stellen gebraucht wird: vor jedem Neuzeichnen und wenn
+// es gar nichts zu zeichnen gibt.
+function entferneLinien() {
   state.lines.forEach(l => map.removeLayer(l));
   state.lines = [];
+}
+
+function drawRoutes(all, best) {
+  entferneLinien();
 
   // Verworfene Varianten blass im Hintergrund - man sieht, was es sonst gäbe.
   all.filter(r => r !== best).forEach(r => {
@@ -2161,11 +2175,14 @@ function beendeRide() {
   document.getElementById('rideEndAufstieg').textContent = Math.round(s.aufstiegM) + ' hm';
   document.getElementById('rideEndKurven').textContent = Math.round(s.kurvigkeit) + ' Grad/km';
 
+  const istKurz = ride.punkte.length < RIDE_KURZ_GRENZE;
+
   document.getElementById('rideCurveFill').style.width = Math.min(100, (s.kurvigkeit / 500) * 100) + '%';
   document.getElementById('rideCurveWord').textContent =
-    ride.punkte.length < 5
-      ? 'Zu wenig aufgezeichnet für eine Auswertung.'
-      : kurvigkeitsWort(s.kurvigkeit);
+    istKurz ? 'Zu wenig aufgezeichnet für eine Auswertung.' : kurvigkeitsWort(s.kurvigkeit);
+
+  // Kurzer Hinweis statt Sperre - speichern geht trotzdem.
+  document.getElementById('rideKurzHinweis').hidden = !istKurz;
 
   zeichneHöhenprofil(ride.punkte, 'rideHoehenprofil', 'rideHoehenprofilSpanne');
 
@@ -2174,8 +2191,9 @@ function beendeRide() {
     rideKarte().fitBounds(ride.linie.getBounds(), { padding: [40, 40] });
   }
 
-  // Speichern ergibt nur Sinn, wenn überhaupt etwas zusammengekommen ist.
-  document.getElementById('btnRideSpeichern').disabled = ride.punkte.length < 5;
+  // Speichern ist immer erlaubt, auch bei einer Fahrt über 0 Meter. Der
+  // Hinweis oben reicht als Warnung.
+  document.getElementById('btnRideSpeichern').disabled = false;
 }
 
 function speichereRide() {
@@ -2489,18 +2507,24 @@ function gespeicherteRouteHtml(r) {
 function ladeGespeicherteRoute(r) {
   // Eine aufgezeichnete Ausfahrt wird NICHT neu berechnet - sie ist ja
   // bereits gefahren. Stattdessen wird die echte Linie direkt angezeigt.
-  if (r.aufgezeichnet && r.track && r.track.length > 1) {
+  if (r.aufgezeichnet) {
     state.waypoints = [];
     refreshWaypoints();
+    const spur = Array.isArray(r.track) ? r.track : [];
     const alsRoute = {
-      coords: r.track,
+      coords: spur,
       distance: r.distance,
       time: r.time || 0,
       ascend: r.ascend || 0,
       curviness: r.curviness || 0,
     };
     state.route = alsRoute;
-    drawRoutes([alsRoute], alsRoute);
+    // Eine Linie braucht mindestens zwei Punkte. Bei einer sehr kurzen
+    // Aufzeichnung (schlechtes GPS, oder eine Testfahrt über 0 Meter)
+    // bleibt die Karte leer, die Zahlen und Notizen sollen aber trotzdem
+    // erscheinen - sonst landet man auf einem toten Bildschirm.
+    if (spur.length > 1) drawRoutes([alsRoute], alsRoute);
+    else entferneLinien();
     showStats(alsRoute);
     zeigeAufzeichnungsExtras(r);
     return;

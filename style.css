@@ -141,6 +141,20 @@ html, body {
 
 .konto-wechsel { margin-top: 22px; font-size: 13px; color: var(--muted); }
 
+/* Kurzer Hinweis über den Auswertungszahlen einer sehr kurzen Ausfahrt.
+   Gedämpft und nicht rot: Es ist kein Fehler, nur eine Einordnung. */
+.kurz-hinweis {
+  margin: 0 0 14px;
+  padding: 9px 11px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.kurz-hinweis[hidden] { display: none; }
+
 /* ---------- Routenplaner: zwei Spalten, Bedienfeld links, Karte rechts ---------- */
 .app-layout {
   height: 100%;
