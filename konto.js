@@ -401,16 +401,79 @@ if (backendVerfügbar()) {
    die Datenbank - das ist der nächste Schritt. Bis dahin siehst du eine
    Tour auf einem zweiten Gerät ohne ihre Bilder. */
 
+// Name des Behälters im Dateispeicher von Supabase.
+const FOTO_BEHÄLTER = 'tourfotos';
+
+/* Fotos gehören nicht in die Datenbank, sondern in den Dateispeicher.
+   Der Grund ist nicht Ordnungsliebe: Ein Bild als Text (Base64) wird ein
+   Drittel größer, und beim Herunterladen einer Tour landete es wieder im
+   localStorage - genau dem 5-MB-Speicher, dessentwegen wir die Bilder
+   überhaupt verkleinern. So liegt lokal nur noch der Pfad.
+
+   Der Behälter ist NICHT öffentlich. Zum Anzeigen erzeugt die App einen
+   signierten Link, der nach einer Stunde verfällt. Bei einer privaten
+   Ausfahrt ist das der Unterschied zwischen "nur ich" und "jeder, der die
+   Adresse kennt". */
+
+// Ein verkleinertes Foto liegt als "data:image/jpeg;base64,...."-Text vor.
+// Zum Hochladen braucht es die reinen Bytes.
+function datenUrlZuBlob(datenUrl) {
+  const [kopf, inhalt] = datenUrl.split(',');
+  const typ = (kopf.match(/:(.*?);/) || [])[1] || 'image/jpeg';
+  const rohtext = atob(inhalt);
+  const bytes = new Uint8Array(rohtext.length);
+  for (let i = 0; i < rohtext.length; i++) bytes[i] = rohtext.charCodeAt(i);
+  return new Blob([bytes], { type: typ });
+}
+
+// Der Pfad beginnt mit der Nutzerkennung. Genau daran hängt die
+// Zugriffsregel im Dateispeicher: wer nicht der erste Ordner ist, kommt
+// nicht heran.
+function fotoPfad(tourId, fotoId) {
+  return `${angemeldeterNutzer.id}/${tourId}/${fotoId}.jpg`;
+}
+
+// Lädt die Fotos einer Tour hoch und gibt die Liste zurück, wie sie in der
+// Datenbank stehen soll: mit Pfad statt Bilddaten. Fotos, die schon einen
+// Pfad haben, werden nicht erneut hochgeladen.
+async function fotosHochladen(tour) {
+  const fotos = Array.isArray(tour.fotos) ? tour.fotos : [];
+  const ergebnis = [];
+
+  for (const foto of fotos) {
+    if (foto.pfad) { ergebnis.push({ id: foto.id, pfad: foto.pfad, lat: foto.lat, lon: foto.lon }); continue; }
+    if (!foto.bild) continue;
+
+    const pfad = fotoPfad(tour.id, foto.id);
+    const { error } = await backend.storage.from(FOTO_BEHÄLTER)
+      .upload(pfad, datenUrlZuBlob(foto.bild), { contentType: 'image/jpeg', upsert: true });
+
+    if (error) {
+      showToast('Ein Foto konnte nicht hochgeladen werden, es bleibt auf dem Gerät.');
+      continue;
+    }
+    ergebnis.push({ id: foto.id, pfad, lat: foto.lat, lon: foto.lon });
+  }
+  return ergebnis;
+}
+
+// Besorgt einen kurzlebigen Link zum Anzeigen. Eine Stunde reicht: Wer die
+// Tour länger offen hat, lädt die Seite ohnehin irgendwann neu.
+async function fotoAnzeigeUrl(pfad) {
+  if (!backendVerfügbar() || !angemeldeterNutzer) return null;
+  const { data, error } = await backend.storage.from(FOTO_BEHÄLTER)
+    .createSignedUrl(pfad, 60 * 60);
+  return error ? null : data.signedUrl;
+}
+
 // Übersetzt eine Tour aus der App in eine Zeile der Tabelle.
-function tourAlsZeile(tour) {
-  // Die Fotos werden hier bewusst herausgeschnitten (siehe oben). Der Rest
-  // wandert als Ganzes ins JSON-Feld.
-  const { fotos, ...ohneFotos } = tour;
+function tourAlsZeile(tour, fotosMitPfad) {
   return {
     id: String(tour.id),
     nutzer_id: angemeldeterNutzer.id,
     name: tour.name,
-    daten: ohneFotos,
+    // Die Bilddaten selbst stehen NICHT im JSON, nur die Pfade dorthin.
+    daten: { ...tour, fotos: fotosMitPfad },
     entfernung_m: Math.round(tour.distance || 0),
     kurvigkeit: Math.round(tour.curviness || 0),
     aufgezeichnet: !!tour.aufgezeichnet,
@@ -422,15 +485,42 @@ function tourAlsZeile(tour) {
 // damit die Datenbank weiß, woran sie "schon vorhanden" erkennt.
 async function tourHochladen(tour) {
   if (!backendVerfügbar() || !angemeldeterNutzer) return;
+
+  const fotosMitPfad = await fotosHochladen(tour);
+
   const { error } = await backend.from('touren')
-    .upsert(tourAlsZeile(tour), { onConflict: 'nutzer_id,id' });
+    .upsert(tourAlsZeile(tour, fotosMitPfad), { onConflict: 'nutzer_id,id' });
+
   // Kein Abbruch bei einem Fehler: Die Tour liegt bereits im localStorage,
   // sie ist also nicht verloren. Nur der Abgleich hat nicht geklappt.
-  if (error) showToast('Tour ist gespeichert, aber noch nicht auf dem Server.');
+  if (error) { showToast('Tour ist gespeichert, aber noch nicht auf dem Server.'); return; }
+
+  // Die Pfade auch lokal vermerken, sonst würden dieselben Bilder beim
+  // nächsten Abgleich noch einmal hochgeladen.
+  const liste = loadSaved();
+  const eintrag = liste.find(t => String(t.id) === String(tour.id));
+  if (eintrag && Array.isArray(eintrag.fotos)) {
+    eintrag.fotos.forEach(f => {
+      const passend = fotosMitPfad.find(p => String(p.id) === String(f.id));
+      if (passend) f.pfad = passend.pfad;
+    });
+    speichereListe(liste);
+  }
 }
 
 async function tourInCloudLöschen(id) {
   if (!backendVerfügbar() || !angemeldeterNutzer) return;
+
+  // Erst die Bilder, dann die Zeile. Andersherum wüsste danach niemand
+  // mehr, welche Dateien zu dieser Tour gehörten - sie lägen für immer im
+  // Speicher herum und würden Platz verbrauchen.
+  const { data: dateien } = await backend.storage.from(FOTO_BEHÄLTER)
+    .list(`${angemeldeterNutzer.id}/${id}`);
+  if (dateien && dateien.length) {
+    await backend.storage.from(FOTO_BEHÄLTER)
+      .remove(dateien.map(d => `${angemeldeterNutzer.id}/${id}/${d.name}`));
+  }
+
   await backend.from('touren').delete().eq('id', String(id));
 }
 

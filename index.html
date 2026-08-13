@@ -38,10 +38,10 @@
        durchgehend alte Version, weil die Seite dann Elemente enthält, die
        das Skript noch gar nicht kennt.
 
-       Für den Browser ist "app.js?v=4" eine andere Adresse als "app.js?v=3",
+       Für den Browser ist "app.js?v=5" eine andere Adresse als "app.js?v=4",
        er holt sie also frisch. Wichtig: BEI JEDER VERÖFFENTLICHUNG die Zahl
        an allen drei Stellen um eins erhöhen. -->
-  <link rel="stylesheet" href="style.css?v=4">
+  <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 
@@ -203,6 +203,11 @@
         <div class="row">
           <button class="btn ghost" id="btnRideFoto">&#128247; Foto hinzuf&uuml;gen</button>
         </div>
+
+        <!-- Die unterwegs aufgenommenen Fotos schon w&auml;hrend der Fahrt
+             zeigen. Ohne diese Galerie sieht man nach dem Ausl&ouml;sen
+             nichts und k&ouml;nnte denken, das Bild sei verlorengegangen. -->
+        <div id="rideFotosLive" class="foto-galerie"></div>
       </div>
 
       <!-- Nach dem Beenden: dieselbe Fläche zeigt die volle Auswertung -->
@@ -488,9 +493,9 @@
 
   </div>
 
-  <script src="app.js?v=4"></script>
+  <script src="app.js?v=5"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=4"></script>
+  <script src="konto.js?v=5"></script>
 </body>
 </html>

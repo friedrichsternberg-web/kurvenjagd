@@ -2319,21 +2319,29 @@ function fotoEntfernen(id) {
   zeichneFotoMarker();
 }
 
-// Galerie in der Auswertung - mit Kreuz zum Entfernen, weil die Fotos dort
-// noch bearbeitbar sind.
+// Zeichnet die Galerie an BEIDEN Stellen: während der Fahrt und in der
+// Auswertung danach. Die Fotos schon unterwegs zu zeigen ist wichtig -
+// sonst passiert nach dem Auslösen sichtbar nichts und man könnte denken,
+// das Bild sei nicht angekommen.
+// Beide Galerien haben ein Kreuz zum Entfernen, weil die Fotos bis zum
+// Speichern noch bearbeitbar sind.
 function zeichneFotoGalerie() {
-  const galerie = document.getElementById('rideFotos');
-  galerie.innerHTML = ride.fotos.map(f => `
-    <div class="foto-kachel">
-      <img src="${f.bild}" alt="Foto der Ausfahrt" data-bild="${f.id}">
-      <button class="foto-loeschen" data-loeschen="${f.id}" title="Foto entfernen">&times;</button>
-    </div>`).join('');
+  ['rideFotosLive', 'rideFotos'].forEach(bereichsId => {
+    const galerie = document.getElementById(bereichsId);
+    if (!galerie) return;
 
-  galerie.querySelectorAll('[data-bild]').forEach(el => {
-    el.addEventListener('click', () => zeigeFotoGross(el.getAttribute('src')));
-  });
-  galerie.querySelectorAll('[data-loeschen]').forEach(el => {
-    el.addEventListener('click', () => fotoEntfernen(el.dataset.loeschen));
+    galerie.innerHTML = ride.fotos.map(f => `
+      <div class="foto-kachel">
+        <img src="${f.bild}" alt="Foto der Ausfahrt" data-bild="${f.id}">
+        <button class="foto-loeschen" data-loeschen="${f.id}" title="Foto entfernen">&times;</button>
+      </div>`).join('');
+
+    galerie.querySelectorAll('[data-bild]').forEach(el => {
+      el.addEventListener('click', () => zeigeFotoGross(el.getAttribute('src')));
+    });
+    galerie.querySelectorAll('[data-loeschen]').forEach(el => {
+      el.addEventListener('click', () => fotoEntfernen(el.dataset.loeschen));
+    });
   });
 }
 
@@ -2377,10 +2385,27 @@ function zeigeAufzeichnungsExtras(r) {
   notizenFeld.previousElementSibling.hidden = !notizen; // die Überschrift "Notizen"
 
   fotosTitel.hidden = fotos.length === 0;
-  galerie.innerHTML = fotos.map(f =>
-    `<div class="foto-kachel"><img src="${f.bild}" alt="Foto der Ausfahrt"></div>`).join('');
-  galerie.querySelectorAll('img').forEach(el => {
-    el.addEventListener('click', () => zeigeFotoGross(el.getAttribute('src')));
+
+  // Zwei Herkünfte sind möglich: Das Bild liegt als Text direkt in der Tour
+  // (so wurde es auf diesem Gerät aufgenommen), oder es liegt nur noch als
+  // Pfad vor, weil die Tour vom Server kam. Im zweiten Fall muss erst ein
+  // kurzlebiger Link besorgt werden - deshalb bekommt das Bild seine
+  // Quelle nachträglich, sobald sie da ist.
+  galerie.innerHTML = fotos.map((f, i) =>
+    `<div class="foto-kachel"><img data-nr="${i}" alt="Foto der Ausfahrt"></div>`).join('');
+
+  fotos.forEach(async (f, i) => {
+    const bildElement = galerie.querySelector(`img[data-nr="${i}"]`);
+    if (!bildElement) return;
+
+    let quelle = f.bild;
+    if (!quelle && f.pfad && typeof fotoAnzeigeUrl === 'function') {
+      quelle = await fotoAnzeigeUrl(f.pfad);
+    }
+    if (!quelle) return;
+
+    bildElement.src = quelle;
+    bildElement.addEventListener('click', () => zeigeFotoGross(quelle));
   });
 }
 
