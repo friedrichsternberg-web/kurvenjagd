@@ -53,14 +53,14 @@ html, body {
 .back-btn { margin-bottom: 20px; }
 
 /* Startmenü mit eigenem Foto als Hintergrund: das Motorrad soll mittig im
-   Bild stehen (Bildposition 55% 42% trifft ungefaehr die Mitte von Fahrer
-   und Maschine im Originalfoto), die Karte mit den Buttons sitzt darueber,
+   Bild stehen (Bildposition 55% 42% trifft ungefähr die Mitte von Fahrer
+   und Maschine im Originalfoto), die Karte mit den Buttons sitzt darüber,
    horizontal zentriert. */
 .start-screen--hero {
   align-items: flex-start;
   justify-content: center;
   padding: 5vh 5vw;
-  padding-top: max(5vh, env(safe-area-inset-top) + 16px); /* Abstand zur Notch/Statusleiste, falls zum Homescreen hinzugefuegt */
+  padding-top: max(5vh, env(safe-area-inset-top) + 16px); /* Abstand zur Notch/Statusleiste, falls zum Homescreen hinzugefügt */
   background: url('img/start-hintergrund.jpg') 55% 42% / cover no-repeat;
 }
 
@@ -82,6 +82,64 @@ html, body {
   .start-screen--hero { padding: 24px; padding-top: max(24px, env(safe-area-inset-top) + 16px); }
   .start-card { padding: 22px 20px; }
 }
+
+/* ---------- Konto ----------
+   Ein Knopf, der wie ein Textlink aussieht. Gebraucht für die kleinen
+   Nebenwege ("Passwort vergessen", "Abmelden"), die keinen vollwertigen
+   Knopf verdienen, aber trotzdem anklickbar sein müssen. Bewusst ein
+   <button> und kein <a>, weil nichts verlinkt wird. */
+.linkbtn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--accent);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.linkbtn:hover { color: var(--text); }
+
+/* Statuszeile unter den Startmenü-Knöpfen. */
+.konto-zeile {
+  margin-top: 18px;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.konto-zeile[hidden] { display: none; }
+.konto-zeile #kontoEmail { color: var(--text); }
+.konto-zeile .linkbtn { margin-left: 8px; }
+
+.konto-formular {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+  margin-bottom: 14px;
+}
+.konto-formular label { font-size: 12px; color: var(--muted); }
+.konto-formular input {
+  padding: 11px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--text);
+  font: inherit;
+  margin-bottom: 6px;
+}
+.konto-formular input:focus { outline: none; border-color: var(--accent); }
+.konto-formular .btn { margin-top: 6px; padding: 13px; font-size: 16px; }
+
+.konto-meldung {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+.konto-meldung[hidden] { display: none; }
+.konto-meldung.fehler { color: var(--accent); }
+
+.konto-wechsel { margin-top: 22px; font-size: 13px; color: var(--muted); }
 
 /* ---------- Routenplaner: zwei Spalten, Bedienfeld links, Karte rechts ---------- */
 .app-layout {

@@ -24,6 +24,12 @@
        statt der lockeren BSD-Lizenz von Leaflet selbst. -->
   <script src="https://unpkg.com/leaflet-rotate@0.2.8/dist/leaflet-rotate-src.js"></script>
 
+  <!-- Supabase: unser Server für Konten und (später) geteilte Routen und
+       Ausfahrten. Die Bibliothek stellt das globale Objekt "supabase"
+       bereit, benutzt wird sie in konto.js. Version fest verdrahtet statt
+       "@2", damit eine neue Fassung die App nicht über Nacht verändert. -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/dist/umd/supabase.js"></script>
+
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -42,6 +48,53 @@
         <button class="btn ghost" id="btnStartRide">Meinen Ride aufzeichnen</button>
         <button class="btn ghost" id="btnStartTouren">Meine Touren</button>
       </div>
+
+      <!-- Statuszeile zum Konto. Bewusst klein und unter den Knöpfen:
+           Anmelden ist freiwillig, wer nur eine Route planen will, soll
+           nicht erst an einer Anmeldemaske vorbei. Ohne eingetragene
+           Server-Zugangsdaten blendet konto.js die ganze Zeile aus. -->
+      <div id="kontoZeile" class="konto-zeile" hidden>
+        <div id="kontoAbgemeldet">
+          <button class="linkbtn" id="btnKontoAnmelden">Anmelden oder Konto anlegen</button>
+        </div>
+        <div id="kontoAngemeldet" hidden>
+          Angemeldet als <span id="kontoEmail"></span>
+          <button class="linkbtn" id="btnKontoAbmelden">Abmelden</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Konto: Anmelden und Registrieren teilen sich ein Formular,
+       weil beide dieselben zwei Felder brauchen. Welcher Fall gemeint ist,
+       merkt sich konto.js in der Variable kontoModus. ===== -->
+  <div id="kontoScreen" class="start-screen" hidden>
+    <div class="start-screen-inner">
+      <button class="btn ghost back-btn" id="btnKontoZurueck">&larr; Zurück</button>
+      <h2 id="kontoTitel">Anmelden</h2>
+      <p class="sub">
+        Zum Planen brauchst du kein Konto. Erst fürs Teilen von Routen und
+        für Verabredungen zu Ausfahrten.
+      </p>
+
+      <form id="kontoFormular" class="konto-formular">
+        <label for="kontoEmailEingabe">E-Mail</label>
+        <input type="email" id="kontoEmailEingabe" autocomplete="email" placeholder="du@beispiel.de">
+
+        <label for="kontoPasswortEingabe">Passwort</label>
+        <input type="password" id="kontoPasswortEingabe" autocomplete="current-password" placeholder="mindestens 6 Zeichen">
+
+        <p id="kontoMeldung" class="konto-meldung" hidden></p>
+
+        <button type="submit" class="btn" id="btnKontoAbsenden">Anmelden</button>
+      </form>
+
+      <button class="linkbtn" id="btnPasswortVergessen">Passwort vergessen</button>
+
+      <p class="konto-wechsel">
+        <span id="kontoWechselText">Noch kein Konto?</span>
+        <button class="linkbtn" id="btnKontoWechseln">Konto anlegen</button>
+      </p>
     </div>
   </div>
 
@@ -390,5 +443,8 @@
   </div>
 
   <script src="app.js"></script>
+  <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
+       zeigeBildschirm() von dort benutzt. -->
+  <script src="konto.js"></script>
 </body>
 </html>

@@ -1,24 +1,28 @@
-# macOS legt diese Datei in jedem Ordner an - gehoert nicht ins Projekt
+# macOS legt diese Datei in jedem Ordner an - gehört nicht ins Projekt
 .DS_Store
 
-# Falls spaeter Pakete dazukommen
+# Falls später Pakete dazukommen
 node_modules/
 
 # Heruntergeladene Routen
 *.gpx
 
-# Unbearbeitete Kamera-Originale - viel zu gross fuers Repo, die
-# schlanke Version fuers Web liegt direkt daneben (start-hintergrund.jpg)
+# Unbearbeitete Kamera-Originale - viel zu groß fürs Repo, die
+# schlanke Version fürs Web liegt direkt daneben (start-hintergrund.jpg)
 img/IMG_*.JPG
 
 # iPhone-Screenshots zum Debuggen, kein Teil der App
 img/Kurvenjagd - Motorrad-Routenplaner*.png
 
-# Persoenliche Projektnotizen - bleiben absichtlich nur lokal, weil das
-# GitHub-Repository oeffentlich ist (noetig fuer die kostenlose Auslieferung
-# ueber GitHub Pages).
+# Persönliche Projektnotizen - bleiben absichtlich nur lokal, weil das
+# GitHub-Repository öffentlich ist (nötig für die kostenlose Auslieferung
+# über GitHub Pages).
 CLAUDE.md
 
-# Quellmaterial und Ueberbleibsel, gehoeren nicht in die App
-PÄSSE.pdf
+# Quellmaterial und Überbleibsel, gehören nicht in die App.
+# Bewusst *.pdf statt "PÄSSE.pdf": macOS legt Umlaute im Dateinamen zerlegt
+# ab (A + Umlautpunkte), git vergleicht aber Zeichen für Zeichen mit dem
+# Muster - der Name traf deshalb nie zu und die Datei wäre beinahe im
+# öffentlichen Repository gelandet.
+*.pdf
 _git_muell/
