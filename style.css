@@ -385,13 +385,46 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 .startseite { display: block; overflow-y: auto; text-align: left; position: relative; }
 
 .start-hero {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: 68vh;
-  background: url('img/start-hintergrund.jpg') 55% 38% / cover no-repeat;
-  pointer-events: none;
-  z-index: 0;
+  position: relative;
+  /* Die Hoehe folgt dem Seitenverhaeltnis des Fotos (1000 zu 1251, also
+     125% der Breite). Dadurch fuellt das Bild den Bereich genau aus und
+     die Maschine wird an keiner Seite angeschnitten. Die Obergrenze von
+     70vh verhindert, dass auf sehr schmalen, hohen Geraeten fast nichts
+     anderes mehr auf den Bildschirm passt. */
+  height: min(62vh, 125vw);
+  padding: 0 var(--s4);
+  background: url('img/start-hero.jpg') center top / cover no-repeat;
+  /* Der Uebergang ins Dunkle laeuft ueber die untere Haelfte und endet
+     weich, statt an einer Kante abzureissen. Die vielen Zwischenstufen
+     sind kein Zufall: mit nur zwei oder drei bilden sich in dunklen
+     Verlaeufen sichtbare Streifen. */
+  --hero-fade: linear-gradient(to bottom,
+    rgba(14,15,18,0.58) 0%,
+    rgba(14,15,18,0.24) 11%,
+    rgba(14,15,18,0.08) 26%,
+    rgba(14,15,18,0.08) 52%,
+    rgba(14,15,18,0.22) 64%,
+    rgba(14,15,18,0.44) 74%,
+    rgba(14,15,18,0.66) 83%,
+    rgba(14,15,18,0.85) 91%,
+    rgba(14,15,18,0.95) 96%,
+    var(--bg) 100%);
 }
+.start-hero::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: var(--hero-fade);
+  pointer-events: none;
+}
+.start-hero > * { position: relative; z-index: 1; }
+.start-hero::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: var(--hero-fade);
+  pointer-events: none;
+}
+/* Kopfzeile und Schriftzug muessen ueber dem Verlauf liegen. */
+.start-hero > * { position: relative; z-index: 1; }
 /* Der Verlauf nach unten ist hier ausnahmsweise erlaubt: er macht den Text
    darueber lesbar und blendet das Bild in den Hintergrund, statt es hart
    abzuschneiden. */
@@ -409,11 +442,13 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 .startseite-inhalt {
   position: relative;
   z-index: 1;
-  min-height: 100%;
   display: flex;
   flex-direction: column;
-  gap: var(--s5);
+  gap: var(--s4);
   padding: 0 var(--s4) var(--s5);
+  /* Der Schriftzug ruckt in den Verlauf hinein, damit Bild und Flaeche
+     ineinander uebergehen statt sich abzuloesen. */
+  margin-top: -52px;
 }
 
 .start-kopf {
@@ -429,7 +464,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 /* Der Schriftzug ueber dem Bild. Zwischen den beiden Zeilen liegt bewusst
    ein grosser Sprung: die kleine Zeile ist die Beschriftung, die grosse
    die Ansage. */
-.start-claim { margin: 0; padding: 8vh 0 var(--s2); }
+.start-claim { margin: 0; }
 .start-claim-klein {
   margin: 0 0 var(--s2);
   font-family: var(--schrift-display);
@@ -442,9 +477,9 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 .start-claim-gross {
   margin: 0;
   font-family: var(--schrift-display);
-  font-size: 46px;
+  font-size: clamp(30px, 10.5vw, 48px);
   font-weight: 700;
-  line-height: 0.98;
+  line-height: 0.96;
   letter-spacing: -0.01em;
   text-shadow: 0 2px 18px rgba(0,0,0,0.55);
 }

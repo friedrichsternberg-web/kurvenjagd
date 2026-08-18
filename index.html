@@ -38,10 +38,10 @@
        durchgehend alte Version, weil die Seite dann Elemente enthält, die
        das Skript noch gar nicht kennt.
 
-       Für den Browser ist "app.js?v=8" eine andere Adresse als "app.js?v=7",
+       Für den Browser ist "app.js?v=9" eine andere Adresse als "app.js?v=8",
        er holt sie also frisch. Wichtig: BEI JEDER VERÖFFENTLICHUNG die Zahl
        an allen drei Stellen um eins erhöhen. -->
-  <link rel="stylesheet" href="style.css?v=8">
+  <link rel="stylesheet" href="style.css?v=9">
 </head>
 <body>
 
@@ -108,11 +108,12 @@
        Vorlage bleiben bewusst weg - es gibt nur, was auch funktioniert. -->
   <div id="startMenu" class="start-screen startseite">
 
-    <!-- Reine Bildebene, nicht anklickbar. Liegt unter dem Inhalt. -->
-    <div class="start-hero" aria-hidden="true"></div>
-
-    <div class="startseite-inhalt">
-
+    <!-- Der Bildbereich enthaelt Kopfzeile und Schriftzug, damit beide
+         garantiert AUF dem Bild sitzen und nicht daneben rutschen, wenn
+         sich die Bildschirmhoehe aendert. Seine Hoehe folgt dem
+         Seitenverhaeltnis des Fotos (siehe .start-hero in style.css) -
+         dadurch wird die Maschine nie angeschnitten. -->
+    <div class="start-hero">
       <header class="start-kopf">
         <div>
           <h1 class="brand-title">Kurvenjagd</h1>
@@ -123,6 +124,14 @@
         </button>
       </header>
 
+    </div>
+
+    <div class="startseite-inhalt">
+
+      <!-- Der Schriftzug steht UNTER dem Bild, nicht darauf. Grund: Auf dem
+           Foto sitzt die Maschine mittig, es gibt also keine ruhige Ecke
+           fuer Text. Im Verlauf darunter liegt er frei und das Motorrad
+           bleibt unverdeckt. -->
       <div class="start-claim">
         <p class="start-claim-klein">Mehr Kurven. Mehr Freiheit.</p>
         <p class="start-claim-gross">Dein Ride.<br>Deine App.</p>
@@ -626,9 +635,9 @@
     </button>
   </nav>
 
-  <script src="app.js?v=8"></script>
+  <script src="app.js?v=9"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=8"></script>
+  <script src="konto.js?v=9"></script>
 </body>
 </html>
