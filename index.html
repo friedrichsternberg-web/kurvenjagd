@@ -38,10 +38,10 @@
        durchgehend alte Version, weil die Seite dann Elemente enthält, die
        das Skript noch gar nicht kennt.
 
-       Für den Browser ist "app.js?v=11" eine andere Adresse als "app.js?v=10",
+       Für den Browser ist "app.js?v=12" eine andere Adresse als "app.js?v=11",
        er holt sie also frisch. Wichtig: BEI JEDER VERÖFFENTLICHUNG die Zahl
        an allen drei Stellen um eins erhöhen. -->
-  <link rel="stylesheet" href="style.css?v=11">
+  <link rel="stylesheet" href="style.css?v=12">
 </head>
 <body>
 
@@ -108,11 +108,14 @@
        Vorlage bleiben bewusst weg - es gibt nur, was auch funktioniert. -->
   <div id="startMenu" class="start-screen startseite">
 
-    <!-- Der Bildbereich enthaelt Kopfzeile und Schriftzug, damit beide
-         garantiert AUF dem Bild sitzen und nicht daneben rutschen, wenn
-         sich die Bildschirmhoehe aendert. Seine Hoehe folgt dem
-         Seitenverhaeltnis des Fotos (siehe .start-hero in style.css) -
-         dadurch wird die Maschine nie angeschnitten. -->
+    <!-- Der Bildbereich traegt Kopfzeile UND Schriftzug. Beides liegt auf
+         dem Foto, so wie in der Vorlage - das spart die Hoehe, die der
+         Schriftzug sonst darunter braeuchte, und genau daran scheiterte
+         vorher das Ziel "ohne Scrollen".
+
+         Moeglich wird das durch den Zuschnitt: Die Maschine sitzt rechts,
+         links bleibt Strasse und Mauer frei. Darauf steht der Text, ohne
+         etwas zu verdecken. -->
     <div class="start-hero">
       <header class="start-kopf">
         <div>
@@ -124,18 +127,13 @@
         </button>
       </header>
 
-    </div>
-
-    <div class="startseite-inhalt">
-
-      <!-- Der Schriftzug steht UNTER dem Bild, nicht darauf. Grund: Auf dem
-           Foto sitzt die Maschine mittig, es gibt also keine ruhige Ecke
-           fuer Text. Im Verlauf darunter liegt er frei und das Motorrad
-           bleibt unverdeckt. -->
       <div class="start-claim">
         <p class="start-claim-klein">Mehr Kurven. Mehr Freiheit.</p>
         <p class="start-claim-gross">Dein Ride.<br>Deine App.</p>
       </div>
+    </div>
+
+    <div class="startseite-inhalt">
 
       <div class="kachel-raster">
         <button class="kachel" id="btnStartPlaner" style="--kachel-bild: url('img/kacheln/routenplaner.jpg')">
@@ -635,9 +633,9 @@
     </button>
   </nav>
 
-  <script src="app.js?v=11"></script>
+  <script src="app.js?v=12"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=11"></script>
+  <script src="konto.js?v=12"></script>
 </body>
 </html>
