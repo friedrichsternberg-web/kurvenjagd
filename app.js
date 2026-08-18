@@ -2992,6 +2992,12 @@ document.querySelectorAll('.nav-tab').forEach(knopf => {
   });
 });
 
+// Der runde Knopf oben rechts fuehrt auf denselben Weg wie der Textlink
+// unten - es gibt nur eine Stelle, an der das Konto geoeffnet wird.
+document.getElementById('btnKontoRund').addEventListener('click', () => {
+  document.getElementById('btnKontoAnmelden').click();
+});
+
 document.getElementById('btnStartPlaner').addEventListener('click', zeigePlaner);
 document.getElementById('btnStartTouren').addEventListener('click', zeigeMeineTouren);
 document.getElementById('btnTourenZurueck').addEventListener('click', zeigeStartmenü);

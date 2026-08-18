@@ -38,10 +38,10 @@
        durchgehend alte Version, weil die Seite dann Elemente enthält, die
        das Skript noch gar nicht kennt.
 
-       Für den Browser ist "app.js?v=7" eine andere Adresse als "app.js?v=6",
+       Für den Browser ist "app.js?v=8" eine andere Adresse als "app.js?v=7",
        er holt sie also frisch. Wichtig: BEI JEDER VERÖFFENTLICHUNG die Zahl
        an allen drei Stellen um eins erhöhen. -->
-  <link rel="stylesheet" href="style.css?v=7">
+  <link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
 
@@ -98,49 +98,74 @@
   </svg>
 
   <!-- ===== Startbildschirm =====
-       Aufbau bewusst anders als vorher: Frueher fuellte das Foto den
-       ganzen Hintergrund und eine durchscheinende Karte schwebte darauf.
-       Diese Kombination ist der Baustein, an dem man neue Apps sofort als
-       "irgendwie alle gleich" erkennt. Jetzt hat das Foto einen festen
-       Platz mit harter Unterkante, darunter liegen die Inhalte auf ruhiger
-       Flaeche.
+       Aufbau nach dem Vorbild aus "Design Inspro": Das Motorradbild ist
+       nicht ein Block neben dem Inhalt, sondern liegt HINTER allem und
+       verlaeuft nach unten ins Dunkle. Der Inhalt schwimmt darauf.
 
-       Die Kacheln sind absichtlich NICHT alle gleich gross: der
-       Routenplaner ist die Hauptsache und nimmt die volle Breite, die
-       beiden anderen teilen sich die Zeile darunter. Drei gleich grosse
-       Karten nebeneinander waeren wieder der Einheitslook. ===== -->
+       Die Kacheln tragen selbst je ein Bild und liegen wie geschliffene
+       Glasplatten darueber: helle Lichtkante oben, Schatten unten, ein
+       weicher Glanz quer darueber. Community und "Mehr entdecken" aus der
+       Vorlage bleiben bewusst weg - es gibt nur, was auch funktioniert. -->
   <div id="startMenu" class="start-screen startseite">
+
+    <!-- Reine Bildebene, nicht anklickbar. Liegt unter dem Inhalt. -->
+    <div class="start-hero" aria-hidden="true"></div>
+
     <div class="startseite-inhalt">
 
-      <div class="start-bild">
-        <div class="start-bild-text">
+      <header class="start-kopf">
+        <div>
           <h1 class="brand-title">Kurvenjagd</h1>
-          <p class="start-claim">Mehr Kurven. Mehr Freiheit.</p>
+          <p class="sub">Routenplaner v0.1</p>
         </div>
+        <button class="glas-rund" id="btnKontoRund" title="Konto" aria-label="Konto">
+          <svg class="ic gross"><use href="#icon-profil"></use></svg>
+        </button>
+      </header>
+
+      <div class="start-claim">
+        <p class="start-claim-klein">Mehr Kurven. Mehr Freiheit.</p>
+        <p class="start-claim-gross">Dein Ride.<br>Deine App.</p>
       </div>
 
       <div class="kachel-raster">
-        <button class="kachel kachel--breit" id="btnStartPlaner">
-          <svg class="ic gross"><use href="#icon-route"></use></svg>
-          <span class="kachel-titel">Routenplaner</span>
-          <span class="kachel-sub">Finde deine n&auml;chste Traumstrecke.</span>
+        <button class="kachel" id="btnStartPlaner" style="--kachel-bild: url('img/kacheln/routenplaner.jpg')">
+          <span class="kachel-inhalt">
+            <svg class="ic gross kachel-symbol"><use href="#icon-route"></use></svg>
+            <span class="kachel-text">
+              <span class="kachel-titel">Routenplaner</span>
+              <span class="kachel-sub">Finde deine n&auml;chste Traumstrecke.</span>
+            </span>
+          </span>
+          <span class="kachel-pfeil" aria-hidden="true">&rarr;</span>
         </button>
-        <button class="kachel" id="btnStartRide">
-          <svg class="ic gross"><use href="#icon-aufnahme"></use></svg>
-          <span class="kachel-titel">Ride aufzeichnen</span>
-          <span class="kachel-sub">Deine Fahrt in Zahlen.</span>
+
+        <button class="kachel" id="btnStartRide" style="--kachel-bild: url('img/kacheln/aufzeichnen.jpg')">
+          <span class="kachel-inhalt">
+            <svg class="ic gross kachel-symbol"><use href="#icon-aufnahme"></use></svg>
+            <span class="kachel-text">
+              <span class="kachel-titel">Ride aufzeichnen</span>
+              <span class="kachel-sub">Deine Fahrt. Deine Daten.</span>
+            </span>
+          </span>
+          <span class="kachel-pfeil" aria-hidden="true">&rarr;</span>
         </button>
-        <button class="kachel" id="btnStartTouren">
-          <svg class="ic gross"><use href="#icon-touren"></use></svg>
-          <span class="kachel-titel">Meine Touren</span>
-          <span class="kachel-sub">Alles auf einen Blick.</span>
+
+        <button class="kachel kachel--breit" id="btnStartTouren" style="--kachel-bild: url('img/kacheln/touren.jpg')">
+          <span class="kachel-inhalt">
+            <svg class="ic gross kachel-symbol"><use href="#icon-touren"></use></svg>
+            <span class="kachel-text">
+              <span class="kachel-titel">Meine Touren</span>
+              <span class="kachel-sub">Alle deine Fahrten auf einen Blick.</span>
+            </span>
+          </span>
+          <span class="kachel-pfeil" aria-hidden="true">&rarr;</span>
         </button>
       </div>
 
-      <!-- Statuszeile zum Konto. Bewusst klein und ganz unten: Anmelden
-           ist freiwillig, wer nur eine Route planen will, soll nicht erst
-           an einer Anmeldemaske vorbei. Ohne eingetragene Server-Zugangs-
-           daten blendet konto.js die ganze Zeile aus. -->
+      <!-- Statuszeile zum Konto. Anmelden ist freiwillig, deshalb steht sie
+           klein am Ende und nicht im Weg. Ohne eingetragene Server-
+           Zugangsdaten blendet konto.js die ganze Zeile aus. -->
       <div id="kontoZeile" class="konto-zeile" hidden>
         <div id="kontoAbgemeldet">
           <button class="linkbtn" id="btnKontoAnmelden">Anmelden oder Konto anlegen</button>
@@ -601,9 +626,9 @@
     </button>
   </nav>
 
-  <script src="app.js?v=7"></script>
+  <script src="app.js?v=8"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=7"></script>
+  <script src="konto.js?v=8"></script>
 </body>
 </html>

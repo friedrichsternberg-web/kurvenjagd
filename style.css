@@ -3,22 +3,35 @@
    Kurvenjagd - Aussehen der App
    CSS beschreibt nur, WIE die Elemente aus index.html aussehen.
 
-   DESIGNSPRACHE (festgelegt am 18.08.2026)
-   Anspruch war: modern und grafisch hochwertig, aber ohne den
-   Einheitslook, den viele neue Apps gerade haben. Daraus folgen ein paar
-   bewusste Verbote. Wer spaeter etwas dazubaut, sollte sie kennen:
+   DESIGNSPRACHE (Stand 18.08.2026, abends geaendert)
+   Modern, grafisch hochwertig, dynamisch. Die Richtung ist "Liquid Glass":
+   Flaechen wirken wie geschliffenes Glas ueber dem Bild darunter - mit
+   einer hellen Lichtkante oben, einem Schatten unten und einem weichen
+   Glanz quer darueber. Das Motorradbild ist dabei nicht Beiwerk, sondern
+   Untergrund: es liegt hinter dem Inhalt und scheint durch.
 
-     1. Kein backdrop-filter, kein Milchglas. Flaechen sind matt.
-        Motorradbekleidung ist auch matt.
-     2. Farbverlaeufe nur, wo sie Daten bedeuten. Der Kurvigkeitsbalken
-        (gruen zu gelb zu orange) darf einen haben, weil er eine Skala
-        ist. Ein Knopf nicht.
-     3. Kein Verlaufstext, kein Leuchten, keine Schimmerkanten.
-     4. Keine Emoji als Symbole - dafuer gibt es die SVG-Sammlung in
+   ACHTUNG, das war heute Mittag noch andersherum: Da stand hier ein
+   Verbot von backdrop-filter, weil Milchglas als Erkennungszeichen
+   austauschbarer Apps galt. Friedrich hat sich das angesehen und die
+   entgegengesetzte Richtung gewaehlt. Die Regel steht deshalb nicht mehr
+   im Weg, aber der Unterschied bleibt wichtig:
+
+     Milchglas von der Stange = weisser Schleier ueber Farbverlaufblasen,
+     ueberall gleich, ohne Bezug zum Inhalt.
+
+     Liquid Glass = eine Linse ueber etwas Echtem. Das Bild darunter muss
+     erkennbar bleiben, die Kanten fangen Licht, und beim Antippen gibt
+     die Flaeche spuerbar nach.
+
+   Was weiterhin gilt:
+
+     1. Farbverlaeufe nur, wo sie Daten bedeuten oder Text lesbar machen.
+        Der Kurvigkeitsbalken darf einen, ein Knopf nicht.
+     2. Kein Verlaufstext, kein Neonleuchten.
+     3. Keine Emoji als Symbole - dafuer gibt es die SVG-Sammlung in
         index.html.
-     5. Radien bleiben klein (6 bis 16px). Pillenformen nur bei echten
-        Schaltern.
-     6. Tiefe entsteht ueber 1px-Kanten, nicht ueber weiche Schatten.
+     4. Bedienelemente ohne Bild bleiben matt. Glas ist teuer, es wirkt
+        nur, wenn es nicht ueberall klebt.
 
    Orange ist die EINZIGE Signalfarbe und wird sparsam eingesetzt. Wenn
    alles orange ist, bedeutet orange nichts mehr.
@@ -173,7 +186,31 @@ html, body {
 .ic.klein { width: 16px; height: 16px; stroke-width: 1.8; }
 
 /* Knoepfe mit Symbol brauchen etwas Abstand dazwischen. */
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--s2); }
+.btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: var(--r-sm);
+  /* Der Verlauf ist hier keine Deko, sondern Woelbung: oben etwas heller,
+     unten etwas dunkler. Zusammen mit der Lichtkante wirkt der Knopf
+     dadurch koerperlich statt aufgemalt. */
+  background: linear-gradient(to bottom, #FF7A1A, var(--accent) 55%, #EA5F00);
+  color: var(--accent-ink);
+  font-family: var(--schrift-text);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.25),
+    0 4px 14px rgba(255, 107, 0, 0.25);
+  transition: transform 0.14s cubic-bezier(0.2,0.8,0.2,1), filter 0.14s ease;
+}
+.btn:active { transform: scale(0.97); }
 
 /* ---------- Startmenü & "Meine Touren" ----------
    Beide sind einfache, zentrierte Vollbild-Ansichten - der Einstieg vor
@@ -253,8 +290,16 @@ html, body {
   display: flex;
   height: calc(var(--nav-h) + env(safe-area-inset-bottom));
   padding-bottom: env(safe-area-inset-bottom);
-  background: var(--surface);
-  border-top: 1px solid var(--line);
+  /* Glas statt matter Flaeche: Auf dem Startbildschirm liegt das Foto
+     darunter und scheint verwischt durch, auf den Kartenbildschirmen die
+     Karte. Genau davon lebt der Effekt - deshalb hier eine sehr dunkle
+     Fuellung statt einer hellen, sonst waere die Leiste ueber heller
+     Karte nicht mehr zu lesen. */
+  background: rgba(14, 15, 18, 0.72);
+  backdrop-filter: blur(24px) saturate(170%);
+  -webkit-backdrop-filter: blur(24px) saturate(170%);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 .haupt-nav[hidden] { display: none; }
 
@@ -270,14 +315,14 @@ html, body {
   color: var(--muted);
   cursor: pointer;
   padding: 0;
-  /* Die Beschriftung in der schmalen Schrift, damit auch "Aufzeichnen"
-     auf einem schmalen Handy in eine Zeile passt. */
   font-family: var(--schrift-display);
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  transition: color 0.15s ease, transform 0.15s cubic-bezier(0.2,0.8,0.2,1);
 }
+.nav-tab:active { transform: scale(0.92); }
 .nav-tab .ic { width: 22px; height: 22px; }
 .nav-tab.aktiv { color: var(--accent); }
 .nav-tab:hover:not(.aktiv) { color: var(--text); }
@@ -285,97 +330,233 @@ html, body {
 /* Solange die Leiste sichtbar ist, halten alle Bildschirme unten Platz frei. */
 body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 
+/* ---------- Glas ----------
+   Das Grundrezept, aus dem alle Glasflaechen gebaut sind. Vier Schichten
+   uebereinander, jede mit einer Aufgabe:
+
+     1. Eine sehr helle, fast durchsichtige Fuellung. Sie faerbt nichts,
+        sie hebt nur an.
+     2. backdrop-filter: verwischt und saettigt, was DAHINTER liegt. Das
+        ist der eigentliche Glaseffekt - ohne etwas dahinter passiert
+        nichts, deshalb sitzt Glas hier immer ueber dem Bild.
+     3. Zwei innere Linien: oben eine helle Lichtkante, unten eine dunkle.
+        Genau das laesst eine Flaeche wie eine Scheibe mit Dicke wirken
+        statt wie ein aufgemalter Kasten.
+     4. Ein weicher Schlagschatten nach aussen, damit sie abhebt.
+
+   -webkit-backdrop-filter muss mit dabeistehen, sonst bleibt der Effekt
+   auf iPhones aus - und das ist die Hauptzielgruppe. */
+.glas {
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.30),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.30),
+    0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+/* Runder Glasknopf, z.B. fuer das Konto oben rechts. */
+.glas-rund {
+  width: 46px; height: 46px;
+  flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 6px 18px rgba(0, 0, 0, 0.4);
+  transition: transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.16s ease;
+}
+.glas-rund:hover { background: rgba(255, 255, 255, 0.16); }
+.glas-rund:active { transform: scale(0.94); }
+
 /* ---------- Startbildschirm ----------
-   Ein senkrechter Aufbau: Bildblock oben, Inhalte darunter. Der Bildblock
-   hat eine harte Unterkante, kein weicher Verlauf ins Nichts - der Verlauf
-   ueber dem Foto ist genau der Griff, der ueberall gleich aussieht. Nur
-   direkt hinter der Schrift liegt ein Schatten, damit sie lesbar bleibt. */
-.startseite { display: block; overflow-y: auto; text-align: left; }
+   Die Bildebene liegt fest hinter dem Inhalt und verlaeuft nach unten ins
+   Dunkle. Sie scrollt NICHT mit (position: absolute im scrollenden
+   Container waere mitgescrollt) - dadurch bleibt der Eindruck, dass der
+   Inhalt ueber dem Bild schwebt. */
+.startseite { display: block; overflow-y: auto; text-align: left; position: relative; }
+
+.start-hero {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 68vh;
+  background: url('img/start-hintergrund.jpg') 55% 38% / cover no-repeat;
+  pointer-events: none;
+  z-index: 0;
+}
+/* Der Verlauf nach unten ist hier ausnahmsweise erlaubt: er macht den Text
+   darueber lesbar und blendet das Bild in den Hintergrund, statt es hart
+   abzuschneiden. */
+.start-hero::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom,
+    rgba(14,15,18,0.62) 0%,
+    rgba(14,15,18,0.28) 22%,
+    rgba(14,15,18,0.22) 44%,
+    rgba(14,15,18,0.78) 74%,
+    var(--bg) 100%);
+}
+
 .startseite-inhalt {
+  position: relative;
+  z-index: 1;
   min-height: 100%;
   display: flex;
   flex-direction: column;
   gap: var(--s5);
-  padding-bottom: var(--s5);
+  padding: 0 var(--s4) var(--s5);
 }
 
-.start-bild {
-  position: relative;
-  height: 42vh;
-  min-height: 240px;
-  background: url('img/start-hintergrund.jpg') 55% 42% / cover no-repeat;
+.start-kopf {
   display: flex;
-  align-items: flex-end;
-  border-bottom: 2px solid var(--accent);
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s3);
+  padding-top: max(var(--s5), env(safe-area-inset-top) + var(--s3));
 }
-.start-bild-text {
-  padding: var(--s5) var(--s4);
-  padding-top: var(--s6);
-  width: 100%;
-  /* Nur ein Schatten unter der Schrift, keine Flaeche ueber dem ganzen Bild. */
-  background: linear-gradient(to top, rgba(14,15,18,0.92), rgba(14,15,18,0));
-}
-.start-claim {
-  margin: var(--s1) 0 0;
+.start-kopf .brand-title { font-size: 28px; text-shadow: 0 2px 12px rgba(0,0,0,0.6); }
+.start-kopf .sub { color: rgba(255,255,255,0.72); text-shadow: 0 1px 8px rgba(0,0,0,0.6); }
+
+/* Der Schriftzug ueber dem Bild. Zwischen den beiden Zeilen liegt bewusst
+   ein grosser Sprung: die kleine Zeile ist die Beschriftung, die grosse
+   die Ansage. */
+.start-claim { margin: 0; padding: 8vh 0 var(--s2); }
+.start-claim-klein {
+  margin: 0 0 var(--s2);
   font-family: var(--schrift-display);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--accent);
+  letter-spacing: 0.22em;
+  color: rgba(255,255,255,0.82);
+}
+.start-claim-gross {
+  margin: 0;
+  font-family: var(--schrift-display);
+  font-size: 46px;
+  font-weight: 700;
+  line-height: 0.98;
+  letter-spacing: -0.01em;
+  text-shadow: 0 2px 18px rgba(0,0,0,0.55);
 }
 
 /* ---------- Kacheln ----------
-   Zwei Spalten, die erste Kachel ueber beide. Bewusst ungleich: drei
-   gleich grosse Karten nebeneinander sind das Erkennungszeichen des
-   Einheitslooks, und der Routenplaner IST wichtiger als der Rest. */
+   Jede Kachel traegt ihr eigenes Bild (ueber die Marke --kachel-bild aus
+   dem HTML) und liegt als Glasplatte darauf. Der Aufbau von hinten nach
+   vorn: Bild, dunkler Schleier fuer die Lesbarkeit, Glanzstreifen, Inhalt.
+
+   Bild und Schleier stecken in ::before und ::after, damit das HTML nicht
+   mit reinen Gestaltungselementen zugestellt wird. */
 .kachel-raster {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--s3);
-  padding: 0 var(--s4);
 }
 .kachel {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;   /* Symbol oben, Text unten - dadurch stehen
-                                       beide Kacheln auf einer Linie, auch wenn
-                                       eine Ueberschrift umbricht */
-  gap: var(--s2);
+  justify-content: flex-end;
+  min-height: 200px;
   padding: var(--s4);
-  min-height: 118px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-md);
-  background: var(--surface);
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: var(--surface-2);
   color: var(--text);
   text-align: left;
   cursor: pointer;
-  transition: border-color 0.12s ease, background 0.12s ease;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+    0 12px 32px rgba(0, 0, 0, 0.5);
+  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1),
+              box-shadow 0.18s ease;
 }
-.kachel:hover { border-color: var(--muted); background: var(--surface-2); }
-.kachel:active { transform: translateY(1px); }
-.kachel .ic { color: var(--accent); }
-.kachel--breit {
-  grid-column: 1 / -1;
-  min-height: 0;
-  /* Die Hauptkachel bekommt als einzige die Signalfarbe als Flaeche. */
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--accent-ink);
+
+/* Schicht 1 und 2: das Bild, darueber der Schleier. Der Schleier ist unten
+   links am dichtesten - genau dort steht der Text. */
+.kachel::before {
+  content: "";
+  position: absolute; inset: 0;
+  z-index: -2;
+  background-image: var(--kachel-bild);
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
-.kachel--breit:hover { background: var(--accent-dk); border-color: var(--accent-dk); }
-.kachel--breit .ic { color: var(--accent-ink); }
+.kachel::after {
+  content: "";
+  position: absolute; inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(to top, rgba(10,11,14,0.94) 0%, rgba(10,11,14,0.55) 42%, rgba(10,11,14,0.12) 100%),
+    linear-gradient(115deg, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.05) 26%, rgba(255,255,255,0) 52%);
+}
+
+/* Beim Antippen gibt die Kachel nach und das Bild darunter zieht leicht
+   heran. Diese Verzoegerung ist das, was den Eindruck von Tiefe erzeugt:
+   Glas und Bild bewegen sich nicht gleich schnell. */
+.kachel:hover { transform: translateY(-2px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.34), inset 0 -1px 0 rgba(0,0,0,0.35), 0 18px 40px rgba(0,0,0,0.55); }
+.kachel:hover::before { transform: scale(1.06); }
+.kachel:active { transform: scale(0.985); }
+
+.kachel--breit { grid-column: 1 / -1; min-height: 160px; }
+.kachel--breit .kachel-titel { font-size: clamp(18px, 5.6vw, 24px); }
+
+.kachel-inhalt {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+  min-width: 0;              /* ohne das bricht langer Text nicht um, sondern
+                                schiebt die Kachel breiter */
+}
+.kachel-symbol {
+  color: var(--accent);
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
+}
+.kachel-text { display: flex; flex-direction: column; gap: 3px; }
 .kachel-titel {
   font-family: var(--schrift-display);
-  font-size: 19px;
+  /* clamp() heisst: mindestens 13px, hoechstens 18px, dazwischen 4.1% der
+     Bildschirmbreite. Damit passt "ROUTENPLANER" auf ein iPhone SE genauso
+     in eine Zeile wie auf ein grosses Geraet - eine feste Groesse hatte hier
+     um genau einen Pixel nicht gereicht und das Wort zerrissen. */
+  font-size: clamp(13px, 4.1vw, 18px);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.02em;
-  line-height: 1.1;
+  letter-spacing: 0;
+  line-height: 1.08;
+  /* break-word statt anywhere: bricht nur, wenn ein einzelnes Wort wirklich
+     nicht passt. "anywhere" hatte mitten im Wort getrennt (ROUTENPL/ANER). */
+  overflow-wrap: break-word;
 }
-.kachel-sub { font-size: 13px; color: var(--muted); line-height: 1.35; margin-top: 2px; }
-.kachel--breit .kachel-sub { color: rgba(20,10,0,0.72); }
+.kachel-sub {
+  font-size: 13px;
+  color: rgba(255,255,255,0.72);
+  line-height: 1.35;
+  padding-right: 30px;   /* nur die Unterzeile laeuft in den Pfeil hinein */
+}
+
+.kachel-pfeil {
+  position: absolute;
+  right: var(--s4); bottom: var(--s4);
+  color: var(--accent);
+  font-size: 20px;
+  line-height: 1;
+  transition: transform 0.18s ease;
+}
+.kachel:hover .kachel-pfeil { transform: translateX(4px); }
 
 /* Bildschirme mit einer Liste statt eines Formulars: Inhalt oben statt
    senkrecht zentriert, und ueber die volle Breite. Ein Formular in der
@@ -408,7 +589,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
    schiebt sie an das untere Ende der Spalte, egal wie hoch der Rest ist. */
 .konto-zeile {
   margin-top: auto;
-  padding: 0 var(--s4);
+  padding-top: var(--s2);
   font-size: 13px;
   color: var(--muted);
   line-height: 1.6;
@@ -522,10 +703,15 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 #panel {
   width: 330px;
   flex: 0 0 330px;
-  background: var(--surface);
-  border-right: 1px solid var(--line);
   display: flex;
   flex-direction: column;
+  /* Glas ueber der Karte. Die Fuellung ist dunkel und nicht hell: darunter
+     liegt eine helle Landkarte, ein weisser Schleier waere unlesbar. */
+  background: rgba(14, 15, 18, 0.82);
+  backdrop-filter: blur(26px) saturate(150%);
+  -webkit-backdrop-filter: blur(26px) saturate(150%);
+  border-right: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.10);
 }
 
 /* Der eigentliche scrollende Inhalt - getrennt vom Griff, siehe oben. */
@@ -658,10 +844,12 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 /* ---------- Umschalter (Planungsart) ---------- */
 .segmented {
   display: flex;
-  background: var(--surface-2);
-  border-radius: var(--radius);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
   padding: 3px;
   gap: 3px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 .seg {
   flex: 1;
@@ -677,7 +865,11 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   letter-spacing: 0.05em;
   cursor: pointer;
 }
-.seg.active { background: var(--accent); color: var(--accent-ink); }
+.seg.active {
+  background: linear-gradient(to bottom, #FF7A1A, #EA5F00);
+  color: var(--accent-ink);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 8px rgba(0,0,0,0.35);
+}
 
 /* ---------- Kurvigkeits-Regler ---------- */
 /* -webkit-appearance/appearance entfernen die Browser-Standardoptik, damit
@@ -750,10 +942,15 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 }
 .btn:hover { background: var(--accent-dk); }
 .btn.ghost {
-  background: transparent;
-  border-color: var(--line);
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  border-color: rgba(255, 255, 255, 0.16);
   color: var(--text);
   font-weight: 500;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 3px 10px rgba(0, 0, 0, 0.3);
 }
 .btn.ghost:hover { border-color: var(--muted); background: var(--surface-2); color: var(--text); }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -833,13 +1030,16 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 /* ---------- Statistik ---------- */
 .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .stat {
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  border-radius: var(--r-sm);
+  background: linear-gradient(to bottom, rgba(255,255,255,0.055), rgba(255,255,255,0.015));
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 10px;
   padding: var(--s2) var(--s3);
   display: flex;
   flex-direction: column;
   gap: 2px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.22);
 }
 .stat .k {
   font-family: var(--schrift-display);
@@ -912,14 +1112,16 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 
 .ride-panel {
   flex: 0 0 auto;
-  max-height: 62dvh;
+  max-height: 55dvh;
   overflow-y: auto;
-  background: var(--surface);
-  border-top: 1px solid var(--line);
-  border-radius: 16px 16px 0 0;
-  padding: 16px 18px;
-  /* Abstand zur Home-Leiste des iPhones, sonst liegen die Knoepfe darunter */
-  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  padding: var(--s4);
+  padding-bottom: max(var(--s4), env(safe-area-inset-bottom));
+  background: rgba(14, 15, 18, 0.86);
+  backdrop-filter: blur(26px) saturate(150%);
+  -webkit-backdrop-filter: blur(26px) saturate(150%);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
 }
 /* Nach dem Beenden darf das Feld mehr Platz nehmen - dann ist die
    Auswertung wichtiger als die Karte. */
@@ -1072,14 +1274,17 @@ body.nav-modus #panel {
   position: absolute;
   top: 16px; left: 16px; right: 16px;
   z-index: 900;
-  background: var(--surface);
-  border: 1px solid var(--gps);
-  border-left-width: 3px;
-  border-radius: var(--r-md);
+  background: rgba(14, 15, 18, 0.80);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-left: 3px solid var(--gps);
+  border-radius: 14px;
   padding: var(--s3) var(--s4);
   display: flex;
   align-items: center;
   gap: var(--s4);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 10px 30px rgba(0,0,0,0.5);
 }
 /* Ohne diese Regel gewinnt "display: flex" oben gegen das hidden-Attribut -
    derselbe Fehler wie bei .busy weiter unten, also gleich mitgelöst. */
@@ -1175,15 +1380,18 @@ body.nav-modus #panel {
   position: absolute;
   top: 16px; left: 50%;
   transform: translateX(-50%);
-  background: var(--surface);
-  border: 1px solid var(--accent);
-  border-left-width: 3px;
+  background: rgba(14, 15, 18, 0.80);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-left: 3px solid var(--accent);
   color: var(--text);
   padding: 10px 14px;
-  border-radius: var(--r-sm);
+  border-radius: 12px;
   font-size: 14px;
   z-index: 1000;
   max-width: 80%;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 10px 30px rgba(0,0,0,0.5);
 }
 
 .busy {
