@@ -222,10 +222,42 @@ html, body {
   align-items: center;
   justify-content: center;
   text-align: center;
+  /* Konto, Passwort und "Meine Touren" haben kein eigenes Bild. Damit das
+     Glas darauf ueberhaupt etwas zu brechen hat, liegt hier eine sehr
+     dunkle, stark weichgezeichnete Fassung des Startfotos. Sie ist nur
+     360 Pixel breit und 2 KB gross - unscharf braucht keine Aufloesung,
+     und der Browser muss zur Laufzeit nichts rechnen. */
+  background:
+    linear-gradient(rgba(14,15,18,0.45), rgba(14,15,18,0.74)),
+    url('img/hintergrund-weich.jpg') center / cover no-repeat fixed;
 }
 .start-screen[hidden] { display: none; }
 
-.start-screen-inner { width: 320px; }
+.start-screen-inner {
+  width: 320px;
+  max-width: 100%;
+  /* Die Formulare liegen jetzt auf einer Glasplatte statt frei im Raum. */
+  padding: var(--s5);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.055);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.26),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.30),
+    0 16px 40px rgba(0, 0, 0, 0.5);
+}
+/* Auf Listenbildschirmen waere so eine Platte im Weg - dort ist die Liste
+   selbst aus Glas, siehe .saved-list li. */
+.listen-screen .start-screen-inner {
+  background: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 0;
+  box-shadow: none;
+  border-radius: 0;
+}
 .start-screen-inner .sub { margin: 0 0 32px; }
 .start-screen-inner h2 {
   margin: 0 0 var(--s4);
@@ -382,7 +414,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
    Dunkle. Sie scrollt NICHT mit (position: absolute im scrollenden
    Container waere mitgescrollt) - dadurch bleibt der Eindruck, dass der
    Inhalt ueber dem Bild schwebt. */
-.startseite { display: block; overflow-y: auto; text-align: left; position: relative; }
+.startseite { background: var(--bg); display: block; overflow-y: auto; text-align: left; position: relative; }
 
 .start-hero {
   position: relative;
@@ -645,12 +677,13 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 .konto-formular label { font-size: 12px; color: var(--muted); }
 .konto-formular input {
   padding: 11px;
-  border-radius: var(--radius);
-  border: 1px solid var(--line);
-  background: var(--surface-2);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.28);
   color: var(--text);
   font: inherit;
   margin-bottom: 6px;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.35);
 }
 .konto-formular input:focus { outline: none; border-color: var(--accent); }
 .konto-formular .btn { margin-top: 6px; padding: 13px; font-size: 16px; }
@@ -670,13 +703,14 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
    Gedämpft und nicht rot: Es ist kein Fehler, nur eine Einordnung. */
 .kurz-hinweis {
   margin: 0 0 14px;
-  padding: 9px 11px;
-  border-radius: var(--radius);
-  border: 1px solid var(--line);
-  background: var(--surface-2);
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--muted);
   font-size: 13px;
   line-height: 1.45;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.16);
 }
 .kurz-hinweis[hidden] { display: none; }
 
@@ -833,12 +867,13 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 .search-input {
   width: 100%;
   padding: 11px 12px;
-  border-radius: var(--r-sm);
-  border: 1px solid var(--line);
-  background: var(--surface-2);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.28);
   color: var(--text);
   font-family: var(--schrift-text);
   font-size: 15px;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.35);
 }
 .search-input:focus { outline: none; border-color: var(--accent); }
 .richtung-select { margin-top: 8px; cursor: pointer; }
@@ -846,15 +881,18 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   position: absolute;
   top: calc(100% + 4px);
   left: 0; right: 0;
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  border-radius: 8px;
+  background: rgba(20, 22, 27, 0.88);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
   list-style: none;
   margin: 0;
   padding: 4px;
   max-height: 220px;
   overflow-y: auto;
   z-index: 500;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 12px 30px rgba(0,0,0,0.5);
 }
 .search-results li {
   padding: 8px 9px;
@@ -1016,14 +1054,26 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 7px 9px;
-  background: var(--surface-2);
-  border-radius: 8px;
-  margin-bottom: 5px;
+  padding: 9px 11px;
+  border-radius: 12px;
+  margin-bottom: 6px;
   font-size: 13px;
+  background: rgba(255, 255, 255, 0.055);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.22);
+  transition: background 0.14s ease, transform 0.14s cubic-bezier(0.2,0.8,0.2,1);
 }
+.saved-list li:active { transform: scale(0.985); }
 .wp-list li.empty, .saved-list li.empty {
   background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 0;
+  box-shadow: none;
   color: var(--muted);
   font-size: 12px;
   padding: 4px 0;
@@ -1043,7 +1093,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 .wp-coord { color: var(--muted); font-variant-numeric: tabular-nums; }
 
 .saved-list li { cursor: pointer; justify-content: space-between; align-items: center; gap: var(--s3); }
-.saved-list li:hover { background: var(--surface-2); }
+.saved-list li:hover { background: rgba(255, 255, 255, 0.10); }
 .saved-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .saved-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
 .saved-marke { flex: 0 0 auto; display: flex; color: var(--accent); }
@@ -1125,8 +1175,10 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   width: 100%;
   height: 90px;
   margin-top: 6px;
-  background: var(--surface-2);
-  border-radius: 8px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35);
 }
 .hoehenprofil-fläche { opacity: 0.28; }
 .hoehenprofil-linie { fill: none; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
@@ -1211,10 +1263,12 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   width: 100%;
   aspect-ratio: 1;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 12px;
   display: block;
   cursor: pointer;
   background: var(--surface-2);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 4px 12px rgba(0,0,0,0.4);
 }
 /* Kleines Kreuz zum Entfernen - nur dort, wo Fotos noch bearbeitbar sind. */
 .foto-loeschen {
@@ -1236,7 +1290,9 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   position: fixed;
   inset: 0;
   z-index: 2000;
-  background: rgba(10, 11, 13, 0.94);
+  background: rgba(10, 11, 13, 0.78);
+  backdrop-filter: blur(30px) saturate(140%);
+  -webkit-backdrop-filter: blur(30px) saturate(140%);
   display: flex;
   align-items: center;
   justify-content: center;
