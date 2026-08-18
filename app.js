@@ -384,7 +384,9 @@ async function runSearch(query) {
 
 // Steht immer ganz oben in der Vorschlagsliste, auch während einer Suche -
 // so wie bei Google Maps "Ihr Standort" immer als erste Option auftaucht.
-const STANDORT_OPTION_HTML = '<li class="standort-option" data-standort="1">&#128205; Aktueller Standort</li>';
+const STANDORT_OPTION_HTML = '<li class="standort-option" data-standort="1">'
+  + '<svg class="ic klein" aria-hidden="true"><use href="#icon-standort"></use></svg>'
+  + '<span>Aktueller Standort</span></li>';
 
 function renderSearchResults(results) {
   const list = document.getElementById('searchResults');
@@ -1861,7 +1863,7 @@ function setPoiAktiv(aktiv) {
 function zeichnePassMarker(pass) {
   const icon = L.divIcon({
     className: '',
-    html: `<div class="poi-marker pass">⛰</div>`,
+    html: `<div class="poi-marker pass">${symbol('berg', 'klein')}</div>`,
     iconSize: [24, 24],
     iconAnchor: [12, 12],
   });
@@ -2353,7 +2355,7 @@ function zeichneFotoMarker() {
 
   ride.fotos.filter(f => Number.isFinite(f.lat)).forEach(f => {
     const marker = L.marker([f.lat, f.lon], {
-      icon: L.divIcon({ className: '', html: '<div class="foto-marker">📷</div>', iconSize: [26, 26], iconAnchor: [13, 13] }),
+      icon: L.divIcon({ className: '', html: `<div class="foto-marker">${symbol('kamera', 'klein')}</div>`, iconSize: [26, 26], iconAnchor: [13, 13] }),
     }).addTo(karte);
     marker.on('click', () => zeigeFotoGross(f.bild));
     ride.fotoMarker.push(marker);
@@ -2515,7 +2517,7 @@ function gespeicherteRouteHtml(r) {
   // Aufgezeichnete Ausfahrten stehen in derselben Liste wie geplante
   // Routen - das kleine Motorrad-Zeichen macht auf einen Blick klar,
   // welche davon wirklich gefahren wurde.
-  const marke = r.aufgezeichnet ? '<span class="saved-marke" title="Aufgezeichnete Ausfahrt">🏍</span>' : '';
+  const marke = r.aufgezeichnet ? `<span class="saved-marke" title="Aufgezeichnete Ausfahrt">${symbol('motorrad', 'klein')}</span>` : '';
   return `
     <li data-id="${r.id}">
       ${marke}
@@ -2677,6 +2679,15 @@ function setCurveLevel(level) {
   document.getElementById('curveSlider').value = level;
   document.getElementById('modeHint').textContent = curveLevelHint(level);
 }
+
+// Baut ein Symbol aus der Sammlung in index.html. Das <use> verweist auf
+// eines der dortigen <symbol>-Elemente, deshalb steht jede Zeichnung nur
+// einmal im Dokument, egal wie oft sie auftaucht.
+// zusatz nimmt weitere Klassen entgegen, z.B. 'klein' oder 'gross'.
+function symbol(name, zusatz = '') {
+  return `<svg class="ic ${zusatz}" aria-hidden="true"><use href="#icon-${name}"></use></svg>`;
+}
+
 
 /* --- 9b. Startmenü ---------------------------------------------------------
    Sechs Bildschirme, immer ist genau einer sichtbar: Startmenü, "Meine

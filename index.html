@@ -38,12 +38,64 @@
        durchgehend alte Version, weil die Seite dann Elemente enthält, die
        das Skript noch gar nicht kennt.
 
-       Für den Browser ist "app.js?v=5" eine andere Adresse als "app.js?v=4",
+       Für den Browser ist "app.js?v=6" eine andere Adresse als "app.js?v=4",
        er holt sie also frisch. Wichtig: BEI JEDER VERÖFFENTLICHUNG die Zahl
        an allen drei Stellen um eins erhöhen. -->
-  <link rel="stylesheet" href="style.css?v=5">
+  <link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
+
+  <!-- ===== Symbolsammlung =====
+       Alle Symbole der App an einer Stelle, als SVG statt als Emoji.
+       Warum nicht Emoji: Sie sehen auf jedem Geraet anders aus (Apple,
+       Android und Windows zeichnen jedes Emoji selbst), lassen sich nicht
+       einfaerben und wirken zusammengesucht. Diese hier sind alle im
+       gleichen Raster (24x24) und in der gleichen Strichstaerke gezeichnet
+       und nehmen ueber "currentColor" die Textfarbe an.
+
+       Benutzt werden sie mit:
+         <svg class="ic"><use href="#icon-route"></use></svg>
+       oder aus app.js heraus ueber die Hilfsfunktion symbol().
+
+       Das <svg> hier ist selbst unsichtbar, es ist nur der Vorrat. ===== -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="icon-start" viewBox="0 0 24 24">
+        <path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/>
+      </symbol>
+      <symbol id="icon-route" viewBox="0 0 24 24">
+        <circle cx="6" cy="18" r="2.4"/><circle cx="18" cy="6" r="2.4"/>
+        <path d="M8.4 18h4.6a3 3 0 0 0 0-6h-2a3 3 0 0 1 0-6h4.6"/>
+      </symbol>
+      <symbol id="icon-aufnahme" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="8.5"/>
+        <circle cx="12" cy="12" r="3.4" fill="currentColor" stroke="none"/>
+      </symbol>
+      <symbol id="icon-touren" viewBox="0 0 24 24">
+        <path d="M9 4 3.5 6.3v13.4L9 17.4l6 2.3 5.5-2.3V4L15 6.3 9 4Z"/>
+        <path d="M9 4v13.4M15 6.3v13.4"/>
+      </symbol>
+      <symbol id="icon-profil" viewBox="0 0 24 24">
+        <circle cx="12" cy="8" r="3.8"/>
+        <path d="M4.5 20c0-3.6 3.4-5.6 7.5-5.6s7.5 2 7.5 5.6"/>
+      </symbol>
+      <symbol id="icon-kamera" viewBox="0 0 24 24">
+        <path d="M4 8h2.8l1.4-2h7.6L17.2 8H20a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/>
+        <circle cx="12" cy="13.5" r="3.4"/>
+      </symbol>
+      <symbol id="icon-motorrad" viewBox="0 0 24 24">
+        <circle cx="5.5" cy="16.5" r="3.4"/><circle cx="18.5" cy="16.5" r="3.4"/>
+        <path d="M8.9 16.5h3.2l3.2-5.4h3.2M12.1 11.1 9.6 7.6H6.4M15 7.6h3"/>
+      </symbol>
+      <symbol id="icon-berg" viewBox="0 0 24 24">
+        <path d="M2.5 19.5h19L14.5 7.2a1 1 0 0 0-1.7 0l-3 5.2-1.9-2.6a1 1 0 0 0-1.6.1L2.5 19.5Z"/>
+      </symbol>
+      <symbol id="icon-standort" viewBox="0 0 24 24">
+        <path d="M12 21.5s7-6 7-11.5a7 7 0 1 0-14 0c0 5.5 7 11.5 7 11.5Z"/>
+        <circle cx="12" cy="10" r="2.6"/>
+      </symbol>
+    </defs>
+  </svg>
 
   <!-- ===== Startmenü: einfacher Einstiegsbildschirm vor dem eigentlichen
        Routenplaner. Fürs Erste nur zwei Wege: neue Route planen, oder eine
@@ -201,7 +253,7 @@
           <button class="btn ghost" id="btnRideStop">Beenden</button>
         </div>
         <div class="row">
-          <button class="btn ghost" id="btnRideFoto">&#128247; Foto hinzuf&uuml;gen</button>
+          <button class="btn ghost" id="btnRideFoto"><svg class="ic"><use href="#icon-kamera"></use></svg>Foto hinzuf&uuml;gen</button>
         </div>
 
         <!-- Die unterwegs aufgenommenen Fotos schon w&auml;hrend der Fahrt
@@ -493,9 +545,9 @@
 
   </div>
 
-  <script src="app.js?v=5"></script>
+  <script src="app.js?v=6"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=5"></script>
+  <script src="konto.js?v=6"></script>
 </body>
 </html>

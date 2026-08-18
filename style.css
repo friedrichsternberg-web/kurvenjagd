@@ -2,20 +2,97 @@
 /* ============================================================
    Kurvenjagd - Aussehen der App
    CSS beschreibt nur, WIE die Elemente aus index.html aussehen.
+
+   DESIGNSPRACHE (festgelegt am 18.08.2026)
+   Anspruch war: modern und grafisch hochwertig, aber ohne den
+   Einheitslook, den viele neue Apps gerade haben. Daraus folgen ein paar
+   bewusste Verbote. Wer spaeter etwas dazubaut, sollte sie kennen:
+
+     1. Kein backdrop-filter, kein Milchglas. Flaechen sind matt.
+        Motorradbekleidung ist auch matt.
+     2. Farbverlaeufe nur, wo sie Daten bedeuten. Der Kurvigkeitsbalken
+        (gruen zu gelb zu orange) darf einen haben, weil er eine Skala
+        ist. Ein Knopf nicht.
+     3. Kein Verlaufstext, kein Leuchten, keine Schimmerkanten.
+     4. Keine Emoji als Symbole - dafuer gibt es die SVG-Sammlung in
+        index.html.
+     5. Radien bleiben klein (6 bis 16px). Pillenformen nur bei echten
+        Schaltern.
+     6. Tiefe entsteht ueber 1px-Kanten, nicht ueber weiche Schatten.
+
+   Orange ist die EINZIGE Signalfarbe und wird sparsam eingesetzt. Wenn
+   alles orange ist, bedeutet orange nichts mehr.
    ============================================================ */
 
+/* ---------- Schrift ----------
+   Barlow, eine leicht technische Grotesk. Eine Familie in zwei Breiten
+   statt zweier verschiedener Schriften - das wirkt ruhiger und ist
+   schwerer falsch zu machen.
+
+   Die Dateien liegen ABSICHTLICH im eigenen Ordner und werden nicht per
+   Link von Google geladen: Google Fonts direkt einzubinden ist in
+   Deutschland datenschutzrechtlich angreifbar, weil dabei die IP-Adresse
+   des Besuchers an Google geht. Lizenz ist SIL OFL 1.1, der Text liegt
+   in fonts/LIZENZ-Barlow-OFL.txt.
+
+   font-display: swap heisst: Text erscheint sofort in der Systemschrift
+   und wechselt nach, sobald Barlow geladen ist. Ohne das bliebe die App
+   fuer einen Moment leer. */
+
+@font-face {
+  font-family: "Barlow"; font-style: normal; font-weight: 400;
+  font-display: swap; src: url("fonts/barlow-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Barlow"; font-style: normal; font-weight: 500;
+  font-display: swap; src: url("fonts/barlow-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Barlow"; font-style: normal; font-weight: 600;
+  font-display: swap; src: url("fonts/barlow-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Barlow Condensed"; font-style: normal; font-weight: 600;
+  font-display: swap; src: url("fonts/barlow-condensed-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Barlow Condensed"; font-style: normal; font-weight: 700;
+  font-display: swap; src: url("fonts/barlow-condensed-700.woff2") format("woff2");
+}
+
 :root {
-  --bg:        #14161a;
-  --panel:     #1c1f26;
-  --panel-2:   #23272f;
-  --line:      #333842;
-  --text:      #e8eaed;
-  --muted:     #9aa2ae;
-  --accent:    #ff7a1a;   /* Orange - die Signalfarbe der App */
-  --accent-dk: #d9620c;
-  --good:      #4ade80;
-  --gps:       #4a9eff;   /* Blau - eigener Standort, damit er sich von der orangen Route abhebt */
-  --radius:    10px;
+  /* Flaechen, von dunkel nach hell gestaffelt */
+  --bg:         #0E0F12;   /* Grundflaeche, fast schwarz */
+  --surface:    #16181D;   /* Karten und Bedienfeld */
+  --surface-2:  #1E2128;   /* Vertiefungen: Eingabefelder, Messwerte */
+  --line:       #2A2E37;   /* Kanten */
+
+  --text:       #F2F3F5;
+  --muted:      #8B929E;   /* Nebentext und Beschriftungen */
+
+  --accent:     #FF6B00;   /* Signalfarbe */
+  --accent-dk:  #D95A00;   /* gedrueckter Zustand */
+  --accent-ink: #140A00;   /* Text AUF Orange */
+
+  --good:       #4ADE80;   /* positive Auswertung */
+  --gps:        #4A9EFF;   /* eigener Standort - hebt sich von der orangen Route ab */
+  --danger:     #FF5A52;   /* Loeschen und Verwerfen */
+
+  /* Radien. Bewusst klein gehalten, siehe Verbot 5 oben. */
+  --r-sm: 6px;    /* Chips, Eingabefelder, Knoepfe */
+  --r-md: 12px;   /* Karten */
+  --r-lg: 16px;   /* grosse Bloecke, Oberkante der Schublade */
+  --radius: var(--r-sm);   /* Altname aus der ersten Fassung, damit bestehende Regeln weiter gelten */
+
+  /* Abstandsskala. Immer eine dieser Stufen benutzen, nie krumme Werte -
+     das ist der Unterschied zwischen "gestaltet" und "zusammengeschoben". */
+  --s1: 4px;  --s2: 8px;  --s3: 12px;
+  --s4: 16px; --s5: 24px; --s6: 32px;
+
+  /* Zwei Schriftrollen: Condensed fuer Ueberschriften und Messwerte,
+     die normale Breite fuer alles zum Lesen. */
+  --schrift-text: "Barlow", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --schrift-display: "Barlow Condensed", "Barlow", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -25,9 +102,61 @@ html, body {
   height: 100%;
   background: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  font-size: 15px;
+  font-family: var(--schrift-text);
+  font-size: 16px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
 }
+
+/* ---------- Wiederkehrende Bausteine ----------
+   .titel  - grosse Ueberschrift in Versalien
+   .label  - kleine Beschriftung ueber einem Abschnitt
+   .wert   - eine Zahl zum Ablesen (Tacho, Distanz, Grad/km)
+
+   Der Kniff bei .wert ist tabular-nums: alle Ziffern sind gleich breit,
+   dadurch huepft ein hochzaehlender Wert nicht hin und her. */
+.titel {
+  font-family: var(--schrift-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  line-height: 1.05;
+  margin: 0;
+}
+.label {
+  font-family: var(--schrift-display);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  font-size: 12px;
+  color: var(--muted);
+}
+.wert {
+  font-family: var(--schrift-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+/* ---------- Symbole ----------
+   Alle SVG-Symbole nehmen ueber currentColor die Textfarbe ihrer Umgebung
+   an, dadurch passen sie ohne Zutun in jeden Knopf und jede Liste.
+   fill:none plus stroke ist der Grund, warum sie ueberall gleich wirken:
+   es sind Strichzeichnungen, keine Flaechen. */
+.ic {
+  width: 20px; height: 20px;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ic.gross { width: 24px; height: 24px; }
+.ic.klein { width: 16px; height: 16px; stroke-width: 1.8; }
+
+/* Knoepfe mit Symbol brauchen etwas Abstand dazwischen. */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--s2); }
 
 /* ---------- Startmenü & "Meine Touren" ----------
    Beide sind einfache, zentrierte Vollbild-Ansichten - der Einstieg vor
@@ -44,7 +173,14 @@ html, body {
 
 .start-screen-inner { width: 320px; }
 .start-screen-inner .sub { margin: 0 0 32px; }
-.start-screen-inner h2 { margin: 0 0 16px; font-size: 20px; }
+.start-screen-inner h2 {
+  margin: 0 0 var(--s4);
+  font-family: var(--schrift-display);
+  font-weight: 700;
+  font-size: 26px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
 .start-screen-inner .saved-list { text-align: left; }
 
 .start-screen-buttons { display: flex; flex-direction: column; gap: 10px; }
@@ -65,17 +201,17 @@ html, body {
 }
 
 /* Die Karte selbst: derselbe dunkle Ton wie das restliche Bedienfeld
-   (var(--panel)), aber leicht transparent mit Weichzeichner dahinter -
+   (var(--surface)), aber leicht transparent mit Weichzeichner dahinter -
    das lässt das Foto durchscheinen, ohne dass der Text darauf schwerer
    zu lesen wird. */
+/* Die Karte auf dem Startbild. Frueher lag hier Milchglas darueber
+   (backdrop-filter) - genau der Baustein, an dem man den Einheitslook
+   sofort erkennt. Jetzt eine matte, undurchsichtige Flaeche mit Kante. */
 .start-card {
-  background: rgba(28, 31, 38, 0.86);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  padding: 28px 26px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: var(--s5);
 }
 
 @media (max-width: 480px) {
@@ -122,7 +258,7 @@ html, body {
   padding: 11px;
   border-radius: var(--radius);
   border: 1px solid var(--line);
-  background: var(--panel-2);
+  background: var(--surface-2);
   color: var(--text);
   font: inherit;
   margin-bottom: 6px;
@@ -148,7 +284,7 @@ html, body {
   padding: 9px 11px;
   border-radius: var(--radius);
   border: 1px solid var(--line);
-  background: var(--panel-2);
+  background: var(--surface-2);
   color: var(--muted);
   font-size: 13px;
   line-height: 1.45;
@@ -210,7 +346,7 @@ html, body {
 #panel {
   width: 330px;
   flex: 0 0 330px;
-  background: var(--panel);
+  background: var(--surface);
   border-right: 1px solid var(--line);
   display: flex;
   flex-direction: column;
@@ -231,8 +367,12 @@ html, body {
    sowohl im Bedienfeld-Header als auch auf dem Startbildschirm genutzt. */
 .brand-title {
   margin: 0;
-  font-size: 22px;
-  letter-spacing: -0.3px;
+  font-family: var(--schrift-display);
+  font-weight: 700;
+  font-size: 24px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 1.05;
 }
 .brand-title::before {
   content: "";
@@ -244,15 +384,16 @@ html, body {
   vertical-align: middle;
 }
 .start-screen-inner .brand-title { font-size: 32px; }
-.sub { margin: 2px 0 0; color: var(--muted); font-size: 12px; }
+.sub { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
 
 .block h2 {
-  margin: 0 0 8px;
+  margin: 0 0 var(--s2);
+  font-family: var(--schrift-display);
+  font-weight: 600;
   font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.09em;
   color: var(--muted);
-  font-weight: 600;
 }
 
 /* ---------- Einklappbare Abschnitte (Optionen, Sehenswertes, ...) ----------
@@ -262,9 +403,10 @@ html, body {
    damit es zum Rest des Bedienfelds passt. */
 .accordion summary {
   margin: 0;
+  font-family: var(--schrift-display);
   font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.09em;
   color: var(--muted);
   font-weight: 600;
   cursor: pointer;
@@ -286,19 +428,20 @@ html, body {
 .accordion-body { margin-top: 10px; }
 
 .hint  { color: var(--muted); font-size: 12px; margin: 8px 0 0; line-height: 1.45; }
-.tiny  { color: #6b727d; font-size: 11px; line-height: 1.5; }
+.tiny  { color: var(--muted); opacity: 0.75; font-size: 11px; line-height: 1.5; }
 .tiny a, .hint a { color: var(--muted); }
 
 /* ---------- Ortssuche ---------- */
 .search-wrap { position: relative; }
 .search-input {
   width: 100%;
-  padding: 9px 11px;
-  border-radius: var(--radius);
+  padding: 11px 12px;
+  border-radius: var(--r-sm);
   border: 1px solid var(--line);
-  background: var(--panel-2);
+  background: var(--surface-2);
   color: var(--text);
-  font: inherit;
+  font-family: var(--schrift-text);
+  font-size: 15px;
 }
 .search-input:focus { outline: none; border-color: var(--accent); }
 .richtung-select { margin-top: 8px; cursor: pointer; }
@@ -306,7 +449,7 @@ html, body {
   position: absolute;
   top: calc(100% + 4px);
   left: 0; right: 0;
-  background: var(--panel-2);
+  background: var(--surface-2);
   border: 1px solid var(--line);
   border-radius: 8px;
   list-style: none;
@@ -323,22 +466,23 @@ html, body {
   font-size: 13px;
   line-height: 1.35;
 }
-.search-results li:hover { background: #333842; }
+.search-results li:hover { background: var(--surface-2); }
 .search-results li.empty { cursor: default; color: var(--muted); }
 .search-results li.empty:hover { background: transparent; }
 .search-results li.standort-option {
+  display: flex; align-items: center; gap: var(--s2);
   color: var(--gps);
   font-weight: 600;
   border-bottom: 1px solid var(--line);
   padding-bottom: 10px;
   margin-bottom: 4px;
 }
-.search-results li.standort-option:hover { background: #1c2c3d; }
+.search-results li.standort-option:hover { background: rgba(74, 158, 255, 0.12); }
 
 /* ---------- Umschalter (Planungsart) ---------- */
 .segmented {
   display: flex;
-  background: var(--panel-2);
+  background: var(--surface-2);
   border-radius: var(--radius);
   padding: 3px;
   gap: 3px;
@@ -347,14 +491,17 @@ html, body {
   flex: 1;
   padding: 9px 0;
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   background: transparent;
   color: var(--muted);
-  font: inherit;
+  font-family: var(--schrift-display);
+  font-size: 14px;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   cursor: pointer;
 }
-.seg.active { background: var(--accent); color: #1a1206; }
+.seg.active { background: var(--accent); color: var(--accent-ink); }
 
 /* ---------- Kurvigkeits-Regler ---------- */
 /* -webkit-appearance/appearance entfernen die Browser-Standardoptik, damit
@@ -414,30 +561,32 @@ html, body {
 .row[hidden] { display: none; }
 .btn {
   flex: 1;
-  padding: 10px 12px;
-  border: 0;
-  border-radius: var(--radius);
+  padding: 12px 14px;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
   background: var(--accent);
-  color: #1a1206;
-  font: inherit;
+  color: var(--accent-ink);
+  font-family: var(--schrift-text);
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
 }
 .btn:hover { background: var(--accent-dk); }
 .btn.ghost {
   background: transparent;
-  border: 1px solid var(--line);
-  color: var(--muted);
+  border-color: var(--line);
+  color: var(--text);
   font-weight: 500;
 }
-.btn.ghost:hover { border-color: var(--muted); color: var(--text); }
+.btn.ghost:hover { border-color: var(--muted); background: var(--surface-2); color: var(--text); }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .klick-modus-btn { width: 100%; margin-top: 8px; font-size: 12.5px; }
 .klick-modus-btn.active {
   background: var(--accent);
   border-color: var(--accent);
-  color: #1a1206;
+  color: var(--accent-ink);
   font-weight: 600;
 }
 
@@ -447,7 +596,7 @@ html, body {
   min-width: 18px;
   padding: 1px 6px;
   border-radius: 9px;
-  background: var(--panel-2);
+  background: var(--surface-2);
   color: var(--text);
   font-size: 11px;
   text-align: center;
@@ -460,7 +609,7 @@ html, body {
   align-items: center;
   gap: 9px;
   padding: 7px 9px;
-  background: var(--panel-2);
+  background: var(--surface-2);
   border-radius: 8px;
   margin-bottom: 5px;
   font-size: 13px;
@@ -476,7 +625,7 @@ html, body {
   flex: 0 0 20px;
   border-radius: 50%;
   background: var(--accent);
-  color: #1a1206;
+  color: var(--accent-ink);
   font-size: 11px;
   font-weight: 700;
   display: flex; align-items: center; justify-content: center;
@@ -484,34 +633,55 @@ html, body {
 .wp-coord { color: var(--muted); font-variant-numeric: tabular-nums; }
 
 .saved-list li { cursor: pointer; justify-content: space-between; }
-.saved-list li:hover { background: #2b303a; }
+.saved-list li:hover { background: var(--surface-2); }
 .saved-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.saved-marke { flex: 0 0 auto; font-size: 13px; }
-.saved-meta { color: var(--muted); font-size: 11px; }
+.saved-marke { flex: 0 0 auto; display: flex; color: var(--accent); }
+.saved-meta {
+  color: var(--muted);
+  font-family: var(--schrift-display);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  font-variant-numeric: tabular-nums;
+}
 .del {
   border: 0; background: transparent; color: var(--muted);
   cursor: pointer; font-size: 16px; line-height: 1; padding: 0 2px;
 }
-.del:hover { color: #ff6b6b; }
+.del:hover { color: var(--danger); }
 
 /* ---------- Statistik ---------- */
 .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .stat {
-  background: var(--panel-2);
-  border-radius: 8px;
-  padding: 9px 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: var(--s2) var(--s3);
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
-.stat .k { font-size: 11px; color: var(--muted); }
-.stat .v { font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.stat .k {
+  font-family: var(--schrift-display);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.stat .v {
+  font-family: var(--schrift-display);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
 .stat.highlight { grid-column: 1 / -1; border: 1px solid var(--accent); }
 .stat.highlight .v { color: var(--accent); }
 
 .curvebar {
   height: 6px;
-  background: var(--panel-2);
+  background: var(--surface-2);
   border-radius: 3px;
   margin-top: 8px;
   overflow: hidden;
@@ -536,7 +706,7 @@ html, body {
   width: 100%;
   height: 90px;
   margin-top: 6px;
-  background: var(--panel-2);
+  background: var(--surface-2);
   border-radius: 8px;
 }
 .hoehenprofil-fläche { opacity: 0.28; }
@@ -554,13 +724,13 @@ html, body {
 }
 .ride-screen[hidden] { display: none; }
 
-.ride-map { flex: 1; min-height: 0; background: #202329; }
+.ride-map { flex: 1; min-height: 0; background: var(--surface-2); }
 
 .ride-panel {
   flex: 0 0 auto;
   max-height: 62dvh;
   overflow-y: auto;
-  background: var(--panel);
+  background: var(--surface);
   border-top: 1px solid var(--line);
   border-radius: 16px 16px 0 0;
   padding: 16px 18px;
@@ -618,7 +788,7 @@ html, body {
   border-radius: 8px;
   display: block;
   cursor: pointer;
-  background: var(--panel-2);
+  background: var(--surface-2);
 }
 /* Kleines Kreuz zum Entfernen - nur dort, wo Fotos noch bearbeitbar sind. */
 .foto-loeschen {
@@ -633,7 +803,7 @@ html, body {
   line-height: 1;
   cursor: pointer;
 }
-.foto-loeschen:hover { background: #a03028; }
+.foto-loeschen:hover { background: var(--danger); }
 
 /* Vollbild-Ansicht eines angetippten Fotos */
 .foto-ansicht {
@@ -667,7 +837,8 @@ html, body {
   width: 26px; height: 26px;
   border-radius: 50%;
   background: var(--text);
-  border: 2px solid #1a1206;
+  color: var(--accent-ink);   /* Farbe des Symbols darin */
+  border: 2px solid var(--accent-ink);
   box-shadow: 0 2px 6px rgba(0,0,0,0.5);
   display: flex; align-items: center; justify-content: center;
   font-size: 13px;
@@ -681,8 +852,17 @@ html, body {
 }
 
 /* ---------- Live-Navigation ---------- */
-.nav-btn { background: var(--gps); }
-.nav-btn:hover { background: #3a87e0; }
+/* Die Navigation ist der einzige Knopf, der NICHT orange ist: Blau ist in
+   dieser App durchgehend die Farbe des eigenen Standorts, und genau darum
+   geht es hier. Trotzdem nur als Umriss, nicht als Flaeche - eine zweite
+   grosse Farbflaeche wuerde mit dem Orange um Aufmerksamkeit streiten. */
+.nav-btn {
+  background: transparent;
+  border-color: var(--gps);
+  color: var(--gps);
+  font-weight: 600;
+}
+.nav-btn:hover { background: rgba(74, 158, 255, 0.12); border-color: var(--gps); color: var(--gps); }
 
 /* Während die Navigation läuft, fährt das Seitenpanel weg und die Karte
    nutzt den vollen Platz - wie bei einem eigenständigen Navi-Gerät. */
@@ -703,7 +883,7 @@ body.nav-modus #panel {
   position: absolute;
   top: 16px; left: 16px; right: 16px;
   z-index: 900;
-  background: var(--panel);
+  background: var(--surface);
   border: 1px solid var(--gps);
   border-radius: var(--radius);
   padding: 14px 16px;
@@ -729,7 +909,7 @@ body.nav-modus #panel {
   bottom: 20px; left: 50%;
   transform: translateX(-50%);
   z-index: 900;
-  background: #2b2018;
+  background: var(--surface-2);
   border: 1px solid var(--accent);
   color: var(--text);
   padding: 10px 20px;
@@ -749,7 +929,7 @@ body.nav-modus #panel {
   display: flex; align-items: center; justify-content: center;
   color: var(--gps);
   font-size: 22px;
-  text-shadow: 0 0 3px #14161a, 0 0 3px #14161a, 0 0 3px #14161a;
+  text-shadow: 0 0 3px var(--bg), 0 0 3px var(--bg), 0 0 3px var(--bg);
 }
 
 /* Eigener Standort beim Start: schlichter blauer Punkt, ohne Blickrichtung -
@@ -758,13 +938,13 @@ body.nav-modus #panel {
   width: 16px; height: 16px;
   border-radius: 50%;
   background: var(--gps);
-  border: 3px solid #14161a;
+  border: 3px solid var(--bg);
   box-shadow: 0 0 0 2px var(--gps);
 }
 
 /* ---------- Karte ---------- */
 #mapWrap { flex: 1; position: relative; }
-#map { position: absolute; inset: 0; background: #202329; }
+#map { position: absolute; inset: 0; background: var(--surface-2); }
 
 /* Leaflet-Bedienelemente etwas dunkler einfärben */
 .leaflet-control-attribution { display: none; }  /* wir zeigen die Quellen links im Panel */
@@ -774,8 +954,8 @@ body.nav-modus #panel {
   width: 26px; height: 26px;
   border-radius: 50%;
   background: var(--accent);
-  color: #1a1206;
-  border: 2px solid #1a1206;
+  color: var(--accent-ink);
+  border: 2px solid var(--accent-ink);
   box-shadow: 0 2px 6px rgba(0,0,0,0.5);
   display: flex; align-items: center; justify-content: center;
   font-weight: 700; font-size: 12px;
@@ -789,9 +969,12 @@ body.nav-modus #panel {
   display: flex; align-items: center; justify-content: center;
   font-size: 14px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.5);
-  border: 2px solid #1a1206;
+  border: 2px solid var(--accent-ink);
 }
-.poi-marker.pass { background: #d8d2c4; }  /* helles Steingrau für Passhöhen */
+/* Die Marker enthalten jetzt ein SVG statt eines Emoji. Weil das Symbol
+   seine Farbe ueber currentColor holt, muss hier eine dunkle Textfarbe
+   stehen - sonst waere die Strichzeichnung weiss auf hellem Grund. */
+.poi-marker.pass { background: #D8D2C4; color: #2A2620; }
 
 .poi-popup { font-size: 13px; line-height: 1.5; }
 .poi-popup .poi-popup-titel { font-weight: 700; }
@@ -801,7 +984,7 @@ body.nav-modus #panel {
   position: absolute;
   top: 16px; left: 50%;
   transform: translateX(-50%);
-  background: #2b2018;
+  background: var(--surface-2);
   border: 1px solid var(--accent);
   color: var(--text);
   padding: 10px 16px;
