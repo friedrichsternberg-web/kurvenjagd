@@ -473,8 +473,11 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 
 .panel-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
+  gap: var(--s3);
+  padding-bottom: var(--s3);
+  border-bottom: 1px solid var(--line);
 }
 .back-to-start {
   flex: 0 0 auto;
@@ -794,6 +797,8 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   padding: 4px 0;
 }
 .wp-num {
+  font-family: var(--schrift-display);
+  font-variant-numeric: tabular-nums;
   width: 20px; height: 20px;
   flex: 0 0 20px;
   border-radius: 50%;
@@ -870,6 +875,10 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 
 /* ---------- Höhenprofil ---------- */
 .hoehenprofil-kopf {
+  font-family: var(--schrift-display);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
   display: flex;
   justify-content: space-between;
   align-items: baseline;
@@ -924,13 +933,18 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   margin-bottom: 2px;
 }
 .ride-tempo-wert {
-  font-size: 56px;
+  font-family: var(--schrift-display);
+  font-size: 76px;
   font-weight: 700;
-  line-height: 1;
+  line-height: 0.9;
+  letter-spacing: -0.01em;
   font-variant-numeric: tabular-nums;
   color: var(--accent);
 }
-.ride-tempo-einheit { font-size: 15px; color: var(--muted); }
+.ride-tempo-einheit {
+  font-family: var(--schrift-display);
+  text-transform: uppercase;
+  letter-spacing: 0.06em; font-size: 15px; color: var(--muted); }
 .ride-status { text-align: center; margin: 0 0 12px; }
 .ride-titel { margin: 0 0 12px; font-size: 18px; }
 
@@ -1060,12 +1074,12 @@ body.nav-modus #panel {
   z-index: 900;
   background: var(--surface);
   border: 1px solid var(--gps);
-  border-radius: var(--radius);
-  padding: 14px 16px;
+  border-left-width: 3px;
+  border-radius: var(--r-md);
+  padding: var(--s3) var(--s4);
   display: flex;
   align-items: center;
-  gap: 14px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+  gap: var(--s4);
 }
 /* Ohne diese Regel gewinnt "display: flex" oben gegen das hidden-Attribut -
    derselbe Fehler wie bei .busy weiter unten, also gleich mitgelöst. */
@@ -1076,7 +1090,9 @@ body.nav-modus #panel {
   line-height: 1;
   flex: 0 0 auto;
 }
-.nav-distance { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.nav-distance {
+  font-family: var(--schrift-display);
+  font-variant-numeric: tabular-nums; font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .nav-detail { font-size: 13px; color: var(--muted); margin-top: 2px; }
 
 .nav-stop-btn {
@@ -1159,26 +1175,30 @@ body.nav-modus #panel {
   position: absolute;
   top: 16px; left: 50%;
   transform: translateX(-50%);
-  background: var(--surface-2);
+  background: var(--surface);
   border: 1px solid var(--accent);
+  border-left-width: 3px;
   color: var(--text);
-  padding: 10px 16px;
-  border-radius: var(--radius);
-  font-size: 13px;
+  padding: 10px 14px;
+  border-radius: var(--r-sm);
+  font-size: 14px;
   z-index: 1000;
-  max-width: 70%;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+  max-width: 80%;
 }
 
 .busy {
   position: absolute;
   inset: 0;
-  background: rgba(20,22,26,0.55);
+  background: rgba(14, 15, 18, 0.7);
   display: flex; align-items: center; justify-content: center;
-  gap: 12px;
+  gap: var(--s3);
   z-index: 999;
   color: var(--text);
+  font-family: var(--schrift-display);
   font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 /* Ohne diese Regel gewinnt "display: flex" oben gegen das hidden-Attribut,
    weil eigenes CSS immer Vorrang vor der Browser-Standardregel [hidden] hat. */
