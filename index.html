@@ -97,34 +97,61 @@
     </defs>
   </svg>
 
-  <!-- ===== Startmenü: einfacher Einstiegsbildschirm vor dem eigentlichen
-       Routenplaner. Fürs Erste nur zwei Wege: neue Route planen, oder eine
-       gespeicherte Tour wieder aufrufen. Eigenes Foto als Hintergrund
-       (img/start-hintergrund.jpg), die Bedienelemente liegen oben links
-       in der freien Fläche über dem Bild. ===== -->
-  <div id="startMenu" class="start-screen start-screen--hero">
-    <div class="start-screen-inner start-card">
-      <h1 class="brand-title">Kurvenjagd</h1>
-      <p class="sub">Routenplaner v0.1</p>
-      <div class="start-screen-buttons">
-        <button class="btn" id="btnStartPlaner">Routenplaner</button>
-        <button class="btn ghost" id="btnStartRide">Meinen Ride aufzeichnen</button>
-        <button class="btn ghost" id="btnStartTouren">Meine Touren</button>
+  <!-- ===== Startbildschirm =====
+       Aufbau bewusst anders als vorher: Frueher fuellte das Foto den
+       ganzen Hintergrund und eine durchscheinende Karte schwebte darauf.
+       Diese Kombination ist der Baustein, an dem man neue Apps sofort als
+       "irgendwie alle gleich" erkennt. Jetzt hat das Foto einen festen
+       Platz mit harter Unterkante, darunter liegen die Inhalte auf ruhiger
+       Flaeche.
+
+       Die Kacheln sind absichtlich NICHT alle gleich gross: der
+       Routenplaner ist die Hauptsache und nimmt die volle Breite, die
+       beiden anderen teilen sich die Zeile darunter. Drei gleich grosse
+       Karten nebeneinander waeren wieder der Einheitslook. ===== -->
+  <div id="startMenu" class="start-screen startseite">
+    <div class="startseite-inhalt">
+
+      <div class="start-bild">
+        <div class="start-bild-text">
+          <h1 class="brand-title">Kurvenjagd</h1>
+          <p class="start-claim">Mehr Kurven. Mehr Freiheit.</p>
+        </div>
       </div>
 
-      <!-- Statuszeile zum Konto. Bewusst klein und unter den Knöpfen:
-           Anmelden ist freiwillig, wer nur eine Route planen will, soll
-           nicht erst an einer Anmeldemaske vorbei. Ohne eingetragene
-           Server-Zugangsdaten blendet konto.js die ganze Zeile aus. -->
+      <div class="kachel-raster">
+        <button class="kachel kachel--breit" id="btnStartPlaner">
+          <svg class="ic gross"><use href="#icon-route"></use></svg>
+          <span class="kachel-titel">Routenplaner</span>
+          <span class="kachel-sub">Finde deine n&auml;chste Traumstrecke.</span>
+        </button>
+        <button class="kachel" id="btnStartRide">
+          <svg class="ic gross"><use href="#icon-aufnahme"></use></svg>
+          <span class="kachel-titel">Ride aufzeichnen</span>
+          <span class="kachel-sub">Deine Fahrt in Zahlen.</span>
+        </button>
+        <button class="kachel" id="btnStartTouren">
+          <svg class="ic gross"><use href="#icon-touren"></use></svg>
+          <span class="kachel-titel">Meine Touren</span>
+          <span class="kachel-sub">Alles auf einen Blick.</span>
+        </button>
+      </div>
+
+      <!-- Statuszeile zum Konto. Bewusst klein und ganz unten: Anmelden
+           ist freiwillig, wer nur eine Route planen will, soll nicht erst
+           an einer Anmeldemaske vorbei. Ohne eingetragene Server-Zugangs-
+           daten blendet konto.js die ganze Zeile aus. -->
       <div id="kontoZeile" class="konto-zeile" hidden>
         <div id="kontoAbgemeldet">
           <button class="linkbtn" id="btnKontoAnmelden">Anmelden oder Konto anlegen</button>
         </div>
         <div id="kontoAngemeldet" hidden>
-          Angemeldet als <span id="kontoEmail"></span>
+          <svg class="ic klein"><use href="#icon-profil"></use></svg>
+          <span id="kontoEmail"></span>
           <button class="linkbtn" id="btnKontoAbmelden">Abmelden</button>
         </div>
       </div>
+
     </div>
   </div>
 
@@ -195,9 +222,14 @@
        auch im Bedienfeld des Planers unten zu sehen (siehe #savedList) -
        diese Liste hier ist nur ein schnellerer Weg dorthin, ohne erst den
        Planer öffnen zu müssen. ===== -->
-  <div id="tourenScreen" class="start-screen" hidden>
+  <div id="tourenScreen" class="start-screen listen-screen" hidden>
     <div class="start-screen-inner">
-      <button class="btn ghost back-btn" id="btnTourenZurueck">&larr; Zurück</button>
+      <!-- Kein Zurueck-Knopf mehr: die untere Leiste ist auf diesem
+           Bildschirm sichtbar und uebernimmt das Zurueckgehen. Zwei Wege
+           fuer dieselbe Sache nebeneinander verwirren nur. Der Knopf
+           bleibt im HTML, damit die Verkabelung in app.js nicht ins Leere
+           greift, ist aber ausgeblendet. -->
+      <button class="btn ghost back-btn" id="btnTourenZurueck" hidden>&larr; Zurück</button>
       <h2>Meine Touren</h2>
       <ul id="tourenList" class="saved-list"></ul>
     </div>
@@ -544,6 +576,30 @@
   </main>
 
   </div>
+
+
+  <!-- ===== Navigationsleiste =====
+       Liegt AUSSERHALB der Bildschirm-Container, weil zeigeBildschirm()
+       in app.js alles ausblendet, was ein Bildschirm ist. Sie soll aber
+       stehenbleiben, wenn zwischen ihnen gewechselt wird.
+
+       Versteckt wird sie nur an zwei Stellen: waehrend Anmeldung und
+       Passwortwechsel (dort soll nichts ablenken) und waehrend der
+       laufenden Live-Navigation (die gehoert ganz der Karte). ===== -->
+  <nav id="hauptNav" class="haupt-nav">
+    <button class="nav-tab" data-ziel="startMenu">
+      <svg class="ic gross"><use href="#icon-start"></use></svg><span>Start</span>
+    </button>
+    <button class="nav-tab" data-ziel="app">
+      <svg class="ic gross"><use href="#icon-route"></use></svg><span>Planer</span>
+    </button>
+    <button class="nav-tab" data-ziel="rideScreen">
+      <svg class="ic gross"><use href="#icon-aufnahme"></use></svg><span>Aufzeichnen</span>
+    </button>
+    <button class="nav-tab" data-ziel="tourenScreen">
+      <svg class="ic gross"><use href="#icon-touren"></use></svg><span>Touren</span>
+    </button>
+  </nav>
 
   <script src="app.js?v=6"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und

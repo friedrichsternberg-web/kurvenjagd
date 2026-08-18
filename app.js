@@ -1509,6 +1509,7 @@ function startNavigation() {
   state.lines = [];
 
   document.body.classList.add('nav-modus');
+  aktualisiereLeiste(aktuellerBildschirm());   // Leiste weg, die Navigation braucht den Platz
   document.getElementById('navBanner').hidden = false;
   document.getElementById('btnNavStop').hidden = false;
   document.getElementById('btnNavStart').hidden = true;
@@ -1532,6 +1533,7 @@ function stopNavigation() {
   map.setBearing(0); // zurück zu Nord-oben für die normale Routenplanung
 
   document.body.classList.remove('nav-modus');
+  aktualisiereLeiste(aktuellerBildschirm());   // Leiste wieder her
   document.getElementById('navBanner').hidden = true;
   document.getElementById('btnNavStop').hidden = true;
   document.getElementById('btnNavStart').hidden = false;
@@ -2518,11 +2520,23 @@ function gespeicherteRouteHtml(r) {
   // Routen - das kleine Motorrad-Zeichen macht auf einen Blick klar,
   // welche davon wirklich gefahren wurde.
   const marke = r.aufgezeichnet ? `<span class="saved-marke" title="Aufgezeichnete Ausfahrt">${symbol('motorrad', 'klein')}</span>` : '';
+
+  // Die Messwerte stehen in einer eigenen Zeile unter dem Namen statt
+  // dahinter. Bei langen Tournamen wurden sie vorher weggedrueckt, und
+  // sie sind das, wonach man eine Tour tatsaechlich wiedererkennt.
+  const kmText = (r.distance / 1000).toFixed(r.distance < 10000 ? 1 : 0) + ' km';
+  const kurvenText = Math.round(r.curviness || 0) + ' Grad/km';
+  const datum = r.gefahrenAm
+    ? new Date(r.gefahrenAm).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' })
+    : '';
+
   return `
     <li data-id="${r.id}">
       ${marke}
-      <span class="saved-name">${escapeHtml(r.name)}</span>
-      <span class="saved-meta">${(r.distance / 1000).toFixed(0)} km &middot; ${Math.round(r.curviness)}</span>
+      <span class="saved-text">
+        <span class="saved-name">${escapeHtml(r.name)}</span>
+        <span class="saved-meta">${kmText} <i>&middot;</i> ${kurvenText}${datum ? ' <i>&middot;</i> ' + datum : ''}</span>
+      </span>
       <button class="del" data-del="${r.id}" title="Löschen">&times;</button>
     </li>`;
 }
@@ -2697,11 +2711,47 @@ function symbol(name, zusatz = '') {
    unsichtbar - deshalb kennt Leaflet ihre Größe noch nicht und muss beim
    Einblenden per invalidateSize() nachfragen. */
 
-// Blendet genau einen der sechs Bildschirme ein und alle anderen aus.
+// Auf welchen Bildschirmen die untere Leiste NICHT erscheint. Bei Anmeldung
+// und Passwortwechsel soll nichts ablenken, und wer gerade dabei ist, sein
+// Passwort zu setzen, soll nicht mit einem Fehlklick woanders landen.
+const BILDSCHIRME_OHNE_LEISTE = ['kontoScreen', 'passwortNeuScreen'];
+
+// Blendet genau einen der sechs Bildschirme ein und alle anderen aus,
+// und bringt die untere Leiste auf denselben Stand.
 function zeigeBildschirm(sichtbareId) {
   ['startMenu', 'tourenScreen', 'app', 'rideScreen', 'kontoScreen', 'passwortNeuScreen'].forEach(id => {
     document.getElementById(id).hidden = id !== sichtbareId;
   });
+  aktualisiereLeiste(sichtbareId);
+}
+
+// Zeigt oder versteckt die Leiste und hebt den passenden Eintrag hervor.
+// Die Klasse "mit-nav" am body sagt der CSS, dass die Bildschirme unten
+// Platz freihalten muessen - ohne sie waere die Leiste ein Deckel ueber
+// dem letzten Element.
+function aktualisiereLeiste(sichtbareId) {
+  const leiste = document.getElementById('hauptNav');
+  const zeigen = !BILDSCHIRME_OHNE_LEISTE.includes(sichtbareId)
+                 && !document.body.classList.contains('nav-modus');
+
+  leiste.hidden = !zeigen;
+  document.body.classList.toggle('mit-nav', zeigen);
+
+  leiste.querySelectorAll('.nav-tab').forEach(knopf => {
+    knopf.classList.toggle('aktiv', knopf.dataset.ziel === sichtbareId);
+  });
+
+  // Die Karten kennen ihre neue Groesse noch nicht, wenn sich der
+  // verfuegbare Platz gerade geaendert hat.
+  if (sichtbareId === 'app') map.invalidateSize();
+  if (sichtbareId === 'rideScreen') rideKarte().invalidateSize();
+}
+
+// Welcher Bildschirm ist gerade zu sehen? Wird gebraucht, wenn die Leiste
+// unabhaengig vom Bildschirmwechsel neu bewertet werden muss (Navigation).
+function aktuellerBildschirm() {
+  return ['startMenu', 'tourenScreen', 'app', 'rideScreen', 'kontoScreen', 'passwortNeuScreen']
+    .find(id => !document.getElementById(id).hidden) || 'startMenu';
 }
 
 function zeigeStartmenü() {
@@ -2740,8 +2790,17 @@ function zeigeRideScreen() {
 
 const PANEL_MIN_HÖHE = 48; // px - so viel bleibt vom Griff sichtbar, wenn ganz zugezogen
 
-function panelMaxHöhe() { return Math.round(window.innerHeight * 0.85); }
-function panelStandardHöhe() { return Math.round(window.innerHeight * 0.45); }
+// Wie viel Platz die untere Leiste gerade wegnimmt. Ohne diesen Abzug
+// laege der Griff der Schublade hinter der Leiste und waere nicht mehr
+// zu fassen.
+function leistenHöhe() {
+  const leiste = document.getElementById('hauptNav');
+  return leiste && !leiste.hidden ? leiste.getBoundingClientRect().height : 0;
+}
+
+function verfügbareHöhe() { return window.innerHeight - leistenHöhe(); }
+function panelMaxHöhe() { return Math.round(verfügbareHöhe() * 0.85); }
+function panelStandardHöhe() { return Math.round(verfügbareHöhe() * 0.45); }
 
 // Setzt die Panel-Höhe (in px), automatisch auf den erlaubten Bereich
 // begrenzt. animiert=true nutzt die CSS-Übergangsanimation (für Tipp-Klicks
@@ -2920,6 +2979,19 @@ document.getElementById('btnGpx').addEventListener('click', exportGpx);
 document.getElementById('btnNavStart').addEventListener('click', startNavigation);
 document.getElementById('btnNavStop').addEventListener('click', stopNavigation);
 
+// Untere Leiste: jeder Eintrag fuehrt auf seinen Bildschirm. Der Weg
+// laeuft ueber dieselben Funktionen wie die Kacheln, damit es nur eine
+// Stelle gibt, an der etwas passiert (z.B. das Neuzeichnen der Liste).
+document.querySelectorAll('.nav-tab').forEach(knopf => {
+  knopf.addEventListener('click', () => {
+    const ziel = knopf.dataset.ziel;
+    if (ziel === 'app') zeigePlaner();
+    else if (ziel === 'rideScreen') { zeigeRideScreen(); if (!ride.aktiv) rideZurücksetzen(); }
+    else if (ziel === 'tourenScreen') zeigeMeineTouren();
+    else zeigeStartmenü();
+  });
+});
+
 document.getElementById('btnStartPlaner').addEventListener('click', zeigePlaner);
 document.getElementById('btnStartTouren').addEventListener('click', zeigeMeineTouren);
 document.getElementById('btnTourenZurueck').addEventListener('click', zeigeStartmenü);
@@ -2959,3 +3031,9 @@ document.getElementById('fotoAnsicht').addEventListener('click', (e) => {
 
 verkabelePanelSchublade();
 renderSaved();
+
+// Beim Laden ist der Startbildschirm sichtbar (so steht es im HTML). Die
+// Leiste muss trotzdem einmal ihren Zustand setzen, sonst waere sie zwar
+// da, aber ohne hervorgehobenen Eintrag - und die Bildschirme wuerden
+// unten keinen Platz fuer sie freihalten.
+aktualisiereLeiste('startMenu');

@@ -89,6 +89,12 @@
   --s1: 4px;  --s2: 8px;  --s3: 12px;
   --s4: 16px; --s5: 24px; --s6: 32px;
 
+  /* Hoehe der unteren Navigationsleiste. --nav-raum ist der Platz, den
+     die Bildschirme dafuer frei lassen muessen - er ist 0, solange die
+     Leiste versteckt ist (siehe body.mit-nav weiter unten). */
+  --nav-h: 58px;
+  --nav-raum: 0px;
+
   /* Zwei Schriftrollen: Condensed fuer Ueberschriften und Messwerte,
      die normale Breite fuer alles zum Lesen. */
   --schrift-text: "Barlow", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -96,6 +102,17 @@
 }
 
 * { box-sizing: border-box; }
+
+/* Das HTML-Attribut "hidden" soll IMMER gewinnen.
+   Warum das hier steht: Browser blenden ein Element mit hidden nur ueber
+   die schwache Regel "display:none" aus. Jede eigene Regel mit
+   display:flex oder display:grid schlaegt sie - das Element bleibt trotz
+   hidden sichtbar. Genau dieser Fehler ist in diesem Projekt mehrfach
+   aufgetreten, und jedes Mal musste eine eigene [hidden]-Regel
+   nachgereicht werden. Diese eine Zeile erledigt es ein fuer alle Mal.
+   Das !important ist hier ausnahmsweise richtig: hidden IST eine Ansage,
+   keine Empfehlung. */
+[hidden] { display: none !important; }
 
 html, body {
   margin: 0;
@@ -163,7 +180,7 @@ html, body {
    dem eigentlichen Routenplaner (siehe .app-layout weiter unten), der
    anfangs per [hidden] versteckt ist. */
 .start-screen {
-  height: 100%;
+  height: calc(100% - var(--nav-raum));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -186,7 +203,8 @@ html, body {
 .start-screen-buttons { display: flex; flex-direction: column; gap: 10px; }
 .start-screen-buttons .btn { padding: 14px; font-size: 16px; }
 
-.back-btn { margin-bottom: 20px; }
+.back-btn { margin-bottom: var(--s5); }
+.back-btn[hidden] { display: none; }
 
 /* Startmenü mit eigenem Foto als Hintergrund: das Motorrad soll mittig im
    Bild stehen (Bildposition 55% 42% trifft ungefähr die Mitte von Fahrer
@@ -219,6 +237,157 @@ html, body {
   .start-card { padding: 22px 20px; }
 }
 
+/* ---------- Untere Navigationsleiste ----------
+   Fest am unteren Rand. Die Bildschirme darueber bekommen ihre Hoehe
+   ueber calc(100% - var(--nav-raum)), damit nichts hinter der Leiste
+   verschwindet - ein einfaches padding am body wuerde bei Elementen mit
+   height:100% nicht helfen, die wuerden unten herausragen.
+
+   env(safe-area-inset-bottom) ist der Streifen, den iPhones unten fuer
+   die Wisch-Leiste reservieren. Ohne den Zuschlag saessen die Beschriftungen
+   darunter. */
+.haupt-nav {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 900;
+  display: flex;
+  height: calc(var(--nav-h) + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+}
+.haupt-nav[hidden] { display: none; }
+
+.nav-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+  /* Die Beschriftung in der schmalen Schrift, damit auch "Aufzeichnen"
+     auf einem schmalen Handy in eine Zeile passt. */
+  font-family: var(--schrift-display);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.nav-tab .ic { width: 22px; height: 22px; }
+.nav-tab.aktiv { color: var(--accent); }
+.nav-tab:hover:not(.aktiv) { color: var(--text); }
+
+/* Solange die Leiste sichtbar ist, halten alle Bildschirme unten Platz frei. */
+body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
+
+/* ---------- Startbildschirm ----------
+   Ein senkrechter Aufbau: Bildblock oben, Inhalte darunter. Der Bildblock
+   hat eine harte Unterkante, kein weicher Verlauf ins Nichts - der Verlauf
+   ueber dem Foto ist genau der Griff, der ueberall gleich aussieht. Nur
+   direkt hinter der Schrift liegt ein Schatten, damit sie lesbar bleibt. */
+.startseite { display: block; overflow-y: auto; text-align: left; }
+.startseite-inhalt {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s5);
+  padding-bottom: var(--s5);
+}
+
+.start-bild {
+  position: relative;
+  height: 42vh;
+  min-height: 240px;
+  background: url('img/start-hintergrund.jpg') 55% 42% / cover no-repeat;
+  display: flex;
+  align-items: flex-end;
+  border-bottom: 2px solid var(--accent);
+}
+.start-bild-text {
+  padding: var(--s5) var(--s4);
+  padding-top: var(--s6);
+  width: 100%;
+  /* Nur ein Schatten unter der Schrift, keine Flaeche ueber dem ganzen Bild. */
+  background: linear-gradient(to top, rgba(14,15,18,0.92), rgba(14,15,18,0));
+}
+.start-claim {
+  margin: var(--s1) 0 0;
+  font-family: var(--schrift-display);
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+}
+
+/* ---------- Kacheln ----------
+   Zwei Spalten, die erste Kachel ueber beide. Bewusst ungleich: drei
+   gleich grosse Karten nebeneinander sind das Erkennungszeichen des
+   Einheitslooks, und der Routenplaner IST wichtiger als der Rest. */
+.kachel-raster {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s3);
+  padding: 0 var(--s4);
+}
+.kachel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;   /* Symbol oben, Text unten - dadurch stehen
+                                       beide Kacheln auf einer Linie, auch wenn
+                                       eine Ueberschrift umbricht */
+  gap: var(--s2);
+  padding: var(--s4);
+  min-height: 118px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.12s ease, background 0.12s ease;
+}
+.kachel:hover { border-color: var(--muted); background: var(--surface-2); }
+.kachel:active { transform: translateY(1px); }
+.kachel .ic { color: var(--accent); }
+.kachel--breit {
+  grid-column: 1 / -1;
+  min-height: 0;
+  /* Die Hauptkachel bekommt als einzige die Signalfarbe als Flaeche. */
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+.kachel--breit:hover { background: var(--accent-dk); border-color: var(--accent-dk); }
+.kachel--breit .ic { color: var(--accent-ink); }
+.kachel-titel {
+  font-family: var(--schrift-display);
+  font-size: 19px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+}
+.kachel-sub { font-size: 13px; color: var(--muted); line-height: 1.35; margin-top: 2px; }
+.kachel--breit .kachel-sub { color: rgba(20,10,0,0.72); }
+
+/* Bildschirme mit einer Liste statt eines Formulars: Inhalt oben statt
+   senkrecht zentriert, und ueber die volle Breite. Ein Formular in der
+   Mitte wirkt ruhig, eine Liste in der Mitte wirkt verloren. */
+.listen-screen { align-items: stretch; justify-content: flex-start; text-align: left; overflow-y: auto; }
+.listen-screen .start-screen-inner {
+  width: 100%;
+  padding: var(--s5) var(--s4);
+  padding-top: max(var(--s5), env(safe-area-inset-top) + var(--s3));
+}
+.listen-screen .back-btn { flex: 0 0 auto; align-self: flex-start; }
+
 /* ---------- Konto ----------
    Ein Knopf, der wie ein Textlink aussieht. Gebraucht für die kleinen
    Nebenwege ("Passwort vergessen", "Abmelden"), die keinen vollwertigen
@@ -235,15 +404,19 @@ html, body {
 }
 .linkbtn:hover { color: var(--text); }
 
-/* Statuszeile unter den Startmenü-Knöpfen. */
+/* Statuszeile ganz unten auf dem Startbildschirm. margin-top:auto
+   schiebt sie an das untere Ende der Spalte, egal wie hoch der Rest ist. */
 .konto-zeile {
-  margin-top: 18px;
+  margin-top: auto;
+  padding: 0 var(--s4);
   font-size: 13px;
   color: var(--muted);
   line-height: 1.6;
 }
 .konto-zeile[hidden] { display: none; }
 .konto-zeile #kontoEmail { color: var(--text); }
+#kontoAngemeldet { display: flex; align-items: center; gap: var(--s2); flex-wrap: wrap; }
+#kontoAngemeldet[hidden] { display: none; }
 .konto-zeile .linkbtn { margin-left: 8px; }
 
 .konto-formular {
@@ -293,7 +466,7 @@ html, body {
 
 /* ---------- Routenplaner: zwei Spalten, Bedienfeld links, Karte rechts ---------- */
 .app-layout {
-  height: 100%;
+  height: calc(100% - var(--nav-raum));
   display: flex;
 }
 .app-layout[hidden] { display: none; }
@@ -632,10 +805,12 @@ html, body {
 }
 .wp-coord { color: var(--muted); font-variant-numeric: tabular-nums; }
 
-.saved-list li { cursor: pointer; justify-content: space-between; }
+.saved-list li { cursor: pointer; justify-content: space-between; align-items: center; gap: var(--s3); }
 .saved-list li:hover { background: var(--surface-2); }
-.saved-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.saved-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.saved-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
 .saved-marke { flex: 0 0 auto; display: flex; color: var(--accent); }
+.saved-meta i { font-style: normal; opacity: 0.45; margin: 0 2px; }
 .saved-meta {
   color: var(--muted);
   font-family: var(--schrift-display);
@@ -718,7 +893,7 @@ html, body {
    grossen Zahlen - das muss man im Zweifel mit Handschuhen und einem
    kurzen Blick an der Ampel erfassen koennen. */
 .ride-screen {
-  height: 100%;
+  height: calc(100% - var(--nav-raum));
   display: flex;
   flex-direction: column;
 }
