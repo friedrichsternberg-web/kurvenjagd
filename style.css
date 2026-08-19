@@ -2189,3 +2189,153 @@ body.nav-modus #panel {
   background: rgba(255, 255, 255, 0.04);
   margin-bottom: var(--s2) !important;
 }
+
+/* ============================================================================
+   Der Freisteller
+
+   Ein Vollbildfenster ueber allem. Aufbau von oben nach unten: Kopfzeile,
+   Buehne mit dem Foto, Regler, Werkzeugleiste. Die Buehne nimmt sich den
+   Rest - genau wie in der Garage selbst, damit es sich vertraut anfuehlt.
+
+   Das SCHACHBRETT unter dem Foto ist keine Zierde: Ohne es koennte man gar
+   nicht sehen, wo das Bild durchsichtig geworden ist, und damit das Ergebnis
+   nicht beurteilen.
+   ============================================================================ */
+
+.frei-fenster {
+  position: fixed;
+  inset: 0;
+  z-index: 1400;          /* ueber dem Garagen-Dialog (1200) */
+  display: flex;
+  flex-direction: column;
+  background: #0B0C0F;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.frei-fenster[hidden] { display: none; }
+
+.frei-kopf {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  padding: var(--s3) var(--s4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+}
+.frei-kopf h3 {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  font-family: var(--schrift-display);
+  font-weight: 700;
+  /* Auf 320 Pixeln brach die Zeile sonst um und die Kopfzeile wurde doppelt
+     so hoch - Platz, der der Buehne fehlt. */
+  font-size: clamp(14px, 4.4vw, 17px);
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.frei-kopf .btn.klein { padding: 8px 16px; font-size: 14px; }
+
+.frei-buehne {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s3);
+  overflow: hidden;
+}
+
+.frei-leinwand {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: var(--r-md);
+  /* OHNE touch-action: none nimmt der Browser das Wischen als Scrollen und
+     der Pinsel bekommt die Bewegung nie zu sehen. */
+  touch-action: none;
+  -webkit-user-select: none; user-select: none;
+  background-color: #16181D;
+  background-image:
+    linear-gradient(45deg, rgba(255,255,255,0.055) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.055) 75%),
+    linear-gradient(45deg, rgba(255,255,255,0.055) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.055) 75%);
+  background-size: 18px 18px;
+  background-position: 0 0, 9px 9px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+
+.frei-regler { flex: 0 0 auto; padding: 0 var(--s4); }
+.frei-zeile {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s2) 0;
+}
+.frei-zeile[hidden] { display: none; }
+.frei-zeile label {
+  flex: 0 0 auto;
+  width: 108px;
+  font-family: var(--schrift-display);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.frei-zeile .slider {
+  flex: 1;
+  margin: 0;
+  background: rgba(255, 255, 255, 0.14);
+}
+.frei-zeile output {
+  flex: 0 0 auto;
+  width: 30px;
+  text-align: right;
+  font-family: var(--schrift-display);
+  font-variant-numeric: tabular-nums;
+  font-size: 15px;
+}
+
+.frei-werkzeuge {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 4px;
+  padding: var(--s2) var(--s3) var(--s3);
+}
+.frei-werkzeug {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 9px 2px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--muted);
+  cursor: pointer;
+  font-family: var(--schrift-display);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: color 0.14s ease, background 0.14s ease, border-color 0.14s ease;
+}
+.frei-werkzeug span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.frei-werkzeug:hover:not(:disabled) { color: var(--text); background: rgba(255, 255, 255, 0.09); }
+.frei-werkzeug.active {
+  color: var(--accent-ink);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.frei-werkzeug:disabled { opacity: 0.35; cursor: not-allowed; }

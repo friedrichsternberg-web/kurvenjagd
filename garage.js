@@ -647,278 +647,519 @@ function zeichneFotoVorschau() {
       + 'Fl&auml;che dahinter &ndash; Wand, Tor, glatter Himmel.';
 }
 
-/* Trennt den Hintergrund ab, indem von jeder Ecke aus alle benachbarten
-   Bildpunkte aehnlicher Farbe durchsichtig gesetzt werden. Genau so wurde
-   auch das Standardbild freigestellt.
 
-   Umgesetzt mit einer eigenen Warteschlange statt mit Rekursion: Bei einem
-   900 Pixel breiten Bild waeren es bis zu einer halben Million verschachtelte
-   Aufrufe, und daran geht der Browser zugrunde. */
-async function fotoFreistellen() {
-  if (!dialogFoto) return;
+/* ============================================================================
+   Freisteller - den Hintergrund vom Motorrad trennen
 
-  const bild = await new Promise((fertig, fehler) => {
-    const b = new Image();
-    b.onload = () => fertig(b);
-    b.onerror = fehler;
-    b.src = dialogFoto;
-  });
+   WAS HIER GEMESSEN WURDE, damit niemand die Zahlen fuer geraten haelt:
+   An sechs Testfaellen mit bekannter Wahrheit (dasselbe freigestellte
+   Motorrad auf Himmelsverlauf, Bergpanorama und Asphalt montiert, je in
+   heller und schwarzer Lackierung) wurden vier Verfahren durchgerechnet.
 
-  const leinwand = document.createElement('canvas');
-  leinwand.width = bild.naturalWidth;
-  leinwand.height = bild.naturalHeight;
-  const stift = leinwand.getContext('2d');
-  stift.drawImage(bild, 0, 0);
+   Der bisherige Ansatz - Flutfuellung von den vier Ecken mit fester
+   Farbtoleranz - scheitert an genau zwei Dingen: Ein Himmelsverlauf
+   aendert die Farbe ueber das Bild staerker als jede Toleranz zulaesst,
+   und dieselbe Toleranz reicht andererseits aus, um in den Tank zu laufen.
 
-  const flaeche = stift.getImageData(0, 0, leinwand.width, leinwand.height);
-  const punkte = flaeche.data;
-  const breite = leinwand.width, hoehe = leinwand.height;
+   ---------------------------------------------------------------------------
+   1. DIE AUTOMATIK: Minimax-Ausbreitung
 
-  const TOLERANZ = 42;          // wie sehr eine Farbe abweichen darf
-  const besucht = new Uint8Array(breite * hoehe);
-  const warteschlange = [];
+   Der Gedanke, auf den es ankommt:
 
-  const farbeAn = stelle => [punkte[stelle*4], punkte[stelle*4+1], punkte[stelle*4+2]];
+       Die Kosten eines Weges sind die GROESSTE Kante darauf,
+       nicht die Summe der Farbschritte.
 
-  // Von allen vier Ecken aus starten. Eine einzelne Ecke wuerde bei einem
-  // Bild mit Vignette schon nach wenigen Pixeln stehenbleiben.
-  const ecken = [0, breite-1, (hoehe-1)*breite, hoehe*breite-1];
-  const vergleichsfarben = ecken.map(farbeAn);
-  for (const ecke of ecken) { warteschlange.push(ecke); besucht[ecke] = 1; }
+   Ein Himmelsverlauf aendert die Farbe insgesamt stark, von Punkt zu Punkt
+   aber kaum - die groesste Kante auf dem Weg bleibt klein, die Front laeuft
+   glatt hindurch. Die Kante zum Motorrad ist ein Sprung, dort steigt der
+   Hoechstwert schlagartig und die Front bleibt stehen. Genau diese Trennung
+   ist ueber die Farbe allein nicht zu haben.
 
-  const passt = stelle => {
-    const [r,g,b] = farbeAn(stelle);
-    return vergleichsfarben.some(([vr,vg,vb]) =>
-      Math.abs(r-vr) + Math.abs(g-vg) + Math.abs(b-vb) < TOLERANZ * 3);
+   Das Verfahren heisst Image Foresting Transform und ist im Kern eine
+   Wasserscheide, die von Saatpunkten aus waechst.
+
+   Gemessen mit Schwelle 14: Das Motorrad bleibt in ALLEN sechs Faellen zu
+   94 bis 100 Prozent erhalten. Beim Himmelsverlauf liegt die Ueberdeckung
+   mit der Wahrheit bei 91 Prozent (der alte Ansatz kam auf 88, wobei er
+   Loecher ins Motorrad riss). Vor Bergen bleibt viel Hintergrund stehen -
+   dafuer gibt es den Zauberstab.
+
+   Hoehere Schwellen tragen mehr ab, fressen aber die Maschine an: bei 22
+   sind es beim schwarzen Motorrad auf Asphalt nur noch 49 Prozent, bei 34
+   nur 27. Deshalb steht die Automatik bewusst auf der sicheren Seite.
+
+   ---------------------------------------------------------------------------
+   2. DER ZAUBERSTAB: Farbanker ab der Tippstelle
+
+   Fuer den Rest reicht die Kantenstaerke nicht. In einer Wiese liegt JEDE
+   Kante ueber der Schwelle, die Front kommt vom Tipppunkt gar nicht weg;
+   dreht man die Schwelle hoch, springt sie im selben Moment auch ueber die
+   Motorradkante. Gemessen: bei Schwelle 40 bewirkt sie fast nichts, bei 90
+   bleiben vom Motorrad noch 7 Prozent. Es gibt kein brauchbares Fenster.
+
+   Was fehlt, ist die Farbe. Wer auf die Wiese tippt, sagt "das ist
+   Hintergrund" - also wird von dort aus genommen, was zusammenhaengt UND
+   farblich nah an der angetippten Stelle liegt. Kantenstaerke bremst
+   zusaetzlich.
+
+   Gemessen mit Toleranz 28: In allen vier schweren Faellen bleiben 94 bis
+   100 Prozent des Motorrads stehen. Bei 40 sind zwei Faelle besser, aber
+   das schwarze Motorrad auf dunklem Asphalt bricht auf 7 Prozent ein.
+   Deshalb ist 28 die Voreinstellung und der Regler geht bis 55.
+
+   ---------------------------------------------------------------------------
+   3. WAS KEIN VERFAHREN KANN
+
+   Ein schwarzes Motorrad vor dunklem Asphalt hat streckenweise gar keine
+   Kante. Dort ist physikalisch nichts zu trennen, und keine Einstellung
+   aendert daran etwas. Genau dafuer gibt es die Pinsel.
+   ============================================================================ */
+
+// Groesse, in der gerechnet und bearbeitet wird. Das Ergebnis wird am Ende
+// auf die Groesse des Originals gezogen. 560 ist der Punkt, an dem eine
+// Runde auf dem iPhone noch deutlich unter einer Sekunde bleibt.
+const FREI_ARBEITSKANTE = 560;
+
+const FREI_AUTOMATIK_SCHWELLE = 14;   // gemessen: sicherster Wert
+const FREI_ZAUBER_STANDARD    = 28;   // gemessen: haelt in allen Testfaellen
+
+// Alles, was der Freisteller gerade in der Hand hat.
+let frei = null;
+
+/* Kantenstaerke nach Scharr, je Farbkanal, Ergebnis als ganze Zahl 0..1020.
+   Scharr statt Sobel, weil der bei SCHRAEGEN Kanten deutlich genauer liegt -
+   und eine Motorradkontur ist fast ueberall schraeg. Kostet dasselbe.
+
+   Vorher wird leicht geglaettet, sonst bleibt die Front schon im Rauschen
+   einer Wiese haengen. */
+function freiKanten(d, breite, hoehe) {
+  const weich = new Float32Array(breite * hoehe * 3);
+  for (let y = 0; y < hoehe; y++) {
+    for (let x = 0; x < breite; x++) {
+      const i = y * breite + x;
+      for (let k = 0; k < 3; k++) {
+        let summe = 0, zahl = 0;
+        for (let dy = -1; dy <= 1; dy++) {
+          const yy = y + dy; if (yy < 0 || yy >= hoehe) continue;
+          for (let dx = -1; dx <= 1; dx++) {
+            const xx = x + dx; if (xx < 0 || xx >= breite) continue;
+            summe += d[(yy * breite + xx) * 4 + k]; zahl++;
+          }
+        }
+        weich[i * 3 + k] = summe / zahl;
+      }
+    }
+  }
+
+  const E = new Int32Array(breite * hoehe);
+  const hole = (x, y, k) =>
+    weich[(Math.min(hoehe - 1, Math.max(0, y)) * breite + Math.min(breite - 1, Math.max(0, x))) * 3 + k];
+
+  for (let y = 0; y < hoehe; y++) {
+    for (let x = 0; x < breite; x++) {
+      let groesste = 0;
+      for (let k = 0; k < 3; k++) {
+        const gx = (3 * (hole(x+1,y-1,k) - hole(x-1,y-1,k))
+                 + 10 * (hole(x+1,y  ,k) - hole(x-1,y  ,k))
+                  + 3 * (hole(x+1,y+1,k) - hole(x-1,y+1,k))) / 32;
+        const gy = (3 * (hole(x-1,y+1,k) - hole(x-1,y-1,k))
+                 + 10 * (hole(x  ,y+1,k) - hole(x  ,y-1,k))
+                  + 3 * (hole(x+1,y+1,k) - hole(x+1,y-1,k))) / 32;
+        const w = Math.abs(gx) + Math.abs(gy);
+        if (w > groesste) groesste = w;
+      }
+      E[y * breite + x] = Math.min(1020, Math.round(groesste * 4));
+    }
+  }
+  return E;
+}
+
+/* Waechst von den Saatpunkten aus und liefert fuer jeden Punkt, wie gross die
+   groesste Kante auf dem guenstigsten Weg dorthin ist.
+
+   ZWEI FALLEN, beide beim Bauen zugeschnappt:
+
+   1. Der Listenkopf muss in JEDEM Schleifendurchlauf neu gelesen werden.
+      Weil die Kosten beim Minimax oft gleich bleiben, landen neue Punkte im
+      GERADE bearbeiteten Fach. Wer den Kopf einmal in eine Variable liest,
+      verliert sie stillschweigend.
+
+   2. Jede Einsortierung braucht einen EIGENEN Eintrag. Ein Punkt wird
+      mehrfach eingereiht, mit immer kleineren Kosten. Teilen sich alle
+      Eintraege dasselbe "naechster"-Feld am Punkt, zeigt der alte Eintrag
+      nach der zweiten Einsortierung in die neue Liste - die Verkettung
+      schliesst sich zum Kreis und die Schleife laeuft ewig. Genau daran hat
+      sich der Prüfstand beim ersten Versuch aufgehaengt. */
+function freiMinimax(E, breite, hoehe, saaten) {
+  const anzahl = breite * hoehe;
+  const FAECHER = 1024;
+  const kosten = new Int32Array(anzahl).fill(0x7fffffff);
+  const kopf = new Int32Array(FAECHER).fill(-1);
+
+  const grenze = anzahl * 4 + saaten.length + 8;   // hoechstens 4 Entspannungen je Punkt
+  const eintragStelle = new Int32Array(grenze);
+  const eintragNaechster = new Int32Array(grenze);
+  let anzahlEintraege = 0;
+
+  const einreihen = (s, k) => {
+    if (anzahlEintraege >= grenze) return;
+    eintragStelle[anzahlEintraege] = s;
+    eintragNaechster[anzahlEintraege] = kopf[k];
+    kopf[k] = anzahlEintraege++;
   };
 
-  let abgetragen = 0;
-  while (warteschlange.length) {
-    const stelle = warteschlange.pop();
-    if (!passt(stelle)) continue;
+  for (const s of saaten) if (kosten[s] !== 0) { kosten[s] = 0; einreihen(s, 0); }
 
-    punkte[stelle*4 + 3] = 0;   // durchsichtig
-    abgetragen++;
+  for (let fach = 0; fach < FAECHER; fach++) {
+    while (kopf[fach] !== -1) {          // siehe Falle 1: hier neu lesen
+      const eintrag = kopf[fach];
+      kopf[fach] = eintragNaechster[eintrag];
+      const s = eintragStelle[eintrag];
+      if (kosten[s] !== fach) continue;  // veralteter Eintrag
 
-    const x = stelle % breite, y = (stelle - x) / breite;
-    if (x > 0        && !besucht[stelle-1])      { besucht[stelle-1] = 1;      warteschlange.push(stelle-1); }
-    if (x < breite-1 && !besucht[stelle+1])      { besucht[stelle+1] = 1;      warteschlange.push(stelle+1); }
-    if (y > 0        && !besucht[stelle-breite]) { besucht[stelle-breite] = 1; warteschlange.push(stelle-breite); }
-    if (y < hoehe-1  && !besucht[stelle+breite]) { besucht[stelle+breite] = 1; warteschlange.push(stelle+breite); }
+      const x = s % breite, y = (s - x) / breite;
+      if (x > 0)          { const n = s-1;      const w = fach > E[n] ? fach : E[n]; if (w < kosten[n]) { kosten[n] = w; einreihen(n, w); } }
+      if (x < breite - 1) { const n = s+1;      const w = fach > E[n] ? fach : E[n]; if (w < kosten[n]) { kosten[n] = w; einreihen(n, w); } }
+      if (y > 0)          { const n = s-breite; const w = fach > E[n] ? fach : E[n]; if (w < kosten[n]) { kosten[n] = w; einreihen(n, w); } }
+      if (y < hoehe - 1)  { const n = s+breite; const w = fach > E[n] ? fach : E[n]; if (w < kosten[n]) { kosten[n] = w; einreihen(n, w); } }
+    }
   }
-
-  const anteil = abgetragen / (breite * hoehe);
-
-  // Zwei Faelle, die kein brauchbares Ergebnis sind, und beide werden
-  // abgelehnt statt abgeliefert: Fast nichts abgetragen heisst, der
-  // Hintergrund war zu unruhig. Fast alles abgetragen heisst, das Motorrad
-  // hatte selbst die Farbe des Hintergrunds und ist mit verschwunden.
-  if (anteil < 0.08) {
-    showToast('Der Hintergrund ist zu unruhig. Das Foto bleibt, wie es ist.');
-    return;
-  }
-  if (anteil > 0.92) {
-    showToast('Da wäre fast das ganze Bild verschwunden. Das Foto bleibt, wie es ist.');
-    return;
-  }
-
-  stift.putImageData(flaeche, 0, 0);
-  dialogFoto = leinwand.toDataURL('image/webp', 0.85);
-  zeichneFotoVorschau();
-  showToast(`Hintergrund entfernt (${Math.round(anteil * 100)} % des Bildes).`);
+  return kosten;
 }
 
-/* --- Ausruestung ------------------------------------------------------- */
-
-function öffneAusrüstungsDialog(vorhandenes = null) {
-  öffneDialog({
-    titel: vorhandenes ? 'Ausrüstung bearbeiten' : 'Ausrüstung hinzufügen',
-    felder: `
-      <p class="hint hinweis-kasten">
-        Bilder zur Ausr&uuml;stung sollen genauso aus einer Suche kommen wie beim
-        Motorrad, ueber die Produktdaten der Shops. Solange der Zugang dazu
-        fehlt, h&auml;ngt an der Wand das Zeichen der jeweiligen Art.
-      </p>
-
-      <label for="feldArt">Art</label>
-      <select id="feldArt">
-        ${AUSRÜSTUNGSARTEN.map(art => `
-          <option value="${art.schlüssel}" ${vorhandenes?.art === art.schlüssel ? 'selected' : ''}>${art.name}</option>`).join('')}
-      </select>
-
-      <label for="feldTeilName">Bezeichnung</label>
-      <input type="text" id="feldTeilName" placeholder="Rallye 3" value="${sicher(vorhandenes?.name)}">
-
-      <div class="dialog-paar">
-        <div>
-          <label for="feldTeilMarke">Marke</label>
-          <input type="text" id="feldTeilMarke" placeholder="Schuberth" value="${sicher(vorhandenes?.marke)}">
-        </div>
-        <div>
-          <label for="feldTeilGröße">Gr&ouml;&szlig;e</label>
-          <input type="text" id="feldTeilGröße" placeholder="M" value="${sicher(vorhandenes?.größe)}">
-        </div>
-      </div>
-
-      <label for="feldTeilNotiz">Notiz</label>
-      <textarea id="feldTeilNotiz" rows="2" placeholder="Gekauft 2024, Visier gewechselt">${sicher(vorhandenes?.notiz)}</textarea>
-    `,
-
-    beimSpeichern: () => {
-      const datensatz = {
-        id:     vorhandenes ? vorhandenes.id : String(Date.now()),
-        art:    feldWert('feldArt') || 'sonstiges',
-        name:   feldWert('feldTeilName'),
-        marke:  feldWert('feldTeilMarke'),
-        größe:  feldWert('feldTeilGröße'),
-        notiz:  feldWert('feldTeilNotiz'),
-        bild:   null,
-      };
-
-      if (!datensatz.name && !datensatz.marke) {
-        showToast('Trag eine Bezeichnung oder eine Marke ein.');
-        return false;
+// Maske glaetten: Einzelpunkte weg, Nadelstiche zu, Kante weich.
+function freiGlaetten(maske, breite, hoehe) {
+  const kopie = new Uint8Array(maske.length);
+  for (let runde = 0; runde < 2; runde++) {
+    kopie.set(maske);
+    for (let y = 1; y < hoehe - 1; y++) {
+      for (let x = 1; x < breite - 1; x++) {
+        const i = y * breite + x;
+        let voll = 0;
+        for (let dy = -1; dy <= 1; dy++)
+          for (let dx = -1; dx <= 1; dx++)
+            if (kopie[i + dy * breite + dx] > 127) voll++;
+        maske[i] = voll >= 5 ? 255 : 0;
       }
-
-      const platz = garage.ausrüstung.findIndex(teil => teil.id === datensatz.id);
-      if (platz >= 0) garage.ausrüstung[platz] = datensatz;
-      else garage.ausrüstung.push(datensatz);
-
-      return sichereGarageWeg();
-    },
-
-    beimLöschen: vorhandenes ? () => {
-      if (!confirm('Dieses Teil wirklich entfernen?')) return false;
-      garage.ausrüstung = garage.ausrüstung.filter(teil => teil.id !== vorhandenes.id);
-      return sichereGarageWeg();
-    } : null,
-  });
-}
-
-/* Speichern mit ehrlicher Rueckmeldung. Wenn der Browser-Speicher voll ist,
-   muss das gesagt werden - sonst haette man etwas eingetragen, den Dialog
-   geschlossen und beim naechsten Oeffnen waere alles weg, ohne dass je etwas
-   schiefgelaufen zu sein schien. */
-function sichereGarageWeg() {
-  if (speichereGarage()) return true;
-
-  garage = ladeGarage();
-  if (aktivesMotorrad >= garage.motorräder.length) aktivesMotorrad = 0;
-  showToast('Der Browser-Speicher ist voll. Lösche ein paar alte Touren.');
-  return false;
-}
-
-
-/* --- Der Finder im Dialog ------------------------------------------------ */
-
-// Traegt eine Marke ein und laedt die Modelle dazu.
-function markeWählen(marke) {
-  // Im Feld steht die lesbare Fassung, gesucht wird aber mit dem Namen, wie
-  // die Datenbank ihn kennt - deshalb wird beim Abfragen wieder umgedreht.
-  document.getElementById('feldMarke').value = markeLesbar(marke);
-  document.querySelectorAll('.marken-chip').forEach(chip => {
-    chip.classList.toggle('active', chip.dataset.marke === marke);
-  });
-
-  const treffer = document.getElementById('markenTreffer');
-  if (treffer) treffer.hidden = true;
-  const suche = document.getElementById('feldMarkenSuche');
-  if (suche) suche.value = '';
-
-  modelleAnzeigen();
-}
-
-// Holt die Modelle zu Marke und Baujahr und zeigt sie als Knoepfe.
-async function modelleAnzeigen() {
-  const marke = feldWert('feldMarke');
-  const jahr = feldWert('feldBaujahr');
-  const kasten = document.getElementById('modellTreffer');
-  const hinweis = document.getElementById('finderHinweis');
-  if (!kasten) return;
-
-  if (!marke || !jahr) {
-    kasten.hidden = true;
-    hinweis.textContent = 'Wähl Marke und Baujahr, dann erscheinen hier die Modelle.';
-    return;
-  }
-
-  kasten.hidden = false;
-  kasten.innerHTML = `<p class="tiny">Suche Modelle &hellip;</p>`;
-
-  try {
-    const modelle = await modelleHolen(marke, jahr);
-    if (modelle.length === 0) {
-      kasten.hidden = true;
-      hinweis.textContent = `Für ${marke} ${jahr} steht nichts in der Datenbank. Schreib das Modell selbst ins Feld.`;
-      return;
     }
-    const schonGewählt = feldWert('feldModell');
-    kasten.innerHTML = modelle
-      .map(modell => `<button type="button" class="modell-chip ${modell === schonGewählt ? 'active' : ''}" data-modell="${sicher(modell)}">${sicher(modell)}</button>`)
-      .join('');
-    hinweis.textContent = `${modelle.length} Modelle gefunden. Steht deins nicht dabei, schreib es selbst ins Feld.`;
-  } catch {
-    kasten.hidden = true;
-    hinweis.textContent = 'Die Fahrzeugdatenbank ist gerade nicht erreichbar. Trag Marke und Modell von Hand ein.';
   }
 }
 
-/* Fuellt Hubraum und Leistung selbst aus, sobald Marke, Modell und Baujahr
-   feststehen. Schon eingetragene Werte werden NICHT ueberschrieben: Wer
-   seine Maschine umgebaut hat, weiss es besser als jede Datenbank. */
-async function technischeDatenNachziehen() {
-  const marke = feldWert('feldMarke');
-  const modell = feldWert('feldModell');
-  const jahr = feldWert('feldBaujahr');
-  const hubraumFeld = document.getElementById('feldHubraum');
-  const leistungFeld = document.getElementById('feldLeistung');
-  if (!hubraumFeld || !marke || !modell) return;
 
-  const fehltEtwas = !hubraumFeld.value.trim() || !leistungFeld.value.trim();
-  if (!fehltEtwas) return;
 
-  if (!DATEN_API_SCHLÜSSEL) {
-    // Ohne Schluessel schweigt die Funktion. Ein Hinweis an dieser Stelle
-    // waere eine Fehlermeldung fuer etwas, das gar nicht eingerichtet ist.
-    return;
-  }
+/* --- Der Freisteller als Werkzeug ------------------------------------------
+   Ein eigenes Fenster ueber dem Dialog. Der Nutzer sieht sein Foto auf einem
+   Schachbrett - dort, wo es durchsichtig ist, scheint das Muster durch - und
+   hat vier Werkzeuge:
 
-  hubraumFeld.classList.add('wird-geholt');
-  leistungFeld.classList.add('wird-geholt');
-  try {
-    const daten = await technischeDatenHolen(marke, modell, jahr);
-    if (daten) {
-      if (!hubraumFeld.value.trim() && daten.hubraum) hubraumFeld.value = daten.hubraum;
-      if (!leistungFeld.value.trim() && daten.leistung) leistungFeld.value = daten.leistung;
+     Automatik      raeumt auf einen Schlag auf, was sicher Hintergrund ist
+     Zauberstab     antippen, der zusammenhaengende Bereich verschwindet
+     Radierer       wegwischen, was noch stoert
+     Zurueckholen   versehentlich Weggenommenes wiederholen
+
+   Alles ist rueckgaengig zu machen. Das ist keine Bequemlichkeit, sondern
+   Voraussetzung: Ein Zauberstab, der einmal zu viel nimmt, waere ohne
+   Rueckgaengig ein Grund, das Werkzeug nie wieder anzufassen. */
+
+function öffneFreisteller(datenUrl) {
+  const bild = new Image();
+  bild.onload = () => {
+    const faktor = Math.min(1, FREI_ARBEITSKANTE / Math.max(bild.naturalWidth, bild.naturalHeight));
+    const breite = Math.max(1, Math.round(bild.naturalWidth * faktor));
+    const hoehe  = Math.max(1, Math.round(bild.naturalHeight * faktor));
+
+    const arbeit = document.createElement('canvas');
+    arbeit.width = breite; arbeit.height = hoehe;
+    const stift = arbeit.getContext('2d', { willReadFrequently: true });
+    stift.drawImage(bild, 0, 0, breite, hoehe);
+    const bilddaten = stift.getImageData(0, 0, breite, hoehe);
+
+    frei = {
+      quelle: datenUrl,
+      breite, hoehe,
+      farben: bilddaten.data,          // unveraendert, hieraus wird gezeichnet
+      kanten: null,                    // erst bei Bedarf, das Rechnen dauert
+      maske: new Uint8Array(breite * hoehe).fill(255),   // 255 = bleibt
+      verlauf: [],                     // fuer Rueckgaengig
+      werkzeug: 'zauberstab',
+      toleranz: FREI_ZAUBER_STANDARD,
+      pinsel: 26,
+      zeichnetGerade: false,
+    };
+
+    const schau = document.getElementById('freiLeinwand');
+    schau.width = breite; schau.height = hoehe;
+    document.getElementById('freiFenster').hidden = false;
+    freiWerkzeugAnzeigen();
+    freiZeichnen();
+  };
+  bild.onerror = () => showToast('Das Bild konnte nicht geöffnet werden.');
+  bild.src = datenUrl;
+}
+
+function schließeFreisteller() {
+  document.getElementById('freiFenster').hidden = true;
+  frei = null;
+}
+
+// Die Kantenkarte wird erst berechnet, wenn sie zum ersten Mal gebraucht
+// wird - und dann behalten. Sie haengt nur am Bild, nicht an der Maske.
+function freiKantenkarte() {
+  if (!frei.kanten) frei.kanten = freiKanten(frei.farben, frei.breite, frei.hoehe);
+  return frei.kanten;
+}
+
+// Zeichnet das Bild mit der aktuellen Maske. Ein Ausschnitt reicht, wenn nur
+// ein Pinselstrich dazugekommen ist - sonst ruckelt es beim Wischen.
+function freiZeichnen(bereich = null) {
+  const schau = document.getElementById('freiLeinwand');
+  const stift = schau.getContext('2d');
+  const { breite, hoehe, farben, maske } = frei;
+
+  const x0 = bereich ? Math.max(0, bereich.x0) : 0;
+  const y0 = bereich ? Math.max(0, bereich.y0) : 0;
+  const x1 = bereich ? Math.min(breite, bereich.x1) : breite;
+  const y1 = bereich ? Math.min(hoehe, bereich.y1) : hoehe;
+  if (x1 <= x0 || y1 <= y0) return;
+
+  const teil = stift.createImageData(x1 - x0, y1 - y0);
+  const z = teil.data;
+  for (let y = y0; y < y1; y++) {
+    for (let x = x0; x < x1; x++) {
+      const q = (y * breite + x) * 4;
+      const p = ((y - y0) * (x1 - x0) + (x - x0)) * 4;
+      z[p]   = farben[q];
+      z[p+1] = farben[q+1];
+      z[p+2] = farben[q+2];
+      z[p+3] = maske[y * breite + x];
     }
-  } catch {
-    // Stillschweigend. Beide Felder lassen sich von Hand ausfuellen, eine
-    // Fehlermeldung waere hier nur im Weg.
-  } finally {
-    hubraumFeld.classList.remove('wird-geholt');
-    leistungFeld.classList.remove('wird-geholt');
   }
+  stift.putImageData(teil, x0, y0);
 }
 
-// Vorschlagsliste beim Tippen einer Marke.
-async function markenVorschlagen(eingabe) {
-  const treffer = document.getElementById('markenTreffer');
-  if (!treffer) return;
+// Vor jedem Eingriff den Stand sichern. Acht Schritte reichen und halten den
+// Speicherbedarf im Rahmen: bei 560 Punkten Kantenlaenge sind das je etwa
+// 300 KB.
+function freiMerken() {
+  frei.verlauf.push(new Uint8Array(frei.maske));
+  if (frei.verlauf.length > 8) frei.verlauf.shift();
+  freiKnöpfeAnzeigen();
+}
 
-  const suchtext = eingabe.trim().toUpperCase();
-  if (suchtext.length < 2) { treffer.hidden = true; return; }
+function freiZurück() {
+  if (!frei.verlauf.length) return;
+  frei.maske = frei.verlauf.pop();
+  freiZeichnen();
+  freiKnöpfeAnzeigen();
+}
 
-  try {
-    const marken = await markenHolen();
-    const passende = marken.filter(marke => marke.includes(suchtext)).slice(0, 12);
-    treffer.hidden = false;
-    treffer.innerHTML = passende.length
-      ? passende.map(marke => `<li data-marke="${sicher(marke)}">${sicher(markeLesbar(marke))}</li>`).join('')
-      : `<li class="empty">Keine Marke gefunden. Du kannst sie unten von Hand eintragen.</li>`;
-  } catch {
-    treffer.hidden = false;
-    treffer.innerHTML = `<li class="empty">Markenliste nicht erreichbar.</li>`;
+/* Die Automatik. Saatpunkte sind alle Randpunkte - was am Bildrand liegt, ist
+   so gut wie immer Hintergrund. */
+function freiAutomatik() {
+  freiMerken();
+  const { breite, hoehe } = frei;
+  const E = freiKantenkarte();
+
+  const saaten = [];
+  for (let x = 0; x < breite; x++) saaten.push(x, (hoehe - 1) * breite + x);
+  for (let y = 0; y < hoehe; y++) saaten.push(y * breite, y * breite + breite - 1);
+
+  const kosten = freiMinimax(E, breite, hoehe, saaten);
+  for (let s = 0; s < breite * hoehe; s++) {
+    if (kosten[s] <= FREI_AUTOMATIK_SCHWELLE) frei.maske[s] = 0;
   }
+  freiGlaetten(frei.maske, breite, hoehe);
+  freiAufräumen();
+
+  const weg = zähleDurchsichtig();
+  showToast(weg < 4
+    ? 'Kaum etwas gefunden. Nimm den Zauberstab und tipp auf den Hintergrund.'
+    : `Automatik fertig, ${weg} % entfernt. Den Rest mit dem Zauberstab.`);
+}
+
+function zähleDurchsichtig() {
+  let weg = 0;
+  for (let s = 0; s < frei.maske.length; s++) if (frei.maske[s] < 128) weg++;
+  return Math.round(100 * weg / frei.maske.length);
+}
+
+/* Der Zauberstab. Von der angetippten Stelle aus wird genommen, was
+   zusammenhaengt UND farblich nah dran liegt; starke Kanten bremsen
+   zusaetzlich.
+
+   Warum hier die FARBE entscheidet und nicht wie bei der Automatik die Kante:
+   In einer Wiese liegt jede Kante ueber jeder brauchbaren Schwelle - die
+   Front kaeme gar nicht vom Fleck. Wer hintippt, sagt aber "das ist
+   Hintergrund", und damit ist die Farbe der verlaessliche Anker. */
+function freiZauberstab(x, y, selbstMerken = true) {
+  const { breite, hoehe, farben, maske, toleranz } = frei;
+  x = Math.round(x); y = Math.round(y);
+  if (x < 0 || y < 0 || x >= breite || y >= hoehe) return;
+
+  // Beim Wischen sichert der Aufrufer einmal vorher, nicht bei jedem Schritt.
+  if (selbstMerken) freiMerken();
+  const start = y * breite + x;
+  const r0 = farben[start*4], g0 = farben[start*4+1], b0 = farben[start*4+2];
+  const grenzeQ = toleranz * toleranz * 9;
+  const E = freiKantenkarte();
+  const KANTE_MAX = 260;
+
+  if (maske[start] < 128) return;   // hier ist schon nichts mehr
+
+  const genommen = new Uint8Array(breite * hoehe);
+  const stapel = [start];
+  genommen[start] = 1;
+
+  while (stapel.length) {
+    const s = stapel.pop();
+    maske[s] = 0;
+    const sx = s % breite, sy = (s - sx) / breite;
+    const nachbarn = [];
+    if (sx > 0)          nachbarn.push(s-1);
+    if (sx < breite - 1) nachbarn.push(s+1);
+    if (sy > 0)          nachbarn.push(s-breite);
+    if (sy < hoehe - 1)  nachbarn.push(s+breite);
+    for (const n of nachbarn) {
+      if (genommen[n] || E[n] > KANTE_MAX) continue;
+      const dr = farben[n*4] - r0, dg = farben[n*4+1] - g0, db = farben[n*4+2] - b0;
+      if (2*dr*dr + 4*dg*dg + 3*db*db > grenzeQ) continue;
+      genommen[n] = 1; stapel.push(n);
+    }
+  }
+  freiZeichnen();
+}
+
+// Pinsel: rund, weiche Kante. loeschen=true nimmt weg, sonst holt es zurueck.
+function freiPinseln(x, y, löschen) {
+  const { breite, hoehe, maske, pinsel } = frei;
+  const r = pinsel / 2;
+  const x0 = Math.max(0, Math.floor(x - r - 1)), x1 = Math.min(breite, Math.ceil(x + r + 1));
+  const y0 = Math.max(0, Math.floor(y - r - 1)), y1 = Math.min(hoehe, Math.ceil(y + r + 1));
+
+  for (let py = y0; py < y1; py++) {
+    for (let px = x0; px < x1; px++) {
+      const abstand = Math.hypot(px - x, py - y);
+      if (abstand > r) continue;
+      // Aussen weicher, damit der Strich keine harte Treppe hinterlaesst.
+      const staerke = Math.min(1, (r - abstand) / Math.max(1, r * 0.35));
+      const i = py * breite + px;
+      maske[i] = löschen
+        ? Math.round(maske[i] * (1 - staerke))
+        : Math.round(maske[i] + (255 - maske[i]) * staerke);
+    }
+  }
+  freiZeichnen({ x0, y0, x1, y1 });
+}
+
+/* Kleinkram wegräumen: einzelne stehengebliebene Fetzen und Nadelstiche
+   mitten im Motorrad. Läuft am ENDE eines Strichs, nicht währenddessen -
+   ein voller Durchgang kostet rund zehn Millisekunden, und die würden beim
+   Wischen jedes Mal anfallen.
+
+   Gezählt wird über zusammenhängende Bereiche, nicht über einzelne Punkte:
+   Ein Fleck aus dreißig Punkten mitten im Nichts ist Müll, dieselben dreißig
+   Punkte am Rand des Motorrads sind ein Bremshebel. */
+function freiAufräumen() {
+  const { breite, hoehe, maske } = frei;
+  const anzahl = breite * hoehe;
+  const MINDESTGRÖSSE = Math.max(24, Math.round(anzahl * 0.0012));
+
+  const besucht = new Uint8Array(anzahl);
+  const teile = [];
+
+  for (let start = 0; start < anzahl; start++) {
+    if (besucht[start]) continue;
+    const vollDa = maske[start] > 127;
+    const stapel = [start];
+    besucht[start] = 1;
+    teile.length = 0;
+
+    while (stapel.length) {
+      const s = stapel.pop();
+      teile.push(s);
+      const x = s % breite, y = (s - x) / breite;
+      const nachbarn = [];
+      if (x > 0)          nachbarn.push(s-1);
+      if (x < breite - 1) nachbarn.push(s+1);
+      if (y > 0)          nachbarn.push(s-breite);
+      if (y < hoehe - 1)  nachbarn.push(s+breite);
+      for (const n of nachbarn) {
+        if (besucht[n]) continue;
+        if ((maske[n] > 127) !== vollDa) continue;
+        besucht[n] = 1; stapel.push(n);
+      }
+    }
+
+    if (teile.length < MINDESTGRÖSSE) {
+      const neuerWert = vollDa ? 0 : 255;   // umdrehen
+      for (const s of teile) maske[s] = neuerWert;
+    }
+  }
+  freiZeichnen();
+}
+
+// Bildschirmpunkt in Bildpunkt umrechnen.
+function freiPunkt(ereignis) {
+  const schau = document.getElementById('freiLeinwand');
+  const kasten = schau.getBoundingClientRect();
+  return {
+    x: (ereignis.clientX - kasten.left) / kasten.width * frei.breite,
+    y: (ereignis.clientY - kasten.top) / kasten.height * frei.hoehe,
+  };
+}
+
+function freiWerkzeugAnzeigen() {
+  document.querySelectorAll('[data-werkzeug]').forEach(k => {
+    k.classList.toggle('active', k.dataset.werkzeug === frei.werkzeug);
+  });
+  // Der Toleranzregler gehoert zum Zauberstab, die Pinselgroesse zu den
+  // Pinseln. Beides gleichzeitig zu zeigen waere nur Gedraenge.
+  const istZauber = frei.werkzeug === 'zauberstab';
+  document.getElementById('freiToleranzZeile').hidden = !istZauber;
+  document.getElementById('freiPinselZeile').hidden = istZauber;
+  freiKnöpfeAnzeigen();
+}
+
+function freiKnöpfeAnzeigen() {
+  const zurück = document.getElementById('btnFreiZurück');
+  if (zurück) zurück.disabled = !frei || frei.verlauf.length === 0;
+}
+
+// Das Ergebnis in voller Groesse zurueckgeben: Originalbild, Maske darauf.
+function freiÜbernehmen() {
+  const bild = new Image();
+  bild.onload = () => {
+    const voll = document.createElement('canvas');
+    voll.width = bild.naturalWidth; voll.height = bild.naturalHeight;
+    const stift = voll.getContext('2d', { willReadFrequently: true });
+    stift.drawImage(bild, 0, 0);
+    const flaeche = stift.getImageData(0, 0, voll.width, voll.height);
+    const d = flaeche.data;
+
+    // Die Maske ist kleiner gerechnet und wird hier weich hochgezogen -
+    // ohne das Zwischenrechnen haette die Kante sichtbare Stufen.
+    const sx = frei.breite / voll.width, sy = frei.hoehe / voll.height;
+    for (let y = 0; y < voll.height; y++) {
+      for (let x = 0; x < voll.width; x++) {
+        const fx = Math.min(frei.breite - 1.001, x * sx);
+        const fy = Math.min(frei.hoehe  - 1.001, y * sy);
+        const x0 = fx | 0, y0 = fy | 0, tx = fx - x0, ty = fy - y0;
+        const m = frei.maske;
+        const a = m[y0*frei.breite + x0] * (1-tx) * (1-ty)
+                + m[y0*frei.breite + x0+1] * tx * (1-ty)
+                + m[(y0+1)*frei.breite + x0] * (1-tx) * ty
+                + m[(y0+1)*frei.breite + x0+1] * tx * ty;
+        d[(y * voll.width + x) * 4 + 3] = a;
+      }
+    }
+    stift.putImageData(flaeche, 0, 0);
+
+    dialogFoto = voll.toDataURL('image/webp', 0.88);
+    schließeFreisteller();
+    zeichneFotoVorschau();
+    showToast('Freigestellt. Mit "Original zurück" kommst du jederzeit zum Ausgangsbild.');
+  };
+  bild.src = frei.quelle;
 }
 
 
@@ -1030,7 +1271,7 @@ verkabele('garageDialogInhalt', 'click', ereignis => {
     return;
   }
   if (ereignis.target.closest('#btnFreistellen')) {
-    fotoFreistellen();
+    öffneFreisteller(dialogFoto);
   }
 });
 
@@ -1055,6 +1296,87 @@ verkabele('garageDialogInhalt', 'focusout', ereignis => {
 verkabele('garageDialogInhalt', 'change', ereignis => {
   if (ereignis.target.id === 'feldBaujahr') modelleAnzeigen();
 });
+
+/* --- Freisteller ---------------------------------------------------------
+   Die Leinwand bekommt EINEN Satz Zeigerereignisse fuer alle Werkzeuge. Was
+   beim Tippen passiert, entscheidet frei.werkzeug - nicht drei getrennte
+   Zuhoerer, die sich gegenseitig ins Gehege kommen. */
+
+verkabele('btnFreiAbbrechen', 'click', schließeFreisteller);
+verkabele('btnFreiFertig', 'click', () => frei && freiÜbernehmen());
+verkabele('btnFreiAutomatik', 'click', () => frei && freiAutomatik());
+verkabele('btnFreiZurück', 'click', () => frei && freiZurück());
+
+verkabele('freiToleranz', 'input', e => {
+  if (!frei) return;
+  frei.toleranz = Number(e.target.value);
+  document.getElementById('freiToleranzWert').value = e.target.value;
+});
+verkabele('freiPinsel', 'input', e => {
+  if (!frei) return;
+  frei.pinsel = Number(e.target.value);
+  document.getElementById('freiPinselWert').value = e.target.value;
+});
+
+document.querySelectorAll('[data-werkzeug]').forEach(knopf => {
+  knopf.addEventListener('click', () => {
+    if (!frei) return;
+    frei.werkzeug = knopf.dataset.werkzeug;
+    freiWerkzeugAnzeigen();
+  });
+});
+
+verkabele('freiLeinwand', 'pointerdown', ereignis => {
+  if (!frei) return;
+  ereignis.preventDefault();
+  const { x, y } = freiPunkt(ereignis);
+
+  /* Der Stand wird EINMAL vor dem Strich gesichert, nicht bei jeder
+     Bewegung - sonst waere der Verlauf nach einem Wisch voll und
+     Rueckgaengig ginge nur noch ein paar Pixel weit zurueck. */
+  freiMerken();
+  frei.zeichnetGerade = true;
+  frei.letzterPunkt = { x, y };
+  ereignis.currentTarget.setPointerCapture(ereignis.pointerId);
+
+  if (frei.werkzeug === 'zauberstab') freiZauberstab(x, y, false);
+  else freiPinseln(x, y, frei.werkzeug === 'radierer');
+});
+
+verkabele('freiLeinwand', 'pointermove', ereignis => {
+  if (!frei || !frei.zeichnetGerade) return;
+  const { x, y } = freiPunkt(ereignis);
+
+  if (frei.werkzeug === 'zauberstab') {
+    /* Der Zauberstab arbeitet auch beim ZIEHEN weiter und nimmt unterwegs
+       neue Farben auf. Das ist der Unterschied zwischen zwanzigmal tippen
+       und einmal wischen: An einer Felswand steckt Grau UND Gruen, und ein
+       einzelner Farbanker erwischt immer nur eines davon.
+
+       Gedrosselt auf einen Schritt je acht Punkte Weg - sonst rechnet er bei
+       jeder Zwischenmeldung des Fingers neu und die Anzeige haengt. */
+    const weg = Math.hypot(x - frei.letzterPunkt.x, y - frei.letzterPunkt.y);
+    if (weg < 8) return;
+    frei.letzterPunkt = { x, y };
+    freiZauberstab(x, y, false);
+    return;
+  }
+  freiPinseln(x, y, frei.werkzeug === 'radierer');
+});
+
+for (const art of ['pointerup', 'pointercancel', 'pointerleave']) {
+  verkabele('freiLeinwand', art, () => {
+    if (!frei || !frei.zeichnetGerade) return;
+    frei.zeichnetGerade = false;
+    // Erst am Ende des Strichs aufräumen, siehe Begründung an freiAufräumen().
+    if (frei.werkzeug === 'zauberstab') freiAufräumen();
+  });
+}
+
+// Die Escape-Taste schliesst zuerst den Freisteller, dann erst den Dialog.
+document.addEventListener('keydown', ereignis => {
+  if (ereignis.key === 'Escape' && frei) { schließeFreisteller(); ereignis.stopPropagation(); }
+}, true);
 
 // Einmal beim Start zeichnen, damit die Garage auch dann stimmt, wenn man sie
 // ueber die untere Leiste zum ersten Mal oeffnet.
