@@ -910,10 +910,20 @@ async function markenVorschlagen(eingabe) {
    aendert daran etwas. Genau dafuer gibt es die Pinsel.
    ============================================================================ */
 
-// Groesse, in der gerechnet und bearbeitet wird. Das Ergebnis wird am Ende
-// auf die Groesse des Originals gezogen. 560 ist der Punkt, an dem eine
-// Runde auf dem iPhone noch deutlich unter einer Sekunde bleibt.
-const FREI_ARBEITSKANTE = 560;
+/* ZWEI Groessen, und das ist wichtig:
+
+   ANZEIGE UND MASKE laufen in voller Fotogroesse (hoechstens 1000 Punkte
+   Kante). Vorher wurde alles auf 560 gerechnet und auch so angezeigt - auf
+   einem iPhone mit dreifacher Punktdichte wurde dieses Bild dann auf gut
+   1100 Geraetepunkte aufgeblasen. Daher die Unschaerfe im Editor, und daher
+   war auch der Pinsel grober als noetig.
+
+   GERECHNET wird die Automatik weiter auf einer verkleinerten Fassung. Die
+   Kantensuche und die Minimax-Ausbreitung kosten dort ein Viertel der Zeit,
+   und feiner braucht es die Kantenkarte nicht - sie ist ohnehin ein weiches
+   Feld. Die fertige Maske wird einmal hochgezogen. */
+const FREI_ANZEIGEKANTE = 1000;
+const FREI_RECHENKANTE  = 480;
 
 const FREI_AUTOMATIK_SCHWELLE = 14;   // gemessen: sicherster Wert
 const FREI_ZAUBER_STANDARD    = 28;   // gemessen: haelt in allen Testfaellen
@@ -1042,6 +1052,135 @@ function freiGlaetten(maske, breite, hoehe) {
 
 
 
+
+/* --- Der Freisteller mit Modell --------------------------------------------
+
+   HIER LIEGT DER EIGENTLICHE SPRUNG. Alles Vorherige rechnet mit Kanten und
+   Farben - es weiss nicht, was ein Motorrad IST. Deshalb blieb bei einem Foto
+   vor Bergen der halbe Hintergrund stehen, und ein Flugzeug am Himmel wurde
+   ordentlich freigestellt, weil es rechnerisch genauso ein Objekt ist.
+
+   u2netp ist ein kleines neuronales Netz, das gelernt hat, das AUFFAELLIGSTE
+   Objekt eines Bildes zu finden. Auf einem Motorradfoto ist das die Maschine.
+   Nachgemessen an drei Bildern, darunter ein schwarzes Motorrad auf dunklem
+   Asphalt - der Fall, an dem jedes klassische Verfahren scheitern MUSS, weil
+   dort schlicht keine Kante ist: sauber getrennt.
+
+   WARUM AUSGERECHNET DIESES MODELL, und das war die entscheidende Frage:
+
+   - u2netp steht unter Apache 2.0. Kommerzielle Nutzung ist erlaubt, es muss
+     nur der Lizenzhinweis mitgeliefert werden. Er liegt in modell/.
+   - Die bekannteren RMBG-1.4 und RMBG-2.0 waeren besser, sind aber NUR fuer
+     nicht-kommerzielle Nutzung freigegeben. Mit Werbung in der App scheiden
+     sie aus.
+   - Ebenfalls nicht genommen: u2net_portrait aus demselben Projekt. Es wurde
+     auf einem Datensatz mit nicht-kommerzieller Beschraenkung trainiert.
+
+   WAS ES KOSTET: Beim ersten Mal werden rund 7 MB geladen - 4,4 MB Modell
+   und der Rest die Laufzeitbibliothek, die gepackt ankommt. Danach liegt
+   beides im Zwischenspeicher des Browsers. Geladen wird erst, wenn jemand
+   wirklich auf Automatik drueckt, nicht beim Start der App.
+
+   FAELLT ES AUS - kein Netz, Bibliothek blockiert - springt das klassische
+   Verfahren ein. Das ist kein Beiwerk: Ohne Netz waere der Knopf sonst tot. */
+
+const MODELL_DATEI = 'modell/u2netp.onnx';
+const ORT_BIBLIOTHEK = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/ort.min.js';
+const MODELL_KANTE = 320;          // Eingangsgroesse, vom Modell vorgegeben
+
+let modellSitzung = null;
+let modellLaeuft = null;           // laufendes Laden, damit nicht zweimal
+
+// Laedt Bibliothek und Modell, aber erst beim ersten Bedarf.
+async function modellLaden() {
+  if (modellSitzung) return modellSitzung;
+  if (modellLaeuft) return modellLaeuft;
+
+  modellLaeuft = (async () => {
+    if (!window.ort) {
+      await new Promise((fertig, fehler) => {
+        const skript = document.createElement('script');
+        skript.src = ORT_BIBLIOTHEK;
+        skript.onload = fertig;
+        skript.onerror = () => fehler(new Error('Bibliothek nicht erreichbar'));
+        document.head.appendChild(skript);
+      });
+    }
+    // Ein Rechenweg reicht. Mehrere Faeden braeuchten besondere Kopfzeilen
+    // vom Server, die GitHub Pages nicht setzt.
+    ort.env.wasm.numThreads = 1;
+    ort.env.wasm.simd = true;
+    modellSitzung = await ort.InferenceSession.create(MODELL_DATEI, { executionProviders: ['wasm'] });
+    return modellSitzung;
+  })();
+
+  try { return await modellLaeuft; }
+  finally { modellLaeuft = null; }
+}
+
+/* Rechnet das Bild durch das Modell und gibt eine Maske in Anzeigegroesse
+   zurueck. Die Aufbereitung folgt dem Original: auf 320x320 bringen, durch
+   den groessten Farbwert teilen, dann mit den ueblichen Werten normieren. */
+async function modellMaske() {
+  const sitzung = await modellLaden();
+
+  const l = document.createElement('canvas');
+  l.width = MODELL_KANTE; l.height = MODELL_KANTE;
+  const k = l.getContext('2d', { willReadFrequently: true });
+
+  const quelle = document.createElement('canvas');
+  quelle.width = frei.breite; quelle.height = frei.hoehe;
+  quelle.getContext('2d').putImageData(
+    new ImageData(new Uint8ClampedArray(frei.farben), frei.breite, frei.hoehe), 0, 0);
+  k.drawImage(quelle, 0, 0, MODELL_KANTE, MODELL_KANTE);
+
+  const d = k.getImageData(0, 0, MODELL_KANTE, MODELL_KANTE).data;
+  const punkte = MODELL_KANTE * MODELL_KANTE;
+  const eingabe = new Float32Array(3 * punkte);
+  const mittel = [0.485, 0.456, 0.406], streuung = [0.229, 0.224, 0.225];
+
+  let groesster = 1;
+  for (let i = 0; i < punkte; i++) {
+    if (d[i*4]   > groesster) groesster = d[i*4];
+    if (d[i*4+1] > groesster) groesster = d[i*4+1];
+    if (d[i*4+2] > groesster) groesster = d[i*4+2];
+  }
+  for (let i = 0; i < punkte; i++)
+    for (let c = 0; c < 3; c++)
+      eingabe[c * punkte + i] = (d[i*4+c] / groesster - mittel[c]) / streuung[c];
+
+  const ergebnis = await sitzung.run({
+    [sitzung.inputNames[0]]: new ort.Tensor('float32', eingabe, [1, 3, MODELL_KANTE, MODELL_KANTE]),
+  });
+  const roh = ergebnis[sitzung.outputNames[0]].data;
+
+  let kleinster = Infinity, groesstwert = -Infinity;
+  for (const v of roh) { if (v < kleinster) kleinster = v; if (v > groesstwert) groesstwert = v; }
+  const spanne = Math.max(1e-6, groesstwert - kleinster);
+
+  /* Der Ausgang ist ein weicher Wert zwischen 0 und 1. Ihn direkt als
+     Deckkraft zu nehmen gibt einen Schleier um das Motorrad; ihn hart bei
+     0,5 zu schneiden gibt Treppen. Deshalb eine Rampe: unter 0,35 ganz weg,
+     ueber 0,65 ganz da, dazwischen weich. */
+  const maske = new Uint8Array(frei.breite * frei.hoehe);
+  const sx = MODELL_KANTE / frei.breite, sy = MODELL_KANTE / frei.hoehe;
+  for (let y = 0; y < frei.hoehe; y++) {
+    for (let x = 0; x < frei.breite; x++) {
+      const fx = Math.min(MODELL_KANTE - 1.001, x * sx), fy = Math.min(MODELL_KANTE - 1.001, y * sy);
+      const x0 = fx | 0, y0 = fy | 0, tx = fx - x0, ty = fy - y0;
+      const w = roh[y0*MODELL_KANTE + x0] * (1-tx) * (1-ty)
+              + roh[y0*MODELL_KANTE + x0+1] * tx * (1-ty)
+              + roh[(y0+1)*MODELL_KANTE + x0] * (1-tx) * ty
+              + roh[(y0+1)*MODELL_KANTE + x0+1] * tx * ty;
+      const v = (w - kleinster) / spanne;
+      const rampe = Math.min(1, Math.max(0, (v - 0.35) / 0.30));
+      maske[y*frei.breite + x] = Math.round(255 * rampe);
+    }
+  }
+  return maske;
+}
+
+
 /* --- Der Freisteller als Werkzeug ------------------------------------------
    Ein eigenes Fenster ueber dem Dialog. Der Nutzer sieht sein Foto auf einem
    Schachbrett - dort, wo es durchsichtig ist, scheint das Muster durch - und
@@ -1059,7 +1198,7 @@ function freiGlaetten(maske, breite, hoehe) {
 function öffneFreisteller(datenUrl) {
   const bild = new Image();
   bild.onload = () => {
-    const faktor = Math.min(1, FREI_ARBEITSKANTE / Math.max(bild.naturalWidth, bild.naturalHeight));
+    const faktor = Math.min(1, FREI_ANZEIGEKANTE / Math.max(bild.naturalWidth, bild.naturalHeight));
     const breite = Math.max(1, Math.round(bild.naturalWidth * faktor));
     const hoehe  = Math.max(1, Math.round(bild.naturalHeight * faktor));
 
@@ -1069,12 +1208,26 @@ function öffneFreisteller(datenUrl) {
     stift.drawImage(bild, 0, 0, breite, hoehe);
     const bilddaten = stift.getImageData(0, 0, breite, hoehe);
 
+    // Die verkleinerte Fassung fuer die Rechnerei.
+    const kFaktor = Math.min(1, FREI_RECHENKANTE / Math.max(breite, hoehe));
+    const kBreite = Math.max(1, Math.round(breite * kFaktor));
+    const kHoehe  = Math.max(1, Math.round(hoehe * kFaktor));
+    const kleinLeinwand = document.createElement('canvas');
+    kleinLeinwand.width = kBreite; kleinLeinwand.height = kHoehe;
+    kleinLeinwand.getContext('2d', { willReadFrequently: true })
+                 .drawImage(bild, 0, 0, kBreite, kHoehe);
+
     frei = {
       quelle: datenUrl,
       breite, hoehe,
       farben: bilddaten.data,          // unveraendert, hieraus wird gezeichnet
-      kanten: null,                    // erst bei Bedarf, das Rechnen dauert
       maske: new Uint8Array(breite * hoehe).fill(255),   // 255 = bleibt
+      klein: {
+        breite: kBreite, hoehe: kHoehe,
+        farben: kleinLeinwand.getContext('2d', { willReadFrequently: true })
+                             .getImageData(0, 0, kBreite, kHoehe).data,
+        kanten: null,                  // erst bei Bedarf, das Rechnen dauert
+      },
       verlauf: [],                     // fuer Rueckgaengig
       werkzeug: 'zauberstab',
       toleranz: FREI_ZAUBER_STANDARD,
@@ -1100,8 +1253,19 @@ function schließeFreisteller() {
 // Die Kantenkarte wird erst berechnet, wenn sie zum ersten Mal gebraucht
 // wird - und dann behalten. Sie haengt nur am Bild, nicht an der Maske.
 function freiKantenkarte() {
-  if (!frei.kanten) frei.kanten = freiKanten(frei.farben, frei.breite, frei.hoehe);
-  return frei.kanten;
+  const k = frei.klein;
+  if (!k.kanten) k.kanten = freiKanten(k.farben, k.breite, k.hoehe);
+  return k.kanten;
+}
+
+/* Kantenstärke an einer Stelle der GROSSEN Maske nachschlagen. Die Karte
+   liegt verkleinert vor; hier wird umgerechnet. Nächster Nachbar reicht -
+   die Kantenkarte ist ein weiches Feld, da fällt Zwischenrechnen nicht auf. */
+function freiKanteBei(x, y) {
+  const k = frei.klein;
+  const kx = Math.min(k.breite - 1, (x * k.breite / frei.breite) | 0);
+  const ky = Math.min(k.hoehe - 1, (y * k.hoehe / frei.hoehe) | 0);
+  return freiKantenkarte()[ky * k.breite + kx];
 }
 
 // Zeichnet das Bild mit der aktuellen Maske. Ein Ausschnitt reicht, wenn nur
@@ -1150,20 +1314,73 @@ function freiZurück() {
 
 /* Die Automatik. Saatpunkte sind alle Randpunkte - was am Bildrand liegt, ist
    so gut wie immer Hintergrund. */
-function freiAutomatik() {
-  freiMerken();
-  const { breite, hoehe } = frei;
+/* Die Automatik. Erst das Modell, und nur wenn das nicht geht, das
+   klassische Verfahren. Waehrend geladen wird, muss der Knopf sagen, dass
+   etwas passiert - beim ersten Mal dauert es einige Sekunden, und ohne
+   Rueckmeldung wirkt das wie ein Absturz. */
+async function freiAutomatik() {
+  const knopf = document.getElementById('btnFreiAutomatik');
+  if (knopf.disabled) return;
+  knopf.disabled = true;
+  const beschriftung = knopf.querySelector('span');
+  const vorher = beschriftung.textContent;
+  beschriftung.textContent = 'Rechnet …';
+
+  try {
+    freiMerken();
+    const maske = await modellMaske();
+    // Nur wegnehmen, nie zurueckholen: Was von Hand entfernt wurde, bleibt weg.
+    for (let s = 0; s < frei.maske.length; s++) {
+      if (maske[s] < frei.maske[s]) frei.maske[s] = maske[s];
+    }
+    freiAufräumen();
+    freiZeichnen();
+    const weg = zähleDurchsichtig();
+    showToast(`Freigestellt, ${weg} % entfernt. Reste mit dem Zauberstab, Feinheiten mit den Pinseln.`);
+  } catch (fehler) {
+    // Ohne Netz oder mit blockierter Bibliothek: das klassische Verfahren.
+    showToast('Modell nicht erreichbar, nehme das einfache Verfahren.');
+    freiAutomatikKlassisch();
+  } finally {
+    beschriftung.textContent = vorher;
+    knopf.disabled = false;
+    freiKnöpfeAnzeigen();
+  }
+}
+
+function freiAutomatikKlassisch() {
+  const k = frei.klein;
   const E = freiKantenkarte();
 
   const saaten = [];
-  for (let x = 0; x < breite; x++) saaten.push(x, (hoehe - 1) * breite + x);
-  for (let y = 0; y < hoehe; y++) saaten.push(y * breite, y * breite + breite - 1);
+  for (let x = 0; x < k.breite; x++) saaten.push(x, (k.hoehe - 1) * k.breite + x);
+  for (let y = 0; y < k.hoehe; y++) saaten.push(y * k.breite, y * k.breite + k.breite - 1);
 
-  const kosten = freiMinimax(E, breite, hoehe, saaten);
-  for (let s = 0; s < breite * hoehe; s++) {
-    if (kosten[s] <= FREI_AUTOMATIK_SCHWELLE) frei.maske[s] = 0;
+  const kosten = freiMinimax(E, k.breite, k.hoehe, saaten);
+
+  // Ergebnis in der kleinen Fassung aufraeumen, danach hochziehen.
+  const kleinMaske = new Uint8Array(k.breite * k.hoehe);
+  for (let s = 0; s < k.breite * k.hoehe; s++) {
+    kleinMaske[s] = kosten[s] <= FREI_AUTOMATIK_SCHWELLE ? 0 : 255;
   }
-  freiGlaetten(frei.maske, breite, hoehe);
+  freiGlaetten(kleinMaske, k.breite, k.hoehe);
+
+  // Auf die Anzeigegroesse ziehen, mit Zwischenrechnen fuer weiche Kanten.
+  const sx = k.breite / frei.breite, sy = k.hoehe / frei.hoehe;
+  for (let y = 0; y < frei.hoehe; y++) {
+    for (let x = 0; x < frei.breite; x++) {
+      const fx = Math.min(k.breite - 1.001, x * sx), fy = Math.min(k.hoehe - 1.001, y * sy);
+      const x0 = fx | 0, y0 = fy | 0, tx = fx - x0, ty = fy - y0;
+      const a = kleinMaske[y0*k.breite + x0] * (1-tx) * (1-ty)
+              + kleinMaske[y0*k.breite + x0+1] * tx * (1-ty)
+              + kleinMaske[(y0+1)*k.breite + x0] * (1-tx) * ty
+              + kleinMaske[(y0+1)*k.breite + x0+1] * tx * ty;
+      // Nur wegnehmen, nie zurueckholen - was der Nutzer schon von Hand
+      // entfernt hat, bleibt entfernt.
+      if (a < 128) frei.maske[y*frei.breite + x] = 0;
+    }
+  }
+
   freiAufräumen();
   const einzelteile = freiNurHauptobjekt();
 
@@ -1200,7 +1417,7 @@ function freiZauberNachziehen() {
   for (const punkt of frei.letzterStrich.stellen) {
     freiZauberstab(punkt.x, punkt.y, false, false);
   }
-  freiAufräumen();
+  freiAufräumen(true);
 }
 
 function freiZauberstab(x, y, selbstMerken = true, aufzeichnen = true) {
@@ -1214,7 +1431,6 @@ function freiZauberstab(x, y, selbstMerken = true, aufzeichnen = true) {
   const start = y * breite + x;
   const r0 = farben[start*4], g0 = farben[start*4+1], b0 = farben[start*4+2];
   const grenzeQ = toleranz * toleranz * 9;
-  const E = freiKantenkarte();
 
   /* Die Empfindlichkeit steuert BEIDES: wie weit die Farbe abweichen darf und
      wie starke Kanten überlaufen werden dürfen.
@@ -1257,7 +1473,9 @@ function freiZauberstab(x, y, selbstMerken = true, aufzeichnen = true) {
     if (sy > 0)          nachbarn.push(s-breite);
     if (sy < hoehe - 1)  nachbarn.push(s+breite);
     for (const n of nachbarn) {
-      if (genommen[n] || E[n] > KANTE_MAX) continue;
+      if (genommen[n]) continue;
+      const nx = n % breite, ny = (n - nx) / breite;
+      if (freiKanteBei(nx, ny) > KANTE_MAX) continue;
       const dr = farben[n*4] - r0, dg = farben[n*4+1] - g0, db = farben[n*4+2] - b0;
       if (2*dr*dr + 4*dg*dg + 3*db*db > grenzeQ) continue;
       genommen[n] = 1; stapel.push(n);
@@ -1312,10 +1530,27 @@ function freiPinseln(x, y, löschen) {
    Gezählt wird über zusammenhängende Bereiche, nicht über einzelne Punkte:
    Ein Fleck aus dreißig Punkten mitten im Nichts ist Müll, dieselben dreißig
    Punkte am Rand des Motorrads sind ein Bremshebel. */
-function freiAufräumen() {
+/* Kleinkram wegräumen.
+
+   ACHTUNG, hier steckte ein Fehler, der wie ein kaputtes Werkzeug aussah:
+   Diese Funktion drehte JEDEN zusammenhängenden Bereich unter der Mindest-
+   größe um - auch einen frisch durchsichtig gemachten. Ein Zauberstab-Tipper,
+   der eine kleine Fläche nahm, wurde damit sofort wieder zugemalt. Für den
+   Nutzer sah das aus, als passiere gar nichts.
+
+   Deshalb zwei getrennte Richtungen:
+
+     nurInseln = false   nach der Automatik: stehengebliebene Fetzen weg UND
+                         Nadelstiche mitten im Motorrad wieder zu
+     nurInseln = true    nach einer Handarbeit: NUR stehengebliebene Fetzen,
+                         und nur richtig kleine. Was der Nutzer weggenommen
+                         hat, bleibt weg. */
+function freiAufräumen(nurInseln = false) {
   const { breite, hoehe, maske } = frei;
   const anzahl = breite * hoehe;
-  const MINDESTGRÖSSE = Math.max(24, Math.round(anzahl * 0.0012));
+  const MINDESTGRÖSSE = nurInseln
+    ? Math.max(12, Math.round(anzahl * 0.0002))
+    : Math.max(24, Math.round(anzahl * 0.0012));
 
   const besucht = new Uint8Array(anzahl);
   const teile = [];
@@ -1323,6 +1558,8 @@ function freiAufräumen() {
   for (let start = 0; start < anzahl; start++) {
     if (besucht[start]) continue;
     const vollDa = maske[start] > 127;
+    // Bei der Handarbeit werden durchsichtige Bereiche gar nicht erst
+    // angefasst - genau das war der Fehler.
     const stapel = [start];
     besucht[start] = 1;
     teile.length = 0;
@@ -1331,26 +1568,21 @@ function freiAufräumen() {
       const s = stapel.pop();
       teile.push(s);
       const x = s % breite, y = (s - x) / breite;
-      const nachbarn = [];
-      if (x > 0)          nachbarn.push(s-1);
-      if (x < breite - 1) nachbarn.push(s+1);
-      if (y > 0)          nachbarn.push(s-breite);
-      if (y < hoehe - 1)  nachbarn.push(s+breite);
-      for (const n of nachbarn) {
-        if (besucht[n]) continue;
-        if ((maske[n] > 127) !== vollDa) continue;
-        besucht[n] = 1; stapel.push(n);
-      }
+      if (x > 0          && !besucht[s-1]      && (maske[s-1]      > 127) === vollDa) { besucht[s-1]=1;      stapel.push(s-1); }
+      if (x < breite - 1 && !besucht[s+1]      && (maske[s+1]      > 127) === vollDa) { besucht[s+1]=1;      stapel.push(s+1); }
+      if (y > 0          && !besucht[s-breite] && (maske[s-breite] > 127) === vollDa) { besucht[s-breite]=1; stapel.push(s-breite); }
+      if (y < hoehe - 1  && !besucht[s+breite] && (maske[s+breite] > 127) === vollDa) { besucht[s+breite]=1; stapel.push(s+breite); }
     }
 
-    if (teile.length < MINDESTGRÖSSE) {
-      const neuerWert = vollDa ? 0 : 255;   // umdrehen
-      for (const s of teile) maske[s] = neuerWert;
-    }
+    if (teile.length >= MINDESTGRÖSSE) continue;
+    if (nurInseln && !vollDa) continue;        // Weggenommenes bleibt weg
+    const neuerWert = vollDa ? 0 : 255;
+    for (const s of teile) maske[s] = neuerWert;
   }
   freiZeichnen();
 }
 
+// Bildschirmpunkt in Bildpunkt umrechnen.
 /* Behält nur das Hauptobjekt und wirft freistehende Einzelteile weg.
 
    Der Anlass ist ein echtes Bild: Auf Friedrichs Foto steht ein Flugzeug am
@@ -1402,7 +1634,6 @@ function freiNurHauptobjekt() {
   return entfernt;
 }
 
-// Bildschirmpunkt in Bildpunkt umrechnen.
 /* Bildschirmpunkt in Bildpunkt umrechnen.
 
    Der Umweg ueber das tatsaechlich gezeichnete Rechteck ist noetig, weil die
@@ -1454,8 +1685,8 @@ function freiÜbernehmen() {
     const flaeche = stift.getImageData(0, 0, voll.width, voll.height);
     const d = flaeche.data;
 
-    // Die Maske ist kleiner gerechnet und wird hier weich hochgezogen -
-    // ohne das Zwischenrechnen haette die Kante sichtbare Stufen.
+    // Die Maske hat Anzeigegroesse, das Original kann groesser sein -
+    // deshalb weiter mit Zwischenrechnen, sonst haette die Kante Stufen.
     const sx = frei.breite / voll.width, sy = frei.hoehe / voll.height;
     for (let y = 0; y < voll.height; y++) {
       for (let x = 0; x < voll.width; x++) {
@@ -1711,7 +1942,7 @@ for (const art of ['pointerup', 'pointercancel']) {
     if (!frei || !frei.zeichnetGerade) return;
     frei.zeichnetGerade = false;
     // Erst am Ende des Strichs aufräumen, siehe Begründung an freiAufräumen().
-    if (frei.werkzeug === 'zauberstab') freiAufräumen();
+    if (frei.werkzeug === 'zauberstab') freiAufräumen(true);
   });
 }
 

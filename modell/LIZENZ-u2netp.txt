@@ -1,0 +1,33 @@
+u2netp.onnx - Modell zum Freistellen von Objekten
+
+Herkunft
+--------
+U^2-Net (U-Square Net), kleine Fassung "u2netp", rund 1,1 Millionen
+Parameter. Aus dem Projekt:
+
+    https://github.com/xuebinqin/U-2-Net
+
+Veroeffentlicht zu:
+    Qin, Zhang, Huang, Dehghan, Zaiane, Jagersand:
+    "U^2-Net: Going Deeper with Nested U-Structure for Salient Object
+    Detection", Pattern Recognition, 2020.
+
+Die hier abgelegte ONNX-Fassung stammt aus der Veroeffentlichung des
+Projekts rembg (https://github.com/danielgatis/rembg).
+
+Lizenz
+------
+Apache License 2.0. Kommerzielle Nutzung ist ausdruecklich erlaubt,
+Bedingung ist die Weitergabe dieses Lizenzhinweises. Der vollstaendige
+Lizenztext liegt daneben in APACHE-2.0.txt.
+
+WICHTIG, warum ausgerechnet dieses Modell
+-----------------------------------------
+Die bekannteren und teils besseren Modelle RMBG-1.4 und RMBG-2.0 von BRIA
+sind NUR FUER NICHT-KOMMERZIELLE NUTZUNG freigegeben; fuer alles andere
+verlangt der Anbieter einen eigenen Vertrag. Da Kurvenjagd ueber Werbung
+finanziert werden soll, scheiden sie aus.
+
+Ebenfalls nicht verwendet wird "u2net_portrait" aus demselben Projekt: Es
+wurde auf dem APDrawing-Datensatz trainiert, der eine Beschraenkung auf
+nicht-kommerzielle Nutzung traegt.
