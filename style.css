@@ -1832,25 +1832,48 @@ body.nav-modus #panel {
   pointer-events: none;
 }
 
-.motorrad-drehfeld {
+.motorrad-ansicht {
   position: relative;
   width: 100%; height: 100%;
   display: flex; align-items: center; justify-content: center;
-  cursor: grab;
-  /* OHNE DIESE ZEILE funktioniert das Drehen auf dem Handy nicht: der
-     Browser deutet das Wischen sonst als Scrollen und nimmt uns die
-     Bewegung weg, bevor wir sie ueberhaupt sehen. */
-  touch-action: none;
-  -webkit-user-select: none; user-select: none;
 }
-.motorrad-drehfeld[hidden] { display: none; }
-.motorrad-drehfeld.wird-gedreht { cursor: grabbing; }
+.motorrad-ansicht[hidden] { display: none; }
+
+/* Die Zeichnung tritt an die Stelle des Bildes, solange keine Bildquelle
+   eingerichtet ist. Sie traegt den Modellnamen, damit die Buehne trotzdem
+   etwas aussagt und nicht nach fehlgeschlagenem Laden aussieht. */
+.motorrad-zeichnung {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s3);
+  color: var(--muted);
+}
+.motorrad-zeichnung[hidden] { display: none; }
+.motorrad-strich {
+  width: clamp(130px, 40vw, 190px);
+  height: clamp(130px, 40vw, 190px);
+  stroke-width: 1.05;
+  opacity: 0.75;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.6));
+}
+.zeichnung-text {
+  font-family: var(--schrift-display);
+  font-weight: 600;
+  font-size: clamp(15px, 4.4vw, 19px);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--text);
+  opacity: 0.8;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+}
 
 .motorrad-bild {
   max-width: 100%; max-height: 100%;
   object-fit: contain;
   -webkit-user-drag: none;
-  pointer-events: none;   /* das Ziehen gehoert dem Drehfeld, nicht dem Bild */
   /* Die weiche Maske laesst die Fotokanten in den Raum auslaufen. Genau das
      unterscheidet "Motorrad steht in der Garage" von "Foto haengt an der
      Wand". Zwei Verlaeufe uebereinander, die miteinander verrechnet werden:
@@ -1888,19 +1911,6 @@ body.nav-modus #panel {
 .motorrad-platzhalter:hover { color: var(--text); border-color: rgba(255, 255, 255, 0.4); }
 .motorrad-platzhalter-symbol { width: 44px; height: 44px; stroke-width: 1.2; }
 
-.dreh-hinweis {
-  position: absolute;
-  left: 0; right: 0; bottom: 10px;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  color: var(--muted);
-  font-size: 11.5px;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
-}
-.dreh-hinweis[hidden] { display: none; }
 
 /* ---------- Was unter dem Raum steht ---------- */
 .garage-inhalt {
@@ -2028,56 +2038,10 @@ body.nav-modus #panel {
 .dialog-paar > div { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
 .dialog-paar label { margin-top: var(--s3); }
 
-.dialog-bilder { display: flex; flex-direction: column; gap: var(--s2); }
-.dialog-bilder-kopf {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--s3);
-}
-.dialog-bilder .hint { margin: 0; }
 .btn.klein { flex: 0 0 auto; padding: 7px 11px; font-size: 12.5px; }
 
-.dialog-bilder-streifen {
-  display: flex;
-  gap: var(--s2);
-  overflow-x: auto;
-  padding-bottom: 4px;
-  min-height: 20px;
-}
-.dialog-bilder-streifen .tiny { margin: 0; align-self: center; }
 
-.dialog-bild {
-  position: relative;
-  flex: 0 0 auto;
-  width: 74px; height: 74px;
-  border-radius: var(--r-sm);
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-}
-.dialog-bild img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-/* Die Nummer zeigt die Reihenfolge. Bei einer Drehserie ist sie kein
-   Schmuck: sie bestimmt, in welcher Richtung sich die Maschine dreht. */
-.dialog-bild-nr {
-  position: absolute; left: 3px; top: 3px;
-  min-width: 17px; padding: 0 4px;
-  border-radius: 9px;
-  background: rgba(0, 0, 0, 0.68);
-  color: var(--text);
-  font-size: 10px; line-height: 17px; text-align: center;
-  font-variant-numeric: tabular-nums;
-}
-.dialog-bild-weg {
-  position: absolute; right: 2px; top: 2px;
-  width: 20px; height: 20px;
-  border: 0; border-radius: 50%;
-  background: rgba(0, 0, 0, 0.68);
-  color: var(--text);
-  font-size: 15px; line-height: 1;
-  cursor: pointer;
-}
-.dialog-bild-weg:hover { background: var(--danger); }
 
 .garage-dialog-fuss {
   flex: 0 0 auto;
@@ -2088,3 +2052,80 @@ body.nav-modus #panel {
 }
 .garage-dialog-fuss .btn.ghost { flex: 0 0 auto; color: var(--danger); }
 .garage-dialog-fuss .btn.ghost[hidden] { display: none; }
+
+/* ---------- Der Motorrad-Finder im Dialog ----------
+   Marke als Knopfreihe, weil die Fahrzeugdatenbank 1684 Marken kennt und
+   die allermeisten davon amerikanische Kleinstserien sind. Zwoelf Knoepfe
+   decken ab, was in Deutschland tatsaechlich faehrt; fuer alles andere gibt
+   es darunter die Suche. */
+.finder {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+  padding: var(--s3);
+  margin-bottom: var(--s3);
+  border-radius: var(--r-md);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.04);
+}
+.finder .label { margin: 0; }
+.finder .hint { margin: 0; }
+.finder .dialog-paar label:first-child,
+.finder > label { margin-top: var(--s2); }
+
+.finder-marken { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.marken-chip,
+.modell-chip {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  border-radius: var(--r-sm);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted);
+  font-family: var(--schrift-text);
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: color 0.14s ease, border-color 0.14s ease, background 0.14s ease;
+}
+.marken-chip:hover,
+.modell-chip:hover { color: var(--text); border-color: rgba(255, 255, 255, 0.3); }
+.marken-chip.active,
+.modell-chip.active {
+  color: var(--accent-ink);
+  background: var(--accent);
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+/* Die Modelltreffer koennen je nach Marke und Jahr siebzig Eintraege sein.
+   Ohne Hoehenbegrenzung waere der halbe Dialog eine Knopfwueste, deshalb
+   scrollt der Kasten in sich. */
+.finder-modelle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 132px;
+  overflow-y: auto;
+  padding: 2px;
+}
+.finder-modelle[hidden] { display: none; }
+.finder-modelle .tiny { margin: 0; width: 100%; }
+
+/* Die Trefferliste der Markensuche liegt direkt unter dem Eingabefeld und
+   soll den Dialog nicht laenger machen, sondern in sich scrollen. */
+.garage-dialog-inhalt .search-results {
+  position: static;
+  max-height: 180px;
+  margin: 0;
+}
+
+/* Ein Hinweis, der als Kasten dasteht statt als Kleingedrucktes - fuer die
+   Stelle, an der etwas noch nicht fertig ist und der Grund dazugehoert. */
+.hinweis-kasten {
+  padding: var(--s3);
+  border-radius: var(--r-md);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.04);
+  margin-bottom: var(--s2) !important;
+}

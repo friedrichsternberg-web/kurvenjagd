@@ -38,10 +38,10 @@
        durchgehend alte Version, weil die Seite dann Elemente enthält, die
        das Skript noch gar nicht kennt.
 
-       Für den Browser ist "app.js?v=14" eine andere Adresse als "app.js?v=13",
+       Für den Browser ist "app.js?v=15" eine andere Adresse als "app.js?v=14",
        er holt sie also frisch. Wichtig: BEI JEDER VERÖFFENTLICHUNG die Zahl
        an allen drei Stellen um eins erhöhen. -->
-  <link rel="stylesheet" href="style.css?v=14">
+  <link rel="stylesheet" href="style.css?v=15">
 </head>
 <body>
 
@@ -270,21 +270,30 @@
       <div class="hakenleiste" id="hakenleiste"></div>
 
       <!-- Die Buehne. Der Schatten liegt als eigene Flaeche darunter, damit
-           die Maschine auf dem Boden steht statt darueber zu schweben. -->
+           die Maschine auf dem Boden steht statt darueber zu schweben.
+
+           Zwei Zustaende teilen sich den Platz: das Bild aus der
+           Fahrzeugdatenbank, oder - solange es keine Bildquelle gibt - eine
+           Zeichnung mit dem Modellnamen. Die Zeichnung ist kein Notbehelf
+           fuer den Uebergang, sie ist das, was man ohne bezahlte
+           Schnittstelle dauerhaft sieht. Deshalb steht der Name darunter,
+           damit die Buehne trotzdem etwas aussagt. -->
       <div class="garage-buehne">
         <div class="motorrad-schatten" aria-hidden="true"></div>
 
-        <div class="motorrad-drehfeld" id="motorradDrehfeld" hidden>
-          <img id="motorradBild" class="motorrad-bild" alt="Mein Motorrad">
+        <div class="motorrad-ansicht" id="motorradAnsicht" hidden>
+          <img id="motorradBild" class="motorrad-bild" alt="" hidden>
+          <div class="motorrad-zeichnung" id="motorradZeichnung">
+            <svg class="ic motorrad-strich"><use href="#icon-motorrad"></use></svg>
+            <span class="zeichnung-text" id="zeichnungText"></span>
+          </div>
         </div>
 
         <button class="motorrad-platzhalter" id="motorradPlatzhalter">
           <svg class="ic motorrad-platzhalter-symbol"><use href="#icon-motorrad"></use></svg>
-          <span>Motorrad hinzuf&uuml;gen</span>
+          <span>Motorrad suchen</span>
         </button>
       </div>
-
-      <p class="dreh-hinweis" id="drehHinweis" hidden></p>
     </div>
 
     <!-- Alles unter dem Raum scrollt. -->
@@ -292,8 +301,7 @@
 
       <div id="garageOhneMotorrad" class="garage-leer" hidden>
         <p class="hint">
-          Stell deine Maschine in die Garage: ein Foto reicht. Gehst du einmal
-          rundherum und w&auml;hlst alle Bilder aus, l&auml;sst sie sich hier drehen.
+          Such deine Maschine heraus: Marke, Baujahr, Modell. Kein Foto n&ouml;tig.
         </p>
       </div>
 
@@ -795,18 +803,12 @@
     </div>
   </div>
 
-  <!-- Eigene Dateiauswahl fuer die Garage. Bewusst NICHT dieselbe wie fuer
-       die Tourfotos (#fotoEingabe): sonst muessten beide sich merken, wer
-       gerade gefragt hat, und genau daraus entstehen die Fehler, bei denen
-       ein Foto im falschen Ordner landet. -->
-  <input type="file" id="garageFotoEingabe" accept="image/*" multiple hidden>
-
-  <script src="app.js?v=14"></script>
+  <script src="app.js?v=15"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=14"></script>
+  <script src="konto.js?v=15"></script>
   <!-- Nach app.js, weil die Garage verkleinereFoto() und showToast() von
        dort benutzt. -->
-  <script src="garage.js?v=14"></script>
+  <script src="garage.js?v=15"></script>
 </body>
 </html>
