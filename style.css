@@ -2247,12 +2247,14 @@ body.nav-modus #panel {
   justify-content: center;
   padding: var(--s3);
   overflow: hidden;
+  /* Verhindert, dass ein Wisch ueber die Leinwand die Seite dahinter
+     mitzieht - auf dem Handy sonst ein sicherer Weg, den Strich zu verlieren. */
+  overscroll-behavior: contain;
 }
 
 .frei-leinwand {
   max-width: 100%;
   max-height: 100%;
-  object-fit: contain;
   border-radius: var(--r-md);
   /* OHNE touch-action: none nimmt der Browser das Wischen als Scrollen und
      der Pinsel bekommt die Bewegung nie zu sehen. */
