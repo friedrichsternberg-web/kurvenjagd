@@ -38,10 +38,10 @@
        durchgehend alte Version, weil die Seite dann Elemente enthält, die
        das Skript noch gar nicht kennt.
 
-       Für den Browser ist "app.js?v=12" eine andere Adresse als "app.js?v=11",
+       Für den Browser ist "app.js?v=13" eine andere Adresse als "app.js?v=12",
        er holt sie also frisch. Wichtig: BEI JEDER VERÖFFENTLICHUNG die Zahl
        an allen drei Stellen um eins erhöhen. -->
-  <link rel="stylesheet" href="style.css?v=12">
+  <link rel="stylesheet" href="style.css?v=13">
 </head>
 <body>
 
@@ -116,21 +116,19 @@
          Moeglich wird das durch den Zuschnitt: Die Maschine sitzt rechts,
          links bleibt Strasse und Mauer frei. Darauf steht der Text, ohne
          etwas zu verdecken. -->
+    <!-- Der Bildbereich traegt nur noch die Marke. Der Zuschnitt macht das
+         moeglich: Die Maschine sitzt rechts, links bleiben Strasse und
+         Mauer frei, dort steht der Schriftzug ohne etwas zu verdecken. -->
     <div class="start-hero">
       <header class="start-kopf">
-        <div>
+        <div class="start-marke">
           <h1 class="brand-title">Kurvenjagd</h1>
-          <p class="sub">Routenplaner v0.1</p>
+          <p class="start-slogan">Deine All-In-One Motorradapp</p>
         </div>
         <button class="glas-rund" id="btnKontoRund" title="Konto" aria-label="Konto">
           <svg class="ic gross"><use href="#icon-profil"></use></svg>
         </button>
       </header>
-
-      <div class="start-claim">
-        <p class="start-claim-klein">Mehr Kurven. Mehr Freiheit.</p>
-        <p class="start-claim-gross">Dein Ride.<br>Deine App.</p>
-      </div>
     </div>
 
     <div class="startseite-inhalt">
@@ -411,7 +409,7 @@
     <header class="panel-header">
       <div>
         <h1 class="brand-title">Kurvenjagd</h1>
-        <p class="sub">Routenplaner v0.1</p>
+        <p class="sub">Routenplaner</p>
       </div>
       <button class="back-to-start" id="btnZumStartmenü" title="Zurück zum Startmenü">&larr;</button>
     </header>
@@ -633,9 +631,9 @@
     </button>
   </nav>
 
-  <script src="app.js?v=12"></script>
+  <script src="app.js?v=13"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=12"></script>
+  <script src="konto.js?v=13"></script>
 </body>
 </html>
