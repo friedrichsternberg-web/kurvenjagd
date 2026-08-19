@@ -9,7 +9,7 @@
    Aufbau dieser Datei:
      1. Was in der Garage steht (Ablage im Browser)
      2. Der Motorrad-Finder (Fahrzeugdatenbank)
-     3. Woher das Bild kommt
+     3. Das Bild und die technischen Daten
      4. Den Raum zeichnen
      5. Der Dialog zum Anlegen und Aendern
      6. Verkabelung
@@ -17,24 +17,24 @@
    ---------------------------------------------------------------------------
    WICHTIG, WEIL ES DIE GANZE DATEI PRAEGT (Stand 19.08.2026)
 
-   Niemand laedt hier eigene Fotos hoch. Man sucht sein Motorrad wie im
-   Fahrzeugfinder bei Louis - Marke, Baujahr, Modell - und das Bild kommt
-   ueber eine Schnittstelle dazu.
+   Man sucht sein Motorrad wie im Fahrzeugfinder bei Louis - Marke, Baujahr,
+   Modell - und Hubraum und Leistung fuellen sich selbst aus. Wer will, laedt
+   zusaetzlich ein eigenes Foto hoch; ohne Foto steht ein freigestelltes
+   Standardmotorrad auf der Buehne. Leer sieht die Garage also nie aus.
 
-   Das kostet zwei Dinge, die vorher da waren, und beides mit Absicht:
+   Was hier bewusst NICHT steht:
 
-   - Die Drehserie ist raus. Sie war ein Ersatz fuer 3D, und es gibt keine
-     Datenbank mit 3D-Modellen einzelner Motorraeder, an die man ohne
-     Weiteres herankaeme (geprueft am 19.08.2026). Entweder richtige
-     3D-Grafik oder ein ordentliches Einzelbild - nichts dazwischen, das
-     so tut als ob.
-   - Das Hochladen eigener Fotos ist raus, auch bei der Ausruestung.
+   - Keine Drehserie aus mehreren Fotos. Sie war ein Ersatz fuer 3D, und es
+     gibt keine Datenbank mit 3D-Modellen einzelner Motorraeder, an die man
+     ohne Weiteres herankaeme (geprueft am 19.08.2026). Entweder richtige
+     3D-Grafik oder ein ordentliches Einzelbild - nichts dazwischen, das so
+     tut als ob.
 
-   Die Aufgabe ist damit auf zwei Quellen aufgeteilt, und das ist kein
-   Zufall, sondern folgt daraus, was frei zugaenglich ist:
+   Drei Quellen, saeuberlich getrennt, weil sie unterschiedlich weit sind:
 
      LISTE (Marke/Modell/Baujahr)  ->  NHTSA vPIC, siehe Abschnitt 2
-     BILD                          ->  noch offen, siehe Abschnitt 3
+     HUBRAUM UND LEISTUNG          ->  siehe Abschnitt 3, braucht Schluessel
+     BILD                          ->  eigenes Foto, sonst Standardbild
    ---------------------------------------------------------------------------
    ============================================================================ */
 
@@ -44,10 +44,11 @@
    Server. Erst muss klar sein, WAS gespeichert wird, dann kann es auf den
    Server umziehen.
 
-   Seit die Bilder aus einer Datenbank kommen, ist der Platzbedarf nebenbei
-   kein Thema mehr: Gespeichert wird nur noch die Adresse eines Bildes, nicht
-   das Bild selbst. Ein Motorrad braucht jetzt ein paar hundert Byte statt
-   fast einem Megabyte. */
+   Zum Platz: Ohne eigenes Foto braucht ein Motorrad rund 200 Byte, weil nur
+   Text gespeichert wird. Mit eigenem Foto kommen etwa 90 KB dazu. Der
+   Browser-Speicher fasst rund 5 MB und die Touren liegen mit darin - bei
+   einer Handvoll Maschinen ist das unkritisch, aber es ist der Grund, warum
+   es genau EIN Foto je Motorrad gibt und nicht mehrere. */
 
 const GARAGE_SPEICHER = 'kurvenjagd.garage';
 
@@ -89,9 +90,7 @@ function ladeGarage() {
 
     return {
       motorräder: (Array.isArray(gelesen.motorräder) ? gelesen.motorräder : []).map(altesFormatUmschreiben),
-      // Hochgeladene Fotos gibt es nicht mehr. Ein altes Foto wird still
-      // fallengelassen statt weiter mitgeschleppt.
-      ausrüstung: (Array.isArray(gelesen.ausrüstung) ? gelesen.ausrüstung : []).map(teil => ({ ...teil, bild: null })),
+      ausrüstung: Array.isArray(gelesen.ausrüstung) ? gelesen.ausrüstung : [],
     };
   } catch {
     return leereGarage();
@@ -106,7 +105,7 @@ function ladeGarage() {
 function altesFormatUmschreiben(motorrad) {
   if (!Array.isArray(motorrad.bilder)) return motorrad;
   const { bilder, ...rest } = motorrad;
-  return { ...rest, bild: null };
+  return { ...rest, bild: bilder[0] || null };   // das erste Bild bleibt
 }
 
 // Gibt false zurueck, wenn der Browser-Speicher voll ist. Der Aufrufer muss
@@ -221,43 +220,100 @@ function baujahre() {
 }
 
 
-/* --- 3. Woher das Bild kommt ------------------------------------------------
-   HIER STEHT DIE ENTSCHEIDUNG NOCH AUS, und das offen zu lassen ist
-   ehrlicher als eine halbe Loesung. Der Stand der Recherche vom 19.08.2026:
+/* --- 3. Das Bild und die technischen Daten ---------------------------------
 
-   - NHTSA (Abschnitt 2) liefert keine Bilder, nur Namen.
-   - Wikidata waere frei und rechtlich sauber, kennt aber nur 577
-     Motorradmodelle, davon 419 mit Bild. Zu duenn.
-   - carimagesapi.com hat 602 Marken und ueber 9300 Motorradbilder,
-     freigestellt als PNG. Kostenlose Stufe: 5000 Abrufe im Monat, aber MIT
-     Wasserzeichen. Ohne Wasserzeichen 49 $ im Monat, 41 $ bei Jahreszahlung.
-     3D gibt es dort nur fuer Autos, nicht fuer Motorraeder.
-   - Motorcycle Specs Database (RapidAPI) hat 40000 Modelle mit technischen
-     Daten und je einem Bild, kostenlose Grundstufe, sonst 39 $ im Monat.
+   DAS BILD kann aus drei Quellen kommen, in dieser Reihenfolge:
 
-   Solange unten kein Schluessel steht, zeigt die Garage eine saubere
-   Zeichnung statt eines Bildes. Das sieht nach Absicht aus und nicht nach
-   Fehler - und es kostet nichts, bis die Entscheidung faellt.
+     1. ein eigenes Foto, das man im Dialog hochlaedt
+     2. eine Bilddatenbank, sobald eine eingerichtet ist (siehe unten)
+     3. das mitgelieferte Standardbild - freigestellt, mit durchsichtigem
+        Hintergrund, damit es im Raum steht statt als Kachel darin zu haengen
 
-   ACHTUNG, UNGEPRUEFT: Der Aufruf unten folgt der Dokumentation von
-   carimagesapi.com, konnte aber mangels Schluessel nicht ausprobiert werden.
-   Wenn das erste Bild nicht erscheint, liegt es hoechstwahrscheinlich an
-   dieser einen Funktion und nicht am Rest der Garage. */
+   Dadurch sieht die Garage nie leer aus. Wer nichts tut, hat trotzdem eine
+   Maschine auf der Buehne.
 
-const BILD_API_SCHLÜSSEL = '';   // z.B. 'ci_xxxxxxxx'
+   DIE TECHNISCHEN DATEN (Hubraum, Leistung) fuellen sich selbst aus, sobald
+   Marke, Modell und Baujahr feststehen. Die Quelle dafuer ist eine andere als
+   die fuer die Modellliste: Die Fahrzeugdatenbank der US-Behoerde kennt nur
+   Namen, keine Motordaten.
 
+   Beide Schnittstellen brauchen einen Schluessel und stehen deshalb noch
+   still. Sobald Friedrichs eigene Datenbank da ist, treten diese beiden
+   Funktionen an sie - der Rest der Datei merkt davon nichts, weil er nur
+   bildAdresse() und technischeDatenHolen() kennt. Genau dafuer stehen sie
+   hier gebuendelt und nicht verstreut im Code.
+   --------------------------------------------------------------------------- */
+
+const STANDARD_BILD = 'img/bike-standard.webp';
+
+/* Bildquelle. Leer = das Standardbild wird benutzt.
+   Geprueft am 19.08.2026: carimagesapi.com hat 602 Marken und ueber 9300
+   freigestellte Motorradbilder, kostenlos aber mit Wasserzeichen, ohne
+   Wasserzeichen 49 $ im Monat. ACHTUNG, der Aufruf unten folgt deren
+   Dokumentation, konnte mangels Schluessel aber nie ausprobiert werden. */
+const BILD_API_SCHLÜSSEL = '';
+
+/* Datenquelle fuer Hubraum und Leistung.
+   api-ninjas.com/api/motorcycles, kostenloser Schluessel nach Anmeldung.
+   Liefert Felder wie displacement: "649.0 ccm (39.60 cubic inches)" und
+   power: "52.3 HP (38.2 kW) @ 8000 RPM". Ebenfalls ungetestet. */
+const DATEN_API_SCHLÜSSEL = '';
+
+// Welches Bild auf der Buehne steht. Eigenes Foto schlaegt Datenbank,
+// Datenbank schlaegt Standardbild.
 function bildAdresse(motorrad) {
-  if (!BILD_API_SCHLÜSSEL) return null;
-  if (!motorrad.marke || !motorrad.modell) return null;
+  if (!motorrad) return STANDARD_BILD;
+  if (motorrad.bild) return motorrad.bild;
 
-  const felder = new URLSearchParams({
-    api_key: BILD_API_SCHLÜSSEL,
-    type: 'moto',
-    make: motorrad.marke,
-    model: motorrad.modell,
-    year: motorrad.baujahr || '',
-  });
-  return `https://carimagesapi.com/api/v1/signed-url?${felder}`;
+  if (BILD_API_SCHLÜSSEL && motorrad.marke && motorrad.modell) {
+    const felder = new URLSearchParams({
+      api_key: BILD_API_SCHLÜSSEL, type: 'moto',
+      make: motorrad.marke, model: motorrad.modell, year: motorrad.baujahr || '',
+    });
+    return `https://carimagesapi.com/api/v1/signed-url?${felder}`;
+  }
+  return STANDARD_BILD;
+}
+
+/* Holt Hubraum und Leistung zu einem Motorrad.
+   Gibt { hubraum, leistung } zurueck oder null, wenn nichts zu holen war.
+
+   Zur Leistung: Die Quelle nennt sowohl HP als auch kW. Gerechnet wird ueber
+   die kW, weil "HP" je nach Herkunft die amerikanische oder die metrische
+   Pferdestaerke meint - das sind 1,4 Prozent Unterschied. kW ist eindeutig,
+   und ein Kilowatt sind 1,35962 PS. */
+async function technischeDatenHolen(marke, modell, baujahr) {
+  if (!DATEN_API_SCHLÜSSEL || !marke || !modell) return null;
+
+  const felder = new URLSearchParams({ make: marke, model: modell });
+  if (baujahr) felder.set('year', baujahr);
+
+  const antwort = await fetch(`https://api.api-ninjas.com/v1/motorcycles?${felder}`,
+                              { headers: { 'X-Api-Key': DATEN_API_SCHLÜSSEL } });
+  if (!antwort.ok) throw new Error('Datenquelle antwortet nicht');
+
+  const treffer = await antwort.json();
+  if (!Array.isArray(treffer) || treffer.length === 0) return null;
+
+  // Passt ein Eintrag genau aufs Baujahr, den nehmen - sonst den ersten.
+  const eintrag = treffer.find(t => String(t.year) === String(baujahr)) || treffer[0];
+  return {
+    hubraum:  ersteZahl(eintrag.displacement),
+    leistung: leistungInPS(eintrag.power),
+  };
+}
+
+// Zieht die erste Zahl aus einem Text wie "649.0 ccm (39.60 cubic inches)".
+function ersteZahl(text) {
+  const treffer = String(text || '').match(/([\d.]+)/);
+  return treffer ? String(Math.round(parseFloat(treffer[1]))) : '';
+}
+
+// Aus "52.3 HP (38.2 kW) @ 8000 RPM" werden 52 PS.
+function leistungInPS(text) {
+  const inKW = String(text || '').match(/([\d.]+)\s*kW/i);
+  if (inKW) return String(Math.round(parseFloat(inKW[1]) * 1.35962));
+  return ersteZahl(text);
 }
 
 
@@ -271,38 +327,30 @@ function zeichneGarage() {
   zeichneBuehne();
   zeichneDatenblatt();
   zeichneHakenleiste();
-  zeichneAusrüstungsListe();
 }
 
 function zeichneBuehne() {
   const motorrad = motorradAktiv();
-  const ansicht = document.getElementById('motorradAnsicht');
-  const platzhalter = document.getElementById('motorradPlatzhalter');
-  const zeichnung = document.getElementById('motorradZeichnung');
   const bild = document.getElementById('motorradBild');
 
-  platzhalter.hidden = !!motorrad;
-  ansicht.hidden = !motorrad;
-  if (!motorrad) return;
-
+  // Es steht IMMER eine Maschine da - ohne eigenes Foto das freigestellte
+  // Standardbild. Eine leere Buehne saehe nach Fehler aus.
   const adresse = bildAdresse(motorrad);
+  bild.src = adresse;
+  bild.alt = motorrad
+    ? ([motorrad.marke, motorrad.modell].filter(Boolean).join(' ') || 'Mein Motorrad')
+    : 'Motorrad';
 
-  // Ohne Bildquelle steht die Zeichnung dort. Das ist kein Notbehelf fuer
-  // einen Uebergang, sondern der Zustand, den jemand ohne bezahlte
-  // Schnittstelle dauerhaft sieht - deshalb traegt sie den Modellnamen.
-  bild.hidden = !adresse;
-  zeichnung.hidden = !!adresse;
+  // Faellt die Bildquelle aus, das Standardbild nachreichen.
+  bild.onerror = () => {
+    if (bild.src.endsWith(STANDARD_BILD)) return;   // sonst Endlosschleife
+    bild.src = STANDARD_BILD;
+  };
 
-  if (adresse) {
-    bild.src = adresse;
-    bild.alt = [motorrad.marke, motorrad.modell].filter(Boolean).join(' ') || 'Mein Motorrad';
-    // Faellt die Bildquelle aus, wird die Zeichnung nachgereicht statt ein
-    // kaputtes Bildsymbol stehenzulassen.
-    bild.onerror = () => { bild.hidden = true; zeichnung.hidden = false; };
-  }
-
-  document.getElementById('zeichnungText').textContent =
-    [motorrad.marke, motorrad.modell].filter(Boolean).join(' ');
+  // Ohne eigenes Foto ist das Standardbild nur ein Platzhalter und wird
+  // etwas zurueckgenommen, damit es nicht wie die eigene Maschine wirkt.
+  document.getElementById('motorradAnsicht')
+          .classList.toggle('ist-standard', !(motorrad && motorrad.bild));
 }
 
 // Das Datenblatt unter der Buehne: Name, technische Werte, und - falls es
@@ -317,21 +365,16 @@ function zeichneDatenblatt() {
   if (!motorrad) return;
 
   document.getElementById('motorradName').textContent =
-    motorrad.name || [motorrad.marke, motorrad.modell].filter(Boolean).join(' ') || 'Meine Maschine';
+    [motorrad.marke, motorrad.modell].filter(Boolean).join(' ') || 'Meine Maschine';
 
-  const untertitel = [motorrad.marke, motorrad.modell, motorrad.baujahr].filter(Boolean).join(' · ');
-  const untertitelElement = document.getElementById('motorradUntertitel');
-  untertitelElement.textContent = untertitel;
-  untertitelElement.hidden = !untertitel;
 
   // Nur Werte anzeigen, die auch eingetragen sind. Ein Feld mit einem Strich
   // darin sieht nach Fehler aus, ein fehlendes Feld nach "noch nicht
   // ausgefuellt".
   const werte = [
-    { name: 'Hubraum',      wert: motorrad.hubraum  ? zahl(motorrad.hubraum) + ' ccm' : null },
-    { name: 'Leistung',     wert: motorrad.leistung ? zahl(motorrad.leistung) + ' PS' : null },
-    { name: 'Laufleistung', wert: motorrad.kmStand  ? zahl(motorrad.kmStand) + ' km' : null },
-    { name: 'Baujahr',      wert: motorrad.baujahr || null },
+    { name: 'Hubraum',  wert: motorrad.hubraum  ? zahl(motorrad.hubraum) + ' ccm' : null },
+    { name: 'Leistung', wert: motorrad.leistung ? zahl(motorrad.leistung) + ' PS' : null },
+    { name: 'Baujahr',  wert: motorrad.baujahr || null },
   ].filter(eintrag => eintrag.wert);
 
   const raster = document.getElementById('motorradWerte');
@@ -347,7 +390,7 @@ function zeichneDatenblatt() {
   umschalter.innerHTML = garage.motorräder
     .map((eintrag, platz) => `
       <button class="seg ${platz === aktivesMotorrad ? 'active' : ''}" data-motorrad="${platz}">
-        ${sicher(eintrag.name || eintrag.modell || 'Maschine ' + (platz + 1))}
+        ${sicher(eintrag.modell || eintrag.marke || 'Maschine ' + (platz + 1))}
       </button>`)
     .join('');
 }
@@ -380,29 +423,6 @@ function zeichneHakenleiste() {
       </span>
       <span class="haken-name">${sicher(teil.name || artZuName(teil.art))}</span>
     </button>`).join('') + plus;
-}
-
-// Die Liste unter dem Raum. Sie zeigt, was an der Wand keinen Platz hat:
-// Marke, Groesse, Notiz.
-function zeichneAusrüstungsListe() {
-  const liste = document.getElementById('ausrüstungsListe');
-
-  if (garage.ausrüstung.length === 0) {
-    liste.innerHTML = `<li class="empty">Noch nichts eingetragen. Helm, Jacke, Handschuhe &ndash; alles, was du beim Fahren tr&auml;gst.</li>`;
-    return;
-  }
-
-  liste.innerHTML = garage.ausrüstung.map(teil => {
-    const zeile = [teil.marke, teil.größe ? 'Gr. ' + teil.größe : null].filter(Boolean).join(' · ');
-    return `
-      <li data-teil="${sicher(teil.id)}">
-        <span class="saved-marke"><svg class="ic"><use href="#${artZuSymbol(teil.art)}"></use></svg></span>
-        <span class="saved-text">
-          <span class="saved-name">${sicher(teil.name || artZuName(teil.art))}</span>
-          <span class="saved-meta">${sicher(artZuName(teil.art))}${zeile ? ' <i>&middot;</i> ' + sicher(zeile) : ''}</span>
-        </span>
-      </li>`;
-  }).join('');
 }
 
 // Tausendertrennung, damit 12400 als 12.400 dasteht.
@@ -458,6 +478,11 @@ function feldWert(id) {
 /* --- Motorrad ---------------------------------------------------------- */
 
 function öffneMotorradDialog(vorhandenes = null) {
+  // Das Foto lebt waehrend des Dialogs hier und wandert erst beim Speichern
+  // in die Garage. Wer abbricht, soll nichts veraendert haben.
+  dialogFoto = vorhandenes?.bild || null;
+  dialogFotoOriginal = dialogFoto;
+
   öffneDialog({
     titel: vorhandenes ? 'Motorrad bearbeiten' : 'Motorrad hinzufügen',
     felder: `
@@ -499,9 +524,6 @@ function öffneMotorradDialog(vorhandenes = null) {
         </p>
       </div>
 
-      <label for="feldName">Name (frei w&auml;hlbar)</label>
-      <input type="text" id="feldName" placeholder="Die Rote" value="${sicher(vorhandenes?.name)}">
-
       <div class="dialog-paar">
         <div>
           <label for="feldHubraum">Hubraum in ccm</label>
@@ -513,8 +535,16 @@ function öffneMotorradDialog(vorhandenes = null) {
         </div>
       </div>
 
-      <label for="feldKmStand">Laufleistung in km</label>
-      <input type="number" id="feldKmStand" inputmode="numeric" placeholder="18400" value="${sicher(vorhandenes?.kmStand)}">
+      <div class="foto-feld">
+        <div class="foto-feld-kopf">
+          <span class="label">Eigenes Foto</span>
+          <button type="button" class="btn ghost klein" id="btnFotoWählen">
+            <svg class="ic klein"><use href="#icon-kamera"></use></svg> Foto w&auml;hlen
+          </button>
+        </div>
+        <div class="foto-vorschau" id="fotoVorschau"></div>
+        <p class="hint" id="fotoHinweis"></p>
+      </div>
 
       <label for="feldNotiz">Notiz</label>
       <textarea id="feldNotiz" rows="2" placeholder="Umbauten, Reifen, was dir wichtig ist">${sicher(vorhandenes?.notiz)}</textarea>
@@ -523,19 +553,17 @@ function öffneMotorradDialog(vorhandenes = null) {
     beimSpeichern: () => {
       const datensatz = {
         id: vorhandenes ? vorhandenes.id : String(Date.now()),
-        name:     feldWert('feldName'),
         marke:    feldWert('feldMarke'),
         modell:   feldWert('feldModell'),
         baujahr:  feldWert('feldBaujahr'),
         hubraum:  feldWert('feldHubraum'),
         leistung: feldWert('feldLeistung'),
-        kmStand:  feldWert('feldKmStand'),
         notiz:    feldWert('feldNotiz'),
-        bild:     null,   // das Bild kommt aus der Schnittstelle, siehe Abschnitt 3
+        bild:     dialogFoto,
       };
 
-      if (!datensatz.marke && !datensatz.modell && !datensatz.name) {
-        showToast('Such dein Motorrad heraus oder trag wenigstens einen Namen ein.');
+      if (!datensatz.marke && !datensatz.modell) {
+        showToast('Such dein Motorrad heraus oder trag Marke und Modell ein.');
         return false;   // false heisst: Dialog bleibt offen
       }
 
@@ -556,8 +584,148 @@ function öffneMotorradDialog(vorhandenes = null) {
     } : null,
   });
 
+  zeichneFotoVorschau();
   // Steht schon eine Marke fest, gleich die Modelle nachladen.
   if (vorhandenes?.marke && vorhandenes?.baujahr) modelleAnzeigen();
+}
+
+/* --- Das Foto im Dialog ---------------------------------------------------
+   Ein Foto je Motorrad. Es wird verkleinert gespeichert (verkleinereFoto()
+   aus app.js dreht iPhone-Bilder dabei richtig herum).
+
+   Zum FREISTELLEN: Ein Motorrad sauber aus einem beliebigen Foto zu
+   schneiden, koennen heute nur Modelle, die als Datei mehrere zehn Megabyte
+   gross sind, oder Dienste, die je Bild Geld kosten. Beides passt nicht in
+   eine App ohne Server.
+
+   Was hier statt dessen laeuft, ist dasselbe Verfahren, mit dem das
+   Standardbild freigestellt wurde: eine Flutfuellung von den vier Ecken aus.
+   Sie traegt den Hintergrund ab, solange er ruhig und einfarbig ist - weisse
+   Wand, Garagentor, glatter Himmel. Vor einer Hecke oder einer Bergkulisse
+   funktioniert sie nicht, und dann sagt sie das auch statt ein zerfranstes
+   Ergebnis abzuliefern. */
+
+let dialogFoto = null;
+// Das unveraenderte Foto, wie es hochgeladen wurde. Ohne diese Sicherung
+// waere ein misslungenes Freistellen endgueltig: das Ergebnis ueberschreibt
+// das Original, und wer nicht zufrieden ist, muesste die Datei neu suchen.
+let dialogFotoOriginal = null;
+
+async function fotoÜbernehmen(datei) {
+  try {
+    dialogFoto = await verkleinereFoto(datei, 900);
+    dialogFotoOriginal = dialogFoto;
+    zeichneFotoVorschau();
+  } catch {
+    showToast('Das Bild konnte nicht gelesen werden.');
+  }
+}
+
+function zeichneFotoVorschau() {
+  const kasten = document.getElementById('fotoVorschau');
+  const hinweis = document.getElementById('fotoHinweis');
+  if (!kasten) return;
+
+  if (!dialogFoto) {
+    kasten.innerHTML = '';
+    hinweis.innerHTML = 'Ohne eigenes Foto steht ein Standardmotorrad in der Garage.';
+    return;
+  }
+
+  const verändert = dialogFotoOriginal && dialogFoto !== dialogFotoOriginal;
+
+  kasten.innerHTML = `
+    <div class="foto-bild"><img src="${dialogFoto}" alt=""></div>
+    <div class="foto-knöpfe">
+      <button type="button" class="btn ghost klein" id="btnFreistellen">Hintergrund entfernen</button>
+      ${verändert ? '<button type="button" class="btn ghost klein" id="btnFotoZurück">Original zurück</button>' : ''}
+      <button type="button" class="btn ghost klein" id="btnFotoWeg">Foto entfernen</button>
+    </div>`;
+  hinweis.innerHTML = verändert
+    ? 'Sieht das Ergebnis zerfranst aus, hol dir mit "Original zur&uuml;ck" das unver&auml;nderte Foto wieder.'
+    : 'Das Entfernen des Hintergrunds gelingt nur bei einer ruhigen, einfarbigen '
+      + 'Fl&auml;che dahinter &ndash; Wand, Tor, glatter Himmel.';
+}
+
+/* Trennt den Hintergrund ab, indem von jeder Ecke aus alle benachbarten
+   Bildpunkte aehnlicher Farbe durchsichtig gesetzt werden. Genau so wurde
+   auch das Standardbild freigestellt.
+
+   Umgesetzt mit einer eigenen Warteschlange statt mit Rekursion: Bei einem
+   900 Pixel breiten Bild waeren es bis zu einer halben Million verschachtelte
+   Aufrufe, und daran geht der Browser zugrunde. */
+async function fotoFreistellen() {
+  if (!dialogFoto) return;
+
+  const bild = await new Promise((fertig, fehler) => {
+    const b = new Image();
+    b.onload = () => fertig(b);
+    b.onerror = fehler;
+    b.src = dialogFoto;
+  });
+
+  const leinwand = document.createElement('canvas');
+  leinwand.width = bild.naturalWidth;
+  leinwand.height = bild.naturalHeight;
+  const stift = leinwand.getContext('2d');
+  stift.drawImage(bild, 0, 0);
+
+  const flaeche = stift.getImageData(0, 0, leinwand.width, leinwand.height);
+  const punkte = flaeche.data;
+  const breite = leinwand.width, hoehe = leinwand.height;
+
+  const TOLERANZ = 42;          // wie sehr eine Farbe abweichen darf
+  const besucht = new Uint8Array(breite * hoehe);
+  const warteschlange = [];
+
+  const farbeAn = stelle => [punkte[stelle*4], punkte[stelle*4+1], punkte[stelle*4+2]];
+
+  // Von allen vier Ecken aus starten. Eine einzelne Ecke wuerde bei einem
+  // Bild mit Vignette schon nach wenigen Pixeln stehenbleiben.
+  const ecken = [0, breite-1, (hoehe-1)*breite, hoehe*breite-1];
+  const vergleichsfarben = ecken.map(farbeAn);
+  for (const ecke of ecken) { warteschlange.push(ecke); besucht[ecke] = 1; }
+
+  const passt = stelle => {
+    const [r,g,b] = farbeAn(stelle);
+    return vergleichsfarben.some(([vr,vg,vb]) =>
+      Math.abs(r-vr) + Math.abs(g-vg) + Math.abs(b-vb) < TOLERANZ * 3);
+  };
+
+  let abgetragen = 0;
+  while (warteschlange.length) {
+    const stelle = warteschlange.pop();
+    if (!passt(stelle)) continue;
+
+    punkte[stelle*4 + 3] = 0;   // durchsichtig
+    abgetragen++;
+
+    const x = stelle % breite, y = (stelle - x) / breite;
+    if (x > 0        && !besucht[stelle-1])      { besucht[stelle-1] = 1;      warteschlange.push(stelle-1); }
+    if (x < breite-1 && !besucht[stelle+1])      { besucht[stelle+1] = 1;      warteschlange.push(stelle+1); }
+    if (y > 0        && !besucht[stelle-breite]) { besucht[stelle-breite] = 1; warteschlange.push(stelle-breite); }
+    if (y < hoehe-1  && !besucht[stelle+breite]) { besucht[stelle+breite] = 1; warteschlange.push(stelle+breite); }
+  }
+
+  const anteil = abgetragen / (breite * hoehe);
+
+  // Zwei Faelle, die kein brauchbares Ergebnis sind, und beide werden
+  // abgelehnt statt abgeliefert: Fast nichts abgetragen heisst, der
+  // Hintergrund war zu unruhig. Fast alles abgetragen heisst, das Motorrad
+  // hatte selbst die Farbe des Hintergrunds und ist mit verschwunden.
+  if (anteil < 0.08) {
+    showToast('Der Hintergrund ist zu unruhig. Das Foto bleibt, wie es ist.');
+    return;
+  }
+  if (anteil > 0.92) {
+    showToast('Da wäre fast das ganze Bild verschwunden. Das Foto bleibt, wie es ist.');
+    return;
+  }
+
+  stift.putImageData(flaeche, 0, 0);
+  dialogFoto = leinwand.toDataURL('image/webp', 0.85);
+  zeichneFotoVorschau();
+  showToast(`Hintergrund entfernt (${Math.round(anteil * 100)} % des Bildes).`);
 }
 
 /* --- Ausruestung ------------------------------------------------------- */
@@ -695,6 +863,43 @@ async function modelleAnzeigen() {
   }
 }
 
+/* Fuellt Hubraum und Leistung selbst aus, sobald Marke, Modell und Baujahr
+   feststehen. Schon eingetragene Werte werden NICHT ueberschrieben: Wer
+   seine Maschine umgebaut hat, weiss es besser als jede Datenbank. */
+async function technischeDatenNachziehen() {
+  const marke = feldWert('feldMarke');
+  const modell = feldWert('feldModell');
+  const jahr = feldWert('feldBaujahr');
+  const hubraumFeld = document.getElementById('feldHubraum');
+  const leistungFeld = document.getElementById('feldLeistung');
+  if (!hubraumFeld || !marke || !modell) return;
+
+  const fehltEtwas = !hubraumFeld.value.trim() || !leistungFeld.value.trim();
+  if (!fehltEtwas) return;
+
+  if (!DATEN_API_SCHLÜSSEL) {
+    // Ohne Schluessel schweigt die Funktion. Ein Hinweis an dieser Stelle
+    // waere eine Fehlermeldung fuer etwas, das gar nicht eingerichtet ist.
+    return;
+  }
+
+  hubraumFeld.classList.add('wird-geholt');
+  leistungFeld.classList.add('wird-geholt');
+  try {
+    const daten = await technischeDatenHolen(marke, modell, jahr);
+    if (daten) {
+      if (!hubraumFeld.value.trim() && daten.hubraum) hubraumFeld.value = daten.hubraum;
+      if (!leistungFeld.value.trim() && daten.leistung) leistungFeld.value = daten.leistung;
+    }
+  } catch {
+    // Stillschweigend. Beide Felder lassen sich von Hand ausfuellen, eine
+    // Fehlermeldung waere hier nur im Weg.
+  } finally {
+    hubraumFeld.classList.remove('wird-geholt');
+    leistungFeld.classList.remove('wird-geholt');
+  }
+}
+
 // Vorschlagsliste beim Tippen einer Marke.
 async function markenVorschlagen(eingabe) {
   const treffer = document.getElementById('markenTreffer');
@@ -721,18 +926,35 @@ async function markenVorschlagen(eingabe) {
    Bei den Listen wird nicht jedem Eintrag ein eigener Zuhoerer angehaengt,
    sondern einer an die Liste selbst - der prueft dann, worauf geklickt wurde.
    Das ist wichtig, weil die Eintraege beim Neuzeichnen jedes Mal neu
-   entstehen und mitgegebene Zuhoerer dabei verlorengingen. */
+   entstehen und mitgegebene Zuhoerer dabei verlorengingen.
 
-document.getElementById('motorradPlatzhalter').addEventListener('click', () => öffneMotorradDialog(null));
-document.getElementById('btnMotorradBearbeiten').addEventListener('click', () => {
+   ALLES HIER LAEUFT UEBER verkabele(). Der Grund ist eine Stunde Fehlersuche:
+   Ein einziges getElementById() auf ein Element, das es nicht mehr gibt,
+   liefert null, und der Punkt dahinter wirft. Das bricht die Datei an dieser
+   Stelle ab - alles DANACH wird nie angemeldet. Sichtbar war davon nichts
+   ausser dass ein paar Knoepfe nicht mehr reagierten, und der eigentliche
+   Fehler stand am ganz anderen Ende.
+
+   verkabele() meldet fehlende Kennungen in der Konsole und macht weiter. */
+
+function verkabele(kennung, ereignisart, tun) {
+  const element = document.getElementById(kennung);
+  if (!element) {
+    console.warn(`Garage: Element "${kennung}" gibt es nicht (mehr). Verkabelung übersprungen.`);
+    return;
+  }
+  element.addEventListener(ereignisart, tun);
+}
+
+verkabele('btnMotorradNeu', 'click', () => öffneMotorradDialog(null));
+verkabele('btnMotorradBearbeiten', 'click', () => {
   const motorrad = motorradAktiv();
   if (motorrad) öffneMotorradDialog(motorrad);
 });
-document.getElementById('btnMotorradWeiteres').addEventListener('click', () => öffneMotorradDialog(null));
-document.getElementById('btnAusrüstungNeu').addEventListener('click', () => öffneAusrüstungsDialog(null));
+verkabele('btnMotorradWeiteres', 'click', () => öffneMotorradDialog(null));
 
 // Umschalter zwischen mehreren Maschinen.
-document.getElementById('motorradUmschalter').addEventListener('click', ereignis => {
+verkabele('motorradUmschalter', 'click', ereignis => {
   const knopf = ereignis.target.closest('[data-motorrad]');
   if (!knopf) return;
   aktivesMotorrad = Number(knopf.dataset.motorrad);
@@ -740,7 +962,7 @@ document.getElementById('motorradUmschalter').addEventListener('click', ereignis
 });
 
 // Die Hakenleiste: entweder das Plus oder ein Teil zum Bearbeiten.
-document.getElementById('hakenleiste').addEventListener('click', ereignis => {
+verkabele('hakenleiste', 'click', ereignis => {
   if (ereignis.target.closest('[data-neu]')) { öffneAusrüstungsDialog(null); return; }
   const knopf = ereignis.target.closest('[data-teil]');
   if (!knopf) return;
@@ -748,31 +970,23 @@ document.getElementById('hakenleiste').addEventListener('click', ereignis => {
   if (teil) öffneAusrüstungsDialog(teil);
 });
 
-// Dieselbe Sache aus der Liste darunter.
-document.getElementById('ausrüstungsListe').addEventListener('click', ereignis => {
-  const zeile = ereignis.target.closest('[data-teil]');
-  if (!zeile) return;
-  const teil = garage.ausrüstung.find(eintrag => eintrag.id === zeile.dataset.teil);
-  if (teil) öffneAusrüstungsDialog(teil);
-});
-
 // Der Dialog: Speichern, Loeschen, Schliessen.
-document.getElementById('btnGarageDialogSpeichern').addEventListener('click', () => {
+verkabele('btnGarageDialogSpeichern', 'click', () => {
   if (dialogSpeichern && dialogSpeichern() === false) return;   // false = offen lassen
   schließeDialog();
   zeichneGarage();
 });
 
-document.getElementById('btnGarageDialogLöschen').addEventListener('click', () => {
+verkabele('btnGarageDialogLöschen', 'click', () => {
   if (dialogLöschen && dialogLöschen() === false) return;
   schließeDialog();
   zeichneGarage();
 });
 
-document.getElementById('btnGarageDialogZu').addEventListener('click', schließeDialog);
+verkabele('btnGarageDialogZu', 'click', schließeDialog);
 
 // Ein Klick auf die dunkle Flaeche neben dem Fenster schliesst es ebenfalls.
-document.getElementById('garageDialog').addEventListener('click', ereignis => {
+verkabele('garageDialog', 'click', ereignis => {
   if (ereignis.target.id === 'garageDialog') schließeDialog();
 });
 
@@ -783,7 +997,7 @@ document.addEventListener('keydown', ereignis => {
 /* Alles im Dialog haengt an EINEM Zuhoerer, weil der Inhalt bei jedem Oeffnen
    neu entsteht. Ein Zuhoerer direkt am Markenknopf waere beim naechsten
    Oeffnen verschwunden. */
-document.getElementById('garageDialogInhalt').addEventListener('click', ereignis => {
+verkabele('garageDialogInhalt', 'click', ereignis => {
   const marke = ereignis.target.closest('[data-marke]');
   if (marke) { markeWählen(marke.dataset.marke); return; }
 
@@ -793,16 +1007,52 @@ document.getElementById('garageDialogInhalt').addEventListener('click', ereignis
     document.querySelectorAll('.modell-chip').forEach(chip => {
       chip.classList.toggle('active', chip.dataset.modell === modell.dataset.modell);
     });
+    technischeDatenNachziehen();
+    return;
+  }
+
+  // Foto waehlen, entfernen, freistellen.
+  if (ereignis.target.closest('#btnFotoWählen')) {
+    const eingabe = document.getElementById('garageFotoEingabe');
+    eingabe.value = '';   // sonst loest dieselbe Datei beim zweiten Mal nichts aus
+    eingabe.click();
+    return;
+  }
+  if (ereignis.target.closest('#btnFotoWeg')) {
+    dialogFoto = null;
+    dialogFotoOriginal = null;
+    zeichneFotoVorschau();
+    return;
+  }
+  if (ereignis.target.closest('#btnFotoZurück')) {
+    dialogFoto = dialogFotoOriginal;
+    zeichneFotoVorschau();
+    return;
+  }
+  if (ereignis.target.closest('#btnFreistellen')) {
+    fotoFreistellen();
   }
 });
 
+verkabele('garageFotoEingabe', 'change', ereignis => {
+  const datei = ereignis.target.files[0];
+  if (datei) fotoÜbernehmen(datei);
+});
+
 // Tippen in der Markensuche und Wechsel des Baujahrs.
-document.getElementById('garageDialogInhalt').addEventListener('input', ereignis => {
+verkabele('garageDialogInhalt', 'input', ereignis => {
   if (ereignis.target.id === 'feldMarkenSuche') markenVorschlagen(ereignis.target.value);
   if (ereignis.target.id === 'feldMarke') modelleAnzeigen();
 });
 
-document.getElementById('garageDialogInhalt').addEventListener('change', ereignis => {
+// Wer das Modell selbst tippt, soll die Daten genauso bekommen. Der Wechsel
+// aus dem Feld heraus ist dafuer der richtige Zeitpunkt - bei jedem
+// Tastendruck zu fragen waere eine Abfrage je Buchstabe.
+verkabele('garageDialogInhalt', 'focusout', ereignis => {
+  if (ereignis.target.id === 'feldModell') technischeDatenNachziehen();
+});
+
+verkabele('garageDialogInhalt', 'change', ereignis => {
   if (ereignis.target.id === 'feldBaujahr') modelleAnzeigen();
 });
 
