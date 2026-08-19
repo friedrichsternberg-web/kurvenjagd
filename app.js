@@ -2263,13 +2263,13 @@ const FOTO_MAX_ANZAHL = 12;    // pro Ausfahrt, damit der Speicher nicht überl�
 // Der Umweg über ein <img>-Element ist Absicht: der Browser dreht das Bild
 // dabei automatisch richtig herum (iPhone-Fotos tragen die Drehung nur als
 // Vermerk in der Datei, nicht in den Bilddaten selbst).
-function verkleinereFoto(datei) {
+function verkleinereFoto(datei, maxKante = FOTO_MAX_KANTE) {
   return new Promise((fertig, fehler) => {
     const url = URL.createObjectURL(datei);
     const bild = new Image();
 
     bild.onload = () => {
-      const faktor = Math.min(1, FOTO_MAX_KANTE / Math.max(bild.naturalWidth, bild.naturalHeight));
+      const faktor = Math.min(1, maxKante / Math.max(bild.naturalWidth, bild.naturalHeight));
       const leinwand = document.createElement('canvas');
       leinwand.width = Math.round(bild.naturalWidth * faktor);
       leinwand.height = Math.round(bild.naturalHeight * faktor);
@@ -2719,7 +2719,7 @@ const BILDSCHIRME_OHNE_LEISTE = ['kontoScreen', 'passwortNeuScreen'];
 // Blendet genau einen der sechs Bildschirme ein und alle anderen aus,
 // und bringt die untere Leiste auf denselben Stand.
 function zeigeBildschirm(sichtbareId) {
-  ['startMenu', 'tourenScreen', 'app', 'rideScreen', 'kontoScreen', 'passwortNeuScreen'].forEach(id => {
+  ['startMenu', 'garageScreen', 'tourenScreen', 'app', 'rideScreen', 'kontoScreen', 'passwortNeuScreen'].forEach(id => {
     document.getElementById(id).hidden = id !== sichtbareId;
   });
   aktualisiereLeiste(sichtbareId);
@@ -2750,7 +2750,7 @@ function aktualisiereLeiste(sichtbareId) {
 // Welcher Bildschirm ist gerade zu sehen? Wird gebraucht, wenn die Leiste
 // unabhaengig vom Bildschirmwechsel neu bewertet werden muss (Navigation).
 function aktuellerBildschirm() {
-  return ['startMenu', 'tourenScreen', 'app', 'rideScreen', 'kontoScreen', 'passwortNeuScreen']
+  return ['startMenu', 'garageScreen', 'tourenScreen', 'app', 'rideScreen', 'kontoScreen', 'passwortNeuScreen']
     .find(id => !document.getElementById(id).hidden) || 'startMenu';
 }
 
@@ -2769,6 +2769,16 @@ function zeigePlaner() {
   // Kartenbereichs ab - ohne diesen Aufruf bliebe die Karte auf die
   // Größe von vor dem Verstecken "eingefroren".
   map.invalidateSize();
+}
+
+/* Die Garage. zeichneGarage() steht in garage.js, das NACH app.js geladen
+   wird - beim ersten Durchlauf dieser Datei gibt es die Funktion also noch
+   nicht. Die Pruefung auf "typeof ... === 'function'" ist derselbe Schutz
+   wie beim Server weiter oben: faellt garage.js aus, laeuft der Rest der
+   App trotzdem. */
+function zeigeGarage() {
+  zeigeBildschirm('garageScreen');
+  if (typeof zeichneGarage === 'function') zeichneGarage();
 }
 
 function zeigeRideScreen() {
@@ -2988,6 +2998,7 @@ document.querySelectorAll('.nav-tab').forEach(knopf => {
     if (ziel === 'app') zeigePlaner();
     else if (ziel === 'rideScreen') { zeigeRideScreen(); if (!ride.aktiv) rideZurücksetzen(); }
     else if (ziel === 'tourenScreen') zeigeMeineTouren();
+    else if (ziel === 'garageScreen') zeigeGarage();
     else zeigeStartmenü();
   });
 });
@@ -3000,6 +3011,7 @@ document.getElementById('btnKontoRund').addEventListener('click', () => {
 
 document.getElementById('btnStartPlaner').addEventListener('click', zeigePlaner);
 document.getElementById('btnStartTouren').addEventListener('click', zeigeMeineTouren);
+document.getElementById('btnStartGarage').addEventListener('click', zeigeGarage);
 document.getElementById('btnTourenZurueck').addEventListener('click', zeigeStartmenü);
 document.getElementById('btnZumStartmenü').addEventListener('click', () => {
   if (nav.aktiv) stopNavigation(); // laufende Navigation nicht einfach im Hintergrund weiterlaufen lassen
