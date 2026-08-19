@@ -1616,56 +1616,69 @@ body.nav-modus #panel {
   body.nav-modus #panel { height: 0 !important; }
 }
 
-
 /* ============================================================================
    Die Garage
 
-   Der Bildschirm ist als RAUM gebaut, nicht als Liste: hinten eine Wand,
-   davor ein Boden, darauf steht das Motorrad, an der Wand haengt die
-   Ausruestung. Wand und Boden sind reine Farbverlaeufe, kein Bild - dadurch
-   ist es auf jedem Geraet gleich scharf und kostet keine Ladezeit.
+   Aufgebaut als RAUM, nicht als Liste: hinten die Wand mit der Hakenleiste,
+   davor der Boden, darauf steht die Maschine.
 
-   Der wichtigste Kniff steckt bei .motorrad-bild: Ein Foto ist ein Rechteck
-   mit Hintergrund und wuerde als solches auf der Wand kleben. Eine weiche
-   Maske laesst seine Raender ausblenden, so dass die Maschine im Raum steht
-   statt als Bild darin zu haengen. Sauberer waere ein freigestelltes Foto,
-   das ist ein spaeterer Schritt.
+   LIQUID GLASS, und zwar nach derselben Regel wie ueberall in dieser App:
+   Glas ist eine Linse ueber etwas Echtem, nie ein Schleier ueber Leere.
+   Deshalb liegt unter dem ganzen Bildschirm dasselbe weichgezeichnete
+   Motorradfoto wie bei Konto und Touren, und Wand und Boden sind
+   halbdurchsichtig darueber gelegt statt deckend. Man sieht das Foto nicht
+   als Foto - man sieht, dass hinter dem Glas etwas ist. Genau darum geht es.
+
+   Was daraus folgt und beim Aendern nicht kaputtgehen darf: Wuerde man Wand
+   und Boden wieder deckend machen, saehe alles gleich aus, aber das Glas
+   waere tot. Das ist genau der Einheitslook, den wir vermeiden.
    ============================================================================ */
 
 .garage-screen {
   height: calc(100% - var(--nav-raum));
   overflow-y: auto;
-  background: var(--bg);
   -webkit-overflow-scrolling: touch;
+  /* Dieselbe Grundlage wie .start-screen: das weichgezeichnete Foto, darauf
+     ein Verlauf, der nach unten dichter wird. "fixed" haelt es beim
+     Scrollen still, dadurch schiebt sich der Inhalt darueber hinweg statt
+     alles zusammen zu wandern. */
+  background:
+    linear-gradient(to bottom,
+      rgba(14,15,18,0.42) 0%,
+      rgba(14,15,18,0.58) 40%,
+      rgba(14,15,18,0.78) 70%,
+      rgba(14,15,18,0.90) 100%),
+    url('img/hintergrund-weich.jpg') center / cover no-repeat fixed;
 }
 .garage-screen[hidden] { display: none; }
 
 /* ---------- Der Raum ---------- */
 .garage-raum {
   position: relative;
-  /* An die Breite gekoppelt, damit der Raum auf schmalen Geraeten nicht
-     zur Briefmarke wird und auf breiten nicht den ganzen Schirm frisst. */
-  height: min(56vh, 118vw);
-  min-height: 330px;
+  /* An die Breite gekoppelt, damit der Raum auf schmalen Geraeten nicht zur
+     Briefmarke wird und auf breiten nicht den ganzen Schirm frisst. */
+  height: min(52vh, 112vw);
+  min-height: 320px;
+  overflow: hidden;
 
   /* Wo die Hakenschiene haengt. Sie steht hier als eine Zahl, weil sich
-     danach DREI Dinge richten muessen: die Schiene selbst, die Teile
-     daran und die Oberkante der Buehne darunter. Stuende sie dreimal
-     einzeln da, waere garantiert irgendwann eine davon vergessen. */
+     danach DREI Dinge richten muessen: die Schiene selbst, die Teile daran
+     und die Oberkante der Buehne darunter. Stuende sie dreimal einzeln da,
+     waere garantiert irgendwann eine davon vergessen. */
   --schiene: calc(clamp(74px, 15vw, 92px) + env(safe-area-inset-top));
   --hakenhoehe: clamp(84px, 24vw, 100px);
-  overflow: hidden;
-  /* Von oben nach unten: Lichtschein einer Deckenlampe, die Wand, dann bei
-     58 % die harte Kante zum Boden - genau diese Kante macht aus zwei
-     Flaechen einen Raum. */
+
+  /* Von oben nach unten: der warme Schein einer Deckenlampe, die Wand, dann
+     bei 58 % die Kante zum Boden. Alle Werte halbdurchsichtig - darunter
+     liegt das Foto, und genau davon lebt das Glas auf dieser Seite. */
   background:
-    radial-gradient(90% 55% at 50% 0%, rgba(255, 150, 60, 0.13), transparent 62%),
+    radial-gradient(88% 52% at 50% 0%, rgba(255, 150, 60, 0.16), transparent 62%),
     linear-gradient(to bottom,
-      #191C22 0%,
-      #1C1F26 40%,
-      #22262E 57.9%,
-      #0F1115 58.1%,
-      #0B0C0F 100%);
+      rgba(30, 34, 42, 0.60) 0%,
+      rgba(28, 32, 39, 0.52) 40%,
+      rgba(34, 38, 47, 0.46) 57.9%,
+      rgba(11, 13, 17, 0.56) 58.1%,
+      rgba(10, 11, 15, 0.72) 100%);
 }
 
 /* Die Bodenflaeche bekommt einen eigenen Lichtfleck, damit sie nach
@@ -1673,7 +1686,7 @@ body.nav-modus #panel {
 .garage-raum::after {
   content: "";
   position: absolute; left: 0; right: 0; top: 58%; bottom: 0;
-  background: radial-gradient(58% 90% at 50% 20%, rgba(255, 255, 255, 0.075), transparent 72%);
+  background: radial-gradient(60% 95% at 50% 16%, rgba(255, 255, 255, 0.12), transparent 74%);
   pointer-events: none;
 }
 .garage-raum > * { position: relative; z-index: 1; }
@@ -1693,20 +1706,25 @@ body.nav-modus #panel {
   line-height: 1;
   letter-spacing: 0.01em;
   text-transform: uppercase;
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.7);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.75);
 }
-.garage-sub { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+.garage-sub {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+}
 
 /* ---------- Hakenleiste an der Wand ----------
    Die Schiene ist ein duenner Strich quer ueber die Wand, mit einer hellen
    Kante darueber - so wirkt sie wie eine Leiste, die etwas von der Wand
-   absteht. Die Teile haengen mit einem Haken daran. */
+   absteht. Die Teile haengen mit einem Buegel daran. */
 .haken-schiene {
   position: absolute;
   left: 0; right: 0;
   top: var(--schiene);
   height: 3px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.20), rgba(0, 0, 0, 0.5));
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.22), rgba(0, 0, 0, 0.5));
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
 }
 
@@ -1728,7 +1746,7 @@ body.nav-modus #panel {
   position: relative;
   flex: 0 0 auto;
   width: clamp(54px, 16vw, 66px);
-  margin-top: 14px;      /* Platz fuer den Haken darueber */
+  margin-top: 14px;      /* Platz fuer den Buegel darueber */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1743,14 +1761,13 @@ body.nav-modus #panel {
 }
 .haken-teil:hover { transform: translateY(2px); }   /* schaukelt leicht am Haken */
 
-/* Der Haken selbst: ein Buegel, der ueber die Schiene greift. */
 .haken-teil::before {
   content: "";
   position: absolute;
   top: -14px; left: 50%;
   width: 14px; height: 16px;
   transform: translateX(-50%);
-  border: 2px solid rgba(255, 255, 255, 0.30);
+  border: 2px solid rgba(255, 255, 255, 0.32);
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
   border-bottom: 0;
@@ -1761,61 +1778,57 @@ body.nav-modus #panel {
   height: clamp(48px, 14vw, 58px);
   display: flex; align-items: center; justify-content: center;
   overflow: hidden;
-  border-radius: 12px;
+  border-radius: 14px;
   color: var(--muted);
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(14px) saturate(150%);
-  -webkit-backdrop-filter: blur(14px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.30),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.30),
     0 8px 18px rgba(0, 0, 0, 0.55);
 }
 .haken-bild img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.haken-teil:hover .haken-bild { color: var(--text); background: rgba(255, 255, 255, 0.13); }
 
 .haken-name {
   max-width: 100%;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   font-size: 10.5px;
   color: var(--muted);
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
 }
 
 /* Leere Haken, solange nichts eingetragen ist. Sie erklaeren ohne Worte,
    wofuer die Leiste da ist. */
 .haken-leer { pointer-events: none; }
-.haken-leer .haken-bild,
 .haken-leer::after {
   content: "";
   display: block;
   width: clamp(48px, 14vw, 58px);
   height: clamp(48px, 14vw, 58px);
-  border-radius: 12px;
-  border: 1px dashed rgba(255, 255, 255, 0.10);
-  background: rgba(255, 255, 255, 0.02);
+  border-radius: 14px;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.025);
 }
 
-.haken-plus .haken-bild,
-.haken-plus::after {
-  content: "";
-  display: flex; align-items: center; justify-content: center;
-  width: clamp(48px, 14vw, 58px);
-  height: clamp(48px, 14vw, 58px);
-  border-radius: 12px;
-  border: 1px dashed rgba(255, 255, 255, 0.24);
+.haken-plus { color: var(--muted); }
+.haken-plus .haken-bild {
+  border-style: dashed;
+  border-color: rgba(255, 255, 255, 0.26);
   background: rgba(255, 255, 255, 0.05);
 }
-.haken-plus { color: var(--muted); }
 .haken-plus:hover { color: var(--accent); }
+.haken-plus:hover .haken-bild { border-color: var(--accent); }
 .haken-plus .ic { width: 22px; height: 22px; }
-.haken-plus::after { display: none; }
 
 /* ---------- Die Buehne mit dem Motorrad ---------- */
 .garage-buehne {
   position: absolute;
   left: var(--s3); right: var(--s3);
-  top: calc(var(--schiene) + var(--hakenhoehe) + 10px);
-  bottom: 34px;
+  top: calc(var(--schiene) + var(--hakenhoehe) + 8px);
+  bottom: 46px;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -1825,7 +1838,7 @@ body.nav-modus #panel {
    stehen. Ohne ihn schwebt jedes freigestellte Motiv. */
 .motorrad-schatten {
   position: absolute;
-  left: 50%; bottom: -16px;
+  left: 50%; bottom: -14px;
   width: 78%; height: 40px;
   transform: translateX(-50%);
   background: radial-gradient(50% 50% at 50% 50%, rgba(0, 0, 0, 0.75), transparent 70%);
@@ -1838,6 +1851,29 @@ body.nav-modus #panel {
   display: flex; align-items: center; justify-content: center;
 }
 .motorrad-ansicht[hidden] { display: none; }
+
+.motorrad-bild {
+  max-width: 100%; max-height: 100%;
+  object-fit: contain;
+  -webkit-user-drag: none;
+  /* Die weiche Maske laesst die Fotokanten in den Raum auslaufen. Genau das
+     unterscheidet "Motorrad steht in der Garage" von "Foto haengt an der
+     Wand". Zwei Verlaeufe uebereinander, die miteinander verrechnet werden:
+     mask-composite sagt "nimm nur, was in BEIDEN sichtbar ist".
+
+     ACHTUNG beim Aendern: Ein radialer Verlauf mit mehr als 100 % Radius
+     spielt sich komplett AUSSERHALB des Bildes ab und ist wirkungslos.
+     Genau daran ist die erste Fassung gescheitert. */
+  -webkit-mask-image:
+    linear-gradient(to right,  transparent 0%, #000 9%, #000 91%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, #000 11%, #000 96%, rgba(0,0,0,0.75) 100%);
+          mask-image:
+    linear-gradient(to right,  transparent 0%, #000 9%, #000 91%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, #000 11%, #000 96%, rgba(0,0,0,0.75) 100%);
+  -webkit-mask-composite: source-in;   /* alte Schreibweise fuer Safari */
+          mask-composite: intersect;
+  filter: drop-shadow(0 18px 26px rgba(0, 0, 0, 0.55));
+}
 
 /* Die Zeichnung tritt an die Stelle des Bildes, solange keine Bildquelle
    eingerichtet ist. Sie traegt den Modellnamen, damit die Buehne trotzdem
@@ -1866,29 +1902,12 @@ body.nav-modus #panel {
   text-transform: uppercase;
   text-align: center;
   color: var(--text);
-  opacity: 0.8;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+  opacity: 0.85;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
 }
 
-.motorrad-bild {
-  max-width: 100%; max-height: 100%;
-  object-fit: contain;
-  -webkit-user-drag: none;
-  /* Die weiche Maske laesst die Fotokanten in den Raum auslaufen. Genau das
-     unterscheidet "Motorrad steht in der Garage" von "Foto haengt an der
-     Wand". Zwei Verlaeufe uebereinander, die miteinander verrechnet werden:
-     mask-composite sagt "nimm nur, was in BEIDEN sichtbar ist". */
-  -webkit-mask-image:
-    linear-gradient(to right,  transparent 0%, #000 9%, #000 91%, transparent 100%),
-    linear-gradient(to bottom, transparent 0%, #000 11%, #000 96%, rgba(0,0,0,0.75) 100%);
-          mask-image:
-    linear-gradient(to right,  transparent 0%, #000 9%, #000 91%, transparent 100%),
-    linear-gradient(to bottom, transparent 0%, #000 11%, #000 96%, rgba(0,0,0,0.75) 100%);
-  -webkit-mask-composite: source-in;   /* alte Schreibweise fuer Safari */
-          mask-composite: intersect;
-  filter: drop-shadow(0 18px 26px rgba(0, 0, 0, 0.55));
-}
-
+/* Der Platzhalter ist selbst eine Glasplatte, kein gestrichelter Kasten -
+   er ist der wichtigste Knopf des Bildschirms, solange die Garage leer ist. */
 .motorrad-platzhalter {
   display: flex;
   flex-direction: column;
@@ -1898,32 +1917,61 @@ body.nav-modus #panel {
   align-self: flex-end;
   margin-bottom: 6px;
   padding: var(--s5) var(--s6);
-  border-radius: var(--r-lg);
-  border: 1px dashed rgba(255, 255, 255, 0.20);
-  background: rgba(255, 255, 255, 0.035);
+  border-radius: 20px;
   color: var(--muted);
   font-family: var(--schrift-text);
   font-size: 14px;
   cursor: pointer;
-  transition: color 0.15s ease, border-color 0.15s ease;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.28),
+    0 12px 30px rgba(0, 0, 0, 0.5);
+  transition: color 0.15s ease, background 0.15s ease, transform 0.16s cubic-bezier(0.2,0.8,0.2,1);
 }
 .motorrad-platzhalter[hidden] { display: none; }
-.motorrad-platzhalter:hover { color: var(--text); border-color: rgba(255, 255, 255, 0.4); }
+.motorrad-platzhalter:hover { color: var(--text); background: rgba(255, 255, 255, 0.11); }
+.motorrad-platzhalter:active { transform: scale(0.97); }
 .motorrad-platzhalter-symbol { width: 44px; height: 44px; stroke-width: 1.2; }
 
-
-/* ---------- Was unter dem Raum steht ---------- */
+/* ---------- Was unter dem Raum steht ----------
+   Der Uebergang vom Raum nach unten ist weich, nicht als Kante: der
+   Inhaltsbereich zieht sich mit einem negativen Abstand unter den Raum und
+   die Platten schieben sich darueber. */
 .garage-inhalt {
-  padding: var(--s4) var(--s4) var(--s6);
+  position: relative;
+  margin-top: -18px;
+  padding: 0 var(--s4) var(--s6);
   display: flex;
   flex-direction: column;
-  gap: var(--s5);
+  gap: var(--s3);
   text-align: left;
 }
-.garage-leer { display: flex; flex-direction: column; gap: var(--s3); }
+
+/* Jeder Abschnitt unter dem Raum ist eine eigene Glasplatte. Vorher lagen
+   die Werte lose auf dem Hintergrund und der Bildschirm zerfiel nach unten
+   hin in Einzelteile. */
+.garage-platte {
+  padding: var(--s4);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.055);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.25),
+    0 12px 34px rgba(0, 0, 0, 0.45);
+}
+.garage-platte[hidden] { display: none; }
+.garage-platte > h2 { margin-top: 0; }
+
+.garage-leer { display: flex; flex-direction: column; gap: var(--s2); }
 .garage-leer[hidden] { display: none; }
 .garage-leer .hint { margin: 0; }
-#garageDatenblatt[hidden] { display: none; }
 
 .motorrad-umschalter { margin-bottom: var(--s3); }
 .motorrad-umschalter[hidden] { display: none; }
@@ -1950,11 +1998,12 @@ body.nav-modus #panel {
 .glas-rund.klein { width: 36px; height: 36px; font-size: 20px; line-height: 1; }
 
 #garageDatenblatt .linkbtn { margin-top: var(--s3); }
+#garageDatenblatt .stats { gap: var(--s2); }
 
 /* ---------- Das Fenster zum Anlegen und Aendern ----------
    Es liegt ueber allem, auch ueber der unteren Leiste (z-index hoeher als
-   deren 900), sonst haette man beim Tippen im Formular die Navigation
-   unter den Fingern. */
+   deren 900), sonst haette man beim Tippen im Formular die Navigation unter
+   den Fingern. */
 .garage-dialog {
   position: fixed;
   inset: 0;
@@ -1974,12 +2023,12 @@ body.nav-modus #panel {
   max-height: 92dvh;
   display: flex;
   flex-direction: column;
-  border-radius: var(--r-lg) var(--r-lg) 0 0;
+  border-radius: 24px 24px 0 0;
   padding-bottom: env(safe-area-inset-bottom);
 }
 @media (min-width: 560px) {
   .garage-dialog { align-items: center; }
-  .garage-dialog-blatt { border-radius: var(--r-lg); max-height: 86dvh; }
+  .garage-dialog-blatt { border-radius: 24px; max-height: 86dvh; }
 }
 
 .garage-dialog-kopf {
@@ -2017,10 +2066,13 @@ body.nav-modus #panel {
 .garage-dialog-inhalt input,
 .garage-dialog-inhalt select,
 .garage-dialog-inhalt textarea {
+  /* Ein <input> bringt eine eigene Wunschbreite von etwa 20 Zeichen mit. In
+     einem Raster aus 1fr-Spalten gewinnt diese Wunschbreite und schiebt das
+     Feld ueber den Rand hinaus - width und min-width nehmen ihr das. */
   width: 100%;
   min-width: 0;
   padding: 11px 12px;
-  border-radius: var(--r-sm);
+  border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.06);
   color: var(--text);
@@ -2039,9 +2091,6 @@ body.nav-modus #panel {
 .dialog-paar label { margin-top: var(--s3); }
 
 .btn.klein { flex: 0 0 auto; padding: 7px 11px; font-size: 12.5px; }
-
-
-
 
 .garage-dialog-fuss {
   flex: 0 0 auto;

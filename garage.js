@@ -684,8 +684,9 @@ async function modelleAnzeigen() {
       hinweis.textContent = `Für ${marke} ${jahr} steht nichts in der Datenbank. Schreib das Modell selbst ins Feld.`;
       return;
     }
+    const schonGewählt = feldWert('feldModell');
     kasten.innerHTML = modelle
-      .map(modell => `<button type="button" class="modell-chip" data-modell="${sicher(modell)}">${sicher(modell)}</button>`)
+      .map(modell => `<button type="button" class="modell-chip ${modell === schonGewählt ? 'active' : ''}" data-modell="${sicher(modell)}">${sicher(modell)}</button>`)
       .join('');
     hinweis.textContent = `${modelle.length} Modelle gefunden. Steht deins nicht dabei, schreib es selbst ins Feld.`;
   } catch {

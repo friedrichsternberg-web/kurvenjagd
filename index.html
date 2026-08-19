@@ -38,10 +38,10 @@
        durchgehend alte Version, weil die Seite dann Elemente enthält, die
        das Skript noch gar nicht kennt.
 
-       Für den Browser ist "app.js?v=15" eine andere Adresse als "app.js?v=14",
+       Für den Browser ist "app.js?v=16" eine andere Adresse als "app.js?v=15",
        er holt sie also frisch. Wichtig: BEI JEDER VERÖFFENTLICHUNG die Zahl
        an allen drei Stellen um eins erhöhen. -->
-  <link rel="stylesheet" href="style.css?v=15">
+  <link rel="stylesheet" href="style.css?v=16">
 </head>
 <body>
 
@@ -299,13 +299,13 @@
     <!-- Alles unter dem Raum scrollt. -->
     <div class="garage-inhalt">
 
-      <div id="garageOhneMotorrad" class="garage-leer" hidden>
+      <div id="garageOhneMotorrad" class="garage-leer garage-platte" hidden>
         <p class="hint">
           Such deine Maschine heraus: Marke, Baujahr, Modell. Kein Foto n&ouml;tig.
         </p>
       </div>
 
-      <div id="garageDatenblatt" hidden>
+      <div id="garageDatenblatt" class="garage-platte" hidden>
         <div class="motorrad-umschalter segmented" id="motorradUmschalter" hidden></div>
 
         <div class="motorrad-kopf">
@@ -323,7 +323,7 @@
         <button class="linkbtn" id="btnMotorradWeiteres">Weiteres Motorrad hinzuf&uuml;gen</button>
       </div>
 
-      <div class="block">
+      <div class="block garage-platte">
         <h2>Mein Equipment</h2>
         <ul id="ausrüstungsListe" class="saved-list"></ul>
         <div class="row">
@@ -803,12 +803,12 @@
     </div>
   </div>
 
-  <script src="app.js?v=15"></script>
+  <script src="app.js?v=16"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=15"></script>
+  <script src="konto.js?v=16"></script>
   <!-- Nach app.js, weil die Garage verkleinereFoto() und showToast() von
        dort benutzt. -->
-  <script src="garage.js?v=15"></script>
+  <script src="garage.js?v=16"></script>
 </body>
 </html>
