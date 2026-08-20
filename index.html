@@ -23,7 +23,7 @@
        "orientation": "portrait" im Manifest ist die Ansage, um die es hier
        geht: Diese App ist fuers Hochformat gebaut. Die spaetere Webseite
        bekommt ein eigenes Design fuers Querformat und ein eigenes Manifest. -->
-  <link rel="manifest" href="manifest.webmanifest?v=36">
+  <link rel="manifest" href="manifest.webmanifest?v=37">
 
   <!-- Faerbt die Statusleiste des Handys in die Grundflaeche der App, damit
        oben kein fremder heller Streifen stehen bleibt. -->
@@ -36,7 +36,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Kurvenjagd">
-  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=36">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=37">
 
   <!-- Fuer die spaetere Webseite und geteilte Routen: So sieht der Link aus,
        wenn ihn jemand in WhatsApp oder Instagram einfuegt. Ohne das steht
@@ -74,7 +74,7 @@
        durchgehend alte Version, weil die Seite dann Elemente enthält, die
        das Skript noch gar nicht kennt.
 
-       Für den Browser ist "app.js?v=36" eine andere Adresse als "app.js?v=26",
+       Für den Browser ist "app.js?v=37" eine andere Adresse als "app.js?v=26",
        er holt sie also frisch.
 
        WICHTIG: BEI JEDER VERÖFFENTLICHUNG die Zahl an ALLEN Stellen um eins
@@ -90,8 +90,8 @@
                    die spaetere Webseite genauso benutzen.
        style.css   die Anordnung DIESER App, ausgelegt auf Hochformat. Die
                    Webseite bekommt dafuer eine eigene Datei. -->
-  <link rel="stylesheet" href="design.css?v=36">
-  <link rel="stylesheet" href="style.css?v=36">
+  <link rel="stylesheet" href="design.css?v=37">
+  <link rel="stylesheet" href="style.css?v=37">
 </head>
 <body>
 
@@ -375,11 +375,14 @@
             </svg>
             <svg class="ic hinweis-kamera"><use href="#icon-kamera"></use></svg>
             <span class="hinweis-text">Dein Bike einf&uuml;gen</span>
+            <!-- Das Abzeichen sitzt halb in der Unterkante der Tafel und
+                 zeigt nach unten auf die Maschine. Es haengt an der Tafel,
+                 statt als eigenes Zeichen daneben zu schweben - deshalb
+                 wirkt es wie ein Teil davon und nicht wie Beiwerk. -->
+            <span class="hinweis-marke" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M5 9.5 12 16l7-6.5"/></svg>
+            </span>
           </span>
-          <svg class="hinweis-pfeil" viewBox="0 0 60 90" aria-hidden="true">
-            <path class="pfeil-linie" d="M30 4C30 34 14 44 14 66"/>
-            <path class="pfeil-spitze" d="M6 56l8 12 12-7"/>
-          </svg>
         </button>
 
         <div class="motorrad-ansicht" id="motorradAnsicht">
@@ -1046,18 +1049,18 @@
   <!-- ZUERST, denn alle anderen benutzen geraet.* beim Laden. Hier steht der
        gesamte Zugriff aufs Geraet - Standort, Speicher, Dateien. Beim Umzug
        in die Stores ist das die einzige Datei, die sich aendert. -->
-  <script src="geraet.js?v=36"></script>
+  <script src="geraet.js?v=37"></script>
   <!-- Der Rechenteil: Kurvigkeit, Sackgassen, Rundtour-Punkte, GPX. Muss VOR
        app.js stehen, weil app.js diese Funktionen beim Routen aufruft. Die
        spaetere Webseite im Querformat laedt genau diese Datei ebenfalls und
        rechnet damit exakt so wie die App. -->
-  <script src="kern.js?v=36"></script>
-  <script src="app.js?v=36"></script>
+  <script src="kern.js?v=37"></script>
+  <script src="app.js?v=37"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=36"></script>
+  <script src="konto.js?v=37"></script>
   <!-- Nach app.js, weil die Garage verkleinereFoto() und showToast() von
        dort benutzt. -->
-  <script src="garage.js?v=36"></script>
+  <script src="garage.js?v=37"></script>
 </body>
 </html>

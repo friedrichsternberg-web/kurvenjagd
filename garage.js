@@ -815,15 +815,24 @@ function setzeBuehnenPlatz() {
        zeigt der Pfeil nicht auf sie, sondern liegt darauf. Gemessen in
        Tellerhoehen, damit der Abstand auf jedem Bildschirm gleich wirkt. */
     const buehneUnten = buehneHoehe + buehneOben;
-    let unten = buehneUnten - ankerY + tellerRyPx * 2.6;
+    /* 4,3 Tellerhoehen ueber der Tellermitte. Frueher waren es 2,6, aber
+       damals hing ein 68 Punkte langer Pfeil unter der Tafel und ihr Kasten
+       endete erst dort. Ohne ihn misst der Kasten bis zur Tafelunterkante -
+       bei gleichem Wert saesse die Tafel also um genau diese Pfeillaenge
+       tiefer und laege auf der Maschine. */
+    let unten = buehneUnten - ankerY + tellerRyPx * 4.3;
 
     /* Obergrenze: Auf einem kurzen Bildschirm - iPhone SE im Hochformat -
        ist der Raum so flach, dass der Hinweis in die Ueberschrift wandert.
-       Deshalb bekommt er einen Deckel: Seine Oberkante bleibt unter dem
-       Kopfbereich, notfalls rueckt er naeher an die Maschine heran. */
+
+       Gemessen wird gegen die KOPFZEILE SELBST, nicht gegen einen Anteil der
+       Raumhoehe. Der Grund: Die Kopfzeile liegt mit IM Raum, und auf einem
+       kurzen Bildschirm ist sie hoeher als jeder feste Anteil - ein Deckel
+       bei 15 Prozent lag dort mitten im Untertitel. */
     hinweis.style.bottom = `${unten}px`;
     const höhe = hinweis.offsetHeight;
-    const mindestenOben = raumH * 0.13;
+    const kopf = raum.querySelector('.garage-kopf');
+    const mindestenOben = (kopf ? kopf.offsetTop + kopf.offsetHeight : 0) + 12;
     const oben = raumH - unten - höhe;
     if (oben < mindestenOben) {
       unten = Math.max(0, raumH - mindestenOben - höhe);

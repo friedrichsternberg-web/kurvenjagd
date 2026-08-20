@@ -1835,7 +1835,9 @@ body.nav-modus .leaflet-control-container { display: none; }
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 26px 30px;
+  /* Unten mehr Luft als oben: Dort haengt das Abzeichen halb in der Kante,
+     und ohne diesen Abstand draengt es sich an die Schrift. */
+  padding: 26px 30px 34px;
   border-radius: var(--r-lg);
   /* Glas ueber dem Raumbild: Die Werkstatt bleibt dahinter erkennbar, der
      Text wird trotzdem lesbar. Genau der Fall, fuer den die Designsprache
@@ -1885,21 +1887,56 @@ body.nav-modus .leaflet-control-container { display: none; }
   text-shadow: 0 1px 10px rgba(0, 0, 0, 0.55);
 }
 
-/* Der Pfeil von der Tafel hinunter zur Maschine. Er ist bewusst geschwungen
-   und nicht gerade - eine gerade Linie sieht aus wie ein Bauteil, eine
-   geschwungene wie eine Geste. */
-.hinweis-pfeil {
-  width: 46px;
-  height: 68px;
-  margin-top: -4px;
+/* Der Zeiger nach unten.
+
+   HIER STAND VORHER ein geschwungener, gestrichelter Pfeil in Weiss. Er war
+   auf dem hellen, unruhigen Werkstattbild kaum zu sehen und wirkte wie ein
+   Fremdkoerper - ein duenner Strich, der neben der Tafel schwebte.
+
+   Der Ersatz macht drei Dinge anders:
+
+     Er HAENGT an der Tafel, halb in ihre Unterkante eingesenkt, statt
+     daneben zu schweben. Dadurch liest er sich als Teil davon.
+
+     Er ist ORANGE. Das ist die einzige Signalfarbe der App, und sie ist die
+     einzige Farbe, die auf diesem grau-blauen Bild sofort auffaellt. Weiss
+     geht darin unter, weil das Bild selbst voller Weiss ist.
+
+     Er ist eine FLAECHE mit Schatten, kein Strich. Eine Scheibe von 36
+     Punkten setzt sich gegen jeden Untergrund durch, ein 2,6 Punkte breiter
+     Strich nicht. */
+.hinweis-marke {
+  position: absolute;
+  left: 50%;
+  bottom: -18px;
+  width: 36px; height: 36px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.45),
+    0 0 0 4px rgba(16, 22, 32, 0.42);
+  animation: marke-nicken 1.9s ease-in-out infinite;
+}
+.hinweis-marke svg {
+  width: 22px; height: 22px;
   fill: none;
-  stroke: rgba(255, 255, 255, 0.8);
+  stroke: var(--accent-ink);
   stroke-width: 2.6;
   stroke-linecap: round;
   stroke-linejoin: round;
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
 }
-.hinweis-pfeil .pfeil-linie { stroke-dasharray: 5 7; }
+
+/* Das Nicken ist der zweite Grund, warum der Zeiger auffaellt: Bewegung
+   sieht das Auge noch am Rand des Blickfelds, Farbe erst beim Hinsehen.
+   Bewusst langsam und klein - ein huepfendes Element waere Reklame. */
+@keyframes marke-nicken {
+  0%, 62%, 100% { transform: translateX(-50%) translateY(0); }
+  78%           { transform: translateX(-50%) translateY(5px); }
+}
 
 /* Beim Antippen gibt die Tafel spuerbar nach - dieselbe Sprache wie bei den
    uebrigen Glasflaechen der App. */
@@ -1907,7 +1944,7 @@ body.nav-modus .leaflet-control-container { display: none; }
 .hinweis-tafel { transition: transform 0.12s ease-out; }
 
 @media (prefers-reduced-motion: reduce) {
-  .buehne-hinweis { animation: none; }
+  .buehne-hinweis, .hinweis-marke { animation: none; }
 }
 
 /* Die Ausgaben neben den Justier-Reglern brauchen etwas mehr Platz als die
