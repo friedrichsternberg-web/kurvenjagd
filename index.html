@@ -923,6 +923,11 @@
        gesamte Zugriff aufs Geraet - Standort, Speicher, Dateien. Beim Umzug
        in die Stores ist das die einzige Datei, die sich aendert. -->
   <script src="geraet.js?v=27"></script>
+  <!-- Der Rechenteil: Kurvigkeit, Sackgassen, Rundtour-Punkte, GPX. Muss VOR
+       app.js stehen, weil app.js diese Funktionen beim Routen aufruft. Die
+       spaetere Webseite im Querformat laedt genau diese Datei ebenfalls und
+       rechnet damit exakt so wie die App. -->
+  <script src="kern.js?v=27"></script>
   <script src="app.js?v=27"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
