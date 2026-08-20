@@ -772,7 +772,7 @@ function zeichneBuehne() {
   // Spiegelung, Schatten, Glut und Leuchtsaum sind Kopien desselben Bildes -
   // nur so folgen sie automatisch jeder Maschine, ohne dass irgendetwas
   // doppelt gespeichert werden muesste.
-  const kopien = ['motorradSpiegel', 'motorradSchatten', 'motorradGlut', 'motorradRand']
+  const kopien = ['motorradSpiegel', 'motorradSchatten', 'motorradGlut', 'motorradRand', 'motorradKante']
     .map(name => document.getElementById(name));
 
   // Faellt die Bildquelle aus, das Standardbild nachreichen.

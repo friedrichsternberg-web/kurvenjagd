@@ -1872,6 +1872,22 @@ body.nav-modus .leaflet-control-container { display: none; }
   50%      { opacity: 0.85; }
 }
 
+/* Die weisse Kantenlinie: eine duenne, STAENDIG sichtbare Linie direkt an
+   der Kontur - sie atmet nicht mit, das ist Absicht: Das Orange dahinter
+   lebt, die Linie steht. Drei gleiche drop-shadows uebereinander
+   verdichten die Linie zu voller Staerke, ohne sie zu verbreitern; mit
+   zweien blieb sie an hellen Bildstellen zu blass. Das Weiss ist das
+   Textweiss der Designsprache, kein reines #fff. */
+.buehne-kante-linie {
+  position: absolute;
+  z-index: 2;
+  top: 0; left: 0;
+  width: 100%;
+  filter: drop-shadow(0 0 1px var(--text))
+          drop-shadow(0 0 1px var(--text))
+          drop-shadow(0 0 1px var(--text));
+}
+
 .motorrad-bild {
   position: relative;
   z-index: 3;
