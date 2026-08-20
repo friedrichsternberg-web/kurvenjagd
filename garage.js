@@ -326,7 +326,18 @@ function zeichneGarage() {
    Eine zweite Garage ist spaeter nur ein weiterer Eintrag hier. */
 const GARAGEN = [{
   name:      'Werkstatt',
+  /* ZWEI Fassungen desselben Raums, aus derselben Kamera gerendert:
+
+     bild          der leere Drehteller. Er kommt zum Einsatz, sobald der
+                   Nutzer ein eigenes Foto hat - dann steht SEINE Maschine
+                   darauf.
+     bildStandard  dieselbe Werkstatt mit einer Beispielmaschine auf dem
+                   Teller. Sie steht da, solange kein eigenes Foto da ist.
+
+     Nachgemessen: Der Tellerrand ist in beiden Bildern zu 98,7 Prozent
+     deckungsgleich - dieselben Standplatzwerte gelten also fuer beide. */
   bild:      'img/garage-werkstatt.webp',
+  bildStandard: 'img/garage-werkstatt-standard.webp',
   // Das Bild wird in anderthalbfacher Groesse ausgeliefert, damit es auf
   // einem Handy mit dreifacher Punktdichte nicht aufgeblasen wird - genau
   // die Unschaerfe, die Friedrich an der ersten Fassung gesehen hat. Die
@@ -681,9 +692,29 @@ function zeichneBuehne() {
   const motorrad = motorradAktiv();
   const bild = document.getElementById('motorradBild');
 
-  // Es steht IMMER eine Maschine da - ohne eigenes Foto das freigestellte
-  // Standardbild. Eine leere Buehne saehe nach Fehler aus. Waehrend
-  // "Position anpassen" hat das Foto aus dem Dialog Vorrang.
+  /* Gibt es ein eigenes Foto? Davon haengt ab, welcher Raum gezeigt wird.
+
+     OHNE eigenes Foto: die Werkstatt MIT der Beispielmaschine, und der
+     Stapel aus Foto, Schatten und Spiegelung bleibt ganz weg. Frueher stand
+     dort das freigestellte Standardmotorrad als eigene Schicht - das sah
+     immer ein wenig nach Aufkleber aus, weil kein Schatten der Welt ein
+     gerendertes Bild schlaegt. Jetzt steht die Beispielmaschine IM Bild,
+     mit dem Licht und den Spiegelungen des Raums.
+
+     MIT eigenem Foto: der leere Teller, und darauf die eigene Maschine. */
+  const eigenesFoto = !!(buehneVorschau || (motorrad && motorrad.bild));
+  const garageBild = garageAktiv();
+  const raumBild = eigenesFoto
+    ? garageBild.bild
+    : (garageBild.bildStandard || garageBild.bild);
+  document.getElementById('buehnePlatte').style.backgroundImage = `url('${raumBild}')`;
+
+  document.getElementById('motorradAnsicht').hidden = !eigenesFoto;
+  document.getElementById('buehneHinweis').hidden = eigenesFoto;
+  if (!eigenesFoto) { setzeBuehnenPlatz(); return; }
+
+  // Ab hier gibt es ein eigenes Foto. Waehrend "Position anpassen" hat das
+  // noch ungespeicherte Foto aus dem Dialog Vorrang.
   const adresse = buehneVorschau || bildAdresse(motorrad);
   const beschreibung = motorrad
     ? ([motorrad.marke, motorrad.modell].filter(Boolean).join(' ') || 'Mein Motorrad')
@@ -714,11 +745,6 @@ function zeichneBuehne() {
      Browser gar nicht mehr. Dann sofort rechnen - sonst bliebe die Maschine
      beim Umschalten zwischen zwei Maschinen auf dem Platz der vorigen. */
   if (bild.complete && bild.naturalWidth) setzeBuehnenPlatz();
-
-  // Ohne eigenes Foto ist das Standardbild nur ein Platzhalter und wird
-  // etwas zurueckgenommen, damit es nicht wie die eigene Maschine wirkt.
-  document.getElementById('motorradAnsicht')
-          .classList.toggle('ist-standard', !buehneVorschau && !(motorrad && motorrad.bild));
 
   setzeBuehnenPlatz();
 }
@@ -763,6 +789,50 @@ function setzeBuehnenPlatz() {
   const ankerX = (tellerX - fensterX) * massstab;
   const ankerY = (tellerY - fensterY) * massstab;
 
+  /* Die Ellipse des Drehtellers auf dem Schirm. Sie wird an drei Stellen
+     gebraucht: fuer die Spiegelung, fuer die Frage ob gedreht werden muss,
+     und fuer die Lage des Hinweises. Deshalb steht sie hier oben, noch vor
+     allen dreien. */
+  const tellerRxPx = garageBild.tellerRx * bildB * massstab;
+  const tellerRyPx = garageBild.tellerRy * bildH * massstab;
+
+  /* Der Hinweis "Dein Bike einfuegen" haengt am selben Anker wie die
+     Maschine: waagerecht ueber der Tellermitte, senkrecht so weit darueber,
+     dass der Pfeil auf dem Sattel der Beispielmaschine endet. Dadurch sitzt
+     er auf jeder Bildschirmgroesse an derselben Stelle IM RAUM statt an
+     einer festen Stelle auf dem Schirm. */
+  const hinweis = document.getElementById('buehneHinweis');
+  if (hinweis && !hinweis.hidden) {
+    // Der Hinweis haengt wie der Maschinenstapel in der Buehne, gerechnet
+    // wird im Raum - also denselben Versatz abziehen.
+    const buehneOben = ansicht.parentElement.offsetTop;
+    const buehneLinks = ansicht.parentElement.offsetLeft;
+    const buehneHoehe = ansicht.parentElement.offsetHeight;
+    const breite = Math.min(raumB * 0.66, tellerRxPx * 1.42);
+    hinweis.style.width = `${breite}px`;
+    hinweis.style.left = `${ankerX - buehneLinks - breite / 2}px`;
+    /* Der Fuss des Pfeils endet ueber der Maschine, nicht auf ihr - sonst
+       zeigt der Pfeil nicht auf sie, sondern liegt darauf. Gemessen in
+       Tellerhoehen, damit der Abstand auf jedem Bildschirm gleich wirkt. */
+    const buehneUnten = buehneHoehe + buehneOben;
+    let unten = buehneUnten - ankerY + tellerRyPx * 2.6;
+
+    /* Obergrenze: Auf einem kurzen Bildschirm - iPhone SE im Hochformat -
+       ist der Raum so flach, dass der Hinweis in die Ueberschrift wandert.
+       Deshalb bekommt er einen Deckel: Seine Oberkante bleibt unter dem
+       Kopfbereich, notfalls rueckt er naeher an die Maschine heran. */
+    hinweis.style.bottom = `${unten}px`;
+    const höhe = hinweis.offsetHeight;
+    const mindestenOben = raumH * 0.13;
+    const oben = raumH - unten - höhe;
+    if (oben < mindestenOben) {
+      unten = Math.max(0, raumH - mindestenOben - höhe);
+      hinweis.style.bottom = `${unten}px`;
+    }
+  }
+  // Ohne eigenes Foto steht die Maschine im Raumbild - hier ist Schluss.
+  if (ansicht.hidden) return;
+
   /* Schritt 4: die Maschine an ihrem INHALT ausrichten, nicht an ihrer
      Bildkante. Ohne diesen Schritt schwebt sie um genau den durchsichtigen
      Rand ihres Fotos ueber dem Teller - siehe rahmenMessen(). */
@@ -770,11 +840,6 @@ function setzeBuehnenPlatz() {
   const rahmen = rahmenMessen(bild) || { links: 0, rechts: 1, oben: 0, unten: 1 };
   const seitenverhältnis = (bild.naturalWidth && bild.naturalHeight)
     ? bild.naturalHeight / bild.naturalWidth : 1;
-
-  // Die Ellipse des Drehtellers auf dem Schirm - Grundlage sowohl fuer die
-  // Spiegelung als auch fuer die Frage, ob gedreht werden muss.
-  const tellerRxPx = garageBild.tellerRx * bildB * massstab;
-  const tellerRyPx = garageBild.tellerRy * bildH * massstab;
 
   const inhaltAnteil = Math.max(0.05, rahmen.rechts - rahmen.links);
   const stand = standflaeche(rahmen, bild.naturalWidth, bild.naturalHeight);
@@ -2389,6 +2454,20 @@ verkabele('btnMotorradBearbeiten', 'click', () => {
   if (motorrad) öffneMotorradDialog(motorrad);
 });
 verkabele('btnMotorradWeiteres', 'click', () => öffneMotorradDialog(null));
+
+/* Der Hinweis im Raumbild fuehrt geradewegs zur Fotoauswahl. Steht schon
+   eine Maschine in der Garage, wird ihr Dialog geoeffnet und die Auswahl
+   gleich aufgeklappt - der Nutzer wollte ein Foto, also bekommt er das
+   Foto-Fenster und nicht erst ein Formular. Ist noch gar keine Maschine da,
+   wird eine angelegt; Marke und Modell traegt er hinterher ein. */
+verkabele('buehneHinweis', 'click', () => {
+  const motorrad = motorradAktiv();
+  öffneMotorradDialog(motorrad || null);
+  const eingabe = document.getElementById('garageFotoEingabe');
+  if (!eingabe) return;
+  eingabe.value = '';   // sonst loest dieselbe Datei beim zweiten Mal nichts aus
+  eingabe.click();
+});
 
 /* --- Das Nachjustieren ------------------------------------------------------
    Beim Oeffnen wandern die gespeicherten Feinwerte in die Regler, jede

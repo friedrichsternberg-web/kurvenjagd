@@ -6,11 +6,17 @@ oeffentlich und soll ueber Werbung finanziert werden. Jedes Bild muss dafuer
 eine geklaerte Herkunft haben.
 
 garage-werkstatt.webp
-  KI-generiertes Bild (leere helle Werkstatt mit Drehteller), erstellt von
-  Friedrich Sternberg im August 2026 mit einem KI-Bildgenerator, als Vorlage
-  fuer die Garagen-Buehne der App. Keine fremden Markenzeichen im Bild.
-  Ausgeliefert in anderthalbfacher Groesse der Quelle (1296 x 2731), damit
-  es auf Bildschirmen mit dreifacher Punktdichte scharf bleibt.
+garage-werkstatt-standard.webp
+  KI-generierte Bilder (helle Werkstatt mit Drehteller), erstellt von
+  Friedrich Sternberg im August 2026 mit einem KI-Bildgenerator als Vorlage
+  fuer die Garagen-Buehne der App. Zwei Fassungen desselben Raums aus
+  derselben Kamera: einmal mit leerem Teller (fuer Nutzer mit eigenem Foto),
+  einmal mit einer Beispielmaschine darauf (solange kein eigenes Foto da
+  ist). Keine fremden Markenzeichen im Bild, die Beispielmaschine ist kein
+  Abbild eines real erhaeltlichen Modells.
+
+  Beide ausgeliefert in anderthalbfacher Groesse der Quelle (1296 x 2731),
+  damit sie auf Bildschirmen mit dreifacher Punktdichte scharf bleiben.
 
 bike-standard.webp
   Freigestelltes Standardmotorrad, aus einem von Friedrich Sternberg

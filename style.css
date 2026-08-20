@@ -1625,7 +1625,9 @@ body.nav-modus .leaflet-control-container { display: none; }
 .buehne-platte {
   position: absolute; inset: 0;
   pointer-events: none;
-  background-image: url('img/garage-werkstatt.webp');
+  /* Nur der Rueckfall fuers allererste Zeichnen - welches der beiden
+     Raumbilder wirklich gilt, setzt zeichneBuehne() in garage.js. */
+  background-image: url('img/garage-werkstatt-standard.webp');
   background-repeat: no-repeat;
   background-size: var(--platte-groesse, cover);
   background-position: var(--platte-lage, center 62%);
@@ -1793,9 +1795,120 @@ body.nav-modus .leaflet-control-container { display: none; }
           mask-image: linear-gradient(to top, transparent var(--glut-kante, 0%), rgba(0,0,0,0.95) var(--glut-kante, 0%), rgba(0,0,0,0.3) calc(var(--glut-kante, 0%) + 14%), transparent calc(var(--glut-kante, 0%) + 30%));
 }
 
-/* Ohne eigenes Foto steht dort das Standardmotorrad. Es wird leicht
-   zurueckgenommen, damit es nicht wie die eigene Maschine wirkt. */
-.motorrad-ansicht.ist-standard .motorrad-bild { opacity: 0.92; }
+.motorrad-ansicht[hidden] { display: none; }
+
+/* ---------- Der Hinweis "Dein Bike einfuegen" ----------
+   Er erscheint nur, solange kein eigenes Foto da ist. Dann steht im Raum
+   eine Beispielmaschine, die zum Bild gehoert - der Hinweis sagt, dass das
+   nicht die eigene ist und wie man das aendert.
+
+   Gestaltet als Tafel an der Werkstattwand, nicht als Bedienelement der
+   App: Sucherwinkel statt Rahmen, Glas statt Flaeche. Lage und Groesse
+   rechnet setzeBuehnenPlatz() aus, damit die Tafel ueber dem Drehteller
+   sitzt und der Pfeil auf die Maschine zeigt. */
+.buehne-hinweis {
+  position: absolute;       /* left, bottom und width setzt garage.js */
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  animation: hinweis-auftauchen 0.5s ease-out both;
+}
+.buehne-hinweis[hidden] { display: none; }
+
+@keyframes hinweis-auftauchen {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.hinweis-tafel {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 26px 30px;
+  border-radius: var(--r-lg);
+  /* Glas ueber dem Raumbild: Die Werkstatt bleibt dahinter erkennbar, der
+     Text wird trotzdem lesbar. Genau der Fall, fuer den die Designsprache
+     Glas vorsieht - eine Linse ueber etwas Echtem.
+
+     DUNKEL getoent, nicht hell: Dahinter liegt eine helle Werkstatt mit
+     einer Werkzeugwand voller Kleinteile. Auf hellem Glas haette weisse
+     Schrift dort keine Chance. */
+  background: linear-gradient(rgba(16, 22, 32, 0.46), rgba(16, 22, 32, 0.30));
+  -webkit-backdrop-filter: blur(16px) saturate(1.05);
+          backdrop-filter: blur(16px) saturate(1.05);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+    0 12px 34px rgba(0, 0, 0, 0.38);
+}
+
+/* Die vier Sucherwinkel in den Ecken. Sie sagen "hier kommt ein Bild hin",
+   ohne dass ein Wort dafuer noetig waere. preserveAspectRatio="none" laesst
+   sie mit der Tafel mitwachsen; die Ecken bleiben trotzdem rechtwinklig,
+   weil sie kurz sind. */
+.hinweis-winkel {
+  position: absolute;
+  inset: 7px;
+  width: calc(100% - 14px);
+  height: calc(100% - 14px);
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.85);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.hinweis-kamera {
+  width: 34px; height: 34px;
+  stroke-width: 1.3;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.hinweis-text {
+  font-family: var(--schrift-display);
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.55);
+}
+
+/* Der Pfeil von der Tafel hinunter zur Maschine. Er ist bewusst geschwungen
+   und nicht gerade - eine gerade Linie sieht aus wie ein Bauteil, eine
+   geschwungene wie eine Geste. */
+.hinweis-pfeil {
+  width: 46px;
+  height: 68px;
+  margin-top: -4px;
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.8);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
+}
+.hinweis-pfeil .pfeil-linie { stroke-dasharray: 5 7; }
+
+/* Beim Antippen gibt die Tafel spuerbar nach - dieselbe Sprache wie bei den
+   uebrigen Glasflaechen der App. */
+.buehne-hinweis:active .hinweis-tafel { transform: scale(0.97); }
+.hinweis-tafel { transition: transform 0.12s ease-out; }
+
+@media (prefers-reduced-motion: reduce) {
+  .buehne-hinweis { animation: none; }
+}
 
 /* Die Ausgaben neben den Justier-Reglern brauchen etwas mehr Platz als die
    im Freisteller, sonst bricht "100 %" auf zwei Zeilen um. */

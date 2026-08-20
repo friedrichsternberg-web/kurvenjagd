@@ -23,7 +23,7 @@
        "orientation": "portrait" im Manifest ist die Ansage, um die es hier
        geht: Diese App ist fuers Hochformat gebaut. Die spaetere Webseite
        bekommt ein eigenes Design fuers Querformat und ein eigenes Manifest. -->
-  <link rel="manifest" href="manifest.webmanifest?v=35">
+  <link rel="manifest" href="manifest.webmanifest?v=36">
 
   <!-- Faerbt die Statusleiste des Handys in die Grundflaeche der App, damit
        oben kein fremder heller Streifen stehen bleibt. -->
@@ -36,7 +36,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Kurvenjagd">
-  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=35">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=36">
 
   <!-- Fuer die spaetere Webseite und geteilte Routen: So sieht der Link aus,
        wenn ihn jemand in WhatsApp oder Instagram einfuegt. Ohne das steht
@@ -74,7 +74,7 @@
        durchgehend alte Version, weil die Seite dann Elemente enthält, die
        das Skript noch gar nicht kennt.
 
-       Für den Browser ist "app.js?v=35" eine andere Adresse als "app.js?v=26",
+       Für den Browser ist "app.js?v=36" eine andere Adresse als "app.js?v=26",
        er holt sie also frisch.
 
        WICHTIG: BEI JEDER VERÖFFENTLICHUNG die Zahl an ALLEN Stellen um eins
@@ -90,8 +90,8 @@
                    die spaetere Webseite genauso benutzen.
        style.css   die Anordnung DIESER App, ausgelegt auf Hochformat. Die
                    Webseite bekommt dafuer eine eigene Datei. -->
-  <link rel="stylesheet" href="design.css?v=35">
-  <link rel="stylesheet" href="style.css?v=35">
+  <link rel="stylesheet" href="design.css?v=36">
+  <link rel="stylesheet" href="style.css?v=36">
 </head>
 <body>
 
@@ -363,6 +363,25 @@
            Spiegelung unter allem, dann der Schatten, dann die Maschine,
            zuoberst das orange Kantenlicht vom LED-Ring des Tellers. -->
       <div class="garage-buehne">
+        <!-- Der Hinweis, solange kein eigenes Foto da ist. Er sitzt im Bild
+             wie eine Tafel an der Werkstattwand: Glasplatte mit
+             Sucherwinkeln, Kamerasymbol, und ein geschwungener Pfeil hinunter
+             zur Maschine, damit ohne Worte klar ist, worum es geht.
+             Ein Druck darauf fuehrt geradewegs zur Fotoauswahl. -->
+        <button type="button" class="buehne-hinweis" id="buehneHinweis" hidden>
+          <span class="hinweis-tafel">
+            <svg class="hinweis-winkel" viewBox="0 0 100 74" aria-hidden="true" preserveAspectRatio="none">
+              <path d="M4 22V8a4 4 0 0 1 4-4h14M78 4h14a4 4 0 0 1 4 4v14M96 52v14a4 4 0 0 1-4 4H78M22 70H8a4 4 0 0 1-4-4V52"/>
+            </svg>
+            <svg class="ic hinweis-kamera"><use href="#icon-kamera"></use></svg>
+            <span class="hinweis-text">Dein Bike einf&uuml;gen</span>
+          </span>
+          <svg class="hinweis-pfeil" viewBox="0 0 60 90" aria-hidden="true">
+            <path class="pfeil-linie" d="M30 4C30 34 14 44 14 66"/>
+            <path class="pfeil-spitze" d="M6 56l8 12 12-7"/>
+          </svg>
+        </button>
+
         <div class="motorrad-ansicht" id="motorradAnsicht">
           <img id="motorradSpiegel" class="buehne-spiegel" alt="" aria-hidden="true">
           <img id="motorradSchatten" class="buehne-schatten" alt="" aria-hidden="true">
@@ -1027,18 +1046,18 @@
   <!-- ZUERST, denn alle anderen benutzen geraet.* beim Laden. Hier steht der
        gesamte Zugriff aufs Geraet - Standort, Speicher, Dateien. Beim Umzug
        in die Stores ist das die einzige Datei, die sich aendert. -->
-  <script src="geraet.js?v=35"></script>
+  <script src="geraet.js?v=36"></script>
   <!-- Der Rechenteil: Kurvigkeit, Sackgassen, Rundtour-Punkte, GPX. Muss VOR
        app.js stehen, weil app.js diese Funktionen beim Routen aufruft. Die
        spaetere Webseite im Querformat laedt genau diese Datei ebenfalls und
        rechnet damit exakt so wie die App. -->
-  <script src="kern.js?v=35"></script>
-  <script src="app.js?v=35"></script>
+  <script src="kern.js?v=36"></script>
+  <script src="app.js?v=36"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=35"></script>
+  <script src="konto.js?v=36"></script>
   <!-- Nach app.js, weil die Garage verkleinereFoto() und showToast() von
        dort benutzt. -->
-  <script src="garage.js?v=35"></script>
+  <script src="garage.js?v=36"></script>
 </body>
 </html>
