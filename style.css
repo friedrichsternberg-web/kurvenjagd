@@ -1899,6 +1899,60 @@ body.nav-modus .leaflet-control-container { display: none; }
           drop-shadow(0 0 7px color-mix(in srgb, var(--text) 55%, transparent));
 }
 
+/* ---------- Das Lauflicht ----------
+   Ein kleiner weisser Streifen, der pausenlos im Uhrzeigersinn an der
+   Aussenlinie der Maschine entlangwandert.
+
+   Wie das ohne Wegberechnung geht: Das Bild in der Huelle traegt weisse
+   drop-shadows, also einen Leuchtrand um die ganze Silhouette. Die HUELLE
+   traegt eine Maske in Form eines Tortenstuecks - nur ein schmales
+   Winkelfenster mit weichem Schweif ist durchlaessig - und dreht sich.
+   Das Bild darin dreht exakt gegenlaeufig (gleiche Dauer, gleiche
+   Gangart) und steht deshalb still. Es wandert also nur das Fenster im
+   Kreis, und sichtbar ist immer genau das Stueck Leuchtrand, das gerade
+   darin liegt: ein Lichtpunkt, der der Kontur folgt.
+
+   Die Huelle ist um den Schattenweg groesser als das Bild (inset -24px
+   gegen die Buehne, das Bild sitzt 24px eingerueckt), denn die Maske
+   schneidet an der Huellenkante ab - saesse sie knapp, waere der
+   Leuchtrand oben und unten gekappt. */
+.buehne-lauf {
+  position: absolute;
+  z-index: 2;
+  inset: -24px;
+  pointer-events: none;
+  animation: lauf-drehen 7s linear infinite;
+  -webkit-mask-image: conic-gradient(from 0deg,
+    transparent 0deg 295deg,
+    rgba(0, 0, 0, 0.25) 322deg,
+    rgba(0, 0, 0, 0.7) 344deg,
+    #000 353deg,
+    #000 358deg,
+    transparent 360deg);
+          mask-image: conic-gradient(from 0deg,
+    transparent 0deg 295deg,
+    rgba(0, 0, 0, 0.25) 322deg,
+    rgba(0, 0, 0, 0.7) 344deg,
+    #000 353deg,
+    #000 358deg,
+    transparent 360deg);
+}
+.buehne-lauf > img {
+  position: absolute;
+  top: 24px; left: 24px;
+  width: calc(100% - 48px);
+  animation: lauf-gegendrehen 7s linear infinite;
+  /* Der Leuchtrand des Laeufers: deutlich breiter und heller als die
+     stehende Kantenlinie, damit der wandernde Punkt sich von ihr abhebt -
+     er konkurriert mit Linie UND Schein, die beide staendig da sind. */
+  filter: drop-shadow(0 0 1.5px var(--text))
+          drop-shadow(0 0 2px var(--text))
+          drop-shadow(0 0 2.5px var(--text))
+          drop-shadow(0 0 7px var(--text));
+}
+@keyframes lauf-drehen       { to { transform: rotate(360deg); } }
+@keyframes lauf-gegendrehen  { to { transform: rotate(-360deg); } }
+
 .motorrad-bild {
   position: relative;
   z-index: 3;
@@ -2140,6 +2194,10 @@ body.nav-modus .leaflet-control-container { display: none; }
      Lampenflackern entfaellt ganz. */
   .buehne-rand  { animation: none; opacity: 0.75; }
   .buehne-lampe { animation: none; opacity: 0; }
+  /* Ohne Drehung staende vom Lauflicht nur ein einzelnes Segment fest im
+     Bild - das saehe kaputt aus, also faellt es ganz weg. Kantenlinie
+     und heller Schein stehen ohnehin. */
+  .buehne-lauf  { display: none; }
 }
 
 /* Die Ausgaben neben den Justier-Reglern brauchen etwas mehr Platz als die
