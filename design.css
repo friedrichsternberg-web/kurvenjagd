@@ -16,9 +16,13 @@
    hochzieht, ergibt am Rechner keinen Sinn.
 
    Die SPRACHE dagegen muss geteilt werden, sonst sind es zwei Produkte, die
-   zufaellig denselben Namen tragen. Dasselbe Orange, dieselbe Schrift,
-   dieselben Abstaende. Wer das Orange spaeter aendert, aendert es an EINER
+   zufaellig denselben Namen tragen. Dieselbe Signalfarbe, dieselbe Schrift,
+   dieselben Abstaende. Wer die Farbe spaeter aendert, aendert sie an EINER
    Stelle und nicht an zweien - und vergisst die zweite nicht.
+
+   Genau das hat sich beim Wechsel von Orange auf RAL 5005 bewaehrt: Bis
+   auf eine Handvoll fest eingetragener Werte, die dabei aufflogen und
+   jetzt ebenfalls hier stehen, war es EINE Zeile.
 
    Die Regel ab jetzt:
 
@@ -59,8 +63,8 @@
      4. Bedienelemente ohne Bild bleiben matt. Glas ist teuer, es wirkt
         nur, wenn es nicht ueberall klebt.
 
-   Orange ist die EINZIGE Signalfarbe und wird sparsam eingesetzt. Wenn
-   alles orange ist, bedeutet orange nichts mehr.
+   RAL 5005 ist die EINZIGE Signalfarbe und wird sparsam eingesetzt. Wenn
+   alles die Signalfarbe traegt, bedeutet sie nichts mehr.
    ============================================================ */
 
 /* ---------- Schrift ----------
@@ -109,12 +113,53 @@
   --text:       #F2F3F5;
   --muted:      #8B929E;   /* Nebentext und Beschriftungen */
 
-  --accent:     #FF6B00;   /* Signalfarbe */
-  --accent-dk:  #D95A00;   /* gedrueckter Zustand */
-  --accent-ink: #140A00;   /* Text AUF Orange */
+  /* Die Signalfarbe ist RAL 5005 "Signalblau".
+
+     ZWEI Toene derselben Farbe, und das hat einen messbaren Grund: RAL 5005
+     ist ein DUNKLES Blau. Auf der fast schwarzen Grundflaeche dieser App
+     kommt es auf einen Kontrast von 2,4:1 - Text und Symbole waeren darin
+     kaum zu erkennen (lesbar wird es ab 4,5:1). Das fruehere Orange kam auf
+     6,7:1, deshalb fiel das dort nie auf.
+
+     --accent      die Farbe selbst, fuer FLAECHEN: Knoepfe, gefuellte
+                   Marken, alles wo heller Text darauf liegt.
+     --accent-hell derselbe Farbton, nur aufgehellt (gleiche 203 Grad, volle
+                   Saettigung), fuer TEXT, SYMBOLE und LINIEN auf dunklem
+                   Grund. Kommt auf 4,8:1.
+
+     Wer eine der beiden aendert, sollte die andere mitziehen - sie sind
+     zwei Ansichten derselben Farbe, keine zwei Farben. */
+  --accent:      #005387;   /* RAL 5005 Signalblau, RGB 0 83 135 */
+  --accent-hell: #0084D6;   /* aufgehellt: Text und Symbole auf Dunkel */
+  --accent-glanz:#0068A8;   /* obere Kante der Knopfwoelbung */
+  --accent-tief: #003F66;   /* untere Kante der Knopfwoelbung */
+  --accent-dk:   #005E99;   /* Zustand beim Ueberfahren. Heller statt
+                               dunkler: Auf einem dunklen Blau verschwaende
+                               ein noch dunkleres Blau im Hintergrund. */
+  --accent-ink:  #FFFFFF;   /* Text AUF der Signalfarbe. Weiss statt des
+                               frueheren Fast-Schwarz - auf RAL 5005 kaeme
+                               dunkler Text auf 2,4:1, Weiss auf 8,1:1. */
 
   --good:       #4ADE80;   /* positive Auswertung */
-  --gps:        #4A9EFF;   /* eigener Standort - hebt sich von der orangen Route ab */
+  --gps:        #4A9EFF;   /* eigener Standort - hebt sich von der Route ab */
+
+  /* Die MESSSKALEN (Kurvigkeit, Steigung). Sie haengen ABSICHTLICH nicht an
+     der Signalfarbe: Hier bedeutet die Farbe einen Wert, nicht die Marke.
+     Wenig - mittel - viel liest jeder als gruen - gelb - orange, das ist
+     erlernt. Am oberen Ende der Skala ein Blau, das dieselbe Farbe hat wie
+     die Knoepfe der App, saehe nach Marke aus und nach nichts sonst. */
+  --skala-wenig:  #4ADE80;
+  --skala-mittel: #FACC15;
+  --skala-viel:   #FF6B00;
+
+  /* Das warme Licht in der Garage: der Schein, den der Raum auf die Kante
+     der Maschine wirft. Auch das ist keine Markenfarbe, sondern LICHT, und
+     es haengt deshalb absichtlich nicht an --accent.
+
+     Nachgesehen beim Wechsel auf RAL 5005: Mit blauem Saum verschwand die
+     Maschine im Raum. Der Werkstattraum ist selbst blau-grau - ein warmer
+     Schein trennt die Maschine davon ab, ein blauer verschmilzt damit. */
+  --licht-warm: #FF6B00;
   --danger:     #FF5A52;   /* Loeschen und Verwerfen */
 
   /* Radien. Bewusst klein gehalten, siehe Verbot 5 oben. */

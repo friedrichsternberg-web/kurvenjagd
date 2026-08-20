@@ -28,7 +28,10 @@
   /* Der Verlauf ist hier keine Deko, sondern Woelbung: oben etwas heller,
      unten etwas dunkler. Zusammen mit der Lichtkante wirkt der Knopf
      dadurch koerperlich statt aufgemalt. */
-  background: linear-gradient(to bottom, #FF7A1A, var(--accent) 55%, #EA5F00);
+  /* Die beiden Kanten kommen aus der Designsprache statt fest eingetragen
+     zu sein. Frueher standen hier zwei Orangetoene - beim Wechsel auf
+     RAL 5005 waere der Knopf dadurch halb orange geblieben. */
+  background: linear-gradient(to bottom, var(--accent-glanz), var(--accent) 55%, var(--accent-tief));
   color: var(--accent-ink);
   font-family: var(--schrift-text);
   font-size: 15px;
@@ -37,7 +40,7 @@
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.45),
     inset 0 -1px 0 rgba(0, 0, 0, 0.25),
-    0 4px 14px rgba(255, 107, 0, 0.25);
+    0 4px 14px color-mix(in srgb, var(--accent) 30%, transparent);
   transition: transform 0.14s cubic-bezier(0.2,0.8,0.2,1), filter 0.14s ease;
 }
 .btn:active { transform: scale(0.97); }
@@ -193,7 +196,7 @@
 }
 .nav-tab:active { transform: scale(0.92); }
 .nav-tab .ic { width: 22px; height: 22px; }
-.nav-tab.aktiv { color: var(--accent); }
+.nav-tab.aktiv { color: var(--accent-hell); }
 .nav-tab:hover:not(.aktiv) { color: var(--text); }
 
 /* Solange die Leiste sichtbar ist, halten alle Bildschirme unten Platz frei. */
@@ -481,7 +484,10 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   z-index: -2;
   background-image: var(--kachel-bild);
   background-size: cover;
-  background-position: center;
+  /* Der Ausschnitt ist je Kachel einstellbar. Gebraucht wird das von der
+     Garage-Kachel: Sie zeigt das hochformatige Werkstattbild, und davon
+     soll der Streifen mit dem Drehteller zu sehen sein, nicht die Mitte. */
+  background-position: var(--kachel-lage, center);
   transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .kachel::after {
@@ -512,6 +518,23 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 .kachel--breit { grid-column: 1 / -1; min-height: 88px; }
 .kachel--breit .kachel-titel { font-size: clamp(18px, 5.6vw, 24px); }
 
+/* Die eigene Maschine in der Garage-Kachel. Sie liegt auf der BILDSCHICHT
+   (z-index -2, wie .kachel::before), nicht darueber: Der Schleier aus
+   ::after deckt sie damit genauso ab wie das Foto darunter, und dadurch
+   gehoert sie zum Kachelbild statt darauf zu kleben. Der Text bleibt
+   lesbar, weil der Schleier unten am dichtesten ist.
+
+   Der Schlagschatten setzt sie vom Foto ab - ohne ihn schwebt ein
+   Freisteller auch hier. left, top und width setzt setzeStartKachelPlatz()
+   in garage.js. */
+.kachel-maschine {
+  position: absolute;
+  z-index: -2;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.6));
+}
+.kachel-maschine[hidden] { display: none; }
+
 .kachel-inhalt {
   display: flex;
   flex-direction: column;
@@ -520,7 +543,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
                                 schiebt die Kachel breiter */
 }
 .kachel-symbol {
-  color: var(--accent);
+  color: var(--accent-hell);
   filter: drop-shadow(0 2px 8px rgba(0,0,0,0.9));
 }
 .kachel-text { display: flex; flex-direction: column; gap: 3px; }
@@ -551,7 +574,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 .kachel-pfeil {
   position: absolute;
   right: var(--s3); bottom: var(--s3);
-  color: var(--accent);
+  color: var(--accent-hell);
   font-size: 20px;
   line-height: 1;
   transition: transform 0.18s ease;
@@ -578,7 +601,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   background: none;
   border: none;
   padding: 0;
-  color: var(--accent);
+  color: var(--accent-hell);
   font: inherit;
   text-decoration: underline;
   cursor: pointer;
@@ -618,7 +641,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   margin-bottom: 6px;
   box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.35);
 }
-.konto-formular input:focus { outline: none; border-color: var(--accent); }
+.konto-formular input:focus { outline: none; border-color: var(--accent-hell); }
 .konto-formular .btn { margin-top: 6px; padding: 13px; font-size: 16px; }
 
 .konto-meldung {
@@ -628,7 +651,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   color: var(--muted);
 }
 .konto-meldung[hidden] { display: none; }
-.konto-meldung.fehler { color: var(--accent); }
+.konto-meldung.fehler { color: var(--accent-hell); }
 
 .konto-wechsel { margin-top: 22px; font-size: 13px; color: var(--muted); }
 
@@ -769,7 +792,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   gap: 20px;
 }
 
-/* .brand-title: der Name "Kurvenjagd" mit dem orangen Punkt davor - wird
+/* .brand-title: der Name "Kurvenjagd" mit dem Punkt in der Signalfarbe davor - wird
    sowohl im Bedienfeld-Header als auch auf dem Startbildschirm genutzt. */
 .brand-title {
   margin: 0;
@@ -850,7 +873,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   font-size: 15px;
   box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.35);
 }
-.search-input:focus { outline: none; border-color: var(--accent); }
+.search-input:focus { outline: none; border-color: var(--accent-hell); }
 .richtung-select { margin-top: 8px; cursor: pointer; }
 .search-results {
   position: absolute;
@@ -914,7 +937,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   cursor: pointer;
 }
 .seg.active {
-  background: linear-gradient(to bottom, #FF7A1A, #EA5F00);
+  background: linear-gradient(to bottom, var(--accent-glanz), var(--accent-tief));
   color: var(--accent-ink);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 8px rgba(0,0,0,0.35);
 }
@@ -929,7 +952,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   appearance: none;
   height: 6px;
   border-radius: 3px;
-  background: linear-gradient(90deg, #4ade80, #facc15, var(--accent));
+  background: linear-gradient(90deg, var(--skala-wenig), var(--skala-mittel), var(--skala-viel));
   outline: none;
   cursor: pointer;
 }
@@ -939,7 +962,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   width: 18px; height: 18px;
   border-radius: 50%;
   background: var(--text);
-  border: 3px solid var(--accent);
+  border: 3px solid var(--accent-hell);
   cursor: pointer;
   box-shadow: 0 1px 4px rgba(0,0,0,0.5);
 }
@@ -947,7 +970,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   width: 18px; height: 18px;
   border-radius: 50%;
   background: var(--text);
-  border: 3px solid var(--accent);
+  border: 3px solid var(--accent-hell);
   cursor: pointer;
   box-shadow: 0 1px 4px rgba(0,0,0,0.5);
 }
@@ -968,7 +991,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 }
 .checkbox-row input[type="checkbox"] {
   width: 17px; height: 17px;
-  accent-color: var(--accent); /* färbt die native Checkbox in Orange ein */
+  accent-color: var(--accent); /* faerbt die native Checkbox in der Signalfarbe ein */
   cursor: pointer;
 }
 
@@ -1071,7 +1094,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 .saved-list li:hover { background: rgba(255, 255, 255, 0.10); }
 .saved-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .saved-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
-.saved-marke { flex: 0 0 auto; display: flex; color: var(--accent); }
+.saved-marke { flex: 0 0 auto; display: flex; color: var(--accent-hell); }
 .saved-meta i { font-style: normal; opacity: 0.45; margin: 0 2px; }
 .saved-meta {
   color: var(--muted);
@@ -1116,8 +1139,8 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
 }
-.stat.highlight { grid-column: 1 / -1; border: 1px solid var(--accent); }
-.stat.highlight .v { color: var(--accent); }
+.stat.highlight { grid-column: 1 / -1; border: 1px solid var(--accent-hell); }
+.stat.highlight .v { color: var(--accent-hell); }
 
 .curvebar {
   height: 6px;
@@ -1129,7 +1152,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 .curvebar-fill {
   height: 100%;
   width: 0%;
-  background: linear-gradient(90deg, #4ade80, #facc15, var(--accent));
+  background: linear-gradient(90deg, var(--skala-wenig), var(--skala-mittel), var(--skala-viel));
   transition: width 0.4s ease;
 }
 
@@ -1203,7 +1226,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   line-height: 0.9;
   letter-spacing: -0.01em;
   font-variant-numeric: tabular-nums;
-  color: var(--accent);
+  color: var(--accent-hell);
 }
 .ride-tempo-einheit {
   font-family: var(--schrift-display);
@@ -1309,10 +1332,14 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 }
 
 /* ---------- Live-Navigation ---------- */
-/* Die Navigation ist der einzige Knopf, der NICHT orange ist: Blau ist in
-   dieser App durchgehend die Farbe des eigenen Standorts, und genau darum
-   geht es hier. Trotzdem nur als Umriss, nicht als Flaeche - eine zweite
-   grosse Farbflaeche wuerde mit dem Orange um Aufmerksamkeit streiten. */
+/* Die Navigation traegt NICHT die Signalfarbe, sondern das helle Blau des
+   eigenen Standorts - und genau darum geht es hier.
+
+   Seit die Signalfarbe selbst ein Blau ist, liegen die beiden naeher
+   beieinander als frueher. Unterschieden werden sie noch durch zweierlei:
+   Dieses Blau ist deutlich heller, und dieser Knopf ist nur ein Umriss,
+   keine Flaeche. Sollte das eines Tages nicht mehr reichen, gehoert der
+   Standortfarbe ein eigener Ton - nicht diesem Knopf eine Ausnahme. */
 .nav-btn {
   background: transparent;
   border-color: var(--gps);
@@ -1372,7 +1399,7 @@ body.nav-modus #panel {
   transform: translateX(-50%);
   z-index: 900;
   background: var(--surface-2);
-  border: 1px solid var(--accent);
+  border: 1px solid var(--accent-hell);
   color: var(--text);
   padding: 10px 20px;
   border-radius: 999px;
@@ -1524,7 +1551,7 @@ body.nav-modus .leaflet-control-container { display: none; }
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
   border: 1px solid rgba(255, 255, 255, 0.14);
-  border-left: 3px solid var(--accent);
+  border-left: 3px solid var(--accent-hell);
   color: var(--text);
   padding: 10px 14px;
   border-radius: 12px;
@@ -1554,7 +1581,7 @@ body.nav-modus .leaflet-control-container { display: none; }
 .spinner {
   width: 22px; height: 22px;
   border: 3px solid rgba(255,255,255,0.15);
-  border-top-color: var(--accent);
+  border-top-color: var(--accent-hell);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -1855,16 +1882,21 @@ body.nav-modus .leaflet-control-container { display: none; }
      schlank - vier volle Lagen uebereinander wurden beim Ausprobieren
      sofort zum Aufkleberrand.
 
-     Beide Zusatztoene sind per color-mix aus der Markenfarbe abgeleitet,
-     es kommt also keine zweite Farbe ins Spiel. Die erste filter-Zeile
-     ist der Rueckfall fuer Browser ohne color-mix - dann eben ohne
-     gluehenden Kern, aber nie ganz ohne Saum. */
-  filter: drop-shadow(0 0 1px var(--accent))
-          drop-shadow(0 0 2px var(--accent))
-          drop-shadow(0 0 9px var(--accent));
-  filter: drop-shadow(0 0 1px color-mix(in srgb, var(--accent) 60%, white))
-          drop-shadow(0 0 2px var(--accent))
-          drop-shadow(0 0 13px color-mix(in srgb, var(--accent) 40%, transparent));
+     Beide Zusatztoene sind per color-mix aus EINER Farbe abgeleitet, es
+     kommt also keine zweite ins Spiel. Die erste filter-Zeile ist der
+     Rueckfall fuer Browser ohne color-mix - dann eben ohne gluehenden
+     Kern, aber nie ganz ohne Saum.
+
+     Diese Farbe ist --licht-warm und NICHT die Signalfarbe der App: Der
+     Saum ist Licht des Raumes, keine Marke. Als die Signalfarbe auf
+     RAL 5005 wechselte, wurde der Saum blau auf blauem Raum und die
+     Maschine verschwand darin - seitdem haengt er an einer eigenen Marke. */
+  filter: drop-shadow(0 0 1px var(--licht-warm))
+          drop-shadow(0 0 2px var(--licht-warm))
+          drop-shadow(0 0 9px var(--licht-warm));
+  filter: drop-shadow(0 0 1px color-mix(in srgb, var(--licht-warm) 60%, white))
+          drop-shadow(0 0 2px var(--licht-warm))
+          drop-shadow(0 0 13px color-mix(in srgb, var(--licht-warm) 40%, transparent));
   animation: rand-atmen 8s ease-in-out infinite;
 }
 @keyframes rand-atmen {
@@ -2144,9 +2176,11 @@ body.nav-modus .leaflet-control-container { display: none; }
      Er HAENGT an der Tafel, halb in ihre Unterkante eingesenkt, statt
      daneben zu schweben. Dadurch liest er sich als Teil davon.
 
-     Er ist ORANGE. Das ist die einzige Signalfarbe der App, und sie ist die
-     einzige Farbe, die auf diesem grau-blauen Bild sofort auffaellt. Weiss
-     geht darin unter, weil das Bild selbst voller Weiss ist.
+     Er traegt die SIGNALFARBE, und zwar deren hellen Ton. Weiss geht auf
+     diesem Bild unter, weil es selbst voller Weiss ist - und RAL 5005 in
+     seiner vollen Tiefe geht auf der grau-blauen Werkstattwand ebenso
+     unter. Der helle Ton ist derselbe Farbton, nur so weit aufgehellt,
+     dass er sich von der Wand loest.
 
      Er ist eine FLAECHE mit Schatten, kein Strich. Eine Scheibe von 36
      Punkten setzt sich gegen jeden Untergrund durch, ein 2,6 Punkte breiter
@@ -2161,7 +2195,7 @@ body.nav-modus .leaflet-control-container { display: none; }
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--accent-hell);
   box-shadow:
     0 6px 16px rgba(0, 0, 0, 0.45),
     0 0 0 4px rgba(16, 22, 32, 0.42);
@@ -2354,12 +2388,12 @@ body.nav-modus .leaflet-control-container { display: none; }
 .garage-dialog-inhalt textarea { resize: vertical; line-height: 1.45; }
 .garage-dialog-inhalt input:focus,
 .garage-dialog-inhalt select:focus,
-.garage-dialog-inhalt textarea:focus { outline: none; border-color: var(--accent); }
+.garage-dialog-inhalt textarea:focus { outline: none; border-color: var(--accent-hell); }
 
 /* Waehrend die technischen Daten geholt werden, pulsiert das Feld leicht.
    Ohne das saehe es aus, als passiere nichts. */
 .garage-dialog-inhalt input.wird-geholt {
-  border-color: var(--accent);
+  border-color: var(--accent-hell);
   animation: holen 1s ease-in-out infinite;
 }
 @keyframes holen { 50% { opacity: 0.55; } }

@@ -734,10 +734,112 @@ function richteLampenEin() {
   });
 }
 
+/* --- Die eigene Maschine in der Kachel auf der Startseite ------------------
+   Die Garage-Kachel zeigt nicht nur ein Werkstattfoto, sondern die Maschine,
+   die gerade in der Garage steht. Wechselt das Foto, wechselt die Kachel.
+
+   Der Ausschnitt ist hier der heikle Teil, und zwar aus einem bestimmten
+   Grund: freiUebernehmen() gibt das freigestellte Bild in VOLLER Groesse
+   zurueck und setzt nur die Durchsichtigkeit. Wer sein Motorrad klein im
+   Bild fotografiert hat, bekommt also ein Foto mit viel leerem Rand. Ein
+   schlichtes "einpassen" (background-size: contain) machte die Maschine
+   dann winzig, waehrend ein randscharfes Foto die Kachel fuellt - zwei
+   Nutzer saehen voellig verschiedene Kacheln.
+
+   Deshalb wird wie auf der Buehne am INHALT gemessen, nicht an der
+   Dateikante: rahmenMessen() sagt, wo die Maschine im Foto wirklich
+   anfaengt und aufhoert, und danach richtet sich alles. */
+function zeichneStartKachel() {
+  const bild = document.getElementById('startKachelBike');
+  if (!bild) return;
+
+  const kachel = document.getElementById('btnStartGarage');
+  const motorrad = motorradAktiv();
+  // Nur ein EIGENES Foto kommt in die Kachel. Ohne eines bleibt es beim
+  // Foto der Kachel - so wie die Buehne ohne eigenes Foto den Raum mit der
+  // Beispielmaschine zeigt.
+  const adresse = (motorrad && motorrad.bild) || null;
+  if (!adresse) {
+    bild.hidden = true;
+    if (kachel) {
+      kachel.style.removeProperty('--kachel-bild');
+      kachel.style.removeProperty('--kachel-lage');
+    }
+    return;
+  }
+
+  /* Mit eigener Maschine wechselt auch der HINTERGRUND der Kachel: statt
+     des Fahrerfotos der leere Drehteller aus der Garage. Zwei Motorraeder
+     uebereinander - das der Kachel und das freigestellte - waren unruhig
+     und man erkannte keines von beiden. Der Raum ist ausserdem hell, und
+     eine dunkle Maschine hebt sich davor ab, statt darin zu verschwinden.
+
+     Der Ausschnitt bei 56 Prozent: Das Werkstattbild ist hochformatig, im
+     Querformat der Kachel ist nur ein Streifen davon zu sehen. 56 Prozent
+     legt ihn auf die Hoehe des Drehtellers - die Maschine steht dann im
+     Raum statt vor der Decke. */
+  if (kachel) {
+    kachel.style.setProperty('--kachel-bild', `url('${garageAktiv().bild}')`);
+    kachel.style.setProperty('--kachel-lage', 'center 56%');
+  }
+
+  if (bild.getAttribute('src') !== adresse) {
+    // Erst wenn das Bild da ist, laesst sich sein Inhaltsrahmen messen.
+    bild.onload = () => { bild.hidden = false; setzeStartKachelPlatz(); };
+    bild.onerror = () => { bild.hidden = true; };
+    bild.src = adresse;
+  }
+  // Liegt es schon im Zwischenspeicher, meldet sich onload je nach Browser
+  // gar nicht mehr - dann sofort rechnen.
+  if (bild.complete && bild.naturalWidth) { bild.hidden = false; setzeStartKachelPlatz(); }
+}
+
+/* Setzt Groesse und Lage der Maschine in der Kachel. Dieselbe Rechnung wie
+   setzeBuehnenPlatz(), nur einfacher: Der INHALT des Fotos soll einen
+   festen Kasten in der Kachel fuellen, egal wie viel leerer Rand um ihn
+   herum liegt. Bei zu breitem Inhalt begrenzt die Breite, sonst die Hoehe -
+   das ist "einpassen", nur eben bezogen auf den Inhalt. */
+function setzeStartKachelPlatz() {
+  const kachel = document.getElementById('btnStartGarage');
+  const bild = document.getElementById('startKachelBike');
+  if (!kachel || !bild || bild.hidden || !bild.naturalWidth) return;
+
+  const kachelB = kachel.clientWidth, kachelH = kachel.clientHeight;
+  if (!kachelB || !kachelH) return;   // Startseite gerade versteckt
+
+  const rahmen = rahmenMessen(bild) || { links: 0, rechts: 1, oben: 0, unten: 1 };
+  const inhaltB = Math.max(0.05, rahmen.rechts - rahmen.links);
+  const inhaltH = Math.max(0.05, rahmen.unten - rahmen.oben);
+  const seitenverhältnis = bild.naturalHeight / bild.naturalWidth;
+
+  /* Der Zielkasten: die rechten zwei Drittel der Kachel. Links bleibt
+     Platz, denn dort stehen Symbol und Titel - der Schleier macht sie zwar
+     lesbar, aber eine Maschine direkt hinter dem Wort "MEINE GARAGE" waere
+     trotzdem unruhig. */
+  const zielB = kachelB * 0.68;
+  const zielH = kachelH * 0.82;
+
+  let elementBreite = zielB / inhaltB;
+  if (elementBreite * seitenverhältnis * inhaltH > zielH) {
+    elementBreite = zielH / (seitenverhältnis * inhaltH);
+  }
+  const elementHöhe = elementBreite * seitenverhältnis;
+
+  bild.style.width = `${elementBreite}px`;
+  /* Ausgerichtet wird der INHALT, nicht die Bildkante: rechts mit einem
+     schmalen Rand, senkrecht mittig. Der leere Rand des Fotos wird dabei
+     herausgerechnet - deshalb steht jede Maschine an derselben Stelle. */
+  bild.style.left = `${kachelB * 0.97 - rahmen.rechts * elementBreite}px`;
+  bild.style.top  = `${kachelH * 0.50 - (rahmen.oben + inhaltH / 2) * elementHöhe}px`;
+}
+
 function zeichneBuehne() {
   const motorrad = motorradAktiv();
   const bild = document.getElementById('motorradBild');
   richteLampenEin();
+  // Die Kachel auf der Startseite zeigt dieselbe Maschine - sie haengt
+  // deshalb am selben Faden wie die Buehne.
+  zeichneStartKachel();
 
   /* Gibt es ein eigenes Foto? Davon haengt ab, welcher Raum gezeigt wird.
 
@@ -2797,6 +2899,14 @@ document.addEventListener('keydown', ereignis => {
    Deshalb braucht es keinen eigenen Haken am Bildschirmwechsel. */
 new ResizeObserver(() => setzeBuehnenPlatz())
   .observe(document.getElementById('garageRaum'));
+
+/* Dasselbe fuer die Kachel auf der Startseite, und aus demselben Grund:
+   Solange die Startseite versteckt ist, hat die Kachel keine Groesse und
+   die Rechnung kann nicht stimmen. Der Beobachter meldet sich, sobald sie
+   eingeblendet wird - ein eigener Haken am Bildschirmwechsel eruebrigt
+   sich damit. */
+new ResizeObserver(() => setzeStartKachelPlatz())
+  .observe(document.getElementById('btnStartGarage'));
 
 // Einmal beim Start zeichnen, damit die Garage auch dann stimmt, wenn man sie
 // ueber die untere Leiste zum ersten Mal oeffnet.
