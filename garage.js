@@ -320,6 +320,38 @@ function zeichneGarage() {
   zeichneHakenleiste();
 }
 
+/* --- Die Buehne: Maschine auf den Drehteller setzen -------------------------
+
+   Der Raum ist ein Bild mit einem leeren Drehteller darin. Damit die
+   Maschine auf jeder Bildschirmgroesse AUF diesem Teller steht, sind vier
+   Zahlen je Garagenbild noetig - als Anteile der Bildflaeche, nicht in
+   Pixeln, dadurch stimmen sie ueberall.
+
+   Die Werte sind am Bild AUSGEMESSEN, nicht geschaetzt: Der orange
+   LED-Ring des Tellers ist das hellste Orange im Bild, seine Bildpunkte
+   lassen sich rechnerisch finden. Ring von x=88 bis x=815, Tellerflaeche
+   von y=1000 bis y=1250, bei 853 x 1844 Bildpunkten.
+
+   Eine zweite Garage ist spaeter nur ein weiterer Eintrag hier. */
+const GARAGEN = [{
+  name:      'Werkstatt',
+  bild:      'img/garage-werkstatt.webp',
+  bildBreite: 853,
+  bildHoehe: 1844,
+  mitteX:    0.528,   // Mitte des Drehtellers, Anteil der Bildbreite
+  bodenY:    0.607,   // wo die Raeder aufsetzen, Anteil der Bildhoehe
+  breite:    0.64,    // wie breit die Maschine wird, Anteil der Bildbreite
+  tellerRx:  0.40,    // halbe Breite der Tellerellipse (fuer die Spiegelung)
+  tellerRy:  0.070,   // halbe Hoehe der Tellerellipse, Anteil der Bildhoehe
+  helligkeit: 0.88,   // Farbangleich: dunkle Werkstatt, Tageslichtfoto abdunkeln
+}];
+
+// Welche Garage gerade eingerichtet ist. Heute immer die erste - der
+// Umschalter kommt, wenn es eine zweite gibt.
+function garageAktiv() {
+  return GARAGEN[0];
+}
+
 function zeichneBuehne() {
   const motorrad = motorradAktiv();
   const bild = document.getElementById('motorradBild');
@@ -327,21 +359,142 @@ function zeichneBuehne() {
   // Es steht IMMER eine Maschine da - ohne eigenes Foto das freigestellte
   // Standardbild. Eine leere Buehne saehe nach Fehler aus.
   const adresse = bildAdresse(motorrad);
-  bild.src = adresse;
-  bild.alt = motorrad
+  const beschreibung = motorrad
     ? ([motorrad.marke, motorrad.modell].filter(Boolean).join(' ') || 'Mein Motorrad')
     : 'Motorrad';
+
+  bild.alt = beschreibung;
+
+  // Spiegelung, Schatten und Glut sind Kopien desselben Bildes - nur so
+  // folgen sie automatisch jeder Maschine, ohne dass irgendetwas doppelt
+  // gespeichert werden muesste.
+  const kopien = ['motorradSpiegel', 'motorradSchatten', 'motorradGlut']
+    .map(name => document.getElementById(name));
 
   // Faellt die Bildquelle aus, das Standardbild nachreichen.
   bild.onerror = () => {
     if (bild.src.endsWith(STANDARD_BILD)) return;   // sonst Endlosschleife
     bild.src = STANDARD_BILD;
+    kopien.forEach(kopie => { kopie.src = STANDARD_BILD; });
   };
+  // Erst wenn das Bild da ist, hat der Stapel seine Hoehe - dann sitzt
+  // auch die Spiegelung richtig.
+  bild.onload = () => setzeBuehnenPlatz();
+
+  bild.src = adresse;
+  kopien.forEach(kopie => { kopie.src = adresse; });
 
   // Ohne eigenes Foto ist das Standardbild nur ein Platzhalter und wird
   // etwas zurueckgenommen, damit es nicht wie die eigene Maschine wirkt.
   document.getElementById('motorradAnsicht')
           .classList.toggle('ist-standard', !(motorrad && motorrad.bild));
+
+  setzeBuehnenPlatz();
+  zeichneAufsetzpunkte(motorrad);
+}
+
+/* Rechnet aus, welcher Ausschnitt des Raumbilds zu sehen ist und wo darin
+   der Drehteller liegt - und stellt die Maschine punktgenau dorthin.
+
+   Der Gedanke in drei Schritten:
+
+   1. Das Bild wird so skaliert, dass es den Raum abdeckt ("cover"). Der
+      Massstab ist damit festgelegt, nur der Ausschnitt ist noch frei.
+   2. Der Ausschnitt wird so gewaehlt, dass der Teller moeglichst auf der
+      Wunschposition landet: waagerecht mittig, der Aufsetzpunkt bei 78
+      Prozent der Raumhoehe. An den Bildraendern wird geklemmt - lieber
+      wandert der Teller etwas aus der Mitte, als dass neben dem Bild
+      Grundflaeche hervorschaut.
+   3. Die Maschine kommt NICHT auf die Wunschposition, sondern auf die
+      Stelle, an der der Teller nach dem Klemmen WIRKLICH liegt. Nur so
+      stehen die Raeder in jedem Fall auf dem Teller. */
+function setzeBuehnenPlatz() {
+  const raum = document.getElementById('garageRaum');
+  const ansicht = document.getElementById('motorradAnsicht');
+  const garageBild = garageAktiv();
+  if (!raum || raum.clientWidth === 0) return;   // Bildschirm gerade versteckt
+
+  const raumB = raum.clientWidth, raumH = raum.clientHeight;
+  const bildB = garageBild.bildBreite, bildH = garageBild.bildHoehe;
+
+  // Schritt 1: der cover-Massstab.
+  const massstab = Math.max(raumB / bildB, raumH / bildH);
+
+  // Schritt 2: den Ausschnitt waehlen und an den Bildrand klemmen.
+  const fensterB = raumB / massstab, fensterH = raumH / massstab;
+  const tellerX = garageBild.mitteX * bildB, tellerY = garageBild.bodenY * bildH;
+  const fensterX = Math.min(Math.max(tellerX - (raumB * 0.5)  / massstab, 0), bildB - fensterB);
+  const fensterY = Math.min(Math.max(tellerY - (raumH * 0.78) / massstab, 0), bildH - fensterH);
+
+  raum.style.setProperty('--platte-groesse', `${bildB * massstab}px ${bildH * massstab}px`);
+  raum.style.setProperty('--platte-lage', `${-fensterX * massstab}px ${-fensterY * massstab}px`);
+
+  // Schritt 3: wo liegt der Teller jetzt wirklich auf dem Schirm?
+  const ankerX = (tellerX - fensterX) * massstab;
+  const ankerY = (tellerY - fensterY) * massstab;
+
+  const maschinenBreite = garageBild.breite * bildB * massstab;
+  const buehne = ansicht.parentElement;   // die Buehne haelt den Stapel
+
+  // Der Stapel haengt in der Buehne, gerechnet wird im Raum - der Versatz
+  // zwischen beiden wird abgezogen.
+  const versatzOben = buehne.offsetTop, versatzLinks = buehne.offsetLeft;
+  ansicht.style.width = `${maschinenBreite}px`;
+  ansicht.style.left = `${ankerX - versatzLinks - maschinenBreite / 2}px`;
+  ansicht.style.bottom = `${(buehne.offsetHeight + versatzOben) - ankerY}px`;
+
+  // Die Tellerellipse fuer die Spiegelung, umgerechnet auf den Stapel.
+  ansicht.style.setProperty('--teller-rx', `${garageBild.tellerRx * bildB * massstab}px`);
+  ansicht.style.setProperty('--teller-ry', `${garageBild.tellerRy * bildH * massstab}px`);
+  ansicht.style.setProperty('--buehne-helligkeit', garageBild.helligkeit);
+}
+
+/* Malt die harten Aufsetzpunkte unter die Reifen.
+
+   Der Grundschatten (die gestauchte Silhouette) schmiert gleichmaessig
+   unter der ganzen Maschine. In Wirklichkeit beruehren nur zwei Stellen
+   den Boden, und dort ist der Schatten hart und dunkel. Wo diese Stellen
+   liegen, weiss die Bodenlinie aus dem Freisteller: Ihre tiefsten Felder
+   sind die Reifen.
+
+   Je naeher ein Feld der tiefsten Stelle kommt, desto dunkler der Punkt
+   darunter. Felder mehr als vier Prozent darueber - Motorblock, Auspuff -
+   bekommen gar nichts: Was den Boden nicht beruehrt, wirft hier keinen
+   harten Schatten. */
+function zeichneAufsetzpunkte(motorrad) {
+  const leinwand = document.getElementById('motorradKontakt');
+  const stift = leinwand.getContext('2d');
+  leinwand.width = 480; leinwand.height = 56;
+  stift.clearRect(0, 0, leinwand.width, leinwand.height);
+
+  const linie = motorrad && motorrad.bodenlinie;
+  if (!Array.isArray(linie) || linie.length === 0) return;   // dann nur der Grundschatten
+
+  const belegt = linie.filter(wert => wert >= 0);
+  if (belegt.length === 0) return;
+  const tiefste = Math.max(...belegt);
+
+  const feldBreite = leinwand.width / linie.length;
+  const mitte = leinwand.height / 2;
+  for (let feld = 0; feld < linie.length; feld++) {
+    if (linie[feld] < 0) continue;
+    const abstand = tiefste - linie[feld];         // 0 = beruehrt den Boden
+    const staerke = Math.max(0, 1 - abstand / 0.04);
+    if (staerke <= 0) continue;
+
+    const x = (feld + 0.5) * feldBreite;
+    const verlauf = stift.createRadialGradient(x, mitte, 0, x, mitte, feldBreite * 1.6);
+    verlauf.addColorStop(0, `rgba(0, 0, 0, ${0.85 * staerke})`);
+    verlauf.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    stift.fillStyle = verlauf;
+    stift.save();
+    // Flachgedrueckt: ein Aufsetzpunkt ist breiter als hoch.
+    stift.translate(x, mitte); stift.scale(1, 0.34); stift.translate(-x, -mitte);
+    stift.beginPath();
+    stift.arc(x, mitte, feldBreite * 1.6, 0, Math.PI * 2);
+    stift.fill();
+    stift.restore();
+  }
 }
 
 // Das Datenblatt unter der Buehne: Name, technische Werte, und - falls es
@@ -651,7 +804,9 @@ function zeichneFotoVorschau() {
     </div>`;
   hinweis.innerHTML = verändert
     ? 'Sieht das Ergebnis zerfranst aus, hol dir mit "Original zur&uuml;ck" das unver&auml;nderte Foto wieder.'
-    : 'Der Hintergrund wird beim Aussuchen des Fotos von selbst entfernt.';
+    : 'Der Hintergrund wird beim Aussuchen von selbst entfernt. Am besten wirkt '
+      + 'ein Foto von der Seite, Maschine auf dem St&auml;nder &ndash; die Garage hat '
+      + 'eine feste Kamera, und eine Seitenansicht passt am nat&uuml;rlichsten hinein.';
 }
 
 
@@ -2000,6 +2155,17 @@ for (const art of ['pointerup', 'pointercancel']) {
 document.addEventListener('keydown', ereignis => {
   if (ereignis.key === 'Escape' && frei) { schließeFreisteller(); ereignis.stopPropagation(); }
 }, true);
+
+/* Die Buehnenrechnung haengt an der Groesse des Raums - und die aendert
+   sich in zwei Faellen: Das Fenster wird gedreht oder verkleinert, und der
+   Garage-Bildschirm wird ueberhaupt erst sichtbar (versteckt hat er die
+   Groesse null, da laesst sich nichts rechnen).
+
+   Ein ResizeObserver deckt BEIDE Faelle ab: Er meldet sich auch dann, wenn
+   ein Element durch das Einblenden von 0 auf seine echte Groesse springt.
+   Deshalb braucht es keinen eigenen Haken am Bildschirmwechsel. */
+new ResizeObserver(() => setzeBuehnenPlatz())
+  .observe(document.getElementById('garageRaum'));
 
 // Einmal beim Start zeichnen, damit die Garage auch dann stimmt, wenn man sie
 // ueber die untere Leiste zum ersten Mal oeffnet.

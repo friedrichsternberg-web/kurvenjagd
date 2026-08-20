@@ -30,3 +30,7 @@ _git_muell/
 # Sitzungseinstellungen von Claude Code. Gehoeren nicht ins oeffentliche
 # Repository - settings.local.json enthaelt die erteilten Berechtigungen.
 .claude/
+
+# Das PNG-Original des Garagenbilds (2 MB) - die App benutzt die kleine
+# WebP-Fassung in img/, das Original bleibt nur lokal liegen.
+Bild Werstatt Bühne.png

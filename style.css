@@ -1602,7 +1602,12 @@ body.nav-modus .leaflet-control-container { display: none; }
 }
 .garage-screen[hidden] { display: none; }
 
-/* ---------- Der Raum ---------- */
+/* ---------- Der Raum ----------
+   Frueher standen hier zwei Farbverlaeufe fuer Wand und Boden und drei
+   gemalte Lichtflecken. Das ist alles raus: Der Raum IST jetzt ein Bild -
+   der gerenderte Werkstattraum mit dem Drehteller. Was frueher die Verlaeufe
+   andeuten mussten (Kante zwischen Wand und Boden, Lichter), bringt das
+   Bild selbst mit. */
 .garage-raum {
   position: relative;
   flex: 1;              /* nimmt allen Platz, den das Datenblatt uebriglaesst */
@@ -1610,28 +1615,34 @@ body.nav-modus .leaflet-control-container { display: none; }
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  /* Die Kante bei 62 % trennt Wand von Boden. Genau diese Kante macht aus
-     zwei Flaechen einen Raum. Alle Werte halbdurchsichtig, siehe Regel 2. */
-  background: linear-gradient(to bottom,
-      rgba(30, 34, 42, 0.60) 0%,
-      rgba(28, 32, 39, 0.52) 46%,
-      rgba(34, 38, 47, 0.46) 75.9%,
-      rgba(11, 13, 17, 0.56) 76.1%,
-      rgba(10, 11, 15, 0.74) 100%);
+  background: var(--bg);
 }
 
-/* Die Lichter. Warm von oben wie eine Deckenlampe, kalt von links wie
-   Tageslicht durch ein Fenster, dazu ein heller Fleck auf dem Boden. */
-.raum-licht {
+/* Schicht 1: das Raumbild. Groesse und Lage rechnet zeichneBuehne() aus und
+   schreibt sie in die beiden Variablen - so landet der Drehteller auf jeder
+   Bildschirmgroesse an derselben Stelle relativ zur Maschine. Solange die
+   Rechnung noch nicht gelaufen ist, deckt "cover" den Raum ordentlich ab. */
+.buehne-platte {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  background-image: url('img/garage-werkstatt.webp');
+  background-repeat: no-repeat;
+  background-size: var(--platte-groesse, cover);
+  background-position: var(--platte-lage, center 62%);
+}
+
+/* Schicht 6: die Dunstschicht. Oben dunkel fuer Ueberschrift und
+   Hakenleiste, unten laeuft das Bild in die Grundflaeche aus, damit an der
+   Glasplatte darunter keine harte Fotokante steht. */
+.buehne-dunst {
   position: absolute; inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(84% 50% at 50% -6%,  rgba(255, 138, 40, 0.30), transparent 68%),
-    radial-gradient(66% 76% at -10% 26%, rgba(64, 136, 255, 0.26), transparent 70%),
-    radial-gradient(56% 42% at 88% 66%,  rgba(120, 90, 255, 0.14), transparent 72%),
-    radial-gradient(52% 34% at 50% 86%,  rgba(255, 255, 255, 0.11), transparent 74%);
+    linear-gradient(to bottom, rgba(14, 15, 18, 0.86) 0%, rgba(14, 15, 18, 0.42) 14%, transparent 30%),
+    linear-gradient(to top,    rgba(14, 15, 18, 0.92) 0%, rgba(14, 15, 18, 0.30) 9%,  transparent 20%);
 }
-.garage-raum > *:not(.raum-licht) { position: relative; z-index: 1; }
+
+.garage-raum > *:not(.buehne-platte):not(.buehne-dunst) { position: relative; z-index: 1; }
 
 .garage-kopf {
   flex: 0 0 auto;
@@ -1784,76 +1795,128 @@ body.nav-modus .leaflet-control-container { display: none; }
 .haken-plus:hover .haken-bild { border-color: var(--accent); }
 .haken-plus .ic { width: 21px; height: 21px; }
 
-/* ---------- Die Buehne mit dem Motorrad ---------- */
+/* ---------- Die Buehne mit dem Motorrad ----------
+
+   Die Maschine steht auf dem Drehteller des Raumbilds. Damit ein
+   freigestelltes Foto dort STEHT statt zu kleben, liegen fuenf Schichten
+   uebereinander, von unten nach oben:
+
+     .buehne-spiegel    die Spiegelung auf der Tellerflaeche
+     .buehne-schatten   die gestauchte Silhouette als weicher Grundschatten
+     .buehne-kontakt    harte, dunkle Aufsetzpunkte unter den Reifen,
+                        gezeichnet aus der Bodenlinie des Freistellers
+     .motorrad-bild     die Maschine selbst
+     .buehne-glut       das orange Licht des LED-Rings, das von unten an
+                        die Maschine schlaegt
+
+   Von den vieren um das Bild herum ist der Schatten der wichtigste: Ein
+   Motorrad ohne Schatten schwebt, und das sieht jeder sofort, ohne sagen zu
+   koennen warum.
+
+   WO und WIE GROSS der Stapel steht, setzt zeichneBuehne() in garage.js -
+   left, bottom und width kommen von dort, ausgerechnet aus der Lage des
+   Drehtellers im Bild. Deshalb steht hier keine Groesse. */
 .garage-buehne {
   position: relative;
   flex: 1;              /* bekommt allen Platz, der uebrigbleibt */
   min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /* Unten Luft lassen: dort schiebt sich die Glasplatte darueber, und ohne
-     diesen Abstand verschwaende die Spiegelung dahinter. */
-  padding: var(--s2) var(--s3) 72px;
-}
-
-/* Der Strahler hinter der Maschine. Er hebt sie von der Wand ab und bringt
-   die Farbe in den Raum, die eine Flaeche nie brauchen wuerde. */
-.buehne-strahler {
-  position: absolute;
-  left: 50%; top: 44%;
-  width: 118%; height: 78%;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  background:
-    radial-gradient(50% 50% at 50% 50%, rgba(255, 118, 20, 0.28), transparent 68%),
-    radial-gradient(40% 46% at 30% 40%, rgba(64, 136, 255, 0.24), transparent 72%);
-  filter: blur(6px);
 }
 
 .motorrad-ansicht {
-  position: relative;
-  width: 100%; height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
+  position: absolute;   /* left/bottom/width setzt zeichneBuehne() */
+  pointer-events: none;
 }
 
 .motorrad-bild {
-  max-width: 100%;
-  min-height: 0;
-  flex: 1 1 auto;
-  object-fit: contain;
-  object-position: bottom;
+  position: relative;
+  z-index: 3;
+  display: block;
+  width: 100%;
   -webkit-user-drag: none;
-  filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.65));
+  /* Leicht abgedunkelt und entsaettigt: Das Foto entstand bei Tageslicht,
+     der Raum ist eine dunkle Werkstatt. Ohne den Angleich wirkt die
+     Maschine wie ein Aufkleber - zu hell fuer ihre Umgebung. Der Wert
+     kommt je Garage aus der GARAGEN-Liste. */
+  filter: brightness(var(--buehne-helligkeit, 0.9)) saturate(0.95) contrast(1.04);
+}
 
-  /* Die Spiegelung auf dem Boden. Der Verlauf wirkt auf das gespiegelte
-     Bild von oben nach unten: oben, direkt unter den Raedern, am
-     kraeftigsten, nach unten hin weg.
+/* Die Spiegelung: dasselbe Bild kopfueber unter dem Aufsetzpunkt, nach
+   unten schnell auslaufend und leicht verwaschen - eine polierte
+   Metallflaeche spiegelt weich, nicht wie ein Badezimmerspiegel.
 
-     Nur WebKit und Blink koennen das, also Safari und Chrome - und damit
-     jedes iPhone und jedes Android. Firefox laesst die Spiegelung einfach
-     weg, was niemandem etwas kaputtmacht. Ein zweites <img> daneben ginge
-     ueberall, skaliert aber anders als das Original, weil "contain" und
-     "cover" verschiedene Massstaebe ergeben. */
-  -webkit-box-reflect: below -6px
-    linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0.10) 22%, transparent 44%);
+   Das ersetzt das fruehere -webkit-box-reflect: Das spiegelte die ganze
+   Schicht mitsamt Schatten und fehlte in Firefox. Der alte Einwand gegen
+   ein zweites <img> (verschiedene Massstaebe durch contain/cover) gilt
+   nicht mehr, seit beide Bilder dieselbe ausgerechnete Breite haben.
+
+   Der clip-path begrenzt die Spiegelung auf die Ellipse der Tellerflaeche,
+   sonst laeuft sie ueber den Podestrand auf den Betonboden - Werte von
+   zeichneBuehne(). */
+.buehne-spiegel {
+  position: absolute;
+  z-index: 1;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  transform: scaleY(-1);
+  transform-origin: top;
+  opacity: 0.34;
+  filter: blur(2px) brightness(0.75) saturate(0.8);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.25) 22%, transparent 46%);
+          mask-image: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.25) 22%, transparent 46%);
+  clip-path: ellipse(var(--teller-rx, 60%) var(--teller-ry, 26px) at 50% 0);
+}
+
+/* Der Grundschatten: die Silhouette der Maschine, am Boden auf ein Sechstel
+   gestaucht, geschwaerzt und verwaschen. Weil er aus dem Bild selbst
+   entsteht, folgt er jeder Maschine von allein - laenger unter einem
+   Tourer, kuerzer unter einer Supermoto. */
+.buehne-schatten {
+  position: absolute;
+  z-index: 2;
+  bottom: -2%;
+  left: 0;
+  width: 100%;
+  transform: scaleY(0.16);
+  transform-origin: bottom;
+  filter: brightness(0) blur(10px);
+  opacity: 0.62;
+}
+
+/* Die Aufsetzpunkte: dort, wo die Bodenlinie am tiefsten ist - unter den
+   Reifen - wird der Schatten hart und fast schwarz. zeichneBuehne() malt
+   sie in diese Leinwand. Ohne Bodenlinie (Standardbild, alte Eintraege)
+   bleibt die Leinwand leer und der Grundschatten allein. */
+.buehne-kontakt {
+  position: absolute;
+  z-index: 2;
+  bottom: -1.5%;
+  left: 0;
+  width: 100%;
+  height: 7%;
+  filter: blur(3px);
+}
+
+/* Die Glut: das orange Licht des LED-Rings von unten. Eine eingefaerbte
+   Kopie der Maschine, auf das untere Viertel maskiert und aufhellend
+   daruebergelegt. Bewusst schwach - uebertrieben saehe es aus wie ein
+   Aufkleber mit Leuchtrand. */
+.buehne-glut {
+  position: absolute;
+  z-index: 4;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  opacity: 0.4;
+  filter: sepia(1) saturate(5) hue-rotate(-18deg) brightness(1.35) blur(1px);
+  mix-blend-mode: screen;
+  -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.35) 14%, transparent 30%);
+          mask-image: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.35) 14%, transparent 30%);
 }
 
 /* Ohne eigenes Foto steht dort das Standardmotorrad. Es wird leicht
    zurueckgenommen, damit es nicht wie die eigene Maschine wirkt. */
-.motorrad-ansicht.ist-standard .motorrad-bild { opacity: 0.90; }
-
-.motorrad-schatten {
-  position: absolute;
-  left: 50%; bottom: 66px;
-  width: 70%; height: 22px;
-  transform: translateX(-50%);
-  background: radial-gradient(50% 50% at 50% 50%, rgba(0, 0, 0, 0.8), transparent 72%);
-  pointer-events: none;
-}
+.motorrad-ansicht.ist-standard .motorrad-bild { opacity: 0.92; }
 
 /* ---------- Das Datenblatt unter dem Raum ---------- */
 .garage-inhalt {

@@ -1,0 +1,24 @@
+Herkunft der Bilder in diesem Ordner
+====================================
+
+Festgehalten aus demselben Grund wie bei Modell und Schrift: Die App ist
+oeffentlich und soll ueber Werbung finanziert werden. Jedes Bild muss dafuer
+eine geklaerte Herkunft haben.
+
+garage-werkstatt.webp
+  KI-generiertes Bild (leerer Werkstattraum mit Drehteller), erstellt von
+  Friedrich Sternberg im August 2026 mit einem KI-Bildgenerator, als Vorlage
+  fuer die Garagen-Buehne der App. Keine fremden Markenzeichen im Bild.
+  Hinweis: Das Motorrad rechts im Hintergrund ist Teil des generierten
+  Bildes, kein Foto eines echten Fahrzeugs.
+
+bike-standard.webp
+  Freigestelltes Standardmotorrad, aus einem von Friedrich Sternberg
+  gelieferten Bild, freigestellt im August 2026.
+
+start-hero.jpg, start-hintergrund.jpg, hintergrund-weich.jpg, kacheln/
+  Eigene Fotos von Friedrich Sternberg beziehungsweise von ihm gelieferte
+  Bilder, teils verkleinert und weichgezeichnet.
+
+icon-*.png, apple-touch-icon.png
+  Aus der eigenen SVG-Symbolsammlung der App gerendert (Platzhalter).
