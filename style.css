@@ -1877,7 +1877,14 @@ body.nav-modus .leaflet-control-container { display: none; }
    lebt, die Linie steht. Drei gleiche drop-shadows uebereinander
    verdichten die Linie zu voller Staerke, ohne sie zu verbreitern; mit
    zweien blieb sie an hellen Bildstellen zu blass. Das Weiss ist das
-   Textweiss der Designsprache, kein reines #fff. */
+   Textweiss der Designsprache, kein reines #fff.
+
+   Der vierte Schatten ist der HELLE SCHEIN: ein breites, halbdurchsichtiges
+   Aufhellen rund um die Linie, ebenfalls staendig da. Er liegt auf
+   derselben Schicht wie die Linie, damit beide zusammen stehen - Kante,
+   heller Saum, und erst dahinter das atmende Orange. Halbdurchsichtig per
+   color-mix, sonst wuerde der Schein zur dicken weissen Wolke; die erste
+   filter-Zeile ist der Rueckfall fuer Browser ohne color-mix. */
 .buehne-kante-linie {
   position: absolute;
   z-index: 2;
@@ -1886,6 +1893,10 @@ body.nav-modus .leaflet-control-container { display: none; }
   filter: drop-shadow(0 0 1px var(--text))
           drop-shadow(0 0 1px var(--text))
           drop-shadow(0 0 1px var(--text));
+  filter: drop-shadow(0 0 1px var(--text))
+          drop-shadow(0 0 1px var(--text))
+          drop-shadow(0 0 1px var(--text))
+          drop-shadow(0 0 7px color-mix(in srgb, var(--text) 55%, transparent));
 }
 
 .motorrad-bild {
