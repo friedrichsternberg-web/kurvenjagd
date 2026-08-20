@@ -366,6 +366,18 @@ const GARAGEN = [{
      genau dort, wo die Schrift steht - er braucht deutlich mehr als eine
      dunkle Werkstatt. Der Wert ist deshalb je Garage einstellbar. */
   dunstOben: 0.90,
+  /* Die Lampen des Raums, fuers Flackern. Je Lampe die Mitte (x, y) und die
+     halbe Groesse ihres Lichtflecks (rx, ry), alles in Anteilen der
+     Bilddatei - ausgemessen wie der Drehteller. "art" waehlt die Animation:
+     eine Leuchtstoffroehre stottert, eine Haengelampe haengt nur weich
+     durch. "takt" ist die Laenge eines Durchlaufs in Sekunden, "versatz"
+     verschiebt den Start - drei verschiedene Takte sorgen dafuer, dass nie
+     zwei Lampen gleichzeitig zucken und sich das Muster kaum wiederholt. */
+  lampen: [
+    { art: 'roehre', x: 0.536, y: 0.309, rx: 0.135, ry: 0.058, takt: 19, versatz: 4 },
+    { art: 'schirm', x: 0.235, y: 0.302, rx: 0.100, ry: 0.055, takt: 23, versatz: 0 },
+    { art: 'schirm', x: 0.891, y: 0.297, rx: 0.100, ry: 0.055, takt: 31, versatz: 9 },
+  ],
 }];
 
 // Welche Garage gerade eingerichtet ist. Heute immer die erste - der
@@ -688,9 +700,34 @@ function drehungNoetig(stand, halbeSpanneAufSchirm, tellerRxPx, tellerRyPx) {
 }
 
 
+/* Legt fuer jede Lampe der aktiven Garage einen Lichtfleck an. Angelegt
+   wird nur einmal je Garage - WO die Flecken liegen, rechnet danach
+   setzeBuehnenPlatz() bei jedem Durchlauf frisch aus, denn das haengt vom
+   gewaehlten Bildausschnitt ab. Takt und Startversatz kommen aus der
+   GARAGEN-Liste, die Animation selbst steht in style.css. */
+function richteLampenEin() {
+  const halter = document.getElementById('buehneLampen');
+  const garageBild = garageAktiv();
+  if (!halter || halter.dataset.garage === garageBild.name) return;
+
+  halter.dataset.garage = garageBild.name;
+  halter.textContent = '';   // Flecken der vorigen Garage raeumen
+  (garageBild.lampen || []).forEach(lampe => {
+    const fleck = document.createElement('span');
+    fleck.className = `buehne-lampe lampe-${lampe.art}`;
+    fleck.style.animationDuration = `${lampe.takt}s`;
+    /* Negativ, damit die Animation mitten im Durchlauf beginnt statt am
+       Anfang - sonst zuckten beim Oeffnen der Garage alle Lampen einmal
+       im Gleichtakt los. */
+    fleck.style.animationDelay = `${-lampe.versatz}s`;
+    halter.appendChild(fleck);
+  });
+}
+
 function zeichneBuehne() {
   const motorrad = motorradAktiv();
   const bild = document.getElementById('motorradBild');
+  richteLampenEin();
 
   /* Gibt es ein eigenes Foto? Davon haengt ab, welcher Raum gezeigt wird.
 
@@ -722,10 +759,10 @@ function zeichneBuehne() {
 
   bild.alt = beschreibung;
 
-  // Spiegelung, Schatten und Glut sind Kopien desselben Bildes - nur so
-  // folgen sie automatisch jeder Maschine, ohne dass irgendetwas doppelt
-  // gespeichert werden muesste.
-  const kopien = ['motorradSpiegel', 'motorradSchatten', 'motorradGlut']
+  // Spiegelung, Schatten, Glut und Leuchtsaum sind Kopien desselben Bildes -
+  // nur so folgen sie automatisch jeder Maschine, ohne dass irgendetwas
+  // doppelt gespeichert werden muesste.
+  const kopien = ['motorradSpiegel', 'motorradSchatten', 'motorradGlut', 'motorradRand']
     .map(name => document.getElementById(name));
 
   // Faellt die Bildquelle aus, das Standardbild nachreichen.
@@ -784,6 +821,23 @@ function setzeBuehnenPlatz() {
 
   raum.style.setProperty('--platte-groesse', `${bildB * massstab}px ${bildH * massstab}px`);
   raum.style.setProperty('--platte-lage', `${-fensterX * massstab}px ${-fensterY * massstab}px`);
+
+  /* Die Lichtflecken des Lampenflackerns wandern mit dem Ausschnitt: Jede
+     Lampe steht in der GARAGEN-Liste in Bildanteilen, hier wird daraus
+     ihre Lage auf dem Schirm - dieselbe Rechnung wie gleich beim Teller. */
+  const lampenHalter = document.getElementById('buehneLampen');
+  if (lampenHalter) {
+    Array.from(lampenHalter.children).forEach((fleck, platz) => {
+      const lampe = (garageBild.lampen || [])[platz];
+      if (!lampe) return;
+      const fleckB = lampe.rx * bildB * massstab * 2;
+      const fleckH = lampe.ry * bildH * massstab * 2;
+      fleck.style.width  = `${fleckB}px`;
+      fleck.style.height = `${fleckH}px`;
+      fleck.style.left = `${(lampe.x * bildB - fensterX) * massstab - fleckB / 2}px`;
+      fleck.style.top  = `${(lampe.y * bildH - fensterY) * massstab - fleckH / 2}px`;
+    });
+  }
 
   // Schritt 3: wo liegt der Teller jetzt wirklich auf dem Schirm?
   const ankerX = (tellerX - fensterX) * massstab;

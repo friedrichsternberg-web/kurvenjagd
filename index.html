@@ -23,7 +23,7 @@
        "orientation": "portrait" im Manifest ist die Ansage, um die es hier
        geht: Diese App ist fuers Hochformat gebaut. Die spaetere Webseite
        bekommt ein eigenes Design fuers Querformat und ein eigenes Manifest. -->
-  <link rel="manifest" href="manifest.webmanifest?v=37">
+  <link rel="manifest" href="manifest.webmanifest?v=38">
 
   <!-- Faerbt die Statusleiste des Handys in die Grundflaeche der App, damit
        oben kein fremder heller Streifen stehen bleibt. -->
@@ -36,7 +36,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Kurvenjagd">
-  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=37">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=38">
 
   <!-- Fuer die spaetere Webseite und geteilte Routen: So sieht der Link aus,
        wenn ihn jemand in WhatsApp oder Instagram einfuegt. Ohne das steht
@@ -74,7 +74,7 @@
        durchgehend alte Version, weil die Seite dann Elemente enthält, die
        das Skript noch gar nicht kennt.
 
-       Für den Browser ist "app.js?v=37" eine andere Adresse als "app.js?v=26",
+       Für den Browser ist "app.js?v=38" eine andere Adresse als "app.js?v=26",
        er holt sie also frisch.
 
        WICHTIG: BEI JEDER VERÖFFENTLICHUNG die Zahl an ALLEN Stellen um eins
@@ -90,8 +90,8 @@
                    die spaetere Webseite genauso benutzen.
        style.css   die Anordnung DIESER App, ausgelegt auf Hochformat. Die
                    Webseite bekommt dafuer eine eigene Datei. -->
-  <link rel="stylesheet" href="design.css?v=37">
-  <link rel="stylesheet" href="style.css?v=37">
+  <link rel="stylesheet" href="design.css?v=38">
+  <link rel="stylesheet" href="style.css?v=38">
 </head>
 <body>
 
@@ -341,6 +341,13 @@
            neu freizustellen. -->
       <div class="buehne-platte" id="buehnePlatte" aria-hidden="true"></div>
 
+      <!-- Schicht 1b: das Lampenflackern. Ueber jeder Lampe des Raumbilds
+           liegt ein kleiner dunkler Lichtfleck, der fast immer unsichtbar
+           ist und alle paar Sekunden kurz aufwacht - dann sackt die Lampe
+           sichtbar ab. Die Flecken selbst legt garage.js an, denn WO die
+           Lampen haengen, weiss nur die GARAGEN-Liste dort. -->
+      <div class="buehne-lampen" id="buehneLampen" aria-hidden="true"></div>
+
       <!-- Schicht 6: dunkler Verlauf oben und unten. Oben macht er die
            Ueberschrift und die Hakenleiste lesbar, unten laesst er das
            Raumbild in die Grundflaeche der App auslaufen, damit an der
@@ -389,6 +396,13 @@
           <img id="motorradSpiegel" class="buehne-spiegel" alt="" aria-hidden="true">
           <img id="motorradSchatten" class="buehne-schatten" alt="" aria-hidden="true">
           <canvas id="motorradKontakt" class="buehne-kontakt" aria-hidden="true"></canvas>
+          <!-- Der Leuchtsaum: dieselbe Aufnahme noch einmal, exakt unter dem
+               Original. Sichtbar bleibt nur der orange Schein, den ihre
+               drop-shadows um die Silhouette legen - das Original deckt den
+               Rest ab. So bekommt die Maschine einen schmalen Farbstreifen
+               entlang ihrer Kontur, der nebenbei ausgefranste Schnittkanten
+               des Freistellers uebertuscht. -->
+          <img id="motorradRand" class="buehne-rand" alt="" aria-hidden="true">
           <img id="motorradBild" class="motorrad-bild" alt="">
           <img id="motorradGlut" class="buehne-glut" alt="" aria-hidden="true">
         </div>
@@ -1049,18 +1063,18 @@
   <!-- ZUERST, denn alle anderen benutzen geraet.* beim Laden. Hier steht der
        gesamte Zugriff aufs Geraet - Standort, Speicher, Dateien. Beim Umzug
        in die Stores ist das die einzige Datei, die sich aendert. -->
-  <script src="geraet.js?v=37"></script>
+  <script src="geraet.js?v=38"></script>
   <!-- Der Rechenteil: Kurvigkeit, Sackgassen, Rundtour-Punkte, GPX. Muss VOR
        app.js stehen, weil app.js diese Funktionen beim Routen aufruft. Die
        spaetere Webseite im Querformat laedt genau diese Datei ebenfalls und
        rechnet damit exakt so wie die App. -->
-  <script src="kern.js?v=37"></script>
-  <script src="app.js?v=37"></script>
+  <script src="kern.js?v=38"></script>
+  <script src="app.js?v=38"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=37"></script>
+  <script src="konto.js?v=38"></script>
   <!-- Nach app.js, weil die Garage verkleinereFoto() und showToast() von
        dort benutzt. -->
-  <script src="garage.js?v=37"></script>
+  <script src="garage.js?v=38"></script>
 </body>
 </html>

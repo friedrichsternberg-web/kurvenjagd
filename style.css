@@ -1648,7 +1648,69 @@ body.nav-modus .leaflet-control-container { display: none; }
     linear-gradient(to top,    rgba(14, 15, 18, 0.92) 0%, rgba(14, 15, 18, 0.30) 9%,  transparent 20%);
 }
 
-.garage-raum > *:not(.buehne-platte):not(.buehne-dunst) { position: relative; z-index: 1; }
+/* ---------- Das Lampenflackern ----------
+   Ueber jeder Lampe des Raumbilds liegt ein dunkler Lichtfleck (angelegt
+   von garage.js, platziert von setzeBuehnenPlatz). "multiply" rechnet ihn
+   in das Bild darunter hinein: Statt einen grauen Klecks DARAUF zu legen,
+   nimmt er der Lampe anteilig ihr Licht - genau so sieht Dimmen aus.
+
+   Fast die ganze Zeit steht die Deckkraft auf null, die Flecken sind
+   unsichtbar und kosten nichts. Nur an wenigen Stellen des Durchlaufs
+   sacken sie fuer Sekundenbruchteile ab. Absichtlich selten und kurz -
+   die Garage soll leben, nicht blinken. */
+.buehne-lampen {
+  position: absolute; inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.buehne-lampe {
+  position: absolute;
+  mix-blend-mode: multiply;
+  opacity: 0;
+  /* Takt und Startversatz setzt garage.js je Lampe, deshalb hier nur der
+     Name der Animation und ihre Gangart. "steps" gibt es nicht: Licht
+     bricht weich ein, nicht in Stufen. */
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+/* Die Leuchtstoffroehre: laenglicher Fleck, in der Mitte am dichtesten. */
+.lampe-roehre {
+  background: radial-gradient(ellipse 50% 42% at 50% 38%,
+    rgba(26, 30, 38, 0.9), rgba(26, 30, 38, 0.35) 55%, rgba(26, 30, 38, 0) 100%);
+  animation-name: lampe-stottern;
+}
+/* Die Haengelampen: runder Schein, der nach aussen weich auslaeuft. */
+.lampe-schirm {
+  background: radial-gradient(closest-side,
+    rgba(26, 30, 38, 0.85), rgba(26, 30, 38, 0.3) 50%, rgba(26, 30, 38, 0) 100%);
+  animation-name: lampe-durchhaengen;
+}
+/* Der typische Leuchtstoff-Stotterer: zweimal kurz weg, spaeter noch ein
+   einzelner Schlag, dazwischen lange Ruhe. Bei 19 Sekunden Laufzeit ist
+   ein Prozent 190 Millisekunden - die Aussetzer dauern also nur einen
+   Wimpernschlag. */
+@keyframes lampe-stottern {
+  0%, 33.6% { opacity: 0; }
+  34%       { opacity: 0.9; }
+  34.5%     { opacity: 0.2; }
+  35.1%     { opacity: 1; }
+  35.9%     { opacity: 0; }
+  60.8%     { opacity: 0; }
+  61.4%     { opacity: 0.55; }
+  62.8%     { opacity: 0; }
+  100%      { opacity: 0; }
+}
+/* Die Haengelampe stottert nicht, sie haengt einmal weich durch - wie bei
+   einer kleinen Spannungsschwankung im Netz. */
+@keyframes lampe-durchhaengen {
+  0%, 44% { opacity: 0; }
+  47%     { opacity: 0.55; }
+  49%     { opacity: 0.35; }
+  52%     { opacity: 0; }
+  100%    { opacity: 0; }
+}
+
+.garage-raum > *:not(.buehne-platte):not(.buehne-lampen):not(.buehne-dunst) { position: relative; z-index: 1; }
 
 .garage-kopf {
   flex: 0 0 auto;
@@ -1706,6 +1768,36 @@ body.nav-modus .leaflet-control-container { display: none; }
 .motorrad-ansicht {
   position: absolute;   /* left/bottom/width setzt zeichneBuehne() */
   pointer-events: none;
+}
+
+/* Der Leuchtsaum: dieselbe Aufnahme noch einmal, deckungsgleich UNTER dem
+   Original. Ihre drop-shadows folgen der Silhouette des Fotos - und weil
+   das Original alles andere abdeckt, bleibt von dieser Kopie nur der
+   schmale orange Schein rund um die Kontur uebrig.
+
+   Warum drei Schatten: Der erste, enge, ist der eigentliche Farbstreifen.
+   Die beiden weiteren lassen ihn nach aussen weich auslaufen, sonst saehe
+   er aus wie ein aufgemalter Umriss. Nebenbei uebertuscht der Saum
+   ausgefranste Kanten des Freistellers - dunkler Fotorand auf orangem
+   Schein liest sich als Gegenlicht, nicht als Schnittfehler.
+
+   Das langsame Atmen macht ihn lebendig, ohne aufzufallen: acht Sekunden
+   je Zug, und nie ganz aus. */
+.buehne-rand {
+  position: absolute;
+  z-index: 2;
+  top: 0; left: 0;
+  width: 100%;
+  filter: drop-shadow(0 0 1px var(--accent))
+          drop-shadow(0 0 2.5px var(--accent))
+          drop-shadow(0 0 7px var(--accent));
+  animation: rand-atmen 8s ease-in-out infinite;
+}
+/* Die Werte sind am Schirm abgestimmt: 0,55 ist die Grenze, ab der der
+   Saum zum Halo wird - das Atmen bleibt bewusst darunter. */
+@keyframes rand-atmen {
+  0%, 100% { opacity: 0.35; }
+  50%      { opacity: 0.55; }
 }
 
 .motorrad-bild {
@@ -1945,6 +2037,10 @@ body.nav-modus .leaflet-control-container { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .buehne-hinweis, .hinweis-marke { animation: none; }
+  /* Der Leuchtsaum bleibt stehen, nur sein Atmen entfaellt; das
+     Lampenflackern entfaellt ganz. */
+  .buehne-rand  { animation: none; opacity: 0.45; }
+  .buehne-lampe { animation: none; opacity: 0; }
 }
 
 /* Die Ausgaben neben den Justier-Reglern brauchen etwas mehr Platz als die
