@@ -1087,16 +1087,95 @@ const MODELL_DATEI = 'modell/u2netp.onnx';
 const ORT_BIBLIOTHEK = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/ort.min.js';
 const MODELL_KANTE = 320;          // Eingangsgroesse, vom Modell vorgegeben
 
+/* Die Groesse der Modelldatei in Bytes, damit der Balken etwas hat, woran er
+   sich messen kann.
+
+   Warum fest eingetragen und nicht aus der Antwort gelesen: GitHub Pages
+   liefert die Datei GEPACKT aus. In der Kopfzeile steht dann die gepackte
+   Groesse (rund 4,2 MB), der Browser reicht uns aber die ausgepackten Bytes
+   durch - der Balken waere schon bei 92 Prozent voll und liefe darueber
+   hinaus. Wird das Modell einmal ausgetauscht, gehoert diese Zahl mit
+   angepasst; sie steht nur fuer die Anzeige, nichts haengt daran. */
+const MODELL_GROESSE = 4574861;
+
 let modellSitzung = null;
 let modellLaeuft = null;           // laufendes Laden, damit nicht zweimal
 
-// Laedt Bibliothek und Modell, aber erst beim ersten Bedarf.
-async function modellLaden() {
+/* Holt die Modelldatei und meldet unterwegs, wieviel schon da ist.
+
+   Ein schlichtes fetch() waere kuerzer, kann aber nur "fertig" sagen. Deshalb
+   wird die Antwort haeppchenweise gelesen: Jedes Stueck, das ankommt, wird
+   gezaehlt und weitergemeldet, am Ende alles zu einem Block zusammengesetzt.
+
+   Kann der Browser das nicht (sehr alte Fassungen kennen response.body
+   nicht), faellt es auf den einfachen Weg zurueck - dann laeuft eben der
+   unbestimmte Streifen weiter. */
+async function modellHolen(melde) {
+  const antwort = await fetch(MODELL_DATEI);
+  if (!antwort.ok) throw new Error('Modelldatei nicht erreichbar');
+  if (!antwort.body || !antwort.body.getReader) return await antwort.arrayBuffer();
+
+  const leser = antwort.body.getReader();
+  const stücke = [];
+  let da = 0;
+
+  for (;;) {
+    const { done, value } = await leser.read();
+    if (done) break;
+    stücke.push(value);
+    da += value.length;
+    const anteil = Math.min(1, da / MODELL_GROESSE);
+    melde('Modell laden', anteil, `${inMegabyte(da)} von ${inMegabyte(MODELL_GROESSE)} MB`);
+  }
+
+  const alles = new Uint8Array(da);
+  let stelle = 0;
+  for (const stück of stücke) { alles.set(stück, stelle); stelle += stück.length; }
+  return alles.buffer;
+}
+
+function inMegabyte(bytes) {
+  return (bytes / (1024 * 1024)).toFixed(1).replace('.', ',');
+}
+
+/* Dem Browser einmal Luft zum Zeichnen lassen.
+
+   Das ist beim Fortschritt entscheidend und leicht zu uebersehen: Das
+   Rechnen im Modell laeuft auf DEMSELBEN Faden wie die Anzeige. Wer den Text
+   umsetzt und sofort weiterrechnet, hat ihn zwar gesetzt - gezeichnet wird er
+   nie, weil der Browser bis zum Ende nicht mehr drankommt. Der Nutzer sieht
+   dann die alte Beschriftung und haelt sie fuer haengengeblieben.
+
+   Zweimal warten, nicht einmal: Der erste Durchgang meldet sich VOR dem
+   Zeichnen, erst der zweite liegt sicher dahinter.
+
+   ABER: requestAnimationFrame feuert NUR, wenn die Seite auch zeichnet. Liegt
+   der Tab im Hintergrund, kommt es nie - und dann bleibt hier alles stehen,
+   nicht bloss die Anzeige. Genau darauf bin ich schon einmal hereingefallen,
+   damals beim Regler. Deshalb laeuft eine Zeitschaltung mit: Wer zuerst
+   kommt, gewinnt. Im sichtbaren Fenster ist das der Bildaufbau, im
+   verdeckten die Uhr. */
+function kurzDurchatmen() {
+  return new Promise(fertig => {
+    let erledigt = false;
+    const einmal = () => { if (!erledigt) { erledigt = true; fertig(); } };
+    requestAnimationFrame(() => requestAnimationFrame(einmal));
+    setTimeout(einmal, 120);
+  });
+}
+
+/* Laedt Bibliothek und Modell, aber erst beim ersten Bedarf.
+
+   melde(text, anteil, zusatz) beschreibt den Stand nach aussen. anteil ist
+   eine Zahl zwischen 0 und 1, oder null, wenn sich die Dauer nicht messen
+   laesst - dann zeigt der Balken einen laufenden Streifen statt einer Zahl. */
+async function modellLaden(melde = () => {}) {
   if (modellSitzung) return modellSitzung;
   if (modellLaeuft) return modellLaeuft;
 
   modellLaeuft = (async () => {
     if (!window.ort) {
+      melde('Bibliothek laden', null);
       await new Promise((fertig, fehler) => {
         const skript = document.createElement('script');
         skript.src = ORT_BIBLIOTHEK;
@@ -1109,7 +1188,16 @@ async function modellLaden() {
     // vom Server, die GitHub Pages nicht setzt.
     ort.env.wasm.numThreads = 1;
     ort.env.wasm.simd = true;
-    modellSitzung = await ort.InferenceSession.create(MODELL_DATEI, { executionProviders: ['wasm'] });
+
+    /* Die Datei wird selbst geholt, statt der Bibliothek nur den Pfad zu
+       geben. Der Grund ist allein die Anzeige: Holt sie die Bibliothek, ist
+       das eine geschlossene Tuer, hinter der vier Megabyte laden und niemand
+       etwas davon sieht. */
+    const daten = await modellHolen(melde);
+
+    melde('Modell vorbereiten', null);
+    await kurzDurchatmen();
+    modellSitzung = await ort.InferenceSession.create(daten, { executionProviders: ['wasm'] });
     return modellSitzung;
   })();
 
@@ -1120,8 +1208,10 @@ async function modellLaden() {
 /* Rechnet das Bild durch das Modell und gibt eine Maske in Anzeigegroesse
    zurueck. Die Aufbereitung folgt dem Original: auf 320x320 bringen, durch
    den groessten Farbwert teilen, dann mit den ueblichen Werten normieren. */
-async function modellMaske() {
-  const sitzung = await modellLaden();
+async function modellMaske(melde = () => {}) {
+  const sitzung = await modellLaden(melde);
+  melde('Motorrad suchen', null);
+  await kurzDurchatmen();
 
   const l = document.createElement('canvas');
   l.width = MODELL_KANTE; l.height = MODELL_KANTE;
@@ -1267,6 +1357,7 @@ function öffneFreisteller(datenUrl, sofortAutomatik = false) {
 
 function schließeFreisteller() {
   document.getElementById('freiFenster').hidden = true;
+  freiFortschrittAus();
   frei = null;
 }
 
@@ -1322,10 +1413,32 @@ function freiZurück() {
   freiKnöpfeAnzeigen();
 }
 
-/* Die Automatik. Saatpunkte sind alle Randpunkte - was am Bildrand liegt, ist
-   so gut wie immer Hintergrund. */
+/* Zeigt den Fortschritt an. anteil zwischen 0 und 1 gibt einen echten Balken
+   mit Zahl, anteil = null einen laufenden Streifen ohne Zahl. */
+function freiFortschritt(text, anteil = null, zusatz = '') {
+  const kasten = document.getElementById('freiFortschritt');
+  if (!kasten) return;
+  kasten.hidden = false;
+  document.getElementById('freiFortschrittText').textContent = text;
+
+  const unbestimmt = anteil === null || anteil === undefined;
+  kasten.classList.toggle('unbestimmt', unbestimmt);
+  document.getElementById('freiFortschrittWert').textContent =
+    unbestimmt ? zusatz : (zusatz || `${Math.round(anteil * 100)} %`);
+  document.getElementById('freiBalken').style.width =
+    unbestimmt ? '' : `${Math.round(anteil * 100)}%`;
+}
+
+function freiFortschrittAus() {
+  const kasten = document.getElementById('freiFortschritt');
+  if (!kasten) return;
+  kasten.hidden = true;
+  kasten.classList.remove('unbestimmt');
+  document.getElementById('freiBalken').style.width = '0';
+}
+
 /* Die Automatik. Erst das Modell, und nur wenn das nicht geht, das
-   klassische Verfahren. Waehrend geladen wird, muss der Knopf sagen, dass
+   klassische Verfahren. Waehrend geladen wird, muss zu sehen sein, dass
    etwas passiert - beim ersten Mal dauert es einige Sekunden, und ohne
    Rueckmeldung wirkt das wie ein Absturz. */
 async function freiAutomatik() {
@@ -1335,10 +1448,13 @@ async function freiAutomatik() {
   const beschriftung = knopf.querySelector('span');
   const vorher = beschriftung.textContent;
   beschriftung.textContent = 'Rechnet …';
+  freiFortschritt('Wird vorbereitet', null);
 
   try {
     freiMerken();
-    const maske = await modellMaske();
+    const maske = await modellMaske(freiFortschritt);
+    // Wer waehrenddessen das Fenster geschlossen hat, hat sich entschieden.
+    if (!frei) return;
     // Nur wegnehmen, nie zurueckholen: Was von Hand entfernt wurde, bleibt weg.
     for (let s = 0; s < frei.maske.length; s++) {
       if (maske[s] < frei.maske[s]) frei.maske[s] = maske[s];
@@ -1348,10 +1464,14 @@ async function freiAutomatik() {
     const weg = zähleDurchsichtig();
     showToast(`Freigestellt, ${weg} % entfernt. Reste kannst du wegradieren.`);
   } catch (fehler) {
+    if (!frei) return;
     // Ohne Netz oder mit blockierter Bibliothek: das klassische Verfahren.
     showToast('Modell nicht erreichbar, nehme das einfache Verfahren.');
+    freiFortschritt('Einfaches Verfahren', null);
+    await kurzDurchatmen();
     freiAutomatikKlassisch();
   } finally {
+    freiFortschrittAus();
     beschriftung.textContent = vorher;
     knopf.disabled = false;
     freiKnöpfeAnzeigen();

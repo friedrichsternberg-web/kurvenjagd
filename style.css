@@ -2239,6 +2239,76 @@ body.nav-modus #panel {
 }
 .frei-kopf .btn.klein { padding: 8px 16px; font-size: 14px; }
 
+/* Der Fortschrittsbalken beim Laden und Rechnen.
+
+   Zwei Zustaende, und der Unterschied ist Absicht:
+
+     mit Klasse "unbestimmt"   ein Streifen laeuft durch, KEINE Zahl. Fuer
+                               Schritte, deren Dauer sich nicht messen laesst.
+     ohne                      die Fuellung waechst auf einen echten Anteil,
+                               daneben steht, wieviel von wieviel geladen ist.
+
+   Ein erfundener Prozentwert waere schlimmer als gar keiner: Er weckt eine
+   Erwartung, die das Programm nicht einloesen kann. */
+.frei-fortschritt {
+  flex: 0 0 auto;
+  padding: var(--s3) var(--s4) 0;
+}
+.frei-fortschritt[hidden] { display: none; }
+
+.frei-fortschritt-zeile {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s2);
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.frei-fortschritt-zeile span:last-child {
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.frei-balken {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.10);
+  overflow: hidden;
+}
+.frei-balken-füllung {
+  height: 100%;
+  width: 0;
+  border-radius: 2px;
+  background: var(--accent);
+  transition: width 0.18s linear;
+}
+
+/* Der laufende Streifen. Er ist bewusst schmal und wandert von links nach
+   rechts wieder heraus - so ist auf einen Blick klar, dass hier nichts
+   gezaehlt wird, sondern nur etwas arbeitet. */
+.frei-fortschritt.unbestimmt .frei-balken-füllung {
+  width: 34%;
+  transition: none;
+  animation: balken-wandern 1.15s ease-in-out infinite;
+}
+@keyframes balken-wandern {
+  0%   { transform: translateX(-110%); }
+  100% { transform: translateX(330%); }
+}
+/* Wer im Betriebssystem weniger Bewegung eingestellt hat, bekommt statt der
+   Wanderung einen ruhig pulsierenden Balken ueber die volle Breite. */
+@media (prefers-reduced-motion: reduce) {
+  .frei-fortschritt.unbestimmt .frei-balken-füllung {
+    width: 100%;
+    animation: balken-pulsen 1.6s ease-in-out infinite;
+  }
+  @keyframes balken-pulsen {
+    0%, 100% { opacity: 0.30; }
+    50%      { opacity: 1; }
+  }
+}
+
 .frei-buehne {
   flex: 1;
   min-height: 0;

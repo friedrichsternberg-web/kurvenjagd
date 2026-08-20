@@ -38,10 +38,10 @@
        durchgehend alte Version, weil die Seite dann Elemente enthält, die
        das Skript noch gar nicht kennt.
 
-       Für den Browser ist "app.js?v=24" eine andere Adresse als "app.js?v=22",
+       Für den Browser ist "app.js?v=25" eine andere Adresse als "app.js?v=22",
        er holt sie also frisch. Wichtig: BEI JEDER VERÖFFENTLICHUNG die Zahl
        an allen drei Stellen um eins erhöhen. -->
-  <link rel="stylesheet" href="style.css?v=24">
+  <link rel="stylesheet" href="style.css?v=25">
 </head>
 <body>
 
@@ -803,6 +803,20 @@
       <button class="btn klein" id="btnFreiFertig">Fertig</button>
     </header>
 
+    <!-- Der Fortschritt beim Freistellen. Beim ersten Mal werden mehrere
+         Megabyte geladen, und ohne Anzeige sieht das aus wie ein Absturz.
+         Zwei Arten von Balken: Beim Herunterladen des Modells stehen echte
+         Zahlen dahinter, bei den uebrigen Schritten laeuft ein Streifen -
+         dort ist die Dauer nicht messbar, und einen erfundenen Prozentwert
+         anzuzeigen waere gelogen. -->
+    <div class="frei-fortschritt" id="freiFortschritt" hidden>
+      <div class="frei-fortschritt-zeile">
+        <span id="freiFortschrittText">Wird geladen</span>
+        <span id="freiFortschrittWert"></span>
+      </div>
+      <div class="frei-balken"><div class="frei-balken-füllung" id="freiBalken"></div></div>
+    </div>
+
     <div class="frei-buehne">
       <canvas id="freiLeinwand" class="frei-leinwand"></canvas>
     </div>
@@ -855,12 +869,12 @@
        ein Foto an der falschen Stelle landet. -->
   <input type="file" id="garageFotoEingabe" accept="image/*" hidden>
 
-  <script src="app.js?v=24"></script>
+  <script src="app.js?v=25"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=24"></script>
+  <script src="konto.js?v=25"></script>
   <!-- Nach app.js, weil die Garage verkleinereFoto() und showToast() von
        dort benutzt. -->
-  <script src="garage.js?v=24"></script>
+  <script src="garage.js?v=25"></script>
 </body>
 </html>
