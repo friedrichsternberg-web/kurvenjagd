@@ -599,6 +599,48 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 
 .konto-wechsel { margin-top: 22px; font-size: 13px; color: var(--muted); }
 
+/* --- Konto löschen --------------------------------------------------------
+   Rot ist hier keine Deko, sondern die einzige Stelle in der App, an der
+   die Farbe eine Warnung ist. Deshalb bekommt sie nur der eine Knopf, der
+   wirklich etwas unwiderruflich macht - würde noch etwas anderes daneben
+   rot leuchten, wäre die Warnung nichts mehr wert. */
+
+.linkbtn.gefahr { color: var(--danger); }
+.linkbtn.gefahr:hover { color: var(--text); }
+
+/* Derselbe Aufbau wie .btn, nur in Rot: gleicher Verlauf von hell nach
+   dunkel, gleiche Lichtkante. Der Knopf soll sich anfühlen wie die
+   anderen und sich nur in der Farbe unterscheiden. */
+.btn.gefahr {
+  background: linear-gradient(to bottom, #FF7B74, var(--danger) 55%, #D93A32);
+  color: #1A0605;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.40),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.25),
+    0 4px 14px rgba(255, 90, 82, 0.28);
+}
+.btn.gefahr:hover { background: #D93A32; color: #FFF; }
+
+.loeschen-ueberschrift {
+  margin: 18px 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: left;
+}
+
+/* Die Aufzählung dessen, was verschwindet. Linksbündig und mit Punkten,
+   damit sie als Liste gelesen wird und nicht als Fließtext überflogen. */
+.loeschen-liste {
+  margin: 0 0 16px;
+  padding-left: 20px;
+  text-align: left;
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+.loeschen-liste strong { color: var(--text); font-weight: 600; }
+
 /* Kurzer Hinweis über den Auswertungszahlen einer sehr kurzen Ausfahrt.
    Gedämpft und nicht rot: Es ist kein Fehler, nur eine Einordnung. */
 .kurz-hinweis {

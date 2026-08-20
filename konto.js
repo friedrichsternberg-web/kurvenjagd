@@ -561,3 +561,190 @@ async function synchronisiereTouren() {
   if (nurLokal.length) teile.push(nurLokal.length + ' hochgeladen');
   if (teile.length) showToast('Touren abgeglichen: ' + teile.join(', ') + '.');
 }
+
+
+/* --- 9. Konto löschen ------------------------------------------------------
+   Beide Stores verlangen zwingend, dass man sein Konto INNERHALB der App
+   löschen kann. Nicht per E-Mail, nicht über ein Formular auf einer
+   Webseite. Ohne diesen Weg kommt die Einreichung gar nicht erst durch.
+
+   Das Löschen besteht aus vier Schritten, und drei davon könnte die App
+   auch allein. Der vierte nicht:
+
+     1. Passwort noch einmal prüfen
+     2. Auf dem Server: Fotos, Touren und das Konto selbst löschen
+     3. Auf dem Gerät: Touren und Garage aus dem localStorage werfen
+     4. Die Sitzung beenden
+
+   Schritt 2 läuft deshalb nicht hier, sondern in einer Edge Function
+   (supabase/functions/konto-loeschen/index.ts). Der Grund steht ausführlich
+   dort: Ein Auth-Konto zu löschen braucht den service_role-Schlüssel, und
+   der darf nie in dieser Datei stehen, weil das Repository öffentlich ist.
+
+   Warum das Passwort noch einmal abgefragt wird: nicht aus Misstrauen
+   gegen den Nutzer, sondern gegen die Lage. Ein entsperrtes Handy liegt
+   auf dem Tisch, jemand tippt daran herum, und danach ist alles weg. Die
+   Prüfung kostet fast nichts, weil sie dieselbe ist wie beim Anmelden. */
+
+
+/* Welche Schlüssel im localStorage zu diesem Nutzer gehören.
+
+   Die Namen holen wir aus app.js und garage.js, statt sie hier
+   abzuschreiben. Eine Kopie würde beim Umbenennen still danebengreifen -
+   das Konto wäre gelöscht, die Daten lägen weiter auf dem Gerät, und
+   niemand würde es merken. Die try-Blöcke fangen den Fall ab, dass eine
+   der beiden Dateien gar nicht geladen wurde. */
+function lokaleSchlüssel() {
+  const schlüssel = [];
+  try { schlüssel.push(STORE); } catch { /* app.js fehlt */ }
+  try { schlüssel.push(GARAGE_SPEICHER); } catch { /* garage.js fehlt */ }
+  return schlüssel;
+}
+
+/* Alles vom Gerät werfen. Wer "Konto löschen" drückt, erwartet nicht, dass
+   danach noch seine Touren dastehen - ein halb geleerter Zustand sieht nach
+   einem Fehler aus. Angesagt wird das vorher auf dem Löschen-Bildschirm. */
+function lokaleDatenLöschen() {
+  lokaleSchlüssel().forEach(schlüssel => geraet.wirfWeg(schlüssel));
+}
+
+/* Übersetzt einen Fehler der Edge Function in einen Satz für den Nutzer.
+   Supabase verpackt die Antwort des Servers in error.context - das ist die
+   rohe Antwort, aus der wir unsere eigene Meldung herausholen. */
+async function fehlerAusFunktion(fehler) {
+  // Ohne context ist die Anfrage gar nicht erst angekommen.
+  if (!fehler.context || typeof fehler.context.json !== 'function') {
+    return 'Der Server war nicht erreichbar. Bist du online?';
+  }
+  if (fehler.context.status === 404) {
+    return 'Die Löschfunktion ist auf dem Server noch nicht eingerichtet.';
+  }
+  try {
+    const körper = await fehler.context.json();
+    if (körper && körper.fehler) return körper.fehler;
+  } catch { /* keine JSON-Antwort, dann eben die allgemeine Meldung */ }
+  return 'Das Löschen ist fehlgeschlagen. Bitte später noch einmal versuchen.';
+}
+
+/* Der eigentliche Vorgang. Gibt wie die Funktionen weiter oben ein Objekt
+   { ok, meldung } zurück, damit die Oberfläche nicht selbst mit
+   Supabase-Antworten hantieren muss. */
+async function löscheKonto(passwort) {
+  if (!backendVerfügbar() || !angemeldeterNutzer) {
+    return { ok: false, meldung: 'Du bist nicht angemeldet.' };
+  }
+
+  // Schritt 1: Ist das wirklich der Kontoinhaber? signInWithPassword prüft
+  // gegen denselben Server wie beim Anmelden. Stimmt das Passwort, ändert
+  // sich für den Nutzer nichts - er war ja schon angemeldet.
+  const { error: passwortFehler } = await backend.auth.signInWithPassword({
+    email: angemeldeterNutzer.email,
+    password: passwort,
+  });
+  if (passwortFehler) return { ok: false, meldung: 'Das Passwort stimmt nicht.' };
+
+  // Schritt 2: Der Aufruf auf dem Server. invoke() hängt das Anmelde-Token
+  // von selbst an - daran erkennt die Funktion drüben, wessen Konto gemeint
+  // ist. Eine Nutzerkennung schicken wir bewusst NICHT mit: Was der Browser
+  // behauptet, darf über das Löschen eines Kontos nicht entscheiden.
+  const { data, error } = await backend.functions.invoke('konto-loeschen', { method: 'POST' });
+  if (error) return { ok: false, meldung: await fehlerAusFunktion(error) };
+  if (!data || !data.ok) {
+    return { ok: false, meldung: (data && data.fehler) || 'Das Löschen ist fehlgeschlagen.' };
+  }
+
+  // Schritt 3: das Gerät. Erst jetzt, denn wäre der Server-Teil
+  // fehlgeschlagen, stünde der Nutzer sonst ohne seine Touren da UND hätte
+  // noch sein Konto.
+  lokaleDatenLöschen();
+
+  // Schritt 4: Sitzung beenden. Ausdrücklich nur lokal ("scope: 'local'"),
+  // denn das Konto auf dem Server gibt es nicht mehr - ein normales
+  // signOut() würde dort nachfragen und mit einem Fehler zurückkommen.
+  await backend.auth.signOut({ scope: 'local' });
+
+  return { ok: true, meldung: '' };
+}
+
+
+/* --- 9b. Oberfläche zum Löschen ------------------------------------------- */
+
+function zeigeLöschenMeldung(text, istFehler = false) {
+  const feld = document.getElementById('loeschenMeldung');
+  feld.textContent = text;
+  feld.hidden = !text;
+  feld.classList.toggle('fehler', istFehler);
+}
+
+/* Baut den Bildschirm auf und trägt ein, was den Nutzer konkret betrifft.
+   Eine allgemeine Warnung liest niemand, "deine 14 Touren" schon.
+
+   Gezählt wird die lokale Liste. Nach einer Anmeldung stehen dort auch die
+   Touren vom Server, weil synchronisiereTouren() sie herunterlädt - die
+   Zahl stimmt also, sobald der Abgleich einmal gelaufen ist. */
+function zeigeKontoLöschen() {
+  document.getElementById('loeschenEmail').textContent =
+    angemeldeterNutzer ? angemeldeterNutzer.email : '';
+
+  const anzahl = loadSaved().length;
+  document.getElementById('loeschenAnzahlTouren').textContent =
+    anzahl === 0 ? 'deine Touren'
+    : anzahl === 1 ? 'deine eine Tour'
+    : 'deine ' + anzahl + ' Touren';
+
+  // Zurücksetzen, falls jemand den Bildschirm schon einmal offen hatte.
+  document.getElementById('loeschenPasswort').value = '';
+  document.getElementById('kontoLoeschenFrage').hidden = false;
+  document.getElementById('kontoGeloeschtFertig').hidden = true;
+  document.getElementById('btnKontoLoeschenZurueck').hidden = false;
+  zeigeLöschenMeldung('');
+
+  zeigeBildschirm('kontoLoeschenScreen');
+}
+
+async function kontoLöschenAbsenden() {
+  const passwort = document.getElementById('loeschenPasswort').value;
+  if (!passwort) { zeigeLöschenMeldung('Bitte dein Passwort eintragen.', true); return; }
+
+  const knopf = document.getElementById('btnKontoLoeschenAbsenden');
+  knopf.disabled = true;
+  zeigeLöschenMeldung('Wird gelöscht...');
+
+  const ergebnis = await löscheKonto(passwort);
+
+  if (!ergebnis.ok) {
+    knopf.disabled = false;
+    zeigeLöschenMeldung(ergebnis.meldung, true);
+    return;
+  }
+
+  // Ab hier gibt es kein Zurück mehr, deshalb verschwindet auch der
+  // Zurück-Knopf: Der einzige Weg von hier führt über das Neuladen, sonst
+  // stünden im Startmenü noch die Touren aus dem Arbeitsspeicher.
+  document.getElementById('kontoLoeschenFrage').hidden = true;
+  document.getElementById('kontoGeloeschtFertig').hidden = false;
+  document.getElementById('btnKontoLoeschenZurueck').hidden = true;
+  knopf.disabled = false;
+}
+
+
+/* --- 9c. Verkabelung des Löschens -----------------------------------------
+   Steht bewusst hier unten bei der Sache selbst und nicht oben in
+   Abschnitt 6: Wer nachsehen will, wie das Löschen funktioniert, findet
+   alles an einer Stelle. */
+
+document.getElementById('btnKontoLoeschenOeffnen').addEventListener('click', zeigeKontoLöschen);
+
+document.getElementById('btnKontoLoeschenZurueck').addEventListener('click', zeigeStartmenü);
+
+document.getElementById('kontoLoeschenFormular').addEventListener('submit', (e) => {
+  e.preventDefault();
+  kontoLöschenAbsenden();
+});
+
+// Neu laden statt nur umzuschalten: Nach dem Löschen liegen die alten
+// Touren noch im Arbeitsspeicher der Seite. Ein Neustart ist der einzige
+// Weg, der wirklich nichts übriglässt.
+document.getElementById('btnKontoGeloeschtWeiter').addEventListener('click', () => {
+  window.location.reload();
+});

@@ -302,6 +302,11 @@
           <svg class="ic klein"><use href="#icon-profil"></use></svg>
           <span id="kontoEmail"></span>
           <button class="linkbtn" id="btnKontoAbmelden">Abmelden</button>
+          <!-- Beide Stores verlangen zwingend, dass man sein Konto INNERHALB
+               der App löschen kann - nicht per Mail, nicht über ein Formular
+               im Netz. Deshalb steht der Weg dorthin hier, wo auch das
+               Abmelden steht, und nicht in einem Untermenü. -->
+          <button class="linkbtn gefahr" id="btnKontoLoeschenOeffnen">Konto löschen</button>
         </div>
       </div>
 
@@ -447,6 +452,68 @@
 
         <button type="submit" class="btn" id="btnPasswortNeuSpeichern">Passwort speichern</button>
       </form>
+    </div>
+  </div>
+
+  <!-- ===== Konto löschen. Ein eigener Bildschirm und kein Rückfragefenster,
+       weil hier etwas stehen muss, das man in ein confirm() nicht
+       hineinbekommt: eine Aufzählung dessen, was tatsächlich verschwindet,
+       und die Ansage, dass es unwiderruflich ist.
+
+       Das Passwort wird noch einmal abgefragt. Nicht aus Misstrauen gegen
+       den Nutzer, sondern gegen die Lage: ein entsperrtes Handy auf dem
+       Tisch, ein Fehlgriff, und alles ist weg. Geprüft wird es gegen
+       denselben Server wie beim Anmelden. ===== -->
+  <div id="kontoLoeschenScreen" class="start-screen" hidden>
+    <div class="start-screen-inner">
+      <button class="btn ghost back-btn" id="btnKontoLoeschenZurueck">&larr; Zurück</button>
+      <h2>Konto löschen</h2>
+
+      <!-- Alles bis zum Ende des Formulars wird nach dem Löschen
+           ausgeblendet, dafür erscheint #kontoGeloeschtFertig weiter unten. -->
+      <div id="kontoLoeschenFrage">
+        <p class="sub">
+          Das lässt sich nicht rückgängig machen. Es gibt keinen Papierkorb und
+          keine Sicherung, aus der wir dein Konto zurückholen könnten.
+        </p>
+
+        <p class="loeschen-ueberschrift">Das verschwindet:</p>
+        <ul class="loeschen-liste">
+          <li>dein Zugang <strong id="loeschenEmail"></strong></li>
+          <li><strong id="loeschenAnzahlTouren"></strong> auf dem Server und auf diesem Gerät</li>
+          <li>alle Fotos, die du zu deinen Ausfahrten abgelegt hast</li>
+          <li>deine Garage: Motorräder und Ausrüstung</li>
+        </ul>
+
+        <p class="sub">
+          Willst du deine Touren behalten, geh vorher zurück und lade sie dir
+          als GPX herunter. Danach ist es zu spät.
+        </p>
+
+        <form id="kontoLoeschenFormular" class="konto-formular">
+          <label for="loeschenPasswort">Zur Sicherheit dein Passwort</label>
+          <input type="password" id="loeschenPasswort" autocomplete="current-password" placeholder="dein Passwort">
+
+          <p id="loeschenMeldung" class="konto-meldung" hidden></p>
+
+          <button type="submit" class="btn gefahr" id="btnKontoLoeschenAbsenden">Konto endgültig löschen</button>
+        </form>
+      </div>
+
+      <!-- Die Bestätigung nach getaner Arbeit. Ein Toast wäre hier zu wenig:
+           Bei etwas Unwiderruflichem soll schwarz auf weiß dastehen, dass es
+           geklappt hat. Der Knopf lädt die Seite neu, damit keine Reste aus
+           dem Arbeitsspeicher übrigbleiben. -->
+      <div id="kontoGeloeschtFertig" hidden>
+        <p class="sub">
+          Dein Konto ist gelöscht. Deine Touren, Fotos und deine Garage sind vom
+          Server und von diesem Gerät entfernt.
+        </p>
+        <p class="sub">
+          Die App kannst du weiter benutzen, zum Planen brauchst du kein Konto.
+        </p>
+        <button class="btn" id="btnKontoGeloeschtWeiter">Zurück zum Start</button>
+      </div>
     </div>
   </div>
 

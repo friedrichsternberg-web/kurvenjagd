@@ -2347,22 +2347,24 @@ function symbol(name, zusatz = '') {
 
 
 /* --- 9b. Startmenü ---------------------------------------------------------
-   Sechs Bildschirme, immer ist genau einer sichtbar: Startmenü, "Meine
-   Touren", der Routenplaner (Bedienfeld + Karte), die Aufzeichnung einer
-   eigenen Ausfahrt, die Anmeldung und das Setzen eines neuen Passworts.
+   Acht Bildschirme, immer ist genau einer sichtbar: Startmenü, die
+   Garage, "Meine Touren", der Routenplaner (Bedienfeld + Karte), die
+   Aufzeichnung einer eigenen Ausfahrt, die Anmeldung, das Setzen eines
+   neuen Passworts und das Löschen des Kontos.
    Beide Karten werden nur einmal erzeugt, bleiben dabei aber zunächst
    unsichtbar - deshalb kennt Leaflet ihre Größe noch nicht und muss beim
    Einblenden per invalidateSize() nachfragen. */
 
-// Auf welchen Bildschirmen die untere Leiste NICHT erscheint. Bei Anmeldung
-// und Passwortwechsel soll nichts ablenken, und wer gerade dabei ist, sein
-// Passwort zu setzen, soll nicht mit einem Fehlklick woanders landen.
-const BILDSCHIRME_OHNE_LEISTE = ['kontoScreen', 'passwortNeuScreen'];
+// Auf welchen Bildschirmen die untere Leiste NICHT erscheint. Bei Anmeldung,
+// Passwortwechsel und Kontolöschung soll nichts ablenken - wer gerade dabei
+// ist, sein Passwort zu setzen oder sein Konto zu löschen, soll nicht mit
+// einem Fehlklick woanders landen.
+const BILDSCHIRME_OHNE_LEISTE = ['kontoScreen', 'passwortNeuScreen', 'kontoLoeschenScreen'];
 
-// Blendet genau einen der sechs Bildschirme ein und alle anderen aus,
+// Blendet genau einen der acht Bildschirme ein und alle anderen aus,
 // und bringt die untere Leiste auf denselben Stand.
 function zeigeBildschirm(sichtbareId) {
-  ['startMenu', 'garageScreen', 'tourenScreen', 'app', 'rideScreen', 'kontoScreen', 'passwortNeuScreen'].forEach(id => {
+  ['startMenu', 'garageScreen', 'tourenScreen', 'app', 'rideScreen', 'kontoScreen', 'passwortNeuScreen', 'kontoLoeschenScreen'].forEach(id => {
     document.getElementById(id).hidden = id !== sichtbareId;
   });
   aktualisiereLeiste(sichtbareId);
@@ -2393,7 +2395,7 @@ function aktualisiereLeiste(sichtbareId) {
 // Welcher Bildschirm ist gerade zu sehen? Wird gebraucht, wenn die Leiste
 // unabhaengig vom Bildschirmwechsel neu bewertet werden muss (Navigation).
 function aktuellerBildschirm() {
-  return ['startMenu', 'garageScreen', 'tourenScreen', 'app', 'rideScreen', 'kontoScreen', 'passwortNeuScreen']
+  return ['startMenu', 'garageScreen', 'tourenScreen', 'app', 'rideScreen', 'kontoScreen', 'passwortNeuScreen', 'kontoLoeschenScreen']
     .find(id => !document.getElementById(id).hidden) || 'startMenu';
 }
 
