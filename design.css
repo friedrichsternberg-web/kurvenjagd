@@ -60,8 +60,13 @@
      2. Kein Verlaufstext, kein Neonleuchten.
      3. Keine Emoji als Symbole - dafuer gibt es die SVG-Sammlung in
         index.html.
-     4. Bedienelemente ohne Bild bleiben matt. Glas ist teuer, es wirkt
-        nur, wenn es nicht ueberall klebt.
+     4. GEKIPPT am 20.08.2026: Hier stand "Bedienelemente ohne Bild
+        bleiben matt". Friedrich hat sich fuer volles Liquid Glass durch
+        die ganze App entschieden - JEDE Flaeche ist jetzt Glas, auch
+        Knoepfe, Eingabefelder und Umschalter. Was die Regel ersetzt:
+        Damit Glas ueberall wirkt, liegt unter jedem Bildschirm etwas,
+        das durchscheinen kann (Foto, Karte, Raum) - Glas ueber blankem
+        Schwarz bleibt tot.
 
    RAL 5005 ist die EINZIGE Signalfarbe und wird sparsam eingesetzt. Wenn
    alles die Signalfarbe traegt, bedeutet sie nichts mehr.
@@ -162,11 +167,25 @@
   --licht-warm: #FF6B00;
   --danger:     #FF5A52;   /* Loeschen und Verwerfen */
 
-  /* Radien. Bewusst klein gehalten, siehe Verbot 5 oben. */
-  --r-sm: 6px;    /* Chips, Eingabefelder, Knoepfe */
-  --r-md: 12px;   /* Karten */
-  --r-lg: 16px;   /* grosse Bloecke, Oberkante der Schublade */
+  /* Radien. Frueher bewusst klein (6/12/16) - mit dem Schritt zu vollem
+     Liquid Glass am 20.08.2026 deutlich angehoben: Glas wirkt erst mit
+     weichen Ecken wie eine geschliffene Scheibe, mit spitzen wie eine
+     Fensterscheibe. --r-pill ist die Pillenform fuer Umschalter, Suche
+     und Abzeichen: 999px heisst schlicht "so rund wie moeglich". */
+  --r-sm: 12px;   /* Chips, Eingabefelder, Knoepfe */
+  --r-md: 18px;   /* Karten */
+  --r-lg: 24px;   /* grosse Bloecke, Oberkante der Schublade */
+  --r-pill: 999px;
   --radius: var(--r-sm);   /* Altname aus der ersten Fassung, damit bestehende Regeln weiter gelten */
+
+  /* Das Glas-Rezept als Marken, damit jede Flaeche dieselbe Scheibe ist:
+     eine Fuellung fuer helle Flaechen ueber Dunklem, eine satte dunkle
+     fuer Flaechen ueber Hellem (Karte!), dazu Kante und Lichtkante. */
+  --glas-hell:   rgba(255, 255, 255, 0.07);
+  --glas-heller: rgba(255, 255, 255, 0.12);   /* gedrueckt / hervorgehoben */
+  --glas-dunkel: rgba(14, 15, 18, 0.78);      /* ueber heller Karte */
+  --glas-rand:   rgba(255, 255, 255, 0.14);
+  --glas-licht:  rgba(255, 255, 255, 0.26);   /* obere Lichtkante (inset) */
 
   /* Abstandsskala. Immer eine dieser Stufen benutzen, nie krumme Werte -
      das ist der Unterschied zwischen "gestaltet" und "zusammengeschoben". */

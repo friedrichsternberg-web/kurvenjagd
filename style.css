@@ -78,7 +78,7 @@
   max-width: 100%;
   /* Die Formulare liegen jetzt auf einer Glasplatte statt frei im Raum. */
   padding: var(--s5);
-  border-radius: 20px;
+  border-radius: var(--r-lg);
   background: rgba(255, 255, 255, 0.055);
   backdrop-filter: blur(22px) saturate(160%);
   -webkit-backdrop-filter: blur(22px) saturate(160%);
@@ -168,10 +168,16 @@
      Fuellung statt einer hellen, sonst waere die Leiste ueber heller
      Karte nicht mehr zu lesen. */
   background: rgba(14, 15, 18, 0.72);
-  backdrop-filter: blur(24px) saturate(170%);
-  -webkit-backdrop-filter: blur(24px) saturate(170%);
+  backdrop-filter: blur(28px) saturate(170%);
+  -webkit-backdrop-filter: blur(28px) saturate(170%);
   border-top: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  /* Abgerundete Oberkante wie im Inspirationsbild: Die Leiste liest sich
+     dadurch als aufgelegte Glasscheibe, nicht als abgeschnittener Rand.
+     Der Schatten nach oben loest sie zusaetzlich vom Inhalt. */
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 -8px 24px rgba(0, 0, 0, 0.35);
 }
 .haupt-nav[hidden] { display: none; }
 
@@ -462,7 +468,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   justify-content: flex-end;
   min-height: 116px;
   padding: var(--s3);
-  border-radius: 22px;
+  border-radius: var(--r-lg);
   border: 1px solid rgba(255, 255, 255, 0.16);
   background: var(--surface-2);
   color: var(--text);
@@ -684,13 +690,15 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 #profilNameFeld[hidden] { display: none; }
 #profilNameFeld input {
   width: 100%;
-  padding: 11px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(0, 0, 0, 0.28);
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--glas-rand);
+  background: var(--glas-hell);
   color: var(--text);
   font: inherit;
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 2px 5px rgba(0, 0, 0, 0.18);
 }
 #profilNameFeld input:focus { outline: none; border-color: var(--accent-hell); }
 #profilNameFeld .btn { margin-top: var(--s2); }
@@ -733,9 +741,9 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   gap: var(--s3);
   padding: var(--s2);
   margin-bottom: 6px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(0, 0, 0, 0.28);
+  border-radius: var(--r-md);
+  border: 1px solid var(--glas-rand);
+  background: var(--glas-hell);
   color: var(--muted);
   font: inherit;
   font-size: 14px;
@@ -769,14 +777,16 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 }
 .konto-formular label { font-size: 12px; color: var(--muted); }
 .konto-formular input {
-  padding: 11px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(0, 0, 0, 0.28);
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--glas-rand);
+  background: var(--glas-hell);
   color: var(--text);
   font: inherit;
   margin-bottom: 6px;
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 2px 5px rgba(0, 0, 0, 0.18);
 }
 .konto-formular input:focus { outline: none; border-color: var(--accent-hell); }
 .konto-formular .btn { margin-top: 6px; padding: 13px; font-size: 16px; }
@@ -908,9 +918,11 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 .panel-grip:active { cursor: grabbing; }
 .panel-grip-strich {
   display: block;
-  width: 36px; height: 4px;
-  border-radius: 2px;
-  background: var(--line);
+  width: 44px; height: 5px;
+  border-radius: var(--r-pill);
+  /* Hell statt dunkel: Auf einer Glasscheibe ist der Griff eine Auflage
+     aus mattem Glas, keine eingefraeste Rille. */
+  background: rgba(255, 255, 255, 0.30);
 }
 .panel-grip:hover .panel-grip-strich { background: var(--muted); }
 
@@ -978,6 +990,19 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
    Zweck - auf-/zuklappen - ganz ohne eigenes JavaScript. Wir entfernen nur
    das Standard-Dreieck davor und ersetzen es durch einen eigenen Pfeil,
    damit es zum Rest des Bedienfelds passt. */
+/* Jeder Abschnitt ist eine eigene kleine Glasplatte, wie die Kartenreihe
+   im Inspirationsbild - vorher waren es nackte Zeilen im Bedienfeld. */
+.accordion {
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  background: var(--glas-hell);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.20);
+}
 .accordion summary {
   margin: 0;
   font-family: var(--schrift-display);
@@ -1010,16 +1035,22 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 
 /* ---------- Ortssuche ---------- */
 .search-wrap { position: relative; }
+/* Als Pille, wie im Inspirationsbild - ein Suchfeld ist das rundeste
+   Element jeder modernen Oberflaeche. Die Fuellung ist helles Glas statt
+   dunkler Vertiefung: Das Feld liegt auf einer Glasplatte, und ein
+   dunkles Loch darin saehe aus wie hineingebohrt. */
 .search-input {
   width: 100%;
-  padding: 11px 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(0, 0, 0, 0.28);
+  padding: 12px 18px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--glas-rand);
+  background: var(--glas-hell);
   color: var(--text);
   font-family: var(--schrift-text);
   font-size: 15px;
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 2px 5px rgba(0, 0, 0, 0.18);
 }
 .search-input:focus { outline: none; border-color: var(--accent-hell); }
 .richtung-select { margin-top: 8px; cursor: pointer; }
@@ -1031,7 +1062,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   backdrop-filter: blur(22px) saturate(160%);
   -webkit-backdrop-filter: blur(22px) saturate(160%);
   border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 12px;
+  border-radius: var(--r-md);
   list-style: none;
   margin: 0;
   padding: 4px;
@@ -1041,8 +1072,8 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 12px 30px rgba(0,0,0,0.5);
 }
 .search-results li {
-  padding: 8px 9px;
-  border-radius: 6px;
+  padding: 8px 10px;
+  border-radius: var(--r-sm);
   cursor: pointer;
   font-size: 13px;
   line-height: 1.35;
@@ -1061,20 +1092,25 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 .search-results li.standort-option:hover { background: rgba(74, 158, 255, 0.12); }
 
 /* ---------- Umschalter (Planungsart) ---------- */
+/* Als PILLE, nach dem Vorbild von Friedrichs Inspirationsbild: Die Rinne
+   ist dunkles Glas, das aktive Segment eine hellere Glasscheibe darin,
+   und die Signalfarbe steckt in Schrift und Symbol des aktiven Segments -
+   nicht in einer gefuellten Flaeche. So bleibt die Farbe ein Zeichen und
+   wird keine Deko. */
 .segmented {
   display: flex;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-  padding: 3px;
-  gap: 3px;
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.26);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: var(--r-pill);
+  padding: 4px;
+  gap: 4px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35);
 }
 .seg {
   flex: 1;
   padding: 9px 0;
-  border: 0;
-  border-radius: var(--r-sm);
+  border: 1px solid transparent;
+  border-radius: var(--r-pill);
   background: transparent;
   color: var(--muted);
   font-family: var(--schrift-display);
@@ -1083,11 +1119,15 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   text-transform: uppercase;
   letter-spacing: 0.05em;
   cursor: pointer;
+  transition: color 0.14s ease, background 0.14s ease;
 }
 .seg.active {
-  background: linear-gradient(to bottom, var(--accent-glanz), var(--accent-tief));
-  color: var(--accent-ink);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 8px rgba(0,0,0,0.35);
+  background: var(--glas-heller);
+  border-color: var(--glas-rand);
+  color: var(--accent-hell);
+  box-shadow:
+    inset 0 1px 0 var(--glas-licht),
+    0 3px 10px rgba(0, 0, 0, 0.35);
 }
 
 /* ---------- Kurvigkeits-Regler ---------- */
@@ -1149,17 +1189,25 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 .btn {
   flex: 1;
   padding: 12px 14px;
-  border: 1px solid transparent;
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: var(--r-sm);
-  background: var(--accent);
+  /* Die Woelbung: oben heller, unten dunkler, dazu Lichtkante und ein
+     weicher Schein in der Knopffarbe. Zusammen liest sich das als
+     gewoelbtes Glas mit Farbe DARUNTER - nicht als angemalte Flaeche. */
+  background: linear-gradient(to bottom, var(--accent-glanz), var(--accent) 55%, var(--accent-tief));
   color: var(--accent-ink);
   font-family: var(--schrift-text);
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.12s ease, border-color 0.12s ease;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.38),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.25),
+    0 6px 18px color-mix(in srgb, var(--accent) 40%, transparent);
+  transition: filter 0.12s ease, transform 0.14s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
-.btn:hover { background: var(--accent-dk); }
+.btn:hover { filter: brightness(1.12); }
+.btn:active { transform: scale(0.97); }
 .btn.ghost {
   background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(14px) saturate(150%);
@@ -1186,9 +1234,10 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 .badge {
   display: inline-block;
   min-width: 18px;
-  padding: 1px 6px;
-  border-radius: 9px;
-  background: var(--surface-2);
+  padding: 1px 8px;
+  border-radius: var(--r-pill);
+  background: var(--glas-heller);
+  border: 1px solid rgba(255, 255, 255, 0.10);
   color: var(--text);
   font-size: 11px;
   text-align: center;
@@ -1200,8 +1249,8 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 9px 11px;
-  border-radius: 12px;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
   margin-bottom: 6px;
   font-size: 13px;
   background: rgba(255, 255, 255, 0.055);
@@ -1261,9 +1310,11 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 /* ---------- Statistik ---------- */
 .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .stat {
-  background: linear-gradient(to bottom, rgba(255,255,255,0.055), rgba(255,255,255,0.015));
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 10px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.065), rgba(255,255,255,0.02));
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: var(--r-sm);
   padding: var(--s2) var(--s3);
   display: flex;
   flex-direction: column;
@@ -1321,7 +1372,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   width: 100%;
   height: 90px;
   margin-top: 6px;
-  border-radius: 12px;
+  border-radius: var(--r-md);
   background: rgba(0, 0, 0, 0.28);
   border: 1px solid rgba(255, 255, 255, 0.09);
   box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35);
@@ -1701,8 +1752,8 @@ body.nav-modus .leaflet-control-container { display: none; }
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-left: 3px solid var(--accent-hell);
   color: var(--text);
-  padding: 10px 14px;
-  border-radius: 12px;
+  padding: 10px 16px;
+  border-radius: var(--r-md);
   font-size: 14px;
   z-index: 1000;
   max-width: 80%;
@@ -1755,9 +1806,18 @@ body.nav-modus .leaflet-control-container { display: none; }
     flex: 0 0 auto;
     height: 45dvh;
     border-right: 0;
-    border-top: 1px solid var(--line);
-    border-radius: 16px 16px 0 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: var(--r-lg) var(--r-lg) 0 0;
     overflow: hidden;   /* rundet auch den Scroll-Inhalt sauber ab, auch beim elastischen Ueberscrollen */
+    /* Die Schublade schiebt sich um eine Eckenrundung UEBER die Karte.
+       Ohne das laege sie schlicht daneben, und ihr Glas haette nichts zu
+       brechen - genau der Unterschied zwischen einer Glasscheibe ueber
+       der Karte und einem schwarzen Kasten darunter. Der Blur an der
+       Oberkante zeigt die Karte verwischt, wie beim Inspirationsbild. */
+    margin-top: calc(-1 * var(--r-lg));
+    position: relative;
+    z-index: 5;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.35);
   }
 
   .panel-grip { display: flex; }
@@ -2406,7 +2466,7 @@ body.nav-modus .leaflet-control-container { display: none; }
 
 .garage-platte {
   padding: var(--s4);
-  border-radius: 20px;
+  border-radius: var(--r-lg);
   background: rgba(255, 255, 255, 0.055);
   backdrop-filter: blur(22px) saturate(160%);
   -webkit-backdrop-filter: blur(22px) saturate(160%);
@@ -2525,13 +2585,16 @@ body.nav-modus .leaflet-control-container { display: none; }
      Feld ueber den Rand hinaus - width und min-width nehmen ihr das. */
   width: 100%;
   min-width: 0;
-  padding: 11px 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.06);
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--glas-rand);
+  background: var(--glas-hell);
   color: var(--text);
   font-family: inherit;
   font-size: 15px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 2px 5px rgba(0, 0, 0, 0.18);
 }
 .garage-dialog-inhalt textarea { resize: vertical; line-height: 1.45; }
 .garage-dialog-inhalt input:focus,
