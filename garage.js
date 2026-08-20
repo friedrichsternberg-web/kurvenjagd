@@ -616,6 +616,12 @@ async function fotoÜbernehmen(datei) {
     dialogFoto = await verkleinereFoto(datei, 900);
     dialogFotoOriginal = dialogFoto;
     zeichneFotoVorschau();
+    /* Und gleich weiter zum Freistellen, ohne dass jemand einen Knopf sucht.
+       Fast jedes Motorradfoto hat einen Hintergrund, der in der Garage nichts
+       zu suchen hat - das Freistellen ist also der Normalfall und nicht die
+       Ausnahme. Wer es doch nicht will, schliesst das Fenster mit dem Kreuz
+       und behaelt sein Foto so, wie es war. */
+    öffneFreisteller(dialogFoto, true);
   } catch {
     showToast('Das Bild konnte nicht gelesen werden.');
   }
@@ -637,14 +643,13 @@ function zeichneFotoVorschau() {
   kasten.innerHTML = `
     <div class="foto-bild"><img src="${dialogFoto}" alt=""></div>
     <div class="foto-knöpfe">
-      <button type="button" class="btn ghost klein" id="btnFreistellen">Hintergrund entfernen</button>
+      <button type="button" class="btn ghost klein" id="btnFreistellen">${verändert ? 'Nachbessern' : 'Hintergrund entfernen'}</button>
       ${verändert ? '<button type="button" class="btn ghost klein" id="btnFotoZurück">Original zurück</button>' : ''}
       <button type="button" class="btn ghost klein" id="btnFotoWeg">Foto entfernen</button>
     </div>`;
   hinweis.innerHTML = verändert
     ? 'Sieht das Ergebnis zerfranst aus, hol dir mit "Original zur&uuml;ck" das unver&auml;nderte Foto wieder.'
-    : 'Das Entfernen des Hintergrunds gelingt nur bei einer ruhigen, einfarbigen '
-      + 'Fl&auml;che dahinter &ndash; Wand, Tor, glatter Himmel.';
+    : 'Der Hintergrund wird beim Aussuchen des Fotos von selbst entfernt.';
 }
 
 
@@ -877,30 +882,25 @@ async function markenVorschlagen(eingabe) {
    94 bis 100 Prozent erhalten. Beim Himmelsverlauf liegt die Ueberdeckung
    mit der Wahrheit bei 91 Prozent (der alte Ansatz kam auf 88, wobei er
    Loecher ins Motorrad riss). Vor Bergen bleibt viel Hintergrund stehen -
-   dafuer gibt es den Zauberstab.
+   was dann noch steht, wird von Hand wegradiert.
 
    Hoehere Schwellen tragen mehr ab, fressen aber die Maschine an: bei 22
    sind es beim schwarzen Motorrad auf Asphalt nur noch 49 Prozent, bei 34
    nur 27. Deshalb steht die Automatik bewusst auf der sicheren Seite.
 
    ---------------------------------------------------------------------------
-   2. DER ZAUBERSTAB: Farbanker ab der Tippstelle
+   2. WARUM DER ZAUBERSTAB WIEDER RAUS IST
 
-   Fuer den Rest reicht die Kantenstaerke nicht. In einer Wiese liegt JEDE
-   Kante ueber der Schwelle, die Front kommt vom Tipppunkt gar nicht weg;
-   dreht man die Schwelle hoch, springt sie im selben Moment auch ueber die
-   Motorradkante. Gemessen: bei Schwelle 40 bewirkt sie fast nichts, bei 90
-   bleiben vom Motorrad noch 7 Prozent. Es gibt kein brauchbares Fenster.
+   Hier stand einmal ein zweites Werkzeug: antippen, und was farblich
+   zusammenhaengt, verschwindet. Es funktionierte auch, gemessen blieben bei
+   Toleranz 28 in allen schweren Faellen 94 bis 100 Prozent des Motorrads
+   stehen.
 
-   Was fehlt, ist die Farbe. Wer auf die Wiese tippt, sagt "das ist
-   Hintergrund" - also wird von dort aus genommen, was zusammenhaengt UND
-   farblich nah an der angetippten Stelle liegt. Kantenstaerke bremst
-   zusaetzlich.
-
-   Gemessen mit Toleranz 28: In allen vier schweren Faellen bleiben 94 bis
-   100 Prozent des Motorrads stehen. Bei 40 sind zwei Faelle besser, aber
-   das schwarze Motorrad auf dunklem Asphalt bricht auf 7 Prozent ein.
-   Deshalb ist 28 die Voreinstellung und der Regler geht bis 55.
+   Trotzdem ist es raus, und das ist eine Entscheidung ueber Bedienung, nicht
+   ueber Rechnerei: Seit die Automatik ueber ein Modell laeuft, das WEISS, wie
+   ein Motorrad aussieht, bleibt so wenig stehen, dass sich der Aufwand nicht
+   lohnt - erst ein Werkzeug waehlen, dann einen Regler verstehen, dann
+   zielen. Radieren kann jeder sofort.
 
    ---------------------------------------------------------------------------
    3. WAS KEIN VERFAHREN KANN
@@ -926,7 +926,6 @@ const FREI_ANZEIGEKANTE = 1000;
 const FREI_RECHENKANTE  = 480;
 
 const FREI_AUTOMATIK_SCHWELLE = 14;   // gemessen: sicherster Wert
-const FREI_ZAUBER_STANDARD    = 28;   // gemessen: haelt in allen Testfaellen
 
 // Alles, was der Freisteller gerade in der Hand hat.
 let frei = null;
@@ -1183,19 +1182,34 @@ async function modellMaske() {
 
 /* --- Der Freisteller als Werkzeug ------------------------------------------
    Ein eigenes Fenster ueber dem Dialog. Der Nutzer sieht sein Foto auf einem
-   Schachbrett - dort, wo es durchsichtig ist, scheint das Muster durch - und
-   hat vier Werkzeuge:
+   Schachbrett - dort, wo es durchsichtig ist, scheint das Muster durch.
 
-     Automatik      raeumt auf einen Schlag auf, was sicher Hintergrund ist
-     Zauberstab     antippen, der zusammenhaengende Bereich verschwindet
-     Radierer       wegwischen, was noch stoert
-     Zurueckholen   versehentlich Weggenommenes wiederholen
+   Der Ablauf ist bewusst so kurz wie moeglich: Wer ein Foto aussucht, sieht
+   sein freigestelltes Motorrad, ohne vorher irgendetwas anzutippen. Die
+   Automatik laeuft von selbst los. Erst danach, und nur wenn noetig, gibt es
+   noch etwas zu tun:
 
-   Alles ist rueckgaengig zu machen. Das ist keine Bequemlichkeit, sondern
-   Voraussetzung: Ein Zauberstab, der einmal zu viel nimmt, waere ohne
-   Rueckgaengig ein Grund, das Werkzeug nie wieder anzufassen. */
+     Radierer       wegwischen, was das Modell stehengelassen hat
+     Zurueckholen   wieder sichtbar machen, was zu viel weg ist
+     Rueckgaengig   den letzten Strich zuruecknehmen
 
-function öffneFreisteller(datenUrl) {
+   Der frueher hier stehende Zauberstab ist raus. Er hat den Nutzer vor eine
+   Entscheidung gestellt (welches Werkzeug, welche Empfindlichkeit), bevor er
+   ueberhaupt ein Ergebnis gesehen hatte - und seit die Automatik ueber ein
+   Modell laeuft, war er die schlechtere Antwort auf jede Frage.
+
+   sofortAutomatik sagt, ob gleich beim Oeffnen gerechnet werden soll. Beim
+   Aussuchen eines Fotos ja; wer spaeter nur nachbessern will, bekommt seinen
+   Stand so, wie er ihn verlassen hat. */
+
+// Der Alphakanal des Bildes als Startmaske. 255 heisst bleibt, 0 heisst weg.
+function maskeAusDurchsichtigkeit(farben, anzahl) {
+  const maske = new Uint8Array(anzahl);
+  for (let s = 0; s < anzahl; s++) maske[s] = farben[s * 4 + 3];
+  return maske;
+}
+
+function öffneFreisteller(datenUrl, sofortAutomatik = false) {
   const bild = new Image();
   bild.onload = () => {
     const faktor = Math.min(1, FREI_ANZEIGEKANTE / Math.max(bild.naturalWidth, bild.naturalHeight));
@@ -1221,7 +1235,13 @@ function öffneFreisteller(datenUrl) {
       quelle: datenUrl,
       breite, hoehe,
       farben: bilddaten.data,          // unveraendert, hieraus wird gezeichnet
-      maske: new Uint8Array(breite * hoehe).fill(255),   // 255 = bleibt
+      /* Die Maske startet MIT DER DURCHSICHTIGKEIT DES FOTOS, nicht mit
+         "alles bleibt". Der Unterschied faellt erst beim zweiten Mal auf:
+         Wer ein schon freigestelltes Foto nochmal oeffnet, um nachzubessern,
+         bekaeme sonst den ganzen Hintergrund als schwarze Flaeche zurueck -
+         denn durchsichtige Bildpunkte lesen sich als Schwarz, und die Maske
+         haette sie wieder auf sichtbar gesetzt. */
+      maske: maskeAusDurchsichtigkeit(bilddaten.data, breite * hoehe),
       klein: {
         breite: kBreite, hoehe: kHoehe,
         farben: kleinLeinwand.getContext('2d', { willReadFrequently: true })
@@ -1229,8 +1249,7 @@ function öffneFreisteller(datenUrl) {
         kanten: null,                  // erst bei Bedarf, das Rechnen dauert
       },
       verlauf: [],                     // fuer Rueckgaengig
-      werkzeug: 'zauberstab',
-      toleranz: FREI_ZAUBER_STANDARD,
+      werkzeug: 'radierer',
       pinsel: 26,
       zeichnetGerade: false,
     };
@@ -1240,6 +1259,7 @@ function öffneFreisteller(datenUrl) {
     document.getElementById('freiFenster').hidden = false;
     freiWerkzeugAnzeigen();
     freiZeichnen();
+    if (sofortAutomatik) freiAutomatik();
   };
   bild.onerror = () => showToast('Das Bild konnte nicht geöffnet werden.');
   bild.src = datenUrl;
@@ -1256,16 +1276,6 @@ function freiKantenkarte() {
   const k = frei.klein;
   if (!k.kanten) k.kanten = freiKanten(k.farben, k.breite, k.hoehe);
   return k.kanten;
-}
-
-/* Kantenstärke an einer Stelle der GROSSEN Maske nachschlagen. Die Karte
-   liegt verkleinert vor; hier wird umgerechnet. Nächster Nachbar reicht -
-   die Kantenkarte ist ein weiches Feld, da fällt Zwischenrechnen nicht auf. */
-function freiKanteBei(x, y) {
-  const k = frei.klein;
-  const kx = Math.min(k.breite - 1, (x * k.breite / frei.breite) | 0);
-  const ky = Math.min(k.hoehe - 1, (y * k.hoehe / frei.hoehe) | 0);
-  return freiKantenkarte()[ky * k.breite + kx];
 }
 
 // Zeichnet das Bild mit der aktuellen Maske. Ein Ausschnitt reicht, wenn nur
@@ -1336,7 +1346,7 @@ async function freiAutomatik() {
     freiAufräumen();
     freiZeichnen();
     const weg = zähleDurchsichtig();
-    showToast(`Freigestellt, ${weg} % entfernt. Reste mit dem Zauberstab, Feinheiten mit den Pinseln.`);
+    showToast(`Freigestellt, ${weg} % entfernt. Reste kannst du wegradieren.`);
   } catch (fehler) {
     // Ohne Netz oder mit blockierter Bibliothek: das klassische Verfahren.
     showToast('Modell nicht erreichbar, nehme das einfache Verfahren.');
@@ -1387,101 +1397,14 @@ function freiAutomatikKlassisch() {
   const weg = zähleDurchsichtig();
   const dazu = einzelteile > 0 ? ` ${einzelteile} freistehende Teile mit weg.` : '';
   showToast(weg < 4
-    ? 'Kaum etwas gefunden. Nimm den Zauberstab und wisch über den Hintergrund.'
-    : `Automatik fertig, ${weg} % entfernt.${dazu} Den Rest mit dem Zauberstab.`);
+    ? 'Kaum etwas gefunden. Radier den Hintergrund von Hand weg.'
+    : `Automatik fertig, ${weg} % entfernt.${dazu} Den Rest wegradieren.`);
 }
 
 function zähleDurchsichtig() {
   let weg = 0;
   for (let s = 0; s < frei.maske.length; s++) if (frei.maske[s] < 128) weg++;
   return Math.round(100 * weg / frei.maske.length);
-}
-
-/* Der Zauberstab. Von der angetippten Stelle aus wird genommen, was
-   zusammenhaengt UND farblich nah dran liegt; starke Kanten bremsen
-   zusaetzlich.
-
-   Warum hier die FARBE entscheidet und nicht wie bei der Automatik die Kante:
-   In einer Wiese liegt jede Kante ueber jeder brauchbaren Schwelle - die
-   Front kaeme gar nicht vom Fleck. Wer hintippt, sagt aber "das ist
-   Hintergrund", und damit ist die Farbe der verlaessliche Anker. */
-/* Wiederholt den letzten Zauberstab-Strich mit der jetzt eingestellten
-   Empfindlichkeit. Damit wirkt der Regler sofort, statt erst beim naechsten
-   Tippen - was Friedrich zu Recht als "passiert nichts" gemeldet hat.
-
-   Moeglich wird das dadurch, dass vor jedem Strich ein Abzug der Maske und
-   die Liste der beruehrten Stellen aufgehoben werden. */
-function freiZauberNachziehen() {
-  if (!frei || !frei.letzterStrich) return;
-  frei.maske.set(frei.letzterStrich.maskeVorher);
-  for (const punkt of frei.letzterStrich.stellen) {
-    freiZauberstab(punkt.x, punkt.y, false, false);
-  }
-  freiAufräumen(true);
-}
-
-function freiZauberstab(x, y, selbstMerken = true, aufzeichnen = true) {
-  const { breite, hoehe, farben, maske, toleranz } = frei;
-  x = Math.round(x); y = Math.round(y);
-  if (x < 0 || y < 0 || x >= breite || y >= hoehe) return;
-
-  // Beim Wischen sichert der Aufrufer einmal vorher, nicht bei jedem Schritt.
-  if (selbstMerken) freiMerken();
-  if (aufzeichnen && frei.letzterStrich) frei.letzterStrich.stellen.push({ x, y });
-  const start = y * breite + x;
-  const r0 = farben[start*4], g0 = farben[start*4+1], b0 = farben[start*4+2];
-  const grenzeQ = toleranz * toleranz * 9;
-
-  /* Die Empfindlichkeit steuert BEIDES: wie weit die Farbe abweichen darf und
-     wie starke Kanten überlaufen werden dürfen.
-
-     Vorher stand die Kantenbremse fest, und genau das war der Grund, warum
-     der Regler sich oft überhaupt nicht auswirkte: Nicht die Farbe war die
-     Grenze, sondern die Kante - man drehte an einer Schraube, die gar nicht
-     klemmte.
-
-     Die Bremse ist bewusst großzügig angesetzt. Der Grund: Solange SIE die
-     Grenze ist, hat der Nutzer gar keinen Einfluss - er dreht dann an der
-     Farbe, während die Kante hält. Nachgemessen an den Testfällen ändert ein
-     großzügigerer Wert dort nichts (die Farbe entscheidet ohnehin), an einem
-     Bergfoto dagegen alles.
-
-     Nachgemessen: Bei 28 bleiben mindestens 94 Prozent des Motorrads stehen.
-     Ab 36 sind es 80, ab 45 nur noch 16. Deshalb 28 als Voreinstellung. */
-  const KANTE_MAX = 180 + toleranz * 12;
-
-  if (maske[start] < 128) {
-    // Hier ist schon nichts mehr. Den aufgezeichneten Strich verwerfen, sonst
-    // zöge der Regler danach einen älteren nach und es sähe nach Zufall aus.
-    if (aufzeichnen && frei.letzterStrich && frei.letzterStrich.stellen.length === 0) {
-      frei.letzterStrich = null;
-    }
-    return;
-  }
-
-  const genommen = new Uint8Array(breite * hoehe);
-  const stapel = [start];
-  genommen[start] = 1;
-
-  while (stapel.length) {
-    const s = stapel.pop();
-    maske[s] = 0;
-    const sx = s % breite, sy = (s - sx) / breite;
-    const nachbarn = [];
-    if (sx > 0)          nachbarn.push(s-1);
-    if (sx < breite - 1) nachbarn.push(s+1);
-    if (sy > 0)          nachbarn.push(s-breite);
-    if (sy < hoehe - 1)  nachbarn.push(s+breite);
-    for (const n of nachbarn) {
-      if (genommen[n]) continue;
-      const nx = n % breite, ny = (n - nx) / breite;
-      if (freiKanteBei(nx, ny) > KANTE_MAX) continue;
-      const dr = farben[n*4] - r0, dg = farben[n*4+1] - g0, db = farben[n*4+2] - b0;
-      if (2*dr*dr + 4*dg*dg + 3*db*db > grenzeQ) continue;
-      genommen[n] = 1; stapel.push(n);
-    }
-  }
-  freiZeichnen();
 }
 
 /* Zieht einen Strich von der letzten zur jetzigen Stelle.
@@ -1529,14 +1452,13 @@ function freiPinseln(x, y, löschen) {
 
    Gezählt wird über zusammenhängende Bereiche, nicht über einzelne Punkte:
    Ein Fleck aus dreißig Punkten mitten im Nichts ist Müll, dieselben dreißig
-   Punkte am Rand des Motorrads sind ein Bremshebel. */
-/* Kleinkram wegräumen.
+   Punkte am Rand des Motorrads sind ein Bremshebel.
 
    ACHTUNG, hier steckte ein Fehler, der wie ein kaputtes Werkzeug aussah:
    Diese Funktion drehte JEDEN zusammenhängenden Bereich unter der Mindest-
-   größe um - auch einen frisch durchsichtig gemachten. Ein Zauberstab-Tipper,
-   der eine kleine Fläche nahm, wurde damit sofort wieder zugemalt. Für den
-   Nutzer sah das aus, als passiere gar nichts.
+   größe um - auch einen frisch durchsichtig gemachten. Wer von Hand eine
+   kleine Fläche wegnahm, sah sie sofort wieder zugemalt, und für ihn sah das
+   aus, als passiere gar nichts.
 
    Deshalb zwei getrennte Richtungen:
 
@@ -1661,11 +1583,6 @@ function freiWerkzeugAnzeigen() {
   document.querySelectorAll('[data-werkzeug]').forEach(k => {
     k.classList.toggle('active', k.dataset.werkzeug === frei.werkzeug);
   });
-  // Der Toleranzregler gehoert zum Zauberstab, die Pinselgroesse zu den
-  // Pinseln. Beides gleichzeitig zu zeigen waere nur Gedraenge.
-  const istZauber = frei.werkzeug === 'zauberstab';
-  document.getElementById('freiToleranzZeile').hidden = !istZauber;
-  document.getElementById('freiPinselZeile').hidden = istZauber;
   freiKnöpfeAnzeigen();
 }
 
@@ -1856,22 +1773,6 @@ verkabele('btnFreiFertig', 'click', () => frei && freiÜbernehmen());
 verkabele('btnFreiAutomatik', 'click', () => frei && freiAutomatik());
 verkabele('btnFreiZurück', 'click', () => frei && freiZurück());
 
-let toleranzWartet = null;
-verkabele('freiToleranz', 'input', e => {
-  if (!frei) return;
-  frei.toleranz = Number(e.target.value);
-  document.getElementById('freiToleranzWert').value = e.target.value;
-  /* Gedrosselt: Beim Ziehen am Regler kommen Dutzende Meldungen je Sekunde,
-     und jede loest eine Neuberechnung aus.
-
-     Bewusst ueber eine Zeitschaltung und NICHT ueber requestAnimationFrame:
-     Das feuert nur, wenn die Seite auch zeichnet. Liegt der Tab im
-     Hintergrund oder ist das Fenster verdeckt, bleibt es stumm - und dann
-     wirkt der Regler scheinbar nicht. Genau darauf bin ich beim Pruefen
-     hereingefallen. */
-  clearTimeout(toleranzWartet);
-  toleranzWartet = setTimeout(freiZauberNachziehen, 60);
-});
 verkabele('freiPinsel', 'input', e => {
   if (!frei) return;
   frei.pinsel = Number(e.target.value);
@@ -1899,35 +1800,14 @@ verkabele('freiLeinwand', 'pointerdown', ereignis => {
   frei.letzterPunkt = { x, y };
   ereignis.currentTarget.setPointerCapture(ereignis.pointerId);
 
-  if (frei.werkzeug === 'zauberstab') {
-    // Abzug und Stellen aufheben, damit der Regler den Strich nachziehen kann.
-    frei.letzterStrich = { maskeVorher: new Uint8Array(frei.maske), stellen: [] };
-    freiZauberstab(x, y, false);
-  } else {
-    freiPinseln(x, y, frei.werkzeug === 'radierer');
-  }
+  freiPinseln(x, y, frei.werkzeug === 'radierer');
 });
 
 verkabele('freiLeinwand', 'pointermove', ereignis => {
   if (!frei || !frei.zeichnetGerade) return;
   const { x, y } = freiPunkt(ereignis);
 
-  if (frei.werkzeug === 'zauberstab') {
-    /* Der Zauberstab arbeitet auch beim ZIEHEN weiter und nimmt unterwegs
-       neue Farben auf. Das ist der Unterschied zwischen zwanzigmal tippen
-       und einmal wischen: An einer Felswand steckt Grau UND Gruen, und ein
-       einzelner Farbanker erwischt immer nur eines davon.
-
-       Gedrosselt auf einen Schritt je acht Punkte Weg - sonst rechnet er bei
-       jeder Zwischenmeldung des Fingers neu und die Anzeige haengt. */
-    const weg = Math.hypot(x - frei.letzterPunkt.x, y - frei.letzterPunkt.y);
-    if (weg < 8) return;
-    frei.letzterPunkt = { x, y };
-    freiZauberstab(x, y, false);
-    return;
-  }
-
-  // Beim Pinsel den Weg seit der letzten Meldung ausmalen, nicht nur den
+  // Den Weg seit der letzten Meldung ausmalen, nicht nur den
   // Endpunkt tupfen - siehe freiPinselStrich().
   freiPinselStrich(frei.letzterPunkt.x, frei.letzterPunkt.y, x, y, frei.werkzeug === 'radierer');
   frei.letzterPunkt = { x, y };
@@ -1941,8 +1821,6 @@ for (const art of ['pointerup', 'pointercancel']) {
   verkabele('freiLeinwand', art, () => {
     if (!frei || !frei.zeichnetGerade) return;
     frei.zeichnetGerade = false;
-    // Erst am Ende des Strichs aufräumen, siehe Begründung an freiAufräumen().
-    if (frei.werkzeug === 'zauberstab') freiAufräumen(true);
   });
 }
 

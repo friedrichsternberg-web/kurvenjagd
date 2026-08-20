@@ -38,10 +38,10 @@
        durchgehend alte Version, weil die Seite dann Elemente enthält, die
        das Skript noch gar nicht kennt.
 
-       Für den Browser ist "app.js?v=23" eine andere Adresse als "app.js?v=22",
+       Für den Browser ist "app.js?v=24" eine andere Adresse als "app.js?v=22",
        er holt sie also frisch. Wichtig: BEI JEDER VERÖFFENTLICHUNG die Zahl
        an allen drei Stellen um eins erhöhen. -->
-  <link rel="stylesheet" href="style.css?v=23">
+  <link rel="stylesheet" href="style.css?v=24">
 </head>
 <body>
 
@@ -144,10 +144,6 @@
       <symbol id="icon-zauber" viewBox="0 0 24 24">
         <path d="M4.5 19.5 15 9"/><path d="m15.6 8.4 2.4-2.4a1.7 1.7 0 0 1 2.4 2.4L18 10.8"/>
         <path d="M6.5 3.5v3M5 5h3M17.5 15.5v3M16 17h3"/>
-      </symbol>
-      <symbol id="icon-tippen" viewBox="0 0 24 24">
-        <path d="M9 11V5.4a1.7 1.7 0 0 1 3.4 0V11"/>
-        <path d="M12.4 11.6V9.9a1.6 1.6 0 0 1 3.2 0v1.9M15.6 12.2v-1a1.6 1.6 0 0 1 3.2 0v5.1a4.5 4.5 0 0 1-4.5 4.5h-2.6a4 4 0 0 1-3.2-1.6l-2.8-3.8a1.6 1.6 0 0 1 2.5-2L9 14.5"/>
       </symbol>
       <symbol id="icon-radierer" viewBox="0 0 24 24">
         <path d="m14.6 4.4 5 5a1.5 1.5 0 0 1 0 2.1l-8 8H6.4l-3-3a1.5 1.5 0 0 1 0-2.1l9-9a1.5 1.5 0 0 1 2.2 0Z"/>
@@ -796,11 +792,10 @@
        Schachbrett, damit man sieht, wo es durchsichtig ist - ohne das koennte
        man das Ergebnis gar nicht beurteilen.
 
-       Vier Werkzeuge: Automatik raeumt auf einen Schlag weg, was sicher
-       Hintergrund ist. Der Zauberstab nimmt den angetippten Bereich. Die
-       beiden Pinsel sind fuer das, was kein Verfahren automatisch trennen
-       kann - ein schwarzes Motorrad vor dunklem Asphalt zum Beispiel hat
-       streckenweise gar keine Kante. ===== -->
+       Die Automatik laeuft beim Oeffnen von selbst los, hier ist also nichts
+       anzutippen. Die beiden Pinsel bleiben fuer das, was kein Verfahren
+       automatisch trennen kann - ein schwarzes Motorrad vor dunklem Asphalt
+       zum Beispiel hat streckenweise gar keine Kante. ===== -->
   <div id="freiFenster" class="frei-fenster" hidden>
     <header class="frei-kopf">
       <button class="glas-rund klein" id="btnFreiAbbrechen" title="Abbrechen" aria-label="Abbrechen">&times;</button>
@@ -813,12 +808,7 @@
     </div>
 
     <div class="frei-regler">
-      <div class="frei-zeile" id="freiToleranzZeile">
-        <label for="freiToleranz">Empfindlichkeit</label>
-        <input type="range" id="freiToleranz" class="slider" min="10" max="55" step="1" value="28">
-        <output id="freiToleranzWert">28</output>
-      </div>
-      <div class="frei-zeile" id="freiPinselZeile" hidden>
+      <div class="frei-zeile" id="freiPinselZeile">
         <label for="freiPinsel">Pinselgr&ouml;&szlig;e</label>
         <input type="range" id="freiPinsel" class="slider" min="8" max="90" step="2" value="26">
         <output id="freiPinselWert">26</output>
@@ -828,9 +818,6 @@
     <div class="frei-werkzeuge">
       <button class="frei-werkzeug" id="btnFreiAutomatik" title="Automatik">
         <svg class="ic gross"><use href="#icon-zauber"></use></svg><span>Automatik</span>
-      </button>
-      <button class="frei-werkzeug" data-werkzeug="zauberstab" title="Zauberstab">
-        <svg class="ic gross"><use href="#icon-tippen"></use></svg><span>Zauberstab</span>
       </button>
       <button class="frei-werkzeug" data-werkzeug="radierer" title="Radierer">
         <svg class="ic gross"><use href="#icon-radierer"></use></svg><span>Radierer</span>
@@ -868,12 +855,12 @@
        ein Foto an der falschen Stelle landet. -->
   <input type="file" id="garageFotoEingabe" accept="image/*" hidden>
 
-  <script src="app.js?v=23"></script>
+  <script src="app.js?v=24"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=23"></script>
+  <script src="konto.js?v=24"></script>
   <!-- Nach app.js, weil die Garage verkleinereFoto() und showToast() von
        dort benutzt. -->
-  <script src="garage.js?v=23"></script>
+  <script src="garage.js?v=24"></script>
 </body>
 </html>
