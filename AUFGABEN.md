@@ -113,22 +113,41 @@ sobald die Hülle steht.
 
 ## Für die spätere Webseite (Querformat)
 
-### 9. Rechenteil vom Bedienteil trennen
+### 9. Rechenteil vom Bedienteil trennen — ERLEDIGT
 
-`app.js` ist 3000 Zeilen und mischt beides. Ein paar Funktionen sind reine
-Rechnerei ohne jeden Bezug zur Oberfläche und wären in der Webseite
-**unverändert** brauchbar:
+Der Rechenteil steht jetzt in **`kern.js`** (510 Zeilen), `app.js` ist von
+3054 auf 2595 Zeilen geschrumpft. Umgezogen sind:
 
-- Kurvigkeit messen (Abschnitt 5)
-- `bearing()`, `destinationPoint()`, Entfernungen
-- GPX bauen (Abschnitt 8)
-- Rundtour-Erzeugung (Abschnitt 5b)
+- Kurvigkeit messen: `curviness()`, `thinCoords()`
+- Kugelrechnung: `bearing()`, `destinationPoint()`, `haversine()`,
+  `sortByBearing()`, `streckenlänge()`
+- Sackgassen erkennen: `findeSackgassen()`, `bewerteSackgassen()`,
+  `sackgassenMeter()`, `durchgangsPunkte()`, `besterDurchgangspunkt()`,
+  `sackgassenSchuldige()`
+- Rundtour-Punkte verteilen: `randomLoopPoints()`, `ersatzpunkt()`,
+  `abseitsGemiedenerZonen()`, `skalierterPunkt()`, `geschätzteFixkostenKm()`
+- GPX bauen: `baueGpx()`
 
-Wandern sie in eine eigene Datei, benutzt die Webseite dieselbe. Bleiben sie,
-wo sie sind, wird jede davon abgeschrieben – und ab dann driften beide
-auseinander, ohne dass es jemand merkt.
+`kern.js` wird in `index.html` **vor** `app.js` geladen. Es gibt keine
+Module, die Funktionen bleiben global, kein einziger Aufruf hat sich
+geändert. Die Webseite lädt später dieselbe Datei und rechnet damit exakt
+wie die App.
 
-**Ist ein größerer Umbau, deshalb bewusst noch nicht gemacht.**
+Bewusst in `app.js` geblieben, weil sie Eingabefelder lesen oder auf die
+Karte zeichnen:
+
+- `generateRoundTrip()` — die Suchschleife selbst. Sie ist der Kandidat für
+  den nächsten Schritt: Als `sucheRundtour(start, zielKm, profil, melde)`
+  mit Parametern statt `state` und `document` wäre auch sie in der Webseite
+  brauchbar. Heute hängt sie an `setBusyText()`, `showToast()`,
+  `drawRoutes()` und `showStats()`.
+- `pickBestRoute()` — rein rechnend und eigentlich auch ein Kandidat, steht
+  aber in Abschnitt 4 zwischen `fetchRoute()` und `brouterUrl()`, und die
+  beiden hängen an `state.optionen`.
+
+Die Regel, damit die Trennung trägt: **Wer in `kern.js` `document`, `map`,
+`state`, `showToast` oder ein Leaflet-Objekt anfasst, macht die Datei für
+die Webseite unbrauchbar.** Der Kopf von `kern.js` sagt das auch.
 
 ### 10. Geteilte Routen brauchen eine Zielseite
 
@@ -152,7 +171,8 @@ soll.
 
 ## Kleinkram, der irgendwann nervt
 
-- **Versionsnummer.** `?v=` steht an acht Stellen in `index.html` und wird
+- **Versionsnummer.** `?v=` steht an neun Stellen in `index.html` (seit
+  `kern.js` dazugekommen ist) und wird
   von Hand erhöht. Genau dieser Fehler ist beim Bauen schon passiert: Die
   Datei war geändert, die Nummer nicht, der Browser lieferte die alte
   Fassung. Auf einem richtigen Webhoster ersetzen Cache-Kopfzeilen das.
