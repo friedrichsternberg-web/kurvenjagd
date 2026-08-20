@@ -364,6 +364,29 @@ function garageAktiv() {
 }
 
 
+/* --- Von Hand nachjustieren -------------------------------------------------
+   Die Erkennung trifft die meisten Fotos, aber keine Erkennung trifft alle.
+   Deshalb hat der Nutzer das letzte Wort: drei Regler fuer Groesse, Hoehe
+   und Neigung, die auf das automatische Ergebnis DRAUFGERECHNET werden.
+
+   Wichtig ist das Draufrechnen: Die Regler ersetzen die Automatik nicht,
+   sie verschieben sie nur. Dadurch bleibt eine Justierung auch dann
+   sinnvoll, wenn sich die Anzeige aendert - anderes Geraet, gedrehtes
+   Fenster, spaeter eine andere Garage.
+
+   Gespeichert wird je Motorrad unter "fein". waehrendJustierung haelt die
+   Werte, solange die Regler offen sind - erst "Fertig" schreibt sie fest. */
+
+const FEIN_STANDARD = { groesse: 1, hoehe: 0, winkel: 0 };
+let währendJustierung = null;
+
+function feinWerte() {
+  if (währendJustierung) return währendJustierung;
+  const motorrad = motorradAktiv();
+  return (motorrad && motorrad.fein) ? motorrad.fein : FEIN_STANDARD;
+}
+
+
 /* --- Wo steht die Maschine im Bild? ----------------------------------------
 
    HIER LAG DER FEHLER, den Friedrich gemeldet hat: Das Motorrad schwebte
@@ -501,53 +524,87 @@ function standflaeche(rahmen, bildBreite, bildHoehe) {
   const bis = Math.ceil(rahmen.rechts * anzahl);
   if (bis - von < 8) return null;      // zu schmal, um zwei Raeder zu trennen
 
-  /* DIE BEIDEN RAEDER FINDEN. Zwei Anlaeufe davor taugten nicht:
+  /* DIE BEIDEN RAEDER FINDEN - dritter Anlauf, und diesmal ueber eine
+     Eigenschaft, die wirklich nur die Standlinie hat.
 
-     "Tiefster Punkt jeder Haelfte" fand bei verkanteten Aufnahmen zweimal
-     dasselbe Rad. "Tiefster Punkt insgesamt, dann tiefster des Rests" fand
-     bei Friedrichs Heckansicht statt des fernen Vorderrads den naechsten
-     tief haengenden Anbau - bei starker Perspektive liegt ein Auspuff NAH
-     an der Kamera tiefer im Bild als ein Reifen WEIT weg von ihr.
+     Die ersten beiden Anlaeufe suchten TIEFE PUNKTE: erst je Haelfte, dann
+     in den Aussenbereichen. Beide sind an Friedrichs Foto gescheitert, denn
+     dort haengt ein Helm am Lenker - rund wie ein Rad und tiefer im Bild
+     als das ferne Vorderrad. Jede Suche nach "tief" findet frueher oder
+     spaeter den Helm.
 
-     Was immer gilt, ist etwas anderes: Die Raeder sind die aeusseren Enden
-     der Maschine. Also wird je ein Rad im linken und im rechten AUSSENDRITTEL
-     des Inhalts gesucht - dort haengt nichts tiefer als der Reifen, denn
-     ausserhalb der Reifen kommt nichts mehr. */
+     Was den Helm von den Raedern unterscheidet, ist nicht seine Form und
+     nicht seine Tiefe, sondern seine Rolle: Die Maschine STEHT nicht auf
+     ihm. Die Linie durch die beiden Radaufstandspunkte traegt die gesamte
+     Silhouette - unter ihr haengt hoechstens Kleinkram um wenige Punkte
+     (ein baumelnder Helm, ein Riemen). Jede andere Linie, etwa die vom
+     Hinterrad zum Helm, laesst ein ganzes Rad darunter herausragen.
+
+     Also: tiefe Stellen als Kandidaten sammeln, alle Paare durchprobieren,
+     und das Paar nehmen, unter dessen Linie am wenigsten herausragt. Bei
+     Gleichstand das breitere Paar - Raeder stehen weit auseinander. */
 
   const spanne = bis - von;
-  // Wie weit um die tiefste Stelle herum noch zum selben Rad gehoert.
-  // Schmal, sonst mittelt man den Reifen mit dem Motorblock daneben.
-  const nahbereich = Math.max(2, Math.round(spanne * 0.12));
-  // Das Suchdrittel ist grosszuegig bemessen (40 Prozent), weil das ferne
-  // Rad einer Schraegansicht deutlich innerhalb der Bildkante liegen kann.
-  const randbereich = Math.max(3, Math.round(spanne * 0.40));
+  const nahbereich = Math.max(2, Math.round(spanne * 0.10));
 
-  function tiefsterBereich(erlaubt) {
-    let tiefste = -1, tiefsteStelle = -1;
-    for (let i = von; i < bis; i++) {
-      if (!erlaubt(i) || boden[i] < 0) continue;
-      if (boden[i] > tiefste) { tiefste = boden[i]; tiefsteStelle = i; }
+  // Kandidaten: oertliche Tiefstpunkte des Profils, mit Mindestabstand.
+  const kandidaten = [];
+  for (let i = von; i < bis; i++) {
+    if (boden[i] < 0) continue;
+    let istTiefster = true;
+    for (let k = Math.max(von, i - nahbereich); k < Math.min(bis, i + nahbereich + 1); k++) {
+      if (boden[k] > boden[i]) { istTiefster = false; break; }
     }
-    if (tiefsteStelle < 0) return null;
-    let summeX = 0, summeY = 0, zahl = 0;
-    for (let i = von; i < bis; i++) {
-      if (!erlaubt(i) || boden[i] < 0 || boden[i] < tiefste - 0.02) continue;
-      // Nur was in der Naehe der tiefsten Stelle liegt, gehoert zu diesem Rad.
-      if (Math.abs(i - tiefsteStelle) > nahbereich) continue;
-      summeX += (i + 0.5) / anzahl; summeY += boden[i]; zahl++;
+    if (!istTiefster) continue;
+    const letzter = kandidaten[kandidaten.length - 1];
+    if (letzter && i - letzter.i < nahbereich) {
+      if (boden[i] > letzter.tiefe) { letzter.i = i; letzter.tiefe = boden[i]; }
+      continue;
     }
-    return zahl ? { x: summeX / zahl, y: summeY / zahl, stelle: tiefsteStelle } : null;
+    kandidaten.push({ i, tiefe: boden[i] });
   }
+  if (kandidaten.length < 2) return null;
 
-  const hinten = tiefsterBereich(i => i < von + randbereich);
-  const vorne  = tiefsterBereich(i => i >= bis - randbereich);
-  if (!hinten || !vorne) return null;
+  // Um jeden Kandidaten den Aufstandspunkt mitteln, gegen Ausreisser.
+  const punkte = kandidaten.map(k => {
+    let sx = 0, sy = 0, n = 0;
+    for (let i = Math.max(von, k.i - nahbereich); i < Math.min(bis, k.i + nahbereich); i++) {
+      if (boden[i] < 0 || boden[i] < k.tiefe - 0.02) continue;
+      sx += (i + 0.5) / anzahl; sy += boden[i]; n++;
+    }
+    return n ? { x: sx / n, y: sy / n, i: k.i } : null;
+  }).filter(Boolean);
 
-  /* Liegen die beiden nah beieinander - die Suchbereiche ueberlappen sich in
-     der Mitte -, ist die Messung nicht zu gebrauchen. Lieber gar keine
-     Neigung annehmen als eine falsche: Eine unnoetige Drehung faellt sofort
-     auf, eine fehlende kaum. */
-  if ((vorne.x - hinten.x) * anzahl < spanne * 0.3) return null;
+  /* Jedes Paar bewerten: Wie viel des Profils ragt UNTER die Linie durch
+     die beiden Punkte hinaus? Zwei Prozent der Bildhoehe sind frei - so
+     viel darf ein Helmriemen baumeln, ohne die Wertung zu verderben. */
+  const TOLERANZ = 0.02;
+  let beste = null;
+  for (let a = 0; a < punkte.length; a++) {
+    for (let b = a + 1; b < punkte.length; b++) {
+      const p1 = punkte[a], p2 = punkte[b];
+      const breite = Math.abs(p2.x - p1.x) * anzahl;
+      if (breite < spanne * 0.30) continue;      // Raeder stehen weit auseinander
+
+      let ueberhang = 0;
+      for (let i = von; i < bis; i++) {
+        if (boden[i] < 0) continue;
+        const x = (i + 0.5) / anzahl;
+        const linieY = p1.y + (x - p1.x) * (p2.y - p1.y) / (p2.x - p1.x);
+        ueberhang += Math.max(0, boden[i] - linieY - TOLERANZ);
+      }
+
+      // Weniger Ueberhang gewinnt; bei fast gleichem Ueberhang das
+      // breitere Paar. Der kleine Zuschlag macht aus "fast gleich" eine
+      // klare Regel statt eines Zufalls.
+      const wertung = ueberhang - breite / anzahl * 0.01;
+      if (!beste || wertung < beste.wertung) beste = { p1, p2, wertung };
+    }
+  }
+  if (!beste) return null;
+
+  const hinten = beste.p1.x <= beste.p2.x ? beste.p1 : beste.p2;
+  const vorne  = beste.p1.x <= beste.p2.x ? beste.p2 : beste.p1;
 
   // In Bildpunkte umrechnen, sonst waere der Winkel vom Seitenverhaeltnis
   // des Fotos abhaengig statt von der Wirklichkeit.
@@ -752,13 +809,20 @@ function setzeBuehnenPlatz() {
                        * Math.max(0.05, rahmen.unten - rahmen.oben);
   if (sichtbareHoehe > raumH * 0.62) zielBreite *= (raumH * 0.62) / sichtbareHoehe;
 
+  /* Zuletzt die Handjustierung: Groesse als Faktor auf das automatische
+     Ergebnis. Nach allen Klemmen, denn wer am Regler dreht, sieht dabei zu
+     und braucht keinen Schutz vor sich selbst. */
+  const fein = feinWerte();
+  zielBreite *= fein.groesse;
+
   const elementBreite = zielBreite / inhaltAnteil;
   const elementHöhe = elementBreite * seitenverhältnis;
 
   /* Schritt 5: Muss die Maschine gedreht werden, damit beide Raeder auf dem
      Teller landen? Die Antwort ist oft NEIN - siehe drehungNoetig(). */
   const drehung = drehungNoetig(
-    stand, (stand ? stand.spannweite : 0) / 2 * elementBreite, tellerRxPx, tellerRyPx);
+    stand, (stand ? stand.spannweite : 0) / 2 * elementBreite, tellerRxPx, tellerRyPx)
+    + fein.winkel;
 
   /* Der Bezugspunkt fuer alles Weitere ist die MITTE ZWISCHEN DEN RAEDERN,
      nicht der unterste Bildpunkt. Bei einer schiefen Maschine sind das zwei
@@ -780,14 +844,17 @@ function setzeBuehnenPlatz() {
 
   ansicht.style.width = `${elementBreite}px`;
   ansicht.style.left = `${ankerX - versatzLinks - fussX * elementBreite}px`;
-  ansicht.style.bottom = `${(buehne.offsetHeight + versatzOben) - ankerY - bodenAbstand}px`;
+  // Die Hoehenjustierung wandert in Tellerhoehen, nicht in Bildpunkten -
+  // so bedeutet derselbe Reglerstand auf jedem Geraet dasselbe. Plus hebt.
+  const feinVersatz = fein.hoehe * tellerRyPx * 2;
+  ansicht.style.bottom = `${(buehne.offsetHeight + versatzOben) - ankerY - bodenAbstand + feinVersatz}px`;
 
   /* Gedreht wird um genau diesen Punkt. Das ist der Kniff: Waehlt man die
      Elementmitte als Drehpunkt, wandern die Raeder beim Drehen vom Teller
      herunter und muessten anschliessend nachgerechnet werden. Dreht man um
      den Aufsetzpunkt, bleibt er liegen, wo er hingehoert. */
   ansicht.style.transformOrigin = `${fussX * elementBreite}px ${fussY * elementHöhe}px`;
-  ansicht.style.transform = drehung ? `rotate(${-drehung}deg)` : '';
+  ansicht.style.transform = Math.abs(drehung) > 0.05 ? `rotate(${-drehung}deg)` : '';
 
   /* Schatten, Spiegelung und Glut haengen alle an der Bodenlinie der
      Maschine, nicht an der Elementkante - sonst wandern sie mit dem leeren
@@ -895,6 +962,10 @@ function zeichneDatenblatt() {
   block.hidden = !motorrad;
   leer.hidden = !!motorrad;
   if (!motorrad) return;
+
+  // Ausrichten lohnt nur beim eigenen Foto - das Standardbild ist
+  // vermessen und steht immer richtig.
+  document.getElementById('btnBuehneJustieren').hidden = !motorrad.bild;
 
   document.getElementById('motorradName').textContent =
     [motorrad.marke, motorrad.modell].filter(Boolean).join(' ') || 'Meine Maschine';
@@ -2284,6 +2355,77 @@ verkabele('btnMotorradBearbeiten', 'click', () => {
   if (motorrad) öffneMotorradDialog(motorrad);
 });
 verkabele('btnMotorradWeiteres', 'click', () => öffneMotorradDialog(null));
+
+/* --- Das Nachjustieren ------------------------------------------------------
+   Beim Oeffnen wandern die gespeicherten Feinwerte in die Regler, jede
+   Bewegung rechnet die Buehne sofort neu, und erst "Fertig" schreibt die
+   Werte in den Datensatz. Wer stattdessen den Bildschirm verlaesst, hat
+   nichts kaputtgemacht - gespeichert war ja noch nichts. */
+
+function justierungÖffnen() {
+  const motorrad = motorradAktiv();
+  if (!motorrad) return;
+  const fein = motorrad.fein || FEIN_STANDARD;
+  währendJustierung = { ...fein };
+
+  document.getElementById('justGroesse').value = Math.round(fein.groesse * 100);
+  document.getElementById('justHoehe').value = Math.round(fein.hoehe * 100);
+  document.getElementById('justWinkel').value = fein.winkel;
+  justierungAnzeigen();
+
+  document.getElementById('garageDatenblatt').hidden = true;
+  document.getElementById('buehneJustierung').hidden = false;
+  setzeBuehnenPlatz();
+}
+
+function justierungSchließen() {
+  währendJustierung = null;
+  document.getElementById('buehneJustierung').hidden = true;
+  zeichneGarage();
+}
+
+function justierungAnzeigen() {
+  const f = währendJustierung;
+  document.getElementById('justGroesseWert').textContent = Math.round(f.groesse * 100) + '\u2009%';
+  document.getElementById('justHoeheWert').textContent = String(Math.round(f.hoehe * 100));
+  document.getElementById('justWinkelWert').textContent = f.winkel + '\u00b0';
+}
+
+verkabele('btnBuehneJustieren', 'click', justierungÖffnen);
+
+verkabele('buehneJustierung', 'input', ereignis => {
+  if (!währendJustierung) return;
+  const wert = Number(ereignis.target.value);
+  if (ereignis.target.id === 'justGroesse') währendJustierung.groesse = wert / 100;
+  if (ereignis.target.id === 'justHoehe')   währendJustierung.hoehe = wert / 100;
+  if (ereignis.target.id === 'justWinkel')  währendJustierung.winkel = wert;
+  justierungAnzeigen();
+  setzeBuehnenPlatz();
+});
+
+verkabele('btnJustZurücksetzen', 'click', () => {
+  if (!währendJustierung) return;
+  währendJustierung = { ...FEIN_STANDARD };
+  document.getElementById('justGroesse').value = 100;
+  document.getElementById('justHoehe').value = 0;
+  document.getElementById('justWinkel').value = 0;
+  justierungAnzeigen();
+  setzeBuehnenPlatz();
+});
+
+verkabele('btnJustFertig', 'click', () => {
+  const motorrad = motorradAktiv();
+  if (motorrad && währendJustierung) {
+    // Steht alles auf Standard, wird das Feld ganz entfernt - ein leerer
+    // Datensatz ist besser lesbar als einer voller Standardwerte.
+    const f = währendJustierung;
+    const istStandard = f.groesse === 1 && f.hoehe === 0 && f.winkel === 0;
+    if (istStandard) delete motorrad.fein;
+    else motorrad.fein = { ...f };
+    sichereGarageWeg();
+  }
+  justierungSchließen();
+});
 
 // Umschalter zwischen mehreren Maschinen.
 verkabele('motorradUmschalter', 'click', ereignis => {

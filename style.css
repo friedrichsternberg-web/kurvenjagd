@@ -1797,6 +1797,18 @@ body.nav-modus .leaflet-control-container { display: none; }
    zurueckgenommen, damit es nicht wie die eigene Maschine wirkt. */
 .motorrad-ansicht.ist-standard .motorrad-bild { opacity: 0.92; }
 
+/* Die Ausgaben neben den Justier-Reglern brauchen etwas mehr Platz als die
+   im Freisteller, sonst bricht "100 %" auf zwei Zeilen um. */
+#buehneJustierung output { min-width: 46px; white-space: nowrap; }
+
+/* Die Justier-Knoepfe unter den drei Reglern. */
+.justierung-knoepfe {
+  display: flex;
+  gap: var(--s3);
+  margin-top: var(--s2);
+}
+.justierung-knoepfe .btn.klein { padding: 10px 14px; font-size: 14px; }
+
 /* ---------- Das Datenblatt unter dem Raum ---------- */
 .garage-inhalt {
   flex: 0 0 auto;
