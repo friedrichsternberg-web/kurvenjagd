@@ -31,6 +31,18 @@ _git_muell/
 # Repository - settings.local.json enthaelt die erteilten Berechtigungen.
 .claude/
 
-# Das PNG-Original des Garagenbilds (2 MB) - die App benutzt die kleine
-# WebP-Fassung in img/, das Original bleibt nur lokal liegen.
-Bild Werkstatt Bühne.png
+# Die PNG-Originale des Garagenbilds (2 MB je Stueck) - die App benutzt die
+# WebP-Fassung in img/, die Originale bleiben nur lokal liegen.
+#
+# Das Sternchen steht fuer das "ue": macOS legt Umlaute im Dateinamen
+# ZERLEGT ab (u + Umlautpunkte), git vergleicht aber Zeichen fuer Zeichen -
+# ein ausgeschriebenes "Bühne" traefe die Datei nie. Derselbe Fehler steckte
+# schon einmal in diesem Projekt, siehe *.pdf weiter unten.
+Bild We*.png
+
+# Quellmaterial fuer die Gestaltung: KI-Entwuerfe, Vorlagen, Schriftreste.
+# Beim Zusammenfuehren der drei Zweige am 20.08.2026 sind diese Ordner
+# versehentlich mitgewandert und lagen dadurch oeffentlich auf GitHub Pages.
+# Sie gehoeren nicht in die App - was daraus gebraucht wird, liegt in img/.
+Design Inspro/
+fonts 2/
