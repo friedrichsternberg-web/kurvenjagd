@@ -380,6 +380,12 @@ function garageAktiv() {
 const FEIN_STANDARD = { groesse: 1, hoehe: 0, winkel: 0 };
 let währendJustierung = null;
 
+/* Zeigt die Buehne gerade ein Foto aus dem Dialog statt der gespeicherten
+   Maschine? Das braucht es, weil "Position anpassen" mitten im Anlegen
+   funktionieren soll - da ist noch gar nichts gespeichert, das die Buehne
+   zeigen koennte. */
+let buehneVorschau = null;
+
 function feinWerte() {
   if (währendJustierung) return währendJustierung;
   const motorrad = motorradAktiv();
@@ -676,8 +682,9 @@ function zeichneBuehne() {
   const bild = document.getElementById('motorradBild');
 
   // Es steht IMMER eine Maschine da - ohne eigenes Foto das freigestellte
-  // Standardbild. Eine leere Buehne saehe nach Fehler aus.
-  const adresse = bildAdresse(motorrad);
+  // Standardbild. Eine leere Buehne saehe nach Fehler aus. Waehrend
+  // "Position anpassen" hat das Foto aus dem Dialog Vorrang.
+  const adresse = buehneVorschau || bildAdresse(motorrad);
   const beschreibung = motorrad
     ? ([motorrad.marke, motorrad.modell].filter(Boolean).join(' ') || 'Mein Motorrad')
     : 'Motorrad';
@@ -711,7 +718,7 @@ function zeichneBuehne() {
   // Ohne eigenes Foto ist das Standardbild nur ein Platzhalter und wird
   // etwas zurueckgenommen, damit es nicht wie die eigene Maschine wirkt.
   document.getElementById('motorradAnsicht')
-          .classList.toggle('ist-standard', !(motorrad && motorrad.bild));
+          .classList.toggle('ist-standard', !buehneVorschau && !(motorrad && motorrad.bild));
 
   setzeBuehnenPlatz();
 }
@@ -963,10 +970,6 @@ function zeichneDatenblatt() {
   leer.hidden = !!motorrad;
   if (!motorrad) return;
 
-  // Ausrichten lohnt nur beim eigenen Foto - das Standardbild ist
-  // vermessen und steht immer richtig.
-  document.getElementById('btnBuehneJustieren').hidden = !motorrad.bild;
-
   document.getElementById('motorradName').textContent =
     [motorrad.marke, motorrad.modell].filter(Boolean).join(' ') || 'Meine Maschine';
 
@@ -1056,6 +1059,7 @@ function öffneMotorradDialog(vorhandenes = null) {
   dialogFoto = vorhandenes?.bild || null;
   dialogFotoOriginal = dialogFoto;
   dialogBodenlinie = vorhandenes?.bodenlinie || null;
+  dialogFein = vorhandenes?.fein ? { ...vorhandenes.fein } : null;
 
   öffneDialog({
     titel: vorhandenes ? 'Motorrad bearbeiten' : 'Motorrad hinzufügen',
@@ -1135,6 +1139,7 @@ function öffneMotorradDialog(vorhandenes = null) {
         notiz:    feldWert('feldNotiz'),
         bild:     dialogFoto,
         bodenlinie: dialogBodenlinie,
+        fein: dialogFein || undefined,   // undefined faellt beim Speichern weg
       };
 
       if (!datensatz.marke && !datensatz.modell) {
@@ -1192,6 +1197,17 @@ let dialogFotoOriginal = null;
    einfachen Schatten zurueck. */
 let dialogBodenlinie = null;
 
+/* Die Handjustierung zum Foto im Dialog (Groesse, Hoehe, Neigung). Sie
+   gehoert zum Foto wie die Bodenlinie und wird mit dem Motorrad
+   gespeichert. null heisst: die Automatik passt, nichts nachjustiert. */
+let dialogFein = null;
+
+/* Steht hier true, kam gerade ein FRISCHES Foto herein - dann geht es nach
+   dem Freistellen von selbst ins Anpassen, damit der Nutzer sein Ergebnis
+   auf dem Teller sieht und gleich zurechtrueckt. Beim Nachbessern eines
+   vorhandenen Fotos bleibt der Weg wie gewohnt. */
+let neuesFotoImFluss = false;
+
 async function fotoÜbernehmen(datei) {
   try {
     /* 1600 Punkte Kante und Guete 0,92 statt der 900/0,72 der Tourfotos.
@@ -1202,9 +1218,12 @@ async function fotoÜbernehmen(datei) {
        Verpixelung, die Friedrich gesehen hat. */
     dialogFoto = await verkleinereFoto(datei, 1600, 0.92);
     dialogFotoOriginal = dialogFoto;
-    // Neues Foto, alte Bodenlinie ungueltig. Das Freistellen liefert gleich
-    // eine neue; bis dahin ist keine besser als eine falsche.
+    // Neues Foto, alte Bodenlinie und alte Justierung ungueltig. Das
+    // Freistellen liefert gleich eine neue Bodenlinie; bis dahin ist keine
+    // besser als eine falsche.
     dialogBodenlinie = null;
+    dialogFein = null;
+    neuesFotoImFluss = true;
     zeichneFotoVorschau();
     /* Und gleich weiter zum Freistellen, ohne dass jemand einen Knopf sucht.
        Fast jedes Motorradfoto hat einen Hintergrund, der in der Garage nichts
@@ -1234,6 +1253,7 @@ function zeichneFotoVorschau() {
     <div class="foto-bild"><img src="${dialogFoto}" alt=""></div>
     <div class="foto-knöpfe">
       <button type="button" class="btn ghost klein" id="btnFreistellen">${verändert ? 'Nachbessern' : 'Hintergrund entfernen'}</button>
+      <button type="button" class="btn ghost klein" id="btnFotoAusrichten">Position anpassen</button>
       ${verändert ? '<button type="button" class="btn ghost klein" id="btnFotoZurück">Original zurück</button>' : ''}
       <button type="button" class="btn ghost klein" id="btnFotoWeg">Foto entfernen</button>
     </div>`;
@@ -1882,6 +1902,7 @@ function öffneFreisteller(datenUrl, sofortAutomatik = false) {
 
 function schließeFreisteller() {
   document.getElementById('freiFenster').hidden = true;
+  neuesFotoImFluss = false;
   freiFortschrittAus();
   frei = null;
 }
@@ -2317,9 +2338,22 @@ function freiÜbernehmen() {
     // Nach dem Schliessen ist sie weg, und aus dem fertigen Bild liesse sie
     // sich nur mit einigem Aufwand zurueckrechnen.
     dialogBodenlinie = bodenlinieAusMaske(frei.maske, frei.breite, frei.hoehe);
+    // MERKEN VOR DEM SCHLIESSEN: schließeFreisteller() loescht die Flagge,
+    // damit ein Abbruch nicht spaeter unvermittelt ins Anpassen fuehrt.
+    const gleichAusrichten = neuesFotoImFluss;
     schließeFreisteller();
     zeichneFotoVorschau();
-    showToast('Freigestellt. Mit "Original zurück" kommst du jederzeit zum Ausgangsbild.');
+
+    /* Bei einem frisch hereingekommenen Foto geht es direkt weiter ins
+       Anpassen: Der Nutzer sieht seine Maschine auf dem Teller und kann
+       sie gleich zurechtruecken, statt den Weg ueber den Dialogknopf zu
+       suchen. Beim Nachbessern eines vorhandenen Fotos bleibt es beim
+       gewohnten Ruecksprung in den Dialog. */
+    if (gleichAusrichten) {
+      positionAnpassen();
+    } else {
+      showToast('Freigestellt. Mit "Original zurück" kommst du jederzeit zum Ausgangsbild.');
+    }
   };
   bild.src = frei.quelle;
 }
@@ -2362,26 +2396,24 @@ verkabele('btnMotorradWeiteres', 'click', () => öffneMotorradDialog(null));
    Werte in den Datensatz. Wer stattdessen den Bildschirm verlaesst, hat
    nichts kaputtgemacht - gespeichert war ja noch nichts. */
 
-function justierungÖffnen() {
-  const motorrad = motorradAktiv();
-  if (!motorrad) return;
-  const fein = motorrad.fein || FEIN_STANDARD;
-  währendJustierung = { ...fein };
+function positionAnpassen() {
+  if (!dialogFoto) return;
+  währendJustierung = dialogFein ? { ...dialogFein } : { ...FEIN_STANDARD };
+  buehneVorschau = dialogFoto;
 
-  document.getElementById('justGroesse').value = Math.round(fein.groesse * 100);
-  document.getElementById('justHoehe').value = Math.round(fein.hoehe * 100);
-  document.getElementById('justWinkel').value = fein.winkel;
+  document.getElementById('justGroesse').value = Math.round(währendJustierung.groesse * 100);
+  document.getElementById('justHoehe').value = Math.round(währendJustierung.hoehe * 100);
+  document.getElementById('justWinkel').value = währendJustierung.winkel;
   justierungAnzeigen();
 
+  /* Der Dialog geht beiseite, nicht zu: Alle Eingaben - Marke, Modell, das
+     Foto selbst - bleiben stehen und warten. Auf der Buehne steht derweil
+     das Dialogfoto, auch wenn die Maschine noch nie gespeichert wurde. */
+  document.getElementById('garageDialog').hidden = true;
   document.getElementById('garageDatenblatt').hidden = true;
+  document.getElementById('garageOhneMotorrad').hidden = true;
   document.getElementById('buehneJustierung').hidden = false;
-  setzeBuehnenPlatz();
-}
-
-function justierungSchließen() {
-  währendJustierung = null;
-  document.getElementById('buehneJustierung').hidden = true;
-  zeichneGarage();
+  zeichneBuehne();
 }
 
 function justierungAnzeigen() {
@@ -2390,8 +2422,6 @@ function justierungAnzeigen() {
   document.getElementById('justHoeheWert').textContent = String(Math.round(f.hoehe * 100));
   document.getElementById('justWinkelWert').textContent = f.winkel + '\u00b0';
 }
-
-verkabele('btnBuehneJustieren', 'click', justierungÖffnen);
 
 verkabele('buehneJustierung', 'input', ereignis => {
   if (!währendJustierung) return;
@@ -2414,17 +2444,23 @@ verkabele('btnJustZurücksetzen', 'click', () => {
 });
 
 verkabele('btnJustFertig', 'click', () => {
-  const motorrad = motorradAktiv();
-  if (motorrad && währendJustierung) {
-    // Steht alles auf Standard, wird das Feld ganz entfernt - ein leerer
-    // Datensatz ist besser lesbar als einer voller Standardwerte.
+  if (währendJustierung) {
+    /* Die Werte gehoeren zum FOTO IM DIALOG, nicht direkt zur gespeicherten
+       Maschine - gespeichert wird beim Speichern des Dialogs, zusammen mit
+       Bild und Bodenlinie. Steht alles auf Standard, wird nichts abgelegt:
+       Ein leerer Datensatz ist besser lesbar als einer voller
+       Standardwerte. */
     const f = währendJustierung;
     const istStandard = f.groesse === 1 && f.hoehe === 0 && f.winkel === 0;
-    if (istStandard) delete motorrad.fein;
-    else motorrad.fein = { ...f };
-    sichereGarageWeg();
+    dialogFein = istStandard ? null : { ...f };
   }
-  justierungSchließen();
+  währendJustierung = null;
+  buehneVorschau = null;
+  document.getElementById('buehneJustierung').hidden = true;
+  // Zurueck in den wartenden Dialog; die Buehne zeigt wieder die
+  // gespeicherte Maschine (oder das Standardbild).
+  document.getElementById('garageDialog').hidden = false;
+  zeichneGarage();
 });
 
 // Umschalter zwischen mehreren Maschinen.
@@ -2488,17 +2524,23 @@ verkabele('garageDialogInhalt', 'click', ereignis => {
     dialogFoto = null;
     dialogFotoOriginal = null;
     dialogBodenlinie = null;
+    dialogFein = null;
     zeichneFotoVorschau();
     return;
   }
   if (ereignis.target.closest('#btnFotoZurück')) {
     dialogFoto = dialogFotoOriginal;
     dialogBodenlinie = null;   // das unbearbeitete Foto hat keine
+    dialogFein = null;
     zeichneFotoVorschau();
     return;
   }
   if (ereignis.target.closest('#btnFreistellen')) {
     öffneFreisteller(dialogFoto);
+    return;
+  }
+  if (ereignis.target.closest('#btnFotoAusrichten')) {
+    positionAnpassen();
   }
 });
 
