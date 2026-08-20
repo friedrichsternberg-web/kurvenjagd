@@ -26,3 +26,7 @@ CLAUDE.md
 # öffentlichen Repository gelandet.
 *.pdf
 _git_muell/
+
+# Sitzungseinstellungen von Claude Code. Gehoeren nicht ins oeffentliche
+# Repository - settings.local.json enthaelt die erteilten Berechtigungen.
+.claude/
