@@ -1921,7 +1921,7 @@ body.nav-modus .leaflet-control-container { display: none; }
   z-index: 2;
   inset: -24px;
   pointer-events: none;
-  animation: lauf-drehen 7s linear infinite;
+  animation: lauf-drehen 8.4s linear infinite;
   -webkit-mask-image: conic-gradient(from 0deg,
     transparent 0deg 295deg,
     rgba(0, 0, 0, 0.25) 322deg,
@@ -1941,14 +1941,15 @@ body.nav-modus .leaflet-control-container { display: none; }
   position: absolute;
   top: 24px; left: 24px;
   width: calc(100% - 48px);
-  animation: lauf-gegendrehen 7s linear infinite;
-  /* Der Leuchtrand des Laeufers: deutlich breiter und heller als die
-     stehende Kantenlinie, damit der wandernde Punkt sich von ihr abhebt -
-     er konkurriert mit Linie UND Schein, die beide staendig da sind. */
-  filter: drop-shadow(0 0 1.5px var(--text))
-          drop-shadow(0 0 2px var(--text))
-          drop-shadow(0 0 2.5px var(--text))
-          drop-shadow(0 0 7px var(--text));
+  animation: lauf-gegendrehen 8.4s linear infinite;
+  /* Der Leuchtrand des Laeufers: genauso SCHMAL wie die stehende
+     Kantenlinie, nur dichter. Er soll exakt AUF der Linie entlanglaufen,
+     nicht als Wolke darum herum - deshalb kein breiter Schein hier. Wo
+     der Laeufer vorbeikommt, verdoppelt sich die Dichte der Linie, und
+     genau das ist der sichtbare Lichtpunkt. */
+  filter: drop-shadow(0 0 1px var(--text))
+          drop-shadow(0 0 1px var(--text))
+          drop-shadow(0 0 2px var(--text));
 }
 @keyframes lauf-drehen       { to { transform: rotate(360deg); } }
 @keyframes lauf-gegendrehen  { to { transform: rotate(-360deg); } }
