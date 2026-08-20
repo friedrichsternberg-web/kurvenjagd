@@ -51,6 +51,7 @@ const nav = {
   ersteZentrierungErledigt: false,
   letzteRohPosition: null,    // für die Kurs-Schätzung, falls das Gerät keinen Kurs liefert
   abweichungSeit: null,       // Zeitpunkt, seit dem die Position von der Route abweicht
+  angezeigteDrehung: 0,       // Grad, um die die Karte gerade gedreht ist (siehe setzeKartenDrehung)
 };
 
 
@@ -58,9 +59,6 @@ const nav = {
 
 const map = L.map('map', {
   zoomControl: true,
-  rotate: true,          // vom Leaflet.Rotate-Plugin - erlaubt map.setBearing() für die Navigation
-  rotateControl: false,  // keinen manuellen Dreh-Knopf nötig, wir drehen per GPS-Kurs
-  touchRotate: false,    // bei der Routenplanung soll man die Karte nicht aus Versehen verdrehen
 }).setView([49.8, 9.9], 8); // Spessart/Franken
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -105,6 +103,11 @@ let kartenKlickModusAktiv = false;
 
 map.on('click', (e) => {
   if (!kartenKlickModusAktiv) return;
+  // Während der Navigation ist die Karte gedreht, und Leaflet rechnet einen
+  // Klick dann auf die falsche Stelle um (gleiche Ursache wie beim gesperrten
+  // Marker-Ziehen in startNavigation). Der Wegpunkt landete also woanders,
+  // als der Finger hingetippt hat.
+  if (nav.aktiv) return;
   addWaypoint(e.latlng.lat, e.latlng.lng);
 });
 
@@ -1494,7 +1497,15 @@ function startNavigation() {
   nav.ersteZentrierungErledigt = false;
   nav.letzteRohPosition = null;
   nav.abweichungSeit = null;
+  nav.angezeigteDrehung = 0;
   nav.aktiv = true;
+
+  // Die Wegpunkt-Marker bleiben während der Fahrt sichtbar, ihr Ziehen muss
+  // aber aus. Grund: Leaflet weiß nichts von unserer CSS-Drehung und würde
+  // eine Fingerbewegung nach rechts als "nach rechts auf der UNGEDREHTEN
+  // Karte" verstehen - der Marker liefe also in eine andere Richtung als der
+  // Finger. In stopNavigation() wird das Ziehen wieder eingeschaltet.
+  state.markers.forEach(m => m.dragging && m.dragging.disable());
 
   nav.watchId = geraet.standortVerfolgen(aufPositionsUpdate, aufPositionsFehler, {
     enableHighAccuracy: true,
@@ -1516,8 +1527,13 @@ function startNavigation() {
 
   // Leaflet merkt selbst nicht, dass die Karte durch das einklappende
   // Seitenpanel breiter wird - nach Ende der CSS-Animation (300ms) Bescheid
-  // geben, sonst bleiben Teile der Karte leer/grau.
-  setTimeout(() => map.invalidateSize(), 320);
+  // geben, sonst bleiben Teile der Karte leer/grau. Erst zu diesem Zeitpunkt
+  // steht auch die endgültige Größe fest, deshalb wird das Kartenquadrat
+  // genau hier vermessen und nicht schon weiter oben.
+  setTimeout(() => {
+    passeKartenQuadratAn();
+    map.invalidateSize();
+  }, 320);
 }
 
 function stopNavigation() {
@@ -1530,7 +1546,15 @@ function stopNavigation() {
   if (nav.gefahrenLinie) { map.removeLayer(nav.gefahrenLinie); nav.gefahrenLinie = null; }
   if (nav.restLinie) { map.removeLayer(nav.restLinie); nav.restLinie = null; }
 
-  map.setBearing(0); // zurück zu Nord-oben für die normale Routenplanung
+  // Zurück zu Nord-oben für die normale Routenplanung. Die Klasse
+  // "nav-modus" verschwindet gleich darunter, damit greifen die Sonderregeln
+  // aus style.css ohnehin nicht mehr - den Winkel setzen wir trotzdem
+  // zurück, sonst blitzt beim nächsten Start der alte Wert kurz auf.
+  nav.angezeigteDrehung = 0;
+  schreibeKartenVariable('--karten-drehung', '0deg');
+
+  // Gegenstück zu startNavigation: Wegpunkte lassen sich wieder verschieben.
+  state.markers.forEach(m => m.dragging && m.dragging.enable());
 
   document.body.classList.remove('nav-modus');
   aktualisiereLeiste(aktuellerBildschirm());   // Leiste wieder her
@@ -1558,7 +1582,7 @@ function aufPositionsUpdate(pos) {
     : geschätzterKurs(latitude, longitude);
 
   zeichnePositionsMarker(latitude, longitude, accuracy || 20);
-  map.setBearing(kurs); // die ganze Karte dreht sich, nicht nur der Marker
+  setzeKartenDrehung(kurs); // die ganze Karte dreht sich, nicht nur der Marker
 
   if (!nav.ersteZentrierungErledigt) {
     map.setView([latitude, longitude], 17);
@@ -1569,7 +1593,11 @@ function aufPositionsUpdate(pos) {
   // Eigene Position etwas unterhalb der Bildschirmmitte anzeigen, damit man
   // mehr von der Strecke VORAUS sieht als von der bereits gefahrenen Strecke
   // - "vorne" ist dank der Kartendrehung ja immer Richtung Bildschirm-oben.
-  map.panBy([0, -map.getSize().y * 0.15], { animate: false });
+  // Gemessen wird an der SICHTBAREN Höhe (#mapWrap) und nicht an
+  // map.getSize(): Der Kartenbehälter ist während der Navigation absichtlich
+  // größer als der Bildschirm, sein Maß wäre hier also zu groß.
+  const sichtbareHöhe = document.getElementById('mapWrap').getBoundingClientRect().height;
+  map.panBy([0, -sichtbareHöhe * 0.15], { animate: false });
 
   prüfeManöver(latitude, longitude);
   prüfeAbweichungVonRoute(latitude, longitude);
@@ -1586,9 +1614,86 @@ function geschätzterKurs(lat, lon) {
   return kurs;
 }
 
+/* Dreht die Karte so, dass die Fahrtrichtung nach oben zeigt.
+
+   Das erledigte früher ein Zusatz-Plugin (Leaflet.Rotate) mit einem Aufruf
+   namens map.setBearing(). Das Plugin musste raus, weil es unter der GPL
+   stand - die Begründung steht in AUFGABEN.md. Wir machen es deshalb selbst,
+   und zwar mit dem einfachsten Mittel, das der Browser dafür hat: Der
+   Kartenbehälter bekommt ein CSS-"transform: rotate()", das gedrehte Bild
+   erzeugt die Grafikkarte.
+
+   Der Trick dabei ist, dass Leaflet von der Drehung gar nichts erfährt. Es
+   rechnet unverändert in seinem eigenen, ungedrehten Koordinatensystem
+   weiter und zeichnet ein ungedrehtes Bild - nur zeigen wir dieses Bild
+   schräg an. Deshalb funktionieren setView(), panTo(), alle Linien und alle
+   Marker ohne die kleinste Änderung weiter.
+
+   Zwei Dinge muss man sich dafür einhandeln, beide sind unten bzw. in
+   style.css erledigt: Der Behälter muss GRÖSSER sein als der Bildschirm
+   (passeKartenQuadratAn), und die Marker müssen ZURÜCKGEDREHT werden, sonst
+   stehen sie schief (Regel ".you-are-here, .wp-marker, ..." in style.css). */
+function setzeKartenDrehung(kurs) {
+  // Ein Kurs von 90 Grad heißt "wir fahren nach Osten". Damit Osten oben
+  // landet, muss sich die Karte um 90 Grad GEGEN den Uhrzeigersinn drehen.
+  // In CSS dreht eine positive Gradzahl im Uhrzeigersinn - also -kurs.
+  const zielwinkel = -kurs;
+
+  // Von 350 Grad auf 10 Grad sind es in Wirklichkeit nur 20 Grad über die
+  // Nordlinie hinweg. Würde man stumpf mit den rohen Zahlen rechnen, drehte
+  // die Karte stattdessen 340 Grad in die Gegenrichtung zurück - bei jeder
+  // Nordüberquerung eine volle Pirouette. Deshalb suchen wir immer die
+  // KLEINSTE Winkeldifferenz und zählen sie auf den bisherigen Wert drauf.
+  // Der darf dadurch über 360 hinauswachsen oder unter 0 fallen, das stört
+  // CSS nicht im Geringsten - 730 Grad sieht aus wie 10 Grad.
+  let differenz = (zielwinkel - nav.angezeigteDrehung) % 360;
+  if (differenz > 180) differenz -= 360;
+  if (differenz < -180) differenz += 360;
+  nav.angezeigteDrehung += differenz;
+
+  schreibeKartenVariable('--karten-drehung', nav.angezeigteDrehung + 'deg');
+}
+
+/* Ein gedrehtes Rechteck deckt seine eigene Fläche nicht mehr ab: Kippt man
+   den Bildschirminhalt um 45 Grad, gucken an allen vier Ecken leere Dreiecke
+   heraus. Der Kartenbehälter muss deshalb während der Navigation größer
+   sein als das Sichtfeld.
+
+   Die sichere Größe ist ein QUADRAT mit der Bildschirmdiagonale als
+   Seitenlänge. Begründung in einem Satz: Ein Kreis mit dieser Diagonale als
+   Durchmesser umschließt den Bildschirm in jeder Drehlage, und dieses
+   Quadrat umschließt wiederum den Kreis. Was über den Bildschirmrand
+   hinausragt, schneidet #mapWrap mit overflow:hidden einfach weg.
+
+   Der Preis sind mehr geladene Kartenkacheln, weil Leaflet nun eine größere
+   Fläche für sichtbar hält, als man tatsächlich sieht. Das alte Plugin machte
+   es allerdings genauso - anders geht es nicht. */
+function passeKartenQuadratAn() {
+  const rahmen = document.getElementById('mapWrap');
+  const { width, height } = rahmen.getBoundingClientRect();
+  const diagonale = Math.ceil(Math.sqrt(width * width + height * height));
+  schreibeKartenVariable('--karten-quadrat', diagonale + 'px');
+}
+
+// Beide Werte oben landen als CSS-Variable an #mapWrap. Von dort erben sie
+// nach unten durch: an die Karte selbst (Drehung und Größe) und an jeden
+// einzelnen Marker darin (Gegendrehung). So muss kein einziger Marker
+// einzeln angefasst werden - das erledigt der Browser.
+function schreibeKartenVariable(name, wert) {
+  document.getElementById('mapWrap').style.setProperty(name, wert);
+}
+
+// Dreht sich das Handy während der Fahrt, ändert sich die Bildschirmdiagonale
+// - dann muss das Quadrat neu vermessen werden, sonst zeigen sich doch wieder
+// leere Ecken. Außerhalb der Navigation ist nichts zu tun.
+window.addEventListener('resize', () => {
+  if (nav.aktiv) passeKartenQuadratAn();
+});
+
+
 // Zeichnet den eigenen Standort als Spitze, die IMMER nach oben zeigt - denn
 // nicht der Marker dreht sich in Fahrtrichtung, sondern die ganze Karte
-// (siehe map.setBearing() in aufPositionsUpdate).
+// (siehe setzeKartenDrehung() in aufPositionsUpdate).
 function zeichnePositionsMarker(lat, lon, accuracy) {
   if (!nav.marker) {
     const icon = L.divIcon({

@@ -10,33 +10,7 @@ Sortiert nach Dringlichkeit, nicht nach Aufwand.
 
 ## Vor der ersten Veröffentlichung in den Stores
 
-### 1. Leaflet.Rotate ersetzen (rechtlich blockierend)
-
-`leaflet-rotate` steht unter **GPL-3.0**. Zwei Probleme, jedes für sich
-ausreichend:
-
-- GPL verlangt, dass die **ganze App** unter GPL steht, sobald sie das
-  Plugin mitliefert. Also quelloffen, inklusive allem, was noch kommt.
-- GPL-3.0 ist mit **Apples Nutzungsbedingungen unvereinbar**. VLC ist genau
-  daran aus dem App Store geflogen.
-
-Gebraucht wird es an genau zwei Stellen: `rotate: true` in den Kartenoptionen
-(`app.js` Abschnitt 2) und `map.setBearing()` in der Live-Navigation.
-
-Wege:
-
-- **Kartenbehälter per CSS drehen** und die Marker gegendrehen. Der Behälter
-  muss dafür größer sein als das Sichtfeld, sonst zeigen sich beim Drehen
-  leere Ecken. Kein fremder Code, volle Kontrolle.
-- **MapLibre GL** statt Leaflet. Kann Drehung und Neigung von Haus aus, steht
-  unter BSD-3. Aber: die ganze Kartenschicht wird ausgetauscht, und Leaflet
-  steckt an vielen Stellen im Code.
-- **Drehung streichen.** Karte immer genordet. Am billigsten, kostet aber
-  spürbar Bedienkomfort während der Fahrt.
-
-Je länger das Plugin drin bleibt, desto mehr hängt daran.
-
-### 2. Konto löschen in der App
+### 1. Konto löschen in der App
 
 Beide Stores verlangen zwingend einen Weg, das eigene Konto **innerhalb der
 App** zu löschen. Nicht per E-Mail, nicht per Formular auf einer Webseite.
@@ -46,7 +20,7 @@ jede Tabelle nochmal anfassen.
 Dazu gehört: Was passiert mit geteilten Routen und mit Ausfahrten, an denen
 andere teilgenommen haben?
 
-### 3. Impressum und Datenschutzerklärung
+### 2. Impressum und Datenschutzerklärung
 
 In Deutschland Pflicht, sobald die App öffentlich ist. Der Store-Eintrag
 verlangt zusätzlich eine erreichbare Adresse zur Datenschutzerklärung, sonst
@@ -55,7 +29,7 @@ kommt die Einreichung gar nicht erst durch.
 Grundlage dafür ist `DATEN.md` – dort steht, was die App wohin schickt.
 **Beim Bauen mitschreiben**, nicht am Ende rekonstruieren.
 
-### 4. Hintergrundstandort ehrlich behandeln
+### 3. Hintergrundstandort ehrlich behandeln
 
 Im Browser bricht jede Aufzeichnung ab, sobald das Handy in die Tasche
 wandert. `geraet.standortImHintergrund()` sagt das schon jetzt, benutzt wird
@@ -70,7 +44,7 @@ schlimmste Fehler in dieser App.
 
 ## Auf dem Weg zu den Stores
 
-### 5. Native Hülle mit Capacitor
+### 4. Native Hülle mit Capacitor
 
 Entscheidung steht noch aus, siehe Notiz im Brain. Der Vorschlag ist
 Capacitor statt React Native: dieselben Dateien, native Hülle drumherum,
@@ -88,7 +62,7 @@ Vorarbeit ist erledigt:
 Was dann ansteht: Xcode und Android Studio einrichten, Berechtigungstexte
 schreiben, Symbole und Startbildschirme erzeugen, Signierung.
 
-### 6. Push
+### 5. Push
 
 Für „ich fahre jetzt los" braucht es APNs (Apple) und Firebase Cloud
 Messaging (Android). Web-Push reicht nicht: Auf iOS gibt es das nur für
@@ -96,13 +70,13 @@ Seiten, die auf dem Startbildschirm liegen.
 
 Das ist der eigentliche Grund, nativ zu gehen. Nicht die Karte.
 
-### 7. Werbung
+### 6. Werbung
 
 AdMob braucht das native SDK. Dazu auf iOS die ATT-Abfrage, in der EU ein
 Zustimmungsbanner (CMP), und in Apples Privacy Manifest muss jedes SDK
 deklariert sein. Erst anfassen, wenn Nutzer da sind.
 
-### 8. Modell mit ins Paket
+### 7. Modell mit ins Paket
 
 Das 4,4-MB-Modell für den Freisteller (`modell/u2netp.onnx`) wird heute beim
 ersten Gebrauch geladen. Nativ liegt es im Paket: kein Download, kein
@@ -113,7 +87,7 @@ sobald die Hülle steht.
 
 ## Für die spätere Webseite (Querformat)
 
-### 9. Rechenteil vom Bedienteil trennen
+### 8. Rechenteil vom Bedienteil trennen
 
 `app.js` ist 3000 Zeilen und mischt beides. Ein paar Funktionen sind reine
 Rechnerei ohne jeden Bezug zur Oberfläche und wären in der Webseite
@@ -130,7 +104,7 @@ auseinander, ohne dass es jemand merkt.
 
 **Ist ein größerer Umbau, deshalb bewusst noch nicht gemacht.**
 
-### 10. Geteilte Routen brauchen eine Zielseite
+### 9. Geteilte Routen brauchen eine Zielseite
 
 Wer einen Link verschickt, muss beim Empfänger etwas sehen, auch ohne
 installierte App. Diese Seite gehört zur Webseite und nicht in die App.
@@ -138,7 +112,7 @@ installierte App. Diese Seite gehört zur Webseite und nicht in die App.
 Die `og:`-Angaben in `index.html` sind der Anfang: Sie bestimmen, wie der Link
 in WhatsApp aussieht.
 
-### 11. Eigene Anordnungsdatei fürs Querformat
+### 10. Eigene Anordnungsdatei fürs Querformat
 
 `design.css` (Sprache) ist von `style.css` (Anordnung, Hochformat) getrennt.
 Die Webseite bekommt ihre eigene Anordnungsdatei und benutzt **dieselbe**
@@ -170,3 +144,36 @@ soll.
   Lässt sich im Simulator erzeugen, wenn die Hülle steht.
 - **`fonts 2/` und `Design Inspro/`** liegen unbenutzt im Projektordner und
   können weg.
+
+---
+
+## Erledigt
+
+### Leaflet.Rotate ersetzt (August 2026)
+
+Das Plugin stand unter **GPL-3.0**. Das hätte die ganze App quelloffen
+gemacht und wäre mit Apples Nutzungsbedingungen unvereinbar gewesen – VLC ist
+genau daran aus dem App Store geflogen. Beides für sich blockierend.
+
+Von den drei erwogenen Wegen (CSS-Drehung, MapLibre GL, Drehung streichen)
+wurde die **CSS-Drehung** genommen: Gedreht wird nur während der Navigation,
+und dort ist die Karte reine Anzeige – niemand setzt Wegpunkte, während er
+fährt. Damit bleibt der Eingriff klein, während MapLibre die gesamte
+Kartenschicht ausgetauscht hätte und ein Streichen der Drehung die Ansicht
+während der Fahrt spürbar schlechter machte.
+
+So funktioniert es: Der Kartenbehälter wird im Navi-Modus zu einem Quadrat mit
+der Bildschirmdiagonale als Seitenlänge – ein kleinerer Behälter zeigte beim
+Drehen leere Ecken – und bekommt ein `transform: rotate()`. Leaflet erfährt
+davon nichts und rechnet unverändert weiter. Die Marker drehen per geerbter
+CSS-Variablen um denselben Winkel zurück, damit sie nicht schief stehen.
+Nachzulesen bei `setzeKartenDrehung()` in `app.js`.
+
+Drei Dinge sind während der Fahrt bewusst abgeschaltet, weil Leaflet die
+Drehung nicht kennt und Bildschirmpunkte sonst falsch umrechnet: die
+Zoom-Knöpfe (sie lägen in den Ecken des vergrößerten Quadrats, weit außerhalb
+des Bildschirms), das Ziehen der Wegpunkt-Marker und das Setzen neuer
+Wegpunkte per Klick.
+
+Nebenbei konnte `index.html` von `leaflet-src.js` auf die kleinere
+`leaflet.js` zurück – die große Fassung war nur wegen des Plugins da.

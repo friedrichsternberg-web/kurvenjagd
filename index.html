@@ -23,7 +23,7 @@
        "orientation": "portrait" im Manifest ist die Ansage, um die es hier
        geht: Diese App ist fuers Hochformat gebaut. Die spaetere Webseite
        bekommt ein eigenes Design fuers Querformat und ein eigenes Manifest. -->
-  <link rel="manifest" href="manifest.webmanifest?v=26">
+  <link rel="manifest" href="manifest.webmanifest?v=27">
 
   <!-- Faerbt die Statusleiste des Handys in die Grundflaeche der App, damit
        oben kein fremder heller Streifen stehen bleibt. -->
@@ -36,7 +36,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Kurvenjagd">
-  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=26">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=27">
 
   <!-- Fuer die spaetere Webseite und geteilte Routen: So sieht der Link aus,
        wenn ihn jemand in WhatsApp oder Instagram einfuegt. Ohne das steht
@@ -47,17 +47,18 @@
   <meta name="description" content="Kurvige Strecken finden, fahren, teilen. Deine Maschine, deine Ausrüstung, deine Touren.">
 
   <!-- Leaflet ist die Kartenbibliothek. Wir laden sie von einem CDN,
-       damit wir nichts installieren müssen. Die unminifizierte "-src"-
-       Datei (statt der kleineren leaflet.js) ist hier absichtlich, weil
-       das Rotations-Plugin direkt in Leaflet-Kernklassen eingreift und
-       das laut Plugin-Dokumentation damit zuverlässiger funktioniert. -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet-src.js"></script>
+       damit wir nichts installieren müssen. Hier stand früher die große,
+       unminifizierte "-src"-Datei, weil das Zusatz-Plugin Leaflet.Rotate
+       direkt in Leaflet-Kernklassen eingriff und die dafür brauchte.
 
-  <!-- Leaflet.Rotate: lässt die Karte sich mit der Fahrtrichtung mitdrehen
-       (Live-Navigation). Achtung, andere Lizenz als der Rest der App: GPL-3.0
-       statt der lockeren BSD-Lizenz von Leaflet selbst. -->
-  <script src="https://unpkg.com/leaflet-rotate@0.2.8/dist/leaflet-rotate-src.js"></script>
+       Dieses Plugin ist raus: Es stand unter der GPL-3.0, und die verlangt,
+       dass die ganze App quelloffen wird - unvereinbar mit einer über
+       Werbung finanzierten App und mit Apples Store-Bedingungen. Die
+       Kartendrehung während der Navigation macht die App jetzt selbst,
+       siehe setzeKartenDrehung() in app.js. Damit reicht die kleine
+       Fassung von Leaflet wieder. -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <!-- Supabase: unser Server für Konten und (später) geteilte Routen und
        Ausfahrten. Die Bibliothek stellt das globale Objekt "supabase"
@@ -73,7 +74,7 @@
        durchgehend alte Version, weil die Seite dann Elemente enthält, die
        das Skript noch gar nicht kennt.
 
-       Für den Browser ist "app.js?v=26" eine andere Adresse als "app.js?v=25",
+       Für den Browser ist "app.js?v=27" eine andere Adresse als "app.js?v=26",
        er holt sie also frisch.
 
        WICHTIG: BEI JEDER VERÖFFENTLICHUNG die Zahl an ALLEN Stellen um eins
@@ -89,8 +90,8 @@
                    die spaetere Webseite genauso benutzen.
        style.css   die Anordnung DIESER App, ausgelegt auf Hochformat. Die
                    Webseite bekommt dafuer eine eigene Datei. -->
-  <link rel="stylesheet" href="design.css?v=26">
-  <link rel="stylesheet" href="style.css?v=26">
+  <link rel="stylesheet" href="design.css?v=27">
+  <link rel="stylesheet" href="style.css?v=27">
 </head>
 <body>
 
@@ -921,13 +922,13 @@
   <!-- ZUERST, denn alle anderen benutzen geraet.* beim Laden. Hier steht der
        gesamte Zugriff aufs Geraet - Standort, Speicher, Dateien. Beim Umzug
        in die Stores ist das die einzige Datei, die sich aendert. -->
-  <script src="geraet.js?v=26"></script>
-  <script src="app.js?v=26"></script>
+  <script src="geraet.js?v=27"></script>
+  <script src="app.js?v=27"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=26"></script>
+  <script src="konto.js?v=27"></script>
   <!-- Nach app.js, weil die Garage verkleinereFoto() und showToast() von
        dort benutzt. -->
-  <script src="garage.js?v=26"></script>
+  <script src="garage.js?v=27"></script>
 </body>
 </html>

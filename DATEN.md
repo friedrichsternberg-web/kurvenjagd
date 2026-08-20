@@ -59,7 +59,7 @@ das ist dann seine Entscheidung, nicht die der App.
 
 Touren wandern in die Tabelle `touren`, Fotos in den Behälter für Tourfotos.
 Beides ist mit dem Konto verknüpft und muss beim Löschen des Kontos
-mitverschwinden, siehe Aufgabe 2 in `AUFGABEN.md`.
+mitverschwinden, siehe „Konto löschen in der App" in `AUFGABEN.md`.
 
 ---
 

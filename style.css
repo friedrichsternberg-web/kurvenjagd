@@ -1310,7 +1310,7 @@ body.nav-modus #panel {
 
 /* Eigener Standort auf der Karte: eine Spitze, die IMMER nach oben zeigt -
    weil sich während der Navigation ja die ganze Karte mit der Fahrtrichtung
-   mitdreht (siehe map.setBearing() in app.js), nicht der Marker selbst. */
+   mitdreht (siehe setzeKartenDrehung() in app.js), nicht der Marker selbst. */
 .you-are-here {
   width: 22px; height: 22px;
   display: flex; align-items: center; justify-content: center;
@@ -1330,8 +1330,82 @@ body.nav-modus #panel {
 }
 
 /* ---------- Karte ---------- */
-#mapWrap { flex: 1; position: relative; }
+
+/* overflow:hidden ist hier kein Schönheitsmittel, sondern Pflicht: Während
+   der Navigation ist die Karte absichtlich viel grösser als der Bildschirm
+   (Begründung gleich darunter). Ohne diese Zeile würde sie über den ganzen
+   Rest der Seite quellen. */
+#mapWrap { flex: 1; position: relative; overflow: hidden; }
+
 #map { position: absolute; inset: 0; background: var(--surface-2); }
+
+/* ---------- Karte drehen während der Navigation ----------------------------
+   Damit man beim Fahren nicht im Kopf umrechnen muss, zeigt die Fahrtrichtung
+   immer nach oben - die Karte dreht sich also unter der eigenen Position weg.
+   Diesen Winkel setzt setzeKartenDrehung() in app.js als CSS-Variable
+   --karten-drehung an #mapWrap, von wo aus er hierher und bis zu jedem
+   einzelnen Marker durchvererbt wird.
+
+   Warum die Karte dabei zum QUADRAT wird: Ein gedrehtes Rechteck deckt seine
+   eigene Fläche nicht mehr ab, an den Ecken gucken sonst leere Dreiecke
+   heraus. Ein Quadrat mit der Bildschirmdiagonale als Seitenlänge deckt den
+   Bildschirm dagegen in jeder Drehlage ab. Die genaue Seitenlänge misst
+   passeKartenQuadratAn() in app.js aus und schreibt sie nach
+   --karten-quadrat; die 150vmax hier sind nur der Rückfallwert, falls diese
+   Messung noch nicht gelaufen ist - grosszügig gerundet, aber immer sicher.
+
+   Die negativen Ränder ziehen das Quadrat um seine halbe Grösse zurück und
+   setzen damit seine MITTE auf die Bildschirmmitte. Nur deshalb kann unten
+   ein reines rotate() stehen: Die Drehung dreht dann um genau diesen Punkt,
+   und das Umschalten in den Navi-Modus fängt sauber bei rotate(0deg) an,
+   statt sichtbar von irgendwo hereinzurutschen.                           */
+body.nav-modus #map {
+  inset: auto;
+  top: 50%;
+  left: 50%;
+  width:  var(--karten-quadrat, 150vmax);
+  height: var(--karten-quadrat, 150vmax);
+  margin-top:  calc(var(--karten-quadrat, 150vmax) / -2);
+  margin-left: calc(var(--karten-quadrat, 150vmax) / -2);
+  transform: rotate(var(--karten-drehung, 0deg));
+  /* Das GPS meldet etwa einmal pro Sekunde. Ohne diesen Übergang würde die
+     Karte im Sekundentakt ruckartig weiterspringen. */
+  transition: transform 0.6s ease-out;
+}
+
+/* Gegendrehung der Marker. Die Karte dreht sich als Ganzes, also drehen sich
+   alle Marker mit - Wegpunkt-Zahlen stünden auf dem Kopf, die Standortspitze
+   zeigte irgendwohin. Jeder Marker dreht deshalb um genau denselben Winkel
+   zurück und steht dadurch wieder gerade auf dem Bildschirm.
+
+   Das kostet keine einzige Zeile JavaScript pro Marker: Die Variable erbt von
+   #mapWrap herunter, also gilt die Regel automatisch auch für Marker, die
+   erst während der Fahrt dazukommen. Ausserhalb der Navigation ist der Wert
+   0deg und die Regel damit wirkungslos. Dieselbe Dauer wie oben, sonst
+   liefen Karte und Marker sichtbar auseinander. */
+.you-are-here,
+.wp-marker,
+.poi-marker,
+.foto-marker,
+.standort-marker {
+  transform: rotate(calc(-1 * var(--karten-drehung, 0deg)));
+  transition: transform 0.6s ease-out;
+}
+
+/* Sprechblasen (z.B. an einem Pass) hängen an ihrer Spitze, deshalb wird hier
+   um genau diese Spitze zurückgedreht - der Text bleibt lesbar, die Blase
+   bleibt am richtigen Ort. */
+.leaflet-popup-content-wrapper {
+  transform: rotate(calc(-1 * var(--karten-drehung, 0deg)));
+  transform-origin: bottom center;
+}
+
+/* Die Zoom-Knöpfe sitzen in den ECKEN des Kartenbehälters - und der ist
+   während der Fahrt viel grösser als der Bildschirm, seine Ecken liegen also
+   weit ausserhalb. Statt sie aufwendig zurückzurechnen blenden wir sie aus:
+   Die Karte zoomt während der Navigation ohnehin selbst auf Stufe 17 und
+   folgt der eigenen Position, von Hand zoomen will da niemand. */
+body.nav-modus .leaflet-control-container { display: none; }
 
 /* Leaflet-Bedienelemente etwas dunkler einfärben */
 .leaflet-control-attribution { display: none; }  /* wir zeigen die Quellen links im Panel */
