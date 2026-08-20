@@ -246,6 +246,27 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 .glas-rund:hover { background: rgba(255, 255, 255, 0.16); }
 .glas-rund:active { transform: scale(0.94); }
 
+/* Die blasse Fassung fuer den zweiten Knopf einer Gruppe. Gleich gross,
+   nur zurueckhaltender - so bleibt die Trefferflaeche voll erhalten und die
+   Rangfolge ist trotzdem auf den ersten Blick da. */
+.glas-rund.blass {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.72);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 4px 12px rgba(0, 0, 0, 0.3);
+}
+.glas-rund.blass:hover { background: rgba(255, 255, 255, 0.12); color: var(--text); }
+
+/* Wenn das Neuladen laeuft, dreht sich der Pfeil - sonst tippt man und ist
+   sich einen Wimpernschlag lang nicht sicher, ob etwas passiert ist. */
+.glas-rund.laedt .ic { animation: knopf-drehen 0.8s linear infinite; }
+@keyframes knopf-drehen {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
 /* ---------- Startbildschirm ----------
    Die Bildebene liegt fest hinter dem Inhalt und verlaeuft nach unten ins
    Dunkle. Sie scrollt NICHT mit (position: absolute im scrollenden
@@ -347,10 +368,22 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--s3);
+  /* Knapper Abstand, und der Grund ist gemessen: Seit rechts zwei Knoepfe
+     stehen statt einem, blieb dem Slogan auf 320 Punkten genau ein Pixel
+     zu wenig und er brach um. Die beiden stehen ohnehin weit auseinander,
+     der Abstand fehlt dort niemandem. */
+  gap: var(--s2);
   padding-top: max(var(--s5), env(safe-area-inset-top) + var(--s4));
 }
 .start-marke { max-width: 62%; }   /* Platz lassen, rechts steht die Maschine */
+/* Die beiden Knoepfe oben rechts. Sie duerfen nie schrumpfen - lieber
+   bricht der Schriftzug um, als dass eine Trefferflaeche kleiner wird. */
+.kopf-knoepfe {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+}
 /* Die Marke ist auf dem Startbildschirm das erste, was man sieht - deshalb
    deutlich groesser als im Bedienfeld. Die Groesse waechst mit der
    Bildschirmbreite mit, damit "KURVENJAGD" auch auf einem schmalen Geraet

@@ -2658,6 +2658,20 @@ document.getElementById('btnKontoRund').addEventListener('click', () => {
   document.getElementById('btnKontoAnmelden').click();
 });
 
+/* Neu laden. Die Rueckfrage ist kein Zierrat: Eine laufende Aufzeichnung
+   liegt im Arbeitsspeicher und ist nach dem Neuladen weg. Wer versehentlich
+   darauf tippt, waehrend eine Ausfahrt mitlaeuft, verliert sie sonst - und
+   das ist der einzige Fall in dieser App, in dem ein Fehlgriff etwas
+   kostet, das sich nicht wiederholen laesst. */
+document.getElementById('btnNeuLaden').addEventListener('click', ereignis => {
+  if (ride.aktiv || nav.aktiv) {
+    const was = ride.aktiv ? 'Aufzeichnung' : 'Navigation';
+    if (!confirm(`Es läuft gerade eine ${was}. Beim Neuladen geht sie verloren. Trotzdem neu laden?`)) return;
+  }
+  ereignis.currentTarget.classList.add('laedt');
+  geraet.frischLaden();
+});
+
 document.getElementById('btnStartPlaner').addEventListener('click', zeigePlaner);
 document.getElementById('btnStartTouren').addEventListener('click', zeigeMeineTouren);
 document.getElementById('btnStartGarage').addEventListener('click', zeigeGarage);

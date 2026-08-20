@@ -23,7 +23,7 @@
        "orientation": "portrait" im Manifest ist die Ansage, um die es hier
        geht: Diese App ist fuers Hochformat gebaut. Die spaetere Webseite
        bekommt ein eigenes Design fuers Querformat und ein eigenes Manifest. -->
-  <link rel="manifest" href="manifest.webmanifest?v=38">
+  <link rel="manifest" href="manifest.webmanifest?v=39">
 
   <!-- Faerbt die Statusleiste des Handys in die Grundflaeche der App, damit
        oben kein fremder heller Streifen stehen bleibt. -->
@@ -36,7 +36,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Kurvenjagd">
-  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=38">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=39">
 
   <!-- Fuer die spaetere Webseite und geteilte Routen: So sieht der Link aus,
        wenn ihn jemand in WhatsApp oder Instagram einfuegt. Ohne das steht
@@ -74,7 +74,7 @@
        durchgehend alte Version, weil die Seite dann Elemente enthält, die
        das Skript noch gar nicht kennt.
 
-       Für den Browser ist "app.js?v=38" eine andere Adresse als "app.js?v=26",
+       Für den Browser ist "app.js?v=39" eine andere Adresse als "app.js?v=26",
        er holt sie also frisch.
 
        WICHTIG: BEI JEDER VERÖFFENTLICHUNG die Zahl an ALLEN Stellen um eins
@@ -90,8 +90,8 @@
                    die spaetere Webseite genauso benutzen.
        style.css   die Anordnung DIESER App, ausgelegt auf Hochformat. Die
                    Webseite bekommt dafuer eine eigene Datei. -->
-  <link rel="stylesheet" href="design.css?v=38">
-  <link rel="stylesheet" href="style.css?v=38">
+  <link rel="stylesheet" href="design.css?v=39">
+  <link rel="stylesheet" href="style.css?v=39">
 </head>
 <body>
 
@@ -128,6 +128,13 @@
       <symbol id="icon-profil" viewBox="0 0 24 24">
         <circle cx="12" cy="8" r="3.8"/>
         <path d="M4.5 20c0-3.6 3.4-5.6 7.5-5.6s7.5 2 7.5 5.6"/>
+      </symbol>
+      <!-- Der Kreispfeil fuers Neuladen. Die Ecke oben rechts ist die
+           Pfeilspitze: Sie oeffnet sich entgegen der Laufrichtung, dadurch
+           liest man sie als Spitze, obwohl es nur zwei Striche sind. -->
+      <symbol id="icon-neu" viewBox="0 0 24 24">
+        <path d="M20.2 14.6A8.6 8.6 0 1 1 17.6 5.4L21.4 9.2"/>
+        <path d="M21.4 4.4v4.8h-4.8"/>
       </symbol>
       <symbol id="icon-kamera" viewBox="0 0 24 24">
         <path d="M4 8h2.8l1.4-2h7.6L17.2 8H20a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/>
@@ -237,9 +244,25 @@
           <h1 class="brand-title">Kurvenjagd</h1>
           <p class="start-slogan">Deine All-In-One Motorradapp</p>
         </div>
-        <button class="glas-rund" id="btnKontoRund" title="Konto" aria-label="Konto">
-          <svg class="ic gross"><use href="#icon-profil"></use></svg>
-        </button>
+        <!-- Zwei Knoepfe nebeneinander. Beide sind gleich GROSS - ein
+             Knopf, dessen Zweck das Erreichbarsein ist, darf nicht der
+             kleinste auf dem Bildschirm sein. Die Rangfolge macht
+             stattdessen die Farbe: Das Neuladen ist blasser, das Konto
+             bleibt der hellere von beiden.
+
+             Warum es diesen Knopf ueberhaupt gibt: Wer die App vom
+             Startbildschirm des Handys oeffnet, hat keine Adresszeile und
+             damit auch keinen Neu-laden-Knopf des Browsers. Selbst die App
+             zu schliessen hilft nicht immer, weil der Zwischenspeicher das
+             ueberlebt. Siehe geraet.frischLaden(). -->
+        <div class="kopf-knoepfe">
+          <button class="glas-rund blass" id="btnNeuLaden" title="App neu laden" aria-label="App neu laden">
+            <svg class="ic gross"><use href="#icon-neu"></use></svg>
+          </button>
+          <button class="glas-rund" id="btnKontoRund" title="Konto" aria-label="Konto">
+            <svg class="ic gross"><use href="#icon-profil"></use></svg>
+          </button>
+        </div>
       </header>
     </div>
 
@@ -1063,18 +1086,18 @@
   <!-- ZUERST, denn alle anderen benutzen geraet.* beim Laden. Hier steht der
        gesamte Zugriff aufs Geraet - Standort, Speicher, Dateien. Beim Umzug
        in die Stores ist das die einzige Datei, die sich aendert. -->
-  <script src="geraet.js?v=38"></script>
+  <script src="geraet.js?v=39"></script>
   <!-- Der Rechenteil: Kurvigkeit, Sackgassen, Rundtour-Punkte, GPX. Muss VOR
        app.js stehen, weil app.js diese Funktionen beim Routen aufruft. Die
        spaetere Webseite im Querformat laedt genau diese Datei ebenfalls und
        rechnet damit exakt so wie die App. -->
-  <script src="kern.js?v=38"></script>
-  <script src="app.js?v=38"></script>
+  <script src="kern.js?v=39"></script>
+  <script src="app.js?v=39"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=38"></script>
+  <script src="konto.js?v=39"></script>
   <!-- Nach app.js, weil die Garage verkleinereFoto() und showToast() von
        dort benutzt. -->
-  <script src="garage.js?v=38"></script>
+  <script src="garage.js?v=39"></script>
 </body>
 </html>
