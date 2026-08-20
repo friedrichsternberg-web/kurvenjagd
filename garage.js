@@ -52,28 +52,20 @@
 
 const GARAGE_SPEICHER = 'kurvenjagd.garage';
 
-/* Die Ausruestungsarten. Diese Liste ist die einzige Stelle, an der steht,
-   welche Arten es gibt: das Auswahlfeld im Dialog und die Symbole an der
-   Wand lesen beide von hier. Eine neue Art kostet also genau eine Zeile. */
-const AUSRÜSTUNGSARTEN = [
-  { schlüssel: 'helm',        name: 'Helm',        symbol: 'icon-helm' },
-  { schlüssel: 'jacke',       name: 'Jacke',       symbol: 'icon-jacke' },
-  { schlüssel: 'hose',        name: 'Hose',        symbol: 'icon-hose' },
-  { schlüssel: 'handschuhe',  name: 'Handschuhe',  symbol: 'icon-handschuh' },
-  { schlüssel: 'stiefel',     name: 'Stiefel',     symbol: 'icon-stiefel' },
-  { schlüssel: 'protektoren', name: 'Protektoren', symbol: 'icon-protektor' },
-  { schlüssel: 'sonstiges',   name: 'Sonstiges',   symbol: 'icon-koffer' },
-];
+/* AUSRUESTUNG IST VORERST DRAUSSEN.
 
-function artZuName(schlüssel) {
-  const art = AUSRÜSTUNGSARTEN.find(a => a.schlüssel === schlüssel);
-  return art ? art.name : 'Sonstiges';
-}
+   Die Wand mit den Haken, der Dialog zum Anlegen und die Liste der Arten
+   sind entfernt. Der Grund ist nicht, dass es nicht funktioniert haette,
+   sondern dass die Teile ohne Produktbilder aus einem Haendlerkatalog nur
+   als Symbol an der Wand haengen - und das ist zu wenig, um eine ganze
+   Reihe im Bild dafuer zu opfern.
 
-function artZuSymbol(schlüssel) {
-  const art = AUSRÜSTUNGSARTEN.find(a => a.schlüssel === schlüssel);
-  return art ? art.symbol : 'icon-koffer';
-}
+   Was BLEIBT, und zwar mit Absicht: Das Feld "ausruestung" in den
+   gespeicherten Daten. Wer frueher schon Teile angelegt hat, verliert sie
+   dadurch nicht. Sie werden nur nicht mehr gezeigt.
+
+   Der alte Stand steht in der Git-Historie und laesst sich zurueckholen,
+   sobald es Produktdaten gibt - siehe AUFGABEN.md. */
 
 /* Die Garage als Ganzes. motorräder ist von Anfang an eine Liste, obwohl
    erst einmal nur eines darin steht. Der Grund ist Erfahrung: Wer spaeter
@@ -317,7 +309,6 @@ function leistungInPS(text) {
 function zeichneGarage() {
   zeichneBuehne();
   zeichneDatenblatt();
-  zeichneHakenleiste();
 }
 
 /* --- Die Buehne: Maschine auf den Drehteller setzen -------------------------
@@ -347,7 +338,7 @@ const GARAGEN = [{
   // 1015 bis 1195. Umgerechnet in Anteile - dadurch bleiben die Werte
   // richtig, egal in welcher Groesse die Datei ausgeliefert wird.
   mitteX:    0.499,   // Mitte des Drehtellers
-  bodenY:    0.622,   // wo die Raeder aufsetzen: knapp vor der Tellermitte
+  bodenY:    0.610,   // wo die Raeder aufsetzen: die MITTE der Tellerellipse
   breite:    0.56,    // wie breit die MASCHINE wird (nicht die Bilddatei)
   tellerRx:  0.427,   // halbe Breite der Tellerellipse, fuer die Spiegelung
   tellerRy:  0.049,   // halbe Hoehe der Tellerellipse
@@ -417,7 +408,7 @@ function rahmenMessen(bildElement) {
   if (!schlüssel) return null;
   if (inhaltsrahmen.has(schlüssel)) return inhaltsrahmen.get(schlüssel);
 
-  const ganzesBild = { links: 0, rechts: 1, oben: 0, unten: 1 };
+  const ganzesBild = { links: 0, rechts: 1, oben: 0, unten: 1, boden: null };
   const bB = bildElement.naturalWidth, bH = bildElement.naturalHeight;
   if (!bB || !bH) return null;   // noch nicht geladen, spaeter nochmal
 
@@ -436,6 +427,10 @@ function rahmenMessen(bildElement) {
     // laeuft nach aussen aus. Wer jeden Hauch von Deckkraft mitzaehlt,
     // misst den Schleier statt der Maschine.
     let l = b, r = -1, o = h, u = -1;
+    // Nebenbei je Spalte den untersten sichtbaren Punkt merken - daraus
+    // ergibt sich die Unterkante der Maschine und damit, wo die Reifen
+    // sitzen und ob sie schief stehen.
+    const boden = new Array(b).fill(-1);
     for (let y = 0; y < h; y++) {
       for (let x = 0; x < b; x++) {
         if (punkte[(y * b + x) * 4 + 3] < 24) continue;
@@ -443,10 +438,14 @@ function rahmenMessen(bildElement) {
         if (x > r) r = x;
         if (y < o) o = y;
         if (y > u) u = y;
+        if (y > boden[x]) boden[x] = y;
       }
     }
     if (r >= l && u >= o) {
-      rahmen = { links: l / b, rechts: (r + 1) / b, oben: o / h, unten: (u + 1) / h };
+      rahmen = {
+        links: l / b, rechts: (r + 1) / b, oben: o / h, unten: (u + 1) / h,
+        boden: boden.map(wert => wert < 0 ? -1 : wert / (h - 1 || 1)),
+      };
     }
   } catch {
     /* Kann die Leinwand nicht gelesen werden - etwa weil das Bild von einem
@@ -458,6 +457,165 @@ function rahmenMessen(bildElement) {
   inhaltsrahmen.set(schlüssel, rahmen);
   return rahmen;
 }
+
+
+/* --- Steht die Maschine schief? ---------------------------------------------
+
+   Friedrich hat es an seinem eigenen Foto gemeldet: Nur das Hinterrad steht
+   auf der Plattform, das Vorderrad haengt darueber hinaus.
+
+   Der Grund ist die Aufnahme. Wer sein Motorrad schraeg von hinten
+   fotografiert, hat das nahe Rad tiefer im Bild als das ferne - die Linie
+   zwischen den beiden Aufsetzpunkten laeuft schraeg. Setzt man so ein Bild
+   waagerecht auf einen runden Teller, landet nur ein Rad darauf.
+
+   WAS HIER PASSIERT: Aus der Unterkante der Maschine werden die beiden
+   Aufsetzpunkte gesucht - links und rechts je der tiefste Bereich, das sind
+   die Reifen. Die Neigung der Verbindungslinie ist der Winkel, um den das
+   Bild zurueckgedreht werden muss, damit beide Raeder gleich hoch stehen.
+
+   ROBUST GEGEN AUSREISSER: Nicht die eine tiefste Spalte zaehlt, sondern der
+   Mittelwert aller Spalten, die nahe daran liegen. Ein einzelner Ausreisser -
+   ein Seitenstaender, ein Grashalm am Rand des Freistellers - verschiebt das
+   Ergebnis dadurch kaum.
+
+   WIE VIEL gedreht wird, entscheidet NICHT diese Funktion. Sie misst nur.
+   Der Grund steht bei drehungNoetig() weiter unten und ist wichtig: Eine
+   schraege Radlinie ist nicht automatisch ein Fehler. */
+
+const DREHUNG_MINDESTENS = 1.5;   // Grad, darunter ist es Rauschen
+const DREHUNG_HOECHSTENS = 14;    // Grad, darueber wird es unnatuerlich
+
+function standflaeche(rahmen, bildBreite, bildHoehe) {
+  if (!rahmen || !rahmen.boden) return null;
+  const boden = rahmen.boden;
+  const anzahl = boden.length;
+
+  const von = Math.floor(rahmen.links * anzahl);
+  const bis = Math.ceil(rahmen.rechts * anzahl);
+  if (bis - von < 8) return null;      // zu schmal, um zwei Raeder zu trennen
+
+  /* DIE BEIDEN RAEDER FINDEN, und der erste Ansatz taugte nicht: "der
+     tiefste Punkt der linken Haelfte und der der rechten" liefert bei einer
+     stark verkanteten Aufnahme zwei Punkte dicht nebeneinander - beide am
+     selben Rad. Aus zwei nahen Punkten laesst sich aber keine verlaessliche
+     Neigung ableiten, kleine Messfehler werden dabei riesig.
+
+     Deshalb: erst den tiefsten Punkt ueberhaupt suchen, das ist mit Sicherheit
+     ein Rad. Dann diesen Bereich ausblenden und den tiefsten des Rests suchen -
+     das ist das andere. So liegen die beiden immer weit auseinander. */
+
+  const spanne = bis - von;
+  /* Zwei verschiedene Breiten, und sie zu verwechseln war der Fehler im
+     ersten Anlauf:
+
+     nahbereich     wie weit um die tiefste Stelle herum noch zum SELBEN Rad
+                    gehoert. Schmal, sonst mittelt man den Reifen mit dem
+                    Motorblock daneben.
+     mindestAbstand wie weit das ANDERE Rad mindestens entfernt sein muss.
+                    Breit, denn zwei Raeder stehen nun einmal weit
+                    auseinander. War dieser Wert zu klein, fand die Suche das
+                    zweite Rad direkt neben dem ersten - also in Wirklichkeit
+                    noch einmal dasselbe. */
+  const nahbereich = Math.max(2, Math.round(spanne * 0.12));
+  const mindestAbstand = Math.max(4, Math.round(spanne * 0.40));
+
+  // Der tiefste Bereich in einem Abschnitt, als Mittelwert aller Spalten
+  // dicht daran - unempfindlich gegen einen einzelnen Ausreisser.
+  function tiefsterBereich(erlaubt) {
+    let tiefste = -1, tiefsteStelle = -1;
+    for (let i = von; i < bis; i++) {
+      if (!erlaubt(i) || boden[i] < 0) continue;
+      if (boden[i] > tiefste) { tiefste = boden[i]; tiefsteStelle = i; }
+    }
+    if (tiefsteStelle < 0) return null;
+    let summeX = 0, summeY = 0, zahl = 0;
+    for (let i = von; i < bis; i++) {
+      if (!erlaubt(i) || boden[i] < 0 || boden[i] < tiefste - 0.02) continue;
+      // Nur was in der Naehe der tiefsten Stelle liegt, gehoert zu diesem Rad.
+      if (Math.abs(i - tiefsteStelle) > nahbereich) continue;
+      summeX += (i + 0.5) / anzahl; summeY += boden[i]; zahl++;
+    }
+    return zahl ? { x: summeX / zahl, y: summeY / zahl, stelle: tiefsteStelle } : null;
+  }
+
+  const erstes = tiefsterBereich(() => true);
+  if (!erstes) return null;
+  const zweites = tiefsterBereich(i => Math.abs(i - erstes.stelle) >= mindestAbstand);
+  if (!zweites) return null;
+
+  const hinten = erstes.x <= zweites.x ? erstes : zweites;
+  const vorne  = erstes.x <= zweites.x ? zweites : erstes;
+
+  /* Liegen die beiden trotzdem noch nah beieinander, ist die Messung nicht
+     zu gebrauchen. Lieber gar keine Neigung annehmen als eine falsche - eine
+     unnoetige Drehung faellt sofort auf, eine fehlende kaum. */
+  if ((vorne.x - hinten.x) * anzahl < spanne * 0.3) return null;
+
+  // In Bildpunkte umrechnen, sonst waere der Winkel vom Seitenverhaeltnis
+  // des Fotos abhaengig statt von der Wirklichkeit.
+  const dx = (vorne.x - hinten.x) * bildBreite;
+  const dy = (vorne.y - hinten.y) * bildHoehe;
+  if (dx <= 0) return null;
+
+  const winkel = Math.atan2(dy, dx) * 180 / Math.PI;
+
+  return {
+    winkel,                                   // Grad, positiv = rechts tiefer
+    mitteX: (hinten.x + vorne.x) / 2,         // Mitte zwischen den Raedern
+    mitteY: (hinten.y + vorne.y) / 2,
+    spannweite: vorne.x - hinten.x,           // Radstand, Anteil der Bildbreite
+  };
+}
+
+/* --- Wie weit muss gedreht werden? ------------------------------------------
+
+   HIER STECKT DIE EIGENTLICHE EINSICHT, und der erste Versuch lag daneben:
+
+   Eine schraege Radlinie ist NICHT automatisch ein Fehler. Wer sein Motorrad
+   schraeg von vorn oder hinten fotografiert, hat das nahe Rad tiefer im Bild
+   als das ferne - vollkommen richtig so, das ist Perspektive. Dreht man ein
+   solches Bild gerade, kippt die Maschine sichtbar nach hinten. Genau das ist
+   beim ersten Versuch mit dem Standardmotorrad passiert.
+
+   Der Drehteller ist aber selbst perspektivisch gezeichnet: eine Ellipse,
+   breiter als hoch. Ein Motorrad, das schraeg darauf steht, DARF seine Raeder
+   auf verschiedenen Hoehen haben - solange beide innerhalb dieser Ellipse
+   liegen. Erst wenn eines darueber hinausragt, stimmt etwas nicht.
+
+   Daraus wird eine Regel, die ohne Raterei auskommt:
+
+     Gedreht wird nur so weit, dass beide Raeder gerade eben auf den Teller
+     passen. Passen sie ohnehin, wird gar nicht gedreht.
+
+   Rechnerisch: Die Ellipse erlaubt bei einem waagerechten Abstand dx von
+   ihrer Mitte einen senkrechten Abstand von hoechstens
+
+       ry * Wurzel(1 - (dx/rx)^2)
+
+   Ist die Radlinie steiler als das, wird der Ueberschuss weggedreht - und
+   keinen Grad mehr. */
+function drehungNoetig(stand, halbeSpanneAufSchirm, tellerRxPx, tellerRyPx) {
+  if (!stand || halbeSpanneAufSchirm <= 1) return 0;
+
+  const steigung = Math.tan(stand.winkel * Math.PI / 180);
+  const anteil = Math.min(1, halbeSpanneAufSchirm / Math.max(1, tellerRxPx));
+  /* Der Sicherheitsabstand von 0,8 sorgt dafuer, dass die Raeder AUF dem
+     Teller stehen und nicht genau auf seiner Kante balancieren. Ohne ihn
+     waere die Regel formal erfuellt und sieht trotzdem knapp aus. */
+  const erlaubteHoehe = tellerRyPx * 0.8 * Math.sqrt(Math.max(0, 1 - anteil * anteil));
+  const erlaubteSteigung = erlaubteHoehe / halbeSpanneAufSchirm;
+
+  if (Math.abs(steigung) <= erlaubteSteigung) return 0;   // passt schon, Finger weg
+
+  // Nur den Ueberschuss wegdrehen, nicht die ganze Neigung.
+  const zielSteigung = Math.sign(steigung) * erlaubteSteigung;
+  const drehung = (Math.atan(steigung) - Math.atan(zielSteigung)) * 180 / Math.PI;
+
+  if (Math.abs(drehung) < DREHUNG_MINDESTENS) return 0;
+  return Math.max(-DREHUNG_HOECHSTENS, Math.min(DREHUNG_HOECHSTENS, drehung));
+}
+
 
 function zeichneBuehne() {
   const motorrad = motorradAktiv();
@@ -502,7 +660,6 @@ function zeichneBuehne() {
           .classList.toggle('ist-standard', !(motorrad && motorrad.bild));
 
   setzeBuehnenPlatz();
-  zeichneAufsetzpunkte(motorrad);
 }
 
 /* Rechnet aus, welcher Ausschnitt des Raumbilds zu sehen ist und wo darin
@@ -553,18 +710,48 @@ function setzeBuehnenPlatz() {
   const seitenverhältnis = (bild.naturalWidth && bild.naturalHeight)
     ? bild.naturalHeight / bild.naturalWidth : 1;
 
+  // Die Ellipse des Drehtellers auf dem Schirm - Grundlage sowohl fuer die
+  // Spiegelung als auch fuer die Frage, ob gedreht werden muss.
+  const tellerRxPx = garageBild.tellerRx * bildB * massstab;
+  const tellerRyPx = garageBild.tellerRy * bildH * massstab;
+
   // Das Bildelement wird so breit gemacht, dass der INHALT die Zielbreite
   // hat. Steht die Maschine nur auf der halben Bildbreite, wird das Element
   // doppelt so breit - sichtbar ist am Ende trotzdem die Zielbreite.
-  const zielBreite = garageBild.breite * bildB * massstab;
+  let zielBreite = garageBild.breite * bildB * massstab;
   const inhaltAnteil = Math.max(0.05, rahmen.rechts - rahmen.links);
+  const stand = standflaeche(rahmen, bild.naturalWidth, bild.naturalHeight);
+
+  /* Notbremse: Ist der Radstand breiter als der Teller, hilft kein Drehen -
+     dann steht die Maschine unweigerlich darueber hinaus. In dem Fall wird
+     sie so weit verkleinert, dass sie darauf passt. Das tritt bei einer
+     Seitenansicht mit langem Radstand auf, etwa einem Tourer. */
+  if (stand && stand.spannweite > 0) {
+    const radstandAufSchirm = (stand.spannweite / inhaltAnteil) * zielBreite;
+    const platz = tellerRxPx * 1.72;      // knapp innerhalb der Tellerbreite
+    if (radstandAufSchirm > platz) zielBreite *= platz / radstandAufSchirm;
+  }
+
   const elementBreite = zielBreite / inhaltAnteil;
   const elementHöhe = elementBreite * seitenverhältnis;
 
-  // Wie weit die Raeder ueber der Elementunterkante liegen, und wie weit die
-  // Mitte der Maschine von der Elementmitte abweicht.
-  const bodenAbstand = (1 - rahmen.unten) * elementHöhe;
-  const inhaltMitte = (rahmen.links + rahmen.rechts) / 2;
+  /* Schritt 5: Muss die Maschine gedreht werden, damit beide Raeder auf dem
+     Teller landen? Die Antwort ist oft NEIN - siehe drehungNoetig(). */
+  const drehung = drehungNoetig(
+    stand, (stand ? stand.spannweite : 0) / 2 * elementBreite, tellerRxPx, tellerRyPx);
+
+  /* Der Bezugspunkt fuer alles Weitere ist die MITTE ZWISCHEN DEN RAEDERN,
+     nicht der unterste Bildpunkt. Bei einer schiefen Maschine sind das zwei
+     verschiedene Stellen: Der unterste Punkt ist das tiefere Rad, die Mitte
+     liegt darueber. Auf den Teller gehoert die Mitte.
+
+     Ohne erkannte Raeder - bei einem Bild ohne Durchsichtigkeit etwa - bleibt
+     es beim untersten Punkt und der Bildmitte, also beim Verhalten von
+     vorher. */
+  const fussY = stand ? stand.mitteY : rahmen.unten;
+  const fussX = stand ? stand.mitteX : (rahmen.links + rahmen.rechts) / 2;
+
+  const bodenAbstand = (1 - fussY) * elementHöhe;
 
   const buehne = ansicht.parentElement;   // die Buehne haelt den Stapel
   // Der Stapel haengt in der Buehne, gerechnet wird im Raum - der Versatz
@@ -572,8 +759,15 @@ function setzeBuehnenPlatz() {
   const versatzOben = buehne.offsetTop, versatzLinks = buehne.offsetLeft;
 
   ansicht.style.width = `${elementBreite}px`;
-  ansicht.style.left = `${ankerX - versatzLinks - inhaltMitte * elementBreite}px`;
+  ansicht.style.left = `${ankerX - versatzLinks - fussX * elementBreite}px`;
   ansicht.style.bottom = `${(buehne.offsetHeight + versatzOben) - ankerY - bodenAbstand}px`;
+
+  /* Gedreht wird um genau diesen Punkt. Das ist der Kniff: Waehlt man die
+     Elementmitte als Drehpunkt, wandern die Raeder beim Drehen vom Teller
+     herunter und muessten anschliessend nachgerechnet werden. Dreht man um
+     den Aufsetzpunkt, bleibt er liegen, wo er hingehoert. */
+  ansicht.style.transformOrigin = `${fussX * elementBreite}px ${fussY * elementHöhe}px`;
+  ansicht.style.transform = drehung ? `rotate(${-drehung}deg)` : '';
 
   /* Schatten, Spiegelung und Glut haengen alle an der Bodenlinie der
      Maschine, nicht an der Elementkante - sonst wandern sie mit dem leeren
@@ -585,13 +779,13 @@ function setzeBuehnenPlatz() {
   ansicht.style.setProperty('--schatten-unten', `${bodenAbstand * (1 - 0.16)}px`);
   // Die Spiegelung wird an der Bodenlinie geklappt. Weil das Element dabei
   // um seine Mitte kippt, muss der leere Rand doppelt herausgerechnet werden.
-  ansicht.style.setProperty('--spiegel-oben', `${(2 * rahmen.unten - 1) * elementHöhe}px`);
+  ansicht.style.setProperty('--spiegel-oben', `${(2 * fussY - 1) * elementHöhe}px`);
   // Die Glut leuchtet von der Bodenlinie nach oben.
-  ansicht.style.setProperty('--glut-kante', `${(1 - rahmen.unten) * 100}%`);
+  ansicht.style.setProperty('--glut-kante', `${(1 - fussY) * 100}%`);
 
   // Die Tellerellipse fuer die Spiegelung, umgerechnet auf den Stapel.
-  ansicht.style.setProperty('--teller-rx', `${garageBild.tellerRx * bildB * massstab}px`);
-  ansicht.style.setProperty('--teller-ry', `${garageBild.tellerRy * bildH * massstab}px`);
+  ansicht.style.setProperty('--teller-rx', `${tellerRxPx}px`);
+  ansicht.style.setProperty('--teller-ry', `${tellerRyPx}px`);
   ansicht.style.setProperty('--buehne-helligkeit', garageBild.helligkeit);
   ansicht.style.setProperty('--schatten-staerke', garageBild.schatten ?? 0.62);
   ansicht.style.setProperty('--glut-staerke', garageBild.glut ?? 0.4);
@@ -599,6 +793,7 @@ function setzeBuehnenPlatz() {
 
   // Der Kontaktschatten sitzt genau unter den Raedern und ist so breit wie
   // die Maschine, nicht wie das Element.
+  zeichneAufsetzpunkte(rahmen, stand, bild.naturalWidth, bild.naturalHeight);
   const kontakt = document.getElementById('motorradKontakt');
   kontakt.style.width = `${zielBreite}px`;
   kontakt.style.left = `${rahmen.links * elementBreite}px`;
@@ -617,29 +812,46 @@ function setzeBuehnenPlatz() {
    darunter. Felder mehr als vier Prozent darueber - Motorblock, Auspuff -
    bekommen gar nichts: Was den Boden nicht beruehrt, wirft hier keinen
    harten Schatten. */
-function zeichneAufsetzpunkte(motorrad) {
+function zeichneAufsetzpunkte(rahmen, stand, bildBreite, bildHoehe) {
   const leinwand = document.getElementById('motorradKontakt');
   const stift = leinwand.getContext('2d');
   leinwand.width = 480; leinwand.height = 56;
   stift.clearRect(0, 0, leinwand.width, leinwand.height);
 
-  const linie = motorrad && motorrad.bodenlinie;
-  if (!Array.isArray(linie) || linie.length === 0) return;   // dann nur der Grundschatten
+  const boden = rahmen && rahmen.boden;
+  if (!Array.isArray(boden) || !boden.length) return;   // dann nur der Grundschatten
 
-  const belegt = linie.filter(wert => wert >= 0);
-  if (belegt.length === 0) return;
-  const tiefste = Math.max(...belegt);
+  /* Der Boden ist bei einer schief aufgenommenen Maschine keine waagerechte
+     Hoehe, sondern die SCHRAEGE LINIE zwischen den beiden Aufsetzpunkten.
+     Wuerde man wie frueher gegen den tiefsten Punkt im ganzen Bild pruefen,
+     bekaeme nur das tiefere Rad einen Kontaktschatten und das hoehere gar
+     keinen - obwohl beide gleich fest auf dem Teller stehen. */
+  const steigung = stand
+    ? Math.tan(stand.winkel * Math.PI / 180) * bildBreite / bildHoehe
+    : 0;
+  const bezugX = stand ? stand.mitteX : 0.5;
+  const bezugY = stand ? stand.mitteY : Math.max(...boden.filter(w => w >= 0));
+  const linieBei = x => bezugY + (x - bezugX) * steigung;
 
-  const feldBreite = leinwand.width / linie.length;
+  // Die Leinwand deckt nur den Bereich ab, in dem die Maschine steht -
+  // deshalb wird auch nur dieser Ausschnitt der Bodenlinie darauf abgebildet.
+  const von = Math.floor(rahmen.links * boden.length);
+  const bis = Math.ceil(rahmen.rechts * boden.length);
+  const spanne = Math.max(1, bis - von);
+  const feldBreite = leinwand.width / spanne;
   const mitte = leinwand.height / 2;
-  for (let feld = 0; feld < linie.length; feld++) {
-    if (linie[feld] < 0) continue;
-    const abstand = tiefste - linie[feld];         // 0 = beruehrt den Boden
+
+  for (let i = von; i < bis; i++) {
+    if (boden[i] === undefined || boden[i] < 0) continue;
+    const x0 = (i + 0.5) / boden.length;
+    // Wie weit haengt diese Spalte ueber dem Boden? 0 heisst: sie steht darauf.
+    const abstand = Math.max(0, linieBei(x0) - boden[i]);
     const staerke = Math.max(0, 1 - abstand / 0.04);
     if (staerke <= 0) continue;
 
-    const x = (feld + 0.5) * feldBreite;
-    const verlauf = stift.createRadialGradient(x, mitte, 0, x, mitte, feldBreite * 1.6);
+    const x = (i - von + 0.5) * feldBreite;
+    const radius = Math.max(4, feldBreite * 1.6);
+    const verlauf = stift.createRadialGradient(x, mitte, 0, x, mitte, radius);
     verlauf.addColorStop(0, `rgba(0, 0, 0, ${0.85 * staerke})`);
     verlauf.addColorStop(1, 'rgba(0, 0, 0, 0)');
     stift.fillStyle = verlauf;
@@ -647,7 +859,7 @@ function zeichneAufsetzpunkte(motorrad) {
     // Flachgedrueckt: ein Aufsetzpunkt ist breiter als hoch.
     stift.translate(x, mitte); stift.scale(1, 0.34); stift.translate(-x, -mitte);
     stift.beginPath();
-    stift.arc(x, mitte, feldBreite * 1.6, 0, Math.PI * 2);
+    stift.arc(x, mitte, radius, 0, Math.PI * 2);
     stift.fill();
     stift.restore();
   }
@@ -693,36 +905,6 @@ function zeichneDatenblatt() {
         ${sicher(eintrag.modell || eintrag.marke || 'Maschine ' + (platz + 1))}
       </button>`)
     .join('');
-}
-
-/* Die Hakenleiste an der Wand. Jedes Ausruestungsteil haengt an einem
-   eigenen Haken. Ist noch nichts da, haengen drei leere Haken dort - das
-   erklaert ohne Worte, wofuer die Leiste gedacht ist. */
-function zeichneHakenleiste() {
-  const leiste = document.getElementById('hakenleiste');
-  const plus = `
-    <button class="haken-teil haken-plus" data-neu="ausrüstung" title="Ausrüstung hinzufügen">
-      <span class="haken-bild"><svg class="ic"><use href="#icon-plus"></use></svg></span>
-      <span class="haken-name">Hinzuf&uuml;gen</span>
-    </button>`;
-
-  if (garage.ausrüstung.length === 0) {
-    leiste.innerHTML = `
-      <div class="haken-teil haken-leer"></div>
-      <div class="haken-teil haken-leer"></div>
-      <div class="haken-teil haken-leer"></div>` + plus;
-    return;
-  }
-
-  leiste.innerHTML = garage.ausrüstung.map(teil => `
-    <button class="haken-teil" data-teil="${sicher(teil.id)}" title="${sicher([teil.marke, teil.name].filter(Boolean).join(' '))}">
-      <span class="haken-bild">
-        ${teil.bild
-          ? `<img src="${sicher(teil.bild)}" alt="">`
-          : `<svg class="ic gross"><use href="#${artZuSymbol(teil.art)}"></use></svg>`}
-      </span>
-      <span class="haken-name">${sicher(teil.name || artZuName(teil.art))}</span>
-    </button>`).join('') + plus;
 }
 
 // Tausendertrennung, damit 12400 als 12.400 dasteht.
@@ -965,73 +1147,6 @@ function zeichneFotoVorschau() {
       + 'eine feste Kamera, und eine Seitenansicht passt am nat&uuml;rlichsten hinein.';
 }
 
-
-/* --- Ausruestung ------------------------------------------------------- */
-
-function öffneAusrüstungsDialog(vorhandenes = null) {
-  öffneDialog({
-    titel: vorhandenes ? 'Ausrüstung bearbeiten' : 'Ausrüstung hinzufügen',
-    felder: `
-      <p class="hint hinweis-kasten">
-        Bilder zur Ausr&uuml;stung sollen genauso aus einer Suche kommen wie beim
-        Motorrad, ueber die Produktdaten der Shops. Solange der Zugang dazu
-        fehlt, h&auml;ngt an der Wand das Zeichen der jeweiligen Art.
-      </p>
-
-      <label for="feldArt">Art</label>
-      <select id="feldArt">
-        ${AUSRÜSTUNGSARTEN.map(art => `
-          <option value="${art.schlüssel}" ${vorhandenes?.art === art.schlüssel ? 'selected' : ''}>${art.name}</option>`).join('')}
-      </select>
-
-      <label for="feldTeilName">Bezeichnung</label>
-      <input type="text" id="feldTeilName" placeholder="Rallye 3" value="${sicher(vorhandenes?.name)}">
-
-      <div class="dialog-paar">
-        <div>
-          <label for="feldTeilMarke">Marke</label>
-          <input type="text" id="feldTeilMarke" placeholder="Schuberth" value="${sicher(vorhandenes?.marke)}">
-        </div>
-        <div>
-          <label for="feldTeilGröße">Gr&ouml;&szlig;e</label>
-          <input type="text" id="feldTeilGröße" placeholder="M" value="${sicher(vorhandenes?.größe)}">
-        </div>
-      </div>
-
-      <label for="feldTeilNotiz">Notiz</label>
-      <textarea id="feldTeilNotiz" rows="2" placeholder="Gekauft 2024, Visier gewechselt">${sicher(vorhandenes?.notiz)}</textarea>
-    `,
-
-    beimSpeichern: () => {
-      const datensatz = {
-        id:     vorhandenes ? vorhandenes.id : String(Date.now()),
-        art:    feldWert('feldArt') || 'sonstiges',
-        name:   feldWert('feldTeilName'),
-        marke:  feldWert('feldTeilMarke'),
-        größe:  feldWert('feldTeilGröße'),
-        notiz:  feldWert('feldTeilNotiz'),
-        bild:   null,
-      };
-
-      if (!datensatz.name && !datensatz.marke) {
-        showToast('Trag eine Bezeichnung oder eine Marke ein.');
-        return false;
-      }
-
-      const platz = garage.ausrüstung.findIndex(teil => teil.id === datensatz.id);
-      if (platz >= 0) garage.ausrüstung[platz] = datensatz;
-      else garage.ausrüstung.push(datensatz);
-
-      return sichereGarageWeg();
-    },
-
-    beimLöschen: vorhandenes ? () => {
-      if (!confirm('Dieses Teil wirklich entfernen?')) return false;
-      garage.ausrüstung = garage.ausrüstung.filter(teil => teil.id !== vorhandenes.id);
-      return sichereGarageWeg();
-    } : null,
-  });
-}
 
 /* Speichern mit ehrlicher Rueckmeldung. Wenn der Browser-Speicher voll ist,
    muss das gesagt werden - sonst haette man etwas eingetragen, den Dialog
@@ -2149,14 +2264,6 @@ verkabele('motorradUmschalter', 'click', ereignis => {
   zeichneGarage();
 });
 
-// Die Hakenleiste: entweder das Plus oder ein Teil zum Bearbeiten.
-verkabele('hakenleiste', 'click', ereignis => {
-  if (ereignis.target.closest('[data-neu]')) { öffneAusrüstungsDialog(null); return; }
-  const knopf = ereignis.target.closest('[data-teil]');
-  if (!knopf) return;
-  const teil = garage.ausrüstung.find(eintrag => eintrag.id === knopf.dataset.teil);
-  if (teil) öffneAusrüstungsDialog(teil);
-});
 
 // Der Dialog: Speichern, Loeschen, Schliessen.
 verkabele('btnGarageDialogSpeichern', 'click', () => {

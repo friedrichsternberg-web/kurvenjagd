@@ -183,6 +183,23 @@ soll.
 
 ---
 
+### Ausrüstung wieder einbauen, wenn es Produktdaten gibt
+
+Die Hakenleiste an der Wand, der Dialog zum Anlegen und die Liste der Arten
+sind am 20.08.2026 **entfernt** worden. Nicht weil sie kaputt waren, sondern
+weil Ausrüstungsteile ohne Produktbilder aus einem Händlerkatalog nur als
+Symbol an der Wand hängen – zu wenig, um eine ganze Reihe im Bild dafür
+aufzugeben.
+
+Das Feld `ausrüstung` in den gespeicherten Daten **bleibt bestehen**. Wer
+früher Teile angelegt hat, verliert sie nicht, sie werden nur nicht gezeigt.
+
+Der alte Stand liegt in der Git-Historie und lässt sich zurückholen, sobald
+es echte Produktdaten gibt. Dazu braucht es vorher Impressum und
+Datenschutzerklärung, siehe oben.
+
+---
+
 ## Kleinkram, der irgendwann nervt
 
 - **Versionsnummer.** `?v=` steht an neun Stellen in `index.html` (seit
