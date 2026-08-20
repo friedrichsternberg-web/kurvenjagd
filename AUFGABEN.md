@@ -36,15 +36,55 @@ Wege:
 
 Je länger das Plugin drin bleibt, desto mehr hängt daran.
 
-### 2. Konto löschen in der App
+### 2. Konto löschen in der App — ERLEDIGT, bis auf einen Handgriff
 
-Beide Stores verlangen zwingend einen Weg, das eigene Konto **innerhalb der
-App** zu löschen. Nicht per E-Mail, nicht per Formular auf einer Webseite.
-Kommt zusammen mit den Konten, nicht danach – nachträglich eingebaut heißt,
-jede Tabelle nochmal anfassen.
+Gebaut am 20.08.2026. Der Weg liegt im Startmenü neben "Abmelden" und führt
+auf einen eigenen Bildschirm: Aufzählung dessen, was verschwindet, Abfrage
+des Passworts, dann Fotos, Touren, Auth-Konto und die lokalen Daten.
 
-Dazu gehört: Was passiert mit geteilten Routen und mit Ausfahrten, an denen
-andere teilgenommen haben?
+Was wobei passiert, steht in `DATEN.md` unter "Was beim Löschen des Kontos
+passiert". Dort steht auch die Regel für geteilte Routen und Ausfahrten:
+Beides bleibt bestehen, der Bezug zur Person verschwindet. Gebaut ist davon
+nichts, weil es beides noch nicht gibt — die Regel steht dort, damit die
+späteren Tabellen sich danach richten. **Wichtig für später:** die Spalte
+mit dem Veranstalter darf nicht auf `ON DELETE CASCADE` stehen, sonst reißt
+ein gelöschtes Konto die Ausfahrten anderer Leute mit.
+
+Die Edge Function `konto-loeschen` liegt seit dem 20.08.2026 auf dem Server
+(Version 1, JWT-Prüfung an). Der Quelltext steht daneben in
+`supabase/functions/konto-loeschen/index.ts` — wer ihn ändert, muss ihn im
+Dashboard unter **Edge Functions** neu hochladen, sonst laufen Datei und
+Server auseinander.
+
+Einen Schlüssel musst du nirgends eintragen: Supabase legt der Funktion den
+service_role-Schlüssel von selbst als Umgebungsvariable bei. Genau deshalb
+steht er nicht im Code — das Repository ist öffentlich.
+
+Geprüft ist bisher, dass die Funktion erreichbar ist und Aufrufe ohne
+gültige Anmeldung mit 401 abweist (ohne Token und mit erfundenem Token),
+und dass der Browser-Preflight durchgeht.
+
+**NOCH ZU TUN: der scharfe Durchlauf.** Mit einem **Wegwerfkonto**, nicht mit
+dem eigenen — es gibt keine Sicherung, und im Projekt steht bisher nur ein
+einziges Konto.
+
+1. In der App ein Konto auf eine Zweitadresse anlegen und den
+   Bestätigungslink anklicken.
+2. Eine Tour speichern und **ein Foto** dazulegen. Ohne Foto prüft der
+   Durchlauf den halben Weg nicht, denn die Fotos sind der Teil, der
+   nicht von selbst mitverschwindet.
+3. Im Startmenü auf **Konto löschen**, Passwort eingeben, löschen.
+4. Im Supabase-Dashboard an drei Stellen nachsehen:
+   - **Table Editor → touren:** keine Zeile mehr mit dieser `nutzer_id`
+   - **Storage → tourfotos:** der Ordner mit der `nutzer_id` ist leer
+     beziehungsweise weg
+   - **Authentication → Users:** das Konto ist verschwunden
+5. Danach in der App nachsehen, dass Touren und Garage auch auf dem Gerät
+   weg sind.
+
+Geht bei Schritt 3 etwas schief, steht der Grund im Dashboard unter
+**Edge Functions → konto-loeschen → Logs**. Die App zeigt dem Nutzer
+absichtlich nur einen kurzen Satz, die Einzelheiten bleiben auf dem Server.
 
 ### 3. Impressum und Datenschutzerklärung
 

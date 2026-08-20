@@ -41,7 +41,7 @@ Dateien. Das ist auch der Grund für die 5-MB-Grenze und dafür, dass
 | **vpic.nhtsa.dot.gov** | Motorradmodelle im Finder | Marke und Baujahr, keine Nutzerdaten | USA |
 | **unpkg.com** | Leaflet | IP-Adresse durch den Abruf | USA |
 | **cdn.jsdelivr.net** | Supabase-Bibliothek, ONNX-Laufzeit | IP-Adresse durch den Abruf | USA |
-| **Supabase** (`copydwpdqpnwjvknsakz`) | Konten, geteilte Touren, Fotos | E-Mail, Touren, Fotos | siehe unten |
+| **Supabase** (`copydwpdqpnwjvknsakz`) | Konten, geteilte Touren, Fotos | E-Mail, Touren, Fotos | EU (Schweden, `eu-north-1`) |
 
 **Ungenutzt, aber im Code vorbereitet:** `carimagesapi.com` und
 `api.api-ninjas.com`. Beide haben keinen Schlüssel und werden nicht
@@ -57,9 +57,65 @@ das ist dann seine Entscheidung, nicht die der App.
 
 ### Bei angemeldeten Nutzern
 
-Touren wandern in die Tabelle `touren`, Fotos in den Behälter für Tourfotos.
-Beides ist mit dem Konto verknüpft und muss beim Löschen des Kontos
-mitverschwinden, siehe Aufgabe 2 in `AUFGABEN.md`.
+Touren wandern in die Tabelle `touren`, Fotos in den Behälter `tourfotos`.
+Der Behälter ist **nicht öffentlich**; zum Anzeigen erzeugt die App einen
+signierten Link, der nach einer Stunde verfällt.
+
+---
+
+## Was beim Löschen des Kontos passiert
+
+Beide Stores verlangen diesen Weg zwingend **innerhalb der App**. Er liegt
+im Startmenü neben "Abmelden" und führt auf einen eigenen Bildschirm, der
+vorher aufzählt, was verschwindet. Vor dem Löschen wird das Passwort noch
+einmal abgefragt.
+
+Gelöscht wird in dieser Reihenfolge:
+
+| Schritt | Was | Wo |
+|---|---|---|
+| 1 | alle Fotos unter `<nutzer_id>/…` | Behälter `tourfotos` |
+| 2 | alle Zeilen mit dieser `nutzer_id` | Tabelle `touren` |
+| 3 | das Auth-Konto selbst, samt E-Mail-Adresse | `auth.users` |
+| 4 | `kurvenjagd.routen` und `kurvenjagd.garage` | localStorage des Geräts |
+
+Die Reihenfolge ist Absicht. Die Tabelle `touren` hängt per Fremdschlüssel
+mit `ON DELETE CASCADE` an `auth.users`, ihre Zeilen würden also ohnehin
+mitverschwinden. Der Dateispeicher weiß davon nichts: Wer das Konto zuerst
+löscht, hat danach Fotos liegen, die niemand mehr zuordnen kann.
+
+Schritt 3 geht **nicht** mit dem öffentlichen Schlüssel. Er läuft in der
+Edge Function `konto-loeschen`
+(`supabase/functions/konto-loeschen/index.ts`), weil dafür der
+service_role-Schlüssel nötig ist. Der steht nirgends im Code, sondern wird
+von Supabase als Umgebungsvariable beigelegt - das Repository ist
+öffentlich.
+
+Die Funktion löscht ausschließlich das Konto dessen, der sie aufruft: Die
+Nutzerkennung kommt aus dem geprüften Anmelde-Token, nicht aus der Anfrage.
+
+**Es gibt keine Sicherung und keinen Papierkorb.** Nach dem Löschen ist
+nichts mehr wiederherstellbar, und genau das steht dem Nutzer vorher auch so
+auf dem Bildschirm.
+
+### Geteilte Routen und Ausfahrten
+
+Beides gibt es heute noch nicht - in der Datenbank steht nur `touren`. Die
+Regel wird trotzdem jetzt festgelegt, damit die späteren Tabellen sich
+danach richten müssen und nicht nachträglich umgebaut werden:
+
+- **Geteilte Routen bleiben bestehen**, der Bezug zum Absender verschwindet.
+  Eine geplante Strecke ist ein Streckenverlauf und keine Angabe über eine
+  Person. Wer den Link schon hat, verliert nichts.
+- **Ausfahrten mit Zusagen bleiben bestehen**, der Veranstalter wird zu
+  "Gelöschter Nutzer". Eine Verabredung gehört nicht dem Veranstalter
+  allein; wer zugesagt hat, hat sich darauf eingestellt.
+- **Eigene Zusagen bei fremden Ausfahrten verschwinden.**
+
+Was das für den Bau heißt: Die Spalte mit dem Veranstalter beziehungsweise
+dem Absender muss `NULL` annehmen können und darf **nicht** auf
+`ON DELETE CASCADE` stehen, sonst reißt das Löschen eines Kontos die
+Ausfahrten anderer Leute mit.
 
 ---
 
@@ -72,9 +128,15 @@ mitverschwinden, siehe Aufgabe 2 in `AUFGABEN.md`.
 - **Kartenbilder verraten den Aufenthaltsort**, auch ohne dass die App den
   Standort abfragt. Wer die Karte auf sein Dorf zieht, sagt dem Kartenserver,
   wo er hinschaut.
-- **Wo Supabase die Daten liegen hat**, muss nachgesehen und hier eingetragen
-  werden. Die Region wird beim Anlegen des Projekts gewählt und steht in den
+- **Wo Supabase die Daten liegen hat:** Region `eu-north-1`, das sind
+  AWS-Rechenzentren in Stockholm. Also innerhalb der EU - für die
+  Datenschutzerklärung der angenehme Fall, weil keine Übermittlung in ein
+  Drittland stattfindet. Nachgesehen am 20.08.2026 in den
   Projekteinstellungen.
+- **Ein Konto lässt sich in der App löschen.** Was dabei verschwindet, steht
+  weiter oben in einem eigenen Abschnitt. Das gehört in die
+  Datenschutzerklärung, weil es die Auskunft über das Recht auf Löschung
+  konkret beantwortet.
 - Kommt Werbung dazu, kommt ein ganzer Abschnitt dazu: welches Netzwerk,
   welche Kennungen, wie der Nutzer widersprechen kann.
 
