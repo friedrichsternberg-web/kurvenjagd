@@ -1706,40 +1706,66 @@ body.nav-modus .leaflet-control-container { display: none; }
   animation-timing-function: linear;
   animation-iteration-count: infinite;
 }
-/* Die Leuchtstoffroehre: laenglicher Fleck, in der Mitte am dichtesten. */
+/* Die Leuchtstoffroehre: laenglicher Fleck. Sein dunkelster Punkt liegt
+   bei 30 Prozent der Hoehe, nicht in der Mitte - unter der Roehre haengt
+   ihr Lichtschein an der Wand, und der soll mit abdunkeln. garage.js
+   setzt den Fleck deshalb so, dass die 30-Prozent-Marke AUF der Roehre
+   liegt (der "anker" in der GARAGEN-Liste). Vorher war der Fleck auf die
+   Roehre zentriert und sein Schwerpunkt hing sichtbar DARUEBER. */
 .lampe-roehre {
-  background: radial-gradient(ellipse 50% 42% at 50% 38%,
+  background: radial-gradient(ellipse 50% 42% at 50% 30%,
     rgba(26, 30, 38, 0.9), rgba(26, 30, 38, 0.35) 55%, rgba(26, 30, 38, 0) 100%);
   animation-name: lampe-stottern;
 }
-/* Die Haengelampen: runder Schein, der nach aussen weich auslaeuft. */
-.lampe-schirm {
+/* Die Haengelampen: runder Schein, dichter Kern, nach aussen weich. Zwei
+   Muster (a und b) mit Aussetzern an verschiedenen Stellen des Durchlaufs -
+   zusammen mit den verschiedenen Takten wirken die beiden Lampen dadurch
+   wirklich unabhaengig statt wie zwei Kopien derselben Stoerung. */
+.lampe-schirm, .lampe-schirm2 {
   background: radial-gradient(closest-side,
-    rgba(26, 30, 38, 0.85), rgba(26, 30, 38, 0.3) 50%, rgba(26, 30, 38, 0) 100%);
-  animation-name: lampe-durchhaengen;
+    rgba(26, 30, 38, 0.92), rgba(26, 30, 38, 0.4) 45%, rgba(26, 30, 38, 0) 88%);
 }
-/* Der typische Leuchtstoff-Stotterer: zweimal kurz weg, spaeter noch ein
-   einzelner Schlag, dazwischen lange Ruhe. Bei 19 Sekunden Laufzeit ist
-   ein Prozent 190 Millisekunden - die Aussetzer dauern also nur einen
-   Wimpernschlag. */
+.lampe-schirm  { animation-name: lampe-durchhaengen-a; }
+.lampe-schirm2 { animation-name: lampe-durchhaengen-b; }
+/* Der Leuchtstoff-Stotterer, gemaechlich: einmal absacken, kurz fangen,
+   tiefer absacken, langsam erholen - gut eine Sekunde. Spaeter im
+   Durchlauf noch ein einzelner weicher Schlag. Bei 19 Sekunden Laufzeit
+   ist ein Prozent 190 Millisekunden. */
 @keyframes lampe-stottern {
-  0%, 33.6% { opacity: 0; }
-  34%       { opacity: 0.9; }
-  34.5%     { opacity: 0.2; }
-  35.1%     { opacity: 1; }
-  35.9%     { opacity: 0; }
-  60.8%     { opacity: 0; }
-  61.4%     { opacity: 0.55; }
-  62.8%     { opacity: 0; }
+  0%, 30%   { opacity: 0; }
+  31.5%     { opacity: 0.85; }
+  33%       { opacity: 0.3; }
+  34.5%     { opacity: 0.95; }
+  37%       { opacity: 0; }
+  63%       { opacity: 0; }
+  64.5%     { opacity: 0.6; }
+  67.5%     { opacity: 0; }
   100%      { opacity: 0; }
 }
-/* Die Haengelampe stottert nicht, sie haengt einmal weich durch - wie bei
-   einer kleinen Spannungsschwankung im Netz. */
-@keyframes lampe-durchhaengen {
-  0%, 44% { opacity: 0; }
-  47%     { opacity: 0.55; }
-  49%     { opacity: 0.35; }
-  52%     { opacity: 0; }
+/* Die Haengelampen stottern nicht, sie haengen durch wie bei einer
+   Spannungsschwankung: ein wackliger Durchhaenger von gut zwei Sekunden,
+   spaeter ein kurzer einzelner. Muster a und b unterscheiden sich in
+   Lage und Tiefe der Aussetzer. */
+@keyframes lampe-durchhaengen-a {
+  0%, 40% { opacity: 0; }
+  43%     { opacity: 0.8; }
+  45%     { opacity: 0.45; }
+  47.5%   { opacity: 0.75; }
+  51%     { opacity: 0; }
+  75%     { opacity: 0; }
+  76.5%   { opacity: 0.5; }
+  79%     { opacity: 0; }
+  100%    { opacity: 0; }
+}
+@keyframes lampe-durchhaengen-b {
+  0%, 22% { opacity: 0; }
+  24%     { opacity: 0.75; }
+  26%     { opacity: 0.35; }
+  27.5%   { opacity: 0.7; }
+  30%     { opacity: 0; }
+  58%     { opacity: 0; }
+  60%     { opacity: 0.55; }
+  63%     { opacity: 0; }
   100%    { opacity: 0; }
 }
 
@@ -1821,16 +1847,29 @@ body.nav-modus .leaflet-control-container { display: none; }
   z-index: 2;
   top: 0; left: 0;
   width: 100%;
+  /* Drei Schatten, von innen nach aussen: ein haarfeiner, zum Weissen hin
+     aufgehellter Kern direkt an der Kante, eine dichte orange Lage, aussen
+     ein breiter, halbdurchsichtiger Schein. Der helle Kern ist der
+     Unterschied zwischen "Gegenlicht" und "orange angemalt", und dass der
+     Aussenschein DURCHSICHTIG ist statt einfach breit, haelt den Streifen
+     schlank - vier volle Lagen uebereinander wurden beim Ausprobieren
+     sofort zum Aufkleberrand.
+
+     Beide Zusatztoene sind per color-mix aus der Markenfarbe abgeleitet,
+     es kommt also keine zweite Farbe ins Spiel. Die erste filter-Zeile
+     ist der Rueckfall fuer Browser ohne color-mix - dann eben ohne
+     gluehenden Kern, aber nie ganz ohne Saum. */
   filter: drop-shadow(0 0 1px var(--accent))
-          drop-shadow(0 0 2.5px var(--accent))
-          drop-shadow(0 0 7px var(--accent));
+          drop-shadow(0 0 2px var(--accent))
+          drop-shadow(0 0 9px var(--accent));
+  filter: drop-shadow(0 0 1px color-mix(in srgb, var(--accent) 60%, white))
+          drop-shadow(0 0 2px var(--accent))
+          drop-shadow(0 0 13px color-mix(in srgb, var(--accent) 40%, transparent));
   animation: rand-atmen 8s ease-in-out infinite;
 }
-/* Die Werte sind am Schirm abgestimmt: 0,55 ist die Grenze, ab der der
-   Saum zum Halo wird - das Atmen bleibt bewusst darunter. */
 @keyframes rand-atmen {
-  0%, 100% { opacity: 0.35; }
-  50%      { opacity: 0.55; }
+  0%, 100% { opacity: 0.6; }
+  50%      { opacity: 0.85; }
 }
 
 .motorrad-bild {
@@ -2072,7 +2111,7 @@ body.nav-modus .leaflet-control-container { display: none; }
   .buehne-hinweis, .hinweis-marke { animation: none; }
   /* Der Leuchtsaum bleibt stehen, nur sein Atmen entfaellt; das
      Lampenflackern entfaellt ganz. */
-  .buehne-rand  { animation: none; opacity: 0.45; }
+  .buehne-rand  { animation: none; opacity: 0.75; }
   .buehne-lampe { animation: none; opacity: 0; }
 }
 

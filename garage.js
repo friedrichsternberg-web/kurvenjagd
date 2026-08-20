@@ -366,17 +366,27 @@ const GARAGEN = [{
      genau dort, wo die Schrift steht - er braucht deutlich mehr als eine
      dunkle Werkstatt. Der Wert ist deshalb je Garage einstellbar. */
   dunstOben: 0.90,
-  /* Die Lampen des Raums, fuers Flackern. Je Lampe die Mitte (x, y) und die
+  /* Die Lampen des Raums, fuers Flackern. Je Lampe die Lage (x, y) und die
      halbe Groesse ihres Lichtflecks (rx, ry), alles in Anteilen der
      Bilddatei - ausgemessen wie der Drehteller. "art" waehlt die Animation:
-     eine Leuchtstoffroehre stottert, eine Haengelampe haengt nur weich
-     durch. "takt" ist die Laenge eines Durchlaufs in Sekunden, "versatz"
-     verschiebt den Start - drei verschiedene Takte sorgen dafuer, dass nie
-     zwei Lampen gleichzeitig zucken und sich das Muster kaum wiederholt. */
+     eine Leuchtstoffroehre stottert, die Haengelampen haengen weich durch,
+     in zwei verschiedenen Mustern (schirm und schirm2), damit sie wirklich
+     unabhaengig voneinander wirken. "takt" ist die Laenge eines Durchlaufs
+     in Sekunden, "versatz" verschiebt den Start - drei verschiedene Takte
+     sorgen dafuer, dass nie zwei Lampen gleichzeitig zucken und sich das
+     Muster kaum wiederholt.
+
+     "anker" sagt, an welchem Anteil der FLECKHOEHE die Lampe sitzt. Bei
+     den Haengelampen ist das die Mitte (0.5). Bei der Roehre liegt der
+     dunkelste Punkt des Verlaufs bei 0.3, denn unter ihr haengt ihr
+     Lichtschein an der Wand und soll mit abdunkeln - der Fleck reicht
+     also weiter nach unten als nach oben. Zentriert man ihn stattdessen,
+     haengt der Schwerpunkt sichtbar UEBER dem Licht, genau das hat
+     Friedrich als "etwas darueber" gesehen. */
   lampen: [
-    { art: 'roehre', x: 0.536, y: 0.309, rx: 0.135, ry: 0.058, takt: 19, versatz: 4 },
-    { art: 'schirm', x: 0.235, y: 0.302, rx: 0.100, ry: 0.055, takt: 23, versatz: 0 },
-    { art: 'schirm', x: 0.891, y: 0.297, rx: 0.100, ry: 0.055, takt: 31, versatz: 9 },
+    { art: 'roehre',  x: 0.536, y: 0.309, rx: 0.135, ry: 0.058, anker: 0.3, takt: 19, versatz: 4 },
+    { art: 'schirm',  x: 0.235, y: 0.302, rx: 0.100, ry: 0.055, anker: 0.5, takt: 23, versatz: 0 },
+    { art: 'schirm2', x: 0.891, y: 0.297, rx: 0.100, ry: 0.055, anker: 0.5, takt: 31, versatz: 9 },
   ],
 }];
 
@@ -835,7 +845,10 @@ function setzeBuehnenPlatz() {
       fleck.style.width  = `${fleckB}px`;
       fleck.style.height = `${fleckH}px`;
       fleck.style.left = `${(lampe.x * bildB - fensterX) * massstab - fleckB / 2}px`;
-      fleck.style.top  = `${(lampe.y * bildH - fensterY) * massstab - fleckH / 2}px`;
+      // Senkrecht haengt der Fleck an seinem Anker (siehe GARAGEN-Liste),
+      // nicht an seiner Mitte - der dunkelste Punkt muss AUF der Lampe
+      // liegen, egal wie weit der Fleck darunter noch auslaeuft.
+      fleck.style.top  = `${(lampe.y * bildH - fensterY) * massstab - fleckH * (lampe.anker ?? 0.5)}px`;
     });
   }
 
