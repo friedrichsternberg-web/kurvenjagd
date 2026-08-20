@@ -1638,7 +1638,11 @@ body.nav-modus .leaflet-control-container { display: none; }
   position: absolute; inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(to bottom, rgba(14, 15, 18, 0.86) 0%, rgba(14, 15, 18, 0.42) 14%, transparent 30%),
+    linear-gradient(to bottom,
+      rgba(14, 15, 18, var(--dunst-oben, 0.86)) 0%,
+      rgba(14, 15, 18, calc(var(--dunst-oben, 0.86) * 0.72)) 12%,
+      rgba(14, 15, 18, calc(var(--dunst-oben, 0.86) * 0.34)) 24%,
+      transparent 38%),
     linear-gradient(to top,    rgba(14, 15, 18, 0.92) 0%, rgba(14, 15, 18, 0.30) 9%,  transparent 20%);
 }
 
@@ -1855,12 +1859,11 @@ body.nav-modus .leaflet-control-container { display: none; }
 .buehne-spiegel {
   position: absolute;
   z-index: 1;
-  top: 100%;
+  top: var(--spiegel-oben, 100%);
   left: 0;
   width: 100%;
   transform: scaleY(-1);
-  transform-origin: top;
-  opacity: 0.34;
+  opacity: 0.30;
   filter: blur(2px) brightness(0.75) saturate(0.8);
   -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.25) 22%, transparent 46%);
           mask-image: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.25) 22%, transparent 46%);
@@ -1874,13 +1877,13 @@ body.nav-modus .leaflet-control-container { display: none; }
 .buehne-schatten {
   position: absolute;
   z-index: 2;
-  bottom: -2%;
+  bottom: var(--schatten-unten, 0px);
   left: 0;
   width: 100%;
   transform: scaleY(0.16);
   transform-origin: bottom;
   filter: brightness(0) blur(10px);
-  opacity: 0.62;
+  opacity: var(--schatten-staerke, 0.62);
 }
 
 /* Die Aufsetzpunkte: dort, wo die Bodenlinie am tiefsten ist - unter den
@@ -1890,10 +1893,9 @@ body.nav-modus .leaflet-control-container { display: none; }
 .buehne-kontakt {
   position: absolute;
   z-index: 2;
-  bottom: -1.5%;
-  left: 0;
-  width: 100%;
-  height: 7%;
+  /* bottom, left und width setzt setzeBuehnenPlatz() - der Kontaktschatten
+     gehoert unter die RAEDER, nicht unter die Bildkante. */
+  height: 5%;
   filter: blur(3px);
 }
 
@@ -1904,14 +1906,16 @@ body.nav-modus .leaflet-control-container { display: none; }
 .buehne-glut {
   position: absolute;
   z-index: 4;
-  bottom: -1px;
+  top: 0;
   left: 0;
   width: 100%;
-  opacity: 0.4;
+  opacity: var(--glut-staerke, 0.4);
   filter: sepia(1) saturate(5) hue-rotate(-18deg) brightness(1.35) blur(1px);
   mix-blend-mode: screen;
-  -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.35) 14%, transparent 30%);
-          mask-image: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.35) 14%, transparent 30%);
+  /* Der Verlauf beginnt an der BODENLINIE der Maschine, nicht an der
+     Bildkante - sonst leuchtet der leere Rand statt der Reifen. */
+  -webkit-mask-image: linear-gradient(to top, transparent var(--glut-kante, 0%), rgba(0,0,0,0.95) var(--glut-kante, 0%), rgba(0,0,0,0.3) calc(var(--glut-kante, 0%) + 14%), transparent calc(var(--glut-kante, 0%) + 30%));
+          mask-image: linear-gradient(to top, transparent var(--glut-kante, 0%), rgba(0,0,0,0.95) var(--glut-kante, 0%), rgba(0,0,0,0.3) calc(var(--glut-kante, 0%) + 14%), transparent calc(var(--glut-kante, 0%) + 30%));
 }
 
 /* Ohne eigenes Foto steht dort das Standardmotorrad. Es wird leicht

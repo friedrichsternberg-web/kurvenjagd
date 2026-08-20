@@ -336,20 +336,127 @@ function zeichneGarage() {
 const GARAGEN = [{
   name:      'Werkstatt',
   bild:      'img/garage-werkstatt.webp',
-  bildBreite: 853,
-  bildHoehe: 1844,
-  mitteX:    0.528,   // Mitte des Drehtellers, Anteil der Bildbreite
-  bodenY:    0.607,   // wo die Raeder aufsetzen, Anteil der Bildhoehe
-  breite:    0.64,    // wie breit die Maschine wird, Anteil der Bildbreite
-  tellerRx:  0.40,    // halbe Breite der Tellerellipse (fuer die Spiegelung)
-  tellerRy:  0.070,   // halbe Hoehe der Tellerellipse, Anteil der Bildhoehe
-  helligkeit: 0.88,   // Farbangleich: dunkle Werkstatt, Tageslichtfoto abdunkeln
+  // Das Bild wird in anderthalbfacher Groesse ausgeliefert, damit es auf
+  // einem Handy mit dreifacher Punktdichte nicht aufgeblasen wird - genau
+  // die Unschaerfe, die Friedrich an der ersten Fassung gesehen hat. Die
+  // Masse hier beziehen sich auf die AUSGELIEFERTE Datei.
+  bildBreite: 1296,
+  bildHoehe: 2731,
+  // Ausgemessen am Bild: Die Riffelplatte des Drehtellers reicht (in der
+  // Quellaufloesung 864 x 1821) waagerecht von 62 bis 800 und senkrecht von
+  // 1015 bis 1195. Umgerechnet in Anteile - dadurch bleiben die Werte
+  // richtig, egal in welcher Groesse die Datei ausgeliefert wird.
+  mitteX:    0.499,   // Mitte des Drehtellers
+  bodenY:    0.622,   // wo die Raeder aufsetzen: knapp vor der Tellermitte
+  breite:    0.56,    // wie breit die MASCHINE wird (nicht die Bilddatei)
+  tellerRx:  0.427,   // halbe Breite der Tellerellipse, fuer die Spiegelung
+  tellerRy:  0.049,   // halbe Hoehe der Tellerellipse
+  // Heller Raum mit Tageslicht: Das Foto darf seine Helligkeit behalten.
+  // Dafuer traegt der Schatten mehr, denn auf hellem Beton faellt er
+  // staerker auf - und er ist es, der die Maschine auf den Boden stellt.
+  helligkeit: 0.97,
+  schatten:  0.72,
+  // Kein LED-Ring in diesem Raum, also fast keine Glut. Der Rest ist das
+  // kuehle Licht, das der polierte Boden zurueckwirft.
+  glut:      0.10,
+  /* Wie stark der Raum oben abgedunkelt wird, damit Ueberschrift und
+     Hakenleiste lesbar bleiben. Dieser Raum hat ein helles Dachfenster
+     genau dort, wo die Schrift steht - er braucht deutlich mehr als eine
+     dunkle Werkstatt. Der Wert ist deshalb je Garage einstellbar. */
+  dunstOben: 0.90,
 }];
 
 // Welche Garage gerade eingerichtet ist. Heute immer die erste - der
 // Umschalter kommt, wenn es eine zweite gibt.
 function garageAktiv() {
   return GARAGEN[0];
+}
+
+
+/* --- Wo steht die Maschine im Bild? ----------------------------------------
+
+   HIER LAG DER FEHLER, den Friedrich gemeldet hat: Das Motorrad schwebte
+   ueber der Plattform statt darauf zu stehen.
+
+   Der Grund ist unscheinbar. Ein freigestelltes Foto ist nicht randlos - um
+   die Maschine herum steht durchsichtige Flaeche, oben, unten und an den
+   Seiten. Wie viel, haengt allein davon ab, wo die Maschine im
+   Ausgangsfoto zufaellig stand. Wer die UNTERKANTE DES BILDES auf den
+   Drehteller setzt, setzt in Wirklichkeit die Unterkante dieser leeren
+   Flaeche darauf - und die Raeder schweben genau so weit darueber, wie das
+   Foto unten leer ist.
+
+   Bei einem Foto, auf dem das Motorrad die untere Bildhaelfte fuellt, faellt
+   das kaum auf. Bei einem Foto, auf dem es klein in der Bildmitte steht,
+   schwebt es einen halben Bildschirm hoch.
+
+   DIE LOESUNG: Nicht die Bildkante zaehlt, sondern der Inhalt. Das Bild
+   wird einmal in eine kleine Leinwand gezeichnet und der Alphakanal
+   abgesucht: In welcher Zeile steht der unterste sichtbare Punkt, in
+   welchen Spalten der linkeste und der rechteste? Das ergibt den
+   INHALTSRAHMEN, und der wird auf den Teller gesetzt.
+
+   Das gilt fuer JEDES Bild: fuer frisch freigestellte, fuer laengst
+   gespeicherte und fuer das Standardmotorrad. Nichts muss nachgetragen
+   werden, nichts muss der Nutzer noch einmal anfassen.
+
+   Ein Bild ohne Durchsichtigkeit - ein Foto, das nie freigestellt wurde -
+   ergibt als Rahmen das ganze Bild. Auch das ist richtig: Dann IST die
+   Bildkante die Unterkante.
+
+   Gemessen wird auf hoechstens 200 Punkten Breite. Das reicht auf ein
+   Tausendstel genau und kostet weniger als eine Hundertstelsekunde. Das
+   Ergebnis wird gemerkt, damit dasselbe Bild nicht zweimal untersucht
+   wird. */
+
+const MESSKANTE = 200;
+const inhaltsrahmen = new Map();
+
+function rahmenMessen(bildElement) {
+  const schlüssel = bildElement.currentSrc || bildElement.src;
+  if (!schlüssel) return null;
+  if (inhaltsrahmen.has(schlüssel)) return inhaltsrahmen.get(schlüssel);
+
+  const ganzesBild = { links: 0, rechts: 1, oben: 0, unten: 1 };
+  const bB = bildElement.naturalWidth, bH = bildElement.naturalHeight;
+  if (!bB || !bH) return null;   // noch nicht geladen, spaeter nochmal
+
+  let rahmen = ganzesBild;
+  try {
+    const faktor = Math.min(1, MESSKANTE / Math.max(bB, bH));
+    const b = Math.max(1, Math.round(bB * faktor));
+    const h = Math.max(1, Math.round(bH * faktor));
+    const leinwand = document.createElement('canvas');
+    leinwand.width = b; leinwand.height = h;
+    const stift = leinwand.getContext('2d', { willReadFrequently: true });
+    stift.drawImage(bildElement, 0, 0, b, h);
+    const punkte = stift.getImageData(0, 0, b, h).data;
+
+    // 24 statt 0 als Schwelle: Der weiche Rand einer freigestellten Kante
+    // laeuft nach aussen aus. Wer jeden Hauch von Deckkraft mitzaehlt,
+    // misst den Schleier statt der Maschine.
+    let l = b, r = -1, o = h, u = -1;
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < b; x++) {
+        if (punkte[(y * b + x) * 4 + 3] < 24) continue;
+        if (x < l) l = x;
+        if (x > r) r = x;
+        if (y < o) o = y;
+        if (y > u) u = y;
+      }
+    }
+    if (r >= l && u >= o) {
+      rahmen = { links: l / b, rechts: (r + 1) / b, oben: o / h, unten: (u + 1) / h };
+    }
+  } catch {
+    /* Kann die Leinwand nicht gelesen werden - etwa weil das Bild von einem
+       fremden Server kommt und die Leinwand dadurch gesperrt ist -, bleibt
+       es beim ganzen Bild. Dann steht die Maschine wie vorher auf ihrer
+       Bildkante, was allemal besser ist als gar keine Anzeige. */
+  }
+
+  inhaltsrahmen.set(schlüssel, rahmen);
+  return rahmen;
 }
 
 function zeichneBuehne() {
@@ -377,12 +484,17 @@ function zeichneBuehne() {
     bild.src = STANDARD_BILD;
     kopien.forEach(kopie => { kopie.src = STANDARD_BILD; });
   };
-  // Erst wenn das Bild da ist, hat der Stapel seine Hoehe - dann sitzt
-  // auch die Spiegelung richtig.
+  // Erst wenn das Bild da ist, laesst sich sein Inhaltsrahmen messen -
+  // und erst dann steht fest, wo die Raeder sitzen.
   bild.onload = () => setzeBuehnenPlatz();
 
   bild.src = adresse;
   kopien.forEach(kopie => { kopie.src = adresse; });
+
+  /* Liegt das Bild schon im Zwischenspeicher, meldet sich onload je nach
+     Browser gar nicht mehr. Dann sofort rechnen - sonst bliebe die Maschine
+     beim Umschalten zwischen zwei Maschinen auf dem Platz der vorigen. */
+  if (bild.complete && bild.naturalWidth) setzeBuehnenPlatz();
 
   // Ohne eigenes Foto ist das Standardbild nur ein Platzhalter und wird
   // etwas zurueckgenommen, damit es nicht wie die eigene Maschine wirkt.
@@ -433,20 +545,64 @@ function setzeBuehnenPlatz() {
   const ankerX = (tellerX - fensterX) * massstab;
   const ankerY = (tellerY - fensterY) * massstab;
 
-  const maschinenBreite = garageBild.breite * bildB * massstab;
-  const buehne = ansicht.parentElement;   // die Buehne haelt den Stapel
+  /* Schritt 4: die Maschine an ihrem INHALT ausrichten, nicht an ihrer
+     Bildkante. Ohne diesen Schritt schwebt sie um genau den durchsichtigen
+     Rand ihres Fotos ueber dem Teller - siehe rahmenMessen(). */
+  const bild = document.getElementById('motorradBild');
+  const rahmen = rahmenMessen(bild) || { links: 0, rechts: 1, oben: 0, unten: 1 };
+  const seitenverhältnis = (bild.naturalWidth && bild.naturalHeight)
+    ? bild.naturalHeight / bild.naturalWidth : 1;
 
+  // Das Bildelement wird so breit gemacht, dass der INHALT die Zielbreite
+  // hat. Steht die Maschine nur auf der halben Bildbreite, wird das Element
+  // doppelt so breit - sichtbar ist am Ende trotzdem die Zielbreite.
+  const zielBreite = garageBild.breite * bildB * massstab;
+  const inhaltAnteil = Math.max(0.05, rahmen.rechts - rahmen.links);
+  const elementBreite = zielBreite / inhaltAnteil;
+  const elementHöhe = elementBreite * seitenverhältnis;
+
+  // Wie weit die Raeder ueber der Elementunterkante liegen, und wie weit die
+  // Mitte der Maschine von der Elementmitte abweicht.
+  const bodenAbstand = (1 - rahmen.unten) * elementHöhe;
+  const inhaltMitte = (rahmen.links + rahmen.rechts) / 2;
+
+  const buehne = ansicht.parentElement;   // die Buehne haelt den Stapel
   // Der Stapel haengt in der Buehne, gerechnet wird im Raum - der Versatz
   // zwischen beiden wird abgezogen.
   const versatzOben = buehne.offsetTop, versatzLinks = buehne.offsetLeft;
-  ansicht.style.width = `${maschinenBreite}px`;
-  ansicht.style.left = `${ankerX - versatzLinks - maschinenBreite / 2}px`;
-  ansicht.style.bottom = `${(buehne.offsetHeight + versatzOben) - ankerY}px`;
+
+  ansicht.style.width = `${elementBreite}px`;
+  ansicht.style.left = `${ankerX - versatzLinks - inhaltMitte * elementBreite}px`;
+  ansicht.style.bottom = `${(buehne.offsetHeight + versatzOben) - ankerY - bodenAbstand}px`;
+
+  /* Schatten, Spiegelung und Glut haengen alle an der Bodenlinie der
+     Maschine, nicht an der Elementkante - sonst wandern sie mit dem leeren
+     Rand mit. Die Werte gehen als CSS-Marken hinueber. */
+  ansicht.style.setProperty('--boden-abstand', `${bodenAbstand}px`);
+  // Der Schatten ist das Bild, auf ein Sechstel gestaucht. Dabei schrumpft
+  // auch sein leerer Rand mit, deshalb rutscht seine Unterkante um genau
+  // diesen Anteil nach oben.
+  ansicht.style.setProperty('--schatten-unten', `${bodenAbstand * (1 - 0.16)}px`);
+  // Die Spiegelung wird an der Bodenlinie geklappt. Weil das Element dabei
+  // um seine Mitte kippt, muss der leere Rand doppelt herausgerechnet werden.
+  ansicht.style.setProperty('--spiegel-oben', `${(2 * rahmen.unten - 1) * elementHöhe}px`);
+  // Die Glut leuchtet von der Bodenlinie nach oben.
+  ansicht.style.setProperty('--glut-kante', `${(1 - rahmen.unten) * 100}%`);
 
   // Die Tellerellipse fuer die Spiegelung, umgerechnet auf den Stapel.
   ansicht.style.setProperty('--teller-rx', `${garageBild.tellerRx * bildB * massstab}px`);
   ansicht.style.setProperty('--teller-ry', `${garageBild.tellerRy * bildH * massstab}px`);
   ansicht.style.setProperty('--buehne-helligkeit', garageBild.helligkeit);
+  ansicht.style.setProperty('--schatten-staerke', garageBild.schatten ?? 0.62);
+  ansicht.style.setProperty('--glut-staerke', garageBild.glut ?? 0.4);
+  raum.style.setProperty('--dunst-oben', garageBild.dunstOben ?? 0.86);
+
+  // Der Kontaktschatten sitzt genau unter den Raedern und ist so breit wie
+  // die Maschine, nicht wie das Element.
+  const kontakt = document.getElementById('motorradKontakt');
+  kontakt.style.width = `${zielBreite}px`;
+  kontakt.style.left = `${rahmen.links * elementBreite}px`;
+  kontakt.style.bottom = `${bodenAbstand - elementHöhe * 0.02}px`;
 }
 
 /* Malt die harten Aufsetzpunkte unter die Reifen.
