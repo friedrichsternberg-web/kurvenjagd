@@ -41,7 +41,7 @@ Dateien. Das ist auch der Grund für die 5-MB-Grenze und dafür, dass
 | **vpic.nhtsa.dot.gov** | Motorradmodelle im Finder | Marke und Baujahr, keine Nutzerdaten | USA |
 | **unpkg.com** | Leaflet | IP-Adresse durch den Abruf | USA |
 | **cdn.jsdelivr.net** | Supabase-Bibliothek, ONNX-Laufzeit | IP-Adresse durch den Abruf | USA |
-| **Supabase** (`copydwpdqpnwjvknsakz`) | Konten, geteilte Touren, Fotos | E-Mail, Touren, Fotos | EU (Schweden, `eu-north-1`) |
+| **Supabase** (`copydwpdqpnwjvknsakz`) | Konten, Profile, geteilte Touren, Fotos | E-Mail, Benutzername, Profilbild, Touren, Fotos | EU (Schweden, `eu-north-1`) |
 
 **Ungenutzt, aber im Code vorbereitet:** `carimagesapi.com` und
 `api.api-ninjas.com`. Beide haben keinen Schlüssel und werden nicht
@@ -61,13 +61,38 @@ Touren wandern in die Tabelle `touren`, Fotos in den Behälter `tourfotos`.
 Der Behälter ist **nicht öffentlich**; zum Anzeigen erzeugt die App einen
 signierten Link, der nach einer Stunde verfällt.
 
+#### Profil
+
+Jedes Konto hat eine Zeile in der Tabelle `profile`: **Benutzername** und,
+wenn eines hinterlegt wurde, der Pfad zum **Profilbild**. Der Benutzername
+wird beim Anlegen des Kontos abgefragt und ist Pflicht, das Bild ist
+freiwillig.
+
+Der Benutzername ist **öffentlich** – das ist sein Zweck. Er steht bewusst
+neben der E-Mail-Adresse und nicht an ihrer Stelle: Wer sich zu einer
+Ausfahrt verabredet, sieht den Benutzernamen, die Adresse sieht niemand
+außer dem Konto selbst. Aus demselben Grund wird ein Benutzername **nie
+aus der E-Mail-Adresse abgeleitet** – aus `vorname.nachname@…` würde sonst
+ungefragt ein öffentlicher Klarname.
+
+Profilbilder liegen im Behälter `profilbilder`, und der ist – anders als
+`tourfotos` – **öffentlich lesbar**. Das ist eine Abwägung: Ein Profilbild
+ist dazu da, dass andere es sehen, und bei privaten Bildern bräuchte jedes
+angezeigte Gesicht in einer Mitfahrerliste einen eigenen signierten Link,
+der stündlich erneuert werden müsste. Wer kein Bild will, lässt es weg –
+es ist freiwillig.
+
+Schreiben darf in beiden Behältern nur, wem der Ordner gehört: Der Pfad
+beginnt mit der Nutzerkennung, daran hängt die Zugriffsregel.
+
 ---
 
 ## Was beim Löschen des Kontos passiert
 
 Beide Stores verlangen diesen Weg zwingend **innerhalb der App**. Er liegt
-im Startmenü neben "Abmelden" und führt auf einen eigenen Bildschirm, der
-vorher aufzählt, was verschwindet. Vor dem Löschen wird das Passwort noch
+im Profil – erreichbar über das Profilsymbol oben rechts – neben
+"Abmelden" und führt auf einen eigenen Bildschirm, der vorher aufzählt,
+was verschwindet. Vor dem Löschen wird das Passwort noch
 einmal abgefragt.
 
 Gelöscht wird in dieser Reihenfolge:
@@ -75,14 +100,17 @@ Gelöscht wird in dieser Reihenfolge:
 | Schritt | Was | Wo |
 |---|---|---|
 | 1 | alle Fotos unter `<nutzer_id>/…` | Behälter `tourfotos` |
-| 2 | alle Zeilen mit dieser `nutzer_id` | Tabelle `touren` |
-| 3 | das Auth-Konto selbst, samt E-Mail-Adresse | `auth.users` |
-| 4 | `kurvenjagd.routen` und `kurvenjagd.garage` | localStorage des Geräts |
+| 2 | das Profilbild unter `<nutzer_id>/…` | Behälter `profilbilder` |
+| 3 | alle Zeilen mit dieser `nutzer_id` | Tabelle `touren` |
+| 4 | das Auth-Konto selbst, samt E-Mail-Adresse | `auth.users` |
+| 5 | die Profilzeile, per `ON DELETE CASCADE` mit Schritt 4 | Tabelle `profile` |
+| 6 | `kurvenjagd.routen`, `kurvenjagd.garage` und ein noch nicht hochgeladenes Profilbild | localStorage des Geräts |
 
-Die Reihenfolge ist Absicht. Die Tabelle `touren` hängt per Fremdschlüssel
-mit `ON DELETE CASCADE` an `auth.users`, ihre Zeilen würden also ohnehin
-mitverschwinden. Der Dateispeicher weiß davon nichts: Wer das Konto zuerst
-löscht, hat danach Fotos liegen, die niemand mehr zuordnen kann.
+Die Reihenfolge ist Absicht. Die Tabellen `touren` und `profile` hängen per
+Fremdschlüssel mit `ON DELETE CASCADE` an `auth.users`, ihre Zeilen würden
+also ohnehin mitverschwinden. Der Dateispeicher weiß davon nichts: Wer das
+Konto zuerst löscht, hat danach Dateien liegen, die niemand mehr zuordnen
+kann. Deshalb kommen beide Behälter zuerst.
 
 Schritt 3 geht **nicht** mit dem öffentlichen Schlüssel. Er läuft in der
 Edge Function `konto-loeschen`

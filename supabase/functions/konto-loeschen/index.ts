@@ -31,10 +31,13 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
-// Name des Behälters im Dateispeicher. Muss mit FOTO_BEHÄLTER in konto.js
-// übereinstimmen - stehen hier zwei verschiedene Namen, bleiben die Fotos
-// nach dem Löschen liegen, ohne dass es jemand merkt.
-const FOTO_BEHÄLTER = 'tourfotos';
+/* Die Behälter im Dateispeicher, aus denen etwas zu löschen ist. Sie
+   müssen mit den Namen in konto.js übereinstimmen - stehen hier andere,
+   bleiben Dateien nach dem Löschen liegen, ohne dass es jemand merkt.
+
+   In BEIDEN beginnt der Pfad mit der Nutzerkennung, deshalb reicht
+   dieselbe Routine für beide. */
+const BEHÄLTER = ['tourfotos', 'profilbilder'];
 
 /* Der Browser fragt vor einem solchen Aufruf erst nach, ob er ihn machen
    darf ("Preflight"). Diese Kopfzeilen sind die Antwort darauf. Ohne sie
@@ -56,11 +59,11 @@ function antwort(inhalt: unknown, status = 200) {
    mehr Touren hat, bekäme ohne diese Schleife nur die ersten hundert zu
    sehen - und der Rest bliebe für immer liegen. Ein Fehler, den man erst
    Monate später bemerkt, deshalb gleich richtig. */
-async function listeVollständig(admin: any, präfix: string) {
+async function listeVollständig(admin: any, behälter: string, präfix: string) {
   const alle: any[] = [];
   const PRO_SEITE = 100;
   for (let seite = 0; ; seite++) {
-    const { data, error } = await admin.storage.from(FOTO_BEHÄLTER)
+    const { data, error } = await admin.storage.from(behälter)
       .list(präfix, { limit: PRO_SEITE, offset: seite * PRO_SEITE });
     if (error || !data || data.length === 0) break;
     alle.push(...data);
@@ -69,30 +72,30 @@ async function listeVollständig(admin: any, präfix: string) {
   return alle;
 }
 
-/* Alle Fotos eines Nutzers einsammeln und löschen.
+/* Alle Dateien eines Nutzers aus EINEM Behälter einsammeln und löschen.
 
-   Die Pfade sehen so aus: <nutzerId>/<tourId>/<fotoId>.jpg. Wir müssen
-   also zwei Ebenen tief gehen. Einträge ohne id sind Ordner, Einträge mit
-   id sind Dateien - so unterscheidet der Dateispeicher die beiden. */
-async function fotosLöschen(admin: any, nutzerId: string) {
+   Die Pfade sehen so aus: <nutzerId>/<tourId>/<fotoId>.jpg bei den
+   Tourfotos und <nutzerId>/profil.jpg beim Profilbild. Deshalb werden
+   beide Ebenen abgeräumt: Einträge ohne id sind Ordner, Einträge mit id
+   sind Dateien - so unterscheidet der Dateispeicher die beiden. */
+async function dateienLöschen(admin: any, behälter: string, nutzerId: string) {
   const pfade: string[] = [];
 
-  for (const eintrag of await listeVollständig(admin, nutzerId)) {
+  for (const eintrag of await listeVollständig(admin, behälter, nutzerId)) {
     if (eintrag.id) {
-      // Eine Datei, die direkt im Nutzerordner liegt. Kommt heute nicht
-      // vor, kostet aber nichts und fängt spätere Änderungen ab.
+      // Eine Datei direkt im Nutzerordner. Genau so liegt das Profilbild.
       pfade.push(`${nutzerId}/${eintrag.name}`);
       continue;
     }
-    for (const datei of await listeVollständig(admin, `${nutzerId}/${eintrag.name}`)) {
+    for (const datei of await listeVollständig(admin, behälter, `${nutzerId}/${eintrag.name}`)) {
       pfade.push(`${nutzerId}/${eintrag.name}/${datei.name}`);
     }
   }
 
   // remove() nimmt höchstens 1000 Pfade auf einmal entgegen.
   for (let i = 0; i < pfade.length; i += 1000) {
-    const { error } = await admin.storage.from(FOTO_BEHÄLTER).remove(pfade.slice(i, i + 1000));
-    if (error) throw new Error('Fotos konnten nicht gelöscht werden: ' + error.message);
+    const { error } = await admin.storage.from(behälter).remove(pfade.slice(i, i + 1000));
+    if (error) throw new Error(`Dateien aus ${behälter} konnten nicht gelöscht werden: ` + error.message);
   }
 
   return pfade.length;
@@ -126,15 +129,15 @@ Deno.serve(async (anfrage) => {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
-    /* Schritt 3: Erst die Fotos, dann die Tourenzeilen, dann das Konto.
+    /* Schritt 3: Erst die Dateien, dann die Tourenzeilen, dann das Konto.
 
        Die Reihenfolge ist nicht beliebig, und der Grund liegt beim
-       Dateispeicher. Die Tabelle "touren" hängt per Fremdschlüssel an
-       auth.users und ist auf ON DELETE CASCADE gestellt - ihre Zeilen
-       würden also von selbst mit dem Konto verschwinden. Die Fotos NICHT:
-       Der Dateispeicher weiß nichts von diesem Fremdschlüssel. Wer das
-       Konto zuerst löscht, hat danach Dateien liegen, zu denen es keinen
-       Nutzer mehr gibt und die niemand mehr zuordnen kann.
+       Dateispeicher. Die Tabellen "touren" und "profile" hängen per
+       Fremdschlüssel an auth.users und sind auf ON DELETE CASCADE gestellt -
+       ihre Zeilen würden also von selbst mit dem Konto verschwinden. Die
+       Dateien NICHT: Der Dateispeicher weiß nichts von diesem
+       Fremdschlüssel. Wer das Konto zuerst löscht, hat danach Dateien
+       liegen, zu denen es keinen Nutzer mehr gibt.
 
        Die Tourenzeilen löschen wir trotzdem ausdrücklich, statt uns auf
        das CASCADE zu verlassen. Zum einen wissen wir dann, wie viele es
@@ -143,14 +146,16 @@ Deno.serve(async (anfrage) => {
 
        Dieselbe Überlegung steckt schon in tourInCloudLöschen() in
        konto.js. */
-    const fotos = await fotosLöschen(admin, user.id);
+    let fotos = 0;
+    for (const behälter of BEHÄLTER) fotos += await dateienLöschen(admin, behälter, user.id);
 
     const { error: tourenFehler, count } = await admin.from('touren')
       .delete({ count: 'exact' }).eq('nutzer_id', user.id);
     if (tourenFehler) return antwort({ fehler: 'Touren konnten nicht gelöscht werden.' }, 500);
 
     /* Schritt 4: Das Konto selbst. Das ist der Schritt, für den es diese
-       ganze Datei gibt - mit dem öffentlichen Schlüssel geht er nicht. */
+       ganze Datei gibt - mit dem öffentlichen Schlüssel geht er nicht.
+       Das Profil verschwindet dabei per CASCADE mit. */
     const { error: kontoFehler } = await admin.auth.admin.deleteUser(user.id);
     if (kontoFehler) return antwort({ fehler: 'Das Konto konnte nicht gelöscht werden.' }, 500);
 

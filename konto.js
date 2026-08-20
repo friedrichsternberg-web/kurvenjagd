@@ -84,8 +84,21 @@ function übersetzeFehler(meldung) {
    damit die Oberfläche weiter unten nicht selbst mit Supabase-Antworten
    hantieren muss. */
 
-async function registriere(email, passwort) {
-  const { data, error } = await backend.auth.signUp({ email, password: passwort });
+async function registriere(email, passwort, benutzername) {
+  /* Der Benutzername reist als Anmeldedatum mit. In der Datenbank hängt am
+     Anlegen eines Kontos ein Auslöser (neues_profil_anlegen), der daraus
+     das Profil baut.
+
+     Warum nicht einfach hinterher eine Zeile schreiben: Ist im Projekt die
+     E-Mail-Bestätigung an - und das ist der Standard -, gibt es hier noch
+     gar keine Sitzung. Ohne Sitzung darf niemand in die Tabelle schreiben,
+     und der Name wäre weg, bis der Nutzer seine Mail liest. So legt der
+     Server das Profil im selben Atemzug an wie das Konto. */
+  const { data, error } = await backend.auth.signUp({
+    email,
+    password: passwort,
+    options: { data: { benutzername } },
+  });
   if (error) return { ok: false, meldung: übersetzeFehler(error.message) };
 
   // Ist im Supabase-Projekt die E-Mail-Bestätigung eingeschaltet (Standard),
@@ -139,6 +152,133 @@ async function setzeNeuesPasswort(neuesPasswort) {
 }
 
 
+/* --- 4b. Das Profil: Benutzername und Bild ---------------------------------
+   Jedes Konto hat ein Profil in der Tabelle "profile". Es trägt den
+   Benutzernamen - den Namen, unter dem andere einen in der Community sehen -
+   und wahlweise ein Bild.
+
+   Warum überhaupt ein Benutzername, wo es doch die E-Mail-Adresse gibt: Die
+   Adresse geht niemanden etwas an. Wer sich zu einer Ausfahrt verabredet,
+   soll "kurvenfritze" sehen und nicht "friedrich.sternberg@…".
+
+   Der Name ist EINDEUTIG, und zwar ohne Rücksicht auf Groß- und
+   Kleinschreibung. Abgesichert wird das in der Datenbank durch einen
+   eindeutigen Index - das ist die Stelle, die wirklich zählt. Die Prüfung
+   hier in der App ist nur die Höflichkeit davor: Man erfährt es beim
+   Tippen und nicht erst nach dem Absenden. */
+
+const NAME_MINDESTENS = 3;
+const NAME_HÖCHSTENS = 24;
+const PROFILBILD_BEHÄLTER = 'profilbilder';
+
+// Das Profil des Angemeldeten, sobald es geladen ist. null heißt: nicht
+// angemeldet oder noch nicht geladen.
+let eigenesProfil = null;
+
+/* Ein Profilbild, das beim Anlegen des Kontos ausgesucht wurde, aber noch
+   nicht hochgeladen werden konnte. Der Grund ist derselbe wie oben: Solange
+   die E-Mail nicht bestätigt ist, gibt es keine Sitzung, und ohne Sitzung
+   nimmt der Dateispeicher nichts an. Es wartet deshalb auf dem Gerät, bis
+   die erste Anmeldung durch ist. */
+const WARTENDES_BILD = 'kurvenjagd.profilbild.wartend';
+
+/* Erlaubt sind Buchstaben, Ziffern, Punkt, Strich und Unterstrich. Keine
+   Leerzeichen: Ein Name mit Leerzeichen sieht in einer Liste aus wie zwei
+   Namen, und beim Vorlesen weiß niemand, wo er aufhört. */
+function benutzernameSauber(name) {
+  const geputzt = (name || '').trim();
+  if (geputzt.length < NAME_MINDESTENS) {
+    return { ok: false, meldung: `Mindestens ${NAME_MINDESTENS} Zeichen.` };
+  }
+  if (geputzt.length > NAME_HÖCHSTENS) {
+    return { ok: false, meldung: `Höchstens ${NAME_HÖCHSTENS} Zeichen.` };
+  }
+  if (!/^[A-Za-z0-9ÄÖÜäöüß._-]+$/.test(geputzt)) {
+    return { ok: false, meldung: 'Nur Buchstaben, Ziffern, Punkt, Strich und Unterstrich.' };
+  }
+  return { ok: true, name: geputzt };
+}
+
+/* Fragt den Server, ob der Name noch frei ist.
+
+   Das läuft über eine Datenbankfunktion und nicht über eine Abfrage auf die
+   Tabelle, aus zwei Gründen: Sie ist auch OHNE Anmeldung aufrufbar - beim
+   Anlegen eines Kontos gibt es noch keine Sitzung -, und sie gibt nur ja
+   oder nein zurück, statt die Liste aller vergebenen Namen herauszurücken. */
+async function benutzernameFrei(name) {
+  if (!backendVerfügbar()) return null;
+  const { data, error } = await backend.rpc('benutzername_frei', { name });
+  if (error) return null;      // Netz weg: dann entscheidet der Server beim Absenden
+  return data === true;
+}
+
+// Holt das eigene Profil vom Server.
+async function profilLaden() {
+  if (!backendVerfügbar() || !angemeldeterNutzer) { eigenesProfil = null; return null; }
+  const { data, error } = await backend
+    .from('profile')
+    .select('benutzername, bild_pfad')
+    .eq('nutzer_id', angemeldeterNutzer.id)
+    .maybeSingle();
+  eigenesProfil = error ? null : data;
+  return eigenesProfil;
+}
+
+/* Die Adresse des Profilbilds. Der Behälter ist öffentlich lesbar, deshalb
+   reicht eine feste Adresse - anders als bei den Tourfotos, für die jedes
+   Mal ein signierter Link geholt werden muss.
+
+   Das "?t=" am Ende ist kein Zierrat: Ohne es zeigt der Browser nach dem
+   Wechseln des Bildes weiter das alte aus seinem Zwischenspeicher, weil die
+   Adresse dieselbe geblieben ist. */
+function profilBildAdresse(pfad, frisch) {
+  if (!pfad) return null;
+  const { data } = backend.storage.from(PROFILBILD_BEHÄLTER).getPublicUrl(pfad);
+  return frisch ? `${data.publicUrl}?t=${frisch}` : data.publicUrl;
+}
+
+/* Lädt ein Profilbild hoch und trägt seinen Pfad ins Profil ein.
+   Gibt { ok, meldung } zurück. */
+async function profilBildHochladen(datenUrl) {
+  if (!backendVerfügbar() || !angemeldeterNutzer) return { ok: false, meldung: 'Nicht angemeldet.' };
+
+  // Immer derselbe Dateiname je Nutzer, mit upsert: So sammeln sich keine
+  // alten Bilder an, die niemand mehr löscht.
+  const pfad = `${angemeldeterNutzer.id}/profil.jpg`;
+  const { error } = await backend.storage.from(PROFILBILD_BEHÄLTER)
+    .upload(pfad, datenUrlZuBlob(datenUrl), { contentType: 'image/jpeg', upsert: true });
+  if (error) return { ok: false, meldung: 'Das Bild konnte nicht hochgeladen werden.' };
+
+  const { error: fehlerZeile } = await backend
+    .from('profile').update({ bild_pfad: pfad }).eq('nutzer_id', angemeldeterNutzer.id);
+  if (fehlerZeile) return { ok: false, meldung: 'Das Bild liegt auf dem Server, ließ sich aber nicht eintragen.' };
+
+  if (eigenesProfil) eigenesProfil.bild_pfad = pfad;
+  return { ok: true, meldung: 'Profilbild gespeichert.' };
+}
+
+/* Ändert den Benutzernamen. Der eindeutige Index in der Datenbank ist die
+   eigentliche Sicherung: Zwischen der Prüfung und dem Absenden kann sich
+   jemand anders denselben Namen genommen haben. Genau dieser Fall wird hier
+   abgefangen und in einen verständlichen Satz übersetzt. */
+async function benutzernameÄndern(name) {
+  const geprüft = benutzernameSauber(name);
+  if (!geprüft.ok) return { ok: false, meldung: geprüft.meldung };
+  if (!backendVerfügbar() || !angemeldeterNutzer) return { ok: false, meldung: 'Nicht angemeldet.' };
+
+  const { error } = await backend
+    .from('profile').update({ benutzername: geprüft.name }).eq('nutzer_id', angemeldeterNutzer.id);
+
+  if (error) {
+    // 23505 ist der Postgres-Code für "dieser Wert gibt es schon".
+    if (error.code === '23505') return { ok: false, meldung: 'Der Name ist inzwischen vergeben.' };
+    return { ok: false, meldung: 'Der Name ließ sich nicht speichern.' };
+  }
+  if (eigenesProfil) eigenesProfil.benutzername = geprüft.name;
+  return { ok: true, meldung: 'Benutzername geändert.' };
+}
+
+
 /* --- 5. Oberfläche ------------------------------------------------------- */
 
 // Ein Formular für zwei Zwecke: "Anmelden" und "Registrieren" brauchen
@@ -165,8 +305,58 @@ function setzeKontoModus(modus) {
     modus === 'anmelden' ? 'Konto anlegen' : 'Anmelden';
   // Das Zurücksetzen des Passworts ergibt nur beim Anmelden Sinn.
   document.getElementById('btnPasswortVergessen').hidden = modus !== 'anmelden';
+  // Benutzername und Profilbild werden nur beim ANLEGEN abgefragt.
+  document.getElementById('kontoNeuFelder').hidden = modus !== 'registrieren';
+  // Das Passwortfeld meint je nach Modus etwas anderes. Sagt man das dem
+  // Browser nicht, bietet der Passwortspeicher beim Anlegen das ALTE
+  // Passwort an statt ein neues vorzuschlagen.
+  document.getElementById('kontoPasswortEingabe').autocomplete =
+    modus === 'anmelden' ? 'current-password' : 'new-password';
   zeigeKontoMeldung('');
   zeigeMailErneutKnopf(false);
+  zeigeNamenHinweis('kontoNameHinweis', '');
+}
+
+/* Die Rückmeldung unter einem Namensfeld. Sie hat drei Zustände: leer
+   (nichts gesagt), gut (grün) und schlecht (rot). Beide Namensfelder -
+   beim Anlegen und im Profil - benutzen dieselbe Funktion. */
+function zeigeNamenHinweis(feldId, text, istGut = false) {
+  const feld = document.getElementById(feldId);
+  if (!feld) return;
+  feld.textContent = text;
+  feld.hidden = !text;
+  feld.classList.toggle('gut', istGut);
+  feld.classList.toggle('fehler', !!text && !istGut);
+}
+
+/* Prüft einen getippten Namen und schreibt das Ergebnis unter das Feld.
+
+   Das "verzoegert" davor ist wichtig: Ohne es ginge bei jedem Tastendruck
+   eine Anfrage zum Server. Bei "kurvenfritze" wären das dreizehn Anfragen,
+   von denen zwölf niemanden interessieren. Gefragt wird erst, wenn eine
+   halbe Sekunde lang nichts mehr getippt wurde. */
+let namensPrüfungLäuft = null;
+
+function prüfeNamenVerzögert(eingabeId, hinweisId) {
+  clearTimeout(namensPrüfungLäuft);
+  const rohname = document.getElementById(eingabeId).value;
+
+  // Solange noch getippt wird, nur die Form prüfen - das geht ohne Netz.
+  const geprüft = benutzernameSauber(rohname);
+  if (!geprüft.ok) {
+    zeigeNamenHinweis(hinweisId, rohname.trim() ? geprüft.meldung : '');
+    return;
+  }
+  zeigeNamenHinweis(hinweisId, 'Wird geprüft …');
+
+  namensPrüfungLäuft = setTimeout(async () => {
+    const frei = await benutzernameFrei(geprüft.name);
+    // Zwischenzeitlich weitergetippt? Dann gilt diese Antwort nicht mehr.
+    if (document.getElementById(eingabeId).value.trim() !== geprüft.name) return;
+    if (frei === null) zeigeNamenHinweis(hinweisId, '');   // Netz weg, still bleiben
+    else if (frei) zeigeNamenHinweis(hinweisId, `„${geprüft.name}“ ist frei.`, true);
+    else zeigeNamenHinweis(hinweisId, `„${geprüft.name}“ ist schon vergeben.`);
+  }, 500);
 }
 
 function zeigeKontoMeldung(text, istFehler = false) {
@@ -183,22 +373,60 @@ function zeigeMailErneutKnopf(sichtbar) {
   document.getElementById('btnMailErneut').hidden = !sichtbar;
 }
 
-// Hält die Anzeige im Startmenü aktuell: entweder "Nicht angemeldet" mit
-// einem Knopf zum Anmelden, oder die E-Mail-Adresse mit einem zum Abmelden.
+/* Hält das Profilsymbol oben rechts aktuell.
+
+   Hier stand einmal eine Statuszeile am Fuß der Startseite. Sie ist
+   umgezogen: Das Symbol oben rechts ist der Ort, an dem jeder sein Konto
+   sucht, und es kann mehr als eine Zeile - es zeigt das Profilbild selbst.
+
+   Ohne eingetragene Server-Zugangsdaten verschwindet der Knopf ganz. Die
+   App ist dann die rein lokale Version, und ein Knopf, der zu einem
+   Anmeldebildschirm ohne Server führt, wäre eine Sackgasse. */
 function aktualisiereKontoAnzeige() {
-  const zeile = document.getElementById('kontoZeile');
-  if (!backendVerfügbar()) {
-    // Ohne eingetragene Zugangsdaten gibt es nichts anzuzeigen - die App
-    // ist dann einfach die rein lokale Version von vorher.
-    zeile.hidden = true;
-    return;
+  const knopf = document.getElementById('btnKontoRund');
+  if (!knopf) return;
+
+  if (!backendVerfügbar()) { knopf.hidden = true; return; }
+  knopf.hidden = false;
+
+  const bild = document.getElementById('kontoRundBild');
+  const symbol = knopf.querySelector('.ic');
+  const adresse = angemeldeterNutzer && eigenesProfil
+    ? profilBildAdresse(eigenesProfil.bild_pfad) : null;
+
+  if (bild) {
+    bild.hidden = !adresse;
+    if (adresse) bild.src = adresse;
   }
-  zeile.hidden = false;
-  document.getElementById('kontoAbgemeldet').hidden = angemeldeterNutzer !== null;
-  document.getElementById('kontoAngemeldet').hidden = angemeldeterNutzer === null;
-  if (angemeldeterNutzer) {
-    document.getElementById('kontoEmail').textContent = angemeldeterNutzer.email;
-  }
+  if (symbol) symbol.hidden = !!adresse;
+
+  knopf.title = angemeldeterNutzer
+    ? (eigenesProfil ? eigenesProfil.benutzername : 'Mein Profil')
+    : 'Anmelden';
+  knopf.setAttribute('aria-label', knopf.title);
+}
+
+/* Füllt den Profilbildschirm. Wird bei jedem Öffnen aufgerufen, damit nach
+   einem Namenswechsel nicht der alte Name stehen bleibt. */
+function zeigeProfil() {
+  if (!angemeldeterNutzer) { zeigeBildschirm('kontoScreen'); return; }
+
+  document.getElementById('profilName').textContent =
+    eigenesProfil ? eigenesProfil.benutzername : '…';
+  document.getElementById('profilMail').textContent = angemeldeterNutzer.email;
+
+  const bild = document.getElementById('profilBildAnzeige');
+  const platzhalter = document.getElementById('profilPlatzhalter');
+  const adresse = eigenesProfil ? profilBildAdresse(eigenesProfil.bild_pfad) : null;
+  bild.hidden = !adresse;
+  platzhalter.hidden = !!adresse;
+  if (adresse) bild.src = adresse;
+
+  // Das Feld zum Ändern beim Öffnen immer wieder einklappen.
+  document.getElementById('profilNameFeld').hidden = true;
+  zeigeNamenHinweis('profilNameHinweis', '');
+
+  zeigeBildschirm('profilScreen');
 }
 
 async function kontoFormularAbsenden() {
@@ -210,13 +438,43 @@ async function kontoFormularAbsenden() {
     return;
   }
 
+  /* Beim Anlegen kommt der Benutzername dazu. Er wird ZWEIMAL geprüft:
+     hier auf seine Form, und gleich darauf beim Server auf Verfügbarkeit.
+     Die letzte Instanz ist aber weder das eine noch das andere, sondern der
+     eindeutige Index in der Datenbank - nur er kann zwei gleichzeitige
+     Anmeldungen mit demselben Namen auseinanderhalten. */
+  let benutzername = null;
+  if (kontoModus === 'registrieren') {
+    const geprüft = benutzernameSauber(document.getElementById('kontoNameEingabe').value);
+    if (!geprüft.ok) {
+      zeigeKontoMeldung('Benutzername: ' + geprüft.meldung, true);
+      return;
+    }
+    benutzername = geprüft.name;
+
+    zeigeKontoMeldung('Benutzername wird geprüft …');
+    const frei = await benutzernameFrei(benutzername);
+    if (frei === false) {
+      zeigeKontoMeldung(`Der Benutzername „${benutzername}“ ist schon vergeben.`, true);
+      zeigeNamenHinweis('kontoNameHinweis', `„${benutzername}“ ist schon vergeben.`);
+      return;
+    }
+  }
+
   const knopf = document.getElementById('btnKontoAbsenden');
   knopf.disabled = true;
   zeigeKontoMeldung('Einen Moment...');
 
   const ergebnis = kontoModus === 'anmelden'
     ? await meldeAn(email, passwort)
-    : await registriere(email, passwort);
+    : await registriere(email, passwort, benutzername);
+
+  /* Ein beim Anlegen ausgesuchtes Bild wartet auf dem Gerät, bis es eine
+     Sitzung gibt - siehe WARTENDES_BILD. Gespeichert wird es erst jetzt,
+     denn vorher ist nicht sicher, dass das Konto überhaupt zustande kommt. */
+  if (ergebnis.ok && kontoModus === 'registrieren' && gewähltesProfilbild) {
+    geraet.schreib(WARTENDES_BILD, gewähltesProfilbild);
+  }
 
   knopf.disabled = false;
   zeigeKontoMeldung(ergebnis.meldung, !ergebnis.ok);
@@ -268,14 +526,123 @@ async function passwortNeuAbsenden() {
 
 /* --- 6. Verkabelung ------------------------------------------------------- */
 
-document.getElementById('btnKontoAnmelden').addEventListener('click', () => {
+/* Das Profilsymbol oben rechts führt an zwei verschiedene Orte, je
+   nachdem: angemeldet zum eigenen Profil, abgemeldet zum Anmelden. Ein
+   Symbol, zwei Ziele - das ist die Erwartung, die jeder von einem
+   Profilsymbol mitbringt. */
+document.getElementById('btnKontoRund').addEventListener('click', () => {
+  if (angemeldeterNutzer) { zeigeProfil(); return; }
   setzeKontoModus('anmelden');
   zeigeBildschirm('kontoScreen');
 });
 
+document.getElementById('btnProfilZurueck').addEventListener('click', zeigeStartmenü);
+
 document.getElementById('btnKontoAbmelden').addEventListener('click', async () => {
   await meldeAb();
+  // Nach dem Abmelden gehört einem der Profilbildschirm nicht mehr.
+  zeigeStartmenü();
   showToast('Abgemeldet.');
+});
+
+
+/* --- 6a. Profilbild auswählen ----------------------------------------------
+   Eine einzige Dateiauswahl für zwei Stellen. Diese Variable merkt sich,
+   welche der beiden gefragt hat: das Anmeldeformular oder der
+   Profilbildschirm. */
+let bildAuswahlFür = null;
+
+// Ein beim Anlegen ausgesuchtes Bild, solange es noch kein Konto gibt.
+let gewähltesProfilbild = null;
+
+function profilBildAuswählen(woher) {
+  bildAuswahlFür = woher;
+  const eingabe = document.getElementById('profilBildEingabe');
+  eingabe.value = '';   // sonst löst dieselbe Datei beim zweiten Mal nichts aus
+  eingabe.click();
+}
+
+document.getElementById('btnKontoBildWaehlen')
+  .addEventListener('click', () => profilBildAuswählen('anmeldung'));
+document.getElementById('btnProfilBild')
+  .addEventListener('click', () => profilBildAuswählen('profil'));
+
+document.getElementById('profilBildEingabe').addEventListener('change', async ereignis => {
+  const datei = ereignis.target.files[0];
+  if (!datei) return;
+
+  /* 512 Punkte Kante reichen: Das Bild wird als runde Scheibe gezeigt,
+     höchstens 96 Punkte groß. Auf einem Bildschirm mit dreifacher
+     Punktdichte sind das 288 echte Punkte - 512 hat Luft nach oben und
+     bleibt trotzdem unter 100 KB. */
+  let datenUrl;
+  try {
+    datenUrl = await verkleinereFoto(datei, 512, 0.85);
+  } catch {
+    showToast('Das Bild konnte nicht gelesen werden.');
+    return;
+  }
+
+  if (bildAuswahlFür === 'anmeldung') {
+    // Noch kein Konto, also noch kein Hochladen. Nur zeigen und merken.
+    gewähltesProfilbild = datenUrl;
+    const vorschau = document.getElementById('kontoBildVorschau');
+    vorschau.src = datenUrl;
+    vorschau.hidden = false;
+    document.getElementById('kontoBildSymbol').hidden = true;
+    document.getElementById('kontoBildText').textContent = 'Bild ändern';
+    return;
+  }
+
+  // Im Profil ist jemand angemeldet - da geht es sofort auf den Server.
+  const ergebnis = await profilBildHochladen(datenUrl);
+  showToast(ergebnis.meldung);
+  if (!ergebnis.ok) return;
+
+  // Frisch anzeigen. Der Zeitstempel hängt hinten an der Adresse, sonst
+  // zeigt der Browser weiter das alte Bild aus seinem Zwischenspeicher.
+  const frisch = profilBildAdresse(eigenesProfil.bild_pfad, Date.now());
+  const anzeige = document.getElementById('profilBildAnzeige');
+  anzeige.src = frisch;
+  anzeige.hidden = false;
+  document.getElementById('profilPlatzhalter').hidden = true;
+  const rund = document.getElementById('kontoRundBild');
+  rund.src = frisch;
+  rund.hidden = false;
+  document.querySelector('#btnKontoRund .ic').hidden = true;
+});
+
+
+/* --- 6b. Benutzernamen prüfen und ändern ---------------------------------- */
+
+document.getElementById('kontoNameEingabe').addEventListener('input',
+  () => prüfeNamenVerzögert('kontoNameEingabe', 'kontoNameHinweis'));
+
+document.getElementById('profilNameEingabe').addEventListener('input',
+  () => prüfeNamenVerzögert('profilNameEingabe', 'profilNameHinweis'));
+
+document.getElementById('btnProfilNameAendern').addEventListener('click', () => {
+  const feld = document.getElementById('profilNameFeld');
+  feld.hidden = !feld.hidden;
+  if (!feld.hidden) {
+    const eingabe = document.getElementById('profilNameEingabe');
+    eingabe.value = eigenesProfil ? eigenesProfil.benutzername : '';
+    eingabe.focus();
+  }
+});
+
+document.getElementById('btnProfilNameSpeichern').addEventListener('click', async () => {
+  const knopf = document.getElementById('btnProfilNameSpeichern');
+  knopf.disabled = true;
+  const ergebnis = await benutzernameÄndern(document.getElementById('profilNameEingabe').value);
+  knopf.disabled = false;
+
+  if (!ergebnis.ok) { zeigeNamenHinweis('profilNameHinweis', ergebnis.meldung); return; }
+  document.getElementById('profilName').textContent = eigenesProfil.benutzername;
+  document.getElementById('profilNameFeld').hidden = true;
+  zeigeNamenHinweis('profilNameHinweis', '');
+  aktualisiereKontoAnzeige();
+  showToast(ergebnis.meldung);
 });
 
 document.getElementById('btnKontoZurueck').addEventListener('click', zeigeStartmenü);
@@ -337,6 +704,41 @@ if (backendVerfügbar() && window.location.hash.includes('type=recovery')) {
 }
 
 
+/* Holt das Profil und reicht ein wartendes Bild nach.
+
+   Das wartende Bild ist der Fall "beim Anlegen ein Bild ausgesucht": Da gab
+   es noch keine Sitzung, also lag es bis hierher auf dem Gerät. Jetzt ist
+   der Weg frei. Danach wird es dort gelöscht, sonst würde es bei jeder
+   Anmeldung erneut hochgeladen. */
+async function profilNachziehen() {
+  await profilLaden();
+
+  /* Kein Profil, obwohl jemand angemeldet ist? Das darf eigentlich nicht
+     vorkommen - der Auslöser in der Datenbank legt es beim Anlegen des
+     Kontos an. Es kam aber genau einmal vor, nämlich bei den Konten, die
+     es schon VOR dem Auslöser gab. Statt darauf zu vertrauen, dass so
+     etwas nie wieder passiert, legt die App fehlende Profile selbst an.
+     Ein Konto ohne Profil hätte in der Community keinen Namen. */
+  if (!eigenesProfil) {
+    const ersatz = 'fahrer' + angemeldeterNutzer.id.replace(/-/g, '').slice(0, 6);
+    const { error } = await backend
+      .from('profile').insert({ nutzer_id: angemeldeterNutzer.id, benutzername: ersatz });
+    if (!error) await profilLaden();
+  }
+
+  aktualisiereKontoAnzeige();
+
+  const wartendes = geraet.lies(WARTENDES_BILD);
+  if (wartendes && eigenesProfil && !eigenesProfil.bild_pfad) {
+    const ergebnis = await profilBildHochladen(wartendes);
+    if (ergebnis.ok) aktualisiereKontoAnzeige();
+  }
+  // Auch wenn es schiefging: Ein Bild, das bei jedem Start erneut scheitert,
+  // ist schlimmer als eines, das fehlt. Nachreichen geht im Profil.
+  if (wartendes) geraet.wirfWeg(WARTENDES_BILD);
+}
+
+
 /* --- 7. Auf Anmeldung reagieren -------------------------------------------
    onAuthStateChange ist die eine Stelle, an der sich alles bündelt: sie
    feuert beim Anmelden, beim Abmelden, beim Start der Seite mit einer noch
@@ -348,6 +750,7 @@ if (backendVerfügbar()) {
   backend.auth.onAuthStateChange((ereignis, sitzung) => {
     const warAngemeldet = angemeldeterNutzer !== null;
     angemeldeterNutzer = sitzung ? sitzung.user : null;
+    if (!angemeldeterNutzer) eigenesProfil = null;
     aktualisiereKontoAnzeige();
 
     // Wer über den "Passwort vergessen"-Link hereinkommt, ist zwar
@@ -380,6 +783,11 @@ if (backendVerfügbar()) {
       // vorher wüsste die Datenbank nicht, wessen Touren gemeint sind.
       synchronisiereTouren();
     }
+
+    /* Das Profil bei JEDER Anmeldung holen, auch beim bloßen Öffnen der
+       Seite mit gültiger Sitzung - sonst stünde das Profilsymbol ohne Bild
+       da, obwohl eines hinterlegt ist. */
+    if (angemeldeterNutzer) profilNachziehen();
   });
 } else {
   aktualisiereKontoAnzeige();
@@ -598,6 +1006,9 @@ function lokaleSchlüssel() {
   const schlüssel = [];
   try { schlüssel.push(STORE); } catch { /* app.js fehlt */ }
   try { schlüssel.push(GARAGE_SPEICHER); } catch { /* garage.js fehlt */ }
+  // Ein noch nicht hochgeladenes Profilbild gehört ebenfalls weg - es wäre
+  // sonst das einzige, was ein gelöschtes Konto überlebt.
+  schlüssel.push(WARTENDES_BILD);
   return schlüssel;
 }
 

@@ -760,10 +760,17 @@ function zeichneStartKachel() {
   // Beispielmaschine zeigt.
   const adresse = (motorrad && motorrad.bild) || null;
   if (!adresse) {
+    /* Ohne eigenes Foto zeigt die Kachel den Raum MIT der Beispielmaschine -
+       genau wie die Buehne. Der Wert wird gesetzt, nicht entfernt: Das
+       "--kachel-bild" steht im style-Attribut im HTML, und removeProperty()
+       loescht dieselbe Eigenschaft, in der auch der Standardwert steht.
+       Die Kachel blieb dadurch leer. */
     bild.hidden = true;
     if (kachel) {
-      kachel.style.removeProperty('--kachel-bild');
-      kachel.style.removeProperty('--kachel-lage');
+      const garageBild = garageAktiv();
+      kachel.style.setProperty('--kachel-bild',
+        `url('${garageBild.bildStandard || garageBild.bild}')`);
+      kachel.style.setProperty('--kachel-lage', 'center 56%');
     }
     return;
   }

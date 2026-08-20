@@ -608,20 +608,157 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 }
 .linkbtn:hover { color: var(--text); }
 
-/* Statuszeile ganz unten auf dem Startbildschirm. margin-top:auto
-   schiebt sie an das untere Ende der Spalte, egal wie hoch der Rest ist. */
-.konto-zeile {
-  margin-top: auto;
-  padding-top: var(--s2);
-  font-size: 13px;
-  color: var(--muted);
-  line-height: 1.6;
+/* ---------- Profil ----------
+   Hier stand einmal eine Statuszeile am Fuss der Startseite. Das Konto
+   sitzt jetzt hinter dem Profilsymbol oben rechts. */
+
+/* Das Profilbild IM runden Knopf oben rechts. Es fuellt ihn ganz aus, das
+   Symbol darunter tritt dafuer zurueck (konto.js schaltet um). */
+.rund-bild {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
 }
-.konto-zeile[hidden] { display: none; }
-.konto-zeile #kontoEmail { color: var(--text); }
-#kontoAngemeldet { display: flex; align-items: center; gap: var(--s2); flex-wrap: wrap; }
-#kontoAngemeldet[hidden] { display: none; }
-.konto-zeile .linkbtn { margin-left: 8px; }
+.rund-bild[hidden] { display: none; }
+.glas-rund { position: relative; overflow: hidden; }
+.glas-rund[hidden] { display: none; }
+
+.profil-kopf {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s2);
+  margin-bottom: var(--s5);
+}
+.profil-kopf h2 { margin: 0; }
+.profil-kopf .sub { margin: 0; }
+
+/* Das grosse runde Profilbild. Es ist ein KNOPF, kein Bild: Ein Druck
+   darauf waehlt ein neues. Das Kamerazeichen an der Ecke sagt das ohne
+   Worte - und es ist der einzige Weg, spaeter noch ein Bild nachzureichen,
+   denn beim Anlegen des Kontos ist es freiwillig. */
+.profil-bild {
+  position: relative;
+  width: 96px; height: 96px;
+  flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--muted);
+  background: var(--surface-2);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 8px 22px rgba(0, 0, 0, 0.5);
+  transition: transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.profil-bild:active { transform: scale(0.96); }
+.profil-bild img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.profil-bild img[hidden] { display: none; }
+.profil-platzhalter { width: 44px; height: 44px; }
+.profil-platzhalter[hidden] { display: none; }
+
+/* Das Kamerazeichen sitzt halb in der Kante des Bildes, so wie das
+   Abzeichen am Hinweis in der Garage - dadurch gehoert es dazu, statt
+   danebenzuschweben. */
+.profil-bild-marke {
+  position: absolute;
+  right: -2px; bottom: -2px;
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  color: var(--accent-ink);
+  background: var(--accent);
+  border: 2px solid var(--bg);
+}
+
+.profil-name-aendern { margin-bottom: var(--s4); }
+#profilNameFeld { margin-top: var(--s2); text-align: left; }
+#profilNameFeld[hidden] { display: none; }
+#profilNameFeld input {
+  width: 100%;
+  padding: 11px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.28);
+  color: var(--text);
+  font: inherit;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.35);
+}
+#profilNameFeld input:focus { outline: none; border-color: var(--accent-hell); }
+#profilNameFeld .btn { margin-top: var(--s2); }
+
+.profil-liste {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s3);
+  padding-top: var(--s4);
+  border-top: 1px solid var(--line);
+}
+
+/* Die Rueckmeldung unter einem Namensfeld: gruen wenn frei, rot wenn
+   vergeben. Gruen ist hier ausnahmsweise erlaubt - es ist keine Deko,
+   sondern die Antwort auf eine Ja-Nein-Frage. */
+.namen-hinweis {
+  margin: 0 0 6px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.namen-hinweis[hidden] { display: none; }
+.namen-hinweis.gut { color: var(--good); }
+.namen-hinweis.fehler { color: var(--danger); }
+
+.freiwillig {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.7;
+}
+
+/* Der Knopf zum Bildaussuchen im Anmeldeformular: kleine runde Vorschau
+   plus Beschriftung. Als Zeile und nicht als grosse Flaeche - das Bild ist
+   freiwillig und soll nicht wichtiger aussehen als das Passwort. */
+.bild-waehlen {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s2);
+  margin-bottom: 6px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.28);
+  color: var(--muted);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+.bild-waehlen:hover { color: var(--text); }
+.bild-waehlen-kreis {
+  position: relative;
+  width: 42px; height: 42px;
+  flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.bild-waehlen-kreis img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+.bild-waehlen-kreis img[hidden] { display: none; }
+.bild-waehlen-kreis .ic[hidden] { display: none; }
 
 .konto-formular {
   display: flex;
@@ -644,6 +781,17 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 .konto-formular input:focus { outline: none; border-color: var(--accent-hell); }
 .konto-formular .btn { margin-top: 6px; padding: 13px; font-size: 16px; }
 
+/* Die Felder fuers Anlegen stecken in einem eigenen Kasten, damit sie sich
+   zusammen aus- und einblenden lassen. Der Kasten braucht die Spaltenordnung
+   noch einmal: Als EIN Flex-Kind des Formulars gibt er sie nicht an seine
+   eigenen Kinder weiter, und Beschriftung und Feld stuenden nebeneinander. */
+#kontoNeuFelder {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+#kontoNeuFelder[hidden] { display: none; }
+
 .konto-meldung {
   margin: 4px 0 0;
   font-size: 13px;
@@ -651,7 +799,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   color: var(--muted);
 }
 .konto-meldung[hidden] { display: none; }
-.konto-meldung.fehler { color: var(--accent-hell); }
+.konto-meldung.fehler { color: var(--danger); }
 
 .konto-wechsel { margin-top: 22px; font-size: 13px; color: var(--muted); }
 

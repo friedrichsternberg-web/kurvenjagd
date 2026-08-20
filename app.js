@@ -2363,12 +2363,27 @@ function symbol(name, zusatz = '') {
 // Passwortwechsel und Kontolöschung soll nichts ablenken - wer gerade dabei
 // ist, sein Passwort zu setzen oder sein Konto zu löschen, soll nicht mit
 // einem Fehlklick woanders landen.
-const BILDSCHIRME_OHNE_LEISTE = ['kontoScreen', 'passwortNeuScreen', 'kontoLoeschenScreen'];
+/* ALLE Bildschirme der App, an EINER Stelle.
 
-// Blendet genau einen der acht Bildschirme ein und alle anderen aus,
-// und bringt die untere Leiste auf denselben Stand.
+   Diese Liste stand einmal doppelt im Code - einmal in zeigeBildschirm()
+   und einmal in aktuellerBildschirm(). Beim Hinzufuegen des Profils fiel
+   genau das auf die Fuesse: Der neue Bildschirm stand in keiner der
+   beiden, zeigeBildschirm() versteckte daraufhin alles und blendete
+   nichts ein - die App zeigte eine schwarze Flaeche. Ein neuer Bildschirm
+   braucht ab jetzt genau einen Eintrag, hier. */
+const BILDSCHIRME = [
+  'startMenu', 'garageScreen', 'tourenScreen', 'app', 'rideScreen',
+  'kontoScreen', 'profilScreen', 'passwortNeuScreen', 'kontoLoeschenScreen',
+];
+
+// Bildschirme, die die untere Leiste ausblenden: alles rund ums Konto.
+// Dort geht es um eine Sache, die man zu Ende bringt.
+const BILDSCHIRME_OHNE_LEISTE = ['kontoScreen', 'profilScreen', 'passwortNeuScreen', 'kontoLoeschenScreen'];
+
+// Blendet genau einen Bildschirm ein und alle anderen aus, und bringt die
+// untere Leiste auf denselben Stand.
 function zeigeBildschirm(sichtbareId) {
-  ['startMenu', 'garageScreen', 'tourenScreen', 'app', 'rideScreen', 'kontoScreen', 'passwortNeuScreen', 'kontoLoeschenScreen'].forEach(id => {
+  BILDSCHIRME.forEach(id => {
     document.getElementById(id).hidden = id !== sichtbareId;
   });
   aktualisiereLeiste(sichtbareId);
@@ -2399,8 +2414,7 @@ function aktualisiereLeiste(sichtbareId) {
 // Welcher Bildschirm ist gerade zu sehen? Wird gebraucht, wenn die Leiste
 // unabhaengig vom Bildschirmwechsel neu bewertet werden muss (Navigation).
 function aktuellerBildschirm() {
-  return ['startMenu', 'garageScreen', 'tourenScreen', 'app', 'rideScreen', 'kontoScreen', 'passwortNeuScreen', 'kontoLoeschenScreen']
-    .find(id => !document.getElementById(id).hidden) || 'startMenu';
+  return BILDSCHIRME.find(id => !document.getElementById(id).hidden) || 'startMenu';
 }
 
 function zeigeStartmenü() {
@@ -2652,11 +2666,10 @@ document.querySelectorAll('.nav-tab').forEach(knopf => {
   });
 });
 
-// Der runde Knopf oben rechts fuehrt auf denselben Weg wie der Textlink
-// unten - es gibt nur eine Stelle, an der das Konto geoeffnet wird.
-document.getElementById('btnKontoRund').addEventListener('click', () => {
-  document.getElementById('btnKontoAnmelden').click();
-});
+/* Der runde Knopf oben rechts wird in konto.js verkabelt, nicht hier: Wohin
+   er fuehrt, haengt davon ab, ob jemand angemeldet ist - und das weiss nur
+   konto.js. Der Textlink am Fuss der Startseite, auf den hier frueher
+   weitergereicht wurde, ist mit dem Umzug des Kontos ins Profil entfallen. */
 
 /* Neu laden. Die Rueckfrage ist kein Zierrat: Eine laufende Aufzeichnung
    liegt im Arbeitsspeicher und ist nach dem Neuladen weg. Wer versehentlich

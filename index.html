@@ -23,7 +23,7 @@
        "orientation": "portrait" im Manifest ist die Ansage, um die es hier
        geht: Diese App ist fuers Hochformat gebaut. Die spaetere Webseite
        bekommt ein eigenes Design fuers Querformat und ein eigenes Manifest. -->
-  <link rel="manifest" href="manifest.webmanifest?v=45">
+  <link rel="manifest" href="manifest.webmanifest?v=46">
 
   <!-- Faerbt die Statusleiste des Handys in die Grundflaeche der App, damit
        oben kein fremder heller Streifen stehen bleibt. -->
@@ -36,7 +36,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Kurvenjagd">
-  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=45">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=46">
 
   <!-- Fuer die spaetere Webseite und geteilte Routen: So sieht der Link aus,
        wenn ihn jemand in WhatsApp oder Instagram einfuegt. Ohne das steht
@@ -74,7 +74,7 @@
        durchgehend alte Version, weil die Seite dann Elemente enthält, die
        das Skript noch gar nicht kennt.
 
-       Für den Browser ist "app.js?v=45" eine andere Adresse als "app.js?v=26",
+       Für den Browser ist "app.js?v=46" eine andere Adresse als "app.js?v=26",
        er holt sie also frisch.
 
        WICHTIG: BEI JEDER VERÖFFENTLICHUNG die Zahl an ALLEN Stellen um eins
@@ -90,8 +90,8 @@
                    die spaetere Webseite genauso benutzen.
        style.css   die Anordnung DIESER App, ausgelegt auf Hochformat. Die
                    Webseite bekommt dafuer eine eigene Datei. -->
-  <link rel="stylesheet" href="design.css?v=45">
-  <link rel="stylesheet" href="style.css?v=45">
+  <link rel="stylesheet" href="design.css?v=46">
+  <link rel="stylesheet" href="style.css?v=46">
 </head>
 <body>
 
@@ -260,6 +260,9 @@
             <svg class="ic gross"><use href="#icon-neu"></use></svg>
           </button>
           <button class="glas-rund" id="btnKontoRund" title="Konto" aria-label="Konto">
+            <!-- Ist ein Profilbild da, tritt es an die Stelle des Symbols
+                 und fuellt den Knopf ganz aus. konto.js schaltet um. -->
+            <img id="kontoRundBild" class="rund-bild" alt="" hidden>
             <svg class="ic gross"><use href="#icon-profil"></use></svg>
           </button>
         </div>
@@ -327,24 +330,11 @@
         </button>
       </div>
 
-      <!-- Statuszeile zum Konto. Anmelden ist freiwillig, deshalb steht sie
-           klein am Ende und nicht im Weg. Ohne eingetragene Server-
-           Zugangsdaten blendet konto.js die ganze Zeile aus. -->
-      <div id="kontoZeile" class="konto-zeile" hidden>
-        <div id="kontoAbgemeldet">
-          <button class="linkbtn" id="btnKontoAnmelden">Anmelden oder Konto anlegen</button>
-        </div>
-        <div id="kontoAngemeldet" hidden>
-          <svg class="ic klein"><use href="#icon-profil"></use></svg>
-          <span id="kontoEmail"></span>
-          <button class="linkbtn" id="btnKontoAbmelden">Abmelden</button>
-          <!-- Beide Stores verlangen zwingend, dass man sein Konto INNERHALB
-               der App löschen kann - nicht per Mail, nicht über ein Formular
-               im Netz. Deshalb steht der Weg dorthin hier, wo auch das
-               Abmelden steht, und nicht in einem Untermenü. -->
-          <button class="linkbtn gefahr" id="btnKontoLoeschenOeffnen">Konto löschen</button>
-        </div>
-      </div>
+      <!-- Hier stand einmal eine Statuszeile zum Konto: E-Mail, Abmelden,
+           Konto loeschen. Das alles sitzt jetzt hinter dem Profilsymbol
+           oben rechts (#profilScreen). Das Symbol ist der Ort, an dem
+           jeder sein Konto sucht, und der Fuss der Startseite gehoert den
+           Kacheln. -->
 
     </div>
   </div>
@@ -539,6 +529,29 @@
         <label for="kontoPasswortEingabe">Passwort</label>
         <input type="password" id="kontoPasswortEingabe" autocomplete="current-password" placeholder="mindestens 6 Zeichen">
 
+        <!-- Nur beim ANLEGEN eines Kontos. Beim Anmelden waeren beide
+             Felder sinnlos, deshalb blendet setzeKontoModus() sie aus.
+
+             Der Benutzername ist der Name, unter dem andere dich in der
+             Community sehen - die E-Mail-Adresse sieht niemand ausser dir.
+             Waehrend des Tippens fragt die App beim Server nach, ob der
+             Name noch frei ist. -->
+        <div id="kontoNeuFelder" hidden>
+          <label for="kontoNameEingabe">Benutzername</label>
+          <input type="text" id="kontoNameEingabe" autocomplete="username"
+                 placeholder="z. B. kurvenfritze" maxlength="24" spellcheck="false">
+          <p id="kontoNameHinweis" class="namen-hinweis" hidden></p>
+
+          <label>Profilbild <span class="freiwillig">freiwillig</span></label>
+          <button type="button" class="bild-waehlen" id="btnKontoBildWaehlen">
+            <span class="bild-waehlen-kreis">
+              <img id="kontoBildVorschau" alt="" hidden>
+              <svg class="ic gross" id="kontoBildSymbol"><use href="#icon-kamera"></use></svg>
+            </span>
+            <span id="kontoBildText">Bild ausw&auml;hlen</span>
+          </button>
+        </div>
+
         <p id="kontoMeldung" class="konto-meldung" hidden></p>
 
         <button type="submit" class="btn" id="btnKontoAbsenden">Anmelden</button>
@@ -557,6 +570,63 @@
       </p>
     </div>
   </div>
+
+  <!-- ===== Das eigene Profil. Erreichbar ueber das Profilsymbol oben
+       rechts auf der Startseite, und nur wenn jemand angemeldet ist -
+       sonst fuehrt dasselbe Symbol geradewegs zum Anmelden.
+
+       Hier steht alles zum Konto beisammen: Bild, Benutzername, E-Mail,
+       Abmelden und Loeschen. Frueher war das eine kleine Zeile am Fuss der
+       Startseite; dort suchte es niemand. ===== -->
+  <div id="profilScreen" class="start-screen" hidden>
+    <div class="start-screen-inner">
+      <button class="btn ghost back-btn" id="btnProfilZurueck">&larr; Zur&uuml;ck</button>
+
+      <div class="profil-kopf">
+        <!-- Ein Druck aufs Bild waehlt ein neues. Das Kamerazeichen an der
+             Ecke sagt das, ohne dass eine Beschriftung noetig waere - und
+             es ist der einzige Weg, spaeter noch ein Bild nachzureichen,
+             denn beim Anlegen ist es freiwillig. -->
+        <button type="button" class="profil-bild" id="btnProfilBild"
+                title="Profilbild ändern" aria-label="Profilbild ändern">
+          <img id="profilBildAnzeige" alt="" hidden>
+          <svg class="ic profil-platzhalter" id="profilPlatzhalter"><use href="#icon-profil"></use></svg>
+          <span class="profil-bild-marke" aria-hidden="true">
+            <svg class="ic klein"><use href="#icon-kamera"></use></svg>
+          </span>
+        </button>
+
+        <h2 id="profilName">&nbsp;</h2>
+        <p class="sub" id="profilMail"></p>
+      </div>
+
+      <!-- Namen aendern. Eingeklappt, damit der Bildschirm ruhig bleibt -
+             gebraucht wird das selten. -->
+      <div class="profil-name-aendern">
+        <button class="linkbtn" id="btnProfilNameAendern">Benutzernamen &auml;ndern</button>
+        <div id="profilNameFeld" hidden>
+          <input type="text" id="profilNameEingabe" maxlength="24" spellcheck="false"
+                 autocomplete="username" placeholder="Neuer Benutzername">
+          <p id="profilNameHinweis" class="namen-hinweis" hidden></p>
+          <button type="button" class="btn" id="btnProfilNameSpeichern">Speichern</button>
+        </div>
+      </div>
+
+      <div class="profil-liste">
+        <button class="linkbtn" id="btnKontoAbmelden">Abmelden</button>
+        <!-- Beide Stores verlangen zwingend, dass man sein Konto INNERHALB
+             der App loeschen kann - nicht per Mail, nicht ueber ein
+             Formular im Netz. Deshalb steht der Weg dorthin hier und nicht
+             in einem Untermenue. -->
+        <button class="linkbtn gefahr" id="btnKontoLoeschenOeffnen">Konto l&ouml;schen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dateiauswahl fuer das Profilbild. Eine einzige fuer beide Stellen -
+       Anmeldeformular und Profilbildschirm; konto.js merkt sich, welche
+       der beiden gerade gefragt hat. -->
+  <input type="file" id="profilBildEingabe" accept="image/*" hidden>
 
   <!-- ===== Neues Passwort setzen. Dieser Bildschirm erscheint NUR, wenn
        jemand über den Link aus der "Passwort vergessen"-Mail hereinkommt.
@@ -1116,18 +1186,18 @@
   <!-- ZUERST, denn alle anderen benutzen geraet.* beim Laden. Hier steht der
        gesamte Zugriff aufs Geraet - Standort, Speicher, Dateien. Beim Umzug
        in die Stores ist das die einzige Datei, die sich aendert. -->
-  <script src="geraet.js?v=45"></script>
+  <script src="geraet.js?v=46"></script>
   <!-- Der Rechenteil: Kurvigkeit, Sackgassen, Rundtour-Punkte, GPX. Muss VOR
        app.js stehen, weil app.js diese Funktionen beim Routen aufruft. Die
        spaetere Webseite im Querformat laedt genau diese Datei ebenfalls und
        rechnet damit exakt so wie die App. -->
-  <script src="kern.js?v=45"></script>
-  <script src="app.js?v=45"></script>
+  <script src="kern.js?v=46"></script>
+  <script src="app.js?v=46"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=45"></script>
+  <script src="konto.js?v=46"></script>
   <!-- Nach app.js, weil die Garage verkleinereFoto() und showToast() von
        dort benutzt. -->
-  <script src="garage.js?v=45"></script>
+  <script src="garage.js?v=46"></script>
 </body>
 </html>
