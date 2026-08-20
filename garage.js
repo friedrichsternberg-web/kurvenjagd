@@ -473,6 +473,7 @@ function öffneMotorradDialog(vorhandenes = null) {
   // in die Garage. Wer abbricht, soll nichts veraendert haben.
   dialogFoto = vorhandenes?.bild || null;
   dialogFotoOriginal = dialogFoto;
+  dialogBodenlinie = vorhandenes?.bodenlinie || null;
 
   öffneDialog({
     titel: vorhandenes ? 'Motorrad bearbeiten' : 'Motorrad hinzufügen',
@@ -551,6 +552,7 @@ function öffneMotorradDialog(vorhandenes = null) {
         leistung: feldWert('feldLeistung'),
         notiz:    feldWert('feldNotiz'),
         bild:     dialogFoto,
+        bodenlinie: dialogBodenlinie,
       };
 
       if (!datensatz.marke && !datensatz.modell) {
@@ -602,10 +604,19 @@ let dialogFoto = null;
 // das Original, und wer nicht zufrieden ist, muesste die Datei neu suchen.
 let dialogFotoOriginal = null;
 
+/* Wo die Maschine auf dem Foto den Boden beruehrt, siehe bodenlinieAusMaske().
+   Sie entsteht beim Freistellen und wird mit dem Motorrad gespeichert. Wer
+   kein eigenes Foto freistellt, hat keine - dann faellt die Anzeige auf den
+   einfachen Schatten zurueck. */
+let dialogBodenlinie = null;
+
 async function fotoÜbernehmen(datei) {
   try {
     dialogFoto = await verkleinereFoto(datei, 900);
     dialogFotoOriginal = dialogFoto;
+    // Neues Foto, alte Bodenlinie ungueltig. Das Freistellen liefert gleich
+    // eine neue; bis dahin ist keine besser als eine falsche.
+    dialogBodenlinie = null;
     zeichneFotoVorschau();
     /* Und gleich weiter zum Freistellen, ohne dass jemand einen Knopf sucht.
        Fast jedes Motorradfoto hat einen Hintergrund, der in der Garage nichts
@@ -1702,6 +1713,50 @@ function freiKnöpfeAnzeigen() {
   if (zurück) zurück.disabled = !frei || frei.verlauf.length === 0;
 }
 
+/* --- Die Bodenlinie ---------------------------------------------------------
+   Wo beruehrt das Motorrad den Boden?
+
+   WOZU DAS GUT IST: Ein freigestelltes Motorrad ohne Schatten schwebt, und
+   das sieht jeder sofort, ohne sagen zu koennen warum. Ein einzelner Fleck
+   unter der Mitte hilft wenig - in Wirklichkeit beruehren nur die beiden
+   Reifen den Boden, und genau dort ist der Schatten hart und dunkel.
+
+   WOHER WIR ES WISSEN, ohne irgendetwas zu raten: Die Maske aus dem
+   Freisteller weiss fuer jede Bildspalte, wo der unterste sichtbare Punkt
+   liegt. Traegt man diese Werte nebeneinander auf, ergibt sich die
+   Unterkante der Maschine - und ihre beiden tiefsten Stellen SIND die
+   Reifen.
+
+   Herauskommen 48 Zahlen zwischen 0 und 1, gemessen vom oberen Bildrand.
+   Das sind ein paar hundert Byte und passen problemlos mit ins gespeicherte
+   Motorrad; ein zweites Bild waere hier voellig unangemessen.
+
+   -1 heisst: In dieser Spalte ist nichts, dort ragt nichts nach unten. */
+function bodenlinieAusMaske(maske, breite, hoehe, felder = 48) {
+  const linie = new Array(felder).fill(-1);
+
+  for (let feld = 0; feld < felder; feld++) {
+    const vonX = Math.floor(feld * breite / felder);
+    const bisX = Math.max(vonX + 1, Math.floor((feld + 1) * breite / felder));
+
+    // Innerhalb eines Feldes zaehlt die TIEFSTE Stelle, nicht der Mittelwert.
+    // Ein Mittelwert wuerde den Reifen mit der Luft daneben verrechnen und
+    // den Aufsetzpunkt nach oben ziehen.
+    let tiefste = -1;
+    for (let x = vonX; x < bisX; x++) {
+      for (let y = hoehe - 1; y >= 0; y--) {
+        if (maske[y * breite + x] > 127) {
+          if (y > tiefste) tiefste = y;
+          break;                       // in dieser Spalte sind wir fertig
+        }
+      }
+    }
+    linie[feld] = tiefste < 0 ? -1 : Number((tiefste / (hoehe - 1)).toFixed(4));
+  }
+
+  return linie;
+}
+
 // Das Ergebnis in voller Groesse zurueckgeben: Originalbild, Maske darauf.
 function freiÜbernehmen() {
   const bild = new Image();
@@ -1732,6 +1787,10 @@ function freiÜbernehmen() {
     stift.putImageData(flaeche, 0, 0);
 
     dialogFoto = voll.toDataURL('image/webp', 0.88);
+    // Die Bodenlinie MUSS hier entstehen, solange die Maske noch da ist.
+    // Nach dem Schliessen ist sie weg, und aus dem fertigen Bild liesse sie
+    // sich nur mit einigem Aufwand zurueckrechnen.
+    dialogBodenlinie = bodenlinieAusMaske(frei.maske, frei.breite, frei.hoehe);
     schließeFreisteller();
     zeichneFotoVorschau();
     showToast('Freigestellt. Mit "Original zurück" kommst du jederzeit zum Ausgangsbild.');
@@ -1839,11 +1898,13 @@ verkabele('garageDialogInhalt', 'click', ereignis => {
   if (ereignis.target.closest('#btnFotoWeg')) {
     dialogFoto = null;
     dialogFotoOriginal = null;
+    dialogBodenlinie = null;
     zeichneFotoVorschau();
     return;
   }
   if (ereignis.target.closest('#btnFotoZurück')) {
     dialogFoto = dialogFotoOriginal;
+    dialogBodenlinie = null;   // das unbearbeitete Foto hat keine
     zeichneFotoVorschau();
     return;
   }
