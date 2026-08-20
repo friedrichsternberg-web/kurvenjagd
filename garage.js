@@ -84,17 +84,13 @@ function leereGarage() {
 }
 
 function ladeGarage() {
-  try {
-    const gelesen = JSON.parse(localStorage.getItem(GARAGE_SPEICHER));
-    if (!gelesen) return leereGarage();
+  const gelesen = geraet.lies(GARAGE_SPEICHER);
+  if (!gelesen) return leereGarage();
 
-    return {
-      motorräder: (Array.isArray(gelesen.motorräder) ? gelesen.motorräder : []).map(altesFormatUmschreiben),
-      ausrüstung: Array.isArray(gelesen.ausrüstung) ? gelesen.ausrüstung : [],
-    };
-  } catch {
-    return leereGarage();
-  }
+  return {
+    motorräder: (Array.isArray(gelesen.motorräder) ? gelesen.motorräder : []).map(altesFormatUmschreiben),
+    ausrüstung: Array.isArray(gelesen.ausrüstung) ? gelesen.ausrüstung : [],
+  };
 }
 
 /* Die erste Fassung der Garage speicherte eine ganze Bilderserie unter
@@ -108,16 +104,11 @@ function altesFormatUmschreiben(motorrad) {
   return { ...rest, bild: bilder[0] || null };   // das erste Bild bleibt
 }
 
-// Gibt false zurueck, wenn der Browser-Speicher voll ist. Der Aufrufer muss
+// Gibt false zurueck, wenn der Geraetespeicher voll ist. Der Aufrufer muss
 // das melden - stillschweigend nichts zu speichern waere das Schlimmste,
 // was hier passieren kann.
 function speichereGarage() {
-  try {
-    localStorage.setItem(GARAGE_SPEICHER, JSON.stringify(garage));
-    return true;
-  } catch {
-    return false;
-  }
+  return geraet.schreib(GARAGE_SPEICHER, garage);
 }
 
 let garage = ladeGarage();

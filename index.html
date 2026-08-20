@@ -11,6 +11,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Kurvenjagd - Motorrad-Routenplaner</title>
 
+  <!-- ===== Die App als App =====
+       Diese paar Zeilen sind die Vorstufe zu den Stores und schon fuer sich
+       nuetzlich: Wer die Seite auf den Startbildschirm legt, bekommt ein
+       Symbol, einen eigenen Eintrag im App-Umschalter und KEINE Adresszeile.
+
+       Die Angaben aus manifest.webmanifest wandern spaeter unveraendert in
+       die native Huelle - Name, Farben und Symbole werden dort aus denselben
+       Dateien erzeugt. Wer sie jetzt richtig setzt, setzt sie einmal.
+
+       "orientation": "portrait" im Manifest ist die Ansage, um die es hier
+       geht: Diese App ist fuers Hochformat gebaut. Die spaetere Webseite
+       bekommt ein eigenes Design fuers Querformat und ein eigenes Manifest. -->
+  <link rel="manifest" href="manifest.webmanifest?v=26">
+
+  <!-- Faerbt die Statusleiste des Handys in die Grundflaeche der App, damit
+       oben kein fremder heller Streifen stehen bleibt. -->
+  <meta name="theme-color" content="#0E0F12">
+
+  <!-- Apple wertet das Manifest bis heute nur teilweise aus und braucht seine
+       eigenen Angaben daneben. "black-translucent" laesst den Inhalt bis unter
+       die Statusleiste laufen - deshalb rechnet das Layout ueberall mit
+       env(safe-area-inset-top). -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Kurvenjagd">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=26">
+
+  <!-- Fuer die spaetere Webseite und geteilte Routen: So sieht der Link aus,
+       wenn ihn jemand in WhatsApp oder Instagram einfuegt. Ohne das steht
+       dort nur die nackte Adresse. -->
+  <meta property="og:title" content="Kurvenjagd">
+  <meta property="og:description" content="Kurvige Strecken finden, fahren, teilen.">
+  <meta property="og:type" content="website">
+  <meta name="description" content="Kurvige Strecken finden, fahren, teilen. Deine Maschine, deine Ausrüstung, deine Touren.">
+
   <!-- Leaflet ist die Kartenbibliothek. Wir laden sie von einem CDN,
        damit wir nichts installieren müssen. Die unminifizierte "-src"-
        Datei (statt der kleineren leaflet.js) ist hier absichtlich, weil
@@ -38,10 +73,24 @@
        durchgehend alte Version, weil die Seite dann Elemente enthält, die
        das Skript noch gar nicht kennt.
 
-       Für den Browser ist "app.js?v=25" eine andere Adresse als "app.js?v=22",
-       er holt sie also frisch. Wichtig: BEI JEDER VERÖFFENTLICHUNG die Zahl
-       an allen drei Stellen um eins erhöhen. -->
-  <link rel="stylesheet" href="style.css?v=25">
+       Für den Browser ist "app.js?v=26" eine andere Adresse als "app.js?v=25",
+       er holt sie also frisch.
+
+       WICHTIG: BEI JEDER VERÖFFENTLICHUNG die Zahl an ALLEN Stellen um eins
+       erhöhen. Wer eine vergisst, bekommt eine Mischung aus alt und neu, und
+       die ist schlimmer als durchgehend alt. Genau das ist beim Bauen schon
+       passiert: Die Datei war geändert, die Nummer nicht, und der Browser
+       lieferte weiter die alte Fassung.
+
+       Zum Nachzählen:  grep -oE '(href|src)="[^"]*\?v=" index.html | wc -l -->
+  <!-- ZWEI Dateien, und die Reihenfolge ist Pflicht.
+
+       design.css  Schrift, Farben, Abstaende, Radien - die Sprache. Sie wird
+                   die spaetere Webseite genauso benutzen.
+       style.css   die Anordnung DIESER App, ausgelegt auf Hochformat. Die
+                   Webseite bekommt dafuer eine eigene Datei. -->
+  <link rel="stylesheet" href="design.css?v=26">
+  <link rel="stylesheet" href="style.css?v=26">
 </head>
 <body>
 
@@ -869,12 +918,16 @@
        ein Foto an der falschen Stelle landet. -->
   <input type="file" id="garageFotoEingabe" accept="image/*" hidden>
 
-  <script src="app.js?v=25"></script>
+  <!-- ZUERST, denn alle anderen benutzen geraet.* beim Laden. Hier steht der
+       gesamte Zugriff aufs Geraet - Standort, Speicher, Dateien. Beim Umzug
+       in die Stores ist das die einzige Datei, die sich aendert. -->
+  <script src="geraet.js?v=26"></script>
+  <script src="app.js?v=26"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=25"></script>
+  <script src="konto.js?v=26"></script>
   <!-- Nach app.js, weil die Garage verkleinereFoto() und showToast() von
        dort benutzt. -->
-  <script src="garage.js?v=25"></script>
+  <script src="garage.js?v=26"></script>
 </body>
 </html>

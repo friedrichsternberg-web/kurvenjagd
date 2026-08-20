@@ -41,7 +41,7 @@ const RIDE_KURZ_GRENZE = 5;
 // während einer aktiven Fahrt gebraucht wird.
 const nav = {
   aktiv: false,
-  watchId: null,             // ID von navigator.geolocation.watchPosition, zum späteren Stoppen
+  watchId: null,             // Kennung von geraet.standortVerfolgen(), zum späteren Stoppen
   marker: null,               // Leaflet-Marker für die eigene Position
   genauigkeitskreis: null,    // Leaflet-Kreis, zeigt die GPS-Ungenauigkeit
   gefahrenLinie: null,        // Leaflet-Linie: bereits gefahrener Streckenteil (grau)
@@ -74,9 +74,9 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 // es einfach bei der Standardansicht - ohne Fehlermeldung, das waere beim
 // Start unnoetig aufdringlich.
 function zeigeEigenenStandortBeimStart() {
-  if (!navigator.geolocation) return;
+  if (!geraet.standortDa()) return;
 
-  navigator.geolocation.getCurrentPosition(
+  geraet.standortEinmal(
     (pos) => {
       const { latitude, longitude } = pos.coords;
       map.setView([latitude, longitude], 12);
@@ -426,7 +426,7 @@ function wireStandortOption() {
 // Einmalige Standortabfrage (anders als bei der Live-Navigation, die
 // dauerhaft verfolgt) - für den Fall "ich will einfach von hier losfahren".
 function aktuellenStandortVerwenden() {
-  if (!navigator.geolocation) {
+  if (!geraet.standortDa()) {
     showToast('Dieses Gerät oder dieser Browser unterstützt keine Standortermittlung.');
     return;
   }
@@ -435,7 +435,7 @@ function aktuellenStandortVerwenden() {
   document.getElementById('searchInput').value = '';
   setBusy(true);
 
-  navigator.geolocation.getCurrentPosition(
+  geraet.standortEinmal(
     (pos) => {
       setBusy(false);
       addWaypoint(pos.coords.latitude, pos.coords.longitude);
@@ -1484,7 +1484,7 @@ function formatRideZeit(sec) {
 function startNavigation() {
   if (!state.route) return;
 
-  if (!navigator.geolocation) {
+  if (!geraet.standortDa()) {
     showToast('Dieses Gerät oder dieser Browser unterstützt keine Standortermittlung.');
     return;
   }
@@ -1496,7 +1496,7 @@ function startNavigation() {
   nav.abweichungSeit = null;
   nav.aktiv = true;
 
-  nav.watchId = navigator.geolocation.watchPosition(aufPositionsUpdate, aufPositionsFehler, {
+  nav.watchId = geraet.standortVerfolgen(aufPositionsUpdate, aufPositionsFehler, {
     enableHighAccuracy: true,
     maximumAge: 2000,
     timeout: 15000,
@@ -1521,7 +1521,7 @@ function startNavigation() {
 }
 
 function stopNavigation() {
-  if (nav.watchId !== null) navigator.geolocation.clearWatch(nav.watchId);
+  geraet.standortLoslassen(nav.watchId);
   nav.watchId = null;
   nav.aktiv = false;
 
@@ -1991,7 +1991,7 @@ function rideZurücksetzen() {
 }
 
 function starteRide() {
-  if (!navigator.geolocation) {
+  if (!geraet.standortDa()) {
     showToast('Dieses Gerät oder dieser Browser unterstützt keine Standortermittlung.');
     return;
   }
@@ -2006,7 +2006,7 @@ function starteRide() {
   document.getElementById('btnRidePause').textContent = 'Pause';
   document.getElementById('rideStatus').textContent = 'Warte auf GPS-Signal...';
 
-  ride.watchId = navigator.geolocation.watchPosition(aufRidePosition, aufRideFehler, {
+  ride.watchId = geraet.standortVerfolgen(aufRidePosition, aufRideFehler, {
     enableHighAccuracy: true,
     maximumAge: 1000,
     timeout: 20000,
@@ -2075,8 +2075,16 @@ function aufRidePosition(pos) {
     }
   }
 
+  /* Der Zusatz "Bildschirm anlassen" ist keine Bevormundung, sondern die
+     ehrliche Ansage: Im Browser hoert die Ortung auf, sobald das Handy in
+     die Tasche wandert. Eine Aufzeichnung zu versprechen, die dann still
+     abbricht, waere das Schlimmste, was diese App tun kann.
+
+     In der spaeteren App faellt der Satz von selbst weg, weil
+     geraet.standortImHintergrund() dort true meldet. */
+  const zusatz = geraet.standortImHintergrund() ? '' : ' · Bildschirm anlassen';
   document.getElementById('rideStatus').textContent =
-    `Aufzeichnung läuft · ${ride.punkte.length} Punkte · GPS ±${Math.round(accuracy)} m`;
+    `Aufzeichnung läuft · ${ride.punkte.length} Punkte · GPS ±${Math.round(accuracy)} m${zusatz}`;
 
   zeichneRideAufKarte(latitude, longitude);
   aktualisiereRideAnzeige();
@@ -2159,7 +2167,7 @@ function pausiereRideUmschalten() {
 function beendeRide() {
   if (!ride.aktiv) return;
 
-  if (ride.watchId !== null) navigator.geolocation.clearWatch(ride.watchId);
+  geraet.standortLoslassen(ride.watchId);
   ride.watchId = null;
   clearInterval(ride.uhr);
   ride.uhr = null;
@@ -2265,7 +2273,7 @@ const FOTO_MAX_ANZAHL = 12;    // pro Ausfahrt, damit der Speicher nicht überl�
 // Vermerk in der Datei, nicht in den Bilddaten selbst).
 function verkleinereFoto(datei, maxKante = FOTO_MAX_KANTE) {
   return new Promise((fertig, fehler) => {
-    const url = URL.createObjectURL(datei);
+    const url = geraet.adresseFür(datei);
     const bild = new Image();
 
     bild.onload = () => {
@@ -2274,10 +2282,10 @@ function verkleinereFoto(datei, maxKante = FOTO_MAX_KANTE) {
       leinwand.width = Math.round(bild.naturalWidth * faktor);
       leinwand.height = Math.round(bild.naturalHeight * faktor);
       leinwand.getContext('2d').drawImage(bild, 0, 0, leinwand.width, leinwand.height);
-      URL.revokeObjectURL(url);
+      geraet.adresseFreigeben(url);
       fertig(leinwand.toDataURL('image/jpeg', FOTO_QUALITÄT));
     };
-    bild.onerror = () => { URL.revokeObjectURL(url); fehler(new Error('Bild konnte nicht gelesen werden')); };
+    bild.onerror = () => { geraet.adresseFreigeben(url); fehler(new Error('Bild konnte nicht gelesen werden')); };
     bild.src = url;
   });
 }
@@ -2428,13 +2436,12 @@ function schließeFotoAnsicht() {
    dann geht der Bildschirm eben wie gewohnt aus (die Aufzeichnung läuft im
    Vordergrund trotzdem weiter). */
 async function bildschirmWachHalten() {
-  try {
-    if ('wakeLock' in navigator) ride.wakeLock = await navigator.wakeLock.request('screen');
-  } catch { /* nicht kritisch, bewusst still */ }
+  ride.wakeLock = await geraet.wachHalten();
 }
 
 function bildschirmWachLassen() {
-  if (ride.wakeLock) { ride.wakeLock.release().catch(() => {}); ride.wakeLock = null; }
+  geraet.wachLassen(ride.wakeLock);
+  ride.wakeLock = null;
 }
 
 // iOS gibt den Wake Lock ab, sobald die App in den Hintergrund geht - beim
@@ -2450,22 +2457,16 @@ document.addEventListener('visibilitychange', () => {
 const STORE = 'kurvenjagd.routen';
 
 function loadSaved() {
-  try { return JSON.parse(localStorage.getItem(STORE)) || []; }
-  catch { return []; }
+  return geraet.lies(STORE, []) || [];
 }
 
-// Die einzige Stelle, an der die Liste in den Browser-Speicher geschrieben
+// Die einzige Stelle, an der die Liste in den Gerätespeicher geschrieben
 // wird. Vorher stand localStorage.setItem an drei Stellen verstreut - mit
 // dem Server als zweiter Ablage wäre daraus schnell ein Durcheinander
 // geworden, bei dem eine Stelle den Abgleich vergisst.
 // Gibt false zurück, wenn der Speicher voll ist (siehe speichereRide).
 function speichereListe(liste) {
-  try {
-    localStorage.setItem(STORE, JSON.stringify(liste));
-    return true;
-  } catch {
-    return false;
-  }
+  return geraet.schreib(STORE, liste);
 }
 
 // Die folgenden zwei Helfer reichen eine Änderung an den Server weiter,
@@ -2656,13 +2657,9 @@ ${pts}
   </trk>
 </gpx>`;
 
-  // Datei im Browser erzeugen und herunterladen
-  const blob = new Blob([gpx], { type: 'application/gpx+xml' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'kurvenjagd-tour.gpx';
-  a.click();
-  URL.revokeObjectURL(a.href);
+  // Wie die Datei beim Nutzer landet, entscheidet geraet.js - im Browser ein
+  // Download, in der späteren App das Teilen-Blatt des Systems.
+  geraet.dateiAnbieten('kurvenjagd-tour.gpx', gpx, 'application/gpx+xml');
 }
 
 
