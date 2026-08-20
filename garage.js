@@ -45,7 +45,7 @@
    Server umziehen.
 
    Zum Platz: Ohne eigenes Foto braucht ein Motorrad rund 200 Byte, weil nur
-   Text gespeichert wird. Mit eigenem Foto kommen etwa 90 KB dazu. Der
+   Text gespeichert wird. Mit eigenem Foto kommen 200 bis 500 KB dazu. Der
    Browser-Speicher fasst rund 5 MB und die Touren liegen mit darin - bei
    einer Handvoll Maschinen ist das unkritisch, aber es ist der Grund, warum
    es genau EIN Foto je Motorrad gibt und nicht mehrere. */
@@ -484,7 +484,13 @@ function rahmenMessen(bildElement) {
    schraege Radlinie ist nicht automatisch ein Fehler. */
 
 const DREHUNG_MINDESTENS = 1.5;   // Grad, darunter ist es Rauschen
-const DREHUNG_HOECHSTENS = 14;    // Grad, darueber wird es unnatuerlich
+/* Die Obergrenze war einmal 14 Grad und das war zu wenig: Friedrichs
+   Heckansicht hat eine Radlinie um die 30 Grad, die Ellipse erlaubt etwa
+   14 - die noetige Korrektur von 16 Grad wurde abgeschnitten und ein Rad
+   blieb in der Luft. Da das Bild freigestellt ist, gibt es keinen Horizont,
+   der eine kraeftigere Drehung verraten wuerde - nur die Maschine selbst,
+   und die sieht gedreht immer noch wie eine Maschine aus. */
+const DREHUNG_HOECHSTENS = 24;    // Grad
 
 function standflaeche(rahmen, bildBreite, bildHoehe) {
   if (!rahmen || !rahmen.boden) return null;
@@ -495,33 +501,27 @@ function standflaeche(rahmen, bildBreite, bildHoehe) {
   const bis = Math.ceil(rahmen.rechts * anzahl);
   if (bis - von < 8) return null;      // zu schmal, um zwei Raeder zu trennen
 
-  /* DIE BEIDEN RAEDER FINDEN, und der erste Ansatz taugte nicht: "der
-     tiefste Punkt der linken Haelfte und der der rechten" liefert bei einer
-     stark verkanteten Aufnahme zwei Punkte dicht nebeneinander - beide am
-     selben Rad. Aus zwei nahen Punkten laesst sich aber keine verlaessliche
-     Neigung ableiten, kleine Messfehler werden dabei riesig.
+  /* DIE BEIDEN RAEDER FINDEN. Zwei Anlaeufe davor taugten nicht:
 
-     Deshalb: erst den tiefsten Punkt ueberhaupt suchen, das ist mit Sicherheit
-     ein Rad. Dann diesen Bereich ausblenden und den tiefsten des Rests suchen -
-     das ist das andere. So liegen die beiden immer weit auseinander. */
+     "Tiefster Punkt jeder Haelfte" fand bei verkanteten Aufnahmen zweimal
+     dasselbe Rad. "Tiefster Punkt insgesamt, dann tiefster des Rests" fand
+     bei Friedrichs Heckansicht statt des fernen Vorderrads den naechsten
+     tief haengenden Anbau - bei starker Perspektive liegt ein Auspuff NAH
+     an der Kamera tiefer im Bild als ein Reifen WEIT weg von ihr.
+
+     Was immer gilt, ist etwas anderes: Die Raeder sind die aeusseren Enden
+     der Maschine. Also wird je ein Rad im linken und im rechten AUSSENDRITTEL
+     des Inhalts gesucht - dort haengt nichts tiefer als der Reifen, denn
+     ausserhalb der Reifen kommt nichts mehr. */
 
   const spanne = bis - von;
-  /* Zwei verschiedene Breiten, und sie zu verwechseln war der Fehler im
-     ersten Anlauf:
-
-     nahbereich     wie weit um die tiefste Stelle herum noch zum SELBEN Rad
-                    gehoert. Schmal, sonst mittelt man den Reifen mit dem
-                    Motorblock daneben.
-     mindestAbstand wie weit das ANDERE Rad mindestens entfernt sein muss.
-                    Breit, denn zwei Raeder stehen nun einmal weit
-                    auseinander. War dieser Wert zu klein, fand die Suche das
-                    zweite Rad direkt neben dem ersten - also in Wirklichkeit
-                    noch einmal dasselbe. */
+  // Wie weit um die tiefste Stelle herum noch zum selben Rad gehoert.
+  // Schmal, sonst mittelt man den Reifen mit dem Motorblock daneben.
   const nahbereich = Math.max(2, Math.round(spanne * 0.12));
-  const mindestAbstand = Math.max(4, Math.round(spanne * 0.40));
+  // Das Suchdrittel ist grosszuegig bemessen (40 Prozent), weil das ferne
+  // Rad einer Schraegansicht deutlich innerhalb der Bildkante liegen kann.
+  const randbereich = Math.max(3, Math.round(spanne * 0.40));
 
-  // Der tiefste Bereich in einem Abschnitt, als Mittelwert aller Spalten
-  // dicht daran - unempfindlich gegen einen einzelnen Ausreisser.
   function tiefsterBereich(erlaubt) {
     let tiefste = -1, tiefsteStelle = -1;
     for (let i = von; i < bis; i++) {
@@ -539,17 +539,14 @@ function standflaeche(rahmen, bildBreite, bildHoehe) {
     return zahl ? { x: summeX / zahl, y: summeY / zahl, stelle: tiefsteStelle } : null;
   }
 
-  const erstes = tiefsterBereich(() => true);
-  if (!erstes) return null;
-  const zweites = tiefsterBereich(i => Math.abs(i - erstes.stelle) >= mindestAbstand);
-  if (!zweites) return null;
+  const hinten = tiefsterBereich(i => i < von + randbereich);
+  const vorne  = tiefsterBereich(i => i >= bis - randbereich);
+  if (!hinten || !vorne) return null;
 
-  const hinten = erstes.x <= zweites.x ? erstes : zweites;
-  const vorne  = erstes.x <= zweites.x ? zweites : erstes;
-
-  /* Liegen die beiden trotzdem noch nah beieinander, ist die Messung nicht
-     zu gebrauchen. Lieber gar keine Neigung annehmen als eine falsche - eine
-     unnoetige Drehung faellt sofort auf, eine fehlende kaum. */
+  /* Liegen die beiden nah beieinander - die Suchbereiche ueberlappen sich in
+     der Mitte -, ist die Messung nicht zu gebrauchen. Lieber gar keine
+     Neigung annehmen als eine falsche: Eine unnoetige Drehung faellt sofort
+     auf, eine fehlende kaum. */
   if ((vorne.x - hinten.x) * anzahl < spanne * 0.3) return null;
 
   // In Bildpunkte umrechnen, sonst waere der Winkel vom Seitenverhaeltnis
@@ -715,22 +712,45 @@ function setzeBuehnenPlatz() {
   const tellerRxPx = garageBild.tellerRx * bildB * massstab;
   const tellerRyPx = garageBild.tellerRy * bildH * massstab;
 
-  // Das Bildelement wird so breit gemacht, dass der INHALT die Zielbreite
-  // hat. Steht die Maschine nur auf der halben Bildbreite, wird das Element
-  // doppelt so breit - sichtbar ist am Ende trotzdem die Zielbreite.
-  let zielBreite = garageBild.breite * bildB * massstab;
   const inhaltAnteil = Math.max(0.05, rahmen.rechts - rahmen.links);
   const stand = standflaeche(rahmen, bild.naturalWidth, bild.naturalHeight);
 
-  /* Notbremse: Ist der Radstand breiter als der Teller, hilft kein Drehen -
-     dann steht die Maschine unweigerlich darueber hinaus. In dem Fall wird
-     sie so weit verkleinert, dass sie darauf passt. Das tritt bei einer
-     Seitenansicht mit langem Radstand auf, etwa einem Tourer. */
-  if (stand && stand.spannweite > 0) {
-    const radstandAufSchirm = (stand.spannweite / inhaltAnteil) * zielBreite;
-    const platz = tellerRxPx * 1.72;      // knapp innerhalb der Tellerbreite
-    if (radstandAufSchirm > platz) zielBreite *= platz / radstandAufSchirm;
+  /* DIE GROESSE, und hier lag der Fehler, den Friedrich als "zu gross"
+     gesehen hat: Sie richtete sich nach der BREITE DES BILDINHALTS. Bei
+     einer Seitenansicht ist das fast der Radstand und die Regel stimmt.
+     Bei einer Schraegansicht von hinten aber ist der Inhalt hoch und
+     schmal - dieselbe Regel machte die Maschine riesig, und auf den Teller
+     passte sie nie.
+
+     Was tatsaechlich zum Teller passen muss, ist der ABSTAND DER BEIDEN
+     RAEDER AUF DEM SCHIRM. Der wird deshalb auf einen festen Anteil der
+     Tellerbreite gesetzt, egal aus welchem Winkel fotografiert wurde.
+     Eine Seitenansicht und eine Heckansicht bekommen so denselben
+     Fussabdruck - unterschiedlich hoch duerfen sie sein, das ist ehrlich. */
+  const RADSTAND_ANTEIL = 1.06;   // Radstand = 1,06 x halbe Tellerbreite
+  let zielBreite;
+  if (stand && stand.spannweite > 0.05) {
+    zielBreite = (tellerRxPx * RADSTAND_ANTEIL) * inhaltAnteil / stand.spannweite;
+  } else {
+    // Ohne erkannte Raeder bleibt nur die alte Regel ueber die Inhaltsbreite.
+    zielBreite = garageBild.breite * bildB * massstab;
   }
+
+  /* Geklemmt, damit ein Messfehler nie ein absurdes Bild ergibt. zielBreite
+     ist die SICHTBARE Breite der Maschine auf dem Schirm: hoechstens gut
+     tellerbreit (ein Tourer mit Koffern darf ueberstehen), nie winzig. */
+  zielBreite = Math.min(zielBreite, tellerRxPx * 2.4);
+  zielBreite = Math.max(zielBreite, tellerRxPx * 0.8);
+
+  /* Die Hoehenbremse. Der Radstand sagt nichts darueber, wie HOCH ein Bild
+     ist - eine Schraegansicht von hinten ist hoch, und auf einem breiten,
+     niedrigen Fenster ist auch der Teller selbst riesig. Beides zusammen
+     kann die Maschine ueber den Raum hinauswachsen lassen. Deshalb die
+     letzte Regel, und sie sticht alle anderen: Die sichtbare Maschine
+     bekommt hoechstens 62 Prozent der Raumhoehe. */
+  const sichtbareHoehe = (zielBreite / inhaltAnteil) * seitenverhältnis
+                       * Math.max(0.05, rahmen.unten - rahmen.oben);
+  if (sichtbareHoehe > raumH * 0.62) zielBreite *= (raumH * 0.62) / sichtbareHoehe;
 
   const elementBreite = zielBreite / inhaltAnteil;
   const elementHöhe = elementBreite * seitenverhältnis;
@@ -1103,7 +1123,13 @@ let dialogBodenlinie = null;
 
 async function fotoÜbernehmen(datei) {
   try {
-    dialogFoto = await verkleinereFoto(datei, 900);
+    /* 1600 Punkte Kante und Guete 0,92 statt der 900/0,72 der Tourfotos.
+       Der Grund: Dieses Bild wird auf der Buehne gross gezeigt, auf einem
+       Handy mit dreifacher Punktdichte braucht die Anzeige gut 900
+       Geraetepunkte NUR fuer die Maschine - ein 900er-Foto, von dem die
+       Maschine nur einen Teil einnimmt, wird dann aufgeblasen. Genau die
+       Verpixelung, die Friedrich gesehen hat. */
+    dialogFoto = await verkleinereFoto(datei, 1600, 0.92);
     dialogFotoOriginal = dialogFoto;
     // Neues Foto, alte Bodenlinie ungueltig. Das Freistellen liefert gleich
     // eine neue; bis dahin ist keine besser als eine falsche.
@@ -2212,7 +2238,10 @@ function freiÜbernehmen() {
     }
     stift.putImageData(flaeche, 0, 0);
 
-    dialogFoto = voll.toDataURL('image/webp', 0.88);
+    /* Guete 0,92: Das Bild durchlaeuft hier die ZWEITE Kompression (die
+       erste war das Einlesen). Wer zweimal presst, presst die Fehler der
+       ersten Runde gleich mit - deshalb an beiden Stellen sparsam. */
+    dialogFoto = voll.toDataURL('image/webp', 0.92);
     // Die Bodenlinie MUSS hier entstehen, solange die Maske noch da ist.
     // Nach dem Schliessen ist sie weg, und aus dem fertigen Bild liesse sie
     // sich nur mit einigem Aufwand zurueckrechnen.

@@ -1926,7 +1926,11 @@ const FOTO_MAX_ANZAHL = 12;    // pro Ausfahrt, damit der Speicher nicht überl�
 // Der Umweg über ein <img>-Element ist Absicht: der Browser dreht das Bild
 // dabei automatisch richtig herum (iPhone-Fotos tragen die Drehung nur als
 // Vermerk in der Datei, nicht in den Bilddaten selbst).
-function verkleinereFoto(datei, maxKante = FOTO_MAX_KANTE) {
+/* guete ist waehlbar, weil dasselbe Werkzeug zwei verschiedene Zwecke hat:
+   Tourfotos duerfen kraeftig gepresst werden (viele Bilder, kleiner
+   Speicher), das Garagenfoto nicht - es ist das Schaustueck der Seite und
+   wird gross angezeigt, da faellt jede Kompressionsstufe auf. */
+function verkleinereFoto(datei, maxKante = FOTO_MAX_KANTE, guete = FOTO_QUALITÄT) {
   return new Promise((fertig, fehler) => {
     const url = geraet.adresseFür(datei);
     const bild = new Image();
@@ -1938,7 +1942,7 @@ function verkleinereFoto(datei, maxKante = FOTO_MAX_KANTE) {
       leinwand.height = Math.round(bild.naturalHeight * faktor);
       leinwand.getContext('2d').drawImage(bild, 0, 0, leinwand.width, leinwand.height);
       geraet.adresseFreigeben(url);
-      fertig(leinwand.toDataURL('image/jpeg', FOTO_QUALITÄT));
+      fertig(leinwand.toDataURL('image/jpeg', guete));
     };
     bild.onerror = () => { geraet.adresseFreigeben(url); fehler(new Error('Bild konnte nicht gelesen werden')); };
     bild.src = url;
