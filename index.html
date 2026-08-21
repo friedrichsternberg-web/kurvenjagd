@@ -23,7 +23,7 @@
        "orientation": "portrait" im Manifest ist die Ansage, um die es hier
        geht: Diese App ist fuers Hochformat gebaut. Die spaetere Webseite
        bekommt ein eigenes Design fuers Querformat und ein eigenes Manifest. -->
-  <link rel="manifest" href="manifest.webmanifest?v=47">
+  <link rel="manifest" href="manifest.webmanifest?v=48">
 
   <!-- Faerbt die Statusleiste des Handys in die Grundflaeche der App, damit
        oben kein fremder heller Streifen stehen bleibt. -->
@@ -36,7 +36,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Kurvenjagd">
-  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=47">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=48">
 
   <!-- Fuer die spaetere Webseite und geteilte Routen: So sieht der Link aus,
        wenn ihn jemand in WhatsApp oder Instagram einfuegt. Ohne das steht
@@ -74,7 +74,7 @@
        durchgehend alte Version, weil die Seite dann Elemente enthält, die
        das Skript noch gar nicht kennt.
 
-       Für den Browser ist "app.js?v=47" eine andere Adresse als "app.js?v=26",
+       Für den Browser ist "app.js?v=48" eine andere Adresse als "app.js?v=26",
        er holt sie also frisch.
 
        WICHTIG: BEI JEDER VERÖFFENTLICHUNG die Zahl an ALLEN Stellen um eins
@@ -90,8 +90,8 @@
                    die spaetere Webseite genauso benutzen.
        style.css   die Anordnung DIESER App, ausgelegt auf Hochformat. Die
                    Webseite bekommt dafuer eine eigene Datei. -->
-  <link rel="stylesheet" href="design.css?v=47">
-  <link rel="stylesheet" href="style.css?v=47">
+  <link rel="stylesheet" href="design.css?v=48">
+  <link rel="stylesheet" href="style.css?v=48">
 </head>
 <body>
 
@@ -128,6 +128,23 @@
       <symbol id="icon-profil" viewBox="0 0 24 24">
         <circle cx="12" cy="8" r="3.8"/>
         <path d="M4.5 20c0-3.6 3.4-5.6 7.5-5.6s7.5 2 7.5 5.6"/>
+      </symbol>
+      <!-- Die Abbiegepfeile der Navigation. Alle nach demselben Bauplan:
+           ein Schaft von unten, der in die Fahrtrichtung fuehrt, und eine
+           offene Spitze. "Scharf" ist kein eigenes Symbol - dieselben
+           Pfeile werden per CSS weitergedreht (.nav-pfeil.scharf), das
+           spart zwei Zeichnungen und bleibt automatisch deckungsgleich. -->
+      <symbol id="icon-ab-gerade" viewBox="0 0 24 24">
+        <path d="M12 21V5"/><path d="M6 10.5 12 4.5l6 6"/>
+      </symbol>
+      <symbol id="icon-ab-rechts" viewBox="0 0 24 24">
+        <path d="M6 21v-8a5 5 0 0 1 5-5h9"/><path d="M15.5 3.5 20 8l-4.5 4.5"/>
+      </symbol>
+      <symbol id="icon-ab-links" viewBox="0 0 24 24">
+        <path d="M18 21v-8a5 5 0 0 0-5-5H4"/><path d="M8.5 3.5 4 8l4.5 4.5"/>
+      </symbol>
+      <symbol id="icon-ab-ziel" viewBox="0 0 24 24">
+        <path d="M6 21V4"/><path d="M6 5h12l-3 3.5 3 3.5H6"/>
       </symbol>
       <!-- Der Kreispfeil fuers Neuladen. Die Ecke oben rechts ist die
            Pfeilspitze: Sie oeffnet sich entgegen der Laufrichtung, dadurch
@@ -912,8 +929,12 @@
           <input type="checkbox" id="optStädte" checked>
           <span>Städte vermeiden</span>
         </label>
+        <!-- "checked" muss hier im HTML stehen UND als Standardwert in
+             state.optionen (app.js) - das Markup stellt den Haken, das
+             state entscheidet beim Rechnen. Laufen die beiden auseinander,
+             zeigt die Oberflaeche etwas anderes als die Route tut. -->
         <label class="checkbox-row">
-          <input type="checkbox" id="optAutobahn">
+          <input type="checkbox" id="optAutobahn" checked>
           <span>Autobahnen vermeiden</span>
         </label>
         <label class="checkbox-row">
@@ -1060,16 +1081,34 @@
     <div id="toast" class="toast" hidden></div>
     <div id="busy" class="busy" hidden><div class="spinner"></div><span>Route wird berechnet...</span></div>
 
-    <!-- Navigations-Overlay: erscheint während einer laufenden Navigation
-         direkt auf der Karte, wie bei einem typischen Navi-Gerät. -->
+    <!-- Navigations-Overlay. Zwei Glasplatten auf der Karte, alles auf
+         einer Bildschirmseite ohne Scrollen:
+
+         OBEN das Manoever: grosser Pfeil, grosse Entfernung, darunter in
+         Worten was zu tun ist, und in der Fusszeile der Tafel schon das
+         DANACH - so weiss man an der Kreuzung bereits, wie es weitergeht.
+
+         UNTEN die Fahrdaten: Tempo, verbleibende Strecke, Ankunftszeit,
+         und der Knopf zum Beenden. Beide Platten fuellt app.js
+         (pruefeManoever und navFussAktualisieren). -->
     <div id="navBanner" class="nav-banner" hidden>
-      <span class="nav-arrow" id="navArrow">&#8594;</span>
-      <div class="nav-texte">
-        <div class="nav-distance" id="navDistance">-</div>
-        <div class="nav-detail" id="navDetail">Warte auf GPS-Signal...</div>
+      <div class="nav-manoever">
+        <span class="nav-pfeil" id="navArrow" aria-hidden="true">
+          <svg class="ic"><use href="#icon-ab-gerade"></use></svg>
+        </span>
+        <div class="nav-texte">
+          <div class="nav-distance" id="navDistance">&ndash;</div>
+          <div class="nav-detail" id="navDetail">Warte auf GPS-Signal &hellip;</div>
+        </div>
       </div>
+      <div class="nav-danach" id="navDanach" hidden></div>
     </div>
-    <button class="nav-stop-btn" id="btnNavStop" hidden>Navigation beenden</button>
+    <div class="nav-fuss" id="navFuss" hidden>
+      <div class="nav-wert"><span class="wert" id="navTempo">0</span><span class="einheit">km/h</span></div>
+      <div class="nav-wert"><span class="wert" id="navRest">&ndash;</span><span class="einheit">&uuml;brig</span></div>
+      <div class="nav-wert"><span class="wert" id="navAnkunft">&ndash;:&ndash;</span><span class="einheit">Ankunft</span></div>
+      <button class="nav-stop-btn" id="btnNavStop" hidden>Beenden</button>
+    </div>
   </main>
 
   </div>
@@ -1186,18 +1225,18 @@
   <!-- ZUERST, denn alle anderen benutzen geraet.* beim Laden. Hier steht der
        gesamte Zugriff aufs Geraet - Standort, Speicher, Dateien. Beim Umzug
        in die Stores ist das die einzige Datei, die sich aendert. -->
-  <script src="geraet.js?v=47"></script>
+  <script src="geraet.js?v=48"></script>
   <!-- Der Rechenteil: Kurvigkeit, Sackgassen, Rundtour-Punkte, GPX. Muss VOR
        app.js stehen, weil app.js diese Funktionen beim Routen aufruft. Die
        spaetere Webseite im Querformat laedt genau diese Datei ebenfalls und
        rechnet damit exakt so wie die App. -->
-  <script src="kern.js?v=47"></script>
-  <script src="app.js?v=47"></script>
+  <script src="kern.js?v=48"></script>
+  <script src="app.js?v=48"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=47"></script>
+  <script src="konto.js?v=48"></script>
   <!-- Nach app.js, weil die Garage verkleinereFoto() und showToast() von
        dort benutzt. -->
-  <script src="garage.js?v=47"></script>
+  <script src="garage.js?v=48"></script>
 </body>
 </html>

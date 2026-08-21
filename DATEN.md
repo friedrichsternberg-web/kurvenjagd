@@ -42,6 +42,7 @@ Dateien. Das ist auch der Grund für die 5-MB-Grenze und dafür, dass
 | **unpkg.com** | Leaflet | IP-Adresse durch den Abruf | USA |
 | **cdn.jsdelivr.net** | Supabase-Bibliothek, ONNX-Laufzeit | IP-Adresse durch den Abruf | USA |
 | **Supabase** (`copydwpdqpnwjvknsakz`) | Konten, Profile, geteilte Touren, Fotos | E-Mail, Benutzername, Profilbild, Touren, Fotos | EU (Schweden, `eu-north-1`) |
+| **de/en.wikipedia.org** | Hubraum und Leistung aus der Infobox des Modells | Marke + Modell als Suchtext, IP-Adresse | USA/weltweit (Wikimedia) |
 
 **Ungenutzt, aber im Code vorbereitet:** `carimagesapi.com` und
 `api.api-ninjas.com`. Beide haben keinen Schlüssel und werden nicht

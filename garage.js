@@ -266,7 +266,23 @@ function bildAdresse(motorrad) {
    Pferdestaerke meint - das sind 1,4 Prozent Unterschied. kW ist eindeutig,
    und ein Kilowatt sind 1,35962 PS. */
 async function technischeDatenHolen(marke, modell, baujahr) {
-  if (!DATEN_API_SCHLÜSSEL || !marke || !modell) return null;
+  if (!marke || !modell) return null;
+
+  /* Erste Quelle: WIKIPEDIA. Kein Schluessel, keine Kosten, und die Lizenz
+     (CC BY-SA) erlaubt kommerzielle Nutzung - fuer eine App, die spaeter
+     ueber Werbung laufen soll, ist das die Bedingung. Eine echte offene
+     Motorrad-Datenbank gibt es nicht: Wikidata wurde geprueft (die Z900
+     hat dort weder Hubraum noch Leistung), die Fertig-Datenbanken auf
+     GitHub sind fast alle von kommerziellen Seiten abgesaugt und damit
+     rechtlich schmutzig. Die Wikipedia-Infobox ist die sauberste Quelle,
+     die es gibt. Die Herkunft steht in DATEN.md. */
+  try {
+    const ausWikipedia = await datenAusWikipedia(marke, modell);
+    if (ausWikipedia) return ausWikipedia;
+  } catch { /* dann eben die zweite Quelle oder von Hand */ }
+
+  // Zweite Quelle, nur mit eingetragenem Schluessel (heute leer).
+  if (!DATEN_API_SCHLÜSSEL) return null;
 
   const felder = new URLSearchParams({ make: marke, model: modell });
   if (baujahr) felder.set('year', baujahr);
@@ -284,6 +300,81 @@ async function technischeDatenHolen(marke, modell, baujahr) {
     hubraum:  ersteZahl(eintrag.displacement),
     leistung: leistungInPS(eintrag.power),
   };
+}
+
+/* --- Hubraum und Leistung aus der Wikipedia-Infobox -------------------------
+   Der Weg in zwei Schritten, beide ueber die offizielle Schnittstelle
+   (api.php, mit origin=* fuer den Browser):
+
+   1. Artikel FINDEN: Die Suche vertraegt die Schreibweisen-Unterschiede
+      ("Z900" bei uns, "Kawasaki Z 900" in der deutschen Wikipedia).
+   2. Die INFOBOX des Artikels lesen (Abschnitt 0 als Wikitext) und die
+      Felder herausziehen. Die deutsche "Infobox Motorrad" traegt Hubraum
+      und Leistung als eigene Felder; die englische schreibt sie als
+      Fliesstext, dort helfen die Muster weiter unten.
+
+   Erst Deutsch, dann Englisch: Die deutsche Infobox ist strenger
+   strukturiert und nennt die Leistung als "kW / PS"-Paar - genau das,
+   was das Formular braucht. */
+async function datenAusWikipedia(marke, modell) {
+  const suchtext = `${markeLesbar(marke)} ${modell}`.trim();
+
+  for (const sprache of ['de', 'en']) {
+    const basis = `https://${sprache}.wikipedia.org/w/api.php`;
+
+    const suche = await fetch(`${basis}?action=opensearch&limit=1&format=json&origin=*` +
+                              `&search=${encodeURIComponent(suchtext)}`);
+    if (!suche.ok) continue;
+    const titel = (await suche.json())[1]?.[0];
+    if (!titel) continue;
+
+    const artikel = await fetch(`${basis}?action=parse&prop=wikitext&section=0&format=json&origin=*` +
+                                `&page=${encodeURIComponent(titel)}`);
+    if (!artikel.ok) continue;
+    const wikitext = (await artikel.json())?.parse?.wikitext?.['*'] || '';
+
+    const daten = sprache === 'de'
+      ? deutscheInfoboxLesen(wikitext)
+      : englischeInfoboxLesen(wikitext);
+    if (daten && (daten.hubraum || daten.leistung)) return daten;
+  }
+  return null;
+}
+
+// Ein Infobox-Feld: "|Hubraum = 948" -> "948". Bis zum Zeilenende, denn
+// dahinter kommt schon das naechste Feld.
+function infoboxFeld(wikitext, feldname) {
+  const treffer = wikitext.match(new RegExp('\\|\\s*' + feldname + '\\s*=\\s*([^\\n]+)', 'i'));
+  return treffer ? treffer[1].trim() : '';
+}
+
+/* Deutsche Infobox. Die Leistung steht dort als "92,2 / 125 bei 9500/min":
+   erst Kilowatt, dann PS. Gibt es beide Zahlen, ist die ZWEITE die PS-Zahl.
+   Steht nur eine da, ist es laut Vorlage die kW-Zahl - dann wird gerechnet.
+   Deutsche Kommas werden vorher zu Punkten, sonst liest parseFloat nur die
+   92 aus der 92,2. */
+function deutscheInfoboxLesen(wikitext) {
+  const hubraum = ersteZahl(infoboxFeld(wikitext, 'Hubraum'));
+
+  const roh = infoboxFeld(wikitext, 'Leistung').replace(/,/g, '.');
+  const zahlen = roh.match(/[\d.]+/g) || [];
+  let leistung = '';
+  if (zahlen.length >= 2 && roh.includes('/')) leistung = String(Math.round(parseFloat(zahlen[1])));
+  else if (zahlen.length >= 1) leistung = String(Math.round(parseFloat(zahlen[0]) * 1.35962));
+
+  return { hubraum, leistung };
+}
+
+/* Englische Infobox. Dort steht "engine = {{convert|948|cc|abbr=on}} ..."
+   und "power = 92.2 kW (125 hp) @ 9500 rpm" - die kW-Zahl ist die
+   verlaesslichste, weil "hp" je nach Herkunft zwei verschiedene
+   Pferdestaerken meinen kann (siehe leistungInPS). */
+function englischeInfoboxLesen(wikitext) {
+  const motorFeld = infoboxFeld(wikitext, 'engine');
+  const ccTreffer = motorFeld.match(/(\d{2,4}(?:\.\d+)?)\s*(?:\|\s*)?cc/i);
+  const hubraum = ccTreffer ? String(Math.round(parseFloat(ccTreffer[1]))) : '';
+
+  return { hubraum, leistung: leistungInPS(infoboxFeld(wikitext, 'power')) };
 }
 
 // Zieht die erste Zahl aus einem Text wie "649.0 ccm (39.60 cubic inches)".
@@ -1362,6 +1453,9 @@ function öffneMotorradDialog(vorhandenes = null) {
           <input type="number" id="feldLeistung" inputmode="numeric" placeholder="95" value="${sicher(vorhandenes?.leistung)}">
         </div>
       </div>
+      <p class="tiny">Leere Felder f&uuml;llt die App automatisch aus der
+        Wikipedia-Infobox deines Modells (Lizenz CC BY-SA). Pr&uuml;f die
+        Werte kurz &ndash; und was nicht stimmt, &uuml;berschreibst du einfach.</p>
 
       <div class="foto-feld">
         <div class="foto-feld-kopf">
@@ -1596,12 +1690,6 @@ async function technischeDatenNachziehen() {
 
   const fehltEtwas = !hubraumFeld.value.trim() || !leistungFeld.value.trim();
   if (!fehltEtwas) return;
-
-  if (!DATEN_API_SCHLÜSSEL) {
-    // Ohne Schluessel schweigt die Funktion. Ein Hinweis an dieser Stelle
-    // waere eine Fehlermeldung fuer etwas, das gar nicht eingerichtet ist.
-    return;
-  }
 
   hubraumFeld.classList.add('wird-geholt');
   leistungFeld.classList.add('wird-geholt');

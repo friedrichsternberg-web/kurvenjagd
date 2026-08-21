@@ -19,8 +19,11 @@ const state = {
   planMode: 'punkt',  // 'punkt' (Punkt-zu-Punkt) oder 'rundtour'
   curveLevel: 100,    // 0-100, vom Kurvigkeits-Regler - 100 = maximal kurvig
   optionen: {          // zusätzliche Routing-Einschränkungen, direkt an BRouter weitergereicht
+    // Städte UND Autobahnen sind ab Werk gemieden - das ist Friedrichs
+    // Ansage: Wer eine Motorrad-App öffnet, will Landstraße. Beides lässt
+    // sich unter "Optionen" von Hand ausschalten.
     städteVermeiden: true,
-    autobahnenVermeiden: false,
+    autobahnenVermeiden: true,
     mautVermeiden: false,
   },
   route: null,        // die aktuell angezeigte Route
@@ -52,6 +55,10 @@ const nav = {
   letzteRohPosition: null,    // für die Kurs-Schätzung, falls das Gerät keinen Kurs liefert
   abweichungSeit: null,       // Zeitpunkt, seit dem die Position von der Route abweicht
   angezeigteDrehung: 0,       // Grad, um die die Karte gerade gedreht ist (siehe setzeKartenDrehung)
+  tempoMS: null,              // geglättetes Tempo in m/s, für Anzeige und Ankunftszeit
+  letzterTick: null,          // { lat, lon, zeit } der letzten Messung, für die Tempo-Schätzung
+  streckenCache: null,        // ausgedünnte Strecke + aufsummierte Längen, einmal je Route
+  zielAngesagt: false,        // "Ziel erreicht" nur ein einziges Mal sprechen
 };
 
 
@@ -1048,6 +1055,10 @@ function startNavigation() {
   nav.letzteRohPosition = null;
   nav.abweichungSeit = null;
   nav.angezeigteDrehung = 0;
+  nav.tempoMS = null;
+  nav.letzterTick = null;
+  nav.streckenCache = null;
+  nav.zielAngesagt = false;
   nav.aktiv = true;
 
   // Die Wegpunkt-Marker bleiben während der Fahrt sichtbar, ihr Ziehen muss
@@ -1072,6 +1083,7 @@ function startNavigation() {
   document.body.classList.add('nav-modus');
   aktualisiereLeiste(aktuellerBildschirm());   // Leiste weg, die Navigation braucht den Platz
   document.getElementById('navBanner').hidden = false;
+  document.getElementById('navFuss').hidden = false;
   document.getElementById('btnNavStop').hidden = false;
   document.getElementById('btnNavStart').hidden = true;
 
@@ -1106,9 +1118,14 @@ function stopNavigation() {
   // Gegenstück zu startNavigation: Wegpunkte lassen sich wieder verschieben.
   state.markers.forEach(m => m.dragging && m.dragging.enable());
 
+  // Eine noch laufende Ansage abbrechen - "in 300 Metern rechts abbiegen"
+  // nach dem Beenden waere unfreiwillig komisch.
+  if (window.speechSynthesis) speechSynthesis.cancel();
+
   document.body.classList.remove('nav-modus');
   aktualisiereLeiste(aktuellerBildschirm());   // Leiste wieder her
   document.getElementById('navBanner').hidden = true;
+  document.getElementById('navFuss').hidden = true;
   document.getElementById('btnNavStop').hidden = true;
   document.getElementById('btnNavStart').hidden = false;
 
@@ -1131,27 +1148,100 @@ function aufPositionsUpdate(pos) {
     ? heading
     : geschätzterKurs(latitude, longitude);
 
+  tempoAktualisieren(pos);
   zeichnePositionsMarker(latitude, longitude, accuracy || 20);
   setzeKartenDrehung(kurs); // die ganze Karte dreht sich, nicht nur der Marker
 
+  /* Die Kamera bekommt EIN Ziel je GPS-Meldung, und das war die Wurzel des
+     staendigen Verschiebens: Frueher liefen hier ZWEI Bewegungen
+     gegeneinander - erst ein animiertes panTo() zur eigenen Position, dann
+     sofort ein hartes panBy() nach unten, damit man mehr Strecke voraus
+     sieht. Das animierte Schwenken war noch unterwegs, wenn der harte
+     Versatz dazwischenfuhr; jede Sekunde zerrte es die Karte hin und her.
+
+     Jetzt wird der Wunschpunkt VORHER ausgerechnet: ein Punkt ein Stueck
+     VORAUS in Fahrtrichtung. Liegt der in der Bildmitte, sitzt die eigene
+     Position automatisch darunter - derselbe Effekt wie frueher, aber als
+     eine einzige, weiche Bewegung. */
+  const zentrum = punktVoraus(latitude, longitude, kurs, kameraVorlaufMeter(latitude));
   if (!nav.ersteZentrierungErledigt) {
-    map.setView([latitude, longitude], 17);
+    map.setView(zentrum, 17, { animate: false });
     nav.ersteZentrierungErledigt = true;
   } else {
-    map.panTo([latitude, longitude], { animate: true, duration: 0.5 });
+    map.panTo(zentrum, { animate: true, duration: 0.9, easeLinearity: 0.4, noMoveStart: true });
   }
-  // Eigene Position etwas unterhalb der Bildschirmmitte anzeigen, damit man
-  // mehr von der Strecke VORAUS sieht als von der bereits gefahrenen Strecke
-  // - "vorne" ist dank der Kartendrehung ja immer Richtung Bildschirm-oben.
-  // Gemessen wird an der SICHTBAREN Höhe (#mapWrap) und nicht an
-  // map.getSize(): Der Kartenbehälter ist während der Navigation absichtlich
-  // größer als der Bildschirm, sein Maß wäre hier also zu groß.
-  const sichtbareHöhe = document.getElementById('mapWrap').getBoundingClientRect().height;
-  map.panBy([0, -sichtbareHöhe * 0.15], { animate: false });
 
   prüfeManöver(latitude, longitude);
   prüfeAbweichungVonRoute(latitude, longitude);
-  aktualisiereRoutenfortschritt(latitude, longitude);
+  const restMeter = aktualisiereRoutenfortschritt(latitude, longitude);
+  navFussAktualisieren(restMeter);
+}
+
+/* Rechnet den Punkt aus, der "meter" weit in Fahrtrichtung voraus liegt -
+   Standardformel fuer einen Zielpunkt auf der Kugel. */
+function punktVoraus(lat, lon, kurs, meter) {
+  const R = 6371000;
+  const d = meter / R;
+  const kursRad = kurs * Math.PI / 180;
+  const lat1 = lat * Math.PI / 180, lon1 = lon * Math.PI / 180;
+  const lat2 = Math.asin(Math.sin(lat1) * Math.cos(d)
+             + Math.cos(lat1) * Math.sin(d) * Math.cos(kursRad));
+  const lon2 = lon1 + Math.atan2(
+    Math.sin(kursRad) * Math.sin(d) * Math.cos(lat1),
+    Math.cos(d) - Math.sin(lat1) * Math.sin(lat2));
+  return [lat2 * 180 / Math.PI, lon2 * 180 / Math.PI];
+}
+
+/* Wie weit die Kamera vorausschauen soll, in Metern. Gemessen wird an der
+   SICHTBAREN Hoehe (#mapWrap), nicht an map.getSize() - der Kartenbehaelter
+   ist waehrend der Navigation absichtlich groesser als der Bildschirm.
+   Die Umrechnung Bildpunkte -> Meter haengt vom Zoom und vom Breitengrad
+   ab; die Formel ist die uebliche Web-Mercator-Aufloesung. */
+function kameraVorlaufMeter(lat) {
+  const sichtbareHöhe = document.getElementById('mapWrap').getBoundingClientRect().height;
+  const meterJePixel = 40075016.686 * Math.abs(Math.cos(lat * Math.PI / 180))
+                     / Math.pow(2, map.getZoom() + 8);
+  return sichtbareHöhe * 0.18 * meterJePixel;
+}
+
+/* Haelt das Tempo aktuell. Das Geraet liefert es meistens selbst mit
+   (pos.coords.speed); wo nicht, wird es aus Strecke und Zeit der letzten
+   beiden Meldungen geschaetzt. Geglaettet wird in beiden Faellen, sonst
+   springt die Anzeige mit jedem GPS-Zittern. */
+function tempoAktualisieren(pos) {
+  const { latitude, longitude, speed } = pos.coords;
+  const jetzt = Date.now();
+
+  let gemessen = null;
+  if (speed !== null && speed !== undefined && !Number.isNaN(speed) && speed >= 0) {
+    gemessen = speed;
+  } else if (nav.letzterTick) {
+    const sekunden = (jetzt - nav.letzterTick.zeit) / 1000;
+    if (sekunden > 0.5) {
+      gemessen = haversine(latitude, longitude, nav.letzterTick.lat, nav.letzterTick.lon) / sekunden;
+    }
+  }
+  nav.letzterTick = { lat: latitude, lon: longitude, zeit: jetzt };
+
+  if (gemessen === null) return;
+  nav.tempoMS = nav.tempoMS === null ? gemessen : nav.tempoMS * 0.65 + gemessen * 0.35;
+}
+
+/* Fuellt die Fahrdatenleiste unten: Tempo, Reststrecke, Ankunftszeit.
+   Die Ankunft rechnet mit dem geglaetteten Tempo, aber nie mit weniger als
+   30 km/h - wer an der Ampel steht, soll keine Ankunft "in 9 Stunden"
+   sehen. Das ist eine Schaetzung und will nichts anderes sein. */
+function navFussAktualisieren(restMeter) {
+  const tempoKmh = nav.tempoMS === null ? 0 : Math.round(nav.tempoMS * 3.6);
+  document.getElementById('navTempo').textContent = String(tempoKmh);
+
+  if (restMeter === null || restMeter === undefined) return;
+  document.getElementById('navRest').textContent = formatNavDistanz(restMeter);
+
+  const rechenTempo = Math.max(nav.tempoMS || 0, 30 / 3.6);
+  const ankunft = new Date(Date.now() + (restMeter / rechenTempo) * 1000);
+  document.getElementById('navAnkunft').textContent =
+    ankunft.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 }
 
 function geschätzterKurs(lat, lon) {
@@ -1268,25 +1358,47 @@ function zeichnePositionsMarker(lat, lon, accuracy) {
 // Streckenpunkt, der der aktuellen Position am nächsten liegt, und teilen
 // die Linie dort in zwei Stücke.
 function aktualisiereRoutenfortschritt(lat, lon) {
-  const pts = thinCoords(state.route.coords, 25);
+  /* Die ausgeduennte Strecke und ihre aufsummierten Laengen aendern sich
+     nur, wenn die ROUTE sich aendert - nicht mit jeder GPS-Meldung. Einmal
+     rechnen, dann wiederverwenden: kumulativ[i] ist die Strecke vom Start
+     bis Punkt i, damit ist die Reststrecke unten eine einzige Subtraktion. */
+  if (!nav.streckenCache || nav.streckenCache.route !== state.route) {
+    const pts = thinCoords(state.route.coords, 25);
+    const kumulativ = [0];
+    for (let i = 1; i < pts.length; i++) {
+      kumulativ.push(kumulativ[i - 1] + haversine(pts[i - 1][1], pts[i - 1][0], pts[i][1], pts[i][0]));
+    }
+    nav.streckenCache = { route: state.route, pts, kumulativ };
+  }
+  const { pts, kumulativ } = nav.streckenCache;
+
   let nächsterIdx = 0, kleinsterAbstand = Infinity;
   for (let i = 0; i < pts.length; i++) {
     const d = haversine(lat, lon, pts[i][1], pts[i][0]);
     if (d < kleinsterAbstand) { kleinsterAbstand = d; nächsterIdx = i; }
   }
 
-  if (nav.gefahrenLinie) map.removeLayer(nav.gefahrenLinie);
-  if (nav.restLinie) map.removeLayer(nav.restLinie);
-
   const gefahren = pts.slice(0, nächsterIdx + 1).map(c => [c[1], c[0]]);
   const rest = pts.slice(nächsterIdx).map(c => [c[1], c[0]]);
 
+  /* Die beiden Linien werden UMGEBOGEN statt jede Sekunde geloescht und neu
+     angelegt - das staendige Entfernen und Einfuegen war eines der Dinge,
+     die die Anzeige waehrend der Fahrt flackern liessen. */
   if (gefahren.length > 1) {
-    nav.gefahrenLinie = L.polyline(gefahren, { color: '#6b727d', weight: 5, opacity: 0.7 }).addTo(map);
+    if (nav.gefahrenLinie) nav.gefahrenLinie.setLatLngs(gefahren);
+    else nav.gefahrenLinie = L.polyline(gefahren, { color: '#6b727d', weight: 5, opacity: 0.7 }).addTo(map);
+  } else if (nav.gefahrenLinie) {
+    map.removeLayer(nav.gefahrenLinie); nav.gefahrenLinie = null;
   }
   if (rest.length > 1) {
-    nav.restLinie = L.polyline(rest, { color: '#ff7a1a', weight: 5, opacity: 0.95 }).addTo(map);
+    if (nav.restLinie) nav.restLinie.setLatLngs(rest);
+    else nav.restLinie = L.polyline(rest, { color: '#ff7a1a', weight: 5, opacity: 0.95 }).addTo(map);
+  } else if (nav.restLinie) {
+    map.removeLayer(nav.restLinie); nav.restLinie = null;
   }
+
+  // Reststrecke: von hier bis zum naechsten Streckenpunkt, plus alles danach.
+  return kleinsterAbstand + (kumulativ[kumulativ.length - 1] - kumulativ[nächsterIdx]);
 }
 
 // Berechnet aus der reinen Routen-Linie eigene Abbiegepunkte: an jedem
@@ -1318,6 +1430,8 @@ function berechneManoever(coords) {
         lon: pts[i][0],
         richtung: diff > 0 ? 'rechts' : 'links',
         scharf: Math.abs(diff) > 130,
+        kleinsteDistanz: Infinity,   // wie nah wir diesem Punkt je gekommen sind
+        angesagt1000: false,
         angesagt300: false,
         angesagt100: false,
         angesagtJetzt: false,
@@ -1332,9 +1446,37 @@ function formatNavDistanz(meter) {
   return meter >= 1000 ? (meter / 1000).toFixed(1) + ' km' : Math.round(meter) + ' m';
 }
 
+/* Schreibt die Manoevertafel: Pfeilsymbol, Entfernung, Text. "scharf" ist
+   kein eigenes Symbol, sondern derselbe Pfeil um 40 Grad weitergedreht
+   (Klasse an .nav-pfeil, siehe style.css). */
+function zeigeManöverTafel(symbol, schärfeKlasse, distanzText, detailText) {
+  const pfeil = document.getElementById('navArrow');
+  pfeil.innerHTML = `<svg class="ic"><use href="#icon-${symbol}"></use></svg>`;
+  pfeil.className = 'nav-pfeil' + (schärfeKlasse ? ' ' + schärfeKlasse : '');
+  document.getElementById('navDistance').textContent = distanzText;
+  document.getElementById('navDetail').textContent = detailText;
+}
+
+function manöverSymbol(m) {
+  return m.richtung === 'rechts' ? 'ab-rechts' : 'ab-links';
+}
+
 function prüfeManöver(lat, lon) {
+  const danach = document.getElementById('navDanach');
+
+  /* Alle Abbiegepunkte abgehakt: Ab hier zaehlt nur noch das Ziel. Die
+     Tafel zeigt die Fahne und die Restentfernung zum letzten Punkt der
+     Route, und kurz davor kommt die eine Ansage, auf die alle warten. */
   if (nav.nächsterIndex >= nav.manöver.length) {
-    document.getElementById('navDetail').textContent = 'Letzter Abbiegepunkt erreicht.';
+    const ende = state.route.coords[state.route.coords.length - 1];
+    const distanz = haversine(lat, lon, ende[1], ende[0]);
+    if (distanz < 40 || nav.zielAngesagt) {
+      if (!nav.zielAngesagt) { sprich('Du hast dein Ziel erreicht.'); nav.zielAngesagt = true; }
+      zeigeManöverTafel('ab-ziel', '', formatNavDistanz(distanz), 'Ziel erreicht');
+    } else {
+      zeigeManöverTafel('ab-ziel', '', formatNavDistanz(distanz), 'Dem Straßenverlauf folgen bis zum Ziel');
+    }
+    danach.hidden = true;
     return;
   }
 
@@ -1343,25 +1485,100 @@ function prüfeManöver(lat, lon) {
   const richtungswort = m.richtung === 'rechts' ? 'rechts' : 'links';
   const schärfewort = m.scharf ? 'scharf ' : '';
 
-  document.getElementById('navArrow').innerHTML = m.richtung === 'rechts' ? '&#8594;' : '&#8592;';
-  document.getElementById('navDistance').textContent = formatNavDistanz(distanz);
-  document.getElementById('navDetail').textContent =
-    `${schärfewort}${richtungswort === 'rechts' ? 'Rechts' : 'Links'} abbiegen`.trim();
+  zeigeManöverTafel(
+    manöverSymbol(m),
+    m.scharf ? `scharf-${m.richtung}` : '',
+    formatNavDistanz(distanz),
+    m.scharf
+      ? `Scharf ${richtungswort} abbiegen`
+      : `${richtungswort === 'rechts' ? 'Rechts' : 'Links'} abbiegen`,
+  );
 
+  /* Das DANACH: schon an dieser Kreuzung wissen, wie es weitergeht. Die
+     Entfernung dorthin ist die Luftlinie zwischen den beiden Punkten -
+     fuer eine Vorschau genau genug. */
+  const m2 = nav.manöver[nav.nächsterIndex + 1];
+  if (m2) {
+    const zwischen = haversine(m.lat, m.lon, m2.lat, m2.lon);
+    danach.innerHTML =
+      `danach <svg class="ic"><use href="#icon-${manöverSymbol(m2)}"></use></svg> ` +
+      `${m2.richtung} in ${formatNavDistanz(zwischen)}`;
+    danach.hidden = false;
+  } else {
+    danach.hidden = true;
+  }
+
+  /* Die Ansagen. Auf der Landstrasse ist man schnell: 300 Meter sind bei
+     100 km/h elf Sekunden. Deshalb kommt bei langen Etappen zusaetzlich
+     eine fruehe Ansage bei einem Kilometer. Die untere Grenze (400 m)
+     verhindert, dass sie einer spaeteren Ansage ins Wort faellt, wenn die
+     Etappe von vornherein kuerzer als ein Kilometer war. */
+  if (distanz < 1000 && distanz > 400 && !m.angesagt1000) {
+    sprich(`In einem Kilometer ${schärfewort}${richtungswort} abbiegen.`);
+    m.angesagt1000 = true;
+  }
   if (distanz < 300 && !m.angesagt300) { sprich(`In 300 Metern ${schärfewort}${richtungswort} abbiegen.`); m.angesagt300 = true; }
   if (distanz < 100 && !m.angesagt100) { sprich(`In 100 Metern ${schärfewort}${richtungswort} abbiegen.`); m.angesagt100 = true; }
-  if (distanz < 25 && !m.angesagtJetzt) {
+
+  /* Abhaken. Der Radius von 40 Metern klingt grosszuegig, ist aber knapp:
+     Das GPS meldet etwa einmal je Sekunde, bei 100 km/h liegen zwischen
+     zwei Meldungen 28 Meter - eine engere Schwelle wird schlicht
+     UEBERSPRUNGEN. Genau das war der Fehler, den die Simulation gezeigt
+     hat: Der Zeiger blieb ewig auf einem laengst passierten Abbiegepunkt
+     stehen, und die Tafel zeigte ein Manoever hinter dem Ruecken.
+
+     Deshalb zusaetzlich das Sicherheitsnetz darunter: Waren wir schon
+     einmal NAH dran (unter 80 m) und die Entfernung waechst wieder
+     deutlich, ist der Punkt passiert - abhaken, auch ohne dass je ein
+     Messpunkt in den 40-Meter-Kreis fiel. */
+  m.kleinsteDistanz = Math.min(m.kleinsteDistanz ?? Infinity, distanz);
+
+  if (distanz < 40 && !m.angesagtJetzt) {
     sprich(`Jetzt ${schärfewort}${richtungswort} abbiegen.`);
     m.angesagtJetzt = true;
     nav.nächsterIndex++; // dieser Abbiegepunkt ist erledigt, weiter zum nächsten
+  } else if (m.kleinsteDistanz < 80 && distanz > m.kleinsteDistanz + 30) {
+    nav.nächsterIndex++; // passiert, ohne je im 40-Meter-Kreis gemessen worden zu sein
   }
+}
+
+/* --- Die Stimme -------------------------------------------------------------
+   Der Browser bringt mehrere deutsche Stimmen mit, und welche er ohne
+   Angabe nimmt, ist Glueckssache - oft eine blecherne. Deshalb wird einmal
+   eine gute weibliche deutsche Stimme ausgesucht und festgehalten.
+
+   Die Wunschliste ist von Hand sortiert: "Anna" ist die angenehme deutsche
+   Systemstimme auf iPhones - und das iPhone ist die Hauptzielgruppe.
+   Danach die besten Stimmen der anderen Plattformen. Faellt alles durch,
+   nimmt die App irgendeine deutsche, bevor sie gar nichts sagt.
+
+   getVoices() liefert beim allerersten Aufruf oft eine LEERE Liste, weil
+   der Browser die Stimmen erst laedt - dafuer gibt es das Ereignis
+   voiceschanged, das die Auswahl dann nachholt. */
+let navStimme = null;
+
+function wähleNavStimme() {
+  if (!window.speechSynthesis) return;
+  const deutsche = speechSynthesis.getVoices()
+    .filter(s => (s.lang || '').toLowerCase().startsWith('de'));
+  if (!deutsche.length) return;
+
+  const wunschliste = ['anna', 'petra', 'helena', 'katja', 'vicki', 'marlene', 'google deutsch'];
+  navStimme = deutsche.find(s => wunschliste.some(w => s.name.toLowerCase().includes(w)))
+           || deutsche[0];
+}
+if (window.speechSynthesis) {
+  wähleNavStimme();
+  speechSynthesis.addEventListener('voiceschanged', wähleNavStimme);
 }
 
 function sprich(text) {
   if (!window.speechSynthesis) return;
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = 'de-DE';
-  window.speechSynthesis.speak(utterance);
+  const ansage = new SpeechSynthesisUtterance(text);
+  ansage.lang = 'de-DE';
+  if (navStimme) ansage.voice = navStimme;
+  ansage.rate = 1.0;
+  window.speechSynthesis.speak(ansage);
 }
 
 // Prüft, ob die aktuelle Position noch nah genug an der geplanten Route

@@ -1560,54 +1560,145 @@ body.nav-modus #panel {
   border-right: 0;
 }
 
-/* Das Banner liegt direkt auf der Karte (wie bei Google Maps/Waze), nicht
-   im Seitenpanel - deutlich größer und beim Fahren besser ablesbar. */
+/* Die Manoevertafel liegt direkt auf der Karte (wie bei Google Maps/Waze).
+   Ausgelegt fuer den Blick von der Maschine: grosser Pfeil, grosse Zahl,
+   ein kurzer Satz - mehr muss in einer halben Sekunde nicht erfassbar
+   sein. Die Entfernung ist das Groesste auf der Tafel, denn sie ist das,
+   was sich staendig aendert und was man wirklich abliest. */
 .nav-banner {
   position: absolute;
-  top: 16px; left: 16px; right: 16px;
+  top: max(12px, env(safe-area-inset-top));
+  left: 12px; right: 12px;
   z-index: 900;
   background: rgba(14, 15, 18, 0.80);
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-left: 3px solid var(--gps);
-  border-radius: 14px;
-  padding: var(--s3) var(--s4);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid var(--glas-rand);
+  border-radius: var(--r-lg);
+  padding: var(--s4);
+  box-shadow:
+    inset 0 1px 0 var(--glas-licht),
+    0 12px 34px rgba(0, 0, 0, 0.5);
+}
+.nav-banner[hidden] { display: none; }
+
+.nav-manoever {
   display: flex;
   align-items: center;
   gap: var(--s4);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 10px 30px rgba(0,0,0,0.5);
 }
-/* Ohne diese Regel gewinnt "display: flex" oben gegen das hidden-Attribut -
-   derselbe Fehler wie bei .busy weiter unten, also gleich mitgelöst. */
-.nav-banner[hidden] { display: none; }
-.nav-arrow {
-  font-size: 32px;
-  color: var(--gps);
-  line-height: 1;
+/* Der Pfeil: eigene Scheibe in der Standortfarbe, damit das Auge sofort
+   dort landet. "scharf" dreht denselben Pfeil einfach 40 Grad weiter -
+   ein eigenes Symbol braucht es dafuer nicht. */
+.nav-pfeil {
   flex: 0 0 auto;
+  width: 72px; height: 72px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--gps) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gps) 45%, transparent);
+  color: var(--gps);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
+.nav-pfeil .ic {
+  width: 46px; height: 46px;
+  stroke-width: 2.4;
+  transition: transform 0.25s ease;
+}
+.nav-pfeil.scharf-rechts .ic { transform: rotate(40deg); }
+.nav-pfeil.scharf-links  .ic { transform: rotate(-40deg); }
+
+.nav-texte { min-width: 0; }
 .nav-distance {
   font-family: var(--schrift-display);
-  font-variant-numeric: tabular-nums; font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.nav-detail { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  font-size: 46px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.nav-detail { font-size: 15px; color: var(--muted); margin-top: 4px; }
+
+/* Das DANACH in der Fusszeile der Tafel: An der Kreuzung selbst will man
+   schon wissen, wie es weitergeht - besonders wenn zwei Abzweigungen kurz
+   hintereinander liegen. */
+.nav-danach {
+  margin-top: var(--s3);
+  padding-top: var(--s3);
+  border-top: 1px solid rgba(255, 255, 255, 0.10);
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  font-size: 13px;
+  color: var(--muted);
+}
+.nav-danach .ic { width: 16px; height: 16px; }
+.nav-danach[hidden] { display: none; }
+
+/* Die Fahrdatenleiste am unteren Rand: Tempo, Rest, Ankunft, Beenden.
+   Eine Zeile, keine zweite - die Navigation MUSS ohne Scrollen auf den
+   Schirm passen, das war die Vorgabe. */
+.nav-fuss {
+  position: absolute;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  left: 12px; right: 12px;
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  padding: var(--s2) var(--s4);
+  background: rgba(14, 15, 18, 0.80);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid var(--glas-rand);
+  border-radius: var(--r-lg);
+  box-shadow:
+    inset 0 1px 0 var(--glas-licht),
+    0 12px 34px rgba(0, 0, 0, 0.5);
+}
+.nav-fuss[hidden] { display: none; }
+.nav-wert {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  min-width: 0;
+}
+.nav-wert .wert {
+  font-family: var(--schrift-display);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.nav-wert .einheit {
+  font-family: var(--schrift-display);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
 
 .nav-stop-btn {
-  position: absolute;
-  bottom: 20px; left: 50%;
-  transform: translateX(-50%);
-  z-index: 900;
-  background: var(--surface-2);
-  border: 1px solid var(--accent-hell);
-  color: var(--text);
-  padding: 10px 20px;
-  border-radius: 999px;
+  flex: 0 0 auto;
+  background: color-mix(in srgb, var(--danger) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--danger) 50%, transparent);
+  color: var(--danger);
+  padding: 10px 16px;
+  border-radius: var(--r-pill);
   font: inherit;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
 }
-.nav-stop-btn:hover { border-color: var(--text); }
+.nav-stop-btn:hover { background: color-mix(in srgb, var(--danger) 26%, transparent); }
+
+/* Waehrend der Fahrt braucht niemand die Zoom-Knoepfe - sie laegen genau
+   unter der Manoevertafel und sind mit Handschuhen ohnehin nicht zu
+   treffen. Die OSM-Quellenangabe bleibt sichtbar, die ist Pflicht. */
+body.nav-modus .leaflet-control-zoom { display: none; }
 
 /* Eigener Standort auf der Karte: eine Spitze, die IMMER nach oben zeigt -
    weil sich während der Navigation ja die ganze Karte mit der Fahrtrichtung
