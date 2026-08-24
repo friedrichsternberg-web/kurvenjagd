@@ -23,7 +23,7 @@
        "orientation": "portrait" im Manifest ist die Ansage, um die es hier
        geht: Diese App ist fuers Hochformat gebaut. Die spaetere Webseite
        bekommt ein eigenes Design fuers Querformat und ein eigenes Manifest. -->
-  <link rel="manifest" href="manifest.webmanifest?v=72">
+  <link rel="manifest" href="manifest.webmanifest?v=74">
 
   <!-- Faerbt die Statusleiste des Handys in die Grundflaeche der App, damit
        oben kein fremder heller Streifen stehen bleibt. -->
@@ -36,7 +36,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Kurvenjagd">
-  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=72">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=74">
 
   <!-- Fuer die spaetere Webseite und geteilte Routen: So sieht der Link aus,
        wenn ihn jemand in WhatsApp oder Instagram einfuegt. Ohne das steht
@@ -99,8 +99,8 @@
                    die spaetere Webseite genauso benutzen.
        style.css   die Anordnung DIESER App, ausgelegt auf Hochformat. Die
                    Webseite bekommt dafuer eine eigene Datei. -->
-  <link rel="stylesheet" href="design.css?v=72">
-  <link rel="stylesheet" href="style.css?v=72">
+  <link rel="stylesheet" href="design.css?v=74">
+  <link rel="stylesheet" href="style.css?v=74">
 </head>
 <body>
 
@@ -714,7 +714,7 @@
   </div>
 
   <!-- ===== Meine Touren: eigener Bildschirm mit der Liste gespeicherter
-       Routen, direkt vom Startmenü aus erreichbar. Dieselben Routen sind
+       Routen, direkt über die untere Leiste erreichbar. Dieselben Routen sind
        auch im Bedienfeld des Planers unten zu sehen (siehe #savedList) -
        diese Liste hier ist nur ein schnellerer Weg dorthin, ohne erst den
        Planer öffnen zu müssen. ===== -->
@@ -924,7 +924,7 @@
   </div>
 
   <!-- ===== Der eigentliche Routenplaner: Bedienfeld + Karte. Anfangs
-       versteckt, bis im Startmenü "Routenplaner" gewählt wird. ===== -->
+       versteckt, bis "Routenplaner" gewählt wird. ===== -->
   <div id="app" class="app-layout" hidden>
 
   <!-- ===== Linke Spalte: Bedienfeld ===== -->
@@ -1341,23 +1341,23 @@
   <!-- ZUERST, denn alle anderen benutzen geraet.* beim Laden. Hier steht der
        gesamte Zugriff aufs Geraet - Standort, Speicher, Dateien. Beim Umzug
        in die Stores ist das die einzige Datei, die sich aendert. -->
-  <script src="geraet.js?v=72"></script>
+  <script src="geraet.js?v=74"></script>
   <!-- Der Rechenteil: Kurvigkeit, Sackgassen, Rundtour-Punkte, GPX. Muss VOR
        app.js stehen, weil app.js diese Funktionen beim Routen aufruft. Die
        spaetere Webseite im Querformat laedt genau diese Datei ebenfalls und
        rechnet damit exakt so wie die App. -->
-  <script src="kern.js?v=72"></script>
-  <script src="app.js?v=72"></script>
+  <script src="kern.js?v=74"></script>
+  <script src="app.js?v=74"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=72"></script>
+  <script src="konto.js?v=74"></script>
   <!-- Nach app.js, weil die Garage verkleinereFoto() und showToast() von
        dort benutzt. -->
-  <script src="garage.js?v=72"></script>
+  <script src="garage.js?v=74"></script>
   <!-- Der Demo-Produktkatalog (nur Daten) und die Shop-Logik. produkte.js
        muss vor shop.js stehen, und beide nach garage.js, weil shop.js
        dessen Helfer (sicher, verkabele) mitbenutzt. -->
-  <script src="produkte.js?v=72"></script>
-  <script src="shop.js?v=72"></script>
+  <script src="produkte.js?v=74"></script>
+  <script src="shop.js?v=74"></script>
 </body>
 </html>

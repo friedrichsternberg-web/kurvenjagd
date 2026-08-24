@@ -12,7 +12,7 @@ Sortiert nach Dringlichkeit, nicht nach Aufwand.
 
 ### 1. Konto löschen in der App — ERLEDIGT, bis auf einen Handgriff
 
-Gebaut am 20.08.2026. Der Weg liegt im Startmenü neben "Abmelden" und führt
+Gebaut am 20.08.2026. Der Weg liegt im Profil neben "Abmelden" und führt
 auf einen eigenen Bildschirm: Aufzählung dessen, was verschwindet, Abfrage
 des Passworts, dann Fotos, Touren, Auth-Konto und die lokalen Daten.
 
@@ -47,7 +47,8 @@ einziges Konto.
 2. Eine Tour speichern und **ein Foto** dazulegen. Ohne Foto prüft der
    Durchlauf den halben Weg nicht, denn die Fotos sind der Teil, der
    nicht von selbst mitverschwindet.
-3. Im Startmenü auf **Konto löschen**, Passwort eingeben, löschen.
+3. Im Profil (Symbol oben rechts) auf **Konto löschen**, Passwort
+   eingeben, löschen.
 4. Im Supabase-Dashboard an drei Stellen nachsehen:
    - **Table Editor → touren:** keine Zeile mehr mit dieser `nutzer_id`
    - **Storage → tourfotos:** der Ordner mit der `nutzer_id` ist leer

@@ -290,7 +290,7 @@ let kontoModus = 'anmelden';
 // ist und noch kein neues Passwort gesetzt hat. Ohne diese Unterscheidung
 // wäre so ein Besuch nicht von einer normalen Anmeldung zu trennen - und
 // genau das war der Fehler: der Link meldete still an und ließ den Nutzer
-// im Startmenü stehen, ohne je nach einem neuen Passwort zu fragen.
+// in der Garage stehen, ohne je nach einem neuen Passwort zu fragen.
 let imPasswortWechsel = false;
 
 function setzeKontoModus(modus) {
@@ -375,7 +375,7 @@ function zeigeMailErneutKnopf(sichtbar) {
 
 /* Hält das Profilsymbol oben rechts aktuell.
 
-   Hier stand einmal eine Statuszeile am Fuß der Startseite. Sie ist
+   Hier stand einmal eine Statuszeile am Fuß des alten Startbildschirms. Sie ist
    umgezogen: Das Symbol oben rechts ist der Ort, an dem jeder sein Konto
    sucht, und es kann mehr als eine Zeile - es zeigt das Profilbild selbst.
 
@@ -695,7 +695,7 @@ document.getElementById('btnMailErneut').addEventListener('click', async () => {
    Bibliothek liest das aus und meldet es als Ereignis (siehe unten). Wir
    schauen zusätzlich selbst nach, bevor sie die Adresse aufräumt: Wenn
    dieses eine Ereignis aus irgendeinem Grund ausbleibt, landet der Nutzer
-   sonst wieder still im Startmenü, ohne je nach einem neuen Passwort
+   sonst wieder still in der Garage, ohne je nach einem neuen Passwort
    gefragt zu werden. Genau dieser Fehler ist aufgetreten. */
 
 if (backendVerfügbar() && window.location.hash.includes('type=recovery')) {
@@ -775,7 +775,7 @@ if (backendVerfügbar()) {
       // INITIAL_SESSION - da wäre eine Begrüßung bei jedem Start lästig.
       if (ereignis === 'SIGNED_IN') {
         // Beim Weg über die Mail ist der Anmeldebildschirm gar nicht offen,
-        // und ohne Rückmeldung stünde der Nutzer ratlos im Startmenü.
+        // und ohne Rückmeldung stünde der Nutzer ratlos in der Garage.
         if (!document.getElementById('kontoScreen').hidden) zeigeGarage();
         showToast('Angemeldet als ' + angemeldeterNutzer.email);
       }
@@ -1132,7 +1132,7 @@ async function kontoLöschenAbsenden() {
 
   // Ab hier gibt es kein Zurück mehr, deshalb verschwindet auch der
   // Zurück-Knopf: Der einzige Weg von hier führt über das Neuladen, sonst
-  // stünden im Startmenü noch die Touren aus dem Arbeitsspeicher.
+  // stünden in der Tourenliste noch die Touren aus dem Arbeitsspeicher.
   document.getElementById('kontoLoeschenFrage').hidden = true;
   document.getElementById('kontoGeloeschtFertig').hidden = false;
   document.getElementById('btnKontoLoeschenZurueck').hidden = true;

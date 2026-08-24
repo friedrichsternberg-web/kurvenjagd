@@ -22,9 +22,15 @@ bike-standard.webp
   Freigestelltes Standardmotorrad, aus einem von Friedrich Sternberg
   gelieferten Bild, freigestellt im August 2026.
 
-start-hero.jpg, start-hintergrund.jpg, hintergrund-weich.jpg, kacheln/
+hintergrund-weich.jpg, kacheln/
   Eigene Fotos von Friedrich Sternberg beziehungsweise von ihm gelieferte
   Bilder, teils verkleinert und weichgezeichnet.
+
+  Am 24.08.2026 entfernt, weil die Garage der Startbildschirm wurde und
+  die Bilder damit niemand mehr anzeigt: start-hero.jpg,
+  start-hintergrund.jpg (das Heldenfoto des alten Startbildschirms) und
+  kacheln/garage.jpg (die weggefallene Garage-Kachel). Sie liegen weiter
+  in der Git-Historie.
 
 icon-*.png, apple-touch-icon.png
   Aus der eigenen SVG-Symbolsammlung der App gerendert (Platzhalter).

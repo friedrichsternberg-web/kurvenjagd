@@ -2450,7 +2450,7 @@ function saveRoute() {
 }
 
 // HTML für eine Zeile in einer Liste gespeicherter Routen - genutzt sowohl
-// im Bedienfeld des Planers (#savedList) als auch auf dem Startbildschirm
+// im Bedienfeld des Planers (#savedList) als auch auf dem Bildschirm
 // "Meine Touren" (#tourenList), damit beide gleich aussehen.
 function gespeicherteRouteHtml(r) {
   // Aufgezeichnete Ausfahrten stehen in derselben Liste wie geplante
@@ -2544,7 +2544,7 @@ function ladeGespeicherteRoute(r) {
 }
 
 // Verkabelt eine Liste gespeicherter Routen: Klick auf das Kreuz löscht die
-// Zeile, Klick auf den Rest lädt die Route. Vom Startbildschirm aus soll
+// Zeile, Klick auf den Rest lädt die Route. Von "Meine Touren" aus soll
 // dabei zusätzlich zum Planer gewechselt werden - deshalb der Parameter.
 function verkabeleGespeicherteListe(list, { zeigePlanerBeimLaden }) {
   list.querySelectorAll('li').forEach(li => {
@@ -2574,7 +2574,7 @@ function renderSaved() {
   verkabeleGespeicherteListe(list, { zeigePlanerBeimLaden: false });
 }
 
-// Dieselbe Liste wie renderSaved(), nur für den Startbildschirm "Meine
+// Dieselbe Liste wie renderSaved(), nur für den Bildschirm "Meine
 // Touren" - von dort führt ein Klick zusätzlich in den Planer.
 function renderTourenListe() {
   const list = document.getElementById('tourenList');
@@ -2645,11 +2645,12 @@ function symbol(name, zusatz = '') {
 }
 
 
-/* --- 9b. Startmenü ---------------------------------------------------------
-   Acht Bildschirme, immer ist genau einer sichtbar: Startmenü, die
-   Garage, "Meine Touren", der Routenplaner (Bedienfeld + Karte), die
-   Aufzeichnung einer eigenen Ausfahrt, die Anmeldung, das Setzen eines
-   neuen Passworts und das Löschen des Kontos.
+/* --- 9b. Die Bildschirme ----------------------------------------------------
+   Zehn Bildschirme, immer ist genau einer sichtbar: die Garage (sie ist
+   seit dem 24.08.2026 der Startbildschirm), "Meine Touren", der
+   Routenplaner (Bedienfeld + Karte), die Aufzeichnung einer eigenen
+   Ausfahrt, Shop und Produktseite, die Anmeldung, das Profil, das Setzen
+   eines neuen Passworts und das Löschen des Kontos.
    Beide Karten werden nur einmal erzeugt, bleiben dabei aber zunächst
    unsichtbar - deshalb kennt Leaflet ihre Größe noch nicht und muss beim
    Einblenden per invalidateSize() nachfragen. */

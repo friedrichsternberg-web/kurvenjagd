@@ -2709,9 +2709,11 @@ function positionAnpassen() {
   document.getElementById('garageDialog').hidden = true;
   document.getElementById('garageDatenblatt').hidden = true;
   document.getElementById('garageOhneMotorrad').hidden = true;
-  // Auch die Shop-Leiste raus: Sie wuerde der Buehne genau in dem Moment
-  // Platz stehlen, in dem man die Maschine praezise sehen muss - und ihre
-  // Karten fuehrten mitten aus der Justierung auf die Produktseite.
+  /* Shop-Leiste und Menue gehen ebenfalls beiseite. Platz nehmen sie der
+     Buehne seit der festen Raumhoehe zwar nicht mehr weg - aber ihre
+     Karten und Kacheln fuehren mitten aus der Justierung heraus auf einen
+     anderen Bildschirm, und der halb ausgefuellte Dialog bliebe dann
+     unsichtbar im Hintergrund haengen. */
   const shopLeiste = document.getElementById('garageShop');
   if (shopLeiste) shopLeiste.hidden = true;
   const menue = document.getElementById('garageMenue');
