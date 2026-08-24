@@ -60,7 +60,24 @@ Geht bei Schritt 3 etwas schief, steht der Grund im Dashboard unter
 **Edge Functions → konto-loeschen → Logs**. Die App zeigt dem Nutzer
 absichtlich nur einen kurzen Satz, die Einzelheiten bleiben auf dem Server.
 
-### 2. Impressum und Datenschutzerklärung — JETZT FÄLLIG, nicht erst zu den Stores
+### 2. Impressum und Datenschutzerklärung — vertagt, dafür geht die App offline
+
+**Entscheidung vom 24.08.2026:** Statt die Rechtstexte jetzt zu schreiben,
+geht die öffentliche Fassung vom Netz. Kein öffentlich angebotener Dienst,
+keine Impressumspflicht – und der Druck ist raus, bis Gewerbe und Texte in
+Ruhe stehen. **Der Schalter dafür liegt in den GitHub-Einstellungen und
+muss von Friedrich umgelegt werden** (Settings → Pages → Source auf „None",
+bzw. „Unpublish site"). Erst danach ist die App wirklich nicht mehr
+erreichbar; der Entwurf unten bleibt liegen, bis es weitergeht.
+
+Solange die App offline ist, läuft sie über `python3 -m http.server 8000`
+auf `http://localhost:8000`. Wichtig: **GPS funktioniert nur dort**, nicht
+über die IP-Adresse im WLAN – Browser geben den Standort nur auf
+`localhost` oder über HTTPS frei.
+
+---
+
+### 2b. Was für die Rückkehr ins Netz fertig ist
 
 **Hochgestuft am 24.08.2026 nach der Rechtsprüfung des Shop-Umbaus.** Die
 Begründung "noch privat" trägt nicht mehr: Die App ist öffentlich
@@ -129,6 +146,17 @@ Das ist der eigentliche Grund, nativ zu gehen. Nicht die Karte.
 AdMob braucht das native SDK. Dazu auf iOS die ATT-Abfrage, in der EU ein
 Zustimmungsbanner (CMP), und in Apples Privacy Manifest muss jedes SDK
 deklariert sein. Erst anfassen, wenn Nutzer da sind.
+
+### 6b. Laufzeitbibliothek des Freistellers selbst hosten
+
+`garage.js` lädt `onnxruntime-web` von cdn.jsdelivr.net (Zeile ~2019).
+Anders als Leaflet und supabase-js passiert das **nicht beim Start**,
+sondern erst beim ersten Freistellen – es ist also kein ungefragter
+Abruf. Sauberer wäre es trotzdem in `extern/`. Zu beachten: Die
+Bibliothek lädt neben `ort.min.js` noch `.wasm`-Dateien nach; die
+müssen mitkommen und der Pfad dorthin über `ort.env.wasm.wasmPaths`
+gesetzt werden. Erledigt sich von selbst, sobald die native Hülle steht
+(Punkt 7).
 
 ### 7. Modell mit ins Paket
 

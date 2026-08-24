@@ -153,8 +153,13 @@ Ausfahrten anderer Leute mit.
   in `extern/` (Lizenzen daneben), aus demselben Grund wie die Schrift
   Barlow: Der Abruf von unpkg/jsDelivr schickte beim Start jede
   Besucher-IP an einen US-Dienst – die Lage aus dem Google-Fonts-Urteil.
-  Damit bleibt als US-Abruf nur der **Motorrad-Finder (NHTSA)**, und der
-  läuft erst, wenn der Nutzer ihn selbst öffnet.
+  Damit fällt weg, was **beim Start ungefragt** in die USA ging. Was
+  bleibt, läuft ausschließlich auf eine Handlung des Nutzers hin: der
+  **Motorrad-Finder (NHTSA)** und die **Wikipedia**-Abfrage bei der
+  Modellwahl, sowie die Laufzeitbibliothek des Freistellers
+  (`onnxruntime-web` von jsDelivr, `garage.js`), die erst beim ersten
+  Freistellen geladen wird. Die gehört bei Gelegenheit ebenfalls nach
+  `extern/` – siehe `AUFGABEN.md`.
 - **Kartenbilder verraten den Aufenthaltsort**, auch ohne dass die App den
   Standort abfragt. Wer die Karte auf sein Dorf zieht, sagt dem Kartenserver,
   wo er hinschaut.
