@@ -40,8 +40,6 @@ Dateien. Das ist auch der Grund für die 5-MB-Grenze und dafür, dass
 | **tile.openstreetmap.org** | Kartenbilder | Kartenausschnitt, damit indirekt der Aufenthaltsort | EU |
 | **nominatim.openstreetmap.org** | Ortssuche | der eingetippte Suchbegriff | EU |
 | **vpic.nhtsa.dot.gov** | Motorradmodelle im Finder | Marke und Baujahr, keine Nutzerdaten | USA |
-| **unpkg.com** | Leaflet | IP-Adresse durch den Abruf | USA |
-| **cdn.jsdelivr.net** | Supabase-Bibliothek, ONNX-Laufzeit | IP-Adresse durch den Abruf | USA |
 | **Supabase** (`copydwpdqpnwjvknsakz`) | Konten, Profile, geteilte Touren, Fotos | E-Mail, Benutzername, Profilbild, Touren, Fotos | EU (Schweden, `eu-north-1`) |
 | **de/en.wikipedia.org** | Hubraum und Leistung aus der Infobox des Modells | Marke + Modell als Suchtext, IP-Adresse | USA/weltweit (Wikimedia) |
 
@@ -151,10 +149,12 @@ Ausfahrten anderer Leute mit.
 
 ## Punkte, die in der Datenschutzerklärung stehen müssen
 
-- **Zwei Abrufe gehen in die USA** (unpkg, jsDelivr) und einer ist ein
-  amerikanischer Behördendienst (NHTSA). Beim Abruf geht jeweils die
-  IP-Adresse mit. Für die native App fällt das weg, dort liegen die
-  Bibliotheken im Paket – ein Grund mehr, sie mitzuliefern statt zu laden.
+- **Leaflet und supabase-js liegen seit dem 24.08.2026 selbst gehostet**
+  in `extern/` (Lizenzen daneben), aus demselben Grund wie die Schrift
+  Barlow: Der Abruf von unpkg/jsDelivr schickte beim Start jede
+  Besucher-IP an einen US-Dienst – die Lage aus dem Google-Fonts-Urteil.
+  Damit bleibt als US-Abruf nur der **Motorrad-Finder (NHTSA)**, und der
+  läuft erst, wenn der Nutzer ihn selbst öffnet.
 - **Kartenbilder verraten den Aufenthaltsort**, auch ohne dass die App den
   Standort abfragt. Wer die Karte auf sein Dorf zieht, sagt dem Kartenserver,
   wo er hinschaut.

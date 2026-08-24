@@ -57,14 +57,23 @@
        Kartendrehung während der Navigation macht die App jetzt selbst,
        siehe setzeKartenDrehung() in app.js. Damit reicht die kleine
        Fassung von Leaflet wieder. -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Beide Bibliotheken liegen SELBST GEHOSTET in extern/, aus demselben
+       Grund wie die Schrift Barlow in fonts/: Ein Abruf von unpkg.com oder
+       jsdelivr.net schickt die IP-Adresse jedes Besuchers beim Start an
+       einen US-Dienst, ohne dass er etwas getan hat - genau die Lage aus
+       dem Google-Fonts-Urteil (LG Muenchen I, 3 O 17493/20). Die Dateien
+       sind Version 1.9.4 (Leaflet) und 2.112.3 (supabase-js), Lizenzen
+       liegen daneben. KEIN ?v= hier: Die Dateien aendern sich nie von
+       selbst; steigt einmal die Bibliotheksversion um, wird der Dateiname
+       bzw. Ordner mit angefasst. -->
+  <link rel="stylesheet" href="extern/leaflet/leaflet.css">
+  <script src="extern/leaflet/leaflet.js"></script>
 
   <!-- Supabase: unser Server für Konten und (später) geteilte Routen und
        Ausfahrten. Die Bibliothek stellt das globale Objekt "supabase"
        bereit, benutzt wird sie in konto.js. Version fest verdrahtet statt
        "@2", damit eine neue Fassung die App nicht über Nacht verändert. -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/dist/umd/supabase.js"></script>
+  <script src="extern/supabase/supabase.js"></script>
 
   <!-- Das "?v=" hinter den eigenen Dateien ist eine Versionsnummer und hat
        einen handfesten Grund: GitHub Pages lässt Browser jede Datei zehn
