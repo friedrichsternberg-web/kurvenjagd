@@ -110,10 +110,10 @@
 
 :root {
   /* Flaechen, von dunkel nach hell gestaffelt */
-  --bg:         #0E0F12;   /* Grundflaeche, fast schwarz */
-  --surface:    #16181D;   /* Karten und Bedienfeld */
-  --surface-2:  #1E2128;   /* Vertiefungen: Eingabefelder, Messwerte */
-  --line:       #2A2E37;   /* Kanten */
+  --bg:         #000000;   /* Grundflaeche, reines Schwarz */
+  --surface:    #181818;   /* Karten und Bedienfeld */
+  --surface-2:  #212121;   /* Vertiefungen: Eingabefelder, Messwerte */
+  --line:       #2E2E2E;   /* Kanten */
 
   --text:       #F2F3F5;
   --muted:      #8B929E;   /* Nebentext und Beschriftungen */
@@ -181,11 +181,11 @@
   /* Das Glas-Rezept als Marken, damit jede Flaeche dieselbe Scheibe ist:
      eine Fuellung fuer helle Flaechen ueber Dunklem, eine satte dunkle
      fuer Flaechen ueber Hellem (Karte!), dazu Kante und Lichtkante. */
-  --glas-hell:   rgba(255, 255, 255, 0.07);
-  --glas-heller: rgba(255, 255, 255, 0.12);   /* gedrueckt / hervorgehoben */
-  --glas-dunkel: rgba(14, 15, 18, 0.78);      /* ueber heller Karte */
-  --glas-rand:   rgba(255, 255, 255, 0.14);
-  --glas-licht:  rgba(255, 255, 255, 0.26);   /* obere Lichtkante (inset) */
+  --glas-hell:   rgba(255, 255, 255, 0.09);
+  --glas-heller: rgba(255, 255, 255, 0.15);   /* gedrueckt / hervorgehoben */
+  --glas-dunkel: rgba(0, 0, 0, 0.74);         /* ueber heller Karte */
+  --glas-rand:   rgba(255, 255, 255, 0.17);
+  --glas-licht:  rgba(255, 255, 255, 0.28);   /* obere Lichtkante (inset) */
 
   /* Abstandsskala. Immer eine dieser Stufen benutzen, nie krumme Werte -
      das ist der Unterschied zwischen "gestaltet" und "zusammengeschoben". */
