@@ -61,24 +61,30 @@ Geht bei Schritt 3 etwas schief, steht der Grund im Dashboard unter
 **Edge Functions → konto-loeschen → Logs**. Die App zeigt dem Nutzer
 absichtlich nur einen kurzen Satz, die Einzelheiten bleiben auf dem Server.
 
-### 2. Impressum und Datenschutzerklärung — vertagt, dafür geht die App offline
+### 2. Impressum und Datenschutzerklärung — vertagt, App bleibt online
 
-**Entscheidung vom 24.08.2026:** Statt die Rechtstexte jetzt zu schreiben,
-geht die öffentliche Fassung vom Netz. Kein öffentlich angebotener Dienst,
-keine Impressumspflicht – und der Druck ist raus, bis Gewerbe und Texte in
-Ruhe stehen. **Der Schalter dafür liegt in den GitHub-Einstellungen und
-muss von Friedrich umgelegt werden** (Settings → Pages → Source auf „None",
-bzw. „Unpublish site"). Erst danach ist die App wirklich nicht mehr
-erreichbar; der Entwurf unten bleibt liegen, bis es weitergeht.
+**Entscheidung vom 24.08.2026:** Die Texte werden vorerst nicht
+geschrieben, und die App bleibt trotzdem öffentlich erreichbar. Das ist
+eine bewusst in Kauf genommene Lücke, keine Einschätzung, dass keine
+Pflicht bestünde: Die App ist öffentlich, nimmt Konten mit E-Mail-Adresse
+an (die Informationspflicht nach Art. 13 DSGVO besteht damit heute) und
+zeigt einen als Preisvergleich aufgemachten Shop mit Händler-Links. Das
+ist ein geschäftsmäßiger digitaler Dienst nach § 5 DDG, unabhängig davon,
+dass noch nichts verdient wird.
 
-Solange die App offline ist, läuft sie über `python3 -m http.server 8000`
-auf `http://localhost:8000`. Wichtig: **GPS funktioniert nur dort**, nicht
-über die IP-Adresse im WLAN – Browser geben den Standort nur auf
-`localhost` oder über HTTPS frei.
+Zwischenzeitlich war das Offline-Nehmen beschlossen (Settings → Pages →
+Source auf „None"). Friedrich hat sich dagegen entschieden, weil er die
+App auf dem Handy weiter benutzen will. Der Schalter bleibt der Weg,
+falls es doch schnell gehen muss.
+
+**Fällig wird es spätestens dann, wenn ein Affiliate-Programm beantragt
+wird** — die Netzwerke prüfen Impressum und Datenschutzerklärung von
+Hand, und ohne sie kommt keine Programmfreigabe. Damit hängt auch die
+Bilderfrage daran (siehe Abschnitt „Der Shop").
 
 ---
 
-### 2b. Was für die Rückkehr ins Netz fertig ist
+### 2b. Was dafür fertig in der Schublade liegt
 
 **Hochgestuft am 24.08.2026 nach der Rechtsprüfung des Shop-Umbaus.** Die
 Begründung "noch privat" trägt nicht mehr: Die App ist öffentlich
@@ -225,12 +231,53 @@ Rechercheberichte zu Markt und Recht liegen im Brain
   einen Serverabruf – der Rest der App merkt nichts. Achtung: `ean` ist
   bei AWIN kein Pflichtfeld, der Abgleich über mehrere Shops braucht einen
   Rückfall über Marke + Modellname.
-- **Produktbilder**: erst einbinden, wenn das jeweilige Programm die
-  Bildnutzung ausdrücklich erlaubt (die Netzwerk-AGB allein tun das
-  nicht). Bis dahin bleiben die SVG-Symbole. Bevorzugt vom Netzwerk-CDN
-  einbinden statt selbst hosten. Die Galerie der Produktseite und die
-  Bildkacheln der Listen sind vorbereitet: Sobald `bilder[].url` gefüllt
-  ist, zeigen sie das Foto statt des Symbols.
+- **Produktbilder — recherchiert am 24.08.2026, hier das Ergebnis.**
+  Die Galerie und die Bildkacheln sind fertig: Sobald `bilder[].url`
+  gefüllt ist, zeigen sie Fotos statt Symbolen. Es fehlen nur Bilder, die
+  gezeigt werden dürfen.
+
+  **Der einzige Weg, der in Tagen echte Bilder für den ganzen Katalog
+  liefert, ist ein Shop-Programm mit Produktfeed.** Bester Kandidat:
+  **FC-Moto über Webgains** (programID 4028, 366.902 Artikel; FC-Moto
+  führt Schuberth, Shoei, Alpinestars, REV'IT!, Dainese, Held und Givi —
+  das eine Programm deckt fast den ganzen Demo-Katalog ab). Ansprechpartner
+  laut Programmseite: Michael Schneider, mschneider@webgains.de.
+  **Netzwerk-Mitgliedschaft allein reicht nicht** — die Bildlizenz hängt
+  ausdrücklich an der Teilnahme am jeweiligen Advertiser-Programm.
+
+  Drei Bedingungen aus den AWIN-Publisher-AGB, die auch für andere
+  Netzwerke sinngemäß gelten und die man kennen muss:
+  1. Die Lizenz gilt für **unveränderte** Bilder. Freistellen, Zuschneiden
+     oder Überlagern ist damit nicht gedeckt, Skalieren schon.
+  2. Sie ist **widerruflich**. Programmaustritt heißt: Bilder müssen weg,
+     dafür braucht es eine Löschroutine.
+  3. Das Netzwerk prüft die Rechte **nicht** und lässt sich von uns
+     freistellen. Liefert ein Shop ein Bild, an dem er selbst keine Rechte
+     hat, haften wir. Deshalb vom Händler eine schriftliche Zusicherung
+     einholen.
+
+  **Zweiter Weg, langsamer, aber unabhängig: direkt beim Hersteller um
+  Bildfreigabe bitten.** Die deutschen Mittelständler sind die besten
+  Kandidaten: Held (Burgberg, 08321/6646-0), Schuberth (Magdeburg,
+  schuberth.com/presse.html), SW-Motech (Rauschenberg,
+  sw-motech.info/en/media/press-portal.html). Wichtig: nicht die Presse-,
+  sondern die **Marketing- oder Händlerbetreuung** ansprechen — Presse
+  denkt in redaktioneller Nutzung und lehnt kommerzielle Anfragen eher ab.
+  In die Anfrage gehören ausdrücklich: kommerzieller Zweck, Produktliste,
+  Kanäle (App, Web, Store-Screenshots), räumlich weltweit, **zeitlich
+  unbefristet**, Bearbeitungsrecht (Zuschneiden, Freistellen), gewünschter
+  Bildnachweis. Eine formlose Zusage reicht nicht: Geizhals sind
+  eingeräumte Bildrechte wieder entzogen worden, deshalb dort ab 2008 die
+  Nutzerbild-Datenbank bepixelung.org.
+
+  **Nicht gangbar:** Bilder aus Shops oder Herstellerseiten herunterladen
+  und selbst hosten (genau der Fall EuGH Renckhoff, C-161/17, mit reger
+  Abmahnpraxis). Presse-Downloads ohne Rückfrage benutzen — die sind fast
+  immer nur für redaktionelle Nutzung freigegeben, und ein Preisvergleich
+  ist keine. Open Icecat (deckt Motorradzubehör nicht ab). Amazons
+  Produkt-API (setzt drei vermittelte Käufe voraus — Henne und Ei).
+  Einbetten vom fremden Server ist rechtlich umstritten und praktisch
+  unbrauchbar, weil man dann nicht zwischenspeichern darf.
 - **"Direkt zu den Shops"** (`SHOP_VERZEICHNIS` in produkte.js) führt
   bislang auf die einfachen Website-Adressen. Mit Partnerprogramm wird je
   Eintrag `affiliateLink` gefüllt UND der Knopf als "Anzeige"
