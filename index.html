@@ -23,7 +23,7 @@
        "orientation": "portrait" im Manifest ist die Ansage, um die es hier
        geht: Diese App ist fuers Hochformat gebaut. Die spaetere Webseite
        bekommt ein eigenes Design fuers Querformat und ein eigenes Manifest. -->
-  <link rel="manifest" href="manifest.webmanifest?v=48">
+  <link rel="manifest" href="manifest.webmanifest?v=49">
 
   <!-- Faerbt die Statusleiste des Handys in die Grundflaeche der App, damit
        oben kein fremder heller Streifen stehen bleibt. -->
@@ -36,7 +36,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Kurvenjagd">
-  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=48">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=49">
 
   <!-- Fuer die spaetere Webseite und geteilte Routen: So sieht der Link aus,
        wenn ihn jemand in WhatsApp oder Instagram einfuegt. Ohne das steht
@@ -74,7 +74,7 @@
        durchgehend alte Version, weil die Seite dann Elemente enthält, die
        das Skript noch gar nicht kennt.
 
-       Für den Browser ist "app.js?v=48" eine andere Adresse als "app.js?v=26",
+       Für den Browser ist "app.js?v=49" eine andere Adresse als "app.js?v=26",
        er holt sie also frisch.
 
        WICHTIG: BEI JEDER VERÖFFENTLICHUNG die Zahl an ALLEN Stellen um eins
@@ -90,8 +90,8 @@
                    die spaetere Webseite genauso benutzen.
        style.css   die Anordnung DIESER App, ausgelegt auf Hochformat. Die
                    Webseite bekommt dafuer eine eigene Datei. -->
-  <link rel="stylesheet" href="design.css?v=48">
-  <link rel="stylesheet" href="style.css?v=48">
+  <link rel="stylesheet" href="design.css?v=49">
+  <link rel="stylesheet" href="style.css?v=49">
 </head>
 <body>
 
@@ -960,13 +960,40 @@
       </div>
     </details>
 
-    <!-- Ortssuche: Alternative zum Klicken auf die Karte -->
+    <!-- Ortssuche: je ein eigenes Feld fuer Start, Zwischenziel und Ziel.
+         Frueher war das EIN Feld, das der Reihe nach Wegpunkte anhaengte -
+         da wusste niemand, welcher Punkt gerade gesetzt wird. Jetzt sagt
+         das Feld selbst, wohin sein Ergebnis geht:
+
+           Start   ersetzt den ersten Wegpunkt (oder legt ihn an)
+           Zwischen  fuegt VOR dem Ziel ein und leert sich fuer das
+                     naechste - so entstehen beliebig viele Zwischenziele
+           Ziel    ersetzt den letzten Wegpunkt (oder legt ihn an)
+
+         Bei der Rundtour ist das Zielfeld gesperrt - die endet am Start,
+         ein eigenes Ziel waere eine leere Behauptung. -->
     <section class="block">
       <h2>Ort suchen</h2>
-      <div class="search-wrap">
-        <input type="text" id="searchInput" class="search-input"
-               placeholder="Ort oder Adresse eingeben..." autocomplete="off">
-        <ul id="searchResults" class="search-results" hidden></ul>
+
+      <div class="such-feld search-wrap">
+        <span class="label">Start</span>
+        <input type="text" id="sucheStart" class="search-input orts-feld" data-rolle="start"
+               placeholder="Startpunkt suchen &hellip;" autocomplete="off">
+        <ul class="search-results" hidden></ul>
+      </div>
+
+      <div class="such-feld search-wrap">
+        <span class="label">Zwischenziel</span>
+        <input type="text" id="sucheZwischen" class="search-input orts-feld" data-rolle="zwischen"
+               placeholder="Zwischenziel hinzuf&uuml;gen &hellip;" autocomplete="off">
+        <ul class="search-results" hidden></ul>
+      </div>
+
+      <div class="such-feld search-wrap" id="zielFeldGruppe">
+        <span class="label">Ziel</span>
+        <input type="text" id="sucheZiel" class="search-input orts-feld" data-rolle="ziel"
+               placeholder="Zielpunkt suchen &hellip;" autocomplete="off">
+        <ul class="search-results" hidden></ul>
       </div>
 
       <!-- Kartenklicks setzen erst dann Wegpunkte, wenn dieser Modus an ist -
@@ -1225,18 +1252,18 @@
   <!-- ZUERST, denn alle anderen benutzen geraet.* beim Laden. Hier steht der
        gesamte Zugriff aufs Geraet - Standort, Speicher, Dateien. Beim Umzug
        in die Stores ist das die einzige Datei, die sich aendert. -->
-  <script src="geraet.js?v=48"></script>
+  <script src="geraet.js?v=49"></script>
   <!-- Der Rechenteil: Kurvigkeit, Sackgassen, Rundtour-Punkte, GPX. Muss VOR
        app.js stehen, weil app.js diese Funktionen beim Routen aufruft. Die
        spaetere Webseite im Querformat laedt genau diese Datei ebenfalls und
        rechnet damit exakt so wie die App. -->
-  <script src="kern.js?v=48"></script>
-  <script src="app.js?v=48"></script>
+  <script src="kern.js?v=49"></script>
+  <script src="app.js?v=49"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=48"></script>
+  <script src="konto.js?v=49"></script>
   <!-- Nach app.js, weil die Garage verkleinereFoto() und showToast() von
        dort benutzt. -->
-  <script src="garage.js?v=48"></script>
+  <script src="garage.js?v=49"></script>
 </body>
 </html>

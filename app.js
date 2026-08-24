@@ -130,7 +130,16 @@ document.getElementById('btnKlickModus').addEventListener('click', () => {
 // UND von der Ortssuche weiter unten, damit beide sich gleich verhalten.
 function addWaypoint(lat, lon) {
   const istErster = state.waypoints.length === 0;
-  state.waypoints.push({ lat, lon });
+
+  /* Ist ueber das Zielfeld ein festes Ziel gesetzt, wird ein Kartenklick
+     zum Zwischenziel und landet DAVOR - sonst wanderte das Ziel still in
+     die Mitte der Route, waehrend das Zielfeld weiter den alten Ort
+     behauptet. */
+  if (zielGesetzt && state.waypoints.length >= 1) {
+    state.waypoints.splice(state.waypoints.length - 1, 0, { lat, lon });
+  } else {
+    state.waypoints.push({ lat, lon });
+  }
   refreshWaypoints();
 
   // Beim allerersten Wegpunkt gibt es noch keine Route, auf die die Karte
@@ -344,42 +353,64 @@ async function searchPlace(query) {
   return res.json();
 }
 
+/* Drei Suchfelder statt einem: Start, Zwischenziel, Ziel. Jedes Feld hat
+   seine eigene Vorschlagsliste (das <ul> direkt daneben) und weiss ueber
+   data-rolle, wohin sein Ergebnis geht.
+
+   Die beiden Merker sagen, ob der ERSTE Wegpunkt wirklich ein gesetzter
+   Start und der LETZTE wirklich ein gesetztes Ziel ist - oder ob da nur
+   der Reihe nach geklickte Punkte liegen. Davon haengt ab, ob ein Feld
+   ersetzt oder anlegt, und wo ein Zwischenziel eingefuegt wird. */
+let startGesetzt = false;
+let zielGesetzt = false;
+
 let searchTimer = null;
 let searchRequestId = 0; // zählt Anfragen durch, damit veraltete Antworten ignoriert werden
 
-document.getElementById('searchInput').addEventListener('input', (e) => {
-  const query = e.target.value.trim();
-  clearTimeout(searchTimer);
+// Steht immer ganz oben in der Vorschlagsliste, auch während einer Suche -
+// so wie bei Google Maps "Ihr Standort" immer als erste Option auftaucht.
+const STANDORT_OPTION_HTML = '<li class="standort-option" data-standort="1">'
+  + '<svg class="ic klein" aria-hidden="true"><use href="#icon-standort"></use></svg>'
+  + '<span>Aktueller Standort</span></li>';
 
-  if (query.length < 3) {
-    // Noch zu kurz zum Suchen, aber "Aktueller Standort" bleibt trotzdem
-    // wählbar - das ist ja keine Textsuche.
-    renderNurStandortOption();
-    return;
-  }
+document.querySelectorAll('.orts-feld').forEach(feld => {
+  const liste = feld.nextElementSibling;   // das <ul class="search-results"> daneben
+  const rolle = feld.dataset.rolle;
 
-  // Erst 400ms nach der letzten Eingabe suchen, sonst laufen bei jedem
-  // Tastendruck einzelne Anfragen los - unnötig und unhöflich dem
-  // kostenlosen Dienst gegenüber.
-  searchTimer = setTimeout(() => runSearch(query), 400);
+  feld.addEventListener('input', () => {
+    const query = feld.value.trim();
+    clearTimeout(searchTimer);
+
+    if (query.length < 3) {
+      // Noch zu kurz zum Suchen, aber "Aktueller Standort" bleibt trotzdem
+      // wählbar - das ist ja keine Textsuche.
+      renderNurStandortOption(feld, liste, rolle);
+      return;
+    }
+
+    // Erst 400ms nach der letzten Eingabe suchen, sonst laufen bei jedem
+    // Tastendruck einzelne Anfragen los - unnötig und unhöflich dem
+    // kostenlosen Dienst gegenüber.
+    searchTimer = setTimeout(() => runSearch(query, feld, liste, rolle), 400);
+  });
+
+  // Auch ohne Eingabe soll "Aktueller Standort" beim Klick ins Suchfeld
+  // gleich zur Auswahl stehen.
+  feld.addEventListener('focus', () => {
+    if (feld.value.trim().length < 3) renderNurStandortOption(feld, liste, rolle);
+  });
+
+  feld.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') hideSearchResults();
+  });
 });
 
-// Auch ohne Eingabe soll "Aktueller Standort" beim Klick ins Suchfeld
-// gleich zur Auswahl stehen.
-document.getElementById('searchInput').addEventListener('focus', (e) => {
-  if (e.target.value.trim().length < 3) renderNurStandortOption();
-});
-
-document.getElementById('searchInput').addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') hideSearchResults();
-});
-
-// Klick außerhalb der Suche schließt die Vorschlagsliste wieder.
+// Klick außerhalb der Suche schließt alle Vorschlagslisten wieder.
 document.addEventListener('click', (e) => {
   if (!e.target.closest('.search-wrap')) hideSearchResults();
 });
 
-async function runSearch(query) {
+async function runSearch(query, feld, liste, rolle) {
   const eigeneId = ++searchRequestId;
   let results;
   try {
@@ -389,66 +420,94 @@ async function runSearch(query) {
   }
   // Während die Anfrage unterwegs war, wurde weitergetippt -> Antwort verwerfen.
   if (eigeneId !== searchRequestId) return;
-  renderSearchResults(results);
+  renderSearchResults(results, feld, liste, rolle);
 }
 
-// Steht immer ganz oben in der Vorschlagsliste, auch während einer Suche -
-// so wie bei Google Maps "Ihr Standort" immer als erste Option auftaucht.
-const STANDORT_OPTION_HTML = '<li class="standort-option" data-standort="1">'
-  + '<svg class="ic klein" aria-hidden="true"><use href="#icon-standort"></use></svg>'
-  + '<span>Aktueller Standort</span></li>';
-
-function renderSearchResults(results) {
-  const list = document.getElementById('searchResults');
-
+function renderSearchResults(results, feld, liste, rolle) {
   const ergebnisseHtml = results.length === 0
     ? '<li class="empty">Nichts gefunden.</li>'
     : results.map((r, i) => `<li data-idx="${i}">${escapeHtml(r.display_name)}</li>`).join('');
 
-  list.innerHTML = STANDORT_OPTION_HTML + ergebnisseHtml;
-  list.hidden = false;
-  wireStandortOption();
+  hideSearchResults();   // nur eine offene Liste, sonst stapeln sie sich
+  liste.innerHTML = STANDORT_OPTION_HTML + ergebnisseHtml;
+  liste.hidden = false;
+  wireStandortOption(liste, feld, rolle);
 
-  list.querySelectorAll('li[data-idx]').forEach(li => {
+  liste.querySelectorAll('li[data-idx]').forEach(li => {
     li.addEventListener('click', () => {
       const r = results[Number(li.dataset.idx)];
-      addWaypoint(Number(r.lat), Number(r.lon));
+      // Der erste Namensteil reicht als Beschriftung - "Würzburg" statt
+      // "Würzburg, Unterfranken, Bayern, Deutschland".
+      ortInsFeld(feld, rolle, String(r.display_name).split(',')[0]);
+      setzeWegpunktFürRolle(rolle, Number(r.lat), Number(r.lon));
       hideSearchResults();
-      document.getElementById('searchInput').value = '';
     });
   });
 }
 
 // Zeigt NUR die Standort-Option an - für den Fall, dass noch nichts
 // Sinnvolles zum Suchen eingegeben wurde.
-function renderNurStandortOption() {
-  const list = document.getElementById('searchResults');
-  list.innerHTML = STANDORT_OPTION_HTML;
-  list.hidden = false;
-  wireStandortOption();
+function renderNurStandortOption(feld, liste, rolle) {
+  hideSearchResults();
+  liste.innerHTML = STANDORT_OPTION_HTML;
+  liste.hidden = false;
+  wireStandortOption(liste, feld, rolle);
 }
 
-function wireStandortOption() {
-  const el = document.querySelector('.standort-option');
-  if (el) el.addEventListener('click', aktuellenStandortVerwenden);
+function wireStandortOption(liste, feld, rolle) {
+  const el = liste.querySelector('.standort-option');
+  if (el) el.addEventListener('click', () => aktuellenStandortVerwenden(feld, rolle));
+}
+
+/* Traegt den gewaehlten Namen ins Feld ein. Start und Ziel BEHALTEN ihren
+   Namen - man soll sehen, was gesetzt ist. Das Zwischenziel-Feld leert
+   sich dagegen sofort: Es ist eine Einwurfoeffnung fuer beliebig viele
+   Punkte, die danach in der Wegpunktliste stehen. */
+function ortInsFeld(feld, rolle, name) {
+  feld.value = rolle === 'zwischen' ? '' : name;
+}
+
+/* Setzt einen gefundenen Ort an die Stelle, die seine Rolle verlangt.
+
+   Start ersetzt den ersten Wegpunkt (bzw. legt ihn an), Ziel den letzten.
+   Ein Zwischenziel wird VOR dem Ziel eingefuegt, solange eines gesetzt
+   ist - sonst hinten angehaengt. So bleibt die Reihenfolge
+   Start -> Zwischenziele -> Ziel von selbst erhalten. */
+function setzeWegpunktFürRolle(rolle, lat, lon) {
+  const istErster = state.waypoints.length === 0;
+
+  if (rolle === 'start') {
+    if (startGesetzt && state.waypoints.length >= 1) state.waypoints[0] = { lat, lon };
+    else { state.waypoints.unshift({ lat, lon }); startGesetzt = true; }
+  } else if (rolle === 'ziel') {
+    if (zielGesetzt && state.waypoints.length >= 1) state.waypoints[state.waypoints.length - 1] = { lat, lon };
+    else { state.waypoints.push({ lat, lon }); zielGesetzt = true; }
+  } else {
+    const platz = zielGesetzt ? Math.max(state.waypoints.length - 1, 0) : state.waypoints.length;
+    state.waypoints.splice(platz, 0, { lat, lon });
+  }
+
+  refreshWaypoints();
+  if (istErster) map.setView([lat, lon], 12);
+  if (state.planMode === 'punkt' && state.waypoints.length >= 2) calculateRoute();
 }
 
 // Einmalige Standortabfrage (anders als bei der Live-Navigation, die
 // dauerhaft verfolgt) - für den Fall "ich will einfach von hier losfahren".
-function aktuellenStandortVerwenden() {
+function aktuellenStandortVerwenden(feld, rolle) {
   if (!geraet.standortDa()) {
     showToast('Dieses Gerät oder dieser Browser unterstützt keine Standortermittlung.');
     return;
   }
 
   hideSearchResults();
-  document.getElementById('searchInput').value = '';
   setBusy(true);
 
   geraet.standortEinmal(
     (pos) => {
       setBusy(false);
-      addWaypoint(pos.coords.latitude, pos.coords.longitude);
+      ortInsFeld(feld, rolle, 'Aktueller Standort');
+      setzeWegpunktFürRolle(rolle, pos.coords.latitude, pos.coords.longitude);
     },
     (err) => {
       setBusy(false);
@@ -459,9 +518,10 @@ function aktuellenStandortVerwenden() {
 }
 
 function hideSearchResults() {
-  const list = document.getElementById('searchResults');
-  list.hidden = true;
-  list.innerHTML = '';
+  document.querySelectorAll('.orts-feld + .search-results').forEach(liste => {
+    liste.hidden = true;
+    liste.innerHTML = '';
+  });
 }
 
 
@@ -2427,6 +2487,7 @@ function ladeGespeicherteRoute(r) {
   // bereits gefahren. Stattdessen wird die echte Linie direkt angezeigt.
   if (r.aufgezeichnet) {
     state.waypoints = [];
+    suchfelderZurücksetzen();
     refreshWaypoints();
     const spur = Array.isArray(r.track) ? r.track : [];
     const alsRoute = {
@@ -2449,6 +2510,23 @@ function ladeGespeicherteRoute(r) {
   }
 
   state.waypoints = r.waypoints;
+
+  /* Die Suchfelder auf den geladenen Stand bringen: Der erste Punkt IST
+     jetzt der Start, der letzte das Ziel (bei Punkt-zu-Punkt). Namen sind
+     nicht gespeichert, also stehen die Koordinaten in den Feldern - das
+     sagt ehrlich "hier ist etwas gesetzt", ohne einen Ortsnamen zu
+     erfinden. */
+  suchfelderZurücksetzen();
+  const alsText = wp => `${wp.lat.toFixed(3)}, ${wp.lon.toFixed(3)}`;
+  if (state.waypoints.length >= 1) {
+    startGesetzt = true;
+    document.getElementById('sucheStart').value = alsText(state.waypoints[0]);
+  }
+  if (!r.roundtrip && state.waypoints.length >= 2) {
+    zielGesetzt = true;
+    document.getElementById('sucheZiel').value = alsText(state.waypoints[state.waypoints.length - 1]);
+  }
+
   // Ältere gespeicherte Routen kennen noch 'mode' statt 'curveLevel' -
   // dafür hier ein sinnvoller Ersatzwert.
   const level = r.curveLevel !== undefined ? r.curveLevel : (r.mode === 'schnell' ? 0 : 100);
@@ -2771,7 +2849,29 @@ function setPlanMode(mode) {
   document.querySelectorAll('#planModeSwitch .seg').forEach(b =>
     b.classList.toggle('active', b.dataset.planMode === mode));
   document.getElementById('roundtripBlock').hidden = mode !== 'rundtour';
+
+  /* Das Zielfeld gibt es in beiden Planungsarten, aber bei der Rundtour
+     ist es gesperrt: Die endet am Start, ein eigenes Ziel waere eine
+     leere Behauptung. Der Platzhalter sagt warum. */
+  const zielFeld = document.getElementById('sucheZiel');
+  zielFeld.disabled = mode === 'rundtour';
+  zielFeld.placeholder = mode === 'rundtour'
+    ? 'Rundtour endet am Start'
+    : 'Zielpunkt suchen …';
+  if (mode === 'rundtour') zielFeld.value = '';
+
   refreshWaypoints(); // Hinweistext und Marker-Beschriftung ("S" vs. "1") aktualisieren
+}
+
+// Setzt die drei Suchfelder und ihre Merker zurueck - gehoert zu jedem
+// Weg, der die Wegpunktliste leert oder komplett ersetzt.
+function suchfelderZurücksetzen() {
+  startGesetzt = false;
+  zielGesetzt = false;
+  ['sucheStart', 'sucheZwischen', 'sucheZiel'].forEach(id => {
+    const feld = document.getElementById(id);
+    if (feld) feld.value = '';
+  });
 }
 
 function curveLevelHint(level) {
@@ -2839,6 +2939,17 @@ document.getElementById('optPoi').addEventListener('change', (e) => setPoiAktiv(
 document.getElementById('btnUndo').addEventListener('click', () => {
   if (nav.aktiv) stopNavigation(); // Route ändert sich gleich - laufende Navigation wäre sonst inkonsistent
   state.waypoints.pop();
+
+  /* Der entfernte letzte Punkt kann das gesetzte Ziel gewesen sein - dann
+     muss auch das Zielfeld wieder leer sein, sonst behauptet es etwas,
+     das auf der Karte nicht mehr existiert. Dasselbe fuer den Start,
+     wenn gar nichts mehr uebrig ist. */
+  if (zielGesetzt) {
+    zielGesetzt = false;
+    document.getElementById('sucheZiel').value = '';
+  }
+  if (state.waypoints.length === 0) suchfelderZurücksetzen();
+
   refreshWaypoints();
 
   if (state.planMode === 'punkt' && state.waypoints.length >= 2) {
@@ -2857,6 +2968,7 @@ document.getElementById('btnUndo').addEventListener('click', () => {
 document.getElementById('btnClear').addEventListener('click', () => {
   if (nav.aktiv) stopNavigation();
   state.waypoints = [];
+  suchfelderZurücksetzen();
   state.route = null;
   state.lines.forEach(l => map.removeLayer(l));
   state.lines = [];

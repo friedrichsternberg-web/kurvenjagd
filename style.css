@@ -1035,6 +1035,16 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 
 /* ---------- Ortssuche ---------- */
 .search-wrap { position: relative; }
+
+/* Die drei Suchfelder: Start, Zwischenziel, Ziel. Beschriftung klein
+   darueber, Felder mit Luft dazwischen. Das gesperrte Zielfeld der
+   Rundtour tritt sichtbar zurueck, statt nur nicht zu reagieren. */
+.such-feld { margin-bottom: var(--s3); }
+.such-feld .label { display: block; margin-bottom: 6px; }
+.such-feld .search-input:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
 /* Als Pille, wie im Inspirationsbild - ein Suchfeld ist das rundeste
    Element jeder modernen Oberflaeche. Die Fuellung ist helles Glas statt
    dunkler Vertiefung: Das Feld liegt auf einer Glasplatte, und ein

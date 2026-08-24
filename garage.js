@@ -336,7 +336,7 @@ async function datenAusWikipedia(marke, modell) {
     const daten = sprache === 'de'
       ? deutscheInfoboxLesen(wikitext)
       : englischeInfoboxLesen(wikitext);
-    if (daten && (daten.hubraum || daten.leistung)) return daten;
+    if (daten && Object.values(daten).some(wert => wert)) return daten;
   }
   return null;
 }
@@ -348,33 +348,56 @@ function infoboxFeld(wikitext, feldname) {
   return treffer ? treffer[1].trim() : '';
 }
 
+// Erste Zahl eines Infobox-Felds, mit deutschen Kommas als Punkte - sonst
+// liest parseFloat aus der "92,2" nur die 92.
+function feldZahl(wikitext, feldname) {
+  const roh = infoboxFeld(wikitext, feldname).replace(/,/g, '.');
+  const treffer = roh.match(/[\d.]+/);
+  return treffer ? String(Math.round(parseFloat(treffer[0]))) : '';
+}
+
 /* Deutsche Infobox. Die Leistung steht dort als "92,2 / 125 bei 9500/min":
    erst Kilowatt, dann PS. Gibt es beide Zahlen, ist die ZWEITE die PS-Zahl.
    Steht nur eine da, ist es laut Vorlage die kW-Zahl - dann wird gerechnet.
-   Deutsche Kommas werden vorher zu Punkten, sonst liest parseFloat nur die
-   92 aus der 92,2. */
-function deutscheInfoboxLesen(wikitext) {
-  const hubraum = ersteZahl(infoboxFeld(wikitext, 'Hubraum'));
 
+   Die uebrigen Werte sind je ein Feld mit fuehrender Zahl: Leergewicht in
+   kg ("179/182 mit ABS" - die erste Zahl ist das Grundmodell), Drehmoment
+   in Nm, Geschwindigkeit in km/h. Nicht jeder Artikel fuellt jedes Feld -
+   was fehlt, bleibt leer und laesst sich im Dialog von Hand eintragen. */
+function deutscheInfoboxLesen(wikitext) {
   const roh = infoboxFeld(wikitext, 'Leistung').replace(/,/g, '.');
   const zahlen = roh.match(/[\d.]+/g) || [];
   let leistung = '';
   if (zahlen.length >= 2 && roh.includes('/')) leistung = String(Math.round(parseFloat(zahlen[1])));
   else if (zahlen.length >= 1) leistung = String(Math.round(parseFloat(zahlen[0]) * 1.35962));
 
-  return { hubraum, leistung };
+  return {
+    hubraum:    feldZahl(wikitext, 'Hubraum'),
+    leistung,
+    gewicht:    feldZahl(wikitext, 'Leergewicht'),
+    drehmoment: feldZahl(wikitext, 'Drehmoment'),
+    vmax:       feldZahl(wikitext, 'Geschwindigkeit'),
+  };
 }
 
 /* Englische Infobox. Dort steht "engine = {{convert|948|cc|abbr=on}} ..."
    und "power = 92.2 kW (125 hp) @ 9500 rpm" - die kW-Zahl ist die
    verlaesslichste, weil "hp" je nach Herkunft zwei verschiedene
-   Pferdestaerken meinen kann (siehe leistungInPS). */
+   Pferdestaerken meinen kann (siehe leistungInPS). Gewicht und Tempo
+   stecken in convert-Vorlagen ("{{convert|179|kg}}"), da reicht ebenfalls
+   die erste Zahl - sie ist immer die metrische. */
 function englischeInfoboxLesen(wikitext) {
   const motorFeld = infoboxFeld(wikitext, 'engine');
   const ccTreffer = motorFeld.match(/(\d{2,4}(?:\.\d+)?)\s*(?:\|\s*)?cc/i);
   const hubraum = ccTreffer ? String(Math.round(parseFloat(ccTreffer[1]))) : '';
 
-  return { hubraum, leistung: leistungInPS(infoboxFeld(wikitext, 'power')) };
+  return {
+    hubraum,
+    leistung:   leistungInPS(infoboxFeld(wikitext, 'power')),
+    gewicht:    feldZahl(wikitext, 'wet_weight') || feldZahl(wikitext, 'dry_weight'),
+    drehmoment: feldZahl(wikitext, 'torque'),
+    vmax:       feldZahl(wikitext, 'top_speed'),
+  };
 }
 
 // Zieht die erste Zahl aus einem Text wie "649.0 ccm (39.60 cubic inches)".
@@ -1319,9 +1342,12 @@ function zeichneDatenblatt() {
   // darin sieht nach Fehler aus, ein fehlendes Feld nach "noch nicht
   // ausgefuellt".
   const werte = [
-    { name: 'Hubraum',  wert: motorrad.hubraum  ? zahl(motorrad.hubraum) + ' ccm' : null },
-    { name: 'Leistung', wert: motorrad.leistung ? zahl(motorrad.leistung) + ' PS' : null },
-    { name: 'Baujahr',  wert: motorrad.baujahr || null },
+    { name: 'Hubraum',    wert: motorrad.hubraum    ? zahl(motorrad.hubraum) + ' ccm' : null },
+    { name: 'Leistung',   wert: motorrad.leistung   ? zahl(motorrad.leistung) + ' PS' : null },
+    { name: 'Baujahr',    wert: motorrad.baujahr || null },
+    { name: 'Gewicht',    wert: motorrad.gewicht    ? zahl(motorrad.gewicht) + ' kg' : null },
+    { name: 'Drehmoment', wert: motorrad.drehmoment ? zahl(motorrad.drehmoment) + ' Nm' : null },
+    { name: 'Spitze',     wert: motorrad.vmax       ? zahl(motorrad.vmax) + ' km/h' : null },
   ].filter(eintrag => eintrag.wert);
 
   const raster = document.getElementById('motorradWerte');
@@ -1453,6 +1479,23 @@ function öffneMotorradDialog(vorhandenes = null) {
           <input type="number" id="feldLeistung" inputmode="numeric" placeholder="95" value="${sicher(vorhandenes?.leistung)}">
         </div>
       </div>
+      <div class="dialog-paar">
+        <div>
+          <label for="feldGewicht">Gewicht in kg</label>
+          <input type="number" id="feldGewicht" inputmode="numeric" placeholder="190" value="${sicher(vorhandenes?.gewicht)}">
+        </div>
+        <div>
+          <label for="feldDrehmoment">Drehmoment in Nm</label>
+          <input type="number" id="feldDrehmoment" inputmode="numeric" placeholder="64" value="${sicher(vorhandenes?.drehmoment)}">
+        </div>
+      </div>
+      <div class="dialog-paar">
+        <div>
+          <label for="feldVmax">Spitze in km/h</label>
+          <input type="number" id="feldVmax" inputmode="numeric" placeholder="200" value="${sicher(vorhandenes?.vmax)}">
+        </div>
+        <div></div>
+      </div>
       <p class="tiny">Leere Felder f&uuml;llt die App automatisch aus der
         Wikipedia-Infobox deines Modells (Lizenz CC BY-SA). Pr&uuml;f die
         Werte kurz &ndash; und was nicht stimmt, &uuml;berschreibst du einfach.</p>
@@ -1480,6 +1523,9 @@ function öffneMotorradDialog(vorhandenes = null) {
         baujahr:  feldWert('feldBaujahr'),
         hubraum:  feldWert('feldHubraum'),
         leistung: feldWert('feldLeistung'),
+        gewicht:  feldWert('feldGewicht'),
+        drehmoment: feldWert('feldDrehmoment'),
+        vmax:     feldWert('feldVmax'),
         notiz:    feldWert('feldNotiz'),
         bild:     dialogFoto,
         bodenlinie: dialogBodenlinie,
@@ -1684,27 +1730,32 @@ async function technischeDatenNachziehen() {
   const marke = feldWert('feldMarke');
   const modell = feldWert('feldModell');
   const jahr = feldWert('feldBaujahr');
-  const hubraumFeld = document.getElementById('feldHubraum');
-  const leistungFeld = document.getElementById('feldLeistung');
-  if (!hubraumFeld || !marke || !modell) return;
 
-  const fehltEtwas = !hubraumFeld.value.trim() || !leistungFeld.value.trim();
-  if (!fehltEtwas) return;
+  // Jedes Formularfeld und der Name, unter dem die Datenquelle den Wert
+  // liefert. Eine Liste statt fuenf einzelner Abfragen - ein neues Feld
+  // ist damit eine Zeile.
+  const felder = [
+    ['feldHubraum', 'hubraum'], ['feldLeistung', 'leistung'],
+    ['feldGewicht', 'gewicht'], ['feldDrehmoment', 'drehmoment'], ['feldVmax', 'vmax'],
+  ].map(([id, name]) => ({ element: document.getElementById(id), name }))
+   .filter(f => f.element);
 
-  hubraumFeld.classList.add('wird-geholt');
-  leistungFeld.classList.add('wird-geholt');
+  if (!felder.length || !marke || !modell) return;
+  if (felder.every(f => f.element.value.trim())) return;   // alles schon da
+
+  felder.forEach(f => f.element.classList.add('wird-geholt'));
   try {
     const daten = await technischeDatenHolen(marke, modell, jahr);
     if (daten) {
-      if (!hubraumFeld.value.trim() && daten.hubraum) hubraumFeld.value = daten.hubraum;
-      if (!leistungFeld.value.trim() && daten.leistung) leistungFeld.value = daten.leistung;
+      felder.forEach(f => {
+        if (!f.element.value.trim() && daten[f.name]) f.element.value = daten[f.name];
+      });
     }
   } catch {
-    // Stillschweigend. Beide Felder lassen sich von Hand ausfuellen, eine
+    // Stillschweigend. Alle Felder lassen sich von Hand ausfuellen, eine
     // Fehlermeldung waere hier nur im Weg.
   } finally {
-    hubraumFeld.classList.remove('wird-geholt');
-    leistungFeld.classList.remove('wird-geholt');
+    felder.forEach(f => f.element.classList.remove('wird-geholt'));
   }
 }
 
