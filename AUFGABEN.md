@@ -202,8 +202,8 @@ Datenschutzerklärung, siehe oben.
 
 ## Kleinkram, der irgendwann nervt
 
-- **Versionsnummer.** `?v=` steht an neun Stellen in `index.html` (seit
-  `kern.js` dazugekommen ist) und wird
+- **Versionsnummer.** `?v=` steht an zwölf Stellen in `index.html` (seit
+  `produkte.js` und `shop.js` dazugekommen sind) und wird
   von Hand erhöht. Genau dieser Fehler ist beim Bauen schon passiert: Die
   Datei war geändert, die Nummer nicht, der Browser lieferte die alte
   Fassung. Auf einem richtigen Webhoster ersetzen Cache-Kopfzeilen das.
