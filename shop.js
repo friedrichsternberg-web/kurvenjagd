@@ -39,7 +39,60 @@ function günstigstesGesamt(produkt) {
 }
 
 
-/* --- 2. Geld und Zeit formatieren ------------------------------------------ */
+/* --- 2. Die Ablage: die Merkliste ------------------------------------------
+   Gespeichert wie die Garage: ein Schluessel im Geraetespeicher, gelesen
+   und geschrieben NUR ueber geraet.js. Je Eintrag stehen drin: welches
+   Produkt, wann gemerkt, und der guenstigste Gesamtpreis zu diesem
+   Zeitpunkt. Der gespeicherte Preis ist die Vorarbeit fuer den spaeteren
+   Preisalarm - der muss dann nur noch vergleichen und melden. */
+
+const SHOP_SPEICHER = 'kurvenjagd.shop';
+
+function leereShopAblage() {
+  return { merkliste: [] };
+}
+
+function ladeShopAblage() {
+  const gelesen = geraet.lies(SHOP_SPEICHER);
+  if (!gelesen) return leereShopAblage();
+  return { merkliste: Array.isArray(gelesen.merkliste) ? gelesen.merkliste : [] };
+}
+
+// Gibt false zurueck, wenn der Geraetespeicher voll ist - der Aufrufer
+// muss das melden, stillschweigend nichts zu speichern waere das Schlimmste.
+function speichereShopAblage() {
+  return geraet.schreib(SHOP_SPEICHER, shopAblage);
+}
+
+let shopAblage = ladeShopAblage();
+
+function istGemerkt(produktId) {
+  return shopAblage.merkliste.some(eintrag => eintrag.produktId === produktId);
+}
+
+function merkenUmschalten(produktId) {
+  if (istGemerkt(produktId)) {
+    shopAblage.merkliste = shopAblage.merkliste.filter(eintrag => eintrag.produktId !== produktId);
+  } else {
+    const produkt = shopKatalog().produkte.find(p => p.id === produktId);
+    if (!produkt) return;
+    shopAblage.merkliste.push({
+      produktId,
+      gemerktAm: new Date().toISOString(),
+      preisBeimMerken: günstigstesGesamt(produkt),
+    });
+  }
+  if (!speichereShopAblage()) {
+    showToast('Der Gerätespeicher ist voll - die Merkliste konnte nicht gespeichert werden.');
+  }
+  zeichneMerkliste();
+  // Steht das Produkt gerade auf der Produktseite, muss dort die
+  // Knopf-Beschriftung mitziehen.
+  if (angezeigtesProdukt?.id === produktId) zeichneProduktSeite();
+}
+
+
+/* --- 3. Geld und Zeit formatieren ------------------------------------------ */
 
 // 505.9 wird zu "505,90 €" - immer mit zwei Nachkommastellen, wie es bei
 // Preisen erwartet wird.
@@ -57,7 +110,7 @@ function stempel(iso) {
 }
 
 
-/* --- 3. Die Uebersicht ------------------------------------------------------
+/* --- 4. Die Uebersicht ------------------------------------------------------
    Kategorien mit Anzeigenamen. Die Schluessel sind dieselben wie frueher
    bei den Ausruestungs-Arten der Garage - so koennen die Vorschlaege
    spaeter pruefen, welche Art in der Garage noch fehlt, und ein gekauftes
@@ -116,6 +169,7 @@ function zeichneShop() {
   zeichneVorschläge();
   zeichneKategorien();
   zeichneProduktListe();
+  zeichneMerkliste();
 }
 
 function zeichneProduktListe() {
@@ -144,7 +198,46 @@ function zeichneProduktListe() {
 }
 
 
-/* --- 4. "Fuer dich": Vorschlaege aus der Garage -----------------------------
+// Die Merkliste unten auf der Uebersicht. Jeder Eintrag vergleicht den
+// Gesamtpreis von damals mit dem von heute - das ist der sichtbare
+// Vorlaeufer des Preisalarms, solange es noch keine Mitteilungen gibt.
+function zeichneMerkliste() {
+  const liste = document.getElementById('shopMerkliste');
+
+  if (!shopAblage.merkliste.length) {
+    liste.innerHTML = '<li class="empty">Noch nichts gemerkt.</li>';
+    return;
+  }
+
+  liste.innerHTML = shopAblage.merkliste.map(eintrag => {
+    const produkt = shopKatalog().produkte.find(p => p.id === eintrag.produktId);
+    if (!produkt) return '';   // Produkt gibt es im Katalog nicht mehr
+
+    const aktuell = günstigstesGesamt(produkt);
+    let vergleich = '';
+    if (aktuell !== null && eintrag.preisBeimMerken !== null) {
+      const unterschied = eintrag.preisBeimMerken - aktuell;
+      if (unterschied > 0.005)       vergleich = `seitdem ${euro(unterschied)} günstiger`;
+      else if (unterschied < -0.005) vergleich = `seitdem ${euro(-unterschied)} teurer`;
+      else                           vergleich = 'Preis unverändert';
+    }
+    const datum = new Date(eintrag.gemerktAm)
+      .toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' });
+
+    return `
+      <li data-produkt="${sicher(produkt.id)}">
+        <span class="saved-marke">${symbol(produkt.bild.symbol, 'klein')}</span>
+        <span class="saved-text">
+          <span class="saved-name">${sicher(produkt.marke)} ${sicher(produkt.name)}</span>
+          <span class="saved-meta">Gemerkt am ${datum}${vergleich ? ' <i>&middot;</i> ' + vergleich : ''}</span>
+        </span>
+        <button class="del" data-merk-weg="${sicher(produkt.id)}" title="Von der Merkliste nehmen">&times;</button>
+      </li>`;
+  }).join('');
+}
+
+
+/* --- 5. "Fuer dich": Vorschlaege aus der Garage -----------------------------
    Das ist der Gedanke hinter dem ganzen Shop: Kurvenjagd weiss aus der
    Garage, welches Motorrad jemand faehrt und welche Ausruestung er schon
    hat - eine allgemeine Preissuchmaschine weiss das nicht. Drei Regeln,
@@ -244,7 +337,7 @@ function zeichneVorschläge() {
 }
 
 
-/* --- 5. Die Produktseite ----------------------------------------------------
+/* --- 6. Die Produktseite ----------------------------------------------------
    Ein Produkt, alle Angebote. Die Seite wird bei jedem Aufruf komplett
    neu zusammengebaut - bei einer Handvoll Angebote ist das billiger und
    einfacher als jedes Detail einzeln nachzufuehren.
@@ -345,7 +438,11 @@ function zeichneProduktSeite() {
             &auml;ndert sich am Preis nichts.</p>
         </div>
       </details>
-    </section>`;
+    </section>
+
+    <button class="btn ghost merken-knopf" data-merken="${sicher(produkt.id)}">
+      ${istGemerkt(produkt.id) ? 'Gemerkt &#10003; &ndash; wieder entfernen' : 'Merken &ndash; Preis im Blick behalten'}
+    </button>`;
 }
 
 
@@ -366,7 +463,7 @@ function öffneAngebot(angebot) {
 }
 
 
-/* --- 6. Verkabelung ---------------------------------------------------------
+/* --- 7. Verkabelung ---------------------------------------------------------
    Die Chips werden bei jedem Zeichnen neu erzeugt, deshalb haengt ihr
    Horcher am BEHAELTER und nicht am einzelnen Knopf - dasselbe Muster wie
    beim Garage-Dialog. Suchfeld und Liste stehen dagegen fest im HTML. */
@@ -395,7 +492,16 @@ verkabele('shopVorschlaege', 'click', ereignis => {
   if (zeile) zeigeProdukt(zeile.dataset.produkt);
 });
 
+verkabele('shopMerkliste', 'click', ereignis => {
+  const wegKnopf = ereignis.target.closest('[data-merk-weg]');
+  if (wegKnopf) { merkenUmschalten(wegKnopf.dataset.merkWeg); return; }
+  const zeile = ereignis.target.closest('li[data-produkt]');
+  if (zeile) zeigeProdukt(zeile.dataset.produkt);
+});
+
 verkabele('shopProduktInhalt', 'click', ereignis => {
+  const merkKnopf = ereignis.target.closest('[data-merken]');
+  if (merkKnopf) { merkenUmschalten(merkKnopf.dataset.merken); return; }
   const knopf = ereignis.target.closest('button[data-angebot]');
   if (!knopf) return;
   const angebote = angeboteZeigbar(angezeigtesProdukt)

@@ -1006,6 +1006,7 @@ function lokaleSchlüssel() {
   const schlüssel = [];
   try { schlüssel.push(STORE); } catch { /* app.js fehlt */ }
   try { schlüssel.push(GARAGE_SPEICHER); } catch { /* garage.js fehlt */ }
+  try { schlüssel.push(SHOP_SPEICHER); } catch { /* shop.js fehlt */ }
   // Ein noch nicht hochgeladenes Profilbild gehört ebenfalls weg - es wäre
   // sonst das einzige, was ein gelöschtes Konto überlebt.
   schlüssel.push(WARTENDES_BILD);

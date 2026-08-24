@@ -3225,3 +3225,7 @@ body.nav-modus .leaflet-control-container { display: none; }
 }
 .vorschlag-leer .hint { margin: 0; }
 .vorschlag-leer .btn { flex: 0 0 auto; }
+
+/* Der Merken-Knopf nimmt die volle Breite unter dem Preisvergleich ein -
+   er ist die einzige Handlung auf der Seite, die nichts kostet. */
+.merken-knopf { width: 100%; margin-top: var(--s3); }
