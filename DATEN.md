@@ -11,7 +11,7 @@ Deshalb die Regel: **Kommt ein Dienst dazu, bekommt er hier eine Zeile.**
 Nachträglich herauszufinden, welcher Aufruf welche Daten mitnimmt, ist ein
 verlorener Nachmittag.
 
-Stand: 20.08.2026
+Stand: 24.08.2026
 
 ---
 
@@ -24,6 +24,7 @@ Gerät nicht, solange niemand angemeldet ist.
 |---|---|
 | `kurvenjagd.routen` | gespeicherte Touren: Wegpunkte, Streckenverlauf, Kurvigkeit, Fotos als Daten-URL |
 | `kurvenjagd.garage` | Motorräder (Marke, Modell, Baujahr, Hubraum, Leistung, Bild) und Ausrüstung |
+| `kurvenjagd.shop` | Merkliste des Shops: Produkt-Schlüssel, Datum und günstigster Gesamtpreis beim Merken |
 
 Aufgezeichnete Fotos liegen **verkleinert im Speicher selbst**, nicht als
 Dateien. Das ist auch der Grund für die 5-MB-Grenze und dafür, dass
@@ -105,7 +106,7 @@ Gelöscht wird in dieser Reihenfolge:
 | 3 | alle Zeilen mit dieser `nutzer_id` | Tabelle `touren` |
 | 4 | das Auth-Konto selbst, samt E-Mail-Adresse | `auth.users` |
 | 5 | die Profilzeile, per `ON DELETE CASCADE` mit Schritt 4 | Tabelle `profile` |
-| 6 | `kurvenjagd.routen`, `kurvenjagd.garage` und ein noch nicht hochgeladenes Profilbild | localStorage des Geräts |
+| 6 | `kurvenjagd.routen`, `kurvenjagd.garage`, `kurvenjagd.shop` und ein noch nicht hochgeladenes Profilbild | localStorage des Geräts |
 
 Die Reihenfolge ist Absicht. Die Tabellen `touren` und `profile` hängen per
 Fremdschlüssel mit `ON DELETE CASCADE` an `auth.users`, ihre Zeilen würden
@@ -169,11 +170,33 @@ Ausfahrten anderer Leute mit.
 - Kommt Werbung dazu, kommt ein ganzer Abschnitt dazu: welches Netzwerk,
   welche Kennungen, wie der Nutzer widersprechen kann.
 
+## Der Shop (Stand: reine Beispieldaten)
+
+Der Shop zeigt derzeit **ausschließlich mitgelieferte Beispieldaten** aus
+`produkte.js`. Es gibt keine Partnerverträge, keine echten Angebote und
+keine Links zu Händlern – der Knopf "Zum Shop" zeigt nur einen Hinweis.
+**Es verlässt dabei nichts das Gerät**, und die App zählt auch keine
+Klicks.
+
+Sobald ein Partnernetzwerk (z.B. AWIN) dazukommt, ändert sich das an drei
+Stellen, und alle drei gehören dann hierher und in die
+Datenschutzerklärung:
+
+- Der "Zum Shop"-Link trägt eine Kennung, über die das Netzwerk einen Kauf
+  dieser App zuordnet. Vor dem ersten Klick braucht es dafür eine
+  Einwilligung (§ 25 TDDDG); der Platz dafür ist `öffneAngebot()` in
+  `shop.js`, die einzige Klickstelle.
+- Produktdaten und -bilder kommen aus dem Datenfeed des Netzwerks (neue
+  Zeile unter "Was das Gerät verlässt", sobald sie die App direkt abruft).
+- Der oben angekündigte Werbe-Abschnitt wird fällig: Netzwerk, Kennungen,
+  Widerspruch.
+
 ## Was die App NICHT tut
 
 Bewusst festgehalten, weil es in der Erklärung ausdrücklich stehen darf:
 
-- keine Analyse, kein Tracking, keine Zählpixel
+- keine Analyse, kein Tracking, keine Zählpixel – auch der Shop zählt
+  keine Klicks
 - keine Weitergabe an Dritte über die oben genannten Dienste hinaus
 - kein Zugriff auf Kontakte, Kalender oder die Fotomediathek – Fotos kommen
   nur einzeln über die Dateiauswahl, die der Nutzer selbst bedient

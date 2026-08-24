@@ -125,6 +125,83 @@ sobald die Hülle steht.
 
 ---
 
+## Der Shop: von der Demo zum echten Preisvergleich
+
+Die Grundlage steht seit dem 24.08.2026: Übersicht mit Vorschlägen aus der
+Garage, Produktseite mit Preisvergleich, Merkliste. Alles Beispieldaten,
+die Angebotsplätze heißen bewusst "Partner-Shop A/B/C" – keine echten
+Händler mit erfundenen Preisen, keine erfundenen Shop-Namen. Die
+Rechercheberichte zu Markt und Recht liegen im Brain
+(`Projekte/Kurvenjagd.md`, Abschnitt vom 24.08.2026).
+
+### Bevor echte Angebote laufen dürfen (Pflicht, sonst Abmahnrisiko)
+
+1. **Gewerbeanmeldung** – Affiliate-Einnahmen sind gewerblich. Vorher mit
+   dem Praxisbetrieb klären, ob eine Nebentätigkeit anzuzeigen ist.
+2. **Impressum** nach § 5 DDG, zusätzlich mit dem Verantwortlichen nach
+   § 18 Abs. 2 MStV (nötig wegen "Unsere Einschätzung"). KEIN Link auf die
+   EU-Streitbeilegungsplattform – die ist seit Juli 2025 abgeschaltet, der
+   Link selbst wäre abmahnbar.
+3. **Datenschutzerklärung** mit eigenem Affiliate-Abschnitt (Netzwerk,
+   Kennungen, Widerruf). Grundlage: `DATEN.md`.
+4. **Einwilligung vor dem ersten Shop-Klick** (§ 25 TDDDG): gehört in
+   `öffneAngebot()` in `shop.js`, die einzige Klickstelle. Kommentar dort
+   markiert die Stelle.
+5. **Beispieldaten restlos raus**, sobald echte Angebote da sind – nicht
+   ausblenden, entfernen. Demo-Preise neben echten wären irreführend.
+6. Am Knopf bleibt die Kennzeichnung: "Anzeige"-Abzeichen an jeder Zeile
+   (steht schon), bei echten Links zusätzlich die Beschriftung
+   `Zum Shop (Anzeige)`.
+7. Vor dem Livegang einmal ein **Fachanwalt für IT-/Wettbewerbsrecht**
+   über Kennzeichnung, Preisdarstellung und die Vergleichs-Offenlegung.
+
+### Der Weg zu den Partnern (Reihenfolge, die am schnellsten trägt)
+
+1. Web-App vorzeigbar + Rechtstexte + Gewerbe (siehe oben).
+2. **AWIN-Registrierung** (5 € Kaution, kommt mit der ersten Auszahlung
+   zurück) → POLO Motorrad beantragen (MID 11475, Programmbetreuung
+   PeakLive, polo-motorrad@peaklive.de) und moto24 (MID 16934).
+   POLO läuft trotz Sanierungsverfahren weiter, aber: nicht als einzige
+   Einnahmequelle einplanen, kurze Auszahlungszyklen wählen.
+3. **Webgains** → FC-Moto (programID 4028), motoin, ChromeBurner.
+4. Parallel **billiger.de (solute GmbH)** anfragen: fertige
+   Preisvergleichsdaten per REST-API, Vergütung je Klick, kostenlos –
+   verlangt aber ein eingetragenes Gewerbe.
+5. **Louis-Status direkt klären**: Die belboon-Kampagnen sind offline
+   (Stand 24.08.2026), das frühere Programm ist nicht mehr auffindbar.
+   Anfrage über die Partnerprogramm-Seite von Louis.
+6. Amazon zuletzt: niedrigste Sätze in Auto & Motorrad (4,5 %),
+   24-h-Cookie, und die alte Produktdaten-API (PA-API 5.0) wird zum
+   15.05.2026 abgeschaltet – wenn, dann direkt die neue Creators API.
+
+### Technisch vorbereitet, wartet auf die Verträge
+
+- **Feed-Import**: `produkte.js` dokumentiert im Kopf die Zuordnung zu den
+  AWIN-Feldern (`ean`, `search_price`, `delivery_cost`, `aw_deep_link`,
+  `aw_image_url`). Getauscht wird nur `shopKatalog()` in `shop.js` gegen
+  einen Serverabruf – der Rest der App merkt nichts. Achtung: `ean` ist
+  bei AWIN kein Pflichtfeld, der Abgleich über mehrere Shops braucht einen
+  Rückfall über Marke + Modellname.
+- **Produktbilder**: erst einbinden, wenn das jeweilige Programm die
+  Bildnutzung ausdrücklich erlaubt (die Netzwerk-AGB allein tun das
+  nicht). Bis dahin bleiben die SVG-Symbole. Bevorzugt vom Netzwerk-CDN
+  einbinden statt selbst hosten.
+- **Preisalarm**: `preisBeimMerken` und `gemerktAm` liegen schon in der
+  Merkliste. Sobald es Mitteilungen gibt (siehe Punkt 5 oben), ist der
+  Alarm nur noch "vergleichen und melden".
+- **Keine Sterne-Bewertungen**, bis eine echte Quelle samt Anzahl,
+  Zeitraum und Herkunft angezeigt werden kann – erfundene Sterne sind ein
+  Per-se-Verbot ohne Demo-Ausnahme, deshalb hat das Datenmodell bewusst
+  kein Bewertungsfeld.
+- **Betriebsstoffe und Pflegemittel** (Öl, Kettenspray) erst mit
+  Grundpreis-Feld (€/l nach § 4 PAngV) in den Katalog.
+- Die **Ausrüstungs-Wand der Garage** (siehe eigener Abschnitt unten)
+  wird mit echten Produktdaten wieder attraktiv: Shop-Kategorien und
+  Ausrüstungs-Arten benutzen dieselben Schlüssel, ein gekauftes Teil kann
+  direkt in die Garage übernommen werden.
+
+---
+
 ## Für die spätere Webseite (Querformat)
 
 ### 8. Rechenteil vom Bedienteil trennen — ERLEDIGT
