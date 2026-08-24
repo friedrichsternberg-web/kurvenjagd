@@ -64,14 +64,14 @@ function stempel(iso) {
    Teil kann eines Tages direkt als Ausruestung uebernommen werden. */
 
 const SHOP_KATEGORIEN = [
-  { schlüssel: 'helm',      name: 'Helme' },
-  { schlüssel: 'jacke',     name: 'Jacken' },
-  { schlüssel: 'hose',      name: 'Hosen' },
-  { schlüssel: 'handschuh', name: 'Handschuhe' },
-  { schlüssel: 'stiefel',   name: 'Stiefel' },
-  { schlüssel: 'protektor', name: 'Protektoren' },
-  { schlüssel: 'koffer',    name: 'Gepäck' },
-  { schlüssel: 'anbau',     name: 'Anbauteile' },
+  { schlüssel: 'helm',      name: 'Helme',       fehlt: 'kein Helm' },
+  { schlüssel: 'jacke',     name: 'Jacken',      fehlt: 'keine Jacke' },
+  { schlüssel: 'hose',      name: 'Hosen',       fehlt: 'keine Hose' },
+  { schlüssel: 'handschuh', name: 'Handschuhe',  fehlt: 'keine Handschuhe' },
+  { schlüssel: 'stiefel',   name: 'Stiefel',     fehlt: 'keine Stiefel' },
+  { schlüssel: 'protektor', name: 'Protektoren', fehlt: 'kein Rückenprotektor' },
+  { schlüssel: 'koffer',    name: 'Gepäck',      fehlt: 'kein Gepäck' },
+  { schlüssel: 'anbau',     name: 'Anbauteile' },   // keine Ausruestung, kann nicht "fehlen"
 ];
 
 function kategorieName(schlüssel) {
@@ -113,6 +113,7 @@ function gefilterteProdukte() {
 // Zeichnet die ganze Uebersicht. Wird bei jedem Oeffnen des Shops gerufen
 // (aus zeigeShop() in app.js).
 function zeichneShop() {
+  zeichneVorschläge();
   zeichneKategorien();
   zeichneProduktListe();
 }
@@ -143,7 +144,107 @@ function zeichneProduktListe() {
 }
 
 
-/* --- 4. Die Produktseite ----------------------------------------------------
+/* --- 4. "Fuer dich": Vorschlaege aus der Garage -----------------------------
+   Das ist der Gedanke hinter dem ganzen Shop: Kurvenjagd weiss aus der
+   Garage, welches Motorrad jemand faehrt und welche Ausruestung er schon
+   hat - eine allgemeine Preissuchmaschine weiss das nicht. Drei Regeln,
+   der Reihe nach, bis drei Vorschlaege zusammen sind:
+
+     a) Teile, die genau zum Modell passen (Sturzbuegel, Traeger),
+     b) Teile fuer die Marke,
+     c) je eine Ausruestungs-Art, die in der Garage noch fehlt.
+
+   Jeder Vorschlag traegt seinen Grund als Text - ein Vorschlag ohne
+   Begruendung sieht aus wie Werbung, einer mit Begruendung wie Hilfe. */
+
+// Vergleichbar machen: Gross-/Kleinschreibung und Leerzeichen duerfen
+// keine Rolle spielen, "Z 900" und "Z900" sind dasselbe Motorrad.
+function vergleichbar(text) {
+  return String(text || '').toUpperCase().replace(/\s+/g, '');
+}
+
+function persönlicheVorschläge() {
+  const motorrad = (typeof motorradAktiv === 'function') ? motorradAktiv() : null;
+  if (!motorrad) return null;   // der Aufrufer zeigt dann den Garagen-Hinweis
+
+  const vorschläge = [];
+  const schonDrin = new Set();
+  const nimm = (produkt, grund) => {
+    if (!produkt || schonDrin.has(produkt.id) || vorschläge.length >= 3) return;
+    schonDrin.add(produkt.id);
+    vorschläge.push({ produkt, grund });
+  };
+
+  const produkte = shopKatalog().produkte;
+  const marke = vergleichbar(motorrad.marke);
+  const modell = vergleichbar(motorrad.modell);
+  const maschine = `${motorrad.marke || ''} ${motorrad.modell || ''}`.trim() || 'Maschine';
+
+  // a) genau dieses Modell
+  if (modell) {
+    produkte
+      .filter(p => p.passtZu.modelle.some(m => vergleichbar(m) === modell))
+      .forEach(p => nimm(p, `Passt an deine ${maschine}`));
+  }
+
+  // b) die Marke
+  if (marke) {
+    produkte
+      .filter(p => p.passtZu.marken.some(m => vergleichbar(m) === marke))
+      .forEach(p => nimm(p, `Für deine ${maschine}`));
+  }
+
+  // c) was in der Garage noch fehlt. garage kommt aus garage.js; die
+  //    Ausruestungsliste existiert dort weiter, auch wenn sie im Bild
+  //    gerade nicht gezeigt wird.
+  const vorhandeneArten = new Set((garage.ausrüstung || []).map(teil => teil.art));
+  SHOP_KATEGORIEN.forEach(kategorie => {
+    if (!kategorie.fehlt || vorhandeneArten.has(kategorie.schlüssel)) return;
+    const kandidat = produkte.find(p =>
+      p.kategorie === kategorie.schlüssel
+      && !p.passtZu.modelle.length && !p.passtZu.marken.length);
+    if (kandidat) nimm(kandidat, `Weil in deiner Garage noch ${kategorie.fehlt} hängt`);
+  });
+
+  return vorschläge;
+}
+
+function zeichneVorschläge() {
+  const behälter = document.getElementById('shopVorschlaege');
+  const vorschläge = persönlicheVorschläge();
+
+  // Ohne Motorrad gibt es nichts Persoenliches - dann ist der ehrliche
+  // Weg ein Hinweis samt Abkuerzung zur Garage, keine erfundene Auswahl.
+  if (vorschläge === null) {
+    behälter.innerHTML = `
+      <div class="vorschlag-leer glas">
+        <p class="hint">Leg dein Motorrad in der Garage an &ndash; dann schlagen
+          wir hier vor, was zu deiner Maschine passt.</p>
+        <button class="btn ghost klein" data-zur-garage>Zur Garage</button>
+      </div>`;
+    return;
+  }
+
+  if (!vorschläge.length) { behälter.innerHTML = ''; return; }
+
+  behälter.innerHTML = `
+    <section class="block vorschlag-block">
+      <h2>F&uuml;r dich</h2>
+      <ul class="saved-list">
+        ${vorschläge.map(({ produkt, grund }) => `
+          <li data-produkt="${sicher(produkt.id)}">
+            <span class="saved-marke">${symbol(produkt.bild.symbol, 'klein')}</span>
+            <span class="saved-text">
+              <span class="saved-name">${sicher(produkt.marke)} ${sicher(produkt.name)}</span>
+              <span class="saved-meta vorschlag-grund">${sicher(grund)}</span>
+            </span>
+          </li>`).join('')}
+      </ul>
+    </section>`;
+}
+
+
+/* --- 5. Die Produktseite ----------------------------------------------------
    Ein Produkt, alle Angebote. Die Seite wird bei jedem Aufruf komplett
    neu zusammengebaut - bei einer Handvoll Angebote ist das billiger und
    einfacher als jedes Detail einzeln nachzufuehren.
@@ -265,7 +366,7 @@ function öffneAngebot(angebot) {
 }
 
 
-/* --- 5. Verkabelung ---------------------------------------------------------
+/* --- 6. Verkabelung ---------------------------------------------------------
    Die Chips werden bei jedem Zeichnen neu erzeugt, deshalb haengt ihr
    Horcher am BEHAELTER und nicht am einzelnen Knopf - dasselbe Muster wie
    beim Garage-Dialog. Suchfeld und Liste stehen dagegen fest im HTML. */
@@ -284,6 +385,12 @@ verkabele('shopSuche', 'input', ereignis => {
 });
 
 verkabele('shopProduktListe', 'click', ereignis => {
+  const zeile = ereignis.target.closest('li[data-produkt]');
+  if (zeile) zeigeProdukt(zeile.dataset.produkt);
+});
+
+verkabele('shopVorschlaege', 'click', ereignis => {
+  if (ereignis.target.closest('[data-zur-garage]')) { zeigeGarage(); return; }
   const zeile = ereignis.target.closest('li[data-produkt]');
   if (zeile) zeigeProdukt(zeile.dataset.produkt);
 });

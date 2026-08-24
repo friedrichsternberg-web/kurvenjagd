@@ -3208,3 +3208,20 @@ body.nav-modus .leaflet-control-container { display: none; }
   font-variant-numeric: tabular-nums;
   color: var(--text);
 }
+
+/* "Fuer dich": der Grund eines Vorschlags in der Akzentfarbe - er ist
+   das Besondere an dieser Liste. Der leere Zustand (noch kein Motorrad
+   in der Garage) ist eine Glaskarte mit Abkuerzung dorthin. */
+.vorschlag-block { margin-bottom: var(--s3); }
+.vorschlag-grund { color: var(--accent-hell); }
+.vorschlag-leer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  padding: var(--s3);
+  border-radius: var(--r-md);
+  margin-bottom: var(--s3);
+}
+.vorschlag-leer .hint { margin: 0; }
+.vorschlag-leer .btn { flex: 0 0 auto; }
