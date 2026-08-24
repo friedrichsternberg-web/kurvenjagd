@@ -519,7 +519,7 @@ async function passwortNeuAbsenden() {
   document.getElementById('passwortNeuWiederholung').value = '';
   meldung('');
   imPasswortWechsel = false;
-  zeigeStartmenü();
+  zeigeGarage();
   showToast('Passwort geändert. Du bist angemeldet.');
 }
 
@@ -536,12 +536,12 @@ document.getElementById('btnKontoRund').addEventListener('click', () => {
   zeigeBildschirm('kontoScreen');
 });
 
-document.getElementById('btnProfilZurueck').addEventListener('click', zeigeStartmenü);
+document.getElementById('btnProfilZurueck').addEventListener('click', zeigeGarage);
 
 document.getElementById('btnKontoAbmelden').addEventListener('click', async () => {
   await meldeAb();
   // Nach dem Abmelden gehört einem der Profilbildschirm nicht mehr.
-  zeigeStartmenü();
+  zeigeGarage();
   showToast('Abgemeldet.');
 });
 
@@ -645,7 +645,7 @@ document.getElementById('btnProfilNameSpeichern').addEventListener('click', asyn
   showToast(ergebnis.meldung);
 });
 
-document.getElementById('btnKontoZurueck').addEventListener('click', zeigeStartmenü);
+document.getElementById('btnKontoZurueck').addEventListener('click', zeigeGarage);
 
 document.getElementById('btnKontoWechseln').addEventListener('click', () => {
   setzeKontoModus(kontoModus === 'anmelden' ? 'registrieren' : 'anmelden');
@@ -776,7 +776,7 @@ if (backendVerfügbar()) {
       if (ereignis === 'SIGNED_IN') {
         // Beim Weg über die Mail ist der Anmeldebildschirm gar nicht offen,
         // und ohne Rückmeldung stünde der Nutzer ratlos im Startmenü.
-        if (!document.getElementById('kontoScreen').hidden) zeigeStartmenü();
+        if (!document.getElementById('kontoScreen').hidden) zeigeGarage();
         showToast('Angemeldet als ' + angemeldeterNutzer.email);
       }
       // Abgeglichen wird in beiden Fällen. Erst jetzt macht das Sinn -
@@ -1147,7 +1147,7 @@ async function kontoLöschenAbsenden() {
 
 document.getElementById('btnKontoLoeschenOeffnen').addEventListener('click', zeigeKontoLöschen);
 
-document.getElementById('btnKontoLoeschenZurueck').addEventListener('click', zeigeStartmenü);
+document.getElementById('btnKontoLoeschenZurueck').addEventListener('click', zeigeGarage);
 
 document.getElementById('kontoLoeschenFormular').addEventListener('submit', (e) => {
   e.preventDefault();

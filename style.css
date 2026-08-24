@@ -119,13 +119,6 @@
    Bild stehen (Bildposition 55% 42% trifft ungefähr die Mitte von Fahrer
    und Maschine im Originalfoto), die Karte mit den Buttons sitzt darüber,
    horizontal zentriert. */
-.start-screen--hero {
-  align-items: flex-start;
-  justify-content: center;
-  padding: 5vh 5vw;
-  padding-top: max(5vh, env(safe-area-inset-top) + 16px); /* Abstand zur Notch/Statusleiste, falls zum Homescreen hinzugefügt */
-  background: url('img/start-hintergrund.jpg') 55% 42% / cover no-repeat;
-}
 
 /* Die Karte selbst: derselbe dunkle Ton wie das restliche Bedienfeld
    (var(--surface)), aber leicht transparent mit Weichzeichner dahinter -
@@ -134,16 +127,9 @@
 /* Die Karte auf dem Startbild. Frueher lag hier Milchglas darueber
    (backdrop-filter) - genau der Baustein, an dem man den Einheitslook
    sofort erkennt. Jetzt eine matte, undurchsichtige Flaeche mit Kante. */
-.start-card {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--r-lg);
-  padding: var(--s5);
-}
 
 @media (max-width: 480px) {
   .start-screen--hero { padding: 24px; padding-top: max(24px, env(safe-area-inset-top) + 16px); }
-  .start-card { padding: 22px 20px; }
 }
 
 /* ---------- Untere Navigationsleiste ----------
@@ -281,110 +267,13 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
    Dunkle. Sie scrollt NICHT mit (position: absolute im scrollenden
    Container waere mitgescrollt) - dadurch bleibt der Eindruck, dass der
    Inhalt ueber dem Bild schwebt. */
-.startseite {
-  background: var(--bg);
-  display: flex;
-  flex-direction: column;
-  /* Beides MUSS hier stehen: .start-screen zentriert seine Kinder (das ist
-     fuer die Formularbildschirme richtig), hier wuerde das den Bildbereich
-     auf Inhaltsbreite zusammenstauchen. */
-  align-items: stretch;
-  justify-content: flex-start;
-  text-align: left;
-  position: relative;
-  overflow-y: auto;   /* Sicherheitsnetz fuer sehr kleine Bildschirme */
-}
 
-.start-hero {
-  position: relative;
-  /* 91vw entspricht dem Seitenverhaeltnis des Zuschnitts (1100 zu 1000).
-     Dadurch fuellt das Foto den Bereich genau aus und wird nirgends
-     angeschnitten. Das Querformat ist der Grund, warum die Startseite ohne
-     Scrollen auskommt: hochkant brauchte der Bildbereich 125% der Breite,
-     jetzt sind es 91%. Das sind auf einem iPhone gut 130 Pixel weniger. */
-  height: min(46vh, 91vw);
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 0 var(--s4) var(--s4);
-  background: url('img/start-hero.jpg') center / cover no-repeat;
-  /* Der Verlauf ist links dichter als rechts: dort steht der Schriftzug,
-     dort liegt aber auch die hellste Stelle des Fotos. Rechts, wo die
-     Maschine steht, bleibt er duenn, damit sie nicht zugedeckt wird. */
-  --hero-fade: linear-gradient(to bottom,
-      rgba(14,15,18,0.60) 0%,
-      rgba(14,15,18,0.20) 16%,
-      rgba(14,15,18,0.10) 40%,
-      rgba(14,15,18,0.28) 62%,
-      rgba(14,15,18,0.58) 78%,
-      rgba(14,15,18,0.82) 90%,
-      var(--bg) 100%),
-    linear-gradient(to right,
-      rgba(14,15,18,0.55) 0%,
-      rgba(14,15,18,0.30) 34%,
-      rgba(14,15,18,0) 62%);
-}
-.start-hero::after {
-  content: "";
-  position: absolute; inset: 0;
-  background: var(--hero-fade);
-  pointer-events: none;
-}
-.start-hero > * { position: relative; z-index: 1; }
-.start-hero::after {
-  content: "";
-  position: absolute; inset: 0;
-  background: var(--hero-fade);
-  pointer-events: none;
-}
-.start-hero > * { position: relative; z-index: 1; }
-.start-hero::after {
-  content: "";
-  position: absolute; inset: 0;
-  background: var(--hero-fade);
-  pointer-events: none;
-}
 /* Kopfzeile und Schriftzug muessen ueber dem Verlauf liegen. */
-.start-hero > * { position: relative; z-index: 1; }
 /* Der Verlauf nach unten ist hier ausnahmsweise erlaubt: er macht den Text
    darueber lesbar und blendet das Bild in den Hintergrund, statt es hart
    abzuschneiden. */
-.start-hero::after {
-  content: "";
-  position: absolute; inset: 0;
-  background: linear-gradient(to bottom,
-    rgba(14,15,18,0.62) 0%,
-    rgba(14,15,18,0.28) 22%,
-    rgba(14,15,18,0.22) 44%,
-    rgba(14,15,18,0.78) 74%,
-    var(--bg) 100%);
-}
 
-.startseite-inhalt {
-  position: relative;
-  z-index: 1;
-  flex: 1;            /* nimmt den Platz unter dem Bild vollstaendig ein */
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--s3);
-  padding: 0 var(--s4) var(--s3);
-  margin-top: -14px;
-}
 
-.start-kopf {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  /* Knapper Abstand, und der Grund ist gemessen: Seit rechts zwei Knoepfe
-     stehen statt einem, blieb dem Slogan auf 320 Punkten genau ein Pixel
-     zu wenig und er brach um. Die beiden stehen ohnehin weit auseinander,
-     der Abstand fehlt dort niemandem. */
-  gap: var(--s2);
-  padding-top: max(var(--s5), env(safe-area-inset-top) + var(--s4));
-}
-.start-marke { max-width: 62%; }   /* Platz lassen, rechts steht die Maschine */
 /* Die beiden Knoepfe oben rechts. Sie duerfen nie schrumpfen - lieber
    bricht der Schriftzug um, als dass eine Trefferflaeche kleiner wird. */
 .kopf-knoepfe {
@@ -397,49 +286,10 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
    deutlich groesser als im Bedienfeld. Die Groesse waechst mit der
    Bildschirmbreite mit, damit "KURVENJAGD" auch auf einem schmalen Geraet
    in einer Zeile bleibt und nicht in die Maschine hineinlaeuft. */
-.start-kopf .brand-title {
-  font-size: clamp(30px, 10vw, 46px);
-  letter-spacing: 0.005em;
-  text-shadow: 0 2px 16px rgba(0,0,0,0.75), 0 1px 3px rgba(0,0,0,0.6);
-}
-.start-kopf .brand-title::before {
-  width: 12px; height: 12px;
-  margin-right: 10px;
-}
-.start-slogan {
-  margin: var(--s1) 0 0 22px;   /* 22px = Breite des Punkts plus Abstand,
-                                   dadurch steht der Slogan buendig unter
-                                   dem "K" statt unter dem Punkt */
-  font-family: var(--schrift-text);
-  font-size: clamp(12px, 3.6vw, 16px);
-  font-weight: 500;
-  color: rgba(255,255,255,0.88);
-  text-shadow: 0 1px 10px rgba(0,0,0,0.8);
-}
 
 /* Der Schriftzug ueber dem Bild. Zwischen den beiden Zeilen liegt bewusst
    ein grosser Sprung: die kleine Zeile ist die Beschriftung, die grosse
    die Ansage. */
-.start-claim { margin: 0; max-width: 68%; }
-.start-claim-klein {
-  margin: 0 0 var(--s1);
-  font-family: var(--schrift-display);
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: rgba(255,255,255,0.85);
-  text-shadow: 0 1px 8px rgba(0,0,0,0.7);
-}
-.start-claim-gross {
-  margin: 0;
-  font-family: var(--schrift-display);
-  font-size: clamp(28px, 9.6vw, 44px);
-  font-weight: 700;
-  line-height: 0.95;
-  letter-spacing: -0.01em;
-  text-shadow: 0 2px 18px rgba(0,0,0,0.6);
-}
 
 /* ---------- Kacheln ----------
    Jede Kachel traegt ihr eigenes Bild (ueber die Marke --kachel-bild aus

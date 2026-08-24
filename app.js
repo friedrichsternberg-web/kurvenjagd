@@ -2179,13 +2179,13 @@ function speichereRide() {
   renderTourenListe();
   showToast('Gespeichert: ' + name);
   rideZurücksetzen();
-  zeigeStartmenü();
+  zeigeGarage();
 }
 
 function verwerfeRide() {
   if (!confirm('Diese Aufzeichnung wirklich verwerfen?')) return;
   rideZurücksetzen();
-  zeigeStartmenü();
+  zeigeGarage();
 }
 
 
@@ -2667,7 +2667,7 @@ function symbol(name, zusatz = '') {
    nichts ein - die App zeigte eine schwarze Flaeche. Ein neuer Bildschirm
    braucht ab jetzt genau einen Eintrag, hier. */
 const BILDSCHIRME = [
-  'startMenu', 'garageScreen', 'tourenScreen', 'app', 'rideScreen',
+  'garageScreen', 'tourenScreen', 'app', 'rideScreen',
   'shopScreen', 'shopProduktScreen',
   'kontoScreen', 'profilScreen', 'passwortNeuScreen', 'kontoLoeschenScreen',
 ];
@@ -2716,14 +2716,7 @@ function aktualisiereLeiste(sichtbareId) {
 // Welcher Bildschirm ist gerade zu sehen? Wird gebraucht, wenn die Leiste
 // unabhaengig vom Bildschirmwechsel neu bewertet werden muss (Navigation).
 function aktuellerBildschirm() {
-  return BILDSCHIRME.find(id => !document.getElementById(id).hidden) || 'startMenu';
-}
-
-/* "Zurueck zum Anfang" heisst seit dem Umbau: in die Garage. Sie ist der
-   Startbildschirm - dort steht die eigene Maschine, darunter der Shop und
-   das Menue in die uebrigen Bereiche. */
-function zeigeStartmenü() {
-  zeigeGarage();
+  return BILDSCHIRME.find(id => !document.getElementById(id).hidden) || 'garageScreen';
 }
 
 function zeigeMeineTouren() {
@@ -3011,9 +3004,10 @@ document.querySelectorAll('.nav-tab').forEach(knopf => {
     if (ziel === 'app') zeigePlaner();
     else if (ziel === 'rideScreen') { zeigeRideScreen(); if (!ride.aktiv) rideZurücksetzen(); }
     else if (ziel === 'tourenScreen') zeigeMeineTouren();
-    else if (ziel === 'garageScreen') zeigeGarage();
     else if (ziel === 'shopScreen') zeigeShop();
-    else zeigeStartmenü();
+    // Auffangzweig: Was hier landet, ist ein Eintrag ohne eigenen Zweig.
+    // Die Garage ist der Startbildschirm und damit der richtige Ort dafuer.
+    else zeigeGarage();
   });
 });
 
@@ -3042,10 +3036,10 @@ document.getElementById('btnStartShop').addEventListener('click', zeigeShop);
 // Den Zurueck-Knopf der Produktseite verkabelt shop.js selbst: Wohin er
 // fuehrt, haengt davon ab, ob man aus dem Shop oder aus der Garage kam -
 // und das weiss nur shop.js.
-document.getElementById('btnTourenZurueck').addEventListener('click', zeigeStartmenü);
+document.getElementById('btnTourenZurueck').addEventListener('click', zeigeGarage);
 document.getElementById('btnZumStartmenü').addEventListener('click', () => {
   if (nav.aktiv) stopNavigation(); // laufende Navigation nicht einfach im Hintergrund weiterlaufen lassen
-  zeigeStartmenü();
+  zeigeGarage();
 });
 
 // "Meinen Ride aufzeichnen": zeigt zunächst nur den Bildschirm. Die
@@ -3056,7 +3050,7 @@ document.getElementById('btnStartRide').addEventListener('click', () => {
   rideZurücksetzen();
 });
 document.getElementById('btnRideStart').addEventListener('click', starteRide);
-document.getElementById('btnRideZurueck').addEventListener('click', zeigeStartmenü);
+document.getElementById('btnRideZurueck').addEventListener('click', zeigeGarage);
 document.getElementById('btnRidePause').addEventListener('click', pausiereRideUmschalten);
 document.getElementById('btnRideStop').addEventListener('click', beendeRide);
 document.getElementById('btnRideSpeichern').addEventListener('click', speichereRide);

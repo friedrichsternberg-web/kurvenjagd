@@ -23,7 +23,7 @@
        "orientation": "portrait" im Manifest ist die Ansage, um die es hier
        geht: Diese App ist fuers Hochformat gebaut. Die spaetere Webseite
        bekommt ein eigenes Design fuers Querformat und ein eigenes Manifest. -->
-  <link rel="manifest" href="manifest.webmanifest?v=71">
+  <link rel="manifest" href="manifest.webmanifest?v=72">
 
   <!-- Faerbt die Statusleiste des Handys in die Grundflaeche der App, damit
        oben kein fremder heller Streifen stehen bleibt. -->
@@ -36,7 +36,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Kurvenjagd">
-  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=71">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=72">
 
   <!-- Fuer die spaetere Webseite und geteilte Routen: So sieht der Link aus,
        wenn ihn jemand in WhatsApp oder Instagram einfuegt. Ohne das steht
@@ -99,8 +99,8 @@
                    die spaetere Webseite genauso benutzen.
        style.css   die Anordnung DIESER App, ausgelegt auf Hochformat. Die
                    Webseite bekommt dafuer eine eigene Datei. -->
-  <link rel="stylesheet" href="design.css?v=71">
-  <link rel="stylesheet" href="style.css?v=71">
+  <link rel="stylesheet" href="design.css?v=72">
+  <link rel="stylesheet" href="style.css?v=72">
 </head>
 <body>
 
@@ -119,9 +119,6 @@
        Das <svg> hier ist selbst unsichtbar, es ist nur der Vorrat. ===== -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <defs>
-      <symbol id="icon-start" viewBox="0 0 24 24">
-        <path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/>
-      </symbol>
       <symbol id="icon-route" viewBox="0 0 24 24">
         <circle cx="6" cy="18" r="2.4"/><circle cx="18" cy="6" r="2.4"/>
         <path d="M8.4 18h4.6a3 3 0 0 0 0-6h-2a3 3 0 0 1 0-6h4.6"/>
@@ -245,50 +242,6 @@
       </symbol>
     </defs>
   </svg>
-
-  <!-- ===== Startbildschirm =====
-       Aufbau nach dem Vorbild aus "Design Inspro": Das Motorradbild ist
-       nicht ein Block neben dem Inhalt, sondern liegt HINTER allem und
-       verlaeuft nach unten ins Dunkle. Der Inhalt schwimmt darauf.
-
-       Die Kacheln tragen selbst je ein Bild und liegen wie geschliffene
-       Glasplatten darueber: helle Lichtkante oben, Schatten unten, ein
-       weicher Glanz quer darueber. Community und "Mehr entdecken" aus der
-       Vorlage bleiben bewusst weg - es gibt nur, was auch funktioniert. -->
-  <div id="startMenu" class="start-screen startseite" hidden>
-
-    <!-- Der Bildbereich traegt Kopfzeile UND Schriftzug. Beides liegt auf
-         dem Foto, so wie in der Vorlage - das spart die Hoehe, die der
-         Schriftzug sonst darunter braeuchte, und genau daran scheiterte
-         vorher das Ziel "ohne Scrollen".
-
-         Moeglich wird das durch den Zuschnitt: Die Maschine sitzt rechts,
-         links bleibt Strasse und Mauer frei. Darauf steht der Text, ohne
-         etwas zu verdecken. -->
-    <!-- Der Bildbereich traegt nur noch die Marke. Der Zuschnitt macht das
-         moeglich: Die Maschine sitzt rechts, links bleiben Strasse und
-         Mauer frei, dort steht der Schriftzug ohne etwas zu verdecken. -->
-    <div class="start-hero">
-      <header class="start-kopf">
-        <div class="start-marke">
-          <h1 class="brand-title">Kurvenjagd</h1>
-          <p class="start-slogan">Deine All-In-One Motorradapp</p>
-        </div>
-      </header>
-    </div>
-
-    <div class="startseite-inhalt">
-
-      </div>
-
-      <!-- Hier stand einmal eine Statuszeile zum Konto: E-Mail, Abmelden,
-           Konto loeschen. Das alles sitzt jetzt hinter dem Profilsymbol
-           oben rechts (#profilScreen). Das Symbol ist der Ort, an dem
-           jeder sein Konto sucht, und der Fuss der Startseite gehoert den
-           Kacheln. -->
-
-    </div>
-  </div>
 
   <!-- ===== Meine Garage =====
        Ein Raum statt einer Liste: hinten die Wand mit der Hakenleiste, an der
@@ -1260,14 +1213,14 @@
        Passwortwechsel (dort soll nichts ablenken) und waehrend der
        laufenden Live-Navigation (die gehoert ganz der Karte). ===== -->
   <nav id="hauptNav" class="haupt-nav">
-    <button class="nav-tab" data-ziel="startMenu">
-      <svg class="ic gross"><use href="#icon-start"></use></svg><span>Start</span>
+    <!-- Die Garage steht an erster Stelle, weil sie der Startbildschirm
+         ist: dort steht die eigene Maschine, darunter der Shop und die
+         Wege in alles Uebrige. -->
+    <button class="nav-tab" data-ziel="garageScreen">
+      <svg class="ic gross"><use href="#icon-garage"></use></svg><span>Garage</span>
     </button>
     <button class="nav-tab" data-ziel="app">
       <svg class="ic gross"><use href="#icon-route"></use></svg><span>Planer</span>
-    </button>
-    <button class="nav-tab" data-ziel="garageScreen">
-      <svg class="ic gross"><use href="#icon-garage"></use></svg><span>Garage</span>
     </button>
     <button class="nav-tab" data-ziel="rideScreen">
       <svg class="ic gross"><use href="#icon-aufnahme"></use></svg><span>Ride</span>
@@ -1275,10 +1228,6 @@
     <button class="nav-tab" data-ziel="tourenScreen">
       <svg class="ic gross"><use href="#icon-touren"></use></svg><span>Touren</span>
     </button>
-    <!-- Sechster Eintrag. Die Leiste wird damit auf schmalen Geraeten
-         eng - "Shop" ist bewusst das kuerzeste Wort dafuer. Wird es auf
-         320 Punkten doch zu gedraengt, fliegt dieser Knopf wieder raus,
-         die Startkachel bleibt in jedem Fall. -->
     <button class="nav-tab" data-ziel="shopScreen">
       <svg class="ic gross"><use href="#icon-shop"></use></svg><span>Shop</span>
     </button>
@@ -1392,23 +1341,23 @@
   <!-- ZUERST, denn alle anderen benutzen geraet.* beim Laden. Hier steht der
        gesamte Zugriff aufs Geraet - Standort, Speicher, Dateien. Beim Umzug
        in die Stores ist das die einzige Datei, die sich aendert. -->
-  <script src="geraet.js?v=71"></script>
+  <script src="geraet.js?v=72"></script>
   <!-- Der Rechenteil: Kurvigkeit, Sackgassen, Rundtour-Punkte, GPX. Muss VOR
        app.js stehen, weil app.js diese Funktionen beim Routen aufruft. Die
        spaetere Webseite im Querformat laedt genau diese Datei ebenfalls und
        rechnet damit exakt so wie die App. -->
-  <script src="kern.js?v=71"></script>
-  <script src="app.js?v=71"></script>
+  <script src="kern.js?v=72"></script>
+  <script src="app.js?v=72"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=71"></script>
+  <script src="konto.js?v=72"></script>
   <!-- Nach app.js, weil die Garage verkleinereFoto() und showToast() von
        dort benutzt. -->
-  <script src="garage.js?v=71"></script>
+  <script src="garage.js?v=72"></script>
   <!-- Der Demo-Produktkatalog (nur Daten) und die Shop-Logik. produkte.js
        muss vor shop.js stehen, und beide nach garage.js, weil shop.js
        dessen Helfer (sicher, verkabele) mitbenutzt. -->
-  <script src="produkte.js?v=71"></script>
-  <script src="shop.js?v=71"></script>
+  <script src="produkte.js?v=72"></script>
+  <script src="shop.js?v=72"></script>
 </body>
 </html>
