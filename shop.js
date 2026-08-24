@@ -95,9 +95,22 @@ function merkenUmschalten(produktId) {
     showToast('Der Gerätespeicher ist voll - die Merkliste konnte nicht gespeichert werden.');
   }
   zeichneMerkliste();
-  // Steht das Produkt gerade auf der Produktseite, muss dort die
-  // Knopf-Beschriftung mitziehen.
-  if (angezeigtesProdukt?.id === produktId) zeichneProduktSeite();
+  // Steht das Produkt gerade auf der Produktseite, zieht dort NUR die
+  // Knopf-Beschriftung mit. Die ganze Seite neu zu bauen wuerde die
+  // Galerie auf das erste Bild zurueckwerfen und den aufgeklappten
+  // Erklaertext wieder schliessen - fuer eine Textzeile zu viel Verlust.
+  if (angezeigtesProdukt?.id === produktId) aktualisiereMerkenKnopf();
+}
+
+function merkenKnopfText(produktId) {
+  return istGemerkt(produktId)
+    ? 'Gemerkt \u2713 \u2013 wieder entfernen'
+    : 'Merken \u2013 Preis im Blick behalten';
+}
+
+function aktualisiereMerkenKnopf() {
+  const knopf = document.querySelector('#shopProduktInhalt .merken-knopf');
+  if (knopf) knopf.textContent = merkenKnopfText(angezeigtesProdukt.id);
 }
 
 
@@ -441,16 +454,32 @@ function zeichneGarageShop() {
    - Der Aufklapper "So entsteht dieser Vergleich": Ein Vergleich, der nur
      Partner-Shops zeigt, muss genau das offenlegen (BGH I ZR 55/16). */
 
-// Welches Produkt gerade auf der Produktseite steht.
+// Welches Produkt gerade auf der Produktseite steht - und woher man kam.
+// Die Herkunft entscheidet, wohin der Zurueck-Knopf fuehrt und welcher
+// Leisten-Eintrag leuchtet: Wer aus der Garage kommt, ist gedanklich noch
+// in der Garage, nicht im Shop.
 let angezeigtesProdukt = null;
+let produktHerkunft = 'shop';
 
-function zeigeProdukt(produktId) {
+function zeigeProdukt(produktId, herkunft = 'shop') {
   angezeigtesProdukt = shopKatalog().produkte.find(p => p.id === produktId) || null;
   if (!angezeigtesProdukt) return;
+  produktHerkunft = herkunft;
   zeichneProduktSeite();
   zeigeBildschirm('shopProduktScreen');
   // Wer aus einer gescrollten Liste kommt, soll oben auf der Seite landen.
   document.getElementById('shopProduktScreen').scrollTop = 0;
+}
+
+// Fuer aktualisiereLeiste() in app.js: welcher Eintrag soll leuchten,
+// solange die Produktseite offen ist.
+function produktLeuchtZiel() {
+  return produktHerkunft === 'garage' ? 'garageScreen' : 'shopScreen';
+}
+
+function zurückVomProdukt() {
+  if (produktHerkunft === 'garage') { zeigeGarage(); return; }
+  zeigeShop();
 }
 
 function zeichneProduktSeite() {
@@ -549,7 +578,7 @@ function zeichneProduktSeite() {
     </section>
 
     <button class="btn ghost merken-knopf" data-merken="${sicher(produkt.id)}">
-      ${istGemerkt(produkt.id) ? 'Gemerkt &#10003; &ndash; wieder entfernen' : 'Merken &ndash; Preis im Blick behalten'}
+      ${merkenKnopfText(produkt.id)}
     </button>`;
 
   const band = document.getElementById('galerieBand');
@@ -605,8 +634,12 @@ verkabele('shopVerzeichnis', 'click', ereignis => {
 
 verkabele('garageShopBand', 'click', ereignis => {
   const karte = ereignis.target.closest('[data-produkt]');
-  if (karte) zeigeProdukt(karte.dataset.produkt);
+  if (karte) zeigeProdukt(karte.dataset.produkt, 'garage');
 });
+
+// Der Zurueck-Knopf der Produktseite gehoert dem Shop und folgt der
+// Herkunft - deshalb ist er HIER verkabelt und nicht in app.js.
+verkabele('btnShopZurueck', 'click', zurückVomProdukt);
 
 verkabele('btnGarageShopAlle', 'click', zeigeShop);
 

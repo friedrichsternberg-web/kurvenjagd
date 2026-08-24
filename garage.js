@@ -2813,6 +2813,11 @@ function positionAnpassen() {
   document.getElementById('garageDialog').hidden = true;
   document.getElementById('garageDatenblatt').hidden = true;
   document.getElementById('garageOhneMotorrad').hidden = true;
+  // Auch die Shop-Leiste raus: Sie wuerde der Buehne genau in dem Moment
+  // Platz stehlen, in dem man die Maschine praezise sehen muss - und ihre
+  // Karten fuehrten mitten aus der Justierung auf die Produktseite.
+  const shopLeiste = document.getElementById('garageShop');
+  if (shopLeiste) shopLeiste.hidden = true;
   document.getElementById('buehneJustierung').hidden = false;
   zeichneBuehne();
 }
@@ -2858,6 +2863,10 @@ verkabele('btnJustFertig', 'click', () => {
   währendJustierung = null;
   buehneVorschau = null;
   document.getElementById('buehneJustierung').hidden = true;
+  // Die Shop-Leiste wieder her, die positionAnpassen() beiseite genommen
+  // hat - shop.js fuellt sie beim naechsten zeigeGarage() ohnehin frisch.
+  const shopLeisteZurück = document.getElementById('garageShop');
+  if (shopLeisteZurück) shopLeisteZurück.hidden = false;
   // Zurueck in den wartenden Dialog; die Buehne zeigt wieder die
   // gespeicherte Maschine (oder das Standardbild).
   document.getElementById('garageDialog').hidden = false;

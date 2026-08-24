@@ -2697,10 +2697,12 @@ function aktualisiereLeiste(sichtbareId) {
   leiste.hidden = !zeigen;
   document.body.classList.toggle('mit-nav', zeigen);
 
-  // Die Produktseite ist ein eigener Bildschirm, gehoert aber zum Shop.
-  // Fuer die Hervorhebung wird sie deshalb auf den Shop abgebildet - sonst
-  // leuchtete beim Blaettern in ein Produkt gar kein Eintrag mehr.
-  const leuchtZiel = sichtbareId === 'shopProduktScreen' ? 'shopScreen' : sichtbareId;
+  // Die Produktseite ist ein eigener Bildschirm ohne eigenen Eintrag in
+  // der Leiste. Welcher Eintrag stattdessen leuchtet, sagt shop.js - es
+  // weiss, ob man aus dem Shop oder aus der Garage hineingekommen ist.
+  const leuchtZiel = sichtbareId === 'shopProduktScreen'
+    ? (typeof produktLeuchtZiel === 'function' ? produktLeuchtZiel() : 'shopScreen')
+    : sichtbareId;
   leiste.querySelectorAll('.nav-tab').forEach(knopf => {
     knopf.classList.toggle('aktiv', knopf.dataset.ziel === leuchtZiel);
   });
@@ -3035,9 +3037,9 @@ document.getElementById('btnStartPlaner').addEventListener('click', zeigePlaner)
 document.getElementById('btnStartTouren').addEventListener('click', zeigeMeineTouren);
 document.getElementById('btnStartGarage').addEventListener('click', zeigeGarage);
 document.getElementById('btnStartShop').addEventListener('click', zeigeShop);
-// Zurueck von der Produktseite fuehrt in die Shop-Uebersicht, nicht zum
-// Startmenue - man war ja gerade beim Stoebern.
-document.getElementById('btnShopZurueck').addEventListener('click', zeigeShop);
+// Den Zurueck-Knopf der Produktseite verkabelt shop.js selbst: Wohin er
+// fuehrt, haengt davon ab, ob man aus dem Shop oder aus der Garage kam -
+// und das weiss nur shop.js.
 document.getElementById('btnTourenZurueck').addEventListener('click', zeigeStartmenü);
 document.getElementById('btnZumStartmenü').addEventListener('click', () => {
   if (nav.aktiv) stopNavigation(); // laufende Navigation nicht einfach im Hintergrund weiterlaufen lassen
