@@ -27,10 +27,12 @@
 
    Zwei Regeln fuer neue Eintraege:
 
-   - "kategorie" benutzt dieselben Schluessel wie frueher die
-     Ausruestungs-Arten der Garage (helm, jacke, hose, handschuh, stiefel,
-     protektor, koffer). Dafuer gibt es die SVG-Symbole schon, und die
-     Vorschlaege koennen spaeter pruefen, was in der Garage fehlt.
+   - "kategorie" lehnt sich an die Ausruestungs-Arten der Garage an
+     (helm, jacke, hose, handschuh, stiefel, protektor, koffer). Dafuer
+     gibt es die SVG-Symbole schon, und die Vorschlaege pruefen darueber,
+     was in der Garage fehlt. Achtung: Drei alte Arten schreiben sich
+     anders (handschuhe, protektoren, sonstiges) - die Uebersetzung
+     steht in shop.js bei den Vorschlaegen.
    - KEINE Betriebsstoffe oder Pflegemittel (Oel, Kettenspray) aufnehmen.
      Fuer die gilt die Grundpreispflicht (Paragraf 4 PAngV, Euro je Liter) -
      diese Kategorie darf erst kommen, wenn es dafuer ein Grundpreis-Feld
@@ -50,10 +52,11 @@ const PRODUKT_KATALOG = {
       marke: 'Schuberth',
       name: 'C5',
       groessen: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
-      eigenschaften: [
-        { k: 'Bauart', v: 'Klapphelm' },
-        { k: 'Norm', v: 'ECE 22.06' },
-        { k: 'Visier', v: 'Pinlock vorbereitet' },
+      eigenschaften: [               // Paare aus Beschriftung und Wert,
+                                     // angezeigt wie das Garage-Datenblatt
+        { name: 'Bauart', wert: 'Klapphelm' },
+        { name: 'Norm', wert: 'ECE 22.06' },
+        { name: 'Visier', wert: 'Pinlock vorbereitet' },
       ],
       bild: { symbol: 'helm', url: null },
       passtZu: { marken: [], modelle: [] },   // leer = passt zu jedem Motorrad
@@ -77,9 +80,9 @@ const PRODUKT_KATALOG = {
       name: 'NXR 2',
       groessen: ['XS', 'S', 'M', 'L', 'XL'],
       eigenschaften: [
-        { k: 'Bauart', v: 'Integralhelm' },
-        { k: 'Norm', v: 'ECE 22.06' },
-        { k: 'Visier', v: 'Pinlock im Lieferumfang' },
+        { name: 'Bauart', wert: 'Integralhelm' },
+        { name: 'Norm', wert: 'ECE 22.06' },
+        { name: 'Visier', wert: 'Pinlock im Lieferumfang' },
       ],
       bild: { symbol: 'helm', url: null },
       passtZu: { marken: [], modelle: [] },
@@ -102,9 +105,9 @@ const PRODUKT_KATALOG = {
       name: 'SMX-6 v2',
       groessen: ['40', '41', '42', '43', '44', '45', '46'],
       eigenschaften: [
-        { k: 'Bauart', v: 'Sportstiefel' },
-        { k: 'Zertifiziert', v: 'CE' },
-        { k: 'Verschluss', v: 'Reißverschluss + Klett' },
+        { name: 'Bauart', wert: 'Sportstiefel' },
+        { name: 'Zertifiziert', wert: 'CE' },
+        { name: 'Verschluss', wert: 'Reißverschluss + Klett' },
       ],
       bild: { symbol: 'stiefel', url: null },
       passtZu: { marken: [], modelle: [] },
@@ -132,9 +135,9 @@ const PRODUKT_KATALOG = {
       name: 'Sand 4 H2O',
       groessen: ['S', 'M', 'L', 'XL', 'XXL'],
       eigenschaften: [
-        { k: 'Bauart', v: 'Touring-Jacke' },
-        { k: 'Membran', v: 'herausnehmbar' },
-        { k: 'Protektoren', v: 'Schulter + Ellbogen (CE)' },
+        { name: 'Bauart', wert: 'Touring-Jacke' },
+        { name: 'Membran', wert: 'herausnehmbar' },
+        { name: 'Protektoren', wert: 'Schulter + Ellbogen (CE)' },
       ],
       bild: { symbol: 'jacke', url: null },
       passtZu: { marken: [], modelle: [] },
@@ -158,9 +161,9 @@ const PRODUKT_KATALOG = {
       name: 'Delta 4',
       groessen: ['46', '48', '50', '52', '54', '56'],
       eigenschaften: [
-        { k: 'Bauart', v: 'Lederhose' },
-        { k: 'Protektoren', v: 'Knie (CE)' },
-        { k: 'Anschluss', v: 'Verbindungsreißverschluss' },
+        { name: 'Bauart', wert: 'Lederhose' },
+        { name: 'Protektoren', wert: 'Knie (CE)' },
+        { name: 'Anschluss', wert: 'Verbindungsreißverschluss' },
       ],
       bild: { symbol: 'hose', url: null },
       passtZu: { marken: [], modelle: [] },
@@ -183,9 +186,9 @@ const PRODUKT_KATALOG = {
       name: 'Air n Dry',
       groessen: ['7', '8', '9', '10', '11'],
       eigenschaften: [
-        { k: 'Bauart', v: '2-Kammer-Handschuh' },
-        { k: 'Membran', v: 'wasserdichte Kammer' },
-        { k: 'Material', v: 'Leder + Textil' },
+        { name: 'Bauart', wert: '2-Kammer-Handschuh' },
+        { name: 'Membran', wert: 'wasserdichte Kammer' },
+        { name: 'Material', wert: 'Leder + Textil' },
       ],
       bild: { symbol: 'handschuh', url: null },
       passtZu: { marken: [], modelle: [] },
@@ -209,9 +212,9 @@ const PRODUKT_KATALOG = {
       name: 'Nucleon KR-2',
       groessen: ['S', 'M', 'L', 'XL'],
       eigenschaften: [
-        { k: 'Bauart', v: 'Rückenprotektor' },
-        { k: 'Norm', v: 'EN 1621-2' },
-        { k: 'Träger', v: 'zum Einschieben in die Jacke' },
+        { name: 'Bauart', wert: 'Rückenprotektor' },
+        { name: 'Norm', wert: 'EN 1621-2' },
+        { name: 'Träger', wert: 'zum Einschieben in die Jacke' },
       ],
       bild: { symbol: 'protektor', url: null },
       passtZu: { marken: [], modelle: [] },
@@ -234,9 +237,9 @@ const PRODUKT_KATALOG = {
       name: 'E22N Seitenkoffer (Paar)',
       groessen: [],
       eigenschaften: [
-        { k: 'Bauart', v: 'Seitenkoffer, Paar' },
-        { k: 'Volumen', v: '22 l je Koffer' },
-        { k: 'System', v: 'Monokey Side' },
+        { name: 'Bauart', wert: 'Seitenkoffer, Paar' },
+        { name: 'Volumen', wert: '22 l je Koffer' },
+        { name: 'System', wert: 'Monokey Side' },
       ],
       bild: { symbol: 'koffer', url: null },
       passtZu: { marken: [], modelle: [] },
@@ -259,9 +262,9 @@ const PRODUKT_KATALOG = {
       name: 'Sturzbügel CB650R',
       groessen: [],
       eigenschaften: [
-        { k: 'Bauart', v: 'Sturzbügel, Stahlrohr' },
-        { k: 'Passt an', v: 'Honda CB650R' },
-        { k: 'Montage', v: 'ohne Bohren' },
+        { name: 'Bauart', wert: 'Sturzbügel, Stahlrohr' },
+        { name: 'Passt an', wert: 'Honda CB650R' },
+        { name: 'Montage', wert: 'ohne Bohren' },
       ],
       bild: { symbol: 'motorrad', url: null },
       // Modellgebundenes Teil: Genau dafuer gibt es passtZu - die
@@ -286,9 +289,9 @@ const PRODUKT_KATALOG = {
       name: 'Topcase-Träger Z 900',
       groessen: [],
       eigenschaften: [
-        { k: 'Bauart', v: 'Topcase-Träger' },
-        { k: 'Passt an', v: 'Kawasaki Z 900' },
-        { k: 'System', v: 'Monokey / Monolock' },
+        { name: 'Bauart', wert: 'Topcase-Träger' },
+        { name: 'Passt an', wert: 'Kawasaki Z 900' },
+        { name: 'System', wert: 'Monokey / Monolock' },
       ],
       bild: { symbol: 'motorrad', url: null },
       passtZu: { marken: ['KAWASAKI'], modelle: ['Z 900', 'Z900'] },

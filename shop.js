@@ -6,8 +6,12 @@
 
    Abschnitte:
      1. Katalog-Zugriff
-     2. Geld und Zeit formatieren
-     3. Die Uebersicht (Produktliste)
+     2. Die Ablage: die Merkliste
+     3. Geld und Zeit formatieren
+     4. Die Uebersicht (Kategorien, Produktliste, Merkliste)
+     5. "Fuer dich": Vorschlaege aus der Garage
+     6. Die Produktseite
+     7. Verkabelung
 
    shop.js wird als LETZTES Skript geladen und benutzt Helfer aus den
    Dateien davor: symbol() und showToast() aus app.js, sicher() und
@@ -83,6 +87,11 @@ function merkenUmschalten(produktId) {
     });
   }
   if (!speichereShopAblage()) {
+    // Denselben Weg geht die Garage in sichereGarageWeg(): den zuletzt
+    // gespeicherten Stand zurueckholen, damit Anzeige und Speicher nicht
+    // auseinanderlaufen. Sonst zeigte der Knopf "Gemerkt", und nach dem
+    // naechsten Neuladen waere der Eintrag stillschweigend weg.
+    shopAblage = ladeShopAblage();
     showToast('Der Gerätespeicher ist voll - die Merkliste konnte nicht gespeichert werden.');
   }
   zeichneMerkliste();
@@ -111,10 +120,12 @@ function stempel(iso) {
 
 
 /* --- 4. Die Uebersicht ------------------------------------------------------
-   Kategorien mit Anzeigenamen. Die Schluessel sind dieselben wie frueher
-   bei den Ausruestungs-Arten der Garage - so koennen die Vorschlaege
-   spaeter pruefen, welche Art in der Garage noch fehlt, und ein gekauftes
-   Teil kann eines Tages direkt als Ausruestung uebernommen werden. */
+   Kategorien mit Anzeigenamen. Die Schluessel entsprechen den
+   Ausruestungs-Arten der Garage - so koennen die Vorschlaege pruefen,
+   welche Art in der Garage noch fehlt, und ein gekauftes Teil kann eines
+   Tages direkt als Ausruestung uebernommen werden. Drei alte Arten
+   schreiben sich anders (handschuhe, protektoren, sonstiges); die
+   Uebersetzung steht bei den Vorschlaegen. */
 
 const SHOP_KATEGORIEN = [
   { schlüssel: 'helm',      name: 'Helme',       fehlt: 'kein Helm' },
@@ -280,17 +291,26 @@ function persönlicheVorschläge() {
       .forEach(p => nimm(p, `Passt an deine ${maschine}`));
   }
 
-  // b) die Marke
+  // b) die Marke - aber nur markenweite Teile. Ein Teil, das an ein
+  //    BESTIMMTES Modell gebunden ist (passtZu.modelle gefuellt), darf
+  //    nur ueber Regel a) kommen: Ein Sturzbuegel fuer die CB650R passt
+  //    eben nicht an jede Honda, und "Fuer deine Honda CBR650R" waere
+  //    dann schlicht falsch.
   if (marke) {
     produkte
-      .filter(p => p.passtZu.marken.some(m => vergleichbar(m) === marke))
-      .forEach(p => nimm(p, `Für deine ${maschine}`));
+      .filter(p => !p.passtZu.modelle.length
+                && p.passtZu.marken.some(m => vergleichbar(m) === marke))
+      .forEach(p => nimm(p, `Für deine ${motorrad.marke}`));
   }
 
   // c) was in der Garage noch fehlt. garage kommt aus garage.js; die
   //    Ausruestungsliste existiert dort weiter, auch wenn sie im Bild
-  //    gerade nicht gezeigt wird.
-  const vorhandeneArten = new Set((garage.ausrüstung || []).map(teil => teil.art));
+  //    gerade nicht gezeigt wird. Drei alte Arten heissen anders als die
+  //    Shop-Kategorien und werden deshalb uebersetzt - "sonstiges" bleibt
+  //    unuebersetzt, weil es zu keiner Kategorie sauber passt.
+  const ART_ZU_KATEGORIE = { handschuhe: 'handschuh', protektoren: 'protektor' };
+  const vorhandeneArten = new Set(
+    (garage.ausrüstung || []).map(teil => ART_ZU_KATEGORIE[teil.art] || teil.art));
   SHOP_KATEGORIEN.forEach(kategorie => {
     if (!kategorie.fehlt || vorhandeneArten.has(kategorie.schlüssel)) return;
     const kandidat = produkte.find(p =>
@@ -403,8 +423,8 @@ function zeichneProduktSeite() {
       </div>` : ''}
 
     <div class="stats produkt-daten">
-      ${produkt.eigenschaften.map(e => `
-        <div class="stat"><span class="k">${sicher(e.k)}</span><span class="v">${sicher(e.v)}</span></div>`).join('')}
+      ${produkt.eigenschaften.map(eigenschaft => `
+        <div class="stat"><span class="k">${sicher(eigenschaft.name)}</span><span class="v">${sicher(eigenschaft.wert)}</span></div>`).join('')}
     </div>
 
     <section class="block">
