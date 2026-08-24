@@ -60,13 +60,27 @@ Geht bei Schritt 3 etwas schief, steht der Grund im Dashboard unter
 **Edge Functions → konto-loeschen → Logs**. Die App zeigt dem Nutzer
 absichtlich nur einen kurzen Satz, die Einzelheiten bleiben auf dem Server.
 
-### 2. Impressum und Datenschutzerklärung
+### 2. Impressum und Datenschutzerklärung — JETZT FÄLLIG, nicht erst zu den Stores
 
-In Deutschland Pflicht, sobald die App öffentlich ist. Der Store-Eintrag
-verlangt zusätzlich eine erreichbare Adresse zur Datenschutzerklärung, sonst
-kommt die Einreichung gar nicht erst durch.
+**Hochgestuft am 24.08.2026 nach der Rechtsprüfung des Shop-Umbaus.** Die
+Begründung "noch privat" trägt nicht mehr: Die App ist öffentlich
+erreichbar, nimmt Konten mit E-Mail-Adresse an (Informationspflicht nach
+Art. 13 DSGVO besteht damit HEUTE), zeigt einen als Preisvergleich
+aufgemachten Shop mit Anzeige-Kennzeichnung und verlinkt namentlich auf
+Händler. Das ist ein geschäftsmäßiger digitaler Dienst nach § 5 DDG —
+unabhängig davon, dass noch nichts verdient wird.
 
-Grundlage dafür ist `DATEN.md` – dort steht, was die App wohin schickt.
+**Der fertige Entwurf zum Ausfüllen liegt in `RECHTLICHES-ENTWURF.md`.**
+Es fehlen nur: ladungsfähige Anschrift (Privatadresse oder
+Impressum-Service) und die Entscheidung über einen zweiten Kontaktweg.
+Danach: eigener Bildschirm "Rechtliches" (über das Profil erreichbar,
+höchstens zwei Tipps von jedem Bildschirm), kein Link auf die
+abgeschaltete EU-Streitbeilegungsplattform.
+
+Der Store-Eintrag verlangt später zusätzlich eine erreichbare Adresse zur
+Datenschutzerklärung, sonst kommt die Einreichung gar nicht erst durch.
+
+Grundlage ist `DATEN.md` – dort steht, was die App wohin schickt.
 **Beim Bauen mitschreiben**, nicht am Ende rekonstruieren.
 
 ### 3. Hintergrundstandort ehrlich behandeln
