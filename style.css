@@ -2716,6 +2716,73 @@ body.nav-modus .leaflet-control-container { display: none; }
 
 .btn.klein { flex: 0 0 auto; padding: 7px 11px; font-size: 12.5px; }
 
+/* ---------- Die Anleitung vor der Fotoauswahl ----------
+   Liegt ueber dem Garage-Dialog (dessen z-index ist 1200), denn sie wird
+   aus ihm heraus geoeffnet. Mittig statt am unteren Rand: Es ist kein
+   Formular, das man ausfuellt, sondern etwas zum Lesen. */
+.foto-tipp {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s4);
+  background: rgba(6, 7, 9, 0.68);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.foto-tipp[hidden] { display: none; }
+
+.foto-tipp-blatt {
+  width: 340px;
+  max-width: 100%;
+  padding: var(--s5);
+  border-radius: var(--r-lg);
+  text-align: center;
+}
+.foto-tipp-symbol { color: var(--accent-hell); margin-bottom: var(--s2); }
+.foto-tipp-blatt h3 {
+  margin: 0 0 var(--s4);
+  font-family: var(--schrift-display);
+  font-weight: 700;
+  font-size: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+}
+
+/* Die Punkte linksbuendig, obwohl die Tafel mittig ist: Eine Aufzaehlung
+   mittig zu setzen macht sie schwerer lesbar, weil jede Zeile woanders
+   anfaengt. Der Punkt davor ist gezeichnet statt vom Browser, damit er in
+   der Signalfarbe steht. */
+.foto-tipp-liste {
+  list-style: none;
+  margin: 0 0 var(--s5);
+  padding: 0;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+}
+.foto-tipp-liste li {
+  position: relative;
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+.foto-tipp-liste li::before {
+  content: "";
+  position: absolute;
+  left: 2px; top: 8px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent-hell);
+}
+.foto-tipp-liste strong { color: var(--text); font-weight: 600; }
+
+.foto-tipp-knoepfe { display: flex; gap: var(--s2); }
+
 /* ---------- Das eigene Foto im Dialog ---------- */
 .foto-feld {
   display: flex;

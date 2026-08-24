@@ -1437,7 +1437,7 @@ function öffneMotorradDialog(vorhandenes = null) {
         <div class="dialog-paar">
           <div>
             <label for="feldMarke">Marke</label>
-            <input type="text" id="feldMarke" placeholder="Honda" value="${sicher(vorhandenes?.marke)}">
+            <input type="text" id="feldMarke" value="${sicher(vorhandenes?.marke)}">
           </div>
           <div>
             <label for="feldBaujahr">Baujahr</label>
@@ -1450,7 +1450,7 @@ function öffneMotorradDialog(vorhandenes = null) {
         </div>
 
         <label for="feldModell">Modell</label>
-        <input type="text" id="feldModell" placeholder="CB650R" value="${sicher(vorhandenes?.modell)}">
+        <input type="text" id="feldModell" value="${sicher(vorhandenes?.modell)}">
         <div class="finder-modelle" id="modellTreffer" hidden></div>
         <p class="hint" id="finderHinweis">
           W&auml;hl Marke und Baujahr, dann erscheinen hier die Modelle. Die
@@ -1462,11 +1462,11 @@ function öffneMotorradDialog(vorhandenes = null) {
       <div class="dialog-paar">
         <div>
           <label for="feldHubraum">Hubraum in ccm</label>
-          <input type="number" id="feldHubraum" inputmode="numeric" placeholder="649" value="${sicher(vorhandenes?.hubraum)}">
+          <input type="number" id="feldHubraum" inputmode="numeric" value="${sicher(vorhandenes?.hubraum)}">
         </div>
         <div>
           <label for="feldLeistung">Leistung in PS</label>
-          <input type="number" id="feldLeistung" inputmode="numeric" placeholder="95" value="${sicher(vorhandenes?.leistung)}">
+          <input type="number" id="feldLeistung" inputmode="numeric" value="${sicher(vorhandenes?.leistung)}">
         </div>
       </div>
       <p class="tiny">Hubraum und Leistung f&uuml;llt die App automatisch aus der
@@ -1484,8 +1484,6 @@ function öffneMotorradDialog(vorhandenes = null) {
         <p class="hint" id="fotoHinweis"></p>
       </div>
 
-      <label for="feldNotiz">Notiz</label>
-      <textarea id="feldNotiz" rows="2" placeholder="Umbauten, Reifen, was dir wichtig ist">${sicher(vorhandenes?.notiz)}</textarea>
     `,
 
     beimSpeichern: () => {
@@ -1496,7 +1494,6 @@ function öffneMotorradDialog(vorhandenes = null) {
         baujahr:  feldWert('feldBaujahr'),
         hubraum:  feldWert('feldHubraum'),
         leistung: feldWert('feldLeistung'),
-        notiz:    feldWert('feldNotiz'),
         bild:     dialogFoto,
         bodenlinie: dialogBodenlinie,
         fein: dialogFein || undefined,   // undefined faellt beim Speichern weg
@@ -1693,6 +1690,29 @@ async function modelleAnzeigen() {
   }
 }
 
+/* Raeumt die Felder, die die APP gefuellt hat - von Hand Eingetipptes
+   bleibt stehen.
+
+   Gebraucht wird das beim Modellwechsel, und dahinter steckt der Fehler,
+   den Friedrich gefunden hat: technischeDatenNachziehen() steigt sofort
+   wieder aus, wenn beide Felder schon etwas enthalten. Nach dem ersten
+   Modell waren sie das - also blieben beim zweiten Modell die Werte des
+   ersten stehen.
+
+   Einfach immer zu ueberschreiben waere die falsche Loesung gewesen: Wer
+   seine Maschine umgebaut hat, weiss es besser als jede Datenbank. Deshalb
+   merkt sich jedes Feld in "dataset.automatisch", woher sein Wert stammt.
+   Getippte Werte loeschen die Marke wieder (siehe der input-Zuhoerer). */
+function automatischeFelderLeeren() {
+  ['feldHubraum', 'feldLeistung'].forEach(id => {
+    const feld = document.getElementById(id);
+    if (feld && feld.dataset.automatisch === '1') {
+      feld.value = '';
+      delete feld.dataset.automatisch;
+    }
+  });
+}
+
 /* Fuellt Hubraum und Leistung selbst aus, sobald Marke, Modell und Baujahr
    feststehen. Schon eingetragene Werte werden NICHT ueberschrieben: Wer
    seine Maschine umgebaut hat, weiss es besser als jede Datenbank. */
@@ -1721,7 +1741,12 @@ async function technischeDatenNachziehen() {
     const daten = await technischeDatenHolen(marke, modell, jahr);
     if (daten) {
       felder.forEach(f => {
-        if (!f.element.value.trim() && daten[f.name]) f.element.value = daten[f.name];
+        if (!f.element.value.trim() && daten[f.name]) {
+          f.element.value = daten[f.name];
+          // Merken, dass dieser Wert von der App kommt - beim naechsten
+          // Modellwechsel darf er deshalb weichen.
+          f.element.dataset.automatisch = '1';
+        }
       });
     }
   } catch {
@@ -2872,6 +2897,34 @@ document.addEventListener('keydown', ereignis => {
   if (ereignis.key === 'Escape' && !document.getElementById('garageDialog').hidden) schließeDialog();
 });
 
+
+/* --- Die Anleitung vor der Fotoauswahl -------------------------------------
+   Ein Fingertipp mehr, dafuer weniger Enttaeuschung: Ein Foto von schraeg
+   hinten im Dunkeln sieht man dem Ergebnis erst nach dem Freistellen an,
+   und dann ist der ganze Weg umsonst gegangen.
+
+   Die Dateiauswahl wird HIER geoeffnet und nicht schon beim Druck auf
+   "Foto waehlen": Browser lassen einen Dateidialog nur direkt aus einer
+   Fingerbewegung heraus zu. Der Druck auf "Foto auswaehlen" ist genau so
+   eine - ein spaeterer Aufruf aus dem Code heraus waere abgewiesen worden. */
+function fotoTippSchliessen() {
+  document.getElementById('fotoTipp').hidden = true;
+}
+
+verkabele('btnFotoTippAbbrechen', 'click', fotoTippSchliessen);
+
+verkabele('btnFotoTippWeiter', 'click', () => {
+  fotoTippSchliessen();
+  const eingabe = document.getElementById('garageFotoEingabe');
+  eingabe.value = '';   // sonst loest dieselbe Datei beim zweiten Mal nichts aus
+  eingabe.click();
+});
+
+// Ein Druck neben das Blatt schliesst ebenfalls - wie beim Garage-Dialog.
+verkabele('fotoTipp', 'click', ereignis => {
+  if (ereignis.target.id === 'fotoTipp') fotoTippSchliessen();
+});
+
 /* Alles im Dialog haengt an EINEM Zuhoerer, weil der Inhalt bei jedem Oeffnen
    neu entsteht. Ein Zuhoerer direkt am Markenknopf waere beim naechsten
    Oeffnen verschwunden. */
@@ -2881,19 +2934,20 @@ verkabele('garageDialogInhalt', 'click', ereignis => {
 
   const modell = ereignis.target.closest('[data-modell]');
   if (modell) {
+    const vorher = document.getElementById('feldModell').value;
     document.getElementById('feldModell').value = modell.dataset.modell;
     document.querySelectorAll('.modell-chip').forEach(chip => {
       chip.classList.toggle('active', chip.dataset.modell === modell.dataset.modell);
     });
+    // Anderes Modell heisst andere Daten: erst raeumen, dann neu holen.
+    if (vorher !== modell.dataset.modell) automatischeFelderLeeren();
     technischeDatenNachziehen();
     return;
   }
 
-  // Foto waehlen, entfernen, freistellen.
+  // Foto waehlen: erst die kurze Anleitung, dann die Dateiauswahl.
   if (ereignis.target.closest('#btnFotoWählen')) {
-    const eingabe = document.getElementById('garageFotoEingabe');
-    eingabe.value = '';   // sonst loest dieselbe Datei beim zweiten Mal nichts aus
-    eingabe.click();
+    document.getElementById('fotoTipp').hidden = false;
     return;
   }
   if (ereignis.target.closest('#btnFotoWeg')) {
@@ -2929,6 +2983,15 @@ verkabele('garageFotoEingabe', 'change', ereignis => {
 verkabele('garageDialogInhalt', 'input', ereignis => {
   if (ereignis.target.id === 'feldMarkenSuche') markenVorschlagen(ereignis.target.value);
   if (ereignis.target.id === 'feldMarke') modelleAnzeigen();
+
+  /* Wer selbst in Hubraum oder Leistung tippt, hat das letzte Wort: Die
+     Marke "kommt von der App" faellt weg, und damit ueberlebt der Wert
+     jeden weiteren Modellwechsel. */
+  if (ereignis.target.id === 'feldHubraum' || ereignis.target.id === 'feldLeistung') {
+    delete ereignis.target.dataset.automatisch;
+  }
+  // Modell von Hand geaendert: die automatisch geholten Werte gelten nicht mehr.
+  if (ereignis.target.id === 'feldModell') automatischeFelderLeeren();
 });
 
 // Wer das Modell selbst tippt, soll die Daten genauso bekommen. Der Wechsel
