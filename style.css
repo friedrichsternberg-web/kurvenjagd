@@ -3341,3 +3341,16 @@ body.nav-modus .leaflet-control-container { display: none; }
   overflow: hidden;
 }
 .garage-shop-meta { font-size: 11px; color: var(--accent-hell); }
+
+/* Der kleine Demo-Vermerk neben der Ueberschrift der Garage-Leiste. Er
+   ist Pflicht, nicht Schmuck: Die Leiste zeigt Preise ausserhalb der
+   Shop-Bildschirme, deren grosser DEMO-Balken hier nicht zu sehen ist. */
+.garage-shop-demo {
+  margin-left: 6px;
+  padding: 1px 8px;
+  border-radius: var(--r-pill);
+  border: 1px solid color-mix(in srgb, var(--licht-warm) 55%, transparent);
+  color: var(--licht-warm);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}

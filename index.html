@@ -23,7 +23,7 @@
        "orientation": "portrait" im Manifest ist die Ansage, um die es hier
        geht: Diese App ist fuers Hochformat gebaut. Die spaetere Webseite
        bekommt ein eigenes Design fuers Querformat und ein eigenes Manifest. -->
-  <link rel="manifest" href="manifest.webmanifest?v=64">
+  <link rel="manifest" href="manifest.webmanifest?v=65">
 
   <!-- Faerbt die Statusleiste des Handys in die Grundflaeche der App, damit
        oben kein fremder heller Streifen stehen bleibt. -->
@@ -36,7 +36,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Kurvenjagd">
-  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=64">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=65">
 
   <!-- Fuer die spaetere Webseite und geteilte Routen: So sieht der Link aus,
        wenn ihn jemand in WhatsApp oder Instagram einfuegt. Ohne das steht
@@ -90,8 +90,8 @@
                    die spaetere Webseite genauso benutzen.
        style.css   die Anordnung DIESER App, ausgelegt auf Hochformat. Die
                    Webseite bekommt dafuer eine eigene Datei. -->
-  <link rel="stylesheet" href="design.css?v=64">
-  <link rel="stylesheet" href="style.css?v=64">
+  <link rel="stylesheet" href="design.css?v=65">
+  <link rel="stylesheet" href="style.css?v=65">
 </head>
 <body>
 
@@ -550,7 +550,10 @@
            shop.js aus, bleibt die Platte einfach verborgen. -->
       <div id="garageShop" class="garage-platte garage-shop" hidden>
         <div class="garage-shop-kopf">
-          <h3>Shop f&uuml;r dich</h3>
+          <!-- Der Demo-Vermerk steht hier NOCH EINMAL, weil diese Leiste
+               Preise ausserhalb der Shop-Bildschirme zeigt - deren
+               DEMO-Balken ist von hier aus nicht zu sehen. -->
+          <h3>Shop f&uuml;r dich <span class="garage-shop-demo">Demo-Preise</span></h3>
           <button class="linkbtn" id="btnGarageShopAlle">Alle ansehen &rarr;</button>
         </div>
         <div class="garage-shop-band" id="garageShopBand"></div>
@@ -1396,23 +1399,23 @@
   <!-- ZUERST, denn alle anderen benutzen geraet.* beim Laden. Hier steht der
        gesamte Zugriff aufs Geraet - Standort, Speicher, Dateien. Beim Umzug
        in die Stores ist das die einzige Datei, die sich aendert. -->
-  <script src="geraet.js?v=64"></script>
+  <script src="geraet.js?v=65"></script>
   <!-- Der Rechenteil: Kurvigkeit, Sackgassen, Rundtour-Punkte, GPX. Muss VOR
        app.js stehen, weil app.js diese Funktionen beim Routen aufruft. Die
        spaetere Webseite im Querformat laedt genau diese Datei ebenfalls und
        rechnet damit exakt so wie die App. -->
-  <script src="kern.js?v=64"></script>
-  <script src="app.js?v=64"></script>
+  <script src="kern.js?v=65"></script>
+  <script src="app.js?v=65"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=64"></script>
+  <script src="konto.js?v=65"></script>
   <!-- Nach app.js, weil die Garage verkleinereFoto() und showToast() von
        dort benutzt. -->
-  <script src="garage.js?v=64"></script>
+  <script src="garage.js?v=65"></script>
   <!-- Der Demo-Produktkatalog (nur Daten) und die Shop-Logik. produkte.js
        muss vor shop.js stehen, und beide nach garage.js, weil shop.js
        dessen Helfer (sicher, verkabele) mitbenutzt. -->
-  <script src="produkte.js?v=64"></script>
-  <script src="shop.js?v=64"></script>
+  <script src="produkte.js?v=65"></script>
+  <script src="shop.js?v=65"></script>
 </body>
 </html>

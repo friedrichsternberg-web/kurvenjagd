@@ -173,10 +173,17 @@ Ausfahrten anderer Leute mit.
 ## Der Shop (Stand: reine Beispieldaten)
 
 Der Shop zeigt derzeit **ausschließlich mitgelieferte Beispieldaten** aus
-`produkte.js`. Es gibt keine Partnerverträge, keine echten Angebote und
-keine Links zu Händlern – der Knopf "Zum Shop" zeigt nur einen Hinweis.
+`produkte.js`. Es gibt keine Partnerverträge und keine echten Angebote –
+der Knopf "Zum Shop" an einem Angebot zeigt nur einen Hinweis.
 **Es verlässt dabei nichts das Gerät**, und die App zählt auch keine
 Klicks.
+
+Einzige Ausnahme: Der Abschnitt **"Direkt zu den Shops"** öffnet auf
+Fingertipp die Website des jeweiligen Händlers (Louis, POLO, FC-Moto,
+Motoin, 24MX) in einem neuen Browser-Tab. Die App sendet dabei selbst
+nichts; was der Browser beim Aufruf der fremden Seite überträgt und was
+diese Seite an Cookies setzt, liegt beim jeweiligen Händler. Die Links
+tragen derzeit **keine Partner-Kennung**.
 
 Sobald ein Partnernetzwerk (z.B. AWIN) dazukommt, ändert sich das an drei
 Stellen, und alle drei gehören dann hierher und in die

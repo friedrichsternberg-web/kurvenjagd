@@ -185,7 +185,14 @@ Rechercheberichte zu Markt und Recht liegen im Brain
 - **Produktbilder**: erst einbinden, wenn das jeweilige Programm die
   Bildnutzung ausdrücklich erlaubt (die Netzwerk-AGB allein tun das
   nicht). Bis dahin bleiben die SVG-Symbole. Bevorzugt vom Netzwerk-CDN
-  einbinden statt selbst hosten.
+  einbinden statt selbst hosten. Die Galerie der Produktseite und die
+  Bildkacheln der Listen sind vorbereitet: Sobald `bilder[].url` gefüllt
+  ist, zeigen sie das Foto statt des Symbols.
+- **"Direkt zu den Shops"** (`SHOP_VERZEICHNIS` in produkte.js) führt
+  bislang auf die einfachen Website-Adressen. Mit Partnerprogramm wird je
+  Eintrag `affiliateLink` gefüllt UND der Knopf als "Anzeige"
+  gekennzeichnet – der Hinweistext unter den Chips kündigt das schon an
+  und muss dann mitgezogen werden.
 - **Preisalarm**: `preisBeimMerken` und `gemerktAm` liegen schon in der
   Merkliste. Sobald es Mitteilungen gibt (siehe Punkt 5 oben), ist der
   Alarm nur noch "vergleichen und melden".
