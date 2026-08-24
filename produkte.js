@@ -389,3 +389,20 @@ const PRODUKT_KATALOG = {
     },
   ],
 };
+
+
+/* Die grossen Shops, direkt erreichbar aus der App. Die Namen sind reine
+   Wortmarken in der Schrift der App - Logos anderer Firmen bleiben
+   draussen, die sind markenrechtlich die riskantere Nutzung.
+
+   "affiliateLink" bleibt null, bis ein Partnerprogramm besteht. Dann
+   ersetzt der Partner-Deeplink die einfache Adresse, und der Eintrag wird
+   in der App als Anzeige gekennzeichnet - vorher waere die Kennzeichnung
+   gelogen, denn ohne Programm verdienen wir an den Links nichts. */
+const SHOP_VERZEICHNIS = [
+  { name: 'Louis',         adresse: 'https://www.louis.de',           affiliateLink: null },
+  { name: 'POLO Motorrad', adresse: 'https://www.polo-motorrad.com',  affiliateLink: null },
+  { name: 'FC-Moto',       adresse: 'https://www.fc-moto.de',         affiliateLink: null },
+  { name: 'Motoin',        adresse: 'https://www.motoin.de',          affiliateLink: null },
+  { name: '24MX',          adresse: 'https://www.24mx.de',            affiliateLink: null },
+];

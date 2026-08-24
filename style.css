@@ -3285,3 +3285,7 @@ body.nav-modus .leaflet-control-container { display: none; }
 /* Der Merken-Knopf nimmt die volle Breite unter dem Preisvergleich ein -
    er ist die einzige Handlung auf der Seite, die nichts kostet. */
 .merken-knopf { width: 100%; margin-top: var(--s3); }
+
+/* "Direkt zu den Shops": dieselben Chips wie bei den Kategorien, nur
+   dass sie nach draussen fuehren. */
+.shop-links { display: flex; flex-wrap: wrap; gap: 6px; }

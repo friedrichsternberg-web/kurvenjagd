@@ -194,6 +194,24 @@ function zeichneShop() {
   zeichneKategorien();
   zeichneProduktListe();
   zeichneMerkliste();
+  zeichneShopVerzeichnis();
+}
+
+// Die Knoepfe "Direkt zu den Shops". Nur Wortmarken in der Schrift der
+// App, keine fremden Logos - siehe den Kommentar am SHOP_VERZEICHNIS.
+function zeichneShopVerzeichnis() {
+  const behälter = document.getElementById('shopVerzeichnis');
+  behälter.innerHTML = SHOP_VERZEICHNIS.map((eintrag, stelle) => `
+    <button type="button" class="marken-chip" data-shop="${stelle}">${sicher(eintrag.name)}</button>`).join('');
+}
+
+/* Wie oeffneAngebot(), nur fuer die Shop-Startseiten: EINE Stelle fuer
+   alle Verzeichnis-Klicks. Solange kein Partnerprogramm besteht, ist es
+   die einfache Website-Adresse; spaeter haengt hier derselbe
+   Einwilligungs-Schritt davor wie bei den Angeboten. */
+function öffneShopSeite(eintrag) {
+  if (!eintrag) return;
+  geraet.öffneExtern(eintrag.affiliateLink || eintrag.adresse);
 }
 
 function zeichneProduktListe() {
@@ -538,6 +556,11 @@ verkabele('shopKategorien', 'click', ereignis => {
 verkabele('shopSuche', 'input', ereignis => {
   shopFilter.suche = ereignis.target.value.trim().toLowerCase();
   zeichneProduktListe();
+});
+
+verkabele('shopVerzeichnis', 'click', ereignis => {
+  const knopf = ereignis.target.closest('button[data-shop]');
+  if (knopf) öffneShopSeite(SHOP_VERZEICHNIS[Number(knopf.dataset.shop)]);
 });
 
 verkabele('shopProduktListe', 'click', ereignis => {

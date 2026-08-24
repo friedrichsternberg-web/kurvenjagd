@@ -23,7 +23,7 @@
        "orientation": "portrait" im Manifest ist die Ansage, um die es hier
        geht: Diese App ist fuers Hochformat gebaut. Die spaetere Webseite
        bekommt ein eigenes Design fuers Querformat und ein eigenes Manifest. -->
-  <link rel="manifest" href="manifest.webmanifest?v=62">
+  <link rel="manifest" href="manifest.webmanifest?v=63">
 
   <!-- Faerbt die Statusleiste des Handys in die Grundflaeche der App, damit
        oben kein fremder heller Streifen stehen bleibt. -->
@@ -36,7 +36,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Kurvenjagd">
-  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=62">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=63">
 
   <!-- Fuer die spaetere Webseite und geteilte Routen: So sieht der Link aus,
        wenn ihn jemand in WhatsApp oder Instagram einfuegt. Ohne das steht
@@ -90,8 +90,8 @@
                    die spaetere Webseite genauso benutzen.
        style.css   die Anordnung DIESER App, ausgelegt auf Hochformat. Die
                    Webseite bekommt dafuer eine eigene Datei. -->
-  <link rel="stylesheet" href="design.css?v=62">
-  <link rel="stylesheet" href="style.css?v=62">
+  <link rel="stylesheet" href="design.css?v=63">
+  <link rel="stylesheet" href="style.css?v=63">
 </head>
 <body>
 
@@ -813,6 +813,23 @@
           eines gemerkten Produkts f&auml;llt. Mitteilungen gibt es noch nicht
           &ndash; bis dahin siehst du den Vergleich hier.</p>
       </section>
+
+      <!-- Der kurze Weg zu den Haendlern selbst. Die Eintraege kommen aus
+           SHOP_VERZEICHNIS in produkte.js und fuehren derzeit schlicht auf
+           die Websites - der Hinweis darunter sagt ehrlich, dass daran
+           noch nichts verdient wird. Mit Partnerprogramm werden daraus
+           gekennzeichnete Anzeige-Links. -->
+      <section class="block">
+        <h2>Direkt zu den Shops</h2>
+        <div class="shop-links" id="shopVerzeichnis"></div>
+        <p class="hint">Diese Links f&uuml;hren direkt auf die Websites der
+          Shops. Es bestehen derzeit keine Partnerprogramme &ndash; wir
+          verdienen an diesen Links nichts. Sobald sich das &auml;ndert,
+          kennzeichnen wir sie als Anzeige.</p>
+        <p class="tiny">Alle genannten Marken-, Produkt- und Firmennamen sind
+          Eigentum der jeweiligen Rechteinhaber und dienen hier allein der
+          Beschreibung und Zuordnung.</p>
+      </section>
     </div>
   </div>
 
@@ -1365,23 +1382,23 @@
   <!-- ZUERST, denn alle anderen benutzen geraet.* beim Laden. Hier steht der
        gesamte Zugriff aufs Geraet - Standort, Speicher, Dateien. Beim Umzug
        in die Stores ist das die einzige Datei, die sich aendert. -->
-  <script src="geraet.js?v=62"></script>
+  <script src="geraet.js?v=63"></script>
   <!-- Der Rechenteil: Kurvigkeit, Sackgassen, Rundtour-Punkte, GPX. Muss VOR
        app.js stehen, weil app.js diese Funktionen beim Routen aufruft. Die
        spaetere Webseite im Querformat laedt genau diese Datei ebenfalls und
        rechnet damit exakt so wie die App. -->
-  <script src="kern.js?v=62"></script>
-  <script src="app.js?v=62"></script>
+  <script src="kern.js?v=63"></script>
+  <script src="app.js?v=63"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=62"></script>
+  <script src="konto.js?v=63"></script>
   <!-- Nach app.js, weil die Garage verkleinereFoto() und showToast() von
        dort benutzt. -->
-  <script src="garage.js?v=62"></script>
+  <script src="garage.js?v=63"></script>
   <!-- Der Demo-Produktkatalog (nur Daten) und die Shop-Logik. produkte.js
        muss vor shop.js stehen, und beide nach garage.js, weil shop.js
        dessen Helfer (sicher, verkabele) mitbenutzt. -->
-  <script src="produkte.js?v=62"></script>
-  <script src="shop.js?v=62"></script>
+  <script src="produkte.js?v=63"></script>
+  <script src="shop.js?v=63"></script>
 </body>
 </html>
