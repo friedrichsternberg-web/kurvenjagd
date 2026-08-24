@@ -508,3 +508,217 @@ ${pts}
   </trk>
 </gpx>`;
 }
+
+
+/* --- Schraeglage ------------------------------------------------------------
+
+   Reine Rechnung, ohne Sensor und ohne Bildschirm. Der Zugriff auf die
+   Bewegungssensoren steht in geraet.js, das Einsammeln waehrend der Fahrt
+   in app.js.
+
+   WARUM DAS NICHT TRIVIAL IST. Der naheliegende Weg - "der
+   Beschleunigungsmesser sagt, wo unten ist, also sagt er auch, wie schief
+   das Motorrad steht" - liefert ausgerechnet in der Kurve FALSCHE Werte,
+   und zwar nicht ein bisschen daneben, sondern qualitativ falsch.
+
+   Der Grund ist Physik: Ein Motorrad legt sich in der Kurve genau so weit,
+   dass die Summe aus Schwerkraft und Fliehkraft entlang seiner Hochachse
+   zeigt. Der Fahrer wird nicht zur Seite gedrueckt, und der Sensor misst
+   deshalb quer FAST NULL. Wer nur den Beschleunigungsmesser fragt, bekommt
+   im schoensten Bogen "0 Grad" zurueck.
+
+   Was in der Kurve trotzdem stimmt: Der BETRAG der gemessenen
+   Beschleunigung waechst. Aus cos(Schraeglage) = g / |a| laesst sich der
+   Winkel zurueckrechnen - allerdings ohne Vorzeichen (links oder rechts?)
+   und nur, solange die Kurve gleichmaessig durchfahren wird.
+
+   Deshalb der uebliche Weg: Die schnelle Aenderung kommt aus dem Gyroskop
+   (Rollrate um die Fahrtachse, aufintegriert), und gegen dessen Drift
+   ziehen langsam die drei Bezugswerte oben. Das ist ein
+   Komplementaerfilter. */
+
+const ERDBESCHLEUNIGUNG = 9.81;
+
+// --- Vektorhandwerk, dreidimensional -----------------------------------------
+function vektorMal(v, faktor)   { return [v[0] * faktor, v[1] * faktor, v[2] * faktor]; }
+function vektorMinus(a, b)      { return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]; }
+function skalarprodukt(a, b)    { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
+function betrag(v)              { return Math.sqrt(skalarprodukt(v, v)); }
+function normiere(v) {
+  const l = betrag(v);
+  return l > 1e-9 ? vektorMal(v, 1 / l) : [0, 0, 0];
+}
+function kreuzprodukt(a, b) {
+  return [a[1] * b[2] - a[2] * b[1],
+          a[2] * b[0] - a[0] * b[2],
+          a[0] * b[1] - a[1] * b[0]];
+}
+
+/* Nullpunkt setzen. Bekommt die Proben, die im Stand gesammelt wurden -
+   je Probe die Beschleunigung EINSCHLIESSLICH Schwerkraft und die
+   Drehrate. Ergebnis ist das Dreibein des Motorrads, ausgedrueckt im
+   Koordinatensystem des Handys, plus der Ruhefehler des Gyroskops.
+
+   Gibt { fehler: '...' } zurueck, wenn waehrend des Messens gewackelt
+   wurde - lieber gar keine Kalibrierung als eine schiefe. */
+function kalibriereNeigung(proben) {
+  if (!Array.isArray(proben) || proben.length < 20) {
+    return { fehler: 'Zu wenige Messwerte. Bitte noch einmal versuchen.' };
+  }
+
+  const mittel = feld => feld.reduce((s, x) => s + x, 0) / feld.length;
+  const streuung = feld => {
+    const m = mittel(feld);
+    return Math.sqrt(mittel(feld.map(x => (x - m) * (x - m))));
+  };
+
+  const ax = proben.map(p => p.a[0]), ay = proben.map(p => p.a[1]), az = proben.map(p => p.a[2]);
+  const a0 = [mittel(ax), mittel(ay), mittel(az)];
+
+  // Steht das Handy wirklich still, misst es genau die Erdbeschleunigung.
+  if (Math.abs(betrag(a0) - ERDBESCHLEUNIGUNG) > 0.5) {
+    return { fehler: 'Das Motorrad scheint nicht ruhig zu stehen. Bitte senkrecht halten und noch einmal.' };
+  }
+  if (Math.max(streuung(ax), streuung(ay), streuung(az)) > 0.35) {
+    return { fehler: 'Es hat gewackelt. Bitte Motor aus und noch einmal.' };
+  }
+
+  // u ist die Hochachse des Motorrads, im Handy-System.
+  const u = normiere(a0);
+
+  /* Die zweite Achse. Sie ist die heikelste Stelle der Kalibrierung, und
+     zwei naheliegende Wege fuehren in die Irre.
+
+     Falsch waere: "Das Handy steht hochkant, also zeigt seine
+     Laengsachse nach vorn." Steht es wirklich senkrecht, ist seine
+     Laengsachse PARALLEL zur Hochachse des Motorrads und enthaelt
+     ueberhaupt keine Richtungsinformation.
+
+     Ebenfalls falsch waere: "Nimm die Achse, die am wenigsten parallel zu
+     u liegt." Bei einem nach hinten geneigten Handy - dem Normalfall in
+     jeder Halterung - ist das die BREITSEITE, und die zeigt zur Seite,
+     nicht nach vorn.
+
+     Richtig ist, ueber die Querachse zu gehen: In einer Hochformat-
+     Halterung zeigt die Breitseite des Handys IMMER quer zum Motorrad,
+     ganz gleich wie steil es steht. Daraus ergibt sich die Fahrtachse als
+     Kreuzprodukt. Nur wenn das Handy quer eingespannt ist, taugt die
+     Breitseite nicht - dann uebernimmt die Laengsachse.
+
+     Ob die Fahrtachse nach vorn oder nach hinten zeigt, laesst sich hier
+     grundsaetzlich nicht entscheiden. Das klaert der Vorzeichen-Waechter
+     weiter unten waehrend der Fahrt am GPS. */
+  const eX = [1, 0, 0], eY = [0, 1, 0];
+  let quer = vektorMinus(eX, vektorMal(u, skalarprodukt(eX, u)));
+  let warnung = null;
+  if (betrag(quer) < 0.3) {
+    quer = vektorMinus(eY, vektorMal(u, skalarprodukt(eY, u)));
+    warnung = 'Das Handy scheint quer eingespannt zu sein. Hochkant misst es genauer.';
+    if (betrag(quer) < 0.3) return { fehler: 'Die Lage des Handys laesst sich nicht bestimmen.' };
+  }
+  const r = normiere(quer);                 // Querachse des Motorrads
+  const f = normiere(kreuzprodukt(r, u));   // Fahrtachse, rechtwinklig dazu
+
+  // Der Ruhefehler des Gyroskops: was es im Stillstand faelschlich meldet.
+  const gyroBias = proben[0].w
+    ? [mittel(proben.map(p => p.w[0])), mittel(proben.map(p => p.w[1])), mittel(proben.map(p => p.w[2]))]
+    : [0, 0, 0];
+
+  return { u, f, r, gyroBias, warnung, angelegtAm: new Date().toISOString() };
+}
+
+/* Rechnet eine Messung aus dem Handy- ins Motorradsystem um. */
+function inMotorradSystem(a, w, basis) {
+  const wOhneFehler = w
+    ? [w[0] - basis.gyroBias[0], w[1] - basis.gyroBias[1], w[2] - basis.gyroBias[2]]
+    : [0, 0, 0];
+  return {
+    aLaengs: skalarprodukt(a, basis.f),
+    aQuer:   skalarprodukt(a, basis.r),
+    aHoch:   skalarprodukt(a, basis.u),
+    // Die Rollrate um die FAHRTACHSE - der wichtigste Einzelwert.
+    rollrate: skalarprodukt(wOhneFehler, basis.f),
+  };
+}
+
+/* Formel 1: aus der Richtung. Gilt im Stand und bei Geradeausfahrt. */
+function schraeglageAusRichtung(aQuer, aHoch) {
+  return Math.atan2(aQuer, aHoch) * 180 / Math.PI;
+}
+
+/* Formel 2: aus dem Betrag, cos(Schraeglage) = g / |a|. Gilt in der
+   gleichmaessig durchfahrenen Kurve, liefert aber KEIN Vorzeichen - das
+   muss von aussen kommen (Gyroskop oder Kursaenderung). */
+function schraeglageAusBetrag(aLaengs, aQuer, aHoch, vorzeichen) {
+  const b = Math.sqrt(aLaengs * aLaengs + aQuer * aQuer + aHoch * aHoch);
+  if (b < ERDBESCHLEUNIGUNG) return 0;
+  const verhaeltnis = Math.min(1, ERDBESCHLEUNIGUNG / b);
+  return Math.sign(vorzeichen || 1) * Math.acos(verhaeltnis) * 180 / Math.PI;
+}
+
+/* Formel 3: aus der Fahrdynamik. Braucht nur Tempo und Kursaenderung,
+   also nur GPS - dafuer weder Erlaubnis noch Kalibrierung. Sie ist gegen
+   die Fliehkraft immun, weil die Fliehkraft hier der Rechenweg IST.
+   Probe: 80 km/h (22,2 m/s) bei 20 Grad je Sekunde ergibt 38,3 Grad. */
+function schraeglageAusFahrt(tempoMS, kursaenderungGradProSek) {
+  if (!tempoMS || tempoMS < 3) return 0;
+  const omega = kursaenderungGradProSek * Math.PI / 180;   // rad/s
+  return Math.atan(tempoMS * omega / ERDBESCHLEUNIGUNG) * 180 / Math.PI;
+}
+
+/* Der Komplementaerfilter. Schnell folgt er dem Gyroskop, langsam zieht
+   ihn der Bezugswert zurecht. tau ist die Zeit, in der ein Fehler auf
+   etwa ein Drittel schrumpft - klein heisst schnell nachgefuehrt, aber
+   auch anfaellig fuer schlechte Bezugswerte.
+
+   Merke fuer spaetere Aenderungen: Der bleibende Winkelfehler ist
+   ungefaehr Gyroskop-Restfehler mal tau. Bei 0,2 Grad je Sekunde
+   Restfehler und tau = 5 s sind das rund 1 Grad. */
+function neuerNeigungsFilter(tau = 5) {
+  let winkel = 0;
+  return {
+    schritt(rollrate, dt, bezugswert = null, tauDiesmal = tau) {
+      winkel += rollrate * dt;                       // Gyroskop aufintegrieren
+      if (bezugswert !== null && Number.isFinite(bezugswert)) {
+        const alpha = tauDiesmal / (tauDiesmal + dt);
+        winkel = alpha * winkel + (1 - alpha) * bezugswert;
+      }
+      // Mehr als 60 Grad faehrt niemand auf der Landstrasse; alles
+      // darueber ist ein Messfehler und wird gekappt.
+      winkel = Math.max(-60, Math.min(60, winkel));
+      return winkel;
+    },
+    wert() { return winkel; },
+    setze(w) { winkel = w; },
+  };
+}
+
+/* Links oder rechts? Die Kalibrierung kann nicht wissen, ob die
+   berechnete Fahrtachse nach VORN oder nach HINTEN zeigt - beides steht
+   rechtwinklig zur Hochachse und sieht in den Zahlen gleich aus. Zeigt sie
+   nach hinten, sind links und rechts vertauscht.
+
+   Auflaesen laesst sich das nur waehrend der Fahrt, und zwar am GPS: Wer
+   nach rechts abbiegt, legt sich nach rechts. Dieser Waechter sammelt
+   Kurven, in denen beide Quellen deutlich genug sind, und meldet nach
+   einigen uebereinstimmenden Faellen, ob gedreht werden muss.
+
+   Er entscheidet bewusst erst nach mehreren Kurven: Eine einzelne
+   Fehlmessung - Schlagloch, Bordsteinkante, GPS-Sprung - soll nicht
+   ausreichen, um links und rechts zu vertauschen. */
+function neuerVorzeichenWaechter(nötigeTreffer = 5) {
+  let einig = 0, uneinig = 0, entschieden = false, faktor = 1;
+  return {
+    prüfe(sensorGrad, gpsGrad) {
+      if (entschieden) return faktor;
+      // Beide muessen deutlich sein, sonst sagt der Vergleich nichts.
+      if (Math.abs(sensorGrad) < 8 || Math.abs(gpsGrad) < 8) return faktor;
+      if (Math.sign(sensorGrad) === Math.sign(gpsGrad)) einig++; else uneinig++;
+      if (einig >= nötigeTreffer)   { entschieden = true; faktor = 1; }
+      if (uneinig >= nötigeTreffer) { entschieden = true; faktor = -1; }
+      return faktor;
+    },
+    faktor() { return faktor; },
+    stehtFest() { return entschieden; },
+  };
+}

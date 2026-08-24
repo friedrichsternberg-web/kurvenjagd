@@ -23,7 +23,7 @@
        "orientation": "portrait" im Manifest ist die Ansage, um die es hier
        geht: Diese App ist fuers Hochformat gebaut. Die spaetere Webseite
        bekommt ein eigenes Design fuers Querformat und ein eigenes Manifest. -->
-  <link rel="manifest" href="manifest.webmanifest?v=80">
+  <link rel="manifest" href="manifest.webmanifest?v=86">
 
   <!-- Faerbt die Statusleiste des Handys in die Grundflaeche der App, damit
        oben kein fremder heller Streifen stehen bleibt. -->
@@ -36,7 +36,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Kurvenjagd">
-  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=80">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=86">
 
   <!-- Fuer die spaetere Webseite und geteilte Routen: So sieht der Link aus,
        wenn ihn jemand in WhatsApp oder Instagram einfuegt. Ohne das steht
@@ -99,8 +99,8 @@
                    die spaetere Webseite genauso benutzen.
        style.css   die Anordnung DIESER App, ausgelegt auf Hochformat. Die
                    Webseite bekommt dafuer eine eigene Datei. -->
-  <link rel="stylesheet" href="design.css?v=80">
-  <link rel="stylesheet" href="style.css?v=80">
+  <link rel="stylesheet" href="design.css?v=86">
+  <link rel="stylesheet" href="style.css?v=86">
 </head>
 <body>
 
@@ -824,6 +824,22 @@
           der Fahrt siehst du alle Werte live, Fotos kannst du unterwegs
           hinzufügen. Notizen schreibst du am Ende dazu.
         </p>
+        <!-- Schraeglage. Der Knopf steht VOR dem Starten, weil der
+             Nullpunkt im Stand gesetzt werden muss - und weil die Erlaubnis
+             fuer die Bewegungssensoren auf dem iPhone aus einer echten
+             Fingerbewegung heraus erfragt werden muss. Wer ihn ueberspringt,
+             zeichnet trotzdem auf; die Schraeglage kommt dann grob aus dem
+             GPS. -->
+        <div class="neigung-block">
+          <p class="hint">
+            <strong>Schr&auml;glage messen?</strong> Stell das Motorrad senkrecht
+            hin, Motor aus, Handy in der Halterung &ndash; und tippe dann auf
+            &bdquo;Nullpunkt setzen&ldquo;. Das dauert zwei Sekunden.
+          </p>
+          <button class="btn ghost" id="btnNeigungNullpunkt">Nullpunkt setzen</button>
+          <p class="hint" id="neigungStatus">Ohne Nullpunkt wird die Schr&auml;glage grob aus dem GPS gesch&auml;tzt.</p>
+        </div>
+
         <div class="row">
           <button class="btn" id="btnRideStart">Aufzeichnung starten</button>
         </div>
@@ -841,6 +857,12 @@
         <p class="hint ride-status" id="rideStatus">Warte auf GPS-Signal...</p>
 
         <div class="stats">
+          <!-- Bewusst klein und zwischen den anderen Werten: Die Schraeglage
+               waehrend der Fahrt anzustarren waere genau das Falsche. Die
+               Auswertung kommt nach der Fahrt. -->
+          <div class="stat" id="rideNeigungKachel" hidden>
+            <span class="k">Schr&auml;glage</span><span class="v" id="rideNeigung">0&deg;</span>
+          </div>
           <div class="stat"><span class="k">Distanz</span><span class="v" id="rideDist">0,0 km</span></div>
           <div class="stat"><span class="k">Fahrzeit</span><span class="v" id="rideZeit">0 min</span></div>
           <div class="stat"><span class="k">&Oslash; Tempo</span><span class="v" id="rideSchnitt">0 km/h</span></div>
@@ -880,7 +902,13 @@
           <div class="stat"><span class="k">Max. Tempo</span><span class="v" id="rideEndMax">-</span></div>
           <div class="stat"><span class="k">H&ouml;henmeter</span><span class="v" id="rideEndAufstieg">-</span></div>
           <div class="stat highlight"><span class="k">Kurven-Score</span><span class="v" id="rideEndKurven">-</span></div>
+          <div class="stat" id="rideEndNeigungKachel" hidden>
+            <span class="k">Schr&auml;glage max.</span><span class="v" id="rideEndNeigung">-</span>
+          </div>
         </div>
+        <!-- Ehrlichkeit statt Bestwert-Jagd: Der Hinweis sagt, wie die Zahl
+             zustande kam und wie genau sie ist. -->
+        <p class="tiny" id="rideNeigungHinweis" hidden></p>
         <div class="curvebar"><div class="curvebar-fill" id="rideCurveFill"></div></div>
         <p class="hint" id="rideCurveWord"></p>
 
@@ -1361,23 +1389,23 @@
   <!-- ZUERST, denn alle anderen benutzen geraet.* beim Laden. Hier steht der
        gesamte Zugriff aufs Geraet - Standort, Speicher, Dateien. Beim Umzug
        in die Stores ist das die einzige Datei, die sich aendert. -->
-  <script src="geraet.js?v=80"></script>
+  <script src="geraet.js?v=86"></script>
   <!-- Der Rechenteil: Kurvigkeit, Sackgassen, Rundtour-Punkte, GPX. Muss VOR
        app.js stehen, weil app.js diese Funktionen beim Routen aufruft. Die
        spaetere Webseite im Querformat laedt genau diese Datei ebenfalls und
        rechnet damit exakt so wie die App. -->
-  <script src="kern.js?v=80"></script>
-  <script src="app.js?v=80"></script>
+  <script src="kern.js?v=86"></script>
+  <script src="app.js?v=86"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=80"></script>
+  <script src="konto.js?v=86"></script>
   <!-- Nach app.js, weil die Garage verkleinereFoto() und showToast() von
        dort benutzt. -->
-  <script src="garage.js?v=80"></script>
+  <script src="garage.js?v=86"></script>
   <!-- Der Demo-Produktkatalog (nur Daten) und die Shop-Logik. produkte.js
        muss vor shop.js stehen, und beide nach garage.js, weil shop.js
        dessen Helfer (sicher, verkabele) mitbenutzt. -->
-  <script src="produkte.js?v=80"></script>
-  <script src="shop.js?v=80"></script>
+  <script src="produkte.js?v=86"></script>
+  <script src="shop.js?v=86"></script>
 </body>
 </html>

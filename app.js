@@ -1993,6 +1993,11 @@ const RIDE_MIN_ABSTAND = 8;          // Meter - darunter gilt es als Stillstand
 const RIDE_HÖHEN_SCHWELLE = 6;       // Meter - erst darüber zählt es als Anstieg
 const RIDE_MAX_PLAUSIBEL_KMH = 300;  // alles darüber ist ein GPS-Ausreißer
 
+/* Der gesetzte Nullpunkt ueberlebt das Schliessen der App - er haengt an
+   der Halterung, nicht an der einzelnen Fahrt. Verstellt sich die
+   Halterung, muss er neu gesetzt werden. */
+const NEIGUNG_BASIS = 'kurvenjagd.neigungBasis';
+
 const ride = {
   aktiv: false,
   pausiert: false,
@@ -2017,6 +2022,26 @@ const ride = {
   notizen: '',
   fotos: [],               // [{ id, bild (Daten-URL), lat, lon }]
   fotoMarker: [],          // Leaflet-Marker der unterwegs gemachten Fotos
+
+  /* Schraeglage. "quelle" sagt ehrlich, woher die Zahlen kommen:
+     'sensor'  Bewegungssensoren mit gesetztem Nullpunkt - genau
+     'gps'     nur aus Tempo und Kursaenderung gerechnet - grob
+     null      gar nichts (kein Sensor, keine Erlaubnis, kein Tempo) */
+  neigung: {
+    quelle: null,
+    basis: null,          // das kalibrierte Dreibein
+    filter: null,
+    waechter: null,       // klaert links/rechts am GPS
+    horcher: null,        // Kennung zum Loslassen des Sensors
+    aktuellGrad: 0,
+    maxLinksGrad: 0,
+    maxRechtsGrad: 0,
+    // Geglaettet ueber eine halbe Sekunde: Ein einzelner Kanaldeckel soll
+    // nicht als "62 Grad Schraeglage" in der Auswertung stehen.
+    fensterWerte: [],
+    letzterKurs: null,
+    letzteKursZeit: null,
+  },
 };
 
 // Die Karte des Aufzeichnungs-Bildschirms ist eine EIGENE Leaflet-Karte,
@@ -2088,6 +2113,7 @@ function starteRide() {
   zeigeRideZustand('live');
   document.getElementById('btnRidePause').textContent = 'Pause';
   document.getElementById('rideStatus').textContent = 'Warte auf GPS-Signal...';
+  starteNeigungsMessung();
 
   ride.watchId = geraet.standortVerfolgen(aufRidePosition, aufRideFehler, {
     enableHighAccuracy: true,
@@ -2109,7 +2135,22 @@ function aufRideFehler(err) {
 function aufRidePosition(pos) {
   if (!ride.aktiv || ride.pausiert) return;
 
-  const { latitude, longitude, altitude, accuracy, speed } = pos.coords;
+  const { latitude, longitude, altitude, accuracy, speed, heading } = pos.coords;
+
+  /* Die Schraeglage wird ZUERST verbucht, noch vor allen Ausstiegen weiter
+     unten. Sonst gingen die Werte jeder Langsamfahrt und jeder engen Kehre
+     verloren - also ausgerechnet dort, wo am meisten Schraeglage anfaellt
+     und das GPS am ungenauesten ist. */
+  const tempoMS = Number.isFinite(speed) && speed >= 0 ? speed : 0;
+  const gpsNeigung = neigungAusGps(tempoMS, heading ?? null, Date.now());
+  if (gpsNeigung !== null) {
+    if (ride.neigung.quelle === 'gps') {
+      neigungBuchen(gpsNeigung);
+    } else if (ride.neigung.waechter) {
+      // Mit Sensor dient das GPS nur dazu, links und rechts zu klaeren.
+      ride.neigung.waechter.prüfe(ride.neigung.aktuellGrad, gpsNeigung);
+    }
+  }
 
   if (Number.isFinite(accuracy) && accuracy > RIDE_MAX_UNGENAUIGKEIT) {
     document.getElementById('rideStatus').textContent =
@@ -2196,7 +2237,147 @@ function zeichneRideAufKarte(lat, lon) {
 }
 
 // Aktuelle Werte der laufenden Ausfahrt - auch für die Auswertung am Ende.
+/* --- Schraeglage waehrend der Fahrt ---------------------------------------
+
+   Zwei Wege laufen nebeneinander, und die App sagt dem Nutzer, welcher
+   gerade traegt:
+
+   MIT SENSOR: Das Gyroskop liefert die schnelle Aenderung, drei
+   Bezugswerte ziehen die Drift zurecht (siehe kern.js). Braucht einmal
+   einen gesetzten Nullpunkt.
+
+   OHNE SENSOR: Aus Tempo und Kursaenderung gerechnet. Das geht immer,
+   auch ohne Erlaubnis, ist aber grob und verschluckt kurze Spitzen -
+   das GPS meldet nur einmal je Sekunde. */
+
+function neigungAusGps(tempoMS, kursGrad, jetzt) {
+  const n = ride.neigung;
+  if (n.letzterKurs === null || kursGrad === null || !Number.isFinite(kursGrad)) {
+    n.letzterKurs = kursGrad; n.letzteKursZeit = jetzt;
+    return null;
+  }
+  const dt = (jetzt - n.letzteKursZeit) / 1000;
+  if (dt < 0.3) return null;
+  // Kursdifferenz auf -180..180 bringen, sonst gibt der Sprung von 359
+  // auf 1 Grad eine Vollbremsung ins Lenkrad.
+  let d = kursGrad - n.letzterKurs;
+  while (d > 180) d -= 360;
+  while (d < -180) d += 360;
+  n.letzterKurs = kursGrad; n.letzteKursZeit = jetzt;
+  return schraeglageAusFahrt(tempoMS, d / dt);
+}
+
+// Traegt einen Wert in die Buchfuehrung ein. Laeuft auch im Stand und in
+// engen Kehren - also gerade dort, wo die meisten Werte anfallen.
+function neigungBuchen(grad) {
+  const n = ride.neigung;
+  n.aktuellGrad = grad;
+  n.fensterWerte.push(grad);
+  if (n.fensterWerte.length > 30) n.fensterWerte.shift();   // rund eine halbe Sekunde
+  const geglaettet = n.fensterWerte.reduce((s, x) => s + x, 0) / n.fensterWerte.length;
+  if (geglaettet < 0) n.maxLinksGrad = Math.max(n.maxLinksGrad, -geglaettet);
+  else                n.maxRechtsGrad = Math.max(n.maxRechtsGrad, geglaettet);
+}
+
+function starteNeigungsMessung() {
+  const n = ride.neigung;
+  n.maxLinksGrad = 0; n.maxRechtsGrad = 0; n.fensterWerte = [];
+  n.letzterKurs = null; n.letzteKursZeit = null;
+
+  if (!n.basis || !geraet.neigungDa()) {
+    n.quelle = 'gps';          // Rueckfallebene, immer verfuegbar
+    return;
+  }
+  n.quelle = 'sensor';
+  n.filter = neuerNeigungsFilter(5);
+  n.waechter = neuerVorzeichenWaechter(5);
+  n.horcher = geraet.neigungVerfolgen(messung => {
+    const m = inMotorradSystem(messung.a, messung.w, n.basis);
+
+    /* Der Bezugswert, gegen den die Gyroskop-Drift gezogen wird. Welcher
+       gilt, haengt vom Fahrzustand ab - in der Kurve luegt die Richtung,
+       im Stand luegt der Betrag. */
+    const betrag = Math.sqrt(m.aLaengs ** 2 + m.aQuer ** 2 + m.aHoch ** 2);
+    const ruhig = Math.abs(betrag - 9.81) < 0.2 && Math.abs(m.rollrate) < 3;
+    let bezug = null, tau = 5;
+    if (ruhig) {
+      bezug = schraeglageAusRichtung(m.aQuer, m.aHoch);
+      tau = 1;                                   // im Stand kraeftig nachziehen
+    } else if (Math.abs(n.filter.wert()) > 25) {
+      bezug = schraeglageAusBetrag(m.aLaengs, m.aQuer, m.aHoch, Math.sign(n.filter.wert()));
+      tau = 8;
+    }
+    const roh = n.filter.schritt(m.rollrate, messung.dt, bezug, tau);
+    neigungBuchen(roh * n.waechter.faktor());
+  });
+}
+
+/* Nullpunkt setzen. Die Reihenfolge in dieser Funktion ist wichtig:
+   requestPermission() steht als ERSTE Anweisung, noch vor jeder Anzeige
+   und jedem Warten. Auf dem iPhone gilt die Erlaubnis der Fingerbewegung
+   nur einen Augenblick - wer vorher auf irgendetwas wartet, bekommt die
+   Rueckfrage gar nicht mehr zu sehen. Und abgelehnt wird sie nur EINMAL
+   gefragt, danach merkt iOS sich das. */
+/* Zeigt an, woran man gerade ist. Wird beim Oeffnen des Bildschirms
+   gerufen, damit ein frueher gesetzter Nullpunkt sichtbar ist - sonst
+   waere nicht zu erkennen, ob die App ihn noch kennt. */
+function neigungStatusAnzeigen() {
+  const meldung = document.getElementById('neigungStatus');
+  if (!meldung) return;
+  if (!ride.neigung.basis) ride.neigung.basis = geraet.lies(NEIGUNG_BASIS);
+  if (ride.neigung.basis?.u) {
+    const wann = new Date(ride.neigung.basis.angelegtAm);
+    meldung.textContent = 'Nullpunkt gesetzt am '
+      + wann.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' })
+      + '. Hat sich die Halterung verstellt, setz ihn neu.';
+  } else {
+    meldung.textContent = 'Ohne Nullpunkt wird die Schräglage grob aus dem GPS geschätzt.';
+  }
+}
+
+async function neigungNullpunktSetzen() {
+  const meldung = document.getElementById('neigungStatus');
+  const erlaubt = await geraet.neigungErlauben();
+  if (!erlaubt) {
+    meldung.textContent = 'Kein Zugriff auf die Bewegungssensoren. Die Schräglage '
+      + 'wird dann grob aus dem GPS geschätzt - die Aufzeichnung läuft normal.';
+    ride.neigung.basis = null;
+    return;
+  }
+  if (!geraet.neigungDa()) {
+    meldung.textContent = 'Dieses Gerät liefert keine Bewegungsdaten. '
+      + 'Die Schräglage wird grob aus dem GPS geschätzt.';
+    return;
+  }
+
+  meldung.textContent = 'Messe … bitte zwei Sekunden ruhig halten.';
+  const proben = [];
+  const horcher = geraet.neigungVerfolgen(m => proben.push(m));
+
+  await new Promise(fertig => setTimeout(fertig, 2000));
+  geraet.neigungLoslassen(horcher);
+
+  if (!proben.length) {
+    meldung.textContent = 'Es kamen keine Sensordaten an. Die Schräglage wird aus dem GPS geschätzt.';
+    return;
+  }
+  const basis = kalibriereNeigung(proben);
+  if (basis.fehler) { meldung.textContent = basis.fehler; return; }
+
+  ride.neigung.basis = basis;
+  geraet.schreib(NEIGUNG_BASIS, basis);
+  meldung.textContent = basis.warnung
+    ? 'Nullpunkt gesetzt. ' + basis.warnung
+    : 'Nullpunkt gesetzt. Die Schräglage wird jetzt aus den Bewegungssensoren gemessen.';
+}
+
+function beendeNeigungsMessung() {
+  const n = ride.neigung;
+  if (n.horcher) { geraet.neigungLoslassen(n.horcher); n.horcher = null; }
+}
+
 function rideStats() {
+  const n = ride.neigung;
   const fahrzeitSek = rideFahrzeitMs() / 1000;
   const schnittKmh = fahrzeitSek > 5 ? (ride.distanzM / fahrzeitSek) * 3.6 : 0;
   return {
@@ -2206,11 +2387,26 @@ function rideStats() {
     maxKmh: ride.maxKmh,
     aufstiegM: ride.aufstiegM,
     kurvigkeit: curviness(ride.punkte.filter(p => Number.isFinite(p[0]))),
+    // Schraeglage. quelle sagt, wie ernst die Zahlen zu nehmen sind.
+    neigung: n.quelle ? {
+      quelle: n.quelle,
+      maxLinksGrad: Math.round(n.maxLinksGrad),
+      maxRechtsGrad: Math.round(n.maxRechtsGrad),
+    } : null,
   };
 }
 
 function aktualisiereRideAnzeige() {
   const s = rideStats();
+  const kachel = document.getElementById('rideNeigungKachel');
+  if (kachel) {
+    kachel.hidden = !s.neigung;
+    if (s.neigung) {
+      const g = Math.round(Math.abs(ride.neigung.aktuellGrad));
+      const seite = ride.neigung.aktuellGrad < -1 ? ' L' : ride.neigung.aktuellGrad > 1 ? ' R' : '';
+      document.getElementById('rideNeigung').textContent = g + '°' + seite;
+    }
+  }
   document.getElementById('rideTempo').textContent = Math.round(ride.aktuellKmh);
   document.getElementById('rideDist').textContent = (s.distanzM / 1000).toFixed(1) + ' km';
   document.getElementById('rideZeit').textContent = formatRideZeit(s.fahrzeitSek);
@@ -2257,6 +2453,7 @@ function beendeRide() {
   if (!ride.pausiert && ride.laufSeit) ride.fahrzeitGesammeltMs += Date.now() - ride.laufSeit;
   ride.laufSeit = null;
   ride.aktiv = false;
+  beendeNeigungsMessung();
   bildschirmWachLassen();
 
   const s = rideStats();
@@ -2269,6 +2466,23 @@ function beendeRide() {
   document.getElementById('rideEndMax').textContent = Math.round(s.maxKmh) + ' km/h';
   document.getElementById('rideEndAufstieg').textContent = Math.round(s.aufstiegM) + ' hm';
   document.getElementById('rideEndKurven').textContent = Math.round(s.kurvigkeit) + ' Grad/km';
+
+  /* Die Schraeglage, und zwar mit Beipackzettel. Der Hinweis darunter ist
+     kein Kleingedrucktes, sondern der Punkt: Eine geschaetzte Zahl ohne
+     Angabe ihrer Genauigkeit lockt dazu, sie steigern zu wollen. */
+  const nKachel = document.getElementById('rideEndNeigungKachel');
+  const nHinweis = document.getElementById('rideNeigungHinweis');
+  nKachel.hidden = !s.neigung;
+  nHinweis.hidden = !s.neigung;
+  if (s.neigung) {
+    document.getElementById('rideEndNeigung').textContent =
+      `${s.neigung.maxLinksGrad}° L / ${s.neigung.maxRechtsGrad}° R`;
+    nHinweis.textContent = s.neigung.quelle === 'sensor'
+      ? 'Aus den Bewegungssensoren geschätzt, Genauigkeit etwa fünf Grad. '
+        + 'Kein Messgerät - und kein Wert, den man steigern sollte.'
+      : 'Grob aus Tempo und Kursänderung geschätzt, Genauigkeit etwa zehn Grad. '
+        + 'Kurze Spitzen fehlen darin. Mit gesetztem Nullpunkt wird es genauer.';
+  }
 
   const istKurz = ride.punkte.length < RIDE_KURZ_GRENZE;
 
@@ -2312,6 +2526,9 @@ function speichereRide() {
     maxKmh: s.maxKmh,
     notizen: document.getElementById('rideNotizen').value.trim(),
     fotos: ride.fotos,
+    // Fehlt bei Ausfahrten von vor dem 24.08.2026 - jede Lesestelle
+    // benutzt deshalb ?. und braucht keinen Wandlungsschritt.
+    neigung: s.neigung,
     gefahrenAm: (ride.gestartetAm || new Date()).toISOString(),
   };
   alle.unshift(neueAusfahrt);
@@ -2907,6 +3124,7 @@ function zeigeShop() {
 
 function zeigeRideScreen() {
   zeigeBildschirm('rideScreen');
+  neigungStatusAnzeigen();
   rideKarte().invalidateSize(); // gleiche Begründung wie beim Planer oben
 }
 
@@ -3212,6 +3430,7 @@ document.getElementById('btnStartRide').addEventListener('click', () => {
   rideZurücksetzen();
 });
 document.getElementById('btnRideStart').addEventListener('click', starteRide);
+document.getElementById('btnNeigungNullpunkt').addEventListener('click', neigungNullpunktSetzen);
 document.getElementById('btnRideZurueck').addEventListener('click', zeigeGarage);
 document.getElementById('btnRidePause').addEventListener('click', pausiereRideUmschalten);
 document.getElementById('btnRideStop').addEventListener('click', beendeRide);

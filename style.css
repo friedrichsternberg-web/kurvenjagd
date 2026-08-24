@@ -3325,3 +3325,15 @@ body.nav-modus .nav-fuss {
    dem Bildschirm. */
 #btnNavZentrieren { color: var(--accent-hell); border-color: var(--accent-hell); }
 .nav-rund .ic { width: 24px; height: 24px; }
+
+/* Der Schraeglage-Block auf dem Aufzeichnen-Bildschirm. Er steht vor dem
+   Start-Knopf, weil der Nullpunkt im Stand gesetzt werden muss. */
+.neigung-block {
+  margin: var(--s3) 0;
+  padding: var(--s3);
+  border: 1px solid var(--glas-rand);
+  border-radius: var(--r-md);
+  background: var(--glas-hell);
+}
+.neigung-block .hint { margin: 0 0 var(--s2); }
+.neigung-block .hint:last-child { margin: var(--s2) 0 0; }

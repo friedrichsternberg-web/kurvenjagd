@@ -25,6 +25,7 @@ Gerät nicht, solange niemand angemeldet ist.
 | `kurvenjagd.routen` | gespeicherte Touren: Wegpunkte, Streckenverlauf, Kurvigkeit, Fotos als Daten-URL |
 | `kurvenjagd.garage` | Motorräder (Marke, Modell, Baujahr, Hubraum, Leistung, Bild) und Ausrüstung |
 | `kurvenjagd.shop` | Merkliste des Shops: Produkt-Schlüssel, Datum und günstigster Gesamtpreis beim Merken |
+| `kurvenjagd.neigungBasis` | Nullpunkt für die Schräglage: die Einbaulage des Handys als drei Achsen, dazu der Ruhefehler des Gyroskops |
 
 Aufgezeichnete Fotos liegen **verkleinert im Speicher selbst**, nicht als
 Dateien. Das ist auch der Grund für die 5-MB-Grenze und dafür, dass
@@ -209,6 +210,10 @@ Bewusst festgehalten, weil es in der Erklärung ausdrücklich stehen darf:
 
 - keine Analyse, kein Tracking, keine Zählpixel – auch der Shop zählt
   keine Klicks
+- **Die Bewegungssensoren werden nur während einer Aufzeichnung gelesen**
+  und nur, wenn der Nutzer den Nullpunkt gesetzt hat. Die Werte bleiben
+  auf dem Gerät; gespeichert wird von einer Fahrt nur die größte
+  Schräglage nach links und rechts, keine Messreihe.
 - keine Weitergabe an Dritte über die oben genannten Dienste hinaus
 - kein Zugriff auf Kontakte, Kalender oder die Fotomediathek – Fotos kommen
   nur einzeln über die Dateiauswahl, die der Nutzer selbst bedient

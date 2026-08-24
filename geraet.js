@@ -23,8 +23,14 @@
    nicht, ob dahinter der Browser oder ein Betriebssystem steckt.
 
    DIE REGEL FÜR ALLES, WAS AB JETZT DAZUKOMMT: Kein navigator.irgendwas, kein
-   localStorage und kein URL.createObjectURL außerhalb dieser Datei. Kommt
-   etwas Neues, bekommt es hier eine Zeile.
+   localStorage, kein URL.createObjectURL und keine Sensor-Ereignisse
+   (devicemotion, deviceorientation) außerhalb dieser Datei. Kommt etwas
+   Neues, bekommt es hier eine Zeile.
+
+   Bei den Sensoren ist der Grund besonders handfest: In der nativen Hülle
+   liefert die eingebettete Ansicht die Bewegungsdaten nur, wenn die Hülle
+   selbst eine Rückfrage beantwortet. Das ist genau die Art Unterschied,
+   die man an einer Stelle behandeln will und nicht an zwanzig.
    ============================================================================ */
 
 const geraet = {
@@ -243,5 +249,66 @@ const geraet = {
      sonst ueber window.opener auf dieses Fenster zugreifen. */
   öffneExtern(adresse) {
     window.open(adresse, '_blank', 'noopener');
+  },
+
+  /* --- Bewegungssensoren, fuer die Schraeglage ----------------------------
+
+     Gibt es Beschleunigungsmesser und Gyroskop ueberhaupt? Die Frage
+     laesst sich vorher nur halb beantworten: Das Ereignis existiert auf
+     fast jedem Geraet, ob wirklich Werte kommen, zeigt sich erst beim
+     Zuhoeren. Deshalb prueft der Aufrufer zusaetzlich, ob nach kurzer
+     Zeit etwas angekommen ist. */
+  neigungDa() {
+    return typeof window.DeviceMotionEvent !== 'undefined';
+  },
+
+  /* Auf dem iPhone muss die Erlaubnis ausdruecklich erfragt werden. */
+  neigungBrauchtErlaubnis() {
+    return typeof window.DeviceMotionEvent?.requestPermission === 'function';
+  },
+
+  /* Die Erlaubnis erfragen. DREI DINGE, die hier zaehlen und die man
+     leicht falsch macht:
+
+     1. Der Aufruf muss aus einer echten Fingerbewegung heraus kommen, und
+        zwar als ERSTE Anweisung im Klickbehandler. Wer davor auf
+        irgendetwas wartet, hat die Berechtigung der Geste verbraucht.
+     2. Er WIRFT dann eine Ausnahme, statt "denied" zurueckzugeben -
+        deshalb das try/catch.
+     3. Eine Ablehnung merkt sich iOS. Es gibt keinen zweiten Dialog.
+        Man hat genau einen sauberen Versuch. */
+  async neigungErlauben() {
+    if (!this.neigungBrauchtErlaubnis()) return true;
+    try {
+      const antwort = await window.DeviceMotionEvent.requestPermission();
+      return antwort === 'granted';
+    } catch {
+      return false;
+    }
+  },
+
+  /* Zuhoeren. Der Rueckruf bekommt je Meldung ein Objekt mit der
+     Beschleunigung einschliesslich Schwerkraft (in m/s^2) und der
+     Drehrate (in Grad je Sekunde). Zurueck kommt eine Kennung zum
+     Loslassen. */
+  neigungVerfolgen(rueckruf) {
+    const horcher = ereignis => {
+      const a = ereignis.accelerationIncludingGravity;
+      if (!a || a.x === null) return;
+      const w = ereignis.rotationRate;
+      rueckruf({
+        a: [a.x, a.y, a.z],
+        w: w ? [w.beta || 0, w.gamma || 0, w.alpha || 0] : [0, 0, 0],
+        // Der Abstand zwischen zwei Meldungen, in Sekunden. Manche Geraete
+        // liefern ihn mit, sonst nehmen wir 60 Meldungen je Sekunde an.
+        dt: ereignis.interval ? ereignis.interval / 1000 : 1 / 60,
+      });
+    };
+    window.addEventListener('devicemotion', horcher);
+    return horcher;
+  },
+
+  neigungLoslassen(kennung) {
+    if (kennung) window.removeEventListener('devicemotion', kennung);
   },
 };

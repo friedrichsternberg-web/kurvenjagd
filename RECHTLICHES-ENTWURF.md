@@ -134,6 +134,28 @@ Landesbeauftragten für Datenschutz.
 Stand: [Datum]
 ```
 
+### Schräglage: was in die Nutzungsbedingungen gehört
+
+Die App schätzt die Schräglage, sie misst sie nicht. Das gehört klar
+gesagt, weil eine Zahl ohne Angabe ihrer Genauigkeit dazu verleitet, sie
+steigern zu wollen — und das wäre bei dieser Zahl gefährlich.
+
+```
+Schräglage
+
+Die angezeigte Schräglage ist ein Schätzwert aus den Bewegungssensoren
+deines Handys, bei nicht gesetztem Nullpunkt aus Geschwindigkeit und
+Kursänderung. Sie ist kein Messgerät und kein Vergleichsmaßstab.
+
+Bei fest eingebautem Handy und gesetztem Nullpunkt liegt die Abweichung
+erfahrungsgemäß bei etwa fünf Grad, ohne Nullpunkt bei etwa zehn Grad,
+wobei kurze Spitzen dann fehlen. Verrutscht die Halterung, wird der Wert
+dauerhaft falsch, ohne dass die App das merken kann.
+
+Die Auswertung erscheint bewusst erst nach der Fahrt. Fahre nie, um einen
+Wert zu erreichen.
+```
+
 Offen für die Zukunft (steht auch in `AUFGABEN.md`): Kommt das
 Partnerprogramm, kommt der Affiliate-Abschnitt samt Einwilligung vor dem
 ersten Klick; kommt Push, kommt der Push-Abschnitt; kommt Werbung, der
