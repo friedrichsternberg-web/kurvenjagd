@@ -750,8 +750,12 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   width: 44px; height: 5px;
   border-radius: var(--r-pill);
   /* Hell statt dunkel: Auf einer Glasscheibe ist der Griff eine Auflage
-     aus mattem Glas, keine eingefraeste Rille. */
-  background: rgba(255, 255, 255, 0.30);
+     aus mattem Glas, keine eingefraeste Rille. Deutlich genug, dass man
+     ihn als Griff erkennt - er ist die einzige Stelle, an der man die
+     Karte groesser ziehen kann, und wer ihn uebersieht, findet die
+     Funktion nie. */
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 .panel-grip:hover .panel-grip-strich { background: var(--muted); }
 
@@ -1566,7 +1570,17 @@ body.nav-modus .leaflet-control-zoom { display: none; }
    der Navigation ist die Karte absichtlich viel grösser als der Bildschirm
    (Begründung gleich darunter). Ohne diese Zeile würde sie über den ganzen
    Rest der Seite quellen. */
-#mapWrap { flex: 1; position: relative; overflow: hidden; }
+/* "isolation: isolate" ist die wichtigste Zeile dieses Kastens. Leaflet
+   vergibt INNERHALB der Karte z-index-Werte von 200 bis 1000 (Kacheln 200,
+   Marker 600, Bedienelemente 1000). Ohne einen eigenen Stapelkontext
+   messen sich diese Werte mit allem anderen auf der Seite - und schlagen
+   das Bedienfeld mit seiner 5 muehelos. Die Folge war sichtbar: Die
+   Schublade schiebt sich um eine Eckenrundung ueber die Karte, und genau
+   dieser Streifen wurde von den Kacheln uebermalt. Mit ihm verschwanden
+   der Griff zum Ziehen, die gerundete Oberkante und die helle Trennlinie.
+   "isolate" sperrt Leaflets Zahlen in den Kasten, danach zaehlt nach
+   aussen nur noch der Kasten selbst. */
+#mapWrap { flex: 1; position: relative; overflow: hidden; isolation: isolate; }
 
 #map { position: absolute; inset: 0; background: var(--surface-2); }
 
@@ -1673,8 +1687,10 @@ body.nav-modus .leaflet-control-container { display: none; }
 
 /* ---------- Overlays ---------- */
 .toast {
-  position: absolute;
-  top: 16px; left: 50%;
+  /* fixed statt absolute: Der Toast haengt jetzt am Bildschirm, nicht
+     mehr an der Karte. Der Abstand nach oben nimmt die Notch mit. */
+  position: fixed;
+  top: calc(16px + env(safe-area-inset-top)); left: 50%;
   transform: translateX(-50%);
   background: rgba(14, 15, 18, 0.80);
   backdrop-filter: blur(20px) saturate(160%);
