@@ -388,6 +388,46 @@ function zeichneVorschläge() {
 }
 
 
+/* Der kleine Shop unten in der Garage: eine wischbare Querleiste.
+   Zuerst alles von der Merkliste (Hinweis "Gemerkt"), dann fuellen die
+   persoenlichen Vorschlaege auf - dieselbe Logik wie im Shop selbst,
+   nur kompakter dargestellt. Gerufen aus zeigeGarage() in app.js,
+   defensiv wie zeichneShop(). */
+function zeichneGarageShop() {
+  const platte = document.getElementById('garageShop');
+  const band = document.getElementById('garageShopBand');
+  if (!platte || !band) return;
+
+  const produkte = shopKatalog().produkte;
+  const einträge = [];
+  const schonDrin = new Set();
+  const nimm = (produkt, hinweis) => {
+    if (!produkt || schonDrin.has(produkt.id) || einträge.length >= 8) return;
+    schonDrin.add(produkt.id);
+    einträge.push({ produkt, hinweis });
+  };
+
+  shopAblage.merkliste.forEach(eintrag =>
+    nimm(produkte.find(p => p.id === eintrag.produktId), 'Gemerkt'));
+  (persönlicheVorschläge() || []).forEach(({ produkt }) => nimm(produkt, 'Für dich'));
+  // Ohne Motorrad und ohne Merkliste zeigt die Leiste einfach den Anfang
+  // des Katalogs - leer waere sie nur ein grauer Balken ohne Zweck.
+  produkte.forEach(produkt => nimm(produkt, 'Aus dem Shop'));
+
+  band.innerHTML = einträge.map(({ produkt, hinweis }) => {
+    const ab = günstigstesGesamt(produkt);
+    return `
+      <button type="button" class="garage-shop-karte" data-produkt="${sicher(produkt.id)}">
+        ${produktMiniBild(produkt)}
+        <span class="garage-shop-name">${sicher(produkt.marke)} ${sicher(produkt.name)}</span>
+        <span class="garage-shop-meta">${sicher(hinweis)}${ab !== null ? ' &middot; ab ' + euro(ab) : ''}</span>
+      </button>`;
+  }).join('');
+
+  platte.hidden = false;
+}
+
+
 /* --- 6. Die Produktseite ----------------------------------------------------
    Ein Produkt, alle Angebote. Die Seite wird bei jedem Aufruf komplett
    neu zusammengebaut - bei einer Handvoll Angebote ist das billiger und
@@ -562,6 +602,13 @@ verkabele('shopVerzeichnis', 'click', ereignis => {
   const knopf = ereignis.target.closest('button[data-shop]');
   if (knopf) öffneShopSeite(SHOP_VERZEICHNIS[Number(knopf.dataset.shop)]);
 });
+
+verkabele('garageShopBand', 'click', ereignis => {
+  const karte = ereignis.target.closest('[data-produkt]');
+  if (karte) zeigeProdukt(karte.dataset.produkt);
+});
+
+verkabele('btnGarageShopAlle', 'click', zeigeShop);
 
 verkabele('shopProduktListe', 'click', ereignis => {
   const zeile = ereignis.target.closest('li[data-produkt]');

@@ -2742,6 +2742,9 @@ function zeigePlaner() {
 function zeigeGarage() {
   zeigeBildschirm('garageScreen');
   if (typeof zeichneGarage === 'function') zeichneGarage();
+  // Die kleine Shop-Leiste unten stammt aus shop.js - gleiche Absicherung
+  // wie bei der Garage selbst: Fehlt die Datei, fehlt nur die Leiste.
+  if (typeof zeichneGarageShop === 'function') zeichneGarageShop();
 }
 
 /* Der Shop. zeichneShop() steht in shop.js, das wie garage.js NACH dieser

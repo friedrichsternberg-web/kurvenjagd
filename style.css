@@ -3289,3 +3289,55 @@ body.nav-modus .leaflet-control-container { display: none; }
 /* "Direkt zu den Shops": dieselben Chips wie bei den Kategorien, nur
    dass sie nach draussen fuehren. */
 .shop-links { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* Die Shop-Leiste in der Garage: eine schmale, wischbare Reihe aus
+   Karten. Sie ist bewusst klein - die Buehne mit der Maschine bleibt
+   der Star des Bildschirms, und die Kein-Scrollen-Regel muss halten. */
+.garage-shop { padding: var(--s3); }
+.garage-shop-kopf {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--s2);
+}
+.garage-shop-kopf h3 {
+  margin: 0;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.garage-shop-band {
+  display: flex;
+  gap: var(--s2);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  /* Etwas Luft, damit der Fokusrand der Karten nicht abgeschnitten wird. */
+  padding: 2px;
+}
+.garage-shop-band::-webkit-scrollbar { display: none; }
+.garage-shop-karte {
+  flex: 0 0 108px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text);
+  text-align: left;
+  font-family: var(--schrift-text);
+  cursor: pointer;
+}
+.garage-shop-karte .produkt-mini-bild { width: 100%; height: 58px; }
+.garage-shop-name {
+  font-size: 12px;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;      /* lange Namen enden nach zwei Zeilen */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.garage-shop-meta { font-size: 11px; color: var(--accent-hell); }
