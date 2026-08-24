@@ -23,7 +23,7 @@
        "orientation": "portrait" im Manifest ist die Ansage, um die es hier
        geht: Diese App ist fuers Hochformat gebaut. Die spaetere Webseite
        bekommt ein eigenes Design fuers Querformat und ein eigenes Manifest. -->
-  <link rel="manifest" href="manifest.webmanifest?v=69">
+  <link rel="manifest" href="manifest.webmanifest?v=71">
 
   <!-- Faerbt die Statusleiste des Handys in die Grundflaeche der App, damit
        oben kein fremder heller Streifen stehen bleibt. -->
@@ -36,7 +36,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Kurvenjagd">
-  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=69">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=71">
 
   <!-- Fuer die spaetere Webseite und geteilte Routen: So sieht der Link aus,
        wenn ihn jemand in WhatsApp oder Instagram einfuegt. Ohne das steht
@@ -99,8 +99,8 @@
                    die spaetere Webseite genauso benutzen.
        style.css   die Anordnung DIESER App, ausgelegt auf Hochformat. Die
                    Webseite bekommt dafuer eine eigene Datei. -->
-  <link rel="stylesheet" href="design.css?v=69">
-  <link rel="stylesheet" href="style.css?v=69">
+  <link rel="stylesheet" href="design.css?v=71">
+  <link rel="stylesheet" href="style.css?v=71">
 </head>
 <body>
 
@@ -255,7 +255,7 @@
        Glasplatten darueber: helle Lichtkante oben, Schatten unten, ein
        weicher Glanz quer darueber. Community und "Mehr entdecken" aus der
        Vorlage bleiben bewusst weg - es gibt nur, was auch funktioniert. -->
-  <div id="startMenu" class="start-screen startseite">
+  <div id="startMenu" class="start-screen startseite" hidden>
 
     <!-- Der Bildbereich traegt Kopfzeile UND Schriftzug. Beides liegt auf
          dem Foto, so wie in der Vorlage - das spart die Hoehe, die der
@@ -307,7 +307,7 @@
        absolut positioniert. Vorher lag sie auf festen Pixelwerten und ist
        auf dem iPhone in die Ueberschrift gelaufen, weil die Statusleiste den
        Kopf nach unten schiebt. Im Fluss kann das nicht mehr passieren. -->
-  <div id="garageScreen" class="garage-screen" hidden>
+  <div id="garageScreen" class="garage-screen">
 
     <div class="garage-raum" id="garageRaum">
 
@@ -755,7 +755,7 @@
         <p class="sub">
           Die App kannst du weiter benutzen, zum Planen brauchst du kein Konto.
         </p>
-        <button class="btn" id="btnKontoGeloeschtWeiter">Zurück zum Start</button>
+        <button class="btn" id="btnKontoGeloeschtWeiter">Zur Garage</button>
       </div>
     </div>
   </div>
@@ -875,7 +875,7 @@
           <button class="btn" id="btnRideStart">Aufzeichnung starten</button>
         </div>
         <div class="row">
-          <button class="btn ghost" id="btnRideZurueck">Zur&uuml;ck zum Start</button>
+          <button class="btn ghost" id="btnRideZurueck">Zur&uuml;ck zur Garage</button>
         </div>
       </div>
 
@@ -997,7 +997,7 @@
         <h1 class="brand-title">Kurvenjagd</h1>
         <p class="sub">Routenplaner</p>
       </div>
-      <button class="back-to-start" id="btnZumStartmenü" title="Zurück zum Startmenü">&larr;</button>
+      <button class="back-to-start" id="btnZumStartmenü" title="Zur Garage">&larr;</button>
     </header>
 
     <!-- Planungsart: normale Route zwischen Punkten, oder Rundtour ab
@@ -1392,23 +1392,23 @@
   <!-- ZUERST, denn alle anderen benutzen geraet.* beim Laden. Hier steht der
        gesamte Zugriff aufs Geraet - Standort, Speicher, Dateien. Beim Umzug
        in die Stores ist das die einzige Datei, die sich aendert. -->
-  <script src="geraet.js?v=69"></script>
+  <script src="geraet.js?v=71"></script>
   <!-- Der Rechenteil: Kurvigkeit, Sackgassen, Rundtour-Punkte, GPX. Muss VOR
        app.js stehen, weil app.js diese Funktionen beim Routen aufruft. Die
        spaetere Webseite im Querformat laedt genau diese Datei ebenfalls und
        rechnet damit exakt so wie die App. -->
-  <script src="kern.js?v=69"></script>
-  <script src="app.js?v=69"></script>
+  <script src="kern.js?v=71"></script>
+  <script src="app.js?v=71"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=69"></script>
+  <script src="konto.js?v=71"></script>
   <!-- Nach app.js, weil die Garage verkleinereFoto() und showToast() von
        dort benutzt. -->
-  <script src="garage.js?v=69"></script>
+  <script src="garage.js?v=71"></script>
   <!-- Der Demo-Produktkatalog (nur Daten) und die Shop-Logik. produkte.js
        muss vor shop.js stehen, und beide nach garage.js, weil shop.js
        dessen Helfer (sicher, verkabele) mitbenutzt. -->
-  <script src="produkte.js?v=69"></script>
-  <script src="shop.js?v=69"></script>
+  <script src="produkte.js?v=71"></script>
+  <script src="shop.js?v=71"></script>
 </body>
 </html>

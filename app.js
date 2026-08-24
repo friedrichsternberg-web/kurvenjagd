@@ -2719,8 +2719,11 @@ function aktuellerBildschirm() {
   return BILDSCHIRME.find(id => !document.getElementById(id).hidden) || 'startMenu';
 }
 
+/* "Zurueck zum Anfang" heisst seit dem Umbau: in die Garage. Sie ist der
+   Startbildschirm - dort steht die eigene Maschine, darunter der Shop und
+   das Menue in die uebrigen Bereiche. */
 function zeigeStartmenü() {
-  zeigeBildschirm('startMenu');
+  zeigeGarage();
 }
 
 function zeigeMeineTouren() {
@@ -3081,4 +3084,4 @@ renderSaved();
 // Leiste muss trotzdem einmal ihren Zustand setzen, sonst waere sie zwar
 // da, aber ohne hervorgehobenen Eintrag - und die Bildschirme wuerden
 // unten keinen Platz fuer sie freihalten.
-aktualisiereLeiste('startMenu');
+aktualisiereLeiste('garageScreen');

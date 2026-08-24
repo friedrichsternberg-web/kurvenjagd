@@ -671,3 +671,12 @@ verkabele('shopProduktInhalt', 'click', ereignis => {
     .sort((a, b) => a.gesamt - b.gesamt);
   öffneAngebot(angebote[Number(knopf.dataset.angebot)]);
 });
+
+
+/* Einmal beim Start zeichnen. Der Grund steht in der Ladereihenfolge:
+   zeichneGarageShop() wird sonst nur aus zeigeGarage() gerufen - und seit
+   die Garage der erste sichtbare Bildschirm ist, findet dieser Aufruf beim
+   allerersten Oeffnen nicht statt. Am Ende von app.js waere es wirkungslos,
+   denn shop.js wird erst danach geladen. Deshalb hier, in der zuletzt
+   geladenen Datei. */
+zeichneGarageShop();
