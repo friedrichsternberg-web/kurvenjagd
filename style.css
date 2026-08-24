@@ -3154,23 +3154,79 @@ body.nav-modus .leaflet-control-container { display: none; }
   text-align: center;
 }
 
-/* Die Produktseite. Oben eine Glasflaeche mit dem grossen
-   Kategorie-Symbol - der Platz, an dem spaeter das echte Produktfoto aus
-   dem Haendlerkatalog steht. Bis die Bildlizenz gesichert ist, bleibt es
-   beim eigenen Symbol. */
-.shop-bild-platzhalter {
+/* Die Bildergalerie der Produktseite: ein wischbares Band, jedes Bild
+   eine volle Breite, scroll-snap laesst es beim Loslassen einschnappen.
+   Hier stehen spaeter die echten Produktfotos aus dem Haendlerkatalog;
+   bis die Bildlizenz gesichert ist, malt die App das Kategorie-Symbol
+   mit einer ehrlichen Beschriftung. */
+.galerie { margin-bottom: var(--s3); }
+.galerie-band {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;            /* das Band selbst zeigt, wo man ist */
+  border-radius: var(--r-md);
+  gap: var(--s2);
+}
+.galerie-band::-webkit-scrollbar { display: none; }
+.galerie-bild {
+  flex: 0 0 100%;
+  scroll-snap-align: center;
   display: grid;
   place-items: center;
-  height: 150px;
-  margin-bottom: var(--s3);
+  align-content: center;
+  gap: var(--s2);
+  height: 230px;
+  margin: 0;
   border: 1px solid var(--glas-rand);
   border-radius: var(--r-md);
   background: var(--glas-hell);
 }
-.shop-bild-platzhalter .ic {
-  width: 64px;
-  height: 64px;
-  color: var(--accent-hell);
+.galerie-bild .ic { width: 84px; height: 84px; color: var(--accent-hell); }
+.galerie-bild img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: var(--r-md);
+}
+.galerie-bild figcaption { color: var(--muted); font-size: 12px; }
+.galerie-punkte {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: var(--s2);
+}
+.galerie-punkte span {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: var(--glas-licht);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.galerie-punkte span.aktiv {
+  background: var(--accent-hell);
+  transform: scale(1.3);
+}
+
+/* Die Bildkachel in den Listen: gross genug, dass ein echtes Foto etwas
+   zeigt, bis dahin das Kategorie-Symbol auf Glas. */
+.produkt-mini-bild {
+  flex: 0 0 auto;
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--glas-rand);
+  border-radius: var(--r-sm);
+  background: var(--glas-hell);
+}
+.produkt-mini-bild .ic { width: 30px; height: 30px; color: var(--accent-hell); }
+.produkt-mini-bild img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: var(--r-sm);
 }
 
 .produkt-titel { margin: 0; }

@@ -20,10 +20,11 @@
      angebote[].versand   <- delivery_cost
      angebote[].deeplink  <- aw_deep_link   (fertiger Provisionslink)
      angebote[].stand     <- last_updated
-     bild.url             <- aw_image_url   (erst nutzen, wenn die
-                                             Bildlizenz des Programms
-                                             gesichert ist - bis dahin
-                                             malt die App das SVG-Symbol)
+     bilder[].url         <- aw_image_url und weitere Bild-Spalten
+                                            (erst nutzen, wenn die Bildlizenz
+                                             des Programms gesichert ist -
+                                             bis dahin malt die App das
+                                             SVG-Symbol samt Beschriftung)
 
    Zwei Regeln fuer neue Eintraege:
 
@@ -58,7 +59,15 @@ const PRODUKT_KATALOG = {
         { name: 'Norm', wert: 'ECE 22.06' },
         { name: 'Visier', wert: 'Pinlock vorbereitet' },
       ],
-      bild: { symbol: 'helm', url: null },
+      symbol: 'helm',
+      bilder: [
+        // Drei Plaetze je Produkt. url fuellt spaeter der Haendler-Feed;
+        // solange sie leer sind, zeichnet die App den Platzhalter mit dem
+        // Kategorie-Symbol und dieser Beschriftung.
+        { url: null, beschriftung: 'Produktfoto folgt aus dem Händlerkatalog' },
+        { url: null, beschriftung: 'Detailansicht folgt' },
+        { url: null, beschriftung: 'Weitere Ansicht folgt' },
+      ],
       passtZu: { marken: [], modelle: [] },   // leer = passt zu jedem Motorrad
       meinung: {
         titel: 'Unsere Einschätzung',
@@ -84,7 +93,15 @@ const PRODUKT_KATALOG = {
         { name: 'Norm', wert: 'ECE 22.06' },
         { name: 'Visier', wert: 'Pinlock im Lieferumfang' },
       ],
-      bild: { symbol: 'helm', url: null },
+      symbol: 'helm',
+      bilder: [
+        // Drei Plaetze je Produkt. url fuellt spaeter der Haendler-Feed;
+        // solange sie leer sind, zeichnet die App den Platzhalter mit dem
+        // Kategorie-Symbol und dieser Beschriftung.
+        { url: null, beschriftung: 'Produktfoto folgt aus dem Händlerkatalog' },
+        { url: null, beschriftung: 'Detailansicht folgt' },
+        { url: null, beschriftung: 'Weitere Ansicht folgt' },
+      ],
       passtZu: { marken: [], modelle: [] },
       meinung: {
         titel: 'Unsere Einschätzung',
@@ -109,7 +126,15 @@ const PRODUKT_KATALOG = {
         { name: 'Zertifiziert', wert: 'CE' },
         { name: 'Verschluss', wert: 'Reißverschluss + Klett' },
       ],
-      bild: { symbol: 'stiefel', url: null },
+      symbol: 'stiefel',
+      bilder: [
+        // Drei Plaetze je Produkt. url fuellt spaeter der Haendler-Feed;
+        // solange sie leer sind, zeichnet die App den Platzhalter mit dem
+        // Kategorie-Symbol und dieser Beschriftung.
+        { url: null, beschriftung: 'Produktfoto folgt aus dem Händlerkatalog' },
+        { url: null, beschriftung: 'Detailansicht folgt' },
+        { url: null, beschriftung: 'Weitere Ansicht folgt' },
+      ],
       passtZu: { marken: [], modelle: [] },
       meinung: {
         titel: 'Unsere Einschätzung',
@@ -139,7 +164,15 @@ const PRODUKT_KATALOG = {
         { name: 'Membran', wert: 'herausnehmbar' },
         { name: 'Protektoren', wert: 'Schulter + Ellbogen (CE)' },
       ],
-      bild: { symbol: 'jacke', url: null },
+      symbol: 'jacke',
+      bilder: [
+        // Drei Plaetze je Produkt. url fuellt spaeter der Haendler-Feed;
+        // solange sie leer sind, zeichnet die App den Platzhalter mit dem
+        // Kategorie-Symbol und dieser Beschriftung.
+        { url: null, beschriftung: 'Produktfoto folgt aus dem Händlerkatalog' },
+        { url: null, beschriftung: 'Detailansicht folgt' },
+        { url: null, beschriftung: 'Weitere Ansicht folgt' },
+      ],
       passtZu: { marken: [], modelle: [] },
       meinung: {
         titel: 'Unsere Einschätzung',
@@ -165,7 +198,15 @@ const PRODUKT_KATALOG = {
         { name: 'Protektoren', wert: 'Knie (CE)' },
         { name: 'Anschluss', wert: 'Verbindungsreißverschluss' },
       ],
-      bild: { symbol: 'hose', url: null },
+      symbol: 'hose',
+      bilder: [
+        // Drei Plaetze je Produkt. url fuellt spaeter der Haendler-Feed;
+        // solange sie leer sind, zeichnet die App den Platzhalter mit dem
+        // Kategorie-Symbol und dieser Beschriftung.
+        { url: null, beschriftung: 'Produktfoto folgt aus dem Händlerkatalog' },
+        { url: null, beschriftung: 'Detailansicht folgt' },
+        { url: null, beschriftung: 'Weitere Ansicht folgt' },
+      ],
       passtZu: { marken: [], modelle: [] },
       meinung: {
         titel: 'Unsere Einschätzung',
@@ -190,7 +231,15 @@ const PRODUKT_KATALOG = {
         { name: 'Membran', wert: 'wasserdichte Kammer' },
         { name: 'Material', wert: 'Leder + Textil' },
       ],
-      bild: { symbol: 'handschuh', url: null },
+      symbol: 'handschuh',
+      bilder: [
+        // Drei Plaetze je Produkt. url fuellt spaeter der Haendler-Feed;
+        // solange sie leer sind, zeichnet die App den Platzhalter mit dem
+        // Kategorie-Symbol und dieser Beschriftung.
+        { url: null, beschriftung: 'Produktfoto folgt aus dem Händlerkatalog' },
+        { url: null, beschriftung: 'Detailansicht folgt' },
+        { url: null, beschriftung: 'Weitere Ansicht folgt' },
+      ],
       passtZu: { marken: [], modelle: [] },
       meinung: {
         titel: 'Unsere Einschätzung',
@@ -216,7 +265,15 @@ const PRODUKT_KATALOG = {
         { name: 'Norm', wert: 'EN 1621-2' },
         { name: 'Träger', wert: 'zum Einschieben in die Jacke' },
       ],
-      bild: { symbol: 'protektor', url: null },
+      symbol: 'protektor',
+      bilder: [
+        // Drei Plaetze je Produkt. url fuellt spaeter der Haendler-Feed;
+        // solange sie leer sind, zeichnet die App den Platzhalter mit dem
+        // Kategorie-Symbol und dieser Beschriftung.
+        { url: null, beschriftung: 'Produktfoto folgt aus dem Händlerkatalog' },
+        { url: null, beschriftung: 'Detailansicht folgt' },
+        { url: null, beschriftung: 'Weitere Ansicht folgt' },
+      ],
       passtZu: { marken: [], modelle: [] },
       meinung: {
         titel: 'Unsere Einschätzung',
@@ -241,7 +298,15 @@ const PRODUKT_KATALOG = {
         { name: 'Volumen', wert: '22 l je Koffer' },
         { name: 'System', wert: 'Monokey Side' },
       ],
-      bild: { symbol: 'koffer', url: null },
+      symbol: 'koffer',
+      bilder: [
+        // Drei Plaetze je Produkt. url fuellt spaeter der Haendler-Feed;
+        // solange sie leer sind, zeichnet die App den Platzhalter mit dem
+        // Kategorie-Symbol und dieser Beschriftung.
+        { url: null, beschriftung: 'Produktfoto folgt aus dem Händlerkatalog' },
+        { url: null, beschriftung: 'Detailansicht folgt' },
+        { url: null, beschriftung: 'Weitere Ansicht folgt' },
+      ],
       passtZu: { marken: [], modelle: [] },
       meinung: {
         titel: 'Unsere Einschätzung',
@@ -266,7 +331,15 @@ const PRODUKT_KATALOG = {
         { name: 'Passt an', wert: 'Honda CB650R' },
         { name: 'Montage', wert: 'ohne Bohren' },
       ],
-      bild: { symbol: 'motorrad', url: null },
+      symbol: 'motorrad',
+      bilder: [
+        // Drei Plaetze je Produkt. url fuellt spaeter der Haendler-Feed;
+        // solange sie leer sind, zeichnet die App den Platzhalter mit dem
+        // Kategorie-Symbol und dieser Beschriftung.
+        { url: null, beschriftung: 'Produktfoto folgt aus dem Händlerkatalog' },
+        { url: null, beschriftung: 'Detailansicht folgt' },
+        { url: null, beschriftung: 'Weitere Ansicht folgt' },
+      ],
       // Modellgebundenes Teil: Genau dafuer gibt es passtZu - die
       // Vorschlaege koennen es Fahrern der passenden Maschine zeigen.
       passtZu: { marken: ['HONDA'], modelle: ['CB650R'] },
@@ -293,7 +366,15 @@ const PRODUKT_KATALOG = {
         { name: 'Passt an', wert: 'Kawasaki Z 900' },
         { name: 'System', wert: 'Monokey / Monolock' },
       ],
-      bild: { symbol: 'motorrad', url: null },
+      symbol: 'motorrad',
+      bilder: [
+        // Drei Plaetze je Produkt. url fuellt spaeter der Haendler-Feed;
+        // solange sie leer sind, zeichnet die App den Platzhalter mit dem
+        // Kategorie-Symbol und dieser Beschriftung.
+        { url: null, beschriftung: 'Produktfoto folgt aus dem Händlerkatalog' },
+        { url: null, beschriftung: 'Detailansicht folgt' },
+        { url: null, beschriftung: 'Weitere Ansicht folgt' },
+      ],
       passtZu: { marken: ['KAWASAKI'], modelle: ['Z 900', 'Z900'] },
       meinung: {
         titel: 'Unsere Einschätzung',

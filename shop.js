@@ -142,6 +142,19 @@ function kategorieName(schlüssel) {
   return SHOP_KATEGORIEN.find(k => k.schlüssel === schlüssel)?.name || schlüssel;
 }
 
+/* Die Bildkachel eines Produkts, wie sie in allen Listen steht. Gibt es
+   ein echtes Foto (bilder[0].url, spaeter aus dem Haendler-Feed), zeigt
+   sie das - bis dahin das Kategorie-Symbol auf Glas. EINE Funktion fuer
+   alle Listen, damit der Wechsel auf echte Fotos ein Handgriff ist. */
+function produktMiniBild(produkt) {
+  const erstes = produkt.bilder[0];
+  if (erstes?.url) {
+    return `<span class="produkt-mini-bild"><img src="${sicher(erstes.url)}"
+      alt="${sicher(produkt.marke + ' ' + produkt.name)}"></span>`;
+  }
+  return `<span class="produkt-mini-bild" title="${sicher(kategorieName(produkt.kategorie))}">${symbol(produkt.symbol)}</span>`;
+}
+
 /* Was gerade gefiltert wird. kategorie null heisst "Alle". Die Suche
    ist immer kleingeschrieben abgelegt, damit der Vergleich unten nicht
    an Gross-/Kleinschreibung haengt. */
@@ -199,7 +212,7 @@ function zeichneProduktListe() {
       : `ab ${euro(ab)} inkl. Versand`;
     return `
       <li data-produkt="${sicher(produkt.id)}">
-        <span class="saved-marke" title="${sicher(kategorieName(produkt.kategorie))}">${symbol(produkt.bild.symbol, 'klein')}</span>
+        ${produktMiniBild(produkt)}
         <span class="saved-text">
           <span class="saved-name">${sicher(produkt.marke)} ${sicher(produkt.name)}</span>
           <span class="saved-meta">${sicher(kategorieName(produkt.kategorie))} <i>&middot;</i> ${abText}</span>
@@ -237,7 +250,7 @@ function zeichneMerkliste() {
 
     return `
       <li data-produkt="${sicher(produkt.id)}">
-        <span class="saved-marke">${symbol(produkt.bild.symbol, 'klein')}</span>
+        ${produktMiniBild(produkt)}
         <span class="saved-text">
           <span class="saved-name">${sicher(produkt.marke)} ${sicher(produkt.name)}</span>
           <span class="saved-meta">Gemerkt am ${datum}${vergleich ? ' <i>&middot;</i> ' + vergleich : ''}</span>
@@ -346,7 +359,7 @@ function zeichneVorschläge() {
       <ul class="saved-list">
         ${vorschläge.map(({ produkt, grund }) => `
           <li data-produkt="${sicher(produkt.id)}">
-            <span class="saved-marke">${symbol(produkt.bild.symbol, 'klein')}</span>
+            ${produktMiniBild(produkt)}
             <span class="saved-text">
               <span class="saved-name">${sicher(produkt.marke)} ${sicher(produkt.name)}</span>
               <span class="saved-meta vorschlag-grund">${sicher(grund)}</span>
@@ -411,8 +424,25 @@ function zeichneProduktSeite() {
       <button class="btn klein" data-angebot="${stelle}">Zum Shop</button>
     </li>`).join('');
 
+  // Die Bilder als wischbares Band: jedes Bild schnappt beim Loslassen
+  //  ein (CSS scroll-snap, kein eigener Wisch-Code noetig). Die Punkte
+  //  darunter zeigen, wo man ist.
+  const galerieBilder = produkt.bilder.map(bild => `
+    <figure class="galerie-bild">
+      ${bild.url
+        ? `<img src="${sicher(bild.url)}" alt="${sicher(produkt.marke + ' ' + produkt.name)}">`
+        : `${symbol(produkt.symbol, 'gross')}
+           <figcaption>${sicher(bild.beschriftung)}</figcaption>`}
+    </figure>`).join('');
+
+  const galeriePunkte = produkt.bilder.map((_, stelle) =>
+    `<span class="${stelle === 0 ? 'aktiv' : ''}"></span>`).join('');
+
   inhalt.innerHTML = `
-    <div class="shop-bild-platzhalter">${symbol(produkt.bild.symbol, 'gross')}</div>
+    <div class="galerie">
+      <div class="galerie-band" id="galerieBand">${galerieBilder}</div>
+      ${produkt.bilder.length > 1 ? `<div class="galerie-punkte" id="galeriePunkte">${galeriePunkte}</div>` : ''}
+    </div>
 
     <h2 class="produkt-titel">${sicher(produkt.marke)} ${sicher(produkt.name)}</h2>
     <p class="hint produkt-kategorie">${sicher(kategorieName(produkt.kategorie))}</p>
@@ -463,6 +493,15 @@ function zeichneProduktSeite() {
     <button class="btn ghost merken-knopf" data-merken="${sicher(produkt.id)}">
       ${istGemerkt(produkt.id) ? 'Gemerkt &#10003; &ndash; wieder entfernen' : 'Merken &ndash; Preis im Blick behalten'}
     </button>`;
+
+  const band = document.getElementById('galerieBand');
+  const punkte = document.getElementById('galeriePunkte');
+  if (band && punkte) {
+    band.addEventListener('scroll', () => {
+      const stelle = Math.round(band.scrollLeft / band.clientWidth);
+      [...punkte.children].forEach((punkt, i) => punkt.classList.toggle('aktiv', i === stelle));
+    }, { passive: true });
+  }
 }
 
 
