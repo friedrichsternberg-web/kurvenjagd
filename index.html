@@ -23,7 +23,7 @@
        "orientation": "portrait" im Manifest ist die Ansage, um die es hier
        geht: Diese App ist fuers Hochformat gebaut. Die spaetere Webseite
        bekommt ein eigenes Design fuers Querformat und ein eigenes Manifest. -->
-  <link rel="manifest" href="manifest.webmanifest?v=52">
+  <link rel="manifest" href="manifest.webmanifest?v=53">
 
   <!-- Faerbt die Statusleiste des Handys in die Grundflaeche der App, damit
        oben kein fremder heller Streifen stehen bleibt. -->
@@ -36,7 +36,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Kurvenjagd">
-  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=52">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=53">
 
   <!-- Fuer die spaetere Webseite und geteilte Routen: So sieht der Link aus,
        wenn ihn jemand in WhatsApp oder Instagram einfuegt. Ohne das steht
@@ -74,7 +74,7 @@
        durchgehend alte Version, weil die Seite dann Elemente enthält, die
        das Skript noch gar nicht kennt.
 
-       Für den Browser ist "app.js?v=52" eine andere Adresse als "app.js?v=26",
+       Für den Browser ist "app.js?v=53" eine andere Adresse als "app.js?v=26",
        er holt sie also frisch.
 
        WICHTIG: BEI JEDER VERÖFFENTLICHUNG die Zahl an ALLEN Stellen um eins
@@ -90,8 +90,8 @@
                    die spaetere Webseite genauso benutzen.
        style.css   die Anordnung DIESER App, ausgelegt auf Hochformat. Die
                    Webseite bekommt dafuer eine eigene Datei. -->
-  <link rel="stylesheet" href="design.css?v=52">
-  <link rel="stylesheet" href="style.css?v=52">
+  <link rel="stylesheet" href="design.css?v=53">
+  <link rel="stylesheet" href="style.css?v=53">
 </head>
 <body>
 
@@ -227,6 +227,10 @@
         <path d="M17.8 3.7a2.4 2.4 0 0 1 2.5 4l-8.4 5.6-1.7-2.6 7.6-7Z"/>
         <path d="M9.5 12.2c1.6-.6 3 .6 3 2.3 0 2.2-1.6 4-4.5 4-1.4 0-2.3-.4-3.5-1.2 1.4-.3 1.9-1.2 2.2-2.4.3-1.4 1.2-2.3 2.8-2.7Z"/>
       </symbol>
+      <symbol id="icon-shop" viewBox="0 0 24 24">
+        <path d="M20.5 10.6V5.4a1.9 1.9 0 0 0-1.9-1.9h-5.2L3.9 13a2 2 0 0 0 0 2.8l4.3 4.3a2 2 0 0 0 2.8 0l9.5-9.5Z"/>
+        <circle cx="16.2" cy="7.8" r="1.5"/>
+      </symbol>
       <symbol id="icon-zurueck" viewBox="0 0 24 24">
         <path d="M4 9.5h10.5a5 5 0 0 1 0 10H8"/><path d="M7.5 5.5 3.5 9.5l4 4"/>
       </symbol>
@@ -341,6 +345,20 @@
             <span class="kachel-text">
               <span class="kachel-titel">Meine Touren</span>
               <span class="kachel-sub">Alle deine Fahrten auf einen Blick.</span>
+            </span>
+          </span>
+          <span class="kachel-pfeil" aria-hidden="true">&rarr;</span>
+        </button>
+
+        <!-- Der Shop bekommt die volle Rasterbreite unter dem 2x2-Block.
+             Noch ohne Hintergrundbild - das kann spaeter als
+             img/kacheln/shop.jpg dazukommen. -->
+        <button class="kachel kachel--breit" id="btnStartShop">
+          <span class="kachel-inhalt">
+            <svg class="ic gross kachel-symbol"><use href="#icon-shop"></use></svg>
+            <span class="kachel-text">
+              <span class="kachel-titel">Shop</span>
+              <span class="kachel-sub">Ausr&uuml;stung finden, Preise vergleichen.</span>
             </span>
           </span>
           <span class="kachel-pfeil" aria-hidden="true">&rarr;</span>
@@ -746,6 +764,55 @@
       <button class="btn ghost back-btn" id="btnTourenZurueck" hidden>&larr; Zurück</button>
       <h2>Meine Touren</h2>
       <ul id="tourenList" class="saved-list"></ul>
+    </div>
+  </div>
+
+  <!-- ===== Shop: Preisvergleich fuer Ausruestung =====
+       Zwei Bildschirme: die Uebersicht (#shopScreen) mit Vorschlaegen,
+       Kategorien, Suche und Merkliste, und die Produktseite
+       (#shopProduktScreen), deren Inhalt shop.js komplett zusammenbaut.
+
+       Der DEMO-Balken steht mit Absicht als festes HTML in beiden
+       Bildschirmen und wird nie per Skript angefasst: Alle Preise sind
+       vorerst Beispieldaten, und dieser Hinweis darf durch keinen
+       Skriptfehler verschwinden koennen. ===== -->
+  <div id="shopScreen" class="start-screen listen-screen" hidden>
+    <div class="start-screen-inner">
+      <p class="shop-demo-balken">DEMO &middot; Alle Preise und Angebote sind Beispieldaten, keine echten Angebote.</p>
+      <h2>Shop</h2>
+
+      <!-- "Fuer dich": Vorschlaege, die zur eigenen Garage passen. Fuellt shop.js. -->
+      <div id="shopVorschlaege"></div>
+
+      <!-- Kategorien als Chips, dasselbe Muster wie die Markenwahl im
+           Motorrad-Finder. Fuellt shop.js. -->
+      <div class="finder-marken" id="shopKategorien"></div>
+
+      <!-- Die Suche filtert nur die mitgelieferte Produktliste - hier
+           geht nichts ins Netz. -->
+      <div class="such-feld search-wrap">
+        <input type="search" id="shopSuche" class="search-input"
+               placeholder="Produkt oder Marke suchen &hellip;" autocomplete="off">
+      </div>
+
+      <ul id="shopProduktListe" class="saved-list">
+        <li class="empty">Der Shop f&uuml;llt sich in den n&auml;chsten Schritten.</li>
+      </ul>
+
+      <section class="block">
+        <h2>Merkliste</h2>
+        <ul id="shopMerkliste" class="saved-list">
+          <li class="empty">Noch nichts gemerkt.</li>
+        </ul>
+      </section>
+    </div>
+  </div>
+
+  <div id="shopProduktScreen" class="start-screen listen-screen" hidden>
+    <div class="start-screen-inner">
+      <p class="shop-demo-balken">DEMO &middot; Alle Preise und Angebote sind Beispieldaten, keine echten Angebote.</p>
+      <button class="btn ghost back-btn" id="btnShopZurueck">&larr; Zur&uuml;ck</button>
+      <div id="shopProduktInhalt"></div>
     </div>
   </div>
 
@@ -1283,18 +1350,18 @@
   <!-- ZUERST, denn alle anderen benutzen geraet.* beim Laden. Hier steht der
        gesamte Zugriff aufs Geraet - Standort, Speicher, Dateien. Beim Umzug
        in die Stores ist das die einzige Datei, die sich aendert. -->
-  <script src="geraet.js?v=52"></script>
+  <script src="geraet.js?v=53"></script>
   <!-- Der Rechenteil: Kurvigkeit, Sackgassen, Rundtour-Punkte, GPX. Muss VOR
        app.js stehen, weil app.js diese Funktionen beim Routen aufruft. Die
        spaetere Webseite im Querformat laedt genau diese Datei ebenfalls und
        rechnet damit exakt so wie die App. -->
-  <script src="kern.js?v=52"></script>
-  <script src="app.js?v=52"></script>
+  <script src="kern.js?v=53"></script>
+  <script src="app.js?v=53"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=52"></script>
+  <script src="konto.js?v=53"></script>
   <!-- Nach app.js, weil die Garage verkleinereFoto() und showToast() von
        dort benutzt. -->
-  <script src="garage.js?v=52"></script>
+  <script src="garage.js?v=53"></script>
 </body>
 </html>

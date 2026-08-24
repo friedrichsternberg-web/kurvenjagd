@@ -3128,3 +3128,28 @@ body.nav-modus .leaflet-control-container { display: none; }
   border-color: var(--accent);
 }
 .frei-werkzeug:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* =========================================================================
+   SHOP
+
+   Der Preisvergleich fuer Ausruestung. Fast alles hier benutzt Bausteine,
+   die es schon gibt (.saved-list, .stats, .marken-chip, .accordion) -
+   dieser Abschnitt ergaenzt nur, was dem Shop allein gehoert.
+   ========================================================================= */
+
+/* Der Demo-Balken. Er sagt auf beiden Shop-Bildschirmen unuebersehbar,
+   dass alle Preise Beispieldaten sind. Warmes Orange statt Markenblau,
+   weil es eine Warnung ist und keine Schmuckfarbe - dieselbe Logik wie
+   bei der Kurvigkeits-Skala, die auch nicht im Markenton faerbt. */
+.shop-demo-balken {
+  margin: 0 0 var(--s3);
+  padding: 8px 14px;
+  border: 1px solid color-mix(in srgb, var(--licht-warm) 55%, transparent);
+  border-radius: var(--r-sm);
+  background: var(--glas-dunkel);
+  color: var(--licht-warm);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-align: center;
+}

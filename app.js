@@ -2668,6 +2668,7 @@ function symbol(name, zusatz = '') {
    braucht ab jetzt genau einen Eintrag, hier. */
 const BILDSCHIRME = [
   'startMenu', 'garageScreen', 'tourenScreen', 'app', 'rideScreen',
+  'shopScreen', 'shopProduktScreen',
   'kontoScreen', 'profilScreen', 'passwortNeuScreen', 'kontoLoeschenScreen',
 ];
 
@@ -2696,8 +2697,12 @@ function aktualisiereLeiste(sichtbareId) {
   leiste.hidden = !zeigen;
   document.body.classList.toggle('mit-nav', zeigen);
 
+  // Die Produktseite ist ein eigener Bildschirm, gehoert aber zum Shop.
+  // Fuer die Hervorhebung wird sie deshalb auf den Shop abgebildet - sonst
+  // leuchtete beim Blaettern in ein Produkt gar kein Eintrag mehr.
+  const leuchtZiel = sichtbareId === 'shopProduktScreen' ? 'shopScreen' : sichtbareId;
   leiste.querySelectorAll('.nav-tab').forEach(knopf => {
-    knopf.classList.toggle('aktiv', knopf.dataset.ziel === sichtbareId);
+    knopf.classList.toggle('aktiv', knopf.dataset.ziel === leuchtZiel);
   });
 
   // Die Karten kennen ihre neue Groesse noch nicht, wenn sich der
@@ -2737,6 +2742,14 @@ function zeigePlaner() {
 function zeigeGarage() {
   zeigeBildschirm('garageScreen');
   if (typeof zeichneGarage === 'function') zeichneGarage();
+}
+
+/* Der Shop. zeichneShop() steht in shop.js, das wie garage.js NACH dieser
+   Datei geladen wird - deshalb dieselbe defensive Pruefung wie bei der
+   Garage: Fehlt shop.js, oeffnet sich wenigstens der leere Bildschirm. */
+function zeigeShop() {
+  if (typeof zeichneShop === 'function') zeichneShop();
+  zeigeBildschirm('shopScreen');
 }
 
 function zeigeRideScreen() {
@@ -2991,6 +3004,7 @@ document.querySelectorAll('.nav-tab').forEach(knopf => {
     else if (ziel === 'rideScreen') { zeigeRideScreen(); if (!ride.aktiv) rideZurücksetzen(); }
     else if (ziel === 'tourenScreen') zeigeMeineTouren();
     else if (ziel === 'garageScreen') zeigeGarage();
+    else if (ziel === 'shopScreen') zeigeShop();
     else zeigeStartmenü();
   });
 });
@@ -3017,6 +3031,10 @@ document.getElementById('btnNeuLaden').addEventListener('click', ereignis => {
 document.getElementById('btnStartPlaner').addEventListener('click', zeigePlaner);
 document.getElementById('btnStartTouren').addEventListener('click', zeigeMeineTouren);
 document.getElementById('btnStartGarage').addEventListener('click', zeigeGarage);
+document.getElementById('btnStartShop').addEventListener('click', zeigeShop);
+// Zurueck von der Produktseite fuehrt in die Shop-Uebersicht, nicht zum
+// Startmenue - man war ja gerade beim Stoebern.
+document.getElementById('btnShopZurueck').addEventListener('click', zeigeShop);
 document.getElementById('btnTourenZurueck').addEventListener('click', zeigeStartmenü);
 document.getElementById('btnZumStartmenü').addEventListener('click', () => {
   if (nav.aktiv) stopNavigation(); // laufende Navigation nicht einfach im Hintergrund weiterlaufen lassen
