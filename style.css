@@ -3153,3 +3153,58 @@ body.nav-modus .leaflet-control-container { display: none; }
   letter-spacing: 0.04em;
   text-align: center;
 }
+
+/* Die Produktseite. Oben eine Glasflaeche mit dem grossen
+   Kategorie-Symbol - der Platz, an dem spaeter das echte Produktfoto aus
+   dem Haendlerkatalog steht. Bis die Bildlizenz gesichert ist, bleibt es
+   beim eigenen Symbol. */
+.shop-bild-platzhalter {
+  display: grid;
+  place-items: center;
+  height: 150px;
+  margin-bottom: var(--s3);
+  border: 1px solid var(--glas-rand);
+  border-radius: var(--r-md);
+  background: var(--glas-hell);
+}
+.shop-bild-platzhalter .ic {
+  width: 64px;
+  height: 64px;
+  color: var(--accent-hell);
+}
+
+.produkt-titel { margin: 0; }
+.produkt-kategorie { margin: 2px 0 var(--s3); }
+
+/* Die Groessen als stumme Chips - reine Information, keine Auswahl.
+   Gewaehlt wird die Groesse spaeter im Shop, nicht hier. */
+.groessen-reihe { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: var(--s3); }
+.shop-groesse {
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--glas-rand);
+  background: var(--glas-hell);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.produkt-daten { margin-bottom: var(--s3); }
+.meinung-text { margin: 0; font-size: 14px; line-height: 1.55; }
+
+/* Eine Angebotszeile traegt mehr Zeilen als eine Tour in "Meine Touren",
+   deshalb bekommt der Text etwas Luft nach innen. Das Abzeichen "Anzeige"
+   steht in derselben Groesse wie der Platzname - eine Kennzeichnung, die
+   kleiner gedruckt ist als das, was sie kennzeichnet, kennzeichnet nichts. */
+.angebots-liste .saved-text { gap: 2px; }
+.angebot-kopf { display: flex; align-items: center; gap: 8px; }
+.angebot-kopf .badge.anzeige { font-size: 13px; color: var(--muted); }
+
+/* Der Gesamtpreis ist DIE Zahl des Vergleichs und steht deshalb im
+   Instrumenten-Stil, wie die Messwerte im Rest der App. */
+.angebot-gesamt {
+  font-family: var(--schrift-display);
+  font-size: 18px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}

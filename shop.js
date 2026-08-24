@@ -143,7 +143,112 @@ function zeichneProduktListe() {
 }
 
 
-/* --- 4. Verkabelung ---------------------------------------------------------
+/* --- 4. Die Produktseite ----------------------------------------------------
+   Ein Produkt, alle Angebote. Die Seite wird bei jedem Aufruf komplett
+   neu zusammengebaut - bei einer Handvoll Angebote ist das billiger und
+   einfacher als jedes Detail einzeln nachzufuehren.
+
+   Drei Dinge stehen hier aus RECHTLICHEN Gruenden und duerfen nicht
+   wegrationalisiert werden, sobald echte Angebote kommen:
+   - Versandkosten und GESAMTPREIS direkt in der Liste (BGH "Froogle"),
+     sortiert wird nach dem Gesamtpreis.
+   - Ein Zeitstempel AN JEDEM Angebot, nicht einer fuer die ganze Seite.
+   - Der Aufklapper "So entsteht dieser Vergleich": Ein Vergleich, der nur
+     Partner-Shops zeigt, muss genau das offenlegen (BGH I ZR 55/16). */
+
+// Welches Produkt gerade auf der Produktseite steht.
+let angezeigtesProdukt = null;
+
+function zeigeProdukt(produktId) {
+  angezeigtesProdukt = shopKatalog().produkte.find(p => p.id === produktId) || null;
+  if (!angezeigtesProdukt) return;
+  zeichneProduktSeite();
+  zeigeBildschirm('shopProduktScreen');
+  // Wer aus einer gescrollten Liste kommt, soll oben auf der Seite landen.
+  document.getElementById('shopProduktScreen').scrollTop = 0;
+}
+
+function zeichneProduktSeite() {
+  const produkt = angezeigtesProdukt;
+  const inhalt = document.getElementById('shopProduktInhalt');
+
+  // Die Angebote, dem Gesamtpreis nach sortiert. Der Verweis auf die
+  // Stelle im Original-Array bleibt erhalten, damit der Knopf "Zum Shop"
+  // spaeter das richtige Angebot oeffnet.
+  const angebote = angeboteZeigbar(produkt)
+    .map(angebot => ({ ...angebot, gesamt: angebot.preis + angebot.versand }))
+    .sort((a, b) => a.gesamt - b.gesamt);
+
+  // Die freien Plaetze heissen schlicht A, B, C ... - siehe produkte.js:
+  // keine echten Haendler mit erfundenen Preisen, keine erfundenen Namen.
+  const platzName = stelle => `Partner-Shop ${String.fromCharCode(65 + stelle)}`;
+
+  const angebotZeilen = angebote.map((angebot, stelle) => `
+    <li>
+      <span class="saved-text">
+        <span class="angebot-kopf">
+          <span class="badge anzeige">Anzeige</span>
+          <span class="saved-name">${platzName(stelle)}</span>
+        </span>
+        <span class="saved-meta">${euro(angebot.preis)} inkl. MwSt. <i>&middot;</i> ${angebot.versand === 0 ? 'versandkostenfrei' : 'zzgl. ' + euro(angebot.versand) + ' Versand'}</span>
+        <span class="angebot-gesamt">Gesamt ${euro(angebot.gesamt)}</span>
+        <span class="tiny">Stand: ${stempel(angebot.stand)}</span>
+      </span>
+      <button class="btn klein" data-angebot="${stelle}">Zum Shop</button>
+    </li>`).join('');
+
+  inhalt.innerHTML = `
+    <div class="shop-bild-platzhalter">${symbol(produkt.bild.symbol, 'gross')}</div>
+
+    <h2 class="produkt-titel">${sicher(produkt.marke)} ${sicher(produkt.name)}</h2>
+    <p class="hint produkt-kategorie">${sicher(kategorieName(produkt.kategorie))}</p>
+
+    ${produkt.groessen.length ? `
+      <div class="groessen-reihe">
+        ${produkt.groessen.map(g => `<span class="shop-groesse">${sicher(g)}</span>`).join('')}
+      </div>` : ''}
+
+    <div class="stats produkt-daten">
+      ${produkt.eigenschaften.map(e => `
+        <div class="stat"><span class="k">${sicher(e.k)}</span><span class="v">${sicher(e.v)}</span></div>`).join('')}
+    </div>
+
+    <section class="block">
+      <h2>${sicher(produkt.meinung.titel)}</h2>
+      <p class="meinung-text">${sicher(produkt.meinung.text)}</p>
+      <p class="hint">Diese Einsch&auml;tzung stammt von uns und beruht auf
+        Herstellerangaben, nicht auf einem eigenen Produkttest.</p>
+    </section>
+
+    <section class="block">
+      <h2>Preisvergleich</h2>
+      <ul class="saved-list angebots-liste">
+        ${angebotZeilen || '<li class="empty">Derzeit kein Angebot mit vollst&auml;ndigen Versandkosten.</li>'}
+      </ul>
+      <p class="hint">Die Pl&auml;tze sind bewusst frei gehalten &ndash; hier
+        erscheinen die Shops unserer k&uuml;nftigen Partnerprogramme.</p>
+      <p class="tiny">Preise und Verf&uuml;gbarkeit entsprechen dem jeweils
+        angegebenen Stand und k&ouml;nnen sich seitdem ge&auml;ndert haben.
+        Ma&szlig;geblich ist der Preis, den der Shop beim Kauf anzeigt.
+        Versandkosten gelten f&uuml;r Standardversand innerhalb Deutschlands.</p>
+      <details class="block accordion vergleich-erklaert">
+        <summary>So entsteht dieser Vergleich</summary>
+        <div class="accordion-body">
+          <p class="hint">Sortiert wird nach dem Gesamtpreis aus Produktpreis
+            und Versandkosten, das g&uuml;nstigste Angebot steht oben. Die
+            H&ouml;he einer Provision hat auf die Reihenfolge keinen Einfluss.</p>
+          <p class="hint">K&uuml;nftig zeigen wir hier ausschlie&szlig;lich
+            Angebote von Shops, mit denen wir ein Partnerprogramm haben, und
+            erhalten f&uuml;r vermittelte K&auml;ufe eine Provision. Der
+            Vergleich bildet daher nicht den gesamten Markt ab. F&uuml;r dich
+            &auml;ndert sich am Preis nichts.</p>
+        </div>
+      </details>
+    </section>`;
+}
+
+
+/* --- 5. Verkabelung ---------------------------------------------------------
    Die Chips werden bei jedem Zeichnen neu erzeugt, deshalb haengt ihr
    Horcher am BEHAELTER und nicht am einzelnen Knopf - dasselbe Muster wie
    beim Garage-Dialog. Suchfeld und Liste stehen dagegen fest im HTML. */
@@ -159,4 +264,15 @@ verkabele('shopKategorien', 'click', ereignis => {
 verkabele('shopSuche', 'input', ereignis => {
   shopFilter.suche = ereignis.target.value.trim().toLowerCase();
   zeichneProduktListe();
+});
+
+verkabele('shopProduktListe', 'click', ereignis => {
+  const zeile = ereignis.target.closest('li[data-produkt]');
+  if (zeile) zeigeProdukt(zeile.dataset.produkt);
+});
+
+verkabele('shopProduktInhalt', 'click', ereignis => {
+  const knopf = ereignis.target.closest('button[data-angebot]');
+  if (!knopf) return;
+  showToast('Demo: Hier öffnet später die Produktseite des Shops.');
 });
