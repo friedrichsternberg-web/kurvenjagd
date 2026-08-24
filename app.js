@@ -1137,6 +1137,12 @@ function startNavigation() {
   nav.letzterTick = null;
   nav.streckenCache = null;
   nav.zielAngesagt = false;
+  /* Folgt die Karte der eigenen Position? Sobald jemand die Karte
+     wegwischt, steht das auf false: Die Karte bleibt dann stehen, wo er
+     sie hingeschoben hat, bis er auf "Zentrieren" tippt. Wichtig dabei -
+     mit dem Schwenk muss auch die DREHUNG einfrieren, sonst dreht sich
+     die Karte unter dem Finger weg, waehrend man sie lesen will. */
+  nav.folgtPosition = true;
   nav.aktiv = true;
 
   // Die Wegpunkt-Marker bleiben während der Fahrt sichtbar, ihr Ziehen muss
@@ -1162,6 +1168,8 @@ function startNavigation() {
   aktualisiereLeiste(aktuellerBildschirm());   // Leiste weg, die Navigation braucht den Platz
   document.getElementById('navBanner').hidden = false;
   document.getElementById('navFuss').hidden = false;
+  document.getElementById('navKnoepfe').hidden = false;
+  navZentrierenKnopfZeigen(false);   // am Anfang folgt die Karte ja
   document.getElementById('btnNavStop').hidden = false;
   document.getElementById('btnNavStart').hidden = true;
 
@@ -1204,6 +1212,9 @@ function stopNavigation() {
   aktualisiereLeiste(aktuellerBildschirm());   // Leiste wieder her
   document.getElementById('navBanner').hidden = true;
   document.getElementById('navFuss').hidden = true;
+  document.getElementById('navKnoepfe').hidden = true;
+  // Zuruecksetzen, sonst folgt die naechste Navigation nicht mehr.
+  nav.folgtPosition = true;
   document.getElementById('btnNavStop').hidden = true;
   document.getElementById('btnNavStart').hidden = false;
 
@@ -1228,7 +1239,8 @@ function aufPositionsUpdate(pos) {
 
   tempoAktualisieren(pos);
   zeichnePositionsMarker(latitude, longitude, accuracy || 20);
-  setzeKartenDrehung(kurs); // die ganze Karte dreht sich, nicht nur der Marker
+  // Drehen nur, solange die Karte der Position folgt - siehe nav.folgtPosition.
+  if (nav.folgtPosition) setzeKartenDrehung(kurs);
 
   /* Die Kamera bekommt EIN Ziel je GPS-Meldung, und das war die Wurzel des
      staendigen Verschiebens: Frueher liefen hier ZWEI Bewegungen
@@ -1242,17 +1254,109 @@ function aufPositionsUpdate(pos) {
      Position automatisch darunter - derselbe Effekt wie frueher, aber als
      eine einzige, weiche Bewegung. */
   const zentrum = punktVoraus(latitude, longitude, kurs, kameraVorlaufMeter(latitude));
+  nav.letztesZentrum = zentrum;   // fuer den Zentrieren-Knopf
+  if (!nav.folgtPosition) {
+    // Die Karte wurde weggeschoben: Messwerte weiterfuehren, Kamera nicht.
+    prüfeManöver(latitude, longitude);
+    prüfeAbweichungVonRoute(latitude, longitude);
+    navFussAktualisieren(aktualisiereRoutenfortschritt(latitude, longitude));
+    return;
+  }
   if (!nav.ersteZentrierungErledigt) {
     map.setView(zentrum, 17, { animate: false });
     nav.ersteZentrierungErledigt = true;
   } else {
-    map.panTo(zentrum, { animate: true, duration: 0.9, easeLinearity: 0.4, noMoveStart: true });
+    /* Dieselbe Dauer und dieselbe Gleichmaessigkeit wie die Drehung in
+       style.css - laufen die beiden auseinander, beschreibt die Karte eine
+       gekruemmte, wackelnde Bahn statt einer ruhigen Fahrt. */
+    map.panTo(zentrum, { animate: true, duration: 1.0, easeLinearity: 1.0, noMoveStart: true });
   }
 
   prüfeManöver(latitude, longitude);
   prüfeAbweichungVonRoute(latitude, longitude);
   const restMeter = aktualisiereRoutenfortschritt(latitude, longitude);
   navFussAktualisieren(restMeter);
+}
+
+/* --- Karte bedienen, waehrend sie gedreht ist ------------------------------
+
+   Leaflets eigene Bedienung ist im Navi-Modus abgeschaltet, und das aus
+   gutem Grund: Die Bibliothek weiss nichts von der CSS-Drehung. Sie zieht
+   fuer jeden Beruehrungspunkt getBoundingClientRect() ab, und das liefert
+   bei einem gedrehten Element die achsparallele Huellbox - jeder Punkt
+   landet also woanders, als der Finger zeigt.
+
+   Der Ausweg nutzt aus, dass die Drehung zwar PUNKTE verdreht, aber keine
+   ABSTAENDE. Deshalb:
+
+   - Zoomen ueber map.setZoom(). Das zoomt um die Kartenmitte, und die
+     liegt bei jeder Drehung an derselben Stelle. Nichts umzurechnen.
+     (map.setZoomAround() darf hier NICHT benutzt werden.)
+   - Wischen selbst behandeln, auf dem ungedrehten #mapWrap. Den
+     Fingerversatz dreht man um den negativen Kartenwinkel zurueck, dann
+     stimmt die Richtung wieder. */
+
+function navZoom(stufen) {
+  if (!nav.aktiv) return;
+  /* Ohne Animation, und das ist Absicht: Waehrend der Fahrt laufen schon
+     Schwenk und Drehung gleichzeitig. Eine dritte Animation obendrauf ist
+     genau das, was die Bildrate kostet - und wer waehrend der Fahrt zoomt,
+     will das Ergebnis sofort sehen, nicht in einer halben Sekunde. */
+  map.setZoom(map.getZoom() + stufen, { animate: false });
+}
+
+// Zurueck zum Folgen: Karte wieder auf die eigene Position, Drehung
+// wieder mitlaufen lassen.
+function navZentrieren() {
+  nav.folgtPosition = true;
+  navZentrierenKnopfZeigen(false);
+  if (nav.letztesZentrum) map.panTo(nav.letztesZentrum, { animate: true, duration: 0.4 });
+}
+
+function navZentrierenKnopfZeigen(zeigen) {
+  const knopf = document.getElementById('btnNavZentrieren');
+  if (knopf) knopf.hidden = !zeigen;
+}
+
+/* Der Wisch. Gerechnet wird mit phi = angezeigte Kartendrehung:
+     dx_karte =  dx * cos(phi) + dy * sin(phi)
+     dy_karte = -dx * sin(phi) + dy * cos(phi)
+   Das ist eine Drehung des Versatzes um -phi. Bei Nordfahrt ist phi = 0
+   und die Formel wird zur Identitaet - deshalb faellt ein Vorzeichenfehler
+   ausgerechnet beim Geradeausfahren nach Norden NICHT auf. Wer hier etwas
+   aendert, prueft bei 90 Grad. */
+function verkabeleNaviWisch() {
+  const rahmen = document.getElementById('mapWrap');
+  if (!rahmen) return;
+  let zieht = false, letzteX = 0, letzteY = 0, zeiger = 0;
+
+  rahmen.addEventListener('pointerdown', ereignis => {
+    if (!nav.aktiv) return;
+    zeiger++;
+    if (zeiger > 1) { zieht = false; return; }   // zwei Finger: nicht schieben
+    zieht = true; letzteX = ereignis.clientX; letzteY = ereignis.clientY;
+  });
+
+  rahmen.addEventListener('pointermove', ereignis => {
+    if (!zieht || !nav.aktiv) return;
+    const dx = ereignis.clientX - letzteX;
+    const dy = ereignis.clientY - letzteY;
+    if (Math.abs(dx) + Math.abs(dy) < 2) return;
+    letzteX = ereignis.clientX; letzteY = ereignis.clientY;
+
+    if (nav.folgtPosition) {           // erster Wisch loest das Folgen
+      nav.folgtPosition = false;
+      navZentrierenKnopfZeigen(true);
+    }
+    const phi = (nav.angezeigteDrehung || 0) * Math.PI / 180;
+    const dxKarte =  dx * Math.cos(phi) + dy * Math.sin(phi);
+    const dyKarte = -dx * Math.sin(phi) + dy * Math.cos(phi);
+    map.panBy([-dxKarte, -dyKarte], { animate: false });
+  });
+
+  const wischEnde = () => { zieht = false; zeiger = Math.max(0, zeiger - 1); };
+  rahmen.addEventListener('pointerup', wischEnde);
+  rahmen.addEventListener('pointercancel', wischEnde);
 }
 
 /* Rechnet den Punkt aus, der "meter" weit in Fahrtrichtung voraus liegt -
@@ -1276,7 +1380,15 @@ function punktVoraus(lat, lon, kurs, meter) {
    Die Umrechnung Bildpunkte -> Meter haengt vom Zoom und vom Breitengrad
    ab; die Formel ist die uebliche Web-Mercator-Aufloesung. */
 function kameraVorlaufMeter(lat) {
-  const sichtbareHöhe = document.getElementById('mapWrap').getBoundingClientRect().height;
+  /* Die Hoehe wird gemessen, wenn sie sich aendert (siehe
+     passeKartenQuadratAn), nicht bei jeder GPS-Meldung. Vorher stand hier
+     ein getBoundingClientRect() unmittelbar hinter dem Schreiben der
+     Drehungs-Variable an dasselbe Element - der Browser musste die gerade
+     verworfene Layoutrechnung des ganzen Kartenbaums sofort blockierend
+     nachholen, und zwar jede Sekunde. Die Hoehe aendert sich waehrend der
+     Fahrt ohnehin nicht. */
+  const sichtbareHöhe = nav.sichtbareHöhe
+    || document.getElementById('mapWrap').getBoundingClientRect().height;
   const meterJePixel = 40075016.686 * Math.abs(Math.cos(lat * Math.PI / 180))
                      / Math.pow(2, map.getZoom() + 8);
   return sichtbareHöhe * 0.18 * meterJePixel;
@@ -1391,6 +1503,9 @@ function passeKartenQuadratAn() {
   const { width, height } = rahmen.getBoundingClientRect();
   const diagonale = Math.ceil(Math.sqrt(width * width + height * height));
   schreibeKartenVariable('--karten-quadrat', diagonale + 'px');
+  // Hier ist die Hoehe ohnehin frisch gemessen - kameraVorlaufMeter()
+  // liest sie von hier, statt sie im GPS-Takt selbst zu erfragen.
+  nav.sichtbareHöhe = height;
 }
 
 // Beide Werte oben landen als CSS-Variable an #mapWrap. Von dort erben sie
@@ -1664,8 +1779,26 @@ function sprich(text) {
 // falsche Abzweigung genommen), wird die Route neu berechnet - kurze,
 // einzelne GPS-Ausreißer lösen dagegen noch keine Neuberechnung aus.
 function prüfeAbweichungVonRoute(lat, lon) {
-  const streckenpunkte = thinCoords(state.route.coords, 25);
-  const minAbstand = Math.min(...streckenpunkte.map(c => haversine(lat, lon, c[1], c[0])));
+  /* Zwei Dinge waren hier teuer und eines davon gefaehrlich.
+
+     Teuer: thinCoords() lief bei JEDER GPS-Meldung ueber die ganze Route,
+     obwohl aktualisiereRoutenfortschritt() dasselbe Ergebnis bereits in
+     nav.streckenCache liegen hat. Jetzt wird es mitbenutzt.
+
+     Gefaehrlich: Math.min(...array) breitet das Feld in eine Argumentliste
+     aus. Bei einer langen Alpenroute sind das zehntausende Argumente, und
+     jenseits einer Grenze wirft die Javascript-Maschine "Maximum call
+     stack size exceeded" - mitten in der Navigation. Eine Schleife kann
+     das nicht passieren. */
+  const streckenpunkte = nav.streckenCache?.route === state.route
+    ? nav.streckenCache.pts
+    : thinCoords(state.route.coords, 25);
+
+  let minAbstand = Infinity;
+  for (const c of streckenpunkte) {
+    const d = haversine(lat, lon, c[1], c[0]);
+    if (d < minAbstand) minAbstand = d;
+  }
 
   if (minAbstand < 60) {
     nav.abweichungSeit = null;
@@ -3019,6 +3152,10 @@ document.getElementById('btnSave').addEventListener('click', saveRoute);
 document.getElementById('btnGpx').addEventListener('click', exportGpx);
 document.getElementById('btnNavStart').addEventListener('click', startNavigation);
 document.getElementById('btnNavStop').addEventListener('click', stopNavigation);
+document.getElementById('btnNavPlus').addEventListener('click', () => navZoom(1));
+document.getElementById('btnNavMinus').addEventListener('click', () => navZoom(-1));
+document.getElementById('btnNavZentrieren').addEventListener('click', navZentrieren);
+verkabeleNaviWisch();
 
 // Untere Leiste: jeder Eintrag fuehrt auf seinen Bildschirm. Der Weg
 // laeuft ueber dieselben Funktionen wie die Kacheln, damit es nur eine

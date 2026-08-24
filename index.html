@@ -23,7 +23,7 @@
        "orientation": "portrait" im Manifest ist die Ansage, um die es hier
        geht: Diese App ist fuers Hochformat gebaut. Die spaetere Webseite
        bekommt ein eigenes Design fuers Querformat und ein eigenes Manifest. -->
-  <link rel="manifest" href="manifest.webmanifest?v=77">
+  <link rel="manifest" href="manifest.webmanifest?v=80">
 
   <!-- Faerbt die Statusleiste des Handys in die Grundflaeche der App, damit
        oben kein fremder heller Streifen stehen bleibt. -->
@@ -36,7 +36,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Kurvenjagd">
-  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=77">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=80">
 
   <!-- Fuer die spaetere Webseite und geteilte Routen: So sieht der Link aus,
        wenn ihn jemand in WhatsApp oder Instagram einfuegt. Ohne das steht
@@ -99,8 +99,8 @@
                    die spaetere Webseite genauso benutzen.
        style.css   die Anordnung DIESER App, ausgelegt auf Hochformat. Die
                    Webseite bekommt dafuer eine eigene Datei. -->
-  <link rel="stylesheet" href="design.css?v=77">
-  <link rel="stylesheet" href="style.css?v=77">
+  <link rel="stylesheet" href="design.css?v=80">
+  <link rel="stylesheet" href="style.css?v=80">
 </head>
 <body>
 
@@ -1193,6 +1193,19 @@
       </div>
       <div class="nav-danach" id="navDanach" hidden></div>
     </div>
+    <!-- Bedienung waehrend der Fahrt. Absichtlich hier in #mapWrap und
+         nicht in der Karte selbst: Die Karte ist im Navi-Modus ein
+         gedrehtes Quadrat mit Bildschirmdiagonale als Seitenlaenge, ihre
+         Ecken liegen weit ausserhalb des Schirms. Alles, was man treffen
+         koennen muss, gehoert deshalb hierher. -->
+    <div class="nav-knoepfe" id="navKnoepfe" hidden>
+      <button class="nav-rund" id="btnNavZentrieren" hidden title="Wieder der Position folgen">
+        <svg class="ic"><use href="#icon-standort"></use></svg>
+      </button>
+      <button class="nav-rund" id="btnNavPlus" title="Hineinzoomen" aria-label="Hineinzoomen">+</button>
+      <button class="nav-rund" id="btnNavMinus" title="Herauszoomen" aria-label="Herauszoomen">&minus;</button>
+    </div>
+
     <div class="nav-fuss" id="navFuss" hidden>
       <div class="nav-wert"><span class="wert" id="navTempo">0</span><span class="einheit">km/h</span></div>
       <div class="nav-wert"><span class="wert" id="navRest">&ndash;</span><span class="einheit">&uuml;brig</span></div>
@@ -1348,23 +1361,23 @@
   <!-- ZUERST, denn alle anderen benutzen geraet.* beim Laden. Hier steht der
        gesamte Zugriff aufs Geraet - Standort, Speicher, Dateien. Beim Umzug
        in die Stores ist das die einzige Datei, die sich aendert. -->
-  <script src="geraet.js?v=77"></script>
+  <script src="geraet.js?v=80"></script>
   <!-- Der Rechenteil: Kurvigkeit, Sackgassen, Rundtour-Punkte, GPX. Muss VOR
        app.js stehen, weil app.js diese Funktionen beim Routen aufruft. Die
        spaetere Webseite im Querformat laedt genau diese Datei ebenfalls und
        rechnet damit exakt so wie die App. -->
-  <script src="kern.js?v=77"></script>
-  <script src="app.js?v=77"></script>
+  <script src="kern.js?v=80"></script>
+  <script src="app.js?v=80"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=77"></script>
+  <script src="konto.js?v=80"></script>
   <!-- Nach app.js, weil die Garage verkleinereFoto() und showToast() von
        dort benutzt. -->
-  <script src="garage.js?v=77"></script>
+  <script src="garage.js?v=80"></script>
   <!-- Der Demo-Produktkatalog (nur Daten) und die Shop-Logik. produkte.js
        muss vor shop.js stehen, und beide nach garage.js, weil shop.js
        dessen Helfer (sicher, verkabele) mitbenutzt. -->
-  <script src="produkte.js?v=77"></script>
-  <script src="shop.js?v=77"></script>
+  <script src="produkte.js?v=80"></script>
+  <script src="shop.js?v=80"></script>
 </body>
 </html>

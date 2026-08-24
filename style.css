@@ -1613,9 +1613,15 @@ body.nav-modus #map {
   margin-top:  calc(var(--karten-quadrat, 150vmax) / -2);
   margin-left: calc(var(--karten-quadrat, 150vmax) / -2);
   transform: rotate(var(--karten-drehung, 0deg));
-  /* Das GPS meldet etwa einmal pro Sekunde. Ohne diesen Übergang würde die
-     Karte im Sekundentakt ruckartig weiterspringen. */
-  transition: transform 0.6s ease-out;
+  /* Das GPS meldet etwa einmal pro Sekunde, und genau so lange muss die
+     Bewegung dauern - dann geht eine Meldung nahtlos in die naechste
+     ueber. Vorher standen hier 0,6 Sekunden mit ease-out, waehrend der
+     Schwenk in app.js 0,9 Sekunden brauchte: Die Drehung war nach 0,6 s
+     fertig, stand 0,4 s still und ruckte dann wieder los. Dieser
+     Anlauf-Bremse-Pause-Rhythmus war das, was auf dem iPhone als
+     "abgehackt" ankam. "linear" statt "ease-out", weil ein Fahrzeug
+     seinen Kurs gleichmaessig aendert und nicht in Schueben. */
+  transition: transform 1s linear;
 }
 
 /* Gegendrehung der Marker. Die Karte dreht sich als Ganzes, also drehen sich
@@ -1634,8 +1640,18 @@ body.nav-modus #map {
 .foto-marker,
 .standort-marker {
   transform: rotate(calc(-1 * var(--karten-drehung, 0deg)));
-  transition: transform 0.6s ease-out;
 }
+
+/* Die Uebergangsanimation bekommt im Navi-Modus NUR der eigene Standort.
+   Auf einer Alpenroute liegen schnell zwanzig Pass-Marker im Bild, und
+   jeder von ihnen waere sonst eine eigene Animation, die der Compositor
+   im Sekundentakt mitrechnet. Die uebrigen Marker springen dadurch hart
+   mit - was niemand sieht, weil sie waehrend der Fahrt Beiwerk sind. */
+.you-are-here { transition: transform 1s linear; }
+body:not(.nav-modus) .wp-marker,
+body:not(.nav-modus) .poi-marker,
+body:not(.nav-modus) .foto-marker,
+body:not(.nav-modus) .standort-marker { transition: transform 1s linear; }
 
 /* Sprechblasen (z.B. an einem Pass) hängen an ihrer Spitze, deshalb wird hier
    um genau diese Spitze zurückgedreht - der Text bleibt lesbar, die Blase
@@ -3256,3 +3272,56 @@ body.nav-modus .leaflet-control-container { display: none; }
    dort sagt es - und am Rechner ist es der schnellste Hinweis darauf,
    dass der naechste Klick etwas anderes tut als sonst. */
 body.kartenklick #map { cursor: crosshair; }
+
+/* ---------- Navigation: Glas kostet hier zu viel ----------
+   Die beiden Navi-Platten liegen ueber einer Karte, die sich in jedem
+   Bild dreht und verschiebt. Ein backdrop-filter muss deshalb in JEDEM
+   Bild den Untergrund zurueckholen, herunterrechnen, weichzeichnen und
+   neu zusammensetzen - zweimal, ueber die volle Bildschirmbreite. Genau
+   das kostet auf dem iPhone die Bildrate.
+
+   Waehrend der Fahrt wiegt Lesbarkeit ohnehin schwerer als Glas: Sonne
+   auf dem Display, Handschuhe, ein Blick von einer Sekunde. Deshalb hier
+   eine ruhige, fast deckende Flaeche statt einer Linse. */
+body.nav-modus .nav-banner,
+body.nav-modus .nav-fuss {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: rgba(0, 0, 0, 0.94);
+}
+
+/* ---------- Bedienung waehrend der Fahrt ----------
+   Drei runde Knoepfe am rechten Rand, zwischen Manoevertafel und
+   Fahrdatenleiste. Gross genug fuer Handschuhe (48 Punkte), und wie die
+   beiden Platten ohne backdrop-filter - hier zaehlt jede Bildrate. */
+.nav-knoepfe {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+.nav-knoepfe[hidden] { display: none; }
+.nav-rund {
+  width: 48px; height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--glas-rand);
+  background: rgba(0, 0, 0, 0.94);
+  color: var(--text);
+  font-family: var(--schrift-display);
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+}
+.nav-rund[hidden] { display: none; }
+.nav-rund:active { background: var(--glas-heller); }
+/* Der Zentrieren-Knopf traegt die Akzentfarbe: Er erscheint nur, wenn die
+   Karte gerade NICHT der Position folgt, und ist dann das Wichtigste auf
+   dem Bildschirm. */
+#btnNavZentrieren { color: var(--accent-hell); border-color: var(--accent-hell); }
+.nav-rund .ic { width: 24px; height: 24px; }
