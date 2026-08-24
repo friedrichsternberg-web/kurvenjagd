@@ -1938,11 +1938,13 @@ body.nav-modus .leaflet-control-container { display: none; }
 
    DREI REGELN, die hier zusammenwirken und die man nicht einzeln kippen darf:
 
-   1. OHNE SCROLLEN. Der Bildschirm ist eine Flex-Spalte mit overflow:hidden.
-      Kopf, Ausruestung und Datenblatt nehmen sich, was sie brauchen, die
-      Buehne bekommt den Rest ueber flex:1. Was hier hinzukommt, muss
-      woanders weichen - deshalb steht die Ausruestung nur an der Wand und
-      nicht noch einmal als Liste darunter.
+   1. DER RAUM HAT EINE FESTE HOEHE, die Seite darunter scrollt. Frueher
+      stand hier "ohne Scrollen": Der Raum bekam den Rest, den die Platten
+      uebrig liessen. Das raechte sich, sobald unten etwas dazukam - der
+      Raum wurde kleiner, das Raumbild bekam einen anderen Ausschnitt, und
+      die ganze Seite sah verschoben aus. Jetzt sagt
+      --garage-raum-hoehe die Hoehe an, und was darunter steht, kann
+      wachsen, ohne oben etwas zu verruecken.
 
    2. LIQUID GLASS heisst Linse, nicht Schleier. Unter allem liegt dasselbe
       weichgezeichnete Motorradfoto wie bei Konto und Touren. Wand und Boden
@@ -1956,9 +1958,30 @@ body.nav-modus .leaflet-control-container { display: none; }
    ============================================================================ */
 
 .garage-screen {
+  /* WIE HOCH DER RAUM MIT DEM MOTORRAD IST. Frueher war das der Rest, den
+     das Datenblatt uebrig liess - und genau daran lag es, dass die Seite
+     "verschoben" aussah: Jedes Element, das unten dazukam, hat oben den
+     Bildausschnitt des Raumbildes verschoben. Jetzt ist die Hoehe eine
+     Ansage und haengt an nichts mehr.
+
+     Die Formel liest sich von innen nach aussen: hoechstens 64 Prozent
+     der Bildschirmhoehe, aber nie breiter als 132 Prozent der Breite
+     (sonst wird der Raum auf einem kurzen, breiten Schirm zum Schlauch),
+     und nie unter 400 Punkten, sonst passt die Maschine nicht mehr drauf.
+     svh statt vh: Die kleine Fassung der Bildschirmhoehe aendert sich
+     NICHT, wenn die Adresszeile des Browsers ein- und ausfaehrt - mit vh
+     wuerde der Raum bei jedem Scrollen neu gerechnet. */
+  --garage-raum-hoehe: calc(max(min(64svh, 132vw), 400px) + env(safe-area-inset-top));
+
   height: calc(100% - var(--nav-raum));
-  /* Kein Scrollen: alles muss auf eine Seite passen. */
-  overflow: hidden;
+  /* Die Seite SCROLLT. Frueher galt hier "alles muss auf eine Seite
+     passen"; seit die Garage der Startbildschirm ist, haengen unter dem
+     Raum der Shop und das Menue, und dafuer braucht es den Weg nach
+     unten. "contain" haelt das Wischen im Bildschirm, statt die Seite
+     dahinter mitzuziehen. */
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
   background:
@@ -1967,7 +1990,9 @@ body.nav-modus .leaflet-control-container { display: none; }
       rgba(14,15,18,0.56) 40%,
       rgba(14,15,18,0.76) 70%,
       rgba(14,15,18,0.90) 100%),
-    url('img/hintergrund-weich.jpg') center / cover no-repeat fixed;
+    /* "scroll" statt "fixed": Ein festgenagelter Hintergrund in einem
+       selbst scrollenden Kasten flackert auf iOS und verrutscht. */
+    url('img/hintergrund-weich.jpg') center / cover no-repeat scroll;
 }
 .garage-screen[hidden] { display: none; }
 
@@ -1979,8 +2004,11 @@ body.nav-modus .leaflet-control-container { display: none; }
    Bild selbst mit. */
 .garage-raum {
   position: relative;
-  flex: 1;              /* nimmt allen Platz, den das Datenblatt uebriglaesst */
-  min-height: 0;
+  /* Feste Hoehe statt Restplatz - die Begruendung steht oben bei
+     --garage-raum-hoehe. position, overflow und die Flex-Spalte muessen
+     bleiben: An ihnen haengt die Rechnung in setzeBuehnenPlatz(). */
+  flex: 0 0 auto;
+  height: var(--garage-raum-hoehe);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -2563,6 +2591,12 @@ body.nav-modus .leaflet-control-container { display: none; }
   z-index: 2;
   margin-top: -20px;    /* schiebt sich unter den Raum, weicher Uebergang */
   padding: 0 var(--s4) var(--s4);
+  /* Eine Spalte mit Luft dazwischen. Ohne den Abstand stossen Datenblatt
+     und Shop-Leiste aneinander und ihre beiden grossen Radien verschmelzen
+     zu einer liegenden Acht. */
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
 }
 
 .garage-platte {
@@ -3291,9 +3325,12 @@ body.nav-modus .leaflet-control-container { display: none; }
 .shop-links { display: flex; flex-wrap: wrap; gap: 6px; }
 
 /* Die Shop-Leiste in der Garage: eine schmale, wischbare Reihe aus
-   Karten. Sie ist bewusst klein - die Buehne mit der Maschine bleibt
-   der Star des Bildschirms, und die Kein-Scrollen-Regel muss halten. */
-.garage-shop { padding: var(--s3); }
+   Karten. Sie bleibt bewusst klein - die Buehne mit der Maschine ist der
+   Star der Seite, der Shop ist das, was man beim Weiterscrollen findet. */
+/* Derselbe Innenabstand wie bei den anderen Platten - sonst steht die
+   Ueberschrift der Leiste vier Punkte weiter links als der Motorradname
+   darueber, und das faellt genau dann auf, wenn beides untereinander steht. */
+.garage-shop { padding: var(--s4); }
 .garage-shop-kopf {
   display: flex;
   align-items: baseline;

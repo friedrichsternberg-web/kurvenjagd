@@ -1031,7 +1031,12 @@ function setzeBuehnenPlatz() {
   const raum = document.getElementById('garageRaum');
   const ansicht = document.getElementById('motorradAnsicht');
   const garageBild = garageAktiv();
-  if (!raum || raum.clientWidth === 0) return;   // Bildschirm gerade versteckt
+  /* Bildschirm gerade versteckt - dann ist nichts zu rechnen. Geprueft
+     werden BEIDE Masse: Bei Hoehe null rechnet die Funktion sonst
+     klaglos weiter, der Massstab bleibt breitengetrieben, und heraus
+     kommt eine Maschine, die niemand sieht. Ein stiller Fehler ist
+     schlimmer als ein lauter. */
+  if (!raum || !raum.clientWidth || !raum.clientHeight) return;
 
   const raumB = raum.clientWidth, raumH = raum.clientHeight;
   const bildB = garageBild.bildBreite, bildH = garageBild.bildHoehe;
