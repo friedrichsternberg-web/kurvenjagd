@@ -124,5 +124,184 @@ const PRODUKT_KATALOG = {
         { shop: null, preis: 199.00, versand: null, deeplink: null, stand: '2026-08-22T10:00:00' },
       ],
     },
+    {
+      id: 'jacke-revit-sand4',
+      ean: null,
+      kategorie: 'jacke',
+      marke: "REV'IT!",
+      name: 'Sand 4 H2O',
+      groessen: ['S', 'M', 'L', 'XL', 'XXL'],
+      eigenschaften: [
+        { k: 'Bauart', v: 'Touring-Jacke' },
+        { k: 'Membran', v: 'herausnehmbar' },
+        { k: 'Protektoren', v: 'Schulter + Ellbogen (CE)' },
+      ],
+      bild: { symbol: 'jacke', url: null },
+      passtZu: { marken: [], modelle: [] },
+      meinung: {
+        titel: 'Unsere Einschätzung',
+        text: 'Vielseitige Reisejacke mit viel Belüftung und '
+            + 'herausnehmbarer Regenmembran. Ein Rückenprotektor ist ab '
+            + 'Werk nicht dabei und sollte mit eingeplant werden.',
+      },
+      angebote: [
+        { shop: null, preis: 349.99, versand: 0,    deeplink: null, stand: '2026-08-24T14:00:00' },
+        { shop: null, preis: 329.90, versand: 5.95, deeplink: null, stand: '2026-08-24T08:45:00' },
+        { shop: null, preis: 359.00, versand: 4.90, deeplink: null, stand: '2026-08-23T16:20:00' },
+      ],
+    },
+    {
+      id: 'hose-dainese-delta4',
+      ean: null,
+      kategorie: 'hose',
+      marke: 'Dainese',
+      name: 'Delta 4',
+      groessen: ['46', '48', '50', '52', '54', '56'],
+      eigenschaften: [
+        { k: 'Bauart', v: 'Lederhose' },
+        { k: 'Protektoren', v: 'Knie (CE)' },
+        { k: 'Anschluss', v: 'Verbindungsreißverschluss' },
+      ],
+      bild: { symbol: 'hose', url: null },
+      passtZu: { marken: [], modelle: [] },
+      meinung: {
+        titel: 'Unsere Einschätzung',
+        text: 'Sportliche Lederhose mit gutem Schnitt für die '
+            + 'Kombination mit einer Lederjacke. Fällt eng aus - im '
+            + 'Zweifel eine Nummer größer wählen.',
+      },
+      angebote: [
+        { shop: null, preis: 399.95, versand: 0,    deeplink: null, stand: '2026-08-24T14:00:00' },
+        { shop: null, preis: 379.00, versand: 6.90, deeplink: null, stand: '2026-08-24T10:00:00' },
+      ],
+    },
+    {
+      id: 'handschuh-held-airndry',
+      ean: null,
+      kategorie: 'handschuh',
+      marke: 'Held',
+      name: 'Air n Dry',
+      groessen: ['7', '8', '9', '10', '11'],
+      eigenschaften: [
+        { k: 'Bauart', v: '2-Kammer-Handschuh' },
+        { k: 'Membran', v: 'wasserdichte Kammer' },
+        { k: 'Material', v: 'Leder + Textil' },
+      ],
+      bild: { symbol: 'handschuh', url: null },
+      passtZu: { marken: [], modelle: [] },
+      meinung: {
+        titel: 'Unsere Einschätzung',
+        text: 'Der bekannte Zwei-Kammer-Trick: vorne luftig, hinten '
+            + 'wasserdicht - ein Handschuh für fast jedes Wetter. Dafür '
+            + 'ist er spürbar teurer als einfache Sommerhandschuhe.',
+      },
+      angebote: [
+        { shop: null, preis: 199.95, versand: 3.95, deeplink: null, stand: '2026-08-24T14:00:00' },
+        { shop: null, preis: 189.90, versand: 5.90, deeplink: null, stand: '2026-08-24T07:30:00' },
+        { shop: null, preis: 209.00, versand: 0,    deeplink: null, stand: '2026-08-23T19:10:00' },
+      ],
+    },
+    {
+      id: 'protektor-alpinestars-kr2',
+      ean: null,
+      kategorie: 'protektor',
+      marke: 'Alpinestars',
+      name: 'Nucleon KR-2',
+      groessen: ['S', 'M', 'L', 'XL'],
+      eigenschaften: [
+        { k: 'Bauart', v: 'Rückenprotektor' },
+        { k: 'Norm', v: 'EN 1621-2' },
+        { k: 'Träger', v: 'zum Einschieben in die Jacke' },
+      ],
+      bild: { symbol: 'protektor', url: null },
+      passtZu: { marken: [], modelle: [] },
+      meinung: {
+        titel: 'Unsere Einschätzung',
+        text: 'Leichter Rückenprotektor zum Nachrüsten für Jacken mit '
+            + 'Protektorentasche. Vor dem Kauf die Taschengröße der '
+            + 'eigenen Jacke messen - die Systeme sind nicht genormt.',
+      },
+      angebote: [
+        { shop: null, preis: 89.95, versand: 3.95, deeplink: null, stand: '2026-08-24T14:00:00' },
+        { shop: null, preis: 79.90, versand: 5.95, deeplink: null, stand: '2026-08-24T12:00:00' },
+      ],
+    },
+    {
+      id: 'koffer-givi-e22',
+      ean: null,
+      kategorie: 'koffer',
+      marke: 'Givi',
+      name: 'E22N Seitenkoffer (Paar)',
+      groessen: [],
+      eigenschaften: [
+        { k: 'Bauart', v: 'Seitenkoffer, Paar' },
+        { k: 'Volumen', v: '22 l je Koffer' },
+        { k: 'System', v: 'Monokey Side' },
+      ],
+      bild: { symbol: 'koffer', url: null },
+      passtZu: { marken: [], modelle: [] },
+      meinung: {
+        titel: 'Unsere Einschätzung',
+        text: 'Günstiger Einstieg ins Seitenkoffer-Fahren. Die Träger '
+            + 'sind modellabhängig und kommen extra dazu - beim '
+            + 'Preisvergleich also den Träger mitrechnen.',
+      },
+      angebote: [
+        { shop: null, preis: 189.00, versand: 9.95, deeplink: null, stand: '2026-08-24T14:00:00' },
+        { shop: null, preis: 199.95, versand: 0,    deeplink: null, stand: '2026-08-24T06:00:00' },
+      ],
+    },
+    {
+      id: 'anbau-swmotech-sturzbuegel-cb650r',
+      ean: null,
+      kategorie: 'anbau',
+      marke: 'SW-Motech',
+      name: 'Sturzbügel CB650R',
+      groessen: [],
+      eigenschaften: [
+        { k: 'Bauart', v: 'Sturzbügel, Stahlrohr' },
+        { k: 'Passt an', v: 'Honda CB650R' },
+        { k: 'Montage', v: 'ohne Bohren' },
+      ],
+      bild: { symbol: 'motorrad', url: null },
+      // Modellgebundenes Teil: Genau dafuer gibt es passtZu - die
+      // Vorschlaege koennen es Fahrern der passenden Maschine zeigen.
+      passtZu: { marken: ['HONDA'], modelle: ['CB650R'] },
+      meinung: {
+        titel: 'Unsere Einschätzung',
+        text: 'Schützt Motor und Verkleidung beim Umfaller im Stand. '
+            + 'Passt nur an die CB650R - beim Kauf das Baujahr '
+            + 'abgleichen, die Halter unterscheiden sich je Jahrgang.',
+      },
+      angebote: [
+        { shop: null, preis: 169.95, versand: 5.95, deeplink: null, stand: '2026-08-24T14:00:00' },
+        { shop: null, preis: 159.00, versand: 8.90, deeplink: null, stand: '2026-08-23T15:40:00' },
+      ],
+    },
+    {
+      id: 'anbau-givi-traeger-z900',
+      ean: null,
+      kategorie: 'anbau',
+      marke: 'Givi',
+      name: 'Topcase-Träger Z 900',
+      groessen: [],
+      eigenschaften: [
+        { k: 'Bauart', v: 'Topcase-Träger' },
+        { k: 'Passt an', v: 'Kawasaki Z 900' },
+        { k: 'System', v: 'Monokey / Monolock' },
+      ],
+      bild: { symbol: 'motorrad', url: null },
+      passtZu: { marken: ['KAWASAKI'], modelle: ['Z 900', 'Z900'] },
+      meinung: {
+        titel: 'Unsere Einschätzung',
+        text: 'Solider Träger als Grundlage für ein Topcase auf der '
+            + 'Z 900. Wie beim Sturzbügel gilt: Baujahr prüfen, Givi '
+            + 'führt je Modelljahr eigene Halter.',
+      },
+      angebote: [
+        { shop: null, preis: 129.90, versand: 6.95, deeplink: null, stand: '2026-08-24T14:00:00' },
+        { shop: null, preis: 139.00, versand: 0,    deeplink: null, stand: '2026-08-24T11:45:00' },
+      ],
+    },
   ],
 };

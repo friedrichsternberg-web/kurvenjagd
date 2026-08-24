@@ -71,20 +71,58 @@ const SHOP_KATEGORIEN = [
   { schlüssel: 'stiefel',   name: 'Stiefel' },
   { schlüssel: 'protektor', name: 'Protektoren' },
   { schlüssel: 'koffer',    name: 'Gepäck' },
+  { schlüssel: 'anbau',     name: 'Anbauteile' },
 ];
 
 function kategorieName(schlüssel) {
   return SHOP_KATEGORIEN.find(k => k.schlüssel === schlüssel)?.name || schlüssel;
 }
 
-// Zeichnet die Produktliste der Uebersicht. Wird bei jedem Oeffnen des
-// Shops gerufen (aus zeigeShop() in app.js).
+/* Was gerade gefiltert wird. kategorie null heisst "Alle". Die Suche
+   ist immer kleingeschrieben abgelegt, damit der Vergleich unten nicht
+   an Gross-/Kleinschreibung haengt. */
+const shopFilter = { kategorie: null, suche: '' };
+
+// Die Kategorie-Chips. Es erscheinen nur Kategorien, in denen wirklich
+// Produkte liegen - ein Chip, hinter dem nichts steckt, waere ein toter Knopf.
+function zeichneKategorien() {
+  const behälter = document.getElementById('shopKategorien');
+  const vorhandene = new Set(shopKatalog().produkte.map(p => p.kategorie));
+  const chips = SHOP_KATEGORIEN.filter(k => vorhandene.has(k.schlüssel));
+
+  behälter.innerHTML = [
+    `<button type="button" class="marken-chip ${shopFilter.kategorie === null ? 'active' : ''}"
+             data-kategorie="">Alle</button>`,
+    ...chips.map(k => `
+      <button type="button" class="marken-chip ${shopFilter.kategorie === k.schlüssel ? 'active' : ''}"
+              data-kategorie="${sicher(k.schlüssel)}">${sicher(k.name)}</button>`),
+  ].join('');
+}
+
+// Kategorie und Suchtext zusammen anwenden. Gesucht wird ueber Marke und
+// Name - mehr braucht es bei einer Handvoll Produkte nicht, und es geht
+// dabei nichts ins Netz.
+function gefilterteProdukte() {
+  return shopKatalog().produkte.filter(produkt => {
+    if (shopFilter.kategorie && produkt.kategorie !== shopFilter.kategorie) return false;
+    if (!shopFilter.suche) return true;
+    return `${produkt.marke} ${produkt.name}`.toLowerCase().includes(shopFilter.suche);
+  });
+}
+
+// Zeichnet die ganze Uebersicht. Wird bei jedem Oeffnen des Shops gerufen
+// (aus zeigeShop() in app.js).
 function zeichneShop() {
+  zeichneKategorien();
+  zeichneProduktListe();
+}
+
+function zeichneProduktListe() {
   const liste = document.getElementById('shopProduktListe');
-  const produkte = shopKatalog().produkte;
+  const produkte = gefilterteProdukte();
 
   if (!produkte.length) {
-    liste.innerHTML = '<li class="empty">Noch keine Produkte im Katalog.</li>';
+    liste.innerHTML = '<li class="empty">Nichts gefunden &ndash; anderes Stichwort oder eine andere Kategorie versuchen.</li>';
     return;
   }
 
@@ -103,3 +141,22 @@ function zeichneShop() {
       </li>`;
   }).join('');
 }
+
+
+/* --- 4. Verkabelung ---------------------------------------------------------
+   Die Chips werden bei jedem Zeichnen neu erzeugt, deshalb haengt ihr
+   Horcher am BEHAELTER und nicht am einzelnen Knopf - dasselbe Muster wie
+   beim Garage-Dialog. Suchfeld und Liste stehen dagegen fest im HTML. */
+
+verkabele('shopKategorien', 'click', ereignis => {
+  const chip = ereignis.target.closest('.marken-chip');
+  if (!chip) return;
+  shopFilter.kategorie = chip.dataset.kategorie || null;
+  zeichneKategorien();       // der aktive Chip wandert mit
+  zeichneProduktListe();
+});
+
+verkabele('shopSuche', 'input', ereignis => {
+  shopFilter.suche = ereignis.target.value.trim().toLowerCase();
+  zeichneProduktListe();
+});
