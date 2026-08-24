@@ -227,4 +227,21 @@ const geraet = {
       return false;
     }
   },
+
+  /* Oeffnet eine fremde Adresse ausserhalb der App, zum Beispiel die
+     Produktseite eines Shops. Heute ist das ein neuer Browser-Tab.
+
+     In der nativen Huelle muss daraus der SYSTEM-Browser werden
+     (Capacitor-Plugin @capacitor/browser), NICHT eine eingebettete
+     WebView: Nur der Systembrowser traegt die Cookies, mit denen ein
+     Partnernetzwerk einen Kauf dieser App zuordnet - in der WebView
+     ginge jede Provision verloren. Genau deshalb wohnt der Aufruf hier
+     und nirgendwo sonst: Beim Umzug aendert sich eine Zeile statt jeder
+     Klickstelle.
+
+     "noopener" kappt die Verbindung zurueck: Die geoeffnete Seite kann
+     sonst ueber window.opener auf dieses Fenster zugreifen. */
+  öffneExtern(adresse) {
+    window.open(adresse, '_blank', 'noopener');
+  },
 };

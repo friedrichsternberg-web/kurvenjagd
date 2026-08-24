@@ -248,6 +248,23 @@ function zeichneProduktSeite() {
 }
 
 
+/* Jeder Klick auf "Zum Shop" laeuft durch DIESE eine Funktion. Das ist
+   Absicht und soll so bleiben: Wenn spaeter echte Partner-Links kommen,
+   gehoert VOR das Oeffnen genau hier die Einwilligungsfrage (der Link
+   traegt dann eine Kennung, ueber die das Netzwerk den Kauf zuordnet -
+   und dafuer braucht es nach Paragraf 25 TDDDG eine Zustimmung). Eine
+   einzige Stelle laesst sich absichern, verstreute Klickstellen nicht. */
+function öffneAngebot(angebot) {
+  if (!angebot) return;
+  if (!angebot.deeplink) {
+    // Demo-Stand: Es gibt noch keinen Partner-Link.
+    showToast('Demo: Hier öffnet später die Produktseite des Shops.');
+    return;
+  }
+  geraet.öffneExtern(angebot.deeplink);
+}
+
+
 /* --- 5. Verkabelung ---------------------------------------------------------
    Die Chips werden bei jedem Zeichnen neu erzeugt, deshalb haengt ihr
    Horcher am BEHAELTER und nicht am einzelnen Knopf - dasselbe Muster wie
@@ -274,5 +291,8 @@ verkabele('shopProduktListe', 'click', ereignis => {
 verkabele('shopProduktInhalt', 'click', ereignis => {
   const knopf = ereignis.target.closest('button[data-angebot]');
   if (!knopf) return;
-  showToast('Demo: Hier öffnet später die Produktseite des Shops.');
+  const angebote = angeboteZeigbar(angezeigtesProdukt)
+    .map(angebot => ({ ...angebot, gesamt: angebot.preis + angebot.versand }))
+    .sort((a, b) => a.gesamt - b.gesamt);
+  öffneAngebot(angebote[Number(knopf.dataset.angebot)]);
 });
