@@ -23,7 +23,7 @@
        "orientation": "portrait" im Manifest ist die Ansage, um die es hier
        geht: Diese App ist fuers Hochformat gebaut. Die spaetere Webseite
        bekommt ein eigenes Design fuers Querformat und ein eigenes Manifest. -->
-  <link rel="manifest" href="manifest.webmanifest?v=66">
+  <link rel="manifest" href="manifest.webmanifest?v=67">
 
   <!-- Faerbt die Statusleiste des Handys in die Grundflaeche der App, damit
        oben kein fremder heller Streifen stehen bleibt. -->
@@ -36,7 +36,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Kurvenjagd">
-  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=66">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=67">
 
   <!-- Fuer die spaetere Webseite und geteilte Routen: So sieht der Link aus,
        wenn ihn jemand in WhatsApp oder Instagram einfuegt. Ohne das steht
@@ -99,8 +99,8 @@
                    die spaetere Webseite genauso benutzen.
        style.css   die Anordnung DIESER App, ausgelegt auf Hochformat. Die
                    Webseite bekommt dafuer eine eigene Datei. -->
-  <link rel="stylesheet" href="design.css?v=66">
-  <link rel="stylesheet" href="style.css?v=66">
+  <link rel="stylesheet" href="design.css?v=67">
+  <link rel="stylesheet" href="style.css?v=67">
 </head>
 <body>
 
@@ -274,28 +274,6 @@
           <h1 class="brand-title">Kurvenjagd</h1>
           <p class="start-slogan">Deine All-In-One Motorradapp</p>
         </div>
-        <!-- Zwei Knoepfe nebeneinander. Beide sind gleich GROSS - ein
-             Knopf, dessen Zweck das Erreichbarsein ist, darf nicht der
-             kleinste auf dem Bildschirm sein. Die Rangfolge macht
-             stattdessen die Farbe: Das Neuladen ist blasser, das Konto
-             bleibt der hellere von beiden.
-
-             Warum es diesen Knopf ueberhaupt gibt: Wer die App vom
-             Startbildschirm des Handys oeffnet, hat keine Adresszeile und
-             damit auch keinen Neu-laden-Knopf des Browsers. Selbst die App
-             zu schliessen hilft nicht immer, weil der Zwischenspeicher das
-             ueberlebt. Siehe geraet.frischLaden(). -->
-        <div class="kopf-knoepfe">
-          <button class="glas-rund blass" id="btnNeuLaden" title="App neu laden" aria-label="App neu laden">
-            <svg class="ic gross"><use href="#icon-neu"></use></svg>
-          </button>
-          <button class="glas-rund" id="btnKontoRund" title="Konto" aria-label="Konto">
-            <!-- Ist ein Profilbild da, tritt es an die Stelle des Symbols
-                 und fuellt den Knopf ganz aus. konto.js schaltet um. -->
-            <img id="kontoRundBild" class="rund-bild" alt="" hidden>
-            <svg class="ic gross"><use href="#icon-profil"></use></svg>
-          </button>
-        </div>
       </header>
     </div>
 
@@ -428,6 +406,28 @@
         <div>
           <h2 class="garage-titel">Meine Garage</h2>
           <p class="garage-sub">Deine Maschine und deine Ausr&uuml;stung.</p>
+        </div>
+        <!-- Zwei Knoepfe nebeneinander. Beide sind gleich GROSS - ein
+             Knopf, dessen Zweck das Erreichbarsein ist, darf nicht der
+             kleinste auf dem Bildschirm sein. Die Rangfolge macht
+             stattdessen die Farbe: Das Neuladen ist blasser, das Konto
+             bleibt der hellere von beiden.
+
+             Warum es diesen Knopf ueberhaupt gibt: Wer die App vom
+             Startbildschirm des Handys oeffnet, hat keine Adresszeile und
+             damit auch keinen Neu-laden-Knopf des Browsers. Selbst die App
+             zu schliessen hilft nicht immer, weil der Zwischenspeicher das
+             ueberlebt. Siehe geraet.frischLaden(). -->
+        <div class="kopf-knoepfe">
+          <button class="glas-rund blass" id="btnNeuLaden" title="App neu laden" aria-label="App neu laden">
+            <svg class="ic gross"><use href="#icon-neu"></use></svg>
+          </button>
+          <button class="glas-rund" id="btnKontoRund" title="Konto" aria-label="Konto">
+            <!-- Ist ein Profilbild da, tritt es an die Stelle des Symbols
+                 und fuellt den Knopf ganz aus. konto.js schaltet um. -->
+            <img id="kontoRundBild" class="rund-bild" alt="" hidden>
+            <svg class="ic gross"><use href="#icon-profil"></use></svg>
+          </button>
         </div>
       </header>
 
@@ -1408,23 +1408,23 @@
   <!-- ZUERST, denn alle anderen benutzen geraet.* beim Laden. Hier steht der
        gesamte Zugriff aufs Geraet - Standort, Speicher, Dateien. Beim Umzug
        in die Stores ist das die einzige Datei, die sich aendert. -->
-  <script src="geraet.js?v=66"></script>
+  <script src="geraet.js?v=67"></script>
   <!-- Der Rechenteil: Kurvigkeit, Sackgassen, Rundtour-Punkte, GPX. Muss VOR
        app.js stehen, weil app.js diese Funktionen beim Routen aufruft. Die
        spaetere Webseite im Querformat laedt genau diese Datei ebenfalls und
        rechnet damit exakt so wie die App. -->
-  <script src="kern.js?v=66"></script>
-  <script src="app.js?v=66"></script>
+  <script src="kern.js?v=67"></script>
+  <script src="app.js?v=67"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=66"></script>
+  <script src="konto.js?v=67"></script>
   <!-- Nach app.js, weil die Garage verkleinereFoto() und showToast() von
        dort benutzt. -->
-  <script src="garage.js?v=66"></script>
+  <script src="garage.js?v=67"></script>
   <!-- Der Demo-Produktkatalog (nur Daten) und die Shop-Logik. produkte.js
        muss vor shop.js stehen, und beide nach garage.js, weil shop.js
        dessen Helfer (sicher, verkabele) mitbenutzt. -->
-  <script src="produkte.js?v=66"></script>
-  <script src="shop.js?v=66"></script>
+  <script src="produkte.js?v=67"></script>
+  <script src="shop.js?v=67"></script>
 </body>
 </html>
