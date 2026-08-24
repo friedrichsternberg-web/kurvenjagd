@@ -1669,7 +1669,22 @@ body:not(.nav-modus) .standort-marker { transition: transform 1s linear; }
 body.nav-modus .leaflet-control-container { display: none; }
 
 /* Leaflet-Bedienelemente etwas dunkler einfärben */
-.leaflet-control-attribution { display: none; }  /* wir zeigen die Quellen links im Panel */
+/* Die Namensnennung von OpenStreetMap. Sie war hier abgeschaltet, weil
+   die Quellen auch im Fuss des Bedienfelds stehen - nur steht der dort
+   ausserhalb des Bildschirms, und auf der Aufzeichnungs-Karte und im
+   Navi-Modus gibt es ihn gar nicht. Die Nutzungsbedingungen sind an
+   dieser Stelle eindeutig: "Do not hide attribution beneath UI, behind
+   toggles, or off-screen."
+
+   Also sichtbar, aber dezent: klein, halbdurchsichtig, in der Ecke. */
+.leaflet-control-attribution {
+  background: rgba(0, 0, 0, 0.55);
+  color: var(--muted);
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: var(--r-sm) 0 0 0;
+}
+.leaflet-control-attribution a { color: var(--muted); text-decoration: underline; }
 
 /* Nummerierte Wegpunkt-Marker */
 .wp-marker {
@@ -3337,3 +3352,44 @@ body.nav-modus .nav-fuss {
 }
 .neigung-block .hint { margin: 0 0 var(--s2); }
 .neigung-block .hint:last-child { margin: var(--s2) 0 0; }
+
+/* Die Namensnennung waehrend der Navigation. Klein und dezent, aber
+   sichtbar - sie ist Pflicht und darf deshalb nicht hinter etwas
+   verschwinden. Sitzt ueber der Fahrdatenleiste am linken Rand. */
+.nav-quelle {
+  position: absolute;
+  left: 12px;
+  bottom: calc(max(12px, env(safe-area-inset-bottom)) + 72px);
+  margin: 0;
+  z-index: 900;
+  padding: 2px 6px;
+  border-radius: var(--r-sm);
+  background: rgba(0, 0, 0, 0.55);
+  color: var(--muted);
+  font-size: 10px;
+}
+.nav-quelle[hidden] { display: none; }
+.nav-quelle a { color: var(--muted); }
+
+/* Der Suchknopf in den Ortsfeldern. Gesucht wird auf Absenden, nicht
+   beim Tippen - der Grund steht in app.js bei der Ortssuche. */
+.such-knopf {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 34px; height: 34px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--glas-heller);
+  color: var(--text);
+  cursor: pointer;
+}
+.such-knopf:active { background: var(--glas-licht); }
+.such-feld .search-input { padding-right: 48px; }
+
+/* Der Knopf, der die Route wirklich berechnet. */
+.route-knopf { width: 100%; margin-top: var(--s3); }
+.route-knopf:disabled { opacity: 0.45; cursor: not-allowed; }
+#routeKnopfHinweis { margin-top: 6px; text-align: center; }

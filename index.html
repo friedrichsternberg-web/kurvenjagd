@@ -23,7 +23,7 @@
        "orientation": "portrait" im Manifest ist die Ansage, um die es hier
        geht: Diese App ist fuers Hochformat gebaut. Die spaetere Webseite
        bekommt ein eigenes Design fuers Querformat und ein eigenes Manifest. -->
-  <link rel="manifest" href="manifest.webmanifest?v=86">
+  <link rel="manifest" href="manifest.webmanifest?v=88">
 
   <!-- Faerbt die Statusleiste des Handys in die Grundflaeche der App, damit
        oben kein fremder heller Streifen stehen bleibt. -->
@@ -36,7 +36,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Kurvenjagd">
-  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=86">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=88">
 
   <!-- Fuer die spaetere Webseite und geteilte Routen: So sieht der Link aus,
        wenn ihn jemand in WhatsApp oder Instagram einfuegt. Ohne das steht
@@ -99,8 +99,8 @@
                    die spaetere Webseite genauso benutzen.
        style.css   die Anordnung DIESER App, ausgelegt auf Hochformat. Die
                    Webseite bekommt dafuer eine eigene Datei. -->
-  <link rel="stylesheet" href="design.css?v=86">
-  <link rel="stylesheet" href="style.css?v=86">
+  <link rel="stylesheet" href="design.css?v=88">
+  <link rel="stylesheet" href="style.css?v=88">
 </head>
 <body>
 
@@ -236,6 +236,9 @@
       <symbol id="icon-shop" viewBox="0 0 24 24">
         <path d="M20.5 10.6V5.4a1.9 1.9 0 0 0-1.9-1.9h-5.2L3.9 13a2 2 0 0 0 0 2.8l4.3 4.3a2 2 0 0 0 2.8 0l9.5-9.5Z"/>
         <circle cx="16.2" cy="7.8" r="1.5"/>
+      </symbol>
+      <symbol id="icon-lupe" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>
       </symbol>
       <symbol id="icon-zurueck" viewBox="0 0 24 24">
         <path d="M4 9.5h10.5a5 5 0 0 1 0 10H8"/><path d="M7.5 5.5 3.5 9.5l4 4"/>
@@ -987,21 +990,28 @@
       <div class="such-feld search-wrap">
         <span class="label">Start</span>
         <input type="text" id="sucheStart" class="search-input orts-feld" data-rolle="start"
-               placeholder="Startpunkt suchen &hellip;" autocomplete="off">
+               placeholder="Startpunkt suchen &hellip;" autocomplete="off"
+               enterkeyhint="search">
+        <button type="button" class="such-knopf" data-sucht-fuer="sucheStart" aria-label="Suchen">
+          <svg class="ic klein"><use href="#icon-lupe"></use></svg>
+        </button>
         <ul class="search-results" hidden></ul>
       </div>
 
-      <div class="such-feld search-wrap">
-        <span class="label">Zwischenziel</span>
-        <input type="text" id="sucheZwischen" class="search-input orts-feld" data-rolle="zwischen"
-               placeholder="Zwischenziel hinzuf&uuml;gen &hellip;" autocomplete="off">
-        <ul class="search-results" hidden></ul>
-      </div>
+      <!-- Die Zwischenziele stehen in einem eigenen Behaelter, weil sie
+           sich vermehren: Sobald eines gesetzt ist, bleibt es stehen und
+           darunter oeffnet sich ein leeres Feld fuers naechste - so wie
+           man es von Navigationsgeraeten kennt. -->
+      <div id="zwischenZiele"></div>
 
       <div class="such-feld search-wrap" id="zielFeldGruppe">
         <span class="label">Ziel</span>
         <input type="text" id="sucheZiel" class="search-input orts-feld" data-rolle="ziel"
-               placeholder="Zielpunkt suchen &hellip;" autocomplete="off">
+               placeholder="Zielpunkt suchen &hellip;" autocomplete="off"
+               enterkeyhint="search">
+        <button type="button" class="such-knopf" data-sucht-fuer="sucheZiel" aria-label="Suchen">
+          <svg class="ic klein"><use href="#icon-lupe"></use></svg>
+        </button>
         <ul class="search-results" hidden></ul>
       </div>
 
@@ -1011,6 +1021,15 @@
       <button class="btn ghost klick-modus-btn" id="btnKlickModus">
         Punkt auf der Karte setzen
       </button>
+
+      <!-- Erst auf Knopfdruck rechnen. Vorher lief die Berechnung bei
+           jedem gesetzten Punkt von selbst los - wer drei Zwischenziele
+           eingab, loeste damit drei Routenberechnungen aus, von denen zwei
+           niemanden interessierten. -->
+      <button class="btn route-knopf" id="btnRouteGenerieren" disabled>
+        Route berechnen
+      </button>
+      <p class="hint" id="routeKnopfHinweis">Setz mindestens Start und Ziel.</p>
     </section>
 
     <!-- Wegpunkte -->
@@ -1168,13 +1187,17 @@
       </div>
     </section>
 
-    <!-- Gespeicherte Routen -->
-    <section class="block">
-      <h2>Meine Routen</h2>
-      <ul id="savedList" class="saved-list">
-        <li class="empty">Noch nichts gespeichert.</li>
-      </ul>
-    </section>
+    <!-- Gespeicherte Routen. Als Aufklapper wie Optionen und
+         Sehenswertes: Die Liste wird mit der Zeit lang und stand sonst
+         immer offen im Weg, obwohl man sie nur ab und zu braucht. -->
+    <details class="block accordion">
+      <summary>Meine Routen</summary>
+      <div class="accordion-body">
+        <ul id="savedList" class="saved-list">
+          <li class="empty">Noch nichts gespeichert.</li>
+        </ul>
+      </div>
+    </details>
 
     <!-- Herkunftsangaben. Die ersten beiden sind Pflicht (OpenStreetMap
          verlangt sie ausdruecklich), die uebrigen sind Anstand: Apache 2.0
@@ -1240,6 +1263,14 @@
       <div class="nav-wert"><span class="wert" id="navAnkunft">&ndash;:&ndash;</span><span class="einheit">Ankunft</span></div>
       <button class="nav-stop-btn" id="btnNavStop" hidden>Beenden</button>
     </div>
+
+    <!-- Namensnennung waehrend der Navigation. Leaflets eigene Anzeige
+         ist hier ausgeblendet, weil sie in der Ecke des gedrehten
+         Kartenquadrats saesse - also weit ausserhalb des Bildschirms.
+         Diese hier liegt im Overlay und wird deshalb nicht mitgedreht. -->
+    <p class="nav-quelle" id="navQuelle" hidden>
+      Karte &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>
+    </p>
   </main>
 
   </div>
@@ -1261,17 +1292,17 @@
   <div id="toast" class="toast" hidden></div>
 
   <nav id="hauptNav" class="haupt-nav">
-    <!-- Die Garage steht an erster Stelle, weil sie der Startbildschirm
-         ist: dort steht die eigene Maschine, darunter der Shop und die
-         Wege in alles Uebrige. -->
-    <button class="nav-tab" data-ziel="garageScreen">
-      <svg class="ic gross"><use href="#icon-garage"></use></svg><span>Garage</span>
-    </button>
     <button class="nav-tab" data-ziel="app">
       <svg class="ic gross"><use href="#icon-route"></use></svg><span>Planer</span>
     </button>
     <button class="nav-tab" data-ziel="rideScreen">
       <svg class="ic gross"><use href="#icon-aufnahme"></use></svg><span>Ride</span>
+    </button>
+    <!-- Die Garage steht in der MITTE: Sie ist der Startbildschirm, und
+         die Mitte ist auf einem Handy die Stelle, die der Daumen am
+         leichtesten trifft. -->
+    <button class="nav-tab" data-ziel="garageScreen">
+      <svg class="ic gross"><use href="#icon-garage"></use></svg><span>Garage</span>
     </button>
     <button class="nav-tab" data-ziel="tourenScreen">
       <svg class="ic gross"><use href="#icon-touren"></use></svg><span>Touren</span>
@@ -1389,23 +1420,23 @@
   <!-- ZUERST, denn alle anderen benutzen geraet.* beim Laden. Hier steht der
        gesamte Zugriff aufs Geraet - Standort, Speicher, Dateien. Beim Umzug
        in die Stores ist das die einzige Datei, die sich aendert. -->
-  <script src="geraet.js?v=86"></script>
+  <script src="geraet.js?v=88"></script>
   <!-- Der Rechenteil: Kurvigkeit, Sackgassen, Rundtour-Punkte, GPX. Muss VOR
        app.js stehen, weil app.js diese Funktionen beim Routen aufruft. Die
        spaetere Webseite im Querformat laedt genau diese Datei ebenfalls und
        rechnet damit exakt so wie die App. -->
-  <script src="kern.js?v=86"></script>
-  <script src="app.js?v=86"></script>
+  <script src="kern.js?v=88"></script>
+  <script src="app.js?v=88"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=86"></script>
+  <script src="konto.js?v=88"></script>
   <!-- Nach app.js, weil die Garage verkleinereFoto() und showToast() von
        dort benutzt. -->
-  <script src="garage.js?v=86"></script>
+  <script src="garage.js?v=88"></script>
   <!-- Der Demo-Produktkatalog (nur Daten) und die Shop-Logik. produkte.js
        muss vor shop.js stehen, und beide nach garage.js, weil shop.js
        dessen Helfer (sicher, verkabele) mitbenutzt. -->
-  <script src="produkte.js?v=86"></script>
-  <script src="shop.js?v=86"></script>
+  <script src="produkte.js?v=88"></script>
+  <script src="shop.js?v=88"></script>
 </body>
 </html>

@@ -70,6 +70,9 @@ const map = L.map('map', {
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
+  // Pflichtangabe, siehe Nutzungsbedingungen von OpenStreetMap. Sie
+  // gehoert AN DIE KARTE, nicht in einen Fuss, den man wegscrollen kann.
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>',
 }).addTo(map);
 
 // Beim Start einmalig den eigenen Standort abfragen und die Karte dorthin
@@ -118,6 +121,11 @@ map.on('click', (e) => {
   addWaypoint(e.latlng.lat, e.latlng.lng);
 });
 
+document.getElementById('btnRouteGenerieren').addEventListener('click', () => {
+  if (state.waypoints.length < 2) return;
+  calculateRoute();
+});
+
 document.getElementById('btnKlickModus').addEventListener('click', () => {
   kartenKlickModusAktiv = !kartenKlickModusAktiv;
   document.getElementById('btnKlickModus').classList.toggle('active', kartenKlickModusAktiv);
@@ -154,9 +162,34 @@ function addWaypoint(lat, lon) {
   // zentrieren könnte - also fahren wir manuell dorthin.
   if (istErster) map.setView([lat, lon], 12);
 
-  // Im Rundtour-Modus wird nicht automatisch geroutet - das passiert erst,
-  // wenn der Nutzer explizit auf "Rundtour generieren" klickt.
-  if (state.planMode === 'punkt' && state.waypoints.length >= 2) calculateRoute();
+  /* Gerechnet wird NIE von selbst, weder hier noch bei der Ortssuche.
+     Vorher lief die Berechnung bei jedem gesetzten Punkt los: Wer drei
+     Zwischenziele eingab, loeste drei Routenberechnungen aus, von denen
+     zwei niemanden interessierten - und sah zwischendurch Routen, die er
+     gar nicht wollte. */
+  routeKnopfAktualisieren();
+}
+
+/* Haelt den Knopf "Route berechnen" auf Stand: Er ist nur benutzbar, wenn
+   ueberhaupt etwas zu rechnen ist, und der Satz darunter sagt, was noch
+   fehlt. Ein grauer Knopf ohne Begruendung ist eine Sackgasse. */
+function routeKnopfAktualisieren() {
+  const knopf = document.getElementById('btnRouteGenerieren');
+  const hinweis = document.getElementById('routeKnopfHinweis');
+  if (!knopf || !hinweis) return;
+
+  if (state.planMode === 'rundtour') {
+    // Die Rundtour hat ihren eigenen Knopf in ihrem eigenen Abschnitt.
+    knopf.hidden = true; hinweis.hidden = true;
+    return;
+  }
+  knopf.hidden = false; hinweis.hidden = false;
+
+  const genug = state.waypoints.length >= 2;
+  knopf.disabled = !genug;
+  hinweis.textContent = genug
+    ? `${state.waypoints.length} Punkte gesetzt.`
+    : (state.waypoints.length === 1 ? 'Jetzt noch ein Ziel.' : 'Setz mindestens Start und Ziel.');
 }
 
 // Beschriftung eines Wegpunkt-Markers: im Rundtour-Modus ist der erste
@@ -205,6 +238,7 @@ function refreshWaypoints() {
 }
 
 function renderWaypointList() {
+  routeKnopfAktualisieren();
   const list = document.getElementById('wpList');
   document.getElementById('wpCount').textContent = state.waypoints.length;
 
@@ -350,7 +384,21 @@ function pickBestRoute(routes, t) {
 /* --- 4b. Ortssuche --------------------------------------------------------
    Nominatim ist der kostenlose Geocoding-Dienst von OpenStreetMap: man
    schickt einen Ortsnamen und bekommt Koordinaten zurück. Kein API-Key
-   nötig - passt damit zu BRouter, das ebenfalls auf OSM-Daten aufbaut.   */
+   nötig - passt damit zu BRouter, das ebenfalls auf OSM-Daten aufbaut.
+
+   WARUM HIER ERST AUF KNOPFDRUCK GESUCHT WIRD, und nicht beim Tippen:
+   Nominatims Nutzungsbedingungen verbieten Vorschlaege waehrend der
+   Eingabe ausdruecklich - "Auto-complete search: This is not yet supported
+   by Nominatim and you must not implement such a service on the client
+   side using the API." Dazu kommt eine Obergrenze von EINER Anfrage je
+   Sekunde ueber alle Nutzer der App zusammen. Eine Suche, die bei jedem
+   Tastendruck losläuft, reisst beides.
+
+   Die Vorschlagsliste selbst waere technisch kein Problem - sie braucht
+   nur einen Dienst, der sie erlaubt. Wer das spaeter will: LocationIQ und
+   Geoapify haben kostenlose Kontingente, die Vorschlaege ausdruecklich
+   einschliessen, brauchen aber einen Schluessel. Getauscht wuerde dann
+   NUR die Funktion ortSuchen() hier unten. */
 
 const NOMINATIM = 'https://nominatim.openstreetmap.org/search';
 
@@ -372,7 +420,6 @@ async function searchPlace(query) {
 let startGesetzt = false;
 let zielGesetzt = false;
 
-let searchTimer = null;
 let searchRequestId = 0; // zählt Anfragen durch, damit veraltete Antworten ignoriert werden
 
 // Steht immer ganz oben in der Vorschlagsliste, auch während einer Suche -
@@ -381,26 +428,27 @@ const STANDORT_OPTION_HTML = '<li class="standort-option" data-standort="1">'
   + '<svg class="ic klein" aria-hidden="true"><use href="#icon-standort"></use></svg>'
   + '<span>Aktueller Standort</span></li>';
 
-document.querySelectorAll('.orts-feld').forEach(feld => {
-  const liste = feld.nextElementSibling;   // das <ul class="search-results"> daneben
+/* Verkabelt EIN Suchfeld. Frueher lief das einmalig ueber alle Felder;
+   seit Zwischenziele nachwachsen, muss es je Feld aufrufbar sein. */
+function verkabeleOrtsFeld(feld) {
+  const liste = feld.parentElement.querySelector('.search-results');
   const rolle = feld.dataset.rolle;
 
-  feld.addEventListener('input', () => {
+  /* Gesucht wird auf Absenden - mit der Eingabetaste oder ueber die Lupe
+     daneben. Warum nicht beim Tippen: siehe Kopf dieses Abschnitts. */
+  const absenden = () => {
     const query = feld.value.trim();
-    clearTimeout(searchTimer);
-
     if (query.length < 3) {
-      // Noch zu kurz zum Suchen, aber "Aktueller Standort" bleibt trotzdem
-      // wählbar - das ist ja keine Textsuche.
-      renderNurStandortOption(feld, liste, rolle);
+      showToast('Bitte mindestens drei Buchstaben eingeben.');
       return;
     }
-
-    // Erst 400ms nach der letzten Eingabe suchen, sonst laufen bei jedem
-    // Tastendruck einzelne Anfragen los - unnötig und unhöflich dem
-    // kostenlosen Dienst gegenüber.
-    searchTimer = setTimeout(() => runSearch(query, feld, liste, rolle), 400);
+    runSearch(query, feld, liste, rolle);
+  };
+  feld.addEventListener('keydown', ereignis => {
+    if (ereignis.key === 'Enter') { ereignis.preventDefault(); absenden(); }
   });
+  const lupe = feld.parentElement.querySelector('.such-knopf');
+  if (lupe) lupe.addEventListener('click', absenden);
 
   // Auch ohne Eingabe soll "Aktueller Standort" beim Klick ins Suchfeld
   // gleich zur Auswahl stehen.
@@ -411,7 +459,39 @@ document.querySelectorAll('.orts-feld').forEach(feld => {
   feld.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') hideSearchResults();
   });
-});
+}
+
+document.querySelectorAll('.orts-feld').forEach(verkabeleOrtsFeld);
+
+/* Ein neues, leeres Zwischenziel-Feld anhaengen. Gerufen wird das, sobald
+   im letzten Zwischenziel-Feld wirklich ein Ort steht - dann bleibt der
+   dort stehen und darunter wartet das naechste. Genau wie bei einem
+   Navigationsgeraet.
+
+   Die Felder tragen bewusst KEINE eigene Kennung: Sie werden ueber ihre
+   Rolle gefunden, und davon gibt es beliebig viele. */
+function neuesZwischenZielFeld() {
+  const behälter = document.getElementById('zwischenZiele');
+  if (!behälter) return null;
+  const nummer = behälter.querySelectorAll('.orts-feld').length + 1;
+  const gruppe = document.createElement('div');
+  gruppe.className = 'such-feld search-wrap';
+  gruppe.innerHTML = `
+    <span class="label">Zwischenziel ${nummer}</span>
+    <input type="text" class="search-input orts-feld" data-rolle="zwischen"
+           placeholder="Zwischenziel hinzufügen …" autocomplete="off" enterkeyhint="search">
+    <button type="button" class="such-knopf" aria-label="Suchen">
+      <svg class="ic klein"><use href="#icon-lupe"></use></svg>
+    </button>
+    <ul class="search-results" hidden></ul>`;
+  behälter.appendChild(gruppe);
+  const feld = gruppe.querySelector('.orts-feld');
+  verkabeleOrtsFeld(feld);
+  return feld;
+}
+
+// Beim Start steht genau ein leeres Zwischenziel-Feld da.
+neuesZwischenZielFeld();
 
 // Klick außerhalb der Suche schließt alle Vorschlagslisten wieder.
 document.addEventListener('click', (e) => {
@@ -467,12 +547,25 @@ function wireStandortOption(liste, feld, rolle) {
   if (el) el.addEventListener('click', () => aktuellenStandortVerwenden(feld, rolle));
 }
 
-/* Traegt den gewaehlten Namen ins Feld ein. Start und Ziel BEHALTEN ihren
-   Namen - man soll sehen, was gesetzt ist. Das Zwischenziel-Feld leert
-   sich dagegen sofort: Es ist eine Einwurfoeffnung fuer beliebig viele
-   Punkte, die danach in der Wegpunktliste stehen. */
+/* Traegt den gewaehlten Namen ins Feld ein - und zwar in JEDES Feld,
+   auch in ein Zwischenziel. Frueher leerte sich das Zwischenziel-Feld
+   sofort wieder, weil es als Einwurfoeffnung fuer beliebig viele Punkte
+   gedacht war. Das war verwirrend: Man tippte etwas ein, es verschwand,
+   und der Punkt tauchte irgendwo in einer Liste weiter unten auf.
+
+   Jetzt bleibt der Ort stehen, wo man ihn eingegeben hat, und darunter
+   oeffnet sich ein leeres Feld fuers naechste Zwischenziel - so wie man
+   es von Navigationsgeraeten kennt. */
 function ortInsFeld(feld, rolle, name) {
-  feld.value = rolle === 'zwischen' ? '' : name;
+  feld.value = name;
+  if (rolle !== 'zwischen') return;
+
+  // Nur nachlegen, wenn dieses Feld das letzte leere war - sonst
+  // entstuende bei jeder Korrektur ein weiteres.
+  const behälter = document.getElementById('zwischenZiele');
+  const felder = [...behälter.querySelectorAll('.orts-feld')];
+  const alleGefuellt = felder.every(f => f.value.trim() !== '');
+  if (alleGefuellt) neuesZwischenZielFeld();
 }
 
 /* Setzt einen gefundenen Ort an die Stelle, die seine Rolle verlangt.
@@ -497,7 +590,8 @@ function setzeWegpunktFürRolle(rolle, lat, lon) {
 
   refreshWaypoints();
   if (istErster) map.setView([lat, lon], 12);
-  if (state.planMode === 'punkt' && state.waypoints.length >= 2) calculateRoute();
+  // Gerechnet wird erst auf Knopfdruck - siehe btnRouteGenerieren.
+  routeKnopfAktualisieren();
 }
 
 // Einmalige Standortabfrage (anders als bei der Live-Navigation, die
@@ -526,7 +620,11 @@ function aktuellenStandortVerwenden(feld, rolle) {
 }
 
 function hideSearchResults() {
-  document.querySelectorAll('.orts-feld + .search-results').forEach(liste => {
+  /* Nach der Klasse suchen, NICHT ueber den Nachbarn: Seit der Suchknopf
+     zwischen Feld und Liste steht, ist die Liste nicht mehr das direkte
+     Geschwister des Feldes. Der alte Selektor ".orts-feld + .search-results"
+     traf danach nichts mehr, und die Vorschlaege blieben offen stehen. */
+  document.querySelectorAll('.search-results').forEach(liste => {
     liste.hidden = true;
     liste.innerHTML = '';
   });
@@ -1169,6 +1267,7 @@ function startNavigation() {
   document.getElementById('navBanner').hidden = false;
   document.getElementById('navFuss').hidden = false;
   document.getElementById('navKnoepfe').hidden = false;
+  document.getElementById('navQuelle').hidden = false;
   navZentrierenKnopfZeigen(false);   // am Anfang folgt die Karte ja
   document.getElementById('btnNavStop').hidden = false;
   document.getElementById('btnNavStart').hidden = true;
@@ -1213,6 +1312,7 @@ function stopNavigation() {
   document.getElementById('navBanner').hidden = true;
   document.getElementById('navFuss').hidden = true;
   document.getElementById('navKnoepfe').hidden = true;
+  document.getElementById('navQuelle').hidden = true;
   // Zuruecksetzen, sonst folgt die naechste Navigation nicht mehr.
   nav.folgtPosition = true;
   document.getElementById('btnNavStop').hidden = true;
@@ -2052,7 +2152,7 @@ function rideKarte() {
   if (rideKarteInstanz) return rideKarteInstanz;
 
   rideKarteInstanz = L.map('rideMap', { zoomControl: true }).setView([49.8, 9.9], 8);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 })
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>' })
     .addTo(rideKarteInstanz);
   return rideKarteInstanz;
 }
