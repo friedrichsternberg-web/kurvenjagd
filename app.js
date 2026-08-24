@@ -3035,7 +3035,6 @@ document.getElementById('btnNeuLaden').addEventListener('click', ereignis => {
 
 document.getElementById('btnStartPlaner').addEventListener('click', zeigePlaner);
 document.getElementById('btnStartTouren').addEventListener('click', zeigeMeineTouren);
-document.getElementById('btnStartGarage').addEventListener('click', zeigeGarage);
 document.getElementById('btnStartShop').addEventListener('click', zeigeShop);
 // Den Zurueck-Knopf der Produktseite verkabelt shop.js selbst: Wohin er
 // fuehrt, haengt davon ab, ob man aus dem Shop oder aus der Garage kam -

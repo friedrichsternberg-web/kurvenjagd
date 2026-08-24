@@ -23,7 +23,7 @@
        "orientation": "portrait" im Manifest ist die Ansage, um die es hier
        geht: Diese App ist fuers Hochformat gebaut. Die spaetere Webseite
        bekommt ein eigenes Design fuers Querformat und ein eigenes Manifest. -->
-  <link rel="manifest" href="manifest.webmanifest?v=68">
+  <link rel="manifest" href="manifest.webmanifest?v=69">
 
   <!-- Faerbt die Statusleiste des Handys in die Grundflaeche der App, damit
        oben kein fremder heller Streifen stehen bleibt. -->
@@ -36,7 +36,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Kurvenjagd">
-  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=68">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=69">
 
   <!-- Fuer die spaetere Webseite und geteilte Routen: So sieht der Link aus,
        wenn ihn jemand in WhatsApp oder Instagram einfuegt. Ohne das steht
@@ -99,8 +99,8 @@
                    die spaetere Webseite genauso benutzen.
        style.css   die Anordnung DIESER App, ausgelegt auf Hochformat. Die
                    Webseite bekommt dafuer eine eigene Datei. -->
-  <link rel="stylesheet" href="design.css?v=68">
-  <link rel="stylesheet" href="style.css?v=68">
+  <link rel="stylesheet" href="design.css?v=69">
+  <link rel="stylesheet" href="style.css?v=69">
 </head>
 <body>
 
@@ -279,77 +279,6 @@
 
     <div class="startseite-inhalt">
 
-      <div class="kachel-raster">
-        <!-- Die Garage steht an erster Stelle: Sie ist der Ort, an dem die
-             eigene Maschine steht, und damit das Erste, was jemand sehen
-             will, der die App aufmacht. -->
-        <button class="kachel" id="btnStartGarage" style="--kachel-bild: url('img/kacheln/garage.jpg')">
-          <!-- Die eigene Maschine IM Kachelbild. Sie liegt auf derselben
-               Schicht wie das Kachelfoto, also UNTER dem Schleier - dadurch
-               gehoert sie zum Bild, statt darauf zu kleben, und der Text
-               bleibt lesbar. Groesse und Lage rechnet garage.js aus, und
-               zwar gemessen am INHALT des Fotos, nicht an seiner Datei-
-               Kante: Ein freigestelltes Foto behaelt seine volle Groesse
-               und kann beliebig viel leeren Rand haben (siehe
-               freiUebernehmen), ein schlichtes "einpassen" machte die
-               Maschine dann winzig. -->
-          <img id="startKachelBike" class="kachel-maschine" alt="" aria-hidden="true" hidden>
-          <span class="kachel-inhalt">
-            <svg class="ic gross kachel-symbol"><use href="#icon-garage"></use></svg>
-            <span class="kachel-text">
-              <span class="kachel-titel">Meine Garage</span>
-              <span class="kachel-sub">Maschine und Ausr&uuml;stung.</span>
-            </span>
-          </span>
-          <span class="kachel-pfeil" aria-hidden="true">&rarr;</span>
-        </button>
-
-        <button class="kachel" id="btnStartPlaner" style="--kachel-bild: url('img/kacheln/routenplaner.jpg')">
-          <span class="kachel-inhalt">
-            <svg class="ic gross kachel-symbol"><use href="#icon-route"></use></svg>
-            <span class="kachel-text">
-              <span class="kachel-titel">Routenplaner</span>
-              <span class="kachel-sub">Finde deine n&auml;chste Traumstrecke.</span>
-            </span>
-          </span>
-          <span class="kachel-pfeil" aria-hidden="true">&rarr;</span>
-        </button>
-
-        <button class="kachel" id="btnStartRide" style="--kachel-bild: url('img/kacheln/aufzeichnen.jpg')">
-          <span class="kachel-inhalt">
-            <svg class="ic gross kachel-symbol"><use href="#icon-aufnahme"></use></svg>
-            <span class="kachel-text">
-              <span class="kachel-titel">Ride aufzeichnen</span>
-              <span class="kachel-sub">Deine Fahrt. Deine Daten.</span>
-            </span>
-          </span>
-          <span class="kachel-pfeil" aria-hidden="true">&rarr;</span>
-        </button>
-
-        <button class="kachel" id="btnStartTouren" style="--kachel-bild: url('img/kacheln/touren.jpg')">
-          <span class="kachel-inhalt">
-            <svg class="ic gross kachel-symbol"><use href="#icon-touren"></use></svg>
-            <span class="kachel-text">
-              <span class="kachel-titel">Meine Touren</span>
-              <span class="kachel-sub">Alle deine Fahrten auf einen Blick.</span>
-            </span>
-          </span>
-          <span class="kachel-pfeil" aria-hidden="true">&rarr;</span>
-        </button>
-
-        <!-- Der Shop bekommt die volle Rasterbreite unter dem 2x2-Block.
-             Noch ohne Hintergrundbild - das kann spaeter als
-             img/kacheln/shop.jpg dazukommen. -->
-        <button class="kachel kachel--breit" id="btnStartShop">
-          <span class="kachel-inhalt">
-            <svg class="ic gross kachel-symbol"><use href="#icon-shop"></use></svg>
-            <span class="kachel-text">
-              <span class="kachel-titel">Shop</span>
-              <span class="kachel-sub">Ausr&uuml;stung finden, Preise vergleichen.</span>
-            </span>
-          </span>
-          <span class="kachel-pfeil" aria-hidden="true">&rarr;</span>
-        </button>
       </div>
 
       <!-- Hier stand einmal eine Statuszeile zum Konto: E-Mail, Abmelden,
@@ -566,6 +495,61 @@
           <button class="linkbtn" id="btnGarageShopAlle">Alle ansehen &rarr;</button>
         </div>
         <div class="garage-shop-band" id="garageShopBand"></div>
+      </div>
+
+      <!-- Das Menue. Seit die Garage der Startbildschirm ist, wohnen die
+           Wege in die uebrigen Bereiche hier unten: erst die eigene
+           Maschine, dann der Shop, dann das, was man sonst vorhat. Eine
+           Garage-Kachel gibt es nicht mehr - man ist ja schon da. -->
+      <div id="garageMenue" class="garage-menue">
+        <h3 class="garage-menue-kopf">Was willst du fahren?</h3>
+        <div class="garage-menue-raster">
+          <button class="kachel" id="btnStartPlaner" style="--kachel-bild: url('img/kacheln/routenplaner.jpg')">
+            <span class="kachel-inhalt">
+              <svg class="ic gross kachel-symbol"><use href="#icon-route"></use></svg>
+              <span class="kachel-text">
+                <span class="kachel-titel">Routenplaner</span>
+                <span class="kachel-sub">Finde deine n&auml;chste Traumstrecke.</span>
+              </span>
+            </span>
+            <span class="kachel-pfeil" aria-hidden="true">&rarr;</span>
+          </button>
+
+          <button class="kachel" id="btnStartRide" style="--kachel-bild: url('img/kacheln/aufzeichnen.jpg')">
+            <span class="kachel-inhalt">
+              <svg class="ic gross kachel-symbol"><use href="#icon-aufnahme"></use></svg>
+              <span class="kachel-text">
+                <span class="kachel-titel">Ride aufzeichnen</span>
+                <span class="kachel-sub">Deine Fahrt. Deine Daten.</span>
+              </span>
+            </span>
+            <span class="kachel-pfeil" aria-hidden="true">&rarr;</span>
+          </button>
+
+          <button class="kachel" id="btnStartTouren" style="--kachel-bild: url('img/kacheln/touren.jpg')">
+            <span class="kachel-inhalt">
+              <svg class="ic gross kachel-symbol"><use href="#icon-touren"></use></svg>
+              <span class="kachel-text">
+                <span class="kachel-titel">Meine Touren</span>
+                <span class="kachel-sub">Alle deine Fahrten auf einen Blick.</span>
+              </span>
+            </span>
+            <span class="kachel-pfeil" aria-hidden="true">&rarr;</span>
+          </button>
+
+          <!-- Noch ohne Hintergrundbild - das kann spaeter als
+               img/kacheln/shop.jpg dazukommen. -->
+          <button class="kachel" id="btnStartShop">
+            <span class="kachel-inhalt">
+              <svg class="ic gross kachel-symbol"><use href="#icon-shop"></use></svg>
+              <span class="kachel-text">
+                <span class="kachel-titel">Shop</span>
+                <span class="kachel-sub">Ausr&uuml;stung finden, Preise vergleichen.</span>
+              </span>
+            </span>
+            <span class="kachel-pfeil" aria-hidden="true">&rarr;</span>
+          </button>
+        </div>
       </div>
 
     </div>
@@ -1408,23 +1392,23 @@
   <!-- ZUERST, denn alle anderen benutzen geraet.* beim Laden. Hier steht der
        gesamte Zugriff aufs Geraet - Standort, Speicher, Dateien. Beim Umzug
        in die Stores ist das die einzige Datei, die sich aendert. -->
-  <script src="geraet.js?v=68"></script>
+  <script src="geraet.js?v=69"></script>
   <!-- Der Rechenteil: Kurvigkeit, Sackgassen, Rundtour-Punkte, GPX. Muss VOR
        app.js stehen, weil app.js diese Funktionen beim Routen aufruft. Die
        spaetere Webseite im Querformat laedt genau diese Datei ebenfalls und
        rechnet damit exakt so wie die App. -->
-  <script src="kern.js?v=68"></script>
-  <script src="app.js?v=68"></script>
+  <script src="kern.js?v=69"></script>
+  <script src="app.js?v=69"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=68"></script>
+  <script src="konto.js?v=69"></script>
   <!-- Nach app.js, weil die Garage verkleinereFoto() und showToast() von
        dort benutzt. -->
-  <script src="garage.js?v=68"></script>
+  <script src="garage.js?v=69"></script>
   <!-- Der Demo-Produktkatalog (nur Daten) und die Shop-Logik. produkte.js
        muss vor shop.js stehen, und beide nach garage.js, weil shop.js
        dessen Helfer (sicher, verkabele) mitbenutzt. -->
-  <script src="produkte.js?v=68"></script>
-  <script src="shop.js?v=68"></script>
+  <script src="produkte.js?v=69"></script>
+  <script src="shop.js?v=69"></script>
 </body>
 </html>
