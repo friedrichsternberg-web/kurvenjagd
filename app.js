@@ -121,6 +121,14 @@ map.on('click', (e) => {
 document.getElementById('btnKlickModus').addEventListener('click', () => {
   kartenKlickModusAktiv = !kartenKlickModusAktiv;
   document.getElementById('btnKlickModus').classList.toggle('active', kartenKlickModusAktiv);
+  /* Ohne Rueckmeldung war nicht zu erkennen, dass der Knopf ueberhaupt
+     etwas bewirkt: Auf der Karte aendert sich nichts, und der Knopf selbst
+     steht bei zugezogener Schublade ausserhalb des Sichtfelds. Jetzt sagt
+     eine Meldung, was zu tun ist, und der Zeiger wird zum Fadenkreuz. */
+  document.body.classList.toggle('kartenklick', kartenKlickModusAktiv);
+  showToast(kartenKlickModusAktiv
+    ? 'Tippe jetzt auf die Karte, um einen Punkt zu setzen.'
+    : 'Punkte setzen ist wieder aus.');
 });
 
 
@@ -932,6 +940,16 @@ function showStats(r) {
   // Route sichtbar. Beim Laden einer Aufzeichnung werden sie direkt danach
   // wieder eingeblendet (siehe ladeGespeicherteRoute).
   zeigeAufzeichnungsExtras(null);
+
+  /* Die Antwort auf die gerade gestellte Frage muss man auch sehen. Der
+     Ergebnisblock steht unten im Bedienfeld; bei zugezogener Schublade
+     rechnete die App bisher stumm vor sich hin und zeigte das Ergebnis an
+     einer Stelle, die niemand im Blick hatte. Also: Schublade auf
+     Standardhoehe fahren und den Block heranholen. */
+  if (typeof setzePanelHöhe === 'function' && fensterIstSchmal()) {
+    setzePanelHöhe(panelStandardHöhe(), { animiert: true });
+  }
+  document.getElementById('statsBlock').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 // Der Kurven-Score in Worten - genutzt von der Routenplanung UND von der
@@ -2782,6 +2800,12 @@ function leistenHöhe() {
 }
 
 function verfügbareHöhe() { return window.innerHeight - leistenHöhe(); }
+
+/* Ist das Bedienfeld gerade eine Schublade unter der Karte? Die Grenze
+   steht in style.css als Media Query; hier wird DIESELBE Zahl abgefragt,
+   statt sie zu erraten. Laufen die beiden auseinander, faehrt die
+   Schublade am Rechner los, wo es gar keine gibt. */
+function fensterIstSchmal() { return window.matchMedia('(max-width: 760px)').matches; }
 function panelMaxHöhe() { return Math.round(verfügbareHöhe() * 0.85); }
 function panelStandardHöhe() { return Math.round(verfügbareHöhe() * 0.45); }
 

@@ -23,7 +23,7 @@
        "orientation": "portrait" im Manifest ist die Ansage, um die es hier
        geht: Diese App ist fuers Hochformat gebaut. Die spaetere Webseite
        bekommt ein eigenes Design fuers Querformat und ein eigenes Manifest. -->
-  <link rel="manifest" href="manifest.webmanifest?v=76">
+  <link rel="manifest" href="manifest.webmanifest?v=77">
 
   <!-- Faerbt die Statusleiste des Handys in die Grundflaeche der App, damit
        oben kein fremder heller Streifen stehen bleibt. -->
@@ -36,7 +36,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Kurvenjagd">
-  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=76">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=77">
 
   <!-- Fuer die spaetere Webseite und geteilte Routen: So sieht der Link aus,
        wenn ihn jemand in WhatsApp oder Instagram einfuegt. Ohne das steht
@@ -99,8 +99,8 @@
                    die spaetere Webseite genauso benutzen.
        style.css   die Anordnung DIESER App, ausgelegt auf Hochformat. Die
                    Webseite bekommt dafuer eine eigene Datei. -->
-  <link rel="stylesheet" href="design.css?v=76">
-  <link rel="stylesheet" href="style.css?v=76">
+  <link rel="stylesheet" href="design.css?v=77">
+  <link rel="stylesheet" href="style.css?v=77">
 </head>
 <body>
 
@@ -953,6 +953,51 @@
       <button class="back-to-start" id="btnZumStartmenü" title="Zur Garage">&larr;</button>
     </header>
 
+    <section class="block">
+      <h2>Ort suchen</h2>
+
+      <div class="such-feld search-wrap">
+        <span class="label">Start</span>
+        <input type="text" id="sucheStart" class="search-input orts-feld" data-rolle="start"
+               placeholder="Startpunkt suchen &hellip;" autocomplete="off">
+        <ul class="search-results" hidden></ul>
+      </div>
+
+      <div class="such-feld search-wrap">
+        <span class="label">Zwischenziel</span>
+        <input type="text" id="sucheZwischen" class="search-input orts-feld" data-rolle="zwischen"
+               placeholder="Zwischenziel hinzuf&uuml;gen &hellip;" autocomplete="off">
+        <ul class="search-results" hidden></ul>
+      </div>
+
+      <div class="such-feld search-wrap" id="zielFeldGruppe">
+        <span class="label">Ziel</span>
+        <input type="text" id="sucheZiel" class="search-input orts-feld" data-rolle="ziel"
+               placeholder="Zielpunkt suchen &hellip;" autocomplete="off">
+        <ul class="search-results" hidden></ul>
+      </div>
+
+      <!-- Kartenklicks setzen erst dann Wegpunkte, wenn dieser Modus an ist -
+           sonst würde jeder Klick zum Erkunden der Karte (z.B. auf einen
+           Pass-Marker) versehentlich einen Wegpunkt anlegen. -->
+      <button class="btn ghost klick-modus-btn" id="btnKlickModus">
+        Punkt auf der Karte setzen
+      </button>
+    </section>
+
+    <!-- Wegpunkte -->
+    <section class="block">
+      <h2>Wegpunkte <span class="badge" id="wpCount">0</span></h2>
+      <ol id="wpList" class="wp-list">
+        <li class="empty">Noch keine Punkte. Suche oben einen Ort &ndash; oder tippe auf
+          &bdquo;Punkt auf der Karte setzen&ldquo; und dann auf die Karte.</li>
+      </ol>
+      <div class="row" id="wpButtons" hidden>
+        <button class="btn ghost" id="btnUndo">Letzten entfernen</button>
+        <button class="btn ghost" id="btnClear">Alles löschen</button>
+      </div>
+    </section>
+
     <!-- Planungsart: normale Route zwischen Punkten, oder Rundtour ab
          einem Startpunkt zurück zu sich selbst -->
     <section class="block">
@@ -1027,50 +1072,6 @@
 
          Bei der Rundtour ist das Zielfeld gesperrt - die endet am Start,
          ein eigenes Ziel waere eine leere Behauptung. -->
-    <section class="block">
-      <h2>Ort suchen</h2>
-
-      <div class="such-feld search-wrap">
-        <span class="label">Start</span>
-        <input type="text" id="sucheStart" class="search-input orts-feld" data-rolle="start"
-               placeholder="Startpunkt suchen &hellip;" autocomplete="off">
-        <ul class="search-results" hidden></ul>
-      </div>
-
-      <div class="such-feld search-wrap">
-        <span class="label">Zwischenziel</span>
-        <input type="text" id="sucheZwischen" class="search-input orts-feld" data-rolle="zwischen"
-               placeholder="Zwischenziel hinzuf&uuml;gen &hellip;" autocomplete="off">
-        <ul class="search-results" hidden></ul>
-      </div>
-
-      <div class="such-feld search-wrap" id="zielFeldGruppe">
-        <span class="label">Ziel</span>
-        <input type="text" id="sucheZiel" class="search-input orts-feld" data-rolle="ziel"
-               placeholder="Zielpunkt suchen &hellip;" autocomplete="off">
-        <ul class="search-results" hidden></ul>
-      </div>
-
-      <!-- Kartenklicks setzen erst dann Wegpunkte, wenn dieser Modus an ist -
-           sonst würde jeder Klick zum Erkunden der Karte (z.B. auf einen
-           Pass-Marker) versehentlich einen Wegpunkt anlegen. -->
-      <button class="btn ghost klick-modus-btn" id="btnKlickModus">
-        Beliebigen Punkt auf der Karte anklicken
-      </button>
-    </section>
-
-    <!-- Wegpunkte -->
-    <section class="block">
-      <h2>Wegpunkte <span class="badge" id="wpCount">0</span></h2>
-      <ol id="wpList" class="wp-list">
-        <li class="empty">Ort suchen oder Klick-Modus einschalten und auf die Karte klicken.</li>
-      </ol>
-      <div class="row" id="wpButtons" hidden>
-        <button class="btn ghost" id="btnUndo">Letzten entfernen</button>
-        <button class="btn ghost" id="btnClear">Alles löschen</button>
-      </div>
-    </section>
-
     <!-- Rundtour: nur im Rundtour-Modus sichtbar -->
     <section class="block" id="roundtripBlock" hidden>
       <h2>Rundtour</h2>
@@ -1347,23 +1348,23 @@
   <!-- ZUERST, denn alle anderen benutzen geraet.* beim Laden. Hier steht der
        gesamte Zugriff aufs Geraet - Standort, Speicher, Dateien. Beim Umzug
        in die Stores ist das die einzige Datei, die sich aendert. -->
-  <script src="geraet.js?v=76"></script>
+  <script src="geraet.js?v=77"></script>
   <!-- Der Rechenteil: Kurvigkeit, Sackgassen, Rundtour-Punkte, GPX. Muss VOR
        app.js stehen, weil app.js diese Funktionen beim Routen aufruft. Die
        spaetere Webseite im Querformat laedt genau diese Datei ebenfalls und
        rechnet damit exakt so wie die App. -->
-  <script src="kern.js?v=76"></script>
-  <script src="app.js?v=76"></script>
+  <script src="kern.js?v=77"></script>
+  <script src="app.js?v=77"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=76"></script>
+  <script src="konto.js?v=77"></script>
   <!-- Nach app.js, weil die Garage verkleinereFoto() und showToast() von
        dort benutzt. -->
-  <script src="garage.js?v=76"></script>
+  <script src="garage.js?v=77"></script>
   <!-- Der Demo-Produktkatalog (nur Daten) und die Shop-Logik. produkte.js
        muss vor shop.js stehen, und beide nach garage.js, weil shop.js
        dessen Helfer (sicher, verkabele) mitbenutzt. -->
-  <script src="produkte.js?v=76"></script>
-  <script src="shop.js?v=76"></script>
+  <script src="produkte.js?v=77"></script>
+  <script src="shop.js?v=77"></script>
 </body>
 </html>

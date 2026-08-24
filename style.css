@@ -3250,3 +3250,9 @@ body.nav-modus .leaflet-control-container { display: none; }
   text-transform: uppercase;
   color: var(--muted);
 }
+
+/* Waehrend "Punkt auf der Karte setzen" an ist, wird der Zeiger zum
+   Fadenkreuz. Auf dem Handy sieht man das zwar nicht, aber die Meldung
+   dort sagt es - und am Rechner ist es der schnellste Hinweis darauf,
+   dass der naechste Klick etwas anderes tut als sonst. */
+body.kartenklick #map { cursor: crosshair; }
