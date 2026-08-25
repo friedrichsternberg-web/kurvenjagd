@@ -1,0 +1,36 @@
+/* ============================================================================
+   quer.css - die Anordnung fuer BREITE Bildschirme
+
+   Das ist die "eigene Anordnungsdatei fuers Querformat", die die Trennung
+   von Designsprache (design.css) und Anordnung (style.css) von Anfang an
+   vorgesehen hat. Sie laedt NACH style.css und ueberschreibt dessen
+   Hochformat-Anordnung allein durch die Reihenfolge - kein !important.
+   Farben, Schrift, Abstaende und Radien kommen weiterhin ausschliesslich
+   als Marken aus design.css; pruefe.sh Regel 2 prueft das auch hier nach.
+
+   ALLES in dieser Datei steht in EINER Bedingung:
+
+     Fensterbreite mindestens 900 Punkte UND Hoehe mindestens 500.
+
+   Warum diese Werte: Der Garagen-Zweispalter braucht rund 420 Punkte Raum
+   plus 380 Punkte Inhaltsspalte, darunter quetscht er. Ein iPad hochkant
+   (768-834 Punkte breit) bleibt dadurch beim Hochformat-Layout - ein
+   Hochformat-Geraet bekommt die Hochformat-Anordnung. Die Hoehengrenze
+   nimmt die Handys im Querformat heraus (844x390 bis 932x440): Dort waere
+   eine Kopfleiste bei 390 Punkten Resthoehe kein Gewinn, und der Planer
+   hat fuer diesen Fall laengst seine Seitenleiste.
+
+   ACHTUNG, es gibt eine ZWEITE, unabhaengige Grenze im Projekt: die 760
+   in style.css (Planer: Seitenleiste oder Schublade?) und ihr Spiegel
+   fensterIstSchmal() in app.js. Die beiden beantworten verschiedene
+   Fragen und duerfen nicht zusammengelegt werden - zwischen 760 und 900
+   ist beides zugleich richtig: Seitenleiste im Planer, aber noch das
+   Hochformat-Layout mit unterer Leiste.
+   ============================================================================ */
+
+@media (min-width: 900px) and (min-height: 500px) {
+
+  /* Die Abschnitte kommen in den naechsten Schritten:
+     Kopfleiste, Garage-Zweispalter, Listen, Ride-Zweispalter. */
+
+}

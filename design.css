@@ -222,15 +222,28 @@
   --raum-dunkel: #1A1E26;
 
   /* Abstandsskala. Immer eine dieser Stufen benutzen, nie krumme Werte -
-     das ist der Unterschied zwischen "gestaltet" und "zusammengeschoben". */
+     das ist der Unterschied zwischen "gestaltet" und "zusammengeschoben".
+     Die beiden grossen Stufen sind fuer breite Bildschirme gedacht - auf
+     einem Handy waere s7 schon ein Fuenftel der Breite. */
   --s1: 4px;  --s2: 8px;  --s3: 12px;
   --s4: 16px; --s5: 24px; --s6: 32px;
+  --s7: 48px; --s8: 64px;
 
-  /* Hoehe der unteren Navigationsleiste. --nav-raum ist der Platz, den
-     die Bildschirme dafuer frei lassen muessen - er ist 0, solange die
-     Leiste versteckt ist (siehe body.mit-nav weiter unten). */
+  /* Hoehe der Navigationsleiste. --nav-raum ist der Platz, den die
+     Bildschirme dafuer frei lassen muessen - er ist 0, solange die Leiste
+     versteckt ist (siehe body.mit-nav in style.css). Wo die Leiste sitzt,
+     entscheidet die Anordnung: im Hochformat unten (style.css), im
+     Querformat oben (quer.css) - der Platzhalter ist derselbe. */
   --nav-h: 58px;
   --nav-raum: 0px;
+
+  /* Masse fuer breite Bildschirme. Hier und nicht in quer.css, weil eine
+     Spaltenbreite eine Ansage der Designsprache ist, kein Anordnungsdetail -
+     und weil style.css eine davon ebenfalls benutzt (das Planer-Bedienfeld
+     ist im Hochformat ueber 760 Punkten dieselbe Seitenleiste). */
+  --inhalt-max: 1080px;    /* Lesebreite fuer Listen und Textseiten */
+  --spalte-panel: 330px;   /* Bedienfeld des Planers als Seitenleiste */
+  --spalte-ride: 380px;    /* Wertefeld beim Aufzeichnen als Seitenspalte */
 
   /* Zwei Schriftrollen: Condensed fuer Ueberschriften und Messwerte,
      die normale Breite fuer alles zum Lesen. */

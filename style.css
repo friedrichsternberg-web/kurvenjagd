@@ -89,6 +89,12 @@
    env(safe-area-inset-bottom) ist der Streifen, den iPhones unten fuer
    die Wisch-Leiste reservieren. Ohne den Zuschlag saessen die Beschriftungen
    darunter. */
+/* Elemente, die nur die Querformat-Kopfleiste braucht (Schriftzug,
+   Rechtliches-Link, Konto-Knopf rechts). Im Hochformat unsichtbar.
+   BEWUSST eine Klasse und nicht das hidden-Attribut: hidden gewinnt per
+   !important (design.css) und liesse sich aus quer.css nicht aufheben. */
+.nur-quer { display: none; }
+
 .haupt-nav {
   position: fixed;
   left: 0; right: 0; bottom: 0;
@@ -682,8 +688,8 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 
 /* ---------- Bedienfeld ---------- */
 #panel {
-  width: 330px;
-  flex: 0 0 330px;
+  width: var(--spalte-panel);
+  flex: 0 0 var(--spalte-panel);
   display: flex;
   flex-direction: column;
   /* Glas ueber der Karte. Die Fuellung ist dunkel und nicht hell: darunter
