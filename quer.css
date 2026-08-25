@@ -109,4 +109,41 @@
     margin-top: var(--nav-raum);
   }
 
+  /* --- 3. Die Garage als Zweispalter ------------------------------------------
+     Im Hochformat stapelt sich alles untereinander und die Seite scrollt.
+     Im Querformat steht der Werkstattraum links und fuellt die Hoehe, rechts
+     laeuft eine Spalte mit Datenblatt, Shop und Menue - nur SIE scrollt,
+     der Raum steht.
+
+     WICHTIG, und das ist die eine eiserne Regel dieses Blocks: Zwischen
+     .garage-raum und .garage-buehne darf NIE ein positionierter Wrapper
+     oder ein transform dazukommen. Die Buehnenrechnung in garage.js misst
+     ueber die offsetParent-Kette, und ein Glied dazwischen wuerde die
+     Maschine neben den Teller stellen. Der Zweispalter braucht deshalb
+     keinerlei JavaScript: Raum und Inhaltsspalte sind im HTML schon
+     Geschwister, und der ResizeObserver auf dem Raum rechnet die Buehne
+     bei jeder Spaltenbreite von selbst neu. */
+  .garage-screen {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(380px, 480px);
+    grid-template-rows: minmax(0, 1fr);
+    overflow: hidden;   /* das Scrollen uebernimmt die rechte Spalte */
+  }
+
+  /* Der Raum fuellt die linke Spalte. Die Hochformat-Hoehenformel (64svh
+     usw.) rechnet mit dem FENSTER und wuerde hier einen falschen Ausschnitt
+     waehlen - die Spaltenhoehe ist die richtige Ansage. */
+  .garage-raum { height: 100%; }
+
+  /* Die rechte Spalte scrollt fuer sich. Der -20px-Ueberlapp des
+     Hochformats (die Platte schiebt sich dort unter den Raum) ergibt
+     nebeneinander keinen Sinn. */
+  .garage-inhalt {
+    overflow-y: auto;
+    min-height: 0;
+    margin-top: 0;
+    padding-top: var(--s4);
+    padding-right: var(--s4);
+  }
+
 }
