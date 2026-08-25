@@ -410,6 +410,8 @@ function zeichneGarageShop() {
   const platte = document.getElementById('garageShop');
   const band = document.getElementById('garageShopBand');
   if (!platte || !band) return;
+  // Abgeschalteter Shop: Die Leiste bleibt versteckt, wie sie im HTML steht.
+  if (!SHOP_AKTIV) return;
 
   const produkte = shopKatalog().produkte;
   const einträge = [];

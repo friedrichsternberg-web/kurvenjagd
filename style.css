@@ -239,6 +239,10 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   grid-template-columns: 1fr 1fr;
   gap: var(--s3);
 }
+/* Eine Kachel ueber beide Spalten - fuer eine ungerade Kachelzahl, damit
+   im Raster keine Luecke bleibt. Gesetzt wird die Klasse von
+   wendeShopSchalterAn() in app.js. */
+.kachel--breit { grid-column: 1 / -1; }
 .kachel {
   position: relative;
   overflow: hidden;

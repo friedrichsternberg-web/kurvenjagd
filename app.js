@@ -29,6 +29,24 @@
    ============================================================================ */
 
 
+/* --- Der Shop-Schalter ------------------------------------------------------
+   true  = der Shop ist ueberall da: Eintrag in der Leiste, Kachel im
+           Garagen-Menue, "Shop fuer dich"-Leiste unter der Garage.
+   false = alles davon ist AUSGEBLENDET, aber nichts ist geloescht - der
+           gesamte Shop-Code samt Demo-Katalog bleibt im Projekt und kommt
+           mit einem einzigen true wieder.
+
+   Warum er gerade aus ist: Die Seite wird bei Affiliate-Netzwerken als
+   Pruef-URL eingereicht, und ein Shop voller Demo-Preise wuerde dort mehr
+   Fragen aufwerfen als beantworten. Sobald die Partnerprogramme freigegeben
+   sind und echte Angebote fliessen koennen, wird er wieder eingeschaltet.
+
+   Angewendet wird der Schalter an drei Stellen: wendeShopSchalterAn()
+   (Abschnitt 21) versteckt Leisten-Eintrag und Kachel, zeigeShop() weicht
+   zur Garage aus, und zeichneGarageShop() in shop.js steigt sofort aus. */
+const SHOP_AKTIV = false;
+
+
 /* --- 1. Zustand ------------------------------------------------------------
    "State" ist alles, was sich während der Benutzung ändert. Wir halten das
    an EINER Stelle, damit man nie suchen muss, wo eine Information herkommt. */
@@ -2943,6 +2961,9 @@ function zeigeGarage() {
    Datei geladen wird - deshalb dieselbe defensive Pruefung wie bei der
    Garage: Fehlt shop.js, oeffnet sich wenigstens der leere Bildschirm. */
 function zeigeShop() {
+  // Solange der Shop abgeschaltet ist, fuehrt jeder Weg dorthin zur
+  // Garage - das faengt Leisten-Eintrag, Kachel und alle Knoepfe auf einmal.
+  if (!SHOP_AKTIV) { zeigeGarage(); return; }
   if (typeof zeichneShop === 'function') zeichneShop();
   zeigeBildschirm('shopScreen');
 }
@@ -3236,6 +3257,21 @@ document.getElementById('btnNeuLaden').addEventListener('click', ereignis => {
 document.getElementById('btnStartPlaner').addEventListener('click', zeigePlaner);
 document.getElementById('btnStartTouren').addEventListener('click', zeigeMeineTouren);
 document.getElementById('btnStartShop').addEventListener('click', zeigeShop);
+
+/* Wendet den Shop-Schalter (ganz oben in dieser Datei) auf die Oberflaeche
+   an: Ohne Shop verschwinden der Eintrag in der Leiste und die Kachel im
+   Garagen-Menue. Die uebrigen vier Leisten-Eintraege verteilen den Platz
+   von selbst. */
+function wendeShopSchalterAn() {
+  if (SHOP_AKTIV) return;
+  document.querySelectorAll('.nav-tab[data-ziel="shopScreen"]')
+    .forEach(knopf => { knopf.hidden = true; });
+  document.getElementById('btnStartShop').hidden = true;
+  // Ohne die Shop-Kachel sind es drei Kacheln in einem Zweierraster - die
+  // letzte nimmt beide Spalten, sonst bleibt daneben ein Loch.
+  document.getElementById('btnStartTouren').classList.add('kachel--breit');
+}
+wendeShopSchalterAn();
 // Den Zurueck-Knopf der Produktseite verkabelt shop.js selbst: Wohin er
 // fuehrt, haengt davon ab, ob man aus dem Shop oder aus der Garage kam -
 // und das weiss nur shop.js.
