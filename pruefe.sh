@@ -17,6 +17,7 @@
 #   7. Keine Datei ueber 1200 Zeilen
 #   8. Kein Sitzungsprotokoll im Quelltext - das gehoert nach
 #      ENTSCHEIDUNGEN.md
+#   9. Der Selbsttest fuer kern.js (pruefe-kern.js) laeuft durch
 #
 # Was das Skript NICHT pruefen kann und trotzdem gilt: neue Namen deutsch
 # mit dem Verb vorn (zeichneRoutenListe, nicht renderRouteList).
@@ -62,6 +63,15 @@ echo "== 8. Sitzungsprotokoll im Quelltext =="
 # Fundstellen gehoeren nach ENTSCHEIDUNGEN.md; ein VERWEIS darauf ist ok.
 grep -rniE 'frueher stand hier|früher stand hier|hier stand einmal|vorher stand hier|(erster|zweiter|dritter) anlauf|gekippt am|hat gemeldet|hat es gemeldet|heute mittag|hier lag der fehler' $JS style.css design.css index.html \
   | grep -v 'ENTSCHEIDUNGEN.md'
+
+echo "== 9. Selbsttest fuer kern.js =="
+# jsc ist der JavaScript-Motor von macOS und liegt auf jedem Mac.
+JSC=/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Helpers/jsc
+if [ -x "$JSC" ]; then
+  "$JSC" pruefe-kern.js
+else
+  echo "uebersprungen: jsc nicht gefunden"
+fi
 
 echo "== fertig =="
 exit 0

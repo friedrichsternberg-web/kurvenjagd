@@ -683,6 +683,23 @@ async function sucheRundtour(start, zielKm, profil, melde) {
       zufallspunkte = repariereSackgassen(
         start, letzter, radius, anzahlPunkte, richtung,
         { ersetzungen, gemiedeneZonen, straßenPool, MINDEST_ZUFALLSPUNKTE });
+    } else if (sauber && sauber.punkte.length === 0) {
+      /* ----- Sauber, aber ohne eigene Form -----
+         Mit festen Zwischenstopps darf repariereSackgassen() die
+         Zufallspunkte bis auf den letzten wegstreichen. Dann ist die
+         sauberste Runde die bloße Fahrt über die festen Punkte, und es gibt
+         keine Form mehr, die sich größer ziehen ließe: Der mittlere Abstand
+         wäre 0/0 und damit NaN, und ein NaN-Radius steckt danach jeden
+         weiteren Punkt an, weil destinationPoint() damit weiterrechnet und
+         {lat: NaN, lon: NaN} liefert. Deshalb hier zurück auf den
+         Anfangsradius und neu würfeln - das ist derselbe Stand wie vor dem
+         ersten Versuch, nur diesmal um die inzwischen bekannten Sackgassen
+         herum. Ohne diesen Rückfall liefe die Suche ihre restlichen
+         Versuche leer: zieheRundeAuf() gibt für eine leere Punktliste
+         wieder eine leere zurück, es würde also immer wieder dieselbe
+         Route angefragt. */
+      radius = anfangsRadius;
+      zufallspunkte = randomLoopPoints(start, radius, anzahlPunkte, richtung, gemiedeneZonen);
     } else if (sauber) {
       /* ----- Sauber, aber die Länge stimmt noch nicht -----
          Von der besten sauberen Form ausgehen und sie gleichmäßig größer
