@@ -1867,6 +1867,20 @@ function rideKarte() {
   return rideKarteInstanz;
 }
 
+/* Meldet der Karte jede Groessenaenderung ihres Kastens. Leaflet merkt von
+   sich aus nur Fensteraenderungen - der Kasten aendert sich aber auch ohne
+   das Fenster: Das Wertefeld wechselt seinen Zustand (bereit/live/fertig)
+   und damit seine Hoehe, und an der Querformat-Grenze wird aus der
+   Schublade unter der Karte eine Spalte daneben. Ohne diese Meldung
+   blieben nach so einem Wechsel graue Streifen ohne Kartenkacheln stehen.
+
+   WICHTIG: Hier wird nur die BESTEHENDE Karte benachrichtigt
+   (rideKarteInstanz), nie rideKarte() gerufen - das wuerde die absichtlich
+   erst beim ersten Oeffnen gebaute Karte schon beim Programmstart anlegen. */
+new ResizeObserver(() => {
+  if (rideKarteInstanz) rideKarteInstanz.invalidateSize();
+}).observe(document.getElementById('rideMap'));
+
 function rideFahrzeitMs() {
   const laufend = ride.laufSeit ? Date.now() - ride.laufSeit : 0;
   return ride.fahrzeitGesammeltMs + laufend;

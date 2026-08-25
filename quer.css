@@ -157,4 +157,22 @@
     padding-inline: var(--s6);
   }
 
+  /* --- 5. Aufzeichnen als Zweispalter -----------------------------------------
+     Karte links in voller Groesse, das Wertefeld als feste Spalte rechts.
+     Im Hochformat ist das Feld eine Schublade UNTER der Karte mit
+     Hoehendeckeln je Zustand (55/70/88dvh) - nebeneinander gilt beides
+     nicht mehr: Die Spalte ist immer voll hoch und scrollt selbst. */
+  .ride-screen { flex-direction: row; }
+  .ride-panel {
+    flex: 0 0 var(--spalte-ride);
+    height: 100%;
+    max-height: none;
+    border-top: 0;
+    border-left: 1px solid var(--glas-hell);
+    border-radius: 0;
+    padding-bottom: var(--s4);
+  }
+  .ride-panel.bereit,
+  .ride-panel.zusammenfassung { max-height: none; }
+
 }
