@@ -78,27 +78,7 @@
 }
 .start-screen-inner .saved-list { text-align: left; }
 
-.start-screen-buttons { display: flex; flex-direction: column; gap: 10px; }
-.start-screen-buttons .btn { padding: 14px; font-size: 16px; }
-
 .back-btn { margin-bottom: var(--s5); }
-
-/* Startmenü mit eigenem Foto als Hintergrund: das Motorrad soll mittig im
-   Bild stehen (Bildposition 55% 42% trifft ungefähr die Mitte von Fahrer
-   und Maschine im Originalfoto), die Karte mit den Buttons sitzt darüber,
-   horizontal zentriert. */
-
-/* Die Karte selbst: derselbe dunkle Ton wie das restliche Bedienfeld
-   (var(--surface)), aber leicht transparent mit Weichzeichner dahinter -
-   das lässt das Foto durchscheinen, ohne dass der Text darauf schwerer
-   zu lesen wird. */
-/* Die Karte auf dem Startbild. Frueher lag hier Milchglas darueber
-   (backdrop-filter) - genau der Baustein, an dem man den Einheitslook
-   sofort erkennt. Jetzt eine matte, undurchsichtige Flaeche mit Kante. */
-
-@media (max-width: 480px) {
-  .start-screen--hero { padding: 24px; padding-top: max(24px, env(safe-area-inset-top) + 16px); }
-}
 
 /* ---------- Untere Navigationsleiste ----------
    Fest am unteren Rand. Die Bildschirme darueber bekommen ihre Hoehe
@@ -233,33 +213,16 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   to   { transform: rotate(360deg); }
 }
 
-/* ---------- Startbildschirm ----------
-   Die Bildebene liegt fest hinter dem Inhalt und verlaeuft nach unten ins
-   Dunkle. Sie scrollt NICHT mit (position: absolute im scrollenden
-   Container waere mitgescrollt) - dadurch bleibt der Eindruck, dass der
-   Inhalt ueber dem Bild schwebt. */
-
-/* Kopfzeile und Schriftzug muessen ueber dem Verlauf liegen. */
-/* Der Verlauf nach unten ist hier ausnahmsweise erlaubt: er macht den Text
-   darueber lesbar und blendet das Bild in den Hintergrund, statt es hart
-   abzuschneiden. */
-
-/* Die beiden Knoepfe oben rechts. Sie duerfen nie schrumpfen - lieber
-   bricht der Schriftzug um, als dass eine Trefferflaeche kleiner wird. */
+/* ---------- Kopfzeile ----------
+   Die beiden runden Knoepfe oben rechts (Neu laden, Konto). Sie duerfen nie
+   schrumpfen - lieber bricht der Schriftzug daneben um, als dass eine
+   Trefferflaeche kleiner wird. */
 .kopf-knoepfe {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: var(--s2);
 }
-/* Die Marke ist auf dem Startbildschirm das erste, was man sieht - deshalb
-   deutlich groesser als im Bedienfeld. Die Groesse waechst mit der
-   Bildschirmbreite mit, damit "KURVENJAGD" auch auf einem schmalen Geraet
-   in einer Zeile bleibt und nicht in die Maschine hineinlaeuft. */
-
-/* Der Schriftzug ueber dem Bild. Zwischen den beiden Zeilen liegt bewusst
-   ein grosser Sprung: die kleine Zeile ist die Beschriftung, die grosse
-   die Ansage. */
 
 /* ---------- Kacheln ----------
    Jede Kachel traegt ihr eigenes Bild (ueber die Marke --kachel-bild aus
@@ -1187,7 +1150,6 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 }
 .hoehenprofil-fläche { opacity: 0.28; }
 .hoehenprofil-linie { fill: none; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
-.hoehenprofil-marke { font-size: 8px; fill: var(--muted); font-family: inherit; }
 
 /* ---------- Ride aufzeichnen ----------
    Eigener Vollbild-Aufbau: Karte oben, Werte-Feld unten. Bewusst mit
@@ -2752,16 +2714,6 @@ body.nav-modus .leaflet-control-container { display: none; }
   position: static;
   max-height: 180px;
   margin: 0;
-}
-
-/* Ein Hinweis, der als Kasten dasteht statt als Kleingedrucktes - fuer die
-   Stelle, an der etwas noch nicht fertig ist und der Grund dazugehoert. */
-.hinweis-kasten {
-  padding: var(--s3);
-  border-radius: var(--r-md);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  background: rgba(255, 255, 255, 0.04);
-  margin-bottom: var(--s2) !important;
 }
 
 /* ============================================================================
