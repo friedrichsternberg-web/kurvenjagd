@@ -41,7 +41,6 @@
       rgba(0, 0, 0,0.86) 100%),
     url('img/hintergrund-weich.jpg') center / cover no-repeat fixed;
 }
-.start-screen[hidden] { display: none; }
 
 .start-screen-inner {
   width: 320px;
@@ -83,7 +82,6 @@
 .start-screen-buttons .btn { padding: 14px; font-size: 16px; }
 
 .back-btn { margin-bottom: var(--s5); }
-.back-btn[hidden] { display: none; }
 
 /* Startmenü mit eigenem Foto als Hintergrund: das Motorrad soll mittig im
    Bild stehen (Bildposition 55% 42% trifft ungefähr die Mitte von Fahrer
@@ -135,7 +133,6 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.18),
     0 -8px 24px rgba(0, 0, 0, 0.35);
 }
-.haupt-nav[hidden] { display: none; }
 
 .nav-tab {
   flex: 1;
@@ -246,7 +243,6 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 /* Der Verlauf nach unten ist hier ausnahmsweise erlaubt: er macht den Text
    darueber lesbar und blendet das Bild in den Hintergrund, statt es hart
    abzuschneiden. */
-
 
 /* Die beiden Knoepfe oben rechts. Sie duerfen nie schrumpfen - lieber
    bricht der Schriftzug um, als dass eine Trefferflaeche kleiner wird. */
@@ -430,7 +426,6 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   border-radius: 50%;
   object-fit: cover;
 }
-.rund-bild[hidden] { display: none; }
 
 .profil-kopf {
   display: flex;
@@ -468,9 +463,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   border-radius: 50%;
   object-fit: cover;
 }
-.profil-bild img[hidden] { display: none; }
 .profil-platzhalter { width: 44px; height: 44px; }
-.profil-platzhalter[hidden] { display: none; }
 
 /* Das Kamerazeichen sitzt halb in der Kante des Bildes, so wie das
    Abzeichen am Hinweis in der Garage - dadurch gehoert es dazu, statt
@@ -488,7 +481,6 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 
 .profil-name-aendern { margin-bottom: var(--s4); }
 #profilNameFeld { margin-top: var(--s2); text-align: left; }
-#profilNameFeld[hidden] { display: none; }
 #profilNameFeld input {
   width: 100%;
   padding: 12px 14px;
@@ -522,7 +514,6 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   line-height: 1.4;
   color: var(--muted);
 }
-.namen-hinweis[hidden] { display: none; }
 .namen-hinweis.gut { color: var(--good); }
 .namen-hinweis.fehler { color: var(--danger); }
 
@@ -566,8 +557,6 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   width: 100%; height: 100%;
   object-fit: cover;
 }
-.bild-waehlen-kreis img[hidden] { display: none; }
-.bild-waehlen-kreis .ic[hidden] { display: none; }
 
 .konto-formular {
   display: flex;
@@ -601,7 +590,6 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   flex-direction: column;
   gap: 6px;
 }
-#kontoNeuFelder[hidden] { display: none; }
 
 .konto-meldung {
   margin: 4px 0 0;
@@ -609,7 +597,6 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   line-height: 1.45;
   color: var(--muted);
 }
-.konto-meldung[hidden] { display: none; }
 .konto-meldung.fehler { color: var(--danger); }
 
 .konto-wechsel { margin-top: 22px; font-size: 13px; color: var(--muted); }
@@ -669,14 +656,12 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   line-height: 1.45;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.16);
 }
-.kurz-hinweis[hidden] { display: none; }
 
 /* ---------- Routenplaner: zwei Spalten, Bedienfeld links, Karte rechts ---------- */
 .app-layout {
   height: calc(100% - var(--nav-raum));
   display: flex;
 }
-.app-layout[hidden] { display: none; }
 
 .panel-header {
   display: flex;
@@ -1000,7 +985,6 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 
 /* ---------- Buttons ---------- */
 .row { display: flex; gap: 8px; margin-top: 10px; }
-.row[hidden] { display: none; }
 .btn {
   flex: 1;
   /* inline-flex mit gap: Knoepfe mit Symbol brauchen Abstand zwischen
@@ -1214,7 +1198,6 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   display: flex;
   flex-direction: column;
 }
-.ride-screen[hidden] { display: none; }
 
 .ride-map { flex: 1; min-height: 0; background: var(--surface-2); }
 
@@ -1319,7 +1302,6 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   justify-content: center;
   padding: 20px;
 }
-.foto-ansicht[hidden] { display: none; }
 .foto-ansicht img { max-width: 100%; max-height: 100%; border-radius: 10px; }
 .foto-ansicht-zu {
   position: absolute;
@@ -1404,7 +1386,6 @@ body.nav-modus #panel {
     inset 0 1px 0 var(--glas-licht),
     0 12px 34px rgba(0, 0, 0, 0.5);
 }
-.nav-banner[hidden] { display: none; }
 
 .nav-manoever {
   display: flex;
@@ -1456,7 +1437,6 @@ body.nav-modus #panel {
   color: var(--muted);
 }
 .nav-danach .ic { width: 16px; height: 16px; }
-.nav-danach[hidden] { display: none; }
 
 /* Die Fahrdatenleiste am unteren Rand: Tempo, Rest, Ankunft, Beenden.
    Eine Zeile, keine zweite - die Navigation MUSS ohne Scrollen auf den
@@ -1480,7 +1460,6 @@ body.nav-modus #panel {
     inset 0 1px 0 var(--glas-licht),
     0 12px 34px rgba(0, 0, 0, 0.5);
 }
-.nav-fuss[hidden] { display: none; }
 .nav-wert {
   display: flex;
   flex-direction: column;
@@ -1731,9 +1710,6 @@ body.nav-modus .leaflet-control-container { display: none; }
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
-/* Ohne diese Regel gewinnt "display: flex" oben gegen das hidden-Attribut,
-   weil eigenes CSS immer Vorrang vor der Browser-Standardregel [hidden] hat. */
-.busy[hidden] { display: none; }
 .spinner {
   width: 22px; height: 22px;
   border: 3px solid rgba(255,255,255,0.15);
@@ -1850,7 +1826,6 @@ body.nav-modus .leaflet-control-container { display: none; }
        selbst scrollenden Kasten flackert auf iOS und verrutscht. */
     url('img/hintergrund-weich.jpg') center / cover no-repeat scroll;
 }
-.garage-screen[hidden] { display: none; }
 
 /* ---------- Der Raum ----------
    Frueher standen hier zwei Farbverlaeufe fuer Wand und Boden und drei
@@ -2015,7 +1990,6 @@ body.nav-modus .leaflet-control-container { display: none; }
   font-size: 12.5px;
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
 }
-
 
 /* ---------- Die Buehne mit dem Motorrad ----------
 
@@ -2266,8 +2240,6 @@ body.nav-modus .leaflet-control-container { display: none; }
           mask-image: linear-gradient(to top, transparent var(--glut-kante, 0%), rgba(0,0,0,0.95) var(--glut-kante, 0%), rgba(0,0,0,0.3) calc(var(--glut-kante, 0%) + 14%), transparent calc(var(--glut-kante, 0%) + 30%));
 }
 
-.motorrad-ansicht[hidden] { display: none; }
-
 /* ---------- Der Hinweis "Dein Bike einfuegen" ----------
    Er erscheint nur, solange kein eigenes Foto da ist. Dann steht im Raum
    eine Beispielmaschine, die zum Bild gehoert - der Hinweis sagt, dass das
@@ -2291,7 +2263,6 @@ body.nav-modus .leaflet-control-container { display: none; }
   -webkit-tap-highlight-color: transparent;
   animation: hinweis-auftauchen 0.5s ease-out both;
 }
-.buehne-hinweis[hidden] { display: none; }
 
 @keyframes hinweis-auftauchen {
   from { opacity: 0; transform: translateY(-8px); }
@@ -2470,14 +2441,11 @@ body.nav-modus .leaflet-control-container { display: none; }
     inset 0 -1px 0 rgba(0, 0, 0, 0.25),
     0 12px 34px rgba(0, 0, 0, 0.45);
 }
-.garage-platte[hidden] { display: none; }
 
 .garage-leer { display: flex; flex-direction: column; gap: var(--s3); }
-.garage-leer[hidden] { display: none; }
 .garage-leer .hint { margin: 0; }
 
 .motorrad-umschalter { margin-bottom: var(--s3); }
-.motorrad-umschalter[hidden] { display: none; }
 
 .motorrad-kopf {
   display: flex;
@@ -2523,7 +2491,6 @@ body.nav-modus .leaflet-control-container { display: none; }
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
 }
-.garage-dialog[hidden] { display: none; }
 
 .garage-dialog-blatt {
   width: 100%;
@@ -2625,7 +2592,6 @@ body.nav-modus .leaflet-control-container { display: none; }
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
-.foto-tipp[hidden] { display: none; }
 
 .foto-tipp-blatt {
   width: 340px;
@@ -2721,7 +2687,6 @@ body.nav-modus .leaflet-control-container { display: none; }
   border-top: 1px solid rgba(255, 255, 255, 0.10);
 }
 .garage-dialog-fuss .btn.ghost { flex: 0 0 auto; color: var(--danger); }
-.garage-dialog-fuss .btn.ghost[hidden] { display: none; }
 
 /* ---------- Der Motorrad-Finder im Dialog ----------
    Marke als Knopfreihe, weil die Fahrzeugdatenbank 1684 Marken kennt und
@@ -2779,7 +2744,6 @@ body.nav-modus .leaflet-control-container { display: none; }
   overflow-y: auto;
   padding: 2px;
 }
-.finder-modelle[hidden] { display: none; }
 .finder-modelle .tiny { margin: 0; width: 100%; }
 
 /* Die Trefferliste der Markensuche liegt direkt unter dem Eingabefeld und
@@ -2822,7 +2786,6 @@ body.nav-modus .leaflet-control-container { display: none; }
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
 }
-.frei-fenster[hidden] { display: none; }
 
 .frei-kopf {
   flex: 0 0 auto;
@@ -2864,7 +2827,6 @@ body.nav-modus .leaflet-control-container { display: none; }
   flex: 0 0 auto;
   padding: var(--s3) var(--s4) 0;
 }
-.frei-fortschritt[hidden] { display: none; }
 
 .frei-fortschritt-zeile {
   display: flex;
@@ -2956,7 +2918,6 @@ body.nav-modus .leaflet-control-container { display: none; }
   gap: var(--s3);
   padding: var(--s2) 0;
 }
-.frei-zeile[hidden] { display: none; }
 .frei-zeile label {
   flex: 0 0 auto;
   width: 108px;
@@ -3256,7 +3217,6 @@ body.nav-modus .leaflet-control-container { display: none; }
    uebrigen Bereiche. Die Ueberschrift traegt denselben leisen Ton wie die
    der Shop-Leiste darueber - beides sind Abschnitte, nicht Titel. */
 .garage-menue { margin-top: var(--s2); }
-.garage-menue[hidden] { display: none; }
 .garage-menue-kopf {
   margin: 0 0 var(--s2);
   font-size: 13px;
@@ -3302,7 +3262,6 @@ body.nav-modus .nav-fuss {
   flex-direction: column;
   gap: var(--s2);
 }
-.nav-knoepfe[hidden] { display: none; }
 .nav-rund {
   width: 48px; height: 48px;
   display: grid;
@@ -3316,7 +3275,6 @@ body.nav-modus .nav-fuss {
   line-height: 1;
   cursor: pointer;
 }
-.nav-rund[hidden] { display: none; }
 .nav-rund:active { background: var(--glas-heller); }
 /* Der Zentrieren-Knopf traegt die Akzentfarbe: Er erscheint nur, wenn die
    Karte gerade NICHT der Position folgt, und ist dann das Wichtigste auf
@@ -3351,7 +3309,6 @@ body.nav-modus .nav-fuss {
   color: var(--muted);
   font-size: 10px;
 }
-.nav-quelle[hidden] { display: none; }
 .nav-quelle a { color: var(--muted); }
 
 /* Der Suchknopf in den Ortsfeldern. Gesucht wird auf Absenden, nicht
