@@ -7,6 +7,25 @@
      3) Wegpunkte an BRouter schicken -> bekommt echte Straßenrouten zurück
      4) Kurvigkeit jeder Route selbst ausrechnen -> kurvigste gewinnt
      5) Route zeichnen, speichern, als GPX exportieren
+
+   Die Abschnitte dieser Datei, in der Reihenfolge, in der sie hier stehen:
+
+      1. Zustand                        12. Sehenswertes: Gebirgspaesse
+      2. Karte aufbauen                 13. Eigene Ausfahrt aufzeichnen
+      3. Wegpunkte zeichnen             14. Schraeglage waehrend der Fahrt
+      4. Routing                        15. Fotos zur Ausfahrt
+      5. Ortssuche                      16. Speichern (im Browser)
+      6. Rundtour generieren            17. GPX-Export
+      7. Zeichnen und Zahlen anzeigen   18. Kleine Helfer fuer die Oberflaeche
+      8. Hoehenprofil                   19. Die Bildschirme
+      9. Live-Navigation                20. Bedienfeld als Schublade
+     10. Karte bedienen (gedreht)       21. Alles verkabeln
+     11. Die Stimme
+
+   Kommt ein Abschnitt dazu, wird UMNUMMERIERT - nicht mit Buchstaben
+   verlaengert. Hier standen einmal 4b, 6b, 6c, 6d, 6f und 6g, und
+   Abschnitt 6d lag vor 6b. Die Reihenfolge im Kopf sagte dann etwas
+   anderes als die Reihenfolge in der Datei.
    ============================================================================ */
 
 
@@ -62,7 +81,7 @@ const nav = {
 };
 
 
-/* --- 2. Karte aufbauen --------------------------------------------------- */
+/* --- 2. Karte aufbauen -------------------------------------------------- */
 
 const map = L.map('map', {
   zoomControl: true,
@@ -140,7 +159,7 @@ document.getElementById('btnKlickModus').addEventListener('click', () => {
 });
 
 
-/* --- 3. Wegpunkte zeichnen und auflisten --------------------------------- */
+/* --- 3. Wegpunkte zeichnen und auflisten -------------------------------- */
 
 // Gemeinsamer Weg, einen Wegpunkt hinzuzufügen - genutzt vom Kartenklick
 // UND von der Ortssuche weiter unten, damit beide sich gleich verhalten.
@@ -261,7 +280,7 @@ function renderWaypointList() {
 }
 
 
-/* --- 4. Routing ----------------------------------------------------------
+/* --- 4. Routing ------------------------------------------------------------
    BRouter ist ein kostenloser Routing-Dienst auf OpenStreetMap-Basis.
    Wir bauen eine URL, holen GeoJSON und lesen Länge, Zeit und Höhe aus.   */
 
@@ -381,7 +400,7 @@ function pickBestRoute(routes, t) {
 }
 
 
-/* --- 4b. Ortssuche --------------------------------------------------------
+/* --- 5. Ortssuche ----------------------------------------------------------
    Nominatim ist der kostenlose Geocoding-Dienst von OpenStreetMap: man
    schickt einen Ortsnamen und bekommt Koordinaten zurück. Kein API-Key
    nötig - passt damit zu BRouter, das ebenfalls auf OSM-Daten aufbaut.
@@ -631,7 +650,7 @@ function hideSearchResults() {
 }
 
 
-/* --- 5. Rundtour generieren ------------------------------------------------
+/* --- 6. Rundtour generieren ------------------------------------------------
    Es gibt keinen kostenlosen Dienst, der auf Zuruf eine Rundtour ab einem
    Punkt liefert - das bauen wir uns selbst: Zufallspunkte im Kreis um den
    Start verteilen, nach Himmelsrichtung sortieren (sonst kreuzt sich die
@@ -988,7 +1007,7 @@ async function generateRoundTrip() {
 }
 
 
-/* --- 6. Zeichnen und Zahlen anzeigen ------------------------------------- */
+/* --- 7. Zeichnen und Zahlen anzeigen ------------------------------------ */
 
 // Nimmt alle gezeichneten Linien wieder von der Karte. Eigene Funktion,
 // weil das an fuenf Stellen gebraucht wird: vor jedem Neuzeichnen, wenn es
@@ -1062,7 +1081,7 @@ function kurvigkeitsWort(c) {
        :           'Kurvenparadies.';
 }
 
-/* --- 6d. Höhenprofil -------------------------------------------------------
+/* --- 8. Höhenprofil --------------------------------------------------------
    BRouter liefert die Höhe schon pro Streckenpunkt mit (coords[i][2], siehe
    fetchRoute) - wir müssen sie nur noch als Graph zeichnen. Statt einer
    Chart-Bibliothek reicht dafür simples SVG: eine gefüllte Fläche unter der
@@ -1208,7 +1227,7 @@ function formatRideZeit(sec) {
 }
 
 
-/* --- 6b. Live-Navigation ----------------------------------------------------
+/* --- 9. Live-Navigation ----------------------------------------------------
    Nutzt zwei im Browser eingebaute APIs, keine Zusatz-Bibliotheken nötig:
      - Geolocation API   für den Live-Standort per GPS
      - SpeechSynthesis   für gesprochene Abbiegehinweise
@@ -1378,7 +1397,7 @@ function aufPositionsUpdate(pos) {
   navFussAktualisieren(restMeter);
 }
 
-/* --- Karte bedienen, waehrend sie gedreht ist ------------------------------
+/* --- 10. Karte bedienen, waehrend sie gedreht ist --------------------------
 
    Leaflets eigene Bedienung ist im Navi-Modus abgeschaltet, und das aus
    gutem Grund: Die Bibliothek weiss nichts von der CSS-Drehung. Sie zieht
@@ -1835,7 +1854,7 @@ function prüfeManöver(lat, lon) {
   }
 }
 
-/* --- Die Stimme -------------------------------------------------------------
+/* --- 11. Die Stimme --------------------------------------------------------
    Der Browser bringt mehrere deutsche Stimmen mit, und welche er ohne
    Angabe nimmt, ist Glueckssache - oft eine blecherne. Deshalb wird einmal
    eine gute weibliche deutsche Stimme ausgesucht und festgehalten.
@@ -1947,7 +1966,7 @@ async function routeNeuBerechnenAbPosition(lat, lon) {
 }
 
 
-/* --- 6c. Sehenswertes: Gebirgspässe ---------------------------------------
+/* --- 12. Sehenswertes: Gebirgspässe ----------------------------------------
    Früher wurden Pässe live über die Overpass API (den freien Abfrage-
    dienst für OpenStreetMap-Daten) geladen. Das war auf Dauer nicht
    zuverlässig genug - die kostenlosen Overpass-Server waren immer wieder
@@ -2068,7 +2087,7 @@ function zeichnePassMarker(pass) {
 }
 
 
-/* --- 6f. Eigene Ausfahrt aufzeichnen ("Meinen Ride aufzeichnen") ------------
+/* --- 13. Eigene Ausfahrt aufzeichnen ("Meinen Ride aufzeichnen") -----------
    Zeichnet die TATSÄCHLICH gefahrene Strecke per GPS auf - im Unterschied
    zum Routenplaner, der eine Strecke im Voraus berechnet. Während der Fahrt
    laufen alle Werte live mit, am Ende gibt es die volle Auswertung und die
@@ -2337,7 +2356,7 @@ function zeichneRideAufKarte(lat, lon) {
 }
 
 // Aktuelle Werte der laufenden Ausfahrt - auch für die Auswertung am Ende.
-/* --- Schraeglage waehrend der Fahrt ---------------------------------------
+/* --- 14. Schraeglage waehrend der Fahrt ------------------------------------
 
    Zwei Wege laufen nebeneinander, und die App sagt dem Nutzer, welcher
    gerade traegt:
@@ -2656,7 +2675,7 @@ function verwerfeRide() {
 }
 
 
-/* --- 6g. Fotos zur Ausfahrt -------------------------------------------------
+/* --- 15. Fotos zur Ausfahrt ------------------------------------------------
    Fotos werden absichtlich verkleinert gespeichert, nicht im Original: ein
    iPhone-Bild hat schnell 4 MB, der Browser-Speicher fasst aber insgesamt
    nur etwa 5 MB. Mit ~1000 Pixel Kantenlänge bleibt ein Foto scharf genug
@@ -2855,7 +2874,7 @@ document.addEventListener('visibilitychange', () => {
 });
 
 
-/* --- 7. Speichern (im Browser) ------------------------------------------- */
+/* --- 16. Speichern (im Browser) ----------------------------------------- */
 
 const STORE = 'kurvenjagd.routen';
 
@@ -3068,7 +3087,7 @@ function escapeHtml(text) {
 }
 
 
-/* --- 8. GPX-Export -------------------------------------------------------
+/* --- 17. GPX-Export --------------------------------------------------------
    Das Zusammensetzen der Datei steht als baueGpx() in kern.js, damit die
    spätere Webseite denselben Code benutzt. Hier bleibt nur, was mit dieser
    App zu tun hat: welche Route gemeint ist und wie die Datei beim Nutzer
@@ -3085,7 +3104,7 @@ function exportGpx() {
 }
 
 
-/* --- 9. Kleine Helfer für die Oberfläche ------------------------------- */
+/* --- 18. Kleine Helfer für die Oberfläche ------------------------------- */
 
 function setBusy(on) {
   document.getElementById('busy').hidden = !on;
@@ -3144,7 +3163,7 @@ function symbol(name, zusatz = '') {
 }
 
 
-/* --- 9b. Die Bildschirme ----------------------------------------------------
+/* --- 19. Die Bildschirme ---------------------------------------------------
    Zehn Bildschirme, immer ist genau einer sichtbar: die Garage (sie ist
    seit dem 24.08.2026 der Startbildschirm), "Meine Touren", der
    Routenplaner (Bedienfeld + Karte), die Aufzeichnung einer eigenen
@@ -3260,7 +3279,7 @@ function zeigeRideScreen() {
 }
 
 
-/* --- 9c. Bedienfeld als Schublade (nur schmale Bildschirme) ----------------
+/* --- 20. Bedienfeld als Schublade (nur schmale Bildschirme) ----------------
    Auf schmalen Bildschirmen (siehe Media Query in style.css) ist das
    Bedienfeld eine Schublade unter der Karte. Am Griff lässt sie sich
    STUFENLOS ziehen - von "nur der Griff ist sichtbar, die Karte hat den
@@ -3423,7 +3442,7 @@ function routeBeiBedarfNeuBerechnen() {
 }
 
 
-/* --- 10. Alles verkabeln ------------------------------------------------- */
+/* --- 21. Alles verkabeln ------------------------------------------------ */
 
 document.querySelectorAll('#planModeSwitch .seg').forEach(b => {
   b.addEventListener('click', () => setPlanMode(b.dataset.planMode));
