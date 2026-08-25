@@ -14,8 +14,8 @@
      7. Verkabelung
 
    shop.js wird als LETZTES Skript geladen und benutzt Helfer aus den
-   Dateien davor: symbol(), showToast() und escapeHtml() aus app.js,
-   verkabele() aus garage.js.
+   Dateien davor: symbol(), showToast(), escapeHtml() und verkabele() aus
+   app.js, motorradAktiv() und garage aus garage.js.
    ========================================================================= */
 
 

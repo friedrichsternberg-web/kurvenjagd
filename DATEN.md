@@ -158,7 +158,7 @@ Ausfahrten anderer Leute mit.
   bleibt, läuft ausschließlich auf eine Handlung des Nutzers hin: der
   **Motorrad-Finder (NHTSA)** und die **Wikipedia**-Abfrage bei der
   Modellwahl, sowie die Laufzeitbibliothek des Freistellers
-  (`onnxruntime-web` von jsDelivr, `garage.js`), die erst beim ersten
+  (`onnxruntime-web` von jsDelivr, `freisteller.js`), die erst beim ersten
   Freistellen geladen wird. Die gehört bei Gelegenheit ebenfalls nach
   `extern/` – siehe `AUFGABEN.md`.
 - **Kartenbilder verraten den Aufenthaltsort**, auch ohne dass die App den

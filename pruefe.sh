@@ -5,7 +5,7 @@
 # Keine Ausgabe unter einer Ueberschrift heisst: Regel eingehalten.
 # Die Zahl bei Regel 2 soll mit jeder Aufraeum-Sitzung kleiner werden.
 
-APP="app.js garage.js konto.js shop.js kern.js produkte.js index.html"
+APP="app.js garage.js finder.js freisteller.js konto.js shop.js kern.js produkte.js index.html"
 
 echo "== 1. Geraetezugriff gehoert nur in geraet.js =="
 grep -nE '(navigator\.|localStorage\.|sessionStorage\.|indexedDB\.|URL\.(create|revoke)ObjectURL)' $APP \
@@ -18,7 +18,7 @@ echo "== 3. kern.js fasst keine Oberflaeche an =="
 grep -nE '(document\.|window\.|showToast\(|[^a-zA-Z.]map\.|[^a-zA-Z.]state\.|[^a-zA-Z]L\.[A-Z])' kern.js
 
 echo "== 4. Funktionen ueber 80 Zeilen =="
-for f in app.js garage.js konto.js shop.js kern.js geraet.js; do
+for f in app.js garage.js finder.js freisteller.js konto.js shop.js kern.js geraet.js; do
   awk -v F="$f" '
     /^(async )?function /{ name=$0; sub(/^async /,"",name); sub(/^function /,"",name);
                            sub(/\(.*/,"",name); start=NR }

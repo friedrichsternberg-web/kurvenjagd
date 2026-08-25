@@ -1430,12 +1430,23 @@
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
   <script src="konto.js?v=88"></script>
-  <!-- Nach app.js, weil die Garage verkleinereFoto() und showToast() von
-       dort benutzt. -->
+  <!-- Die Garage in drei Teilen. Die Reihenfolge ist nicht beliebig:
+
+       finder.js       zuerst, weil zeichneGarage() am Ende von garage.js
+                       sofort laeuft und dabei bildAdresse() von hier braucht.
+       garage.js       der Raum, die Buehne, das Datenblatt, der Dialog.
+       freisteller.js  zuletzt. Der Dialog ruft oeffneFreisteller() nur auf
+                       Knopfdruck, umgekehrt braucht der Freisteller die
+                       Garage beim Laden nicht.
+
+       Alle drei nach app.js, weil sie verkleinereFoto(), showToast() und
+       verkabele() von dort benutzen. -->
+  <script src="finder.js?v=88"></script>
   <script src="garage.js?v=88"></script>
+  <script src="freisteller.js?v=88"></script>
   <!-- Der Demo-Produktkatalog (nur Daten) und die Shop-Logik. produkte.js
        muss vor shop.js stehen, und beide nach garage.js, weil shop.js
-       dessen Helfer (sicher, verkabele) mitbenutzt. -->
+       dessen verkabele() mitbenutzt. -->
   <script src="produkte.js?v=88"></script>
   <script src="shop.js?v=88"></script>
 </body>

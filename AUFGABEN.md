@@ -156,7 +156,7 @@ deklariert sein. Erst anfassen, wenn Nutzer da sind.
 
 ### 6b. Laufzeitbibliothek des Freistellers selbst hosten
 
-`garage.js` lädt `onnxruntime-web` von cdn.jsdelivr.net (Zeile ~2019).
+`freisteller.js` lädt `onnxruntime-web` von cdn.jsdelivr.net.
 Anders als Leaflet und supabase-js passiert das **nicht beim Start**,
 sondern erst beim ersten Freistellen – es ist also kein ungefragter
 Abruf. Sauberer wäre es trotzdem in `extern/`. Zu beachten: Die
@@ -169,7 +169,7 @@ gesetzt werden. Erledigt sich von selbst, sobald die native Hülle steht
 
 Das 4,4-MB-Modell für den Freisteller (`modell/u2netp.onnx`) wird heute beim
 ersten Gebrauch geladen. Nativ liegt es im Paket: kein Download, kein
-Fortschrittsbalken, funktioniert offline. Kleine Änderung in `garage.js`,
+Fortschrittsbalken, funktioniert offline. Kleine Änderung in `freisteller.js`,
 sobald die Hülle steht.
 
 ---
