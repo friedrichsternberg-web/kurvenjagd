@@ -15,36 +15,6 @@
    Querformat und benutzt dieselbe design.css.
    ============================================================================ */
 
-/* Knoepfe mit Symbol brauchen etwas Abstand dazwischen. */
-.btn {
-  flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--s2);
-  padding: 12px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  border-radius: var(--r-sm);
-  /* Der Verlauf ist hier keine Deko, sondern Woelbung: oben etwas heller,
-     unten etwas dunkler. Zusammen mit der Lichtkante wirkt der Knopf
-     dadurch koerperlich statt aufgemalt. */
-  /* Die beiden Kanten kommen aus der Designsprache statt fest eingetragen
-     zu sein. Frueher standen hier zwei Orangetoene - beim Wechsel auf
-     RAL 5005 waere der Knopf dadurch halb orange geblieben. */
-  background: linear-gradient(to bottom, var(--accent-glanz), var(--accent) 55%, var(--accent-tief));
-  color: var(--accent-ink);
-  font-family: var(--schrift-text);
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.45),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.25),
-    0 4px 14px color-mix(in srgb, var(--accent) 30%, transparent);
-  transition: transform 0.14s cubic-bezier(0.2,0.8,0.2,1), filter 0.14s ease;
-}
-.btn:active { transform: scale(0.97); }
-
 /* ---------- Startmenü & "Meine Touren" ----------
    Beide sind einfache, zentrierte Vollbild-Ansichten - der Einstieg vor
    dem eigentlichen Routenplaner (siehe .app-layout weiter unten), der
@@ -223,6 +193,10 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 
 /* Runder Glasknopf, z.B. fuer das Konto oben rechts. */
 .glas-rund {
+  /* position und overflow sind Voraussetzung fuer das Profilbild: .rund-bild
+     liegt mit inset:0 darin und wird vom overflow rund beschnitten. */
+  position: relative;
+  overflow: hidden;
   width: 46px; height: 46px;
   flex: 0 0 auto;
   display: flex; align-items: center; justify-content: center;
@@ -457,8 +431,6 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   object-fit: cover;
 }
 .rund-bild[hidden] { display: none; }
-.glas-rund { position: relative; overflow: hidden; }
-.glas-rund[hidden] { display: none; }
 
 .profil-kopf {
   display: flex;
@@ -1031,12 +1003,21 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 .row[hidden] { display: none; }
 .btn {
   flex: 1;
+  /* inline-flex mit gap: Knoepfe mit Symbol brauchen Abstand zwischen
+     Zeichen und Schrift, und beides soll mittig stehen. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
   padding: 12px 14px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: var(--r-sm);
   /* Die Woelbung: oben heller, unten dunkler, dazu Lichtkante und ein
      weicher Schein in der Knopffarbe. Zusammen liest sich das als
-     gewoelbtes Glas mit Farbe DARUNTER - nicht als angemalte Flaeche. */
+     gewoelbtes Glas mit Farbe DARUNTER - nicht als angemalte Flaeche.
+     Die beiden Farben kommen aus der Designsprache statt fest eingetragen
+     zu sein. Frueher standen hier zwei Orangetoene - beim Wechsel auf
+     RAL 5005 waere der Knopf dadurch halb orange geblieben. */
   background: linear-gradient(to bottom, var(--accent-glanz), var(--accent) 55%, var(--accent-tief));
   color: var(--accent-ink);
   font-family: var(--schrift-text);
@@ -1552,6 +1533,9 @@ body.nav-modus .leaflet-control-zoom { display: none; }
   color: var(--gps);
   font-size: 22px;
   text-shadow: 0 0 3px var(--bg), 0 0 3px var(--bg), 0 0 3px var(--bg);
+  /* Dieser eine Marker folgt der Kartendrehung weich statt zu springen -
+     als einziger, siehe die Begruendung im Marker-Abschnitt weiter unten. */
+  transition: transform 1s linear;
 }
 
 /* Eigener Standort beim Start: schlichter blauer Punkt, ohne Blickrichtung -
@@ -1634,20 +1618,16 @@ body.nav-modus #map {
    erst während der Fahrt dazukommen. Ausserhalb der Navigation ist der Wert
    0deg und die Regel damit wirkungslos. Dieselbe Dauer wie oben, sonst
    liefen Karte und Marker sichtbar auseinander. */
-.you-are-here,
-.wp-marker,
-.poi-marker,
-.foto-marker,
-.standort-marker {
+.you-are-here, .wp-marker, .poi-marker, .foto-marker, .standort-marker {
   transform: rotate(calc(-1 * var(--karten-drehung, 0deg)));
 }
 
-/* Die Uebergangsanimation bekommt im Navi-Modus NUR der eigene Standort.
-   Auf einer Alpenroute liegen schnell zwanzig Pass-Marker im Bild, und
-   jeder von ihnen waere sonst eine eigene Animation, die der Compositor
-   im Sekundentakt mitrechnet. Die uebrigen Marker springen dadurch hart
-   mit - was niemand sieht, weil sie waehrend der Fahrt Beiwerk sind. */
-.you-are-here { transition: transform 1s linear; }
+/* Die Uebergangsanimation bekommt im Navi-Modus NUR der eigene Standort;
+   seine transition-Zeile steht oben in seinem eigenen Block. Auf einer
+   Alpenroute liegen schnell zwanzig Pass-Marker im Bild, und jeder von
+   ihnen waere sonst eine eigene Animation, die der Compositor im
+   Sekundentakt mitrechnet. Die uebrigen Marker springen dadurch hart mit -
+   was niemand sieht, weil sie waehrend der Fahrt Beiwerk sind. */
 body:not(.nav-modus) .wp-marker,
 body:not(.nav-modus) .poi-marker,
 body:not(.nav-modus) .foto-marker,
@@ -2344,6 +2324,9 @@ body.nav-modus .leaflet-control-container { display: none; }
     inset 0 1px 0 rgba(255, 255, 255, 0.28),
     inset 0 -1px 0 rgba(0, 0, 0, 0.22),
     0 12px 34px rgba(0, 0, 0, 0.38);
+  /* Fuer das Nachgeben beim Antippen weiter unten
+     (.buehne-hinweis:active .hinweis-tafel). */
+  transition: transform 0.12s ease-out;
 }
 
 /* Die vier Sucherwinkel in den Ecken. Sie sagen "hier kommt ein Bild hin",
@@ -2432,9 +2415,9 @@ body.nav-modus .leaflet-control-container { display: none; }
 }
 
 /* Beim Antippen gibt die Tafel spuerbar nach - dieselbe Sprache wie bei den
-   uebrigen Glasflaechen der App. */
+   uebrigen Glasflaechen der App. Die dazugehoerige Uebergangsdauer steht
+   oben im Block von .hinweis-tafel. */
 .buehne-hinweis:active .hinweis-tafel { transform: scale(0.97); }
-.hinweis-tafel { transition: transform 0.12s ease-out; }
 
 @media (prefers-reduced-motion: reduce) {
   .buehne-hinweis, .hinweis-marke { animation: none; }
