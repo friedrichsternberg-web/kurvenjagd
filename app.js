@@ -3075,6 +3075,20 @@ function verkabelePanelSchublade() {
   // die zuvor gezogene Hoehe ausserhalb des neuen erlaubten Bereichs liegen -
   // dann neu einklemmen, ohne dass es wie ein Sprung aussieht.
   window.addEventListener('resize', () => {
+    /* Wird das Fenster BREIT, ist das Bedienfeld keine Schublade mehr,
+       sondern die Seitenleiste - und die bezieht ihre Hoehe aus dem
+       CSS-Layout. Eine von der Schublade uebriggebliebene Hoehe im
+       style-Attribut wuerde sie auf z.B. 400 Punkte einfrieren, waehrend
+       die Karte daneben vollhoch steht. Deshalb: Hoehe raeumen und der
+       Karte den neuen Platz melden. */
+    if (!fensterIstSchmal()) {
+      if (panelElement.style.height) {
+        panelElement.style.height = '';
+        panelElement.classList.remove('panel-dragging');
+        planeKartenAbgleich();
+      }
+      return;
+    }
     if (!panelElement.style.height) return; // Hoehe kommt noch von der CSS-Vorgabe, nichts zu tun
     setzePanelHöhe(panelElement.getBoundingClientRect().height, { animiert: true });
   });
