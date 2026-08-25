@@ -1363,6 +1363,10 @@
   <div id="toast" class="toast" hidden></div>
 
   <nav id="hauptNav" class="haupt-nav">
+    <!-- Schriftzug und rechter Bereich existieren nur im Querformat: Dort
+         sitzt DIESELBE Leiste oben und liest sich als Kopf einer Webseite.
+         Im Hochformat blendet .nur-quer (style.css) beides aus. -->
+    <span class="nav-marke nur-quer" aria-hidden="true">Kurvenjagd</span>
     <button class="nav-tab" data-ziel="app">
       <svg class="ic gross"><use href="#icon-route"></use></svg><span>Planer</span>
     </button>
@@ -1381,6 +1385,13 @@
     <button class="nav-tab" data-ziel="shopScreen">
       <svg class="ic gross"><use href="#icon-shop"></use></svg><span>Shop</span>
     </button>
+    <span class="nav-rechts nur-quer">
+      <!-- Derselbe Weg wie der runde Konto-Knopf im Garagenkopf; beide
+           rufen oeffneKontoOderProfil() in konto.js. -->
+      <button class="glas-rund klein" id="btnKontoLeiste" title="Konto" aria-label="Konto">
+        <svg class="ic"><use href="#icon-profil"></use></svg>
+      </button>
+    </span>
   </nav>
 
   <!-- ===== Freisteller =====

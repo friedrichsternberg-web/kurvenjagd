@@ -30,7 +30,83 @@
 
 @media (min-width: 900px) and (min-height: 500px) {
 
-  /* Die Abschnitte kommen in den naechsten Schritten:
-     Kopfleiste, Garage-Zweispalter, Listen, Ride-Zweispalter. */
+  /* --- 1. Die Kopfleiste ----------------------------------------------------
+     DIESELBE Leiste wie im Hochformat (#hauptNav), nur oben statt unten -
+     mit Schriftzug links und Konto rechts liest sie sich als Kopf einer
+     Webseite. Alles an ihr (Eintraege, Leuchten, Verkabelung, das
+     Verstecken im Navi-Modus) bleibt der bestehende Code. */
+
+  .haupt-nav {
+    top: 0;
+    bottom: auto;
+    height: calc(var(--nav-h) + env(safe-area-inset-top));
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: 0;
+    padding-inline: var(--s5);
+    justify-content: flex-start;
+    align-items: center;
+    gap: var(--s2);
+    border-top: 0;
+    border-bottom: 1px solid var(--glas-hell);
+    /* Kante unten rund statt oben, Schatten nach unten statt nach oben -
+       die aufgelegte Glasscheibe haengt jetzt am oberen Rand. */
+    border-radius: 0 0 var(--r-lg) var(--r-lg);
+    box-shadow:
+      inset 0 -1px 0 var(--glas-heller),
+      0 8px 24px var(--schatten-weich);
+  }
+
+  /* Aus den gestapelten Daumen-Tabs werden Reiheneintraege: Symbol und
+     Wort nebeneinander, nur so breit wie ihr Inhalt. */
+  .nav-tab {
+    flex: 0 0 auto;
+    flex-direction: row;
+    gap: var(--s2);
+    padding: 0 var(--s3);
+    height: 100%;
+    font-size: 13px;
+  }
+  .nav-tab .ic { width: 18px; height: 18px; }
+
+  /* Der Schriftzug: dieselbe Stimme wie die Ueberschriften der App. */
+  .nav-marke {
+    display: inline;
+    font-family: var(--schrift-display);
+    font-size: 22px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text);
+    margin-right: var(--s5);
+  }
+
+  /* Der rechte Bereich: schiebt sich selbst an den Rand. */
+  .nav-rechts {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s3);
+    margin-left: auto;
+  }
+
+  /* Der runde Konto-Knopf im Garagenkopf waere der ZWEITE Konto-Knopf im
+     Bild - die Leiste hat schon einen. Der Neu-laden-Knopf daneben bleibt:
+     Am Rechner gibt es zwar F5, aber wer die Seite vom Startbildschirm
+     eines Tablets oeffnet, hat keine Adresszeile. */
+  .kopf-knoepfe #btnKontoRund { display: none; }
+
+  /* --- 2. Der Platz unter der Leiste -----------------------------------------
+     Im Hochformat lassen die Bildschirme mit height: calc(100% - --nav-raum)
+     unten Platz fuer die Leiste. Sitzt sie oben, muss derselbe Platz OBEN
+     frei bleiben: Die Marge schiebt jeden Bildschirm unter die Leiste,
+     Marge + Hoehe = 100%. Der safe-area-Zuschlag wandert mit nach oben.
+
+     Alle Sonderfaelle regeln sich von selbst, weil sie an derselben
+     Schaltung haengen: Auf den Konto-Bildschirmen und im Navi-Modus nimmt
+     app.js der Seite die Klasse mit-nav, --nav-raum faellt auf 0, und
+     damit verschwinden Marge und Hoehenabzug gemeinsam. */
+  body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-top)); }
+  .start-screen, .app-layout, .ride-screen, .garage-screen {
+    margin-top: var(--nav-raum);
+  }
 
 }

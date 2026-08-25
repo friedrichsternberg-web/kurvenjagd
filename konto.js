@@ -521,15 +521,21 @@ async function passwortNeuAbsenden() {
 
 /* --- 6. Verkabelung ------------------------------------------------------- */
 
-/* Das Profilsymbol oben rechts führt an zwei verschiedene Orte, je
-   nachdem: angemeldet zum eigenen Profil, abgemeldet zum Anmelden. Ein
-   Symbol, zwei Ziele - das ist die Erwartung, die jeder von einem
-   Profilsymbol mitbringt. */
-verkabele('btnKontoRund', 'click', () => {
+/* Das Profilsymbol führt an zwei verschiedene Orte, je nachdem:
+   angemeldet zum eigenen Profil, abgemeldet zum Anmelden. Ein Symbol,
+   zwei Ziele - das ist die Erwartung, die jeder von einem Profilsymbol
+   mitbringt.
+
+   Es gibt zwei solcher Knoepfe: den runden im Garagenkopf (Hochformat)
+   und den in der Kopfleiste (Querformat, quer.css blendet um). Beide
+   rufen dieselbe Funktion - zwei Wege, ein Verhalten. */
+function öffneKontoOderProfil() {
   if (angemeldeterNutzer) { zeigeProfil(); return; }
   setzeKontoModus('anmelden');
   zeigeBildschirm('kontoScreen');
-});
+}
+verkabele('btnKontoRund', 'click', öffneKontoOderProfil);
+verkabele('btnKontoLeiste', 'click', öffneKontoOderProfil);
 
 verkabele('btnProfilZurueck', 'click', zeigeGarage);
 
