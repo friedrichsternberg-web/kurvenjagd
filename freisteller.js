@@ -63,18 +63,13 @@
    nur 27. Deshalb steht die Automatik bewusst auf der sicheren Seite.
 
    ---------------------------------------------------------------------------
-   2. WARUM DER ZAUBERSTAB WIEDER RAUS IST
+   2. WARUM ES KEINEN ZAUBERSTAB GIBT
 
-   Hier stand einmal ein zweites Werkzeug: antippen, und was farblich
-   zusammenhaengt, verschwindet. Es funktionierte auch, gemessen blieben bei
-   Toleranz 28 in allen schweren Faellen 94 bis 100 Prozent des Motorrads
-   stehen.
-
-   Trotzdem ist es raus, und das ist eine Entscheidung ueber Bedienung, nicht
-   ueber Rechnerei: Seit die Automatik ueber ein Modell laeuft, das WEISS, wie
-   ein Motorrad aussieht, bleibt so wenig stehen, dass sich der Aufwand nicht
-   lohnt - erst ein Werkzeug waehlen, dann einen Regler verstehen, dann
-   zielen. Radieren kann jeder sofort.
+   Nicht aus technischen Gruenden, sondern wegen der Bedienung: Seit die
+   Automatik ueber ein Modell laeuft, das WEISS, wie ein Motorrad aussieht,
+   bleibt so wenig stehen, dass sich der Aufwand nicht lohnt - erst ein
+   Werkzeug waehlen, dann einen Regler verstehen, dann zielen. Radieren kann
+   jeder sofort. Die Messwerte dazu stehen in ENTSCHEIDUNGEN.md.
 
    ---------------------------------------------------------------------------
    3. WAS KEIN VERFAHREN KANN
@@ -87,10 +82,9 @@
 /* ZWEI Groessen, und das ist wichtig:
 
    ANZEIGE UND MASKE laufen in voller Fotogroesse (hoechstens 1000 Punkte
-   Kante). Vorher wurde alles auf 560 gerechnet und auch so angezeigt - auf
-   einem iPhone mit dreifacher Punktdichte wurde dieses Bild dann auf gut
-   1100 Geraetepunkte aufgeblasen. Daher die Unschaerfe im Editor, und daher
-   war auch der Pinsel grober als noetig.
+   Kante). Kleiner darf es nicht sein: Auf einem iPhone mit dreifacher
+   Punktdichte wird das Bild auf gut 1100 Geraetepunkte aufgeblasen - eine
+   kleinere Maske macht den Editor unscharf und den Pinsel grober als noetig.
 
    GERECHNET wird die Automatik weiter auf einer verkleinerten Fassung. Die
    Kantensuche und die Minimax-Ausbreitung kosten dort ein Viertel der Zeit,
@@ -820,7 +814,7 @@ function freiAufräumen(nurInseln = false) {
 // Bildschirmpunkt in Bildpunkt umrechnen.
 /* Behält nur das Hauptobjekt und wirft freistehende Einzelteile weg.
 
-   Der Anlass ist ein echtes Bild: Auf Friedrichs Foto steht ein Flugzeug am
+   Der Anlass ist ein echtes Bild: Auf dem Foto steht ein Flugzeug am
    Himmel. Die Automatik trägt den Himmel ringsum ab, das Flugzeug bleibt als
    Insel stehen - richtig gerechnet, aber unbrauchbar.
 

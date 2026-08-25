@@ -232,10 +232,8 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
    Bild und Schleier stecken in ::before und ::after, damit das HTML nicht
    mit reinen Gestaltungselementen zugestellt wird. */
 /* Das Raster des Menues unten in der Garage. Bewusst OHNE Zeilenangabe:
-   Frueher stand hier flex:1 mit zwei 1fr-Zeilen, weil die Kacheln den
-   Rest eines nicht scrollenden Bildschirms fuellen sollten. In einer
-   scrollenden Seite gibt es diesen Rest nicht - die Hoehe kommt jetzt aus
-   dem Inhalt, die Untergrenze aus .kachel selbst. */
+   Die Garage scrollt, es gibt also keinen "Rest", den die Kacheln fuellen
+   koennten. Die Hoehe kommt aus dem Inhalt, die Untergrenze aus .kachel. */
 .garage-menue-raster {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -377,8 +375,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 .linkbtn:hover { color: var(--text); }
 
 /* ---------- Profil ----------
-   Hier stand einmal eine Statuszeile am Fuss der Startseite. Das Konto
-   sitzt jetzt hinter dem Profilsymbol oben rechts. */
+   Das Konto sitzt hinter dem Profilsymbol oben rechts. */
 
 /* Das Profilbild IM runden Knopf oben rechts. Es fuellt ihn ganz aus, das
    Symbol darunter tritt dafuer zurueck (konto.js schaltet um). */
@@ -855,8 +852,8 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 .search-results li.standort-option:hover { background: color-mix(in srgb, var(--gps) 12%, transparent); }
 
 /* ---------- Umschalter (Planungsart) ---------- */
-/* Als PILLE, nach dem Vorbild von Friedrichs Inspirationsbild: Die Rinne
-   ist dunkles Glas, das aktive Segment eine hellere Glasscheibe darin,
+/* Als PILLE: Die Rinne ist dunkles Glas, das aktive Segment eine hellere
+   Glasscheibe darin,
    und die Signalfarbe steckt in Schrift und Symbol des aktiven Segments -
    nicht in einer gefuellten Flaeche. So bleibt die Farbe ein Zeichen und
    wird keine Deko. */
@@ -1539,13 +1536,11 @@ body.nav-modus #map {
   margin-left: calc(var(--karten-quadrat, 150vmax) / -2);
   transform: rotate(var(--karten-drehung, 0deg));
   /* Das GPS meldet etwa einmal pro Sekunde, und genau so lange muss die
-     Bewegung dauern - dann geht eine Meldung nahtlos in die naechste
-     ueber. Vorher standen hier 0,6 Sekunden mit ease-out, waehrend der
-     Schwenk in app.js 0,9 Sekunden brauchte: Die Drehung war nach 0,6 s
-     fertig, stand 0,4 s still und ruckte dann wieder los. Dieser
-     Anlauf-Bremse-Pause-Rhythmus war das, was auf dem iPhone als
-     "abgehackt" ankam. "linear" statt "ease-out", weil ein Fahrzeug
-     seinen Kurs gleichmaessig aendert und nicht in Schueben. */
+     Bewegung dauern - dann geht eine Meldung nahtlos in die naechste ueber.
+     Ist sie kuerzer als der Schwenk in app.js, steht die Drehung dazwischen
+     still und ruckt dann wieder los; genau das kam als "abgehackt" an.
+     "linear" statt "ease-out", weil ein Fahrzeug seinen Kurs gleichmaessig
+     aendert und nicht in Schueben. */
   transition: transform 1s linear;
 }
 
@@ -1752,11 +1747,11 @@ body.nav-modus .leaflet-control-container { display: none; }
    ============================================================================ */
 
 .garage-screen {
-  /* WIE HOCH DER RAUM MIT DEM MOTORRAD IST. Frueher war das der Rest, den
-     das Datenblatt uebrig liess - und genau daran lag es, dass die Seite
-     "verschoben" aussah: Jedes Element, das unten dazukam, hat oben den
-     Bildausschnitt des Raumbildes verschoben. Jetzt ist die Hoehe eine
-     Ansage und haengt an nichts mehr.
+  /* WIE HOCH DER RAUM MIT DEM MOTORRAD IST - eine Ansage, kein Rest.
+
+     Das ist die wichtigste Zeile dieses Abschnitts: Haengt die Hoehe am
+     uebrigen Platz, verschiebt JEDES Element, das unten dazukommt, oben den
+     Bildausschnitt des Raumbildes. Die Seite sieht dann verschoben aus.
 
      Die Formel liest sich von innen nach aussen: hoechstens 64 Prozent
      der Bildschirmhoehe, aber nie breiter als 132 Prozent der Breite

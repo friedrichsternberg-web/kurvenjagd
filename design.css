@@ -40,11 +40,8 @@
    Glanz quer darueber. Das Motorradbild ist dabei nicht Beiwerk, sondern
    Untergrund: es liegt hinter dem Inhalt und scheint durch.
 
-   ACHTUNG, das war heute Mittag noch andersherum: Da stand hier ein
-   Verbot von backdrop-filter, weil Milchglas als Erkennungszeichen
-   austauschbarer Apps galt. Friedrich hat sich das angesehen und die
-   entgegengesetzte Richtung gewaehlt. Die Regel steht deshalb nicht mehr
-   im Weg, aber der Unterschied bleibt wichtig:
+   backdrop-filter ist ausdruecklich erwuenscht - es war einmal verboten,
+   siehe ENTSCHEIDUNGEN.md. Der Unterschied bleibt aber wichtig:
 
      Milchglas von der Stange = weisser Schleier ueber Farbverlaufblasen,
      ueberall gleich, ohne Bezug zum Inhalt.
@@ -60,13 +57,11 @@
      2. Kein Verlaufstext, kein Neonleuchten.
      3. Keine Emoji als Symbole - dafuer gibt es die SVG-Sammlung in
         index.html.
-     4. GEKIPPT am 20.08.2026: Hier stand "Bedienelemente ohne Bild
-        bleiben matt". Friedrich hat sich fuer volles Liquid Glass durch
-        die ganze App entschieden - JEDE Flaeche ist jetzt Glas, auch
-        Knoepfe, Eingabefelder und Umschalter. Was die Regel ersetzt:
-        Damit Glas ueberall wirkt, liegt unter jedem Bildschirm etwas,
-        das durchscheinen kann (Foto, Karte, Raum) - Glas ueber blankem
-        Schwarz bleibt tot.
+     4. JEDE Flaeche ist Glas, auch Knoepfe, Eingabefelder und Umschalter.
+        Damit das ueberall wirkt, liegt unter jedem Bildschirm etwas, das
+        durchscheinen kann (Foto, Karte, Raum) - Glas ueber blankem Schwarz
+        bleibt tot. Frueher galt hier "Bedienelemente ohne Bild bleiben
+        matt", siehe ENTSCHEIDUNGEN.md.
 
    RAL 5005 ist die EINZIGE Signalfarbe und wird sparsam eingesetzt. Wenn
    alles die Signalfarbe traegt, bedeutet sie nichts mehr.

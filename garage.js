@@ -137,8 +137,7 @@ const GARAGEN = [{
   bild:      'img/garage-werkstatt.webp',
   bildStandard: 'img/garage-werkstatt-standard.webp',
   // Das Bild wird in anderthalbfacher Groesse ausgeliefert, damit es auf
-  // einem Handy mit dreifacher Punktdichte nicht aufgeblasen wird - genau
-  // die Unschaerfe, die Friedrich an der ersten Fassung gesehen hat. Die
+  // einem Handy mit dreifacher Punktdichte nicht aufgeblasen wird. Die
   // Masse hier beziehen sich auf die AUSGELIEFERTE Datei.
   bildBreite: 1296,
   bildHoehe: 2731,
@@ -178,9 +177,8 @@ const GARAGEN = [{
      den Haengelampen ist das die Mitte (0.5). Bei der Roehre liegt der
      dunkelste Punkt des Verlaufs bei 0.3, denn unter ihr haengt ihr
      Lichtschein an der Wand und soll mit abdunkeln - der Fleck reicht
-     also weiter nach unten als nach oben. Zentriert man ihn stattdessen,
-     haengt der Schwerpunkt sichtbar UEBER dem Licht, genau das hat
-     Friedrich als "etwas darueber" gesehen. */
+     also weiter nach unten als nach oben. Zentriert saehe der Fleck aus,
+     als haenge er ueber der Lampe (siehe ENTSCHEIDUNGEN.md). */
   lampen: [
     { art: 'roehre',  x: 0.536, y: 0.309, rx: 0.135, ry: 0.058, anker: 0.3, takt: 19, versatz: 4 },
     { art: 'schirm',  x: 0.235, y: 0.302, rx: 0.100, ry: 0.055, anker: 0.5, takt: 23, versatz: 0 },
@@ -226,8 +224,7 @@ function feinWerte() {
 
 /* --- Wo steht die Maschine im Bild? ----------------------------------------
 
-   HIER LAG DER FEHLER, den Friedrich gemeldet hat: Das Motorrad schwebte
-   ueber der Plattform statt darauf zu stehen.
+   Aufgesetzt wird die Unterkante des BILDINHALTS, nicht die des Bildes.
 
    Der Grund ist unscheinbar. Ein freigestelltes Foto ist nicht randlos - um
    die Maschine herum steht durchsichtige Flaeche, oben, unten und an den
@@ -321,8 +318,8 @@ function rahmenMessen(bildElement) {
 
 /* --- Steht die Maschine schief? ---------------------------------------------
 
-   Friedrich hat es an seinem eigenen Foto gemeldet: Nur das Hinterrad steht
-   auf der Plattform, das Vorderrad haengt darueber hinaus.
+   Ein schraeg fotografiertes Motorrad muss zurueckgedreht werden, sonst
+   steht nur ein Rad auf dem Teller.
 
    Der Grund ist die Aufnahme. Wer sein Motorrad schraeg von hinten
    fotografiert, hat das nahe Rad tiefer im Bild als das ferne - die Linie
@@ -344,12 +341,10 @@ function rahmenMessen(bildElement) {
    schraege Radlinie ist nicht automatisch ein Fehler. */
 
 const DREHUNG_MINDESTENS = 1.5;   // Grad, darunter ist es Rauschen
-/* Die Obergrenze war einmal 14 Grad und das war zu wenig: Friedrichs
-   Heckansicht hat eine Radlinie um die 30 Grad, die Ellipse erlaubt etwa
-   14 - die noetige Korrektur von 16 Grad wurde abgeschnitten und ein Rad
-   blieb in der Luft. Da das Bild freigestellt ist, gibt es keinen Horizont,
-   der eine kraeftigere Drehung verraten wuerde - nur die Maschine selbst,
-   und die sieht gedreht immer noch wie eine Maschine aus. */
+/* Die Obergrenze darf grosszuegig sein: Da das Bild freigestellt ist, gibt
+   es keinen Horizont, der eine kraeftigere Drehung verraten wuerde - nur die
+   Maschine selbst, und die sieht gedreht immer noch wie eine Maschine aus.
+   Eine Heckansicht braucht schnell um die 16 Grad. */
 const DREHUNG_HOECHSTENS = 24;    // Grad
 
 function standflaeche(rahmen, bildBreite, bildHoehe) {
@@ -361,14 +356,11 @@ function standflaeche(rahmen, bildBreite, bildHoehe) {
   const bis = Math.ceil(rahmen.rechts * anzahl);
   if (bis - von < 8) return null;      // zu schmal, um zwei Raeder zu trennen
 
-  /* DIE BEIDEN RAEDER FINDEN - dritter Anlauf, und diesmal ueber eine
-     Eigenschaft, die wirklich nur die Standlinie hat.
+  /* DIE BEIDEN RAEDER FINDEN, und NICHT ueber die tiefsten Punkte.
 
-     Die ersten beiden Anlaeufe suchten TIEFE PUNKTE: erst je Haelfte, dann
-     in den Aussenbereichen. Beide sind an Friedrichs Foto gescheitert, denn
-     dort haengt ein Helm am Lenker - rund wie ein Rad und tiefer im Bild
-     als das ferne Vorderrad. Jede Suche nach "tief" findet frueher oder
-     spaeter den Helm.
+     Der Grund: An einem Lenker kann ein Helm haengen - rund wie ein Rad und
+     tiefer im Bild als ein fernes Vorderrad. Jede Suche nach "tief" findet
+     frueher oder spaeter den Helm (siehe ENTSCHEIDUNGEN.md).
 
      Was den Helm von den Raedern unterscheidet, ist nicht seine Form und
      nicht seine Tiefe, sondern seine Rolle: Die Maschine STEHT nicht auf
@@ -685,11 +677,9 @@ function setzeBuehnenPlatz() {
        zeigt der Pfeil nicht auf sie, sondern liegt darauf. Gemessen in
        Tellerhoehen, damit der Abstand auf jedem Bildschirm gleich wirkt. */
     const buehneUnten = buehneHoehe + buehneOben;
-    /* 4,3 Tellerhoehen ueber der Tellermitte. Frueher waren es 2,6, aber
-       damals hing ein 68 Punkte langer Pfeil unter der Tafel und ihr Kasten
-       endete erst dort. Ohne ihn misst der Kasten bis zur Tafelunterkante -
-       bei gleichem Wert saesse die Tafel also um genau diese Pfeillaenge
-       tiefer und laege auf der Maschine. */
+    /* 4,3 Tellerhoehen ueber der Tellermitte. Der Wert misst bis zur
+       UNTERKANTE DER TAFEL - haengt eines Tages wieder ein Pfeil darunter,
+       gehoert er abgezogen, sonst liegt die Tafel auf der Maschine. */
     let unten = buehneUnten - ankerY + tellerRyPx * 4.3;
 
     /* Obergrenze: Auf einem kurzen Bildschirm - iPhone SE im Hochformat -
@@ -723,12 +713,10 @@ function setzeBuehnenPlatz() {
   const inhaltAnteil = Math.max(0.05, rahmen.rechts - rahmen.links);
   const stand = standflaeche(rahmen, bild.naturalWidth, bild.naturalHeight);
 
-  /* DIE GROESSE, und hier lag der Fehler, den Friedrich als "zu gross"
-     gesehen hat: Sie richtete sich nach der BREITE DES BILDINHALTS. Bei
-     einer Seitenansicht ist das fast der Radstand und die Regel stimmt.
-     Bei einer Schraegansicht von hinten aber ist der Inhalt hoch und
-     schmal - dieselbe Regel machte die Maschine riesig, und auf den Teller
-     passte sie nie.
+  /* DIE GROESSE richtet sich NICHT nach der Breite des Bildinhalts. Bei
+     einer Seitenansicht waere das fast der Radstand und ginge gut, bei
+     einer Schraegansicht von hinten ist der Inhalt aber hoch und schmal -
+     dieselbe Regel machte die Maschine riesig (siehe ENTSCHEIDUNGEN.md).
 
      Was tatsaechlich zum Teller passen muss, ist der ABSTAND DER BEIDEN
      RAEDER AUF DEM SCHIRM. Der wird deshalb auf einen festen Anteil der
@@ -1147,8 +1135,7 @@ async function fotoÜbernehmen(datei) {
        Der Grund: Dieses Bild wird auf der Buehne gross gezeigt, auf einem
        Handy mit dreifacher Punktdichte braucht die Anzeige gut 900
        Geraetepunkte NUR fuer die Maschine - ein 900er-Foto, von dem die
-       Maschine nur einen Teil einnimmt, wird dann aufgeblasen. Genau die
-       Verpixelung, die Friedrich gesehen hat. */
+       Maschine nur einen Teil einnimmt, wird dann aufgeblasen. */
     dialogFoto = await verkleinereFoto(datei, 1600, 0.92);
     dialogFotoOriginal = dialogFoto;
     // Neues Foto, alte Bodenlinie und alte Justierung ungueltig. Das

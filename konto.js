@@ -379,9 +379,8 @@ function zeigeMailErneutKnopf(sichtbar) {
 
 /* Hält das Profilsymbol oben rechts aktuell.
 
-   Hier stand einmal eine Statuszeile am Fuß des alten Startbildschirms. Sie ist
-   umgezogen: Das Symbol oben rechts ist der Ort, an dem jeder sein Konto
-   sucht, und es kann mehr als eine Zeile - es zeigt das Profilbild selbst.
+   Das Symbol ist der einzige Zugang zum Konto: Dort sucht es jeder, und es
+   kann mehr als eine Statuszeile - es zeigt das Profilbild selbst.
 
    Ohne eingetragene Server-Zugangsdaten verschwindet der Knopf ganz. Die
    App ist dann die rein lokale Version, und ein Knopf, der zu einem

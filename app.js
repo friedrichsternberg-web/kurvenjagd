@@ -38,9 +38,9 @@ const state = {
   planMode: 'punkt',  // 'punkt' (Punkt-zu-Punkt) oder 'rundtour'
   curveLevel: 100,    // 0-100, vom Kurvigkeits-Regler - 100 = maximal kurvig
   optionen: {          // zusätzliche Routing-Einschränkungen, direkt an BRouter weitergereicht
-    // Städte UND Autobahnen sind ab Werk gemieden - das ist Friedrichs
-    // Ansage: Wer eine Motorrad-App öffnet, will Landstraße. Beides lässt
-    // sich unter "Optionen" von Hand ausschalten.
+    // Städte UND Autobahnen sind ab Werk gemieden: Wer eine Motorrad-App
+    // öffnet, will Landstraße. Beides lässt sich unter "Optionen" von Hand
+    // ausschalten.
     städteVermeiden: true,
     autobahnenVermeiden: true,
     mautVermeiden: false,
@@ -1174,12 +1174,11 @@ function punktVoraus(lat, lon, kurs, meter) {
    ab; die Formel ist die uebliche Web-Mercator-Aufloesung. */
 function kameraVorlaufMeter(lat) {
   /* Die Hoehe wird gemessen, wenn sie sich aendert (siehe
-     passeKartenQuadratAn), nicht bei jeder GPS-Meldung. Vorher stand hier
-     ein getBoundingClientRect() unmittelbar hinter dem Schreiben der
-     Drehungs-Variable an dasselbe Element - der Browser musste die gerade
-     verworfene Layoutrechnung des ganzen Kartenbaums sofort blockierend
-     nachholen, und zwar jede Sekunde. Die Hoehe aendert sich waehrend der
-     Fahrt ohnehin nicht. */
+     passeKartenQuadratAn), NICHT bei jeder GPS-Meldung. Ein
+     getBoundingClientRect() direkt hinter dem Schreiben der
+     Drehungs-Variable zwingt den Browser, die gerade verworfene
+     Layoutrechnung des ganzen Kartenbaums sofort blockierend nachzuholen -
+     jede Sekunde. Die Hoehe aendert sich waehrend der Fahrt ohnehin nicht. */
   const sichtbareHöhe = nav.sichtbareHöhe
     || document.getElementById('mapWrap').getBoundingClientRect().height;
   const meterJePixel = 40075016.686 * Math.abs(Math.cos(lat * Math.PI / 180))
@@ -1648,9 +1647,9 @@ async function routeNeuBerechnenAbPosition(lat, lon) {
    Weg: eine von Hand zusammengestellte Liste bekannter Motorrad-Passstraßen
    direkt im Code (PASS_DATEN unten), ohne Netzwerk-Abfrage zur Laufzeit.
    Die Koordinaten wurden einmalig über Nominatim ermittelt (die App-eigene
-   Ortssuche nutzt denselben Dienst), Höhe/Charakter/Maut/Saison stammen aus
-   Friedrichs eigener Recherche - keine Live-Daten, können sich also mit der
-   Zeit verändern (z.B. neue Mautpreise, geänderte Öffnungszeiten).       */
+   Ortssuche nutzt denselben Dienst), Höhe/Charakter/Maut/Saison sind von
+   Hand recherchiert - keine Live-Daten, können sich also mit der Zeit
+   verändern (z.B. neue Mautpreise, geänderte Öffnungszeiten).           */
 
 const PASS_DATEN = [
   // -- Deutschland --
@@ -2556,10 +2555,9 @@ function loadSaved() {
   return geraet.lies(STORE, []) || [];
 }
 
-// Die einzige Stelle, an der die Liste in den Gerätespeicher geschrieben
-// wird. Vorher stand localStorage.setItem an drei Stellen verstreut - mit
-// dem Server als zweiter Ablage wäre daraus schnell ein Durcheinander
-// geworden, bei dem eine Stelle den Abgleich vergisst.
+// Die EINZIGE Stelle, an der die Liste in den Gerätespeicher geschrieben
+// wird. Mit dem Server als zweiter Ablage wären mehrere Schreibstellen ein
+// Durcheinander, bei dem eine davon den Abgleich vergisst.
 // Gibt false zurück, wenn der Speicher voll ist (siehe speichereRide).
 function speichereListe(liste) {
   return geraet.schreib(STORE, liste);
@@ -2856,14 +2854,12 @@ function symbol(name, zusatz = '') {
 // Passwortwechsel und Kontolöschung soll nichts ablenken - wer gerade dabei
 // ist, sein Passwort zu setzen oder sein Konto zu löschen, soll nicht mit
 // einem Fehlklick woanders landen.
-/* ALLE Bildschirme der App, an EINER Stelle.
+/* ALLE Bildschirme der App, an EINER Stelle - ein neuer Bildschirm braucht
+   genau einen Eintrag, hier.
 
-   Diese Liste stand einmal doppelt im Code - einmal in zeigeBildschirm()
-   und einmal in aktuellerBildschirm(). Beim Hinzufuegen des Profils fiel
-   genau das auf die Fuesse: Der neue Bildschirm stand in keiner der
-   beiden, zeigeBildschirm() versteckte daraufhin alles und blendete
-   nichts ein - die App zeigte eine schwarze Flaeche. Ein neuer Bildschirm
-   braucht ab jetzt genau einen Eintrag, hier. */
+   Warum das wichtig ist: Fehlt ein Bildschirm in dieser Liste, versteckt
+   zeigeBildschirm() alles und blendet nichts ein. Die App zeigt dann eine
+   schwarze Flaeche, ohne einen Fehler zu melden. */
 const BILDSCHIRME = [
   'garageScreen', 'tourenScreen', 'app', 'rideScreen',
   'shopScreen', 'shopProduktScreen',

@@ -556,9 +556,9 @@ function sortByBearing(start, points) {
        ZULETZT probierte Versuch, nicht der bislang beste. Das ist der
        entscheidende Punkt: Wird die Runde gerade groesser gezogen und
        entsteht dabei eine Sackgasse, bleibt die gewonnene Laenge erhalten
-       und es wird nur die Sackgasse herausgeschnitten. Vorher wurde so ein
-       Versuch komplett verworfen - die Suche kam deshalb nie ueber eine
-       saubere, aber viel zu kurze Runde hinaus.
+       und es wird nur die Sackgasse herausgeschnitten. Wer so einen Versuch
+       stattdessen komplett verwirft, kommt nie ueber eine saubere, aber
+       viel zu kurze Runde hinaus.
 
      Laenge anpassen - nur wenn die Runde sauber ist: die gefundene Form
        wird gleichmaessig groesser oder kleiner gezogen. */
@@ -754,8 +754,8 @@ async function fixkostenErmitteln(start, fixeZwischenstopps, routing, melde) {
    Wichtig: Die Route faehrt KEINEN Kreis, sondern ein Vieleck von
    Zufallspunkt zu Zufallspunkt. Ein Vieleck mit n Ecken auf einem Kreis mit
    Radius r ist 2*n*sin(180/n)*r lang - bei 4 Punkten also nur etwa 5,7*r
-   statt 6,3*r (Kreisumfang). Vorher wurde mit dem Kreisumfang gerechnet,
-   dadurch fielen die Rundtouren systematisch zu kurz aus.
+   statt 6,3*r (Kreisumfang). Mit dem Kreisumfang gerechnet, fallen die
+   Rundtouren systematisch zu kurz aus.
 
    Dazu ein Aufschlag, weil Strassen nie schnurgerade zwischen zwei Punkten
    verlaufen - und ein groesserer, je kurviger die Route werden soll. Die

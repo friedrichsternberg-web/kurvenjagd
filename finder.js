@@ -140,7 +140,7 @@ function baujahre() {
    Namen, keine Motordaten.
 
    Beide Schnittstellen brauchen einen Schluessel und stehen deshalb noch
-   still. Sobald Friedrichs eigene Datenbank da ist, treten diese beiden
+   still. Sobald eine eigene Datenbank da ist, treten diese beiden
    Funktionen an sie - der Rest der Datei merkt davon nichts, weil er nur
    bildAdresse() und technischeDatenHolen() kennt. Genau dafuer stehen sie
    hier gebuendelt und nicht verstreut im Code.
@@ -383,13 +383,11 @@ async function modelleAnzeigen() {
 /* Raeumt die Felder, die die APP gefuellt hat - von Hand Eingetipptes
    bleibt stehen.
 
-   Gebraucht wird das beim Modellwechsel, und dahinter steckt der Fehler,
-   den Friedrich gefunden hat: technischeDatenNachziehen() steigt sofort
-   wieder aus, wenn beide Felder schon etwas enthalten. Nach dem ersten
-   Modell waren sie das - also blieben beim zweiten Modell die Werte des
-   ersten stehen.
+   Gebraucht wird das beim Modellwechsel: technischeDatenNachziehen()
+   steigt sofort wieder aus, wenn beide Felder schon etwas enthalten. Ohne
+   Raeumen blieben deshalb beim zweiten Modell die Werte des ersten stehen.
 
-   Einfach immer zu ueberschreiben waere die falsche Loesung gewesen: Wer
+   Einfach immer zu ueberschreiben waere die falsche Loesung: Wer
    seine Maschine umgebaut hat, weiss es besser als jede Datenbank. Deshalb
    merkt sich jedes Feld in "dataset.automatisch", woher sein Wert stammt.
    Getippte Werte loeschen die Marke wieder (siehe der input-Zuhoerer). */
