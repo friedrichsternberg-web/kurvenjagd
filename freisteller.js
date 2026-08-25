@@ -257,6 +257,22 @@ function freiGlaetten(maske, breite, hoehe) {
 
 const MODELL_DATEI = 'modell/u2netp.onnx';
 const ORT_BIBLIOTHEK = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/ort.min.js';
+
+/* Die Pruefsumme derselben Datei. Der Browser rechnet sie nach dem
+   Herunterladen selbst nach und weigert sich, das Skript auszufuehren, wenn
+   sie nicht stimmt.
+
+   Warum das noetig ist: Ohne sie vertraut die App einem fremden Server
+   blind. Wird jsDelivr eines Tages uebernommen oder auch nur ein Zwischen-
+   speicher unterwegs vergiftet, laeuft fremder Code mit allen Rechten der
+   Seite - er koennte an die gespeicherten Touren, an das Konto, an alles.
+   Mit dieser Zeile bleibt das Fenster einfach leer und meldet einen Fehler.
+
+   Ermittelt am 24.08.2026, zweimal unabhaengig heruntergeladen und Byte fuer
+   Byte verglichen. Wird die Version oben geaendert, MUSS diese Zeile mit:
+
+     curl -sL <adresse> | openssl dgst -sha384 -binary | openssl base64 -A */
+const ORT_PRUEFSUMME = 'sha384-RPL/K8tc0JVaNWsunkEmCzLeieefvFX2UCRLKLmLVChCI6P+CTKhzqF7VIeCc3Zp';
 const MODELL_KANTE = 320;          // Eingangsgroesse, vom Modell vorgegeben
 
 /* Die Groesse der Modelldatei in Bytes, damit der Balken etwas hat, woran er
@@ -351,6 +367,10 @@ async function modellLaden(melde = () => {}) {
       await new Promise((fertig, fehler) => {
         const skript = document.createElement('script');
         skript.src = ORT_BIBLIOTHEK;
+        skript.integrity = ORT_PRUEFSUMME;
+        // Ohne crossOrigin prueft der Browser die Pruefsumme gar nicht erst -
+        // er darf den Inhalt einer fremden Datei sonst nicht ansehen.
+        skript.crossOrigin = 'anonymous';
         skript.onload = fertig;
         skript.onerror = () => fehler(new Error('Bibliothek nicht erreichbar'));
         document.head.appendChild(skript);

@@ -153,13 +153,13 @@ const STANDARD_BILD = 'img/bike-standard.webp';
    freigestellte Motorradbilder, kostenlos aber mit Wasserzeichen, ohne
    Wasserzeichen 49 $ im Monat. ACHTUNG, der Aufruf unten folgt deren
    Dokumentation, konnte mangels Schluessel aber nie ausprobiert werden. */
-const BILD_API_SCHLÜSSEL = '';
+const BILD_API_SCHLÜSSEL = '';   // ACHTUNG: mit Schluessel auch die CSP in index.html ergaenzen
 
 /* Datenquelle fuer Hubraum und Leistung.
    api-ninjas.com/api/motorcycles, kostenloser Schluessel nach Anmeldung.
    Liefert Felder wie displacement: "649.0 ccm (39.60 cubic inches)" und
    power: "52.3 HP (38.2 kW) @ 8000 RPM". Ebenfalls ungetestet. */
-const DATEN_API_SCHLÜSSEL = '';
+const DATEN_API_SCHLÜSSEL = '';  // ACHTUNG: mit Schluessel auch die CSP in index.html ergaenzen
 
 // Welches Bild auf der Buehne steht. Eigenes Foto schlaegt Datenbank,
 // Datenbank schlaegt Standardbild.

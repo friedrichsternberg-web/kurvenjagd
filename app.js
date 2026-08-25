@@ -2626,14 +2626,19 @@ function gespeicherteRouteHtml(r) {
     ? new Date(r.gefahrenAm).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' })
     : '';
 
+  /* Auch die Kennung geht durch escapeHtml. Heute vergibt sie die App selbst
+     (Date.now()), da kann nichts Boeses drinstehen - aber sobald Routen
+     geteilt werden, kommt sie vom Server und damit von Fremden. Ein
+     Anfuehrungszeichen darin wuerde reichen, um aus dem Attribut
+     auszubrechen und eigenes HTML einzuschleusen. */
   return `
-    <li data-id="${r.id}">
+    <li data-id="${escapeHtml(r.id)}">
       ${marke}
       <span class="saved-text">
         <span class="saved-name">${escapeHtml(r.name)}</span>
         <span class="saved-meta">${kmText} <i>&middot;</i> ${kurvenText}${datum ? ' <i>&middot;</i> ' + datum : ''}</span>
       </span>
-      <button class="del" data-del="${r.id}" title="Löschen">&times;</button>
+      <button class="del" data-del="${escapeHtml(r.id)}" title="Löschen">&times;</button>
     </li>`;
 }
 

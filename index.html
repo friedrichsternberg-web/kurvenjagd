@@ -11,6 +11,73 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Kurvenjagd - Motorrad-Routenplaner</title>
 
+  <!-- ===== Was diese Seite laden darf =====
+       Eine Content-Security-Policy ist eine Erlaubnisliste: Alles, was hier
+       nicht steht, laedt der Browser nicht. Das klingt nach Buerokratie,
+       aber es ist die wirksamste einzelne Zeile gegen eingeschleusten Code -
+       selbst wenn es jemand schafft, fremdes <script> in die Seite zu
+       bringen, faengt der Browser es hier ab.
+
+       Wichtig fuer spaeter: Kommt eine neue Adresse dazu (ein anderer
+       Kartenanbieter, ein Preis-Feed, ein Geocoder mit Schluessel), MUSS
+       sie hier eingetragen werden. Sonst laeuft alles wie gewohnt, nur die
+       eine Anfrage kommt nie an - und in der Konsole steht warum.
+
+       Zeile fuer Zeile:
+
+       default-src 'self'
+         Grundregel: nur die eigenen Dateien. Alles Weitere ist eine
+         bewusste Ausnahme davon.
+
+       script-src 'self' cdn.jsdelivr.net 'wasm-unsafe-eval'
+         Eigener Code, dazu onnxruntime-web fuer den Freisteller (mit
+         Pruefsumme, siehe ORT_PRUEFSUMME in freisteller.js).
+         'wasm-unsafe-eval' erlaubt WebAssembly - ohne das koennte die
+         Bilderkennung nicht rechnen. Es erlaubt KEIN eval() fuer
+         JavaScript, das bleibt verboten.
+
+       style-src 'self' 'unsafe-inline'
+         Das 'unsafe-inline' ist hier noetig und heisst weniger schlimm als
+         es klingt: Leaflet setzt Kartenelemente ueber style-Attribute, und
+         die drei Kacheln geben ihr Hintergrundbild so mit. Bei STIL kann
+         man damit hoechstens etwas verschieben, kein Code laeuft. Bei
+         script-src waere es das Gegenteil - deshalb steht es dort nicht.
+
+       img-src 'self' data: blob: ...
+         data: fuer die verkleinerten Fotos, blob: fuer Bilder aus der
+         Dateiauswahl, dazu die Kartenkacheln und der Bilderspeicher des
+         Kontos.
+
+       connect-src
+         Jede Adresse, die die App im Hintergrund fragt: BRouter fuer
+         Routen, Nominatim fuer die Ortssuche, die US-Fahrzeugdatenbank
+         und die Wikipedia fuer den Motorrad-Finder, Supabase fuer das
+         Konto, jsDelivr fuer die WebAssembly-Datei des Freistellers.
+
+       Nicht drin, obwohl im Code erwaehnt: carimagesapi.com und
+       api-ninjas.com. Beide brauchen einen Schluessel, beide sind
+       abgeschaltet (siehe finder.js). Wer dort einen Schluessel eintraegt,
+       muss die Adresse hier ergaenzen.
+
+       Was ueber ein <meta> NICHT geht: frame-ancestors (verhindert, dass
+       jemand die Seite in einen eigenen Rahmen einbaut). Das braucht eine
+       echte Kopfzeile vom Server, und GitHub Pages setzt keine. Kommt mit
+       einem eigenen Server oder der nativen Huelle. -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    base-uri 'self';
+    object-src 'none';
+    form-action 'self';
+    script-src 'self' https://cdn.jsdelivr.net 'wasm-unsafe-eval';
+    worker-src 'self' blob:;
+    style-src 'self' 'unsafe-inline';
+    font-src 'self';
+    img-src 'self' data: blob: https://tile.openstreetmap.org https://copydwpdqpnwjvknsakz.supabase.co;
+    connect-src 'self' https://brouter.de https://nominatim.openstreetmap.org
+                https://vpic.nhtsa.dot.gov https://de.wikipedia.org https://en.wikipedia.org
+                https://copydwpdqpnwjvknsakz.supabase.co https://cdn.jsdelivr.net;
+    upgrade-insecure-requests">
+
   <!-- ===== Die App als App =====
        Diese paar Zeilen sind die Vorstufe zu den Stores und schon fuer sich
        nuetzlich: Wer die Seite auf den Startbildschirm legt, bekommt ein
