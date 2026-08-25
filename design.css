@@ -178,14 +178,53 @@
   --r-pill: 999px;
   --radius: var(--r-sm);   /* Altname aus der ersten Fassung, damit bestehende Regeln weiter gelten */
 
-  /* Das Glas-Rezept als Marken, damit jede Flaeche dieselbe Scheibe ist:
-     eine Fuellung fuer helle Flaechen ueber Dunklem, eine satte dunkle
-     fuer Flaechen ueber Hellem (Karte!), dazu Kante und Lichtkante. */
-  --glas-hell:   rgba(255, 255, 255, 0.09);
-  --glas-heller: rgba(255, 255, 255, 0.15);   /* gedrueckt / hervorgehoben */
-  --glas-dunkel: rgba(0, 0, 0, 0.74);         /* ueber heller Karte */
-  --glas-rand:   rgba(255, 255, 255, 0.17);
-  --glas-licht:  rgba(255, 255, 255, 0.28);   /* obere Lichtkante (inset) */
+  /* Das Glas-Rezept als Marken, damit jede Flaeche dieselbe Scheibe ist.
+     Fuenf Stufen weisser Schleier, von kaum sichtbar bis zur Lichtkante.
+     Die Namen sagen die STAERKE, nicht den Einsatzort - dieselbe Stufe
+     taugt als Fuellung, als Kante und als Lichtkante, je nachdem wie viel
+     Licht die Stelle vertraegt.
+
+     Warum ueberhaupt Stufen: In style.css standen einmal 99 verschiedene
+     Weisswerte zwischen 0.02 und 1.0. Kein Mensch sieht den Unterschied
+     zwischen 0.12 und 0.14, aber jeder sieht, wenn eine Flaeche aus der
+     Reihe faellt. Weniger Stufen heisst mehr Einheit. */
+  --glas-hauch:  rgba(255, 255, 255, 0.05);   /* Schachbrett, vertiefte Flaechen */
+  --glas-hell:   rgba(255, 255, 255, 0.10);   /* die uebliche Fuellung */
+  --glas-rand:   rgba(255, 255, 255, 0.14);   /* die uebliche Kante */
+  --glas-heller: rgba(255, 255, 255, 0.20);   /* gedrueckt / hervorgehoben */
+  --glas-licht:  rgba(255, 255, 255, 0.32);   /* obere Lichtkante (inset) */
+
+  /* Dasselbe in Schwarz: Schatten unter Glasflaechen, Schleier ueber Fotos.
+     Sechs Stufen statt fuenf, weil Schwarz einen weiteren Bereich abdecken
+     muss - vom kaum merklichen Schatten bis zur fast deckenden Abdeckung
+     ueber einem hellen Foto. */
+  --schatten-hauch:  rgba(0, 0, 0, 0.22);   /* Kontaktschatten, dicht am Rand */
+  --schatten-weich:  rgba(0, 0, 0, 0.35);   /* der uebliche Schlagschatten */
+  --schatten-mittel: rgba(0, 0, 0, 0.50);   /* abgehobene Flaechen */
+  --schatten-stark:  rgba(0, 0, 0, 0.62);   /* Overlays, Textschatten */
+  --schatten-tief:   rgba(0, 0, 0, 0.78);   /* Schleier ueber einem Foto */
+  --schatten-voll:   rgba(0, 0, 0, 0.92);   /* fast deckend */
+
+  /* Altname, damit bestehende Regeln weiter gelten: dunkles Glas ueber
+     einer hellen Flaeche (Karte!) ist genau die zweittiefste Stufe. */
+  --glas-dunkel: var(--schatten-tief);
+
+  /* Der Gefahr-Knopf ist wie der normale Knopf aufgebaut - heller Glanz
+     oben, Grundfarbe in der Mitte, dunkle Kante unten - nur in Rot.
+     Dieselben drei Rollen wie bei --accent, deshalb dieselben Namen. */
+  --danger-glanz: #FF7B74;
+  --danger-tief:  #D93A32;
+  --danger-ink:   #1A0605;   /* Schrift AUF dem roten Knopf */
+
+  /* Das Schild an einem Pass: helles Blech, dunkle Schrift. Umgekehrt zum
+     Rest der App, deshalb braucht es eigene Marken statt --text/--bg. */
+  --pass-schild:     #D8D2C4;
+  --pass-schild-ink: #2A2620;
+
+  /* Der Farbton, in dem die Werkstattlampen abdunkeln. Kein reines
+     Schwarz: Das Raumfoto ist blaugrau, und ein schwarzer Fleck darauf
+     saehe aus wie ein Loch statt wie ausgehendes Licht. */
+  --raum-dunkel: #1A1E26;
 
   /* Abstandsskala. Immer eine dieser Stufen benutzen, nie krumme Werte -
      das ist der Unterschied zwischen "gestaltet" und "zusammengeschoben". */

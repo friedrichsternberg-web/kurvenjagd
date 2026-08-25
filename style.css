@@ -34,11 +34,11 @@
      nicht per CSS - so muss der Browser zur Laufzeit nichts rechnen. */
   background:
     linear-gradient(to bottom,
-      rgba(0, 0, 0,0.30) 0%,
-      rgba(0, 0, 0,0.38) 30%,
-      rgba(0, 0, 0,0.52) 55%,
-      rgba(0, 0, 0,0.72) 78%,
-      rgba(0, 0, 0,0.86) 100%),
+      var(--schatten-weich) 0%,
+      var(--schatten-weich) 30%,
+      var(--schatten-mittel) 55%,
+      var(--schatten-tief) 78%,
+      var(--schatten-voll) 100%),
     url('img/hintergrund-weich.jpg') center / cover no-repeat fixed;
 }
 
@@ -48,14 +48,14 @@
   /* Die Formulare liegen jetzt auf einer Glasplatte statt frei im Raum. */
   padding: var(--s5);
   border-radius: var(--r-lg);
-  background: rgba(255, 255, 255, 0.055);
+  background: var(--glas-hauch);
   backdrop-filter: blur(22px) saturate(160%);
   -webkit-backdrop-filter: blur(22px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.13);
+  border: 1px solid var(--glas-rand);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.26),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.30),
-    0 16px 40px rgba(0, 0, 0, 0.5);
+    inset 0 1px 0 var(--glas-heller),
+    inset 0 -1px 0 var(--schatten-weich),
+    0 16px 40px var(--schatten-mittel);
 }
 /* Auf Listenbildschirmen waere so eine Platte im Weg - dort ist die Liste
    selbst aus Glas, siehe .saved-list li. */
@@ -101,17 +101,17 @@
      Karte. Genau davon lebt der Effekt - deshalb hier eine sehr dunkle
      Fuellung statt einer hellen, sonst waere die Leiste ueber heller
      Karte nicht mehr zu lesen. */
-  background: rgba(0, 0, 0, 0.72);
+  background: var(--schatten-tief);
   backdrop-filter: blur(28px) saturate(170%);
   -webkit-backdrop-filter: blur(28px) saturate(170%);
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: 1px solid var(--glas-hell);
   /* Abgerundete Oberkante wie im Inspirationsbild: Die Leiste liest sich
      dadurch als aufgelegte Glasscheibe, nicht als abgeschnittener Rand.
      Der Schatten nach oben loest sie zusaetzlich vom Inhalt. */
   border-radius: var(--r-lg) var(--r-lg) 0 0;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    0 -8px 24px rgba(0, 0, 0, 0.35);
+    inset 0 1px 0 var(--glas-heller),
+    0 -8px 24px var(--schatten-weich);
 }
 
 .nav-tab {
@@ -158,14 +158,14 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
    -webkit-backdrop-filter muss mit dabeistehen, sonst bleibt der Effekt
    auf iPhones aus - und das ist die Hauptzielgruppe. */
 .glas {
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--glas-hauch);
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid var(--glas-rand);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.30),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.30),
-    0 10px 30px rgba(0, 0, 0, 0.45);
+    inset 0 1px 0 var(--glas-licht),
+    inset 0 -1px 0 var(--schatten-weich),
+    0 10px 30px var(--schatten-mittel);
 }
 
 /* Runder Glasknopf, z.B. fuer das Konto oben rechts. */
@@ -180,30 +180,30 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   border-radius: 50%;
   cursor: pointer;
   color: var(--text);
-  background: rgba(255, 255, 255, 0.10);
+  background: var(--glas-hell);
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid var(--glas-heller);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.35),
-    0 6px 18px rgba(0, 0, 0, 0.4);
+    inset 0 1px 0 var(--glas-licht),
+    0 6px 18px var(--schatten-weich);
   transition: transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.16s ease;
 }
-.glas-rund:hover { background: rgba(255, 255, 255, 0.16); }
+.glas-rund:hover { background: var(--glas-rand); }
 .glas-rund:active { transform: scale(0.94); }
 
 /* Die blasse Fassung fuer den zweiten Knopf einer Gruppe. Gleich gross,
    nur zurueckhaltender - so bleibt die Trefferflaeche voll erhalten und die
    Rangfolge ist trotzdem auf den ersten Blick da. */
 .glas-rund.blass {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.72);
+  background: var(--glas-hauch);
+  border-color: var(--glas-hell);
+  color: color-mix(in srgb, white 72%, transparent);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    0 4px 12px rgba(0, 0, 0, 0.3);
+    inset 0 1px 0 var(--glas-heller),
+    0 4px 12px var(--schatten-weich);
 }
-.glas-rund.blass:hover { background: rgba(255, 255, 255, 0.12); color: var(--text); }
+.glas-rund.blass:hover { background: var(--glas-hell); color: var(--text); }
 
 /* Wenn das Neuladen laeuft, dreht sich der Pfeil - sonst tippt man und ist
    sich einen Wimpernschlag lang nicht sicher, ob etwas passiert ist. */
@@ -251,15 +251,15 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   min-height: 116px;
   padding: var(--s3);
   border-radius: var(--r-lg);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid var(--glas-rand);
   background: var(--surface-2);
   color: var(--text);
   text-align: left;
   cursor: pointer;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.28),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.35),
-    0 12px 32px rgba(0, 0, 0, 0.5);
+    inset 0 1px 0 var(--glas-licht),
+    inset 0 -1px 0 var(--schatten-weich),
+    0 12px 32px var(--schatten-mittel);
   transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1),
               box-shadow 0.18s ease;
 }
@@ -287,19 +287,19 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
        dichter als vorher - in der Vorlage steht der Text auf einer klar
        abgedunkelten Flaeche, nicht auf dem blanken Foto. */
     linear-gradient(to top,
-      rgba(0, 0, 0,0.97) 0%,
-      rgba(0, 0, 0,0.92) 22%,
-      rgba(0, 0, 0,0.72) 45%,
-      rgba(0, 0, 0,0.38) 68%,
-      rgba(0, 0, 0,0.10) 100%),
+      color-mix(in srgb, black 97%, transparent) 0%,
+      color-mix(in srgb, black 92%, transparent) 22%,
+      color-mix(in srgb, black 72%, transparent) 45%,
+      color-mix(in srgb, black 38%, transparent) 68%,
+      color-mix(in srgb, black 10%, transparent) 100%),
     /* Der Glanzstreifen quer darueber bleibt, er macht das Glas aus. */
-    linear-gradient(115deg, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.05) 26%, rgba(255,255,255,0) 52%);
+    linear-gradient(115deg, var(--glas-heller) 0%, var(--glas-hauch) 26%, transparent 52%);
 }
 
 /* Beim Antippen gibt die Kachel nach und das Bild darunter zieht leicht
    heran. Diese Verzoegerung ist das, was den Eindruck von Tiefe erzeugt:
    Glas und Bild bewegen sich nicht gleich schnell. */
-.kachel:hover { transform: translateY(-2px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.34), inset 0 -1px 0 rgba(0,0,0,0.35), 0 18px 40px rgba(0,0,0,0.55); }
+.kachel:hover { transform: translateY(-2px); box-shadow: inset 0 1px 0 var(--glas-licht), inset 0 -1px 0 var(--schatten-weich), 0 18px 40px var(--schatten-mittel); }
 .kachel:hover::before { transform: scale(1.06); }
 .kachel:active { transform: scale(0.985); }
 
@@ -312,7 +312,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 }
 .kachel-symbol {
   color: var(--accent-hell);
-  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.9));
+  filter: drop-shadow(0 2px 8px var(--schatten-voll));
 }
 .kachel-text { display: flex; flex-direction: column; gap: 3px; }
 .kachel-titel {
@@ -326,16 +326,16 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   text-transform: uppercase;
   letter-spacing: 0;
   line-height: 1.08;
-  text-shadow: 0 1px 8px rgba(0,0,0,0.9), 0 1px 2px rgba(0,0,0,0.8);
+  text-shadow: 0 1px 8px var(--schatten-voll), 0 1px 2px var(--schatten-tief);
   /* break-word statt anywhere: bricht nur, wenn ein einzelnes Wort wirklich
      nicht passt. "anywhere" hatte mitten im Wort getrennt (ROUTENPL/ANER). */
   overflow-wrap: break-word;
 }
 .kachel-sub {
   font-size: 13px;
-  color: rgba(255,255,255,0.85);
+  color: color-mix(in srgb, white 85%, transparent);
   line-height: 1.35;
-  text-shadow: 0 1px 6px rgba(0,0,0,0.9);
+  text-shadow: 0 1px 6px var(--schatten-voll);
   padding-right: 30px;   /* nur die Unterzeile laeuft in den Pfeil hinein */
 }
 
@@ -413,10 +413,10 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   cursor: pointer;
   color: var(--muted);
   background: var(--surface-2);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid var(--glas-rand);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    0 8px 22px rgba(0, 0, 0, 0.5);
+    inset 0 1px 0 var(--glas-heller),
+    0 8px 22px var(--schatten-mittel);
   transition: transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .profil-bild:active { transform: scale(0.96); }
@@ -453,8 +453,8 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   color: var(--text);
   font: inherit;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.14),
-    inset 0 2px 5px rgba(0, 0, 0, 0.18);
+    inset 0 1px 0 var(--glas-rand),
+    inset 0 2px 5px var(--schatten-hauch);
 }
 #profilNameFeld input:focus { outline: none; border-color: var(--accent-hell); }
 #profilNameFeld .btn { margin-top: var(--s2); }
@@ -538,8 +538,8 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   font: inherit;
   margin-bottom: 6px;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.14),
-    inset 0 2px 5px rgba(0, 0, 0, 0.18);
+    inset 0 1px 0 var(--glas-rand),
+    inset 0 2px 5px var(--schatten-hauch);
 }
 .konto-formular input:focus { outline: none; border-color: var(--accent-hell); }
 .konto-formular .btn { margin-top: 6px; padding: 13px; font-size: 16px; }
@@ -577,14 +577,14 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
    dunkel, gleiche Lichtkante. Der Knopf soll sich anfühlen wie die
    anderen und sich nur in der Farbe unterscheiden. */
 .btn.gefahr {
-  background: linear-gradient(to bottom, #FF7B74, var(--danger) 55%, #D93A32);
-  color: #1A0605;
+  background: linear-gradient(to bottom, var(--danger-glanz), var(--danger) 55%, var(--danger-tief));
+  color: var(--danger-ink);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.40),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.25),
-    0 4px 14px rgba(255, 90, 82, 0.28);
+    inset 0 1px 0 var(--glas-licht),
+    inset 0 -1px 0 var(--schatten-hauch),
+    0 4px 14px color-mix(in srgb, var(--danger) 28%, transparent);
 }
-.btn.gefahr:hover { background: #D93A32; color: #FFF; }
+.btn.gefahr:hover { background: var(--danger-tief); color: var(--accent-ink); }
 
 .loeschen-ueberschrift {
   margin: 18px 0 6px;
@@ -612,12 +612,12 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   margin: 0 0 14px;
   padding: 10px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glas-hell);
+  background: var(--glas-hauch);
   color: var(--muted);
   font-size: 13px;
   line-height: 1.45;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.16);
+  box-shadow: inset 0 1px 0 var(--glas-rand);
 }
 
 /* ---------- Routenplaner: zwei Spalten, Bedienfeld links, Karte rechts ---------- */
@@ -674,8 +674,8 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
      ihn als Griff erkennt - er ist die einzige Stelle, an der man die
      Karte groesser ziehen kann, und wer ihn uebersieht, findet die
      Funktion nie. */
-  background: rgba(255, 255, 255, 0.55);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  background: color-mix(in srgb, white 55%, transparent);
+  box-shadow: 0 1px 3px var(--schatten-mittel);
 }
 .panel-grip:hover .panel-grip-strich { background: var(--muted); }
 
@@ -687,11 +687,11 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   flex-direction: column;
   /* Glas ueber der Karte. Die Fuellung ist dunkel und nicht hell: darunter
      liegt eine helle Landkarte, ein weisser Schleier waere unlesbar. */
-  background: rgba(0, 0, 0, 0.82);
+  background: var(--schatten-tief);
   backdrop-filter: blur(26px) saturate(150%);
   -webkit-backdrop-filter: blur(26px) saturate(150%);
-  border-right: 1px solid rgba(255, 255, 255, 0.10);
-  box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.10);
+  border-right: 1px solid var(--glas-hell);
+  box-shadow: inset 1px 0 0 var(--glas-hell);
 }
 
 /* Der eigentliche scrollende Inhalt - getrennt vom Griff, siehe oben. */
@@ -751,10 +751,10 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   background: var(--glas-hell);
   backdrop-filter: blur(18px) saturate(150%);
   -webkit-backdrop-filter: blur(18px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  border: 1px solid var(--glas-hell);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.16),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.20);
+    inset 0 1px 0 var(--glas-rand),
+    inset 0 -1px 0 var(--schatten-hauch);
 }
 .accordion summary {
   margin: 0;
@@ -812,8 +812,8 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   font-family: var(--schrift-text);
   font-size: 15px;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.14),
-    inset 0 2px 5px rgba(0, 0, 0, 0.18);
+    inset 0 1px 0 var(--glas-rand),
+    inset 0 2px 5px var(--schatten-hauch);
 }
 .search-input:focus { outline: none; border-color: var(--accent-hell); }
 .richtung-select { margin-top: 8px; cursor: pointer; }
@@ -821,10 +821,10 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   position: absolute;
   top: calc(100% + 4px);
   left: 0; right: 0;
-  background: rgba(0, 0, 0, 0.88);
+  background: var(--schatten-voll);
   backdrop-filter: blur(22px) saturate(160%);
   -webkit-backdrop-filter: blur(22px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid var(--glas-rand);
   border-radius: var(--r-md);
   list-style: none;
   margin: 0;
@@ -832,7 +832,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   max-height: 220px;
   overflow-y: auto;
   z-index: 500;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 12px 30px rgba(0,0,0,0.5);
+  box-shadow: inset 0 1px 0 var(--glas-heller), 0 12px 30px var(--schatten-mittel);
 }
 .search-results li {
   padding: 8px 10px;
@@ -852,7 +852,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   padding-bottom: 10px;
   margin-bottom: 4px;
 }
-.search-results li.standort-option:hover { background: rgba(74, 158, 255, 0.12); }
+.search-results li.standort-option:hover { background: color-mix(in srgb, var(--gps) 12%, transparent); }
 
 /* ---------- Umschalter (Planungsart) ---------- */
 /* Als PILLE, nach dem Vorbild von Friedrichs Inspirationsbild: Die Rinne
@@ -862,12 +862,12 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
    wird keine Deko. */
 .segmented {
   display: flex;
-  background: rgba(0, 0, 0, 0.26);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: var(--schatten-hauch);
+  border: 1px solid var(--glas-hell);
   border-radius: var(--r-pill);
   padding: 4px;
   gap: 4px;
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35);
+  box-shadow: inset 0 2px 6px var(--schatten-weich);
 }
 .seg {
   flex: 1;
@@ -890,7 +890,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   color: var(--accent-hell);
   box-shadow:
     inset 0 1px 0 var(--glas-licht),
-    0 3px 10px rgba(0, 0, 0, 0.35);
+    0 3px 10px var(--schatten-weich);
 }
 
 /* ---------- Kurvigkeits-Regler ---------- */
@@ -915,7 +915,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   background: var(--text);
   border: 3px solid var(--accent-hell);
   cursor: pointer;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  box-shadow: 0 1px 4px var(--schatten-mittel);
 }
 .slider::-moz-range-thumb {
   width: 18px; height: 18px;
@@ -923,7 +923,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   background: var(--text);
   border: 3px solid var(--accent-hell);
   cursor: pointer;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  box-shadow: 0 1px 4px var(--schatten-mittel);
 }
 .slider::-moz-range-track {
   height: 6px;
@@ -957,7 +957,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   justify-content: center;
   gap: var(--s2);
   padding: 12px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid var(--glas-rand);
   border-radius: var(--r-sm);
   /* Die Woelbung: oben heller, unten dunkler, dazu Lichtkante und ein
      weicher Schein in der Knopffarbe. Zusammen liest sich das als
@@ -972,23 +972,23 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   font-weight: 600;
   cursor: pointer;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.38),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 var(--glas-licht),
+    inset 0 -1px 0 var(--schatten-hauch),
     0 6px 18px color-mix(in srgb, var(--accent) 40%, transparent);
   transition: filter 0.12s ease, transform 0.14s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .btn:hover { filter: brightness(1.12); }
 .btn:active { transform: scale(0.97); }
 .btn.ghost {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--glas-hauch);
   backdrop-filter: blur(14px) saturate(150%);
   -webkit-backdrop-filter: blur(14px) saturate(150%);
-  border-color: rgba(255, 255, 255, 0.16);
+  border-color: var(--glas-rand);
   color: var(--text);
   font-weight: 500;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    0 3px 10px rgba(0, 0, 0, 0.3);
+    inset 0 1px 0 var(--glas-heller),
+    0 3px 10px var(--schatten-weich);
 }
 .btn.ghost:hover { border-color: var(--muted); background: var(--surface-2); color: var(--text); }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -1008,7 +1008,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   padding: 1px 8px;
   border-radius: var(--r-pill);
   background: var(--glas-heller);
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  border: 1px solid var(--glas-hell);
   color: var(--text);
   font-size: 11px;
   text-align: center;
@@ -1024,13 +1024,13 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   border-radius: var(--r-sm);
   margin-bottom: 6px;
   font-size: 13px;
-  background: rgba(255, 255, 255, 0.055);
+  background: var(--glas-hauch);
   backdrop-filter: blur(16px) saturate(150%);
   -webkit-backdrop-filter: blur(16px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  border: 1px solid var(--glas-hell);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.22);
+    inset 0 1px 0 var(--glas-heller),
+    inset 0 -1px 0 var(--schatten-hauch);
   transition: background 0.14s ease, transform 0.14s cubic-bezier(0.2,0.8,0.2,1);
 }
 .saved-list li:active { transform: scale(0.985); }
@@ -1059,7 +1059,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 .wp-coord { color: var(--muted); font-variant-numeric: tabular-nums; }
 
 .saved-list li { cursor: pointer; justify-content: space-between; align-items: center; gap: var(--s3); }
-.saved-list li:hover { background: rgba(255, 255, 255, 0.10); }
+.saved-list li:hover { background: var(--glas-hell); }
 .saved-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .saved-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
 .saved-marke { flex: 0 0 auto; display: flex; color: var(--accent-hell); }
@@ -1081,18 +1081,18 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 /* ---------- Statistik ---------- */
 .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .stat {
-  background: linear-gradient(to bottom, rgba(255,255,255,0.065), rgba(255,255,255,0.02));
+  background: linear-gradient(to bottom, var(--glas-hauch), var(--glas-hauch));
   backdrop-filter: blur(16px) saturate(150%);
   -webkit-backdrop-filter: blur(16px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  border: 1px solid var(--glas-hell);
   border-radius: var(--r-sm);
   padding: var(--s2) var(--s3);
   display: flex;
   flex-direction: column;
   gap: 2px;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.16),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.22);
+    inset 0 1px 0 var(--glas-rand),
+    inset 0 -1px 0 var(--schatten-hauch);
 }
 .stat .k {
   font-family: var(--schrift-display);
@@ -1144,9 +1144,9 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   height: 90px;
   margin-top: 6px;
   border-radius: var(--r-md);
-  background: rgba(0, 0, 0, 0.28);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35);
+  background: var(--schatten-hauch);
+  border: 1px solid var(--glas-hell);
+  box-shadow: inset 0 2px 6px var(--schatten-weich);
 }
 .hoehenprofil-fläche { opacity: 0.28; }
 .hoehenprofil-linie { fill: none; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
@@ -1169,11 +1169,11 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   overflow-y: auto;
   padding: var(--s4);
   padding-bottom: max(var(--s4), env(safe-area-inset-bottom));
-  background: rgba(0, 0, 0, 0.86);
+  background: var(--schatten-voll);
   backdrop-filter: blur(26px) saturate(150%);
   -webkit-backdrop-filter: blur(26px) saturate(150%);
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  border-top: 1px solid var(--glas-hell);
+  box-shadow: inset 0 1px 0 var(--glas-rand);
   border-radius: var(--r-lg) var(--r-lg) 0 0;
 }
 /* Nach dem Beenden darf das Feld mehr Platz nehmen - dann ist die
@@ -1233,8 +1233,8 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   display: block;
   cursor: pointer;
   background: var(--surface-2);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 4px 12px rgba(0,0,0,0.4);
+  border: 1px solid var(--glas-rand);
+  box-shadow: inset 0 1px 0 var(--glas-heller), 0 4px 12px var(--schatten-weich);
 }
 /* Kleines Kreuz zum Entfernen - nur dort, wo Fotos noch bearbeitbar sind. */
 .foto-loeschen {
@@ -1243,7 +1243,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   width: 22px; height: 22px;
   border: 0;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.75);
+  background: var(--schatten-tief);
   color: var(--text);
   font-size: 14px;
   line-height: 1;
@@ -1256,7 +1256,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   position: fixed;
   inset: 0;
   z-index: 2000;
-  background: rgba(0, 0, 0, 0.78);
+  background: var(--schatten-tief);
   backdrop-filter: blur(30px) saturate(140%);
   -webkit-backdrop-filter: blur(30px) saturate(140%);
   display: flex;
@@ -1272,7 +1272,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   width: 40px; height: 40px;
   border: 1px solid var(--line);
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.9);
+  background: var(--schatten-voll);
   color: var(--text);
   font-size: 22px;
   line-height: 1;
@@ -1286,7 +1286,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   background: var(--text);
   color: var(--accent-ink);   /* Farbe des Symbols darin */
   border: 2px solid var(--accent-ink);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  box-shadow: 0 2px 6px var(--schatten-mittel);
   display: flex; align-items: center; justify-content: center;
   font-size: 13px;
 }
@@ -1313,7 +1313,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   color: var(--gps);
   font-weight: 600;
 }
-.nav-btn:hover { background: rgba(74, 158, 255, 0.12); border-color: var(--gps); color: var(--gps); }
+.nav-btn:hover { background: color-mix(in srgb, var(--gps) 12%, transparent); border-color: var(--gps); color: var(--gps); }
 
 /* Während die Navigation läuft, fährt das Seitenpanel weg und die Karte
    nutzt den vollen Platz - wie bei einem eigenständigen Navi-Gerät. */
@@ -1338,7 +1338,7 @@ body.nav-modus #panel {
   top: max(12px, env(safe-area-inset-top));
   left: 12px; right: 12px;
   z-index: 900;
-  background: rgba(0, 0, 0, 0.80);
+  background: var(--schatten-tief);
   backdrop-filter: blur(24px) saturate(160%);
   -webkit-backdrop-filter: blur(24px) saturate(160%);
   border: 1px solid var(--glas-rand);
@@ -1346,7 +1346,7 @@ body.nav-modus #panel {
   padding: var(--s4);
   box-shadow:
     inset 0 1px 0 var(--glas-licht),
-    0 12px 34px rgba(0, 0, 0, 0.5);
+    0 12px 34px var(--schatten-mittel);
 }
 
 .nav-manoever {
@@ -1365,7 +1365,7 @@ body.nav-modus #panel {
   background: color-mix(in srgb, var(--gps) 18%, transparent);
   border: 1px solid color-mix(in srgb, var(--gps) 45%, transparent);
   color: var(--gps);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 1px 0 var(--glas-heller);
 }
 .nav-pfeil .ic {
   width: 46px; height: 46px;
@@ -1391,7 +1391,7 @@ body.nav-modus #panel {
 .nav-danach {
   margin-top: var(--s3);
   padding-top: var(--s3);
-  border-top: 1px solid rgba(255, 255, 255, 0.10);
+  border-top: 1px solid var(--glas-hell);
   display: flex;
   align-items: center;
   gap: var(--s2);
@@ -1413,14 +1413,14 @@ body.nav-modus #panel {
   justify-content: space-between;
   gap: var(--s3);
   padding: var(--s2) var(--s4);
-  background: rgba(0, 0, 0, 0.80);
+  background: var(--schatten-tief);
   backdrop-filter: blur(24px) saturate(160%);
   -webkit-backdrop-filter: blur(24px) saturate(160%);
   border: 1px solid var(--glas-rand);
   border-radius: var(--r-lg);
   box-shadow:
     inset 0 1px 0 var(--glas-licht),
-    0 12px 34px rgba(0, 0, 0, 0.5);
+    0 12px 34px var(--schatten-mittel);
 }
 .nav-wert {
   display: flex;
@@ -1599,7 +1599,7 @@ body.nav-modus .leaflet-control-container { display: none; }
 
    Also sichtbar, aber dezent: klein, halbdurchsichtig, in der Ecke. */
 .leaflet-control-attribution {
-  background: rgba(0, 0, 0, 0.55);
+  background: var(--schatten-mittel);
   color: var(--muted);
   font-size: 10px;
   padding: 2px 6px;
@@ -1614,7 +1614,7 @@ body.nav-modus .leaflet-control-container { display: none; }
   background: var(--accent);
   color: var(--accent-ink);
   border: 2px solid var(--accent-ink);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  box-shadow: 0 2px 6px var(--schatten-mittel);
   display: flex; align-items: center; justify-content: center;
   font-weight: 700; font-size: 12px;
   font-family: -apple-system, sans-serif;
@@ -1626,13 +1626,13 @@ body.nav-modus .leaflet-control-container { display: none; }
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-size: 14px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  box-shadow: 0 2px 6px var(--schatten-mittel);
   border: 2px solid var(--accent-ink);
 }
 /* Die Marker enthalten jetzt ein SVG statt eines Emoji. Weil das Symbol
    seine Farbe ueber currentColor holt, muss hier eine dunkle Textfarbe
    stehen - sonst waere die Strichzeichnung weiss auf hellem Grund. */
-.poi-marker.pass { background: #D8D2C4; color: #2A2620; }
+.poi-marker.pass { background: var(--pass-schild); color: var(--pass-schild-ink); }
 
 .poi-popup { font-size: 13px; line-height: 1.5; }
 .poi-popup .poi-popup-titel { font-weight: 700; }
@@ -1644,10 +1644,10 @@ body.nav-modus .leaflet-control-container { display: none; }
   position: fixed;
   top: calc(16px + env(safe-area-inset-top)); left: 50%;
   transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.80);
+  background: var(--schatten-tief);
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid var(--glas-rand);
   border-left: 3px solid var(--accent-hell);
   color: var(--text);
   padding: 10px 16px;
@@ -1655,13 +1655,13 @@ body.nav-modus .leaflet-control-container { display: none; }
   font-size: 14px;
   z-index: 1000;
   max-width: 80%;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 10px 30px rgba(0,0,0,0.5);
+  box-shadow: inset 0 1px 0 var(--glas-heller), 0 10px 30px var(--schatten-mittel);
 }
 
 .busy {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--schatten-stark);
   display: flex; align-items: center; justify-content: center;
   gap: var(--s3);
   z-index: 999;
@@ -1674,7 +1674,7 @@ body.nav-modus .leaflet-control-container { display: none; }
 }
 .spinner {
   width: 22px; height: 22px;
-  border: 3px solid rgba(255,255,255,0.15);
+  border: 3px solid var(--glas-rand);
   border-top-color: var(--accent-hell);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -1701,7 +1701,7 @@ body.nav-modus .leaflet-control-container { display: none; }
     flex: 0 0 auto;
     height: 45dvh;
     border-right: 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 1px solid var(--glas-rand);
     border-radius: var(--r-lg) var(--r-lg) 0 0;
     overflow: hidden;   /* rundet auch den Scroll-Inhalt sauber ab, auch beim elastischen Ueberscrollen */
     /* Die Schublade schiebt sich um eine Eckenrundung UEBER die Karte.
@@ -1712,7 +1712,7 @@ body.nav-modus .leaflet-control-container { display: none; }
     margin-top: calc(-1 * var(--r-lg));
     position: relative;
     z-index: 5;
-    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 -10px 30px var(--schatten-weich);
   }
 
   .panel-grip { display: flex; }
@@ -1780,10 +1780,10 @@ body.nav-modus .leaflet-control-container { display: none; }
   flex-direction: column;
   background:
     linear-gradient(to bottom,
-      rgba(0, 0, 0,0.40) 0%,
-      rgba(0, 0, 0,0.56) 40%,
-      rgba(0, 0, 0,0.76) 70%,
-      rgba(0, 0, 0,0.90) 100%),
+      var(--schatten-weich) 0%,
+      var(--schatten-stark) 40%,
+      var(--schatten-tief) 70%,
+      var(--schatten-voll) 100%),
     /* "scroll" statt "fixed": Ein festgenagelter Hintergrund in einem
        selbst scrollenden Kasten flackert auf iOS und verrutscht. */
     url('img/hintergrund-weich.jpg') center / cover no-repeat scroll;
@@ -1831,11 +1831,11 @@ body.nav-modus .leaflet-control-container { display: none; }
   pointer-events: none;
   background:
     linear-gradient(to bottom,
-      rgba(0, 0, 0, var(--dunst-oben, 0.86)) 0%,
-      rgba(0, 0, 0, calc(var(--dunst-oben, 0.86) * 0.72)) 12%,
-      rgba(0, 0, 0, calc(var(--dunst-oben, 0.86) * 0.34)) 24%,
+      color-mix(in srgb, black calc(var(--dunst-oben, 0.86) * 100%), transparent) 0%,
+      color-mix(in srgb, black calc(var(--dunst-oben, 0.86) *  72%), transparent) 12%,
+      color-mix(in srgb, black calc(var(--dunst-oben, 0.86) *  34%), transparent) 24%,
       transparent 38%),
-    linear-gradient(to top,    rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.30) 9%,  transparent 20%);
+    linear-gradient(to top,    var(--schatten-voll) 0%, var(--schatten-weich) 9%,  transparent 20%);
 }
 
 /* ---------- Das Lampenflackern ----------
@@ -1871,7 +1871,9 @@ body.nav-modus .leaflet-control-container { display: none; }
    Roehre zentriert und sein Schwerpunkt hing sichtbar DARUEBER. */
 .lampe-roehre {
   background: radial-gradient(ellipse 50% 42% at 50% 30%,
-    rgba(26, 30, 38, 0.9), rgba(26, 30, 38, 0.35) 55%, rgba(26, 30, 38, 0) 100%);
+    color-mix(in srgb, var(--raum-dunkel) 90%, transparent),
+    color-mix(in srgb, var(--raum-dunkel) 35%, transparent) 55%,
+    transparent 100%);
   animation-name: lampe-stottern;
 }
 /* Die Haengelampen: runder Schein, dichter Kern, nach aussen weich. Zwei
@@ -1880,7 +1882,9 @@ body.nav-modus .leaflet-control-container { display: none; }
    wirklich unabhaengig statt wie zwei Kopien derselben Stoerung. */
 .lampe-schirm, .lampe-schirm2 {
   background: radial-gradient(closest-side,
-    rgba(26, 30, 38, 0.92), rgba(26, 30, 38, 0.4) 45%, rgba(26, 30, 38, 0) 88%);
+    color-mix(in srgb, var(--raum-dunkel) 92%, transparent),
+    color-mix(in srgb, var(--raum-dunkel) 40%, transparent) 45%,
+    transparent 88%);
 }
 .lampe-schirm  { animation-name: lampe-durchhaengen-a; }
 .lampe-schirm2 { animation-name: lampe-durchhaengen-b; }
@@ -1944,13 +1948,13 @@ body.nav-modus .leaflet-control-container { display: none; }
   line-height: 1;
   letter-spacing: 0.01em;
   text-transform: uppercase;
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.75);
+  text-shadow: 0 2px 14px var(--schatten-tief);
 }
 .garage-sub {
   margin: 4px 0 0;
   color: var(--muted);
   font-size: 12.5px;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 1px 8px var(--schatten-tief);
 }
 
 /* ---------- Die Buehne mit dem Motorrad ----------
@@ -2038,7 +2042,7 @@ body.nav-modus .leaflet-control-container { display: none; }
    lebt, die Linie steht. Drei gleiche drop-shadows uebereinander
    verdichten die Linie zu voller Staerke, ohne sie zu verbreitern; mit
    zweien blieb sie an hellen Bildstellen zu blass. Das Weiss ist das
-   Textweiss der Designsprache, kein reines #fff.
+   Textweiss der Designsprache, kein reines Weiss.
 
    Der vierte Schatten ist der HELLE SCHEIN: ein breites, halbdurchsichtiges
    Aufhellen rund um die Linie, ebenfalls staendig da. Er liegt auf
@@ -2085,17 +2089,17 @@ body.nav-modus .leaflet-control-container { display: none; }
   animation: lauf-drehen 8.4s linear infinite;
   -webkit-mask-image: conic-gradient(from 0deg,
     transparent 0deg 295deg,
-    rgba(0, 0, 0, 0.25) 322deg,
-    rgba(0, 0, 0, 0.7) 344deg,
-    #000 353deg,
-    #000 358deg,
+    color-mix(in srgb, black 25%, transparent) 322deg,
+    color-mix(in srgb, black 70%, transparent) 344deg,
+    black 353deg,
+    black 358deg,
     transparent 360deg);
           mask-image: conic-gradient(from 0deg,
     transparent 0deg 295deg,
-    rgba(0, 0, 0, 0.25) 322deg,
-    rgba(0, 0, 0, 0.7) 344deg,
-    #000 353deg,
-    #000 358deg,
+    color-mix(in srgb, black 25%, transparent) 322deg,
+    color-mix(in srgb, black 70%, transparent) 344deg,
+    black 353deg,
+    black 358deg,
     transparent 360deg);
 }
 .buehne-lauf > img {
@@ -2149,8 +2153,8 @@ body.nav-modus .leaflet-control-container { display: none; }
   transform: scaleY(-1);
   opacity: 0.30;
   filter: blur(2px) brightness(0.75) saturate(0.8);
-  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.25) 22%, transparent 46%);
-          mask-image: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.25) 22%, transparent 46%);
+  -webkit-mask-image: linear-gradient(to bottom, color-mix(in srgb, black 90%, transparent) 0%, color-mix(in srgb, black 25%, transparent) 22%, transparent 46%);
+          mask-image: linear-gradient(to bottom, color-mix(in srgb, black 90%, transparent) 0%, color-mix(in srgb, black 25%, transparent) 22%, transparent 46%);
   clip-path: ellipse(var(--teller-rx, 60%) var(--teller-ry, 26px) at 50% 0);
 }
 
@@ -2198,8 +2202,8 @@ body.nav-modus .leaflet-control-container { display: none; }
   mix-blend-mode: screen;
   /* Der Verlauf beginnt an der BODENLINIE der Maschine, nicht an der
      Bildkante - sonst leuchtet der leere Rand statt der Reifen. */
-  -webkit-mask-image: linear-gradient(to top, transparent var(--glut-kante, 0%), rgba(0,0,0,0.95) var(--glut-kante, 0%), rgba(0,0,0,0.3) calc(var(--glut-kante, 0%) + 14%), transparent calc(var(--glut-kante, 0%) + 30%));
-          mask-image: linear-gradient(to top, transparent var(--glut-kante, 0%), rgba(0,0,0,0.95) var(--glut-kante, 0%), rgba(0,0,0,0.3) calc(var(--glut-kante, 0%) + 14%), transparent calc(var(--glut-kante, 0%) + 30%));
+  -webkit-mask-image: linear-gradient(to top, transparent var(--glut-kante, 0%), color-mix(in srgb, black 95%, transparent) var(--glut-kante, 0%), color-mix(in srgb, black 30%, transparent) calc(var(--glut-kante, 0%) + 14%), transparent calc(var(--glut-kante, 0%) + 30%));
+          mask-image: linear-gradient(to top, transparent var(--glut-kante, 0%), color-mix(in srgb, black 95%, transparent) var(--glut-kante, 0%), color-mix(in srgb, black 30%, transparent) calc(var(--glut-kante, 0%) + 14%), transparent calc(var(--glut-kante, 0%) + 30%));
 }
 
 /* ---------- Der Hinweis "Dein Bike einfuegen" ----------
@@ -2250,13 +2254,13 @@ body.nav-modus .leaflet-control-container { display: none; }
      DUNKEL getoent, nicht hell: Dahinter liegt eine helle Werkstatt mit
      einer Werkzeugwand voller Kleinteile. Auf hellem Glas haette weisse
      Schrift dort keine Chance. */
-  background: linear-gradient(rgba(0, 0, 0, 0.46), rgba(0, 0, 0, 0.30));
+  background: linear-gradient(var(--schatten-mittel), var(--schatten-weich));
   -webkit-backdrop-filter: blur(16px) saturate(1.05);
           backdrop-filter: blur(16px) saturate(1.05);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.28),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.22),
-    0 12px 34px rgba(0, 0, 0, 0.38);
+    inset 0 1px 0 var(--glas-licht),
+    inset 0 -1px 0 var(--schatten-hauch),
+    0 12px 34px var(--schatten-weich);
   /* Fuer das Nachgeben beim Antippen weiter unten
      (.buehne-hinweis:active .hinweis-tafel). */
   transition: transform 0.12s ease-out;
@@ -2272,7 +2276,7 @@ body.nav-modus .leaflet-control-container { display: none; }
   width: calc(100% - 14px);
   height: calc(100% - 14px);
   fill: none;
-  stroke: rgba(255, 255, 255, 0.85);
+  stroke: color-mix(in srgb, white 85%, transparent);
   stroke-width: 2.2;
   stroke-linecap: round;
   vector-effect: non-scaling-stroke;
@@ -2281,7 +2285,7 @@ body.nav-modus .leaflet-control-container { display: none; }
 .hinweis-kamera {
   width: 34px; height: 34px;
   stroke-width: 1.3;
-  color: rgba(255, 255, 255, 0.92);
+  color: color-mix(in srgb, white 92%, transparent);
 }
 
 .hinweis-text {
@@ -2290,8 +2294,8 @@ body.nav-modus .leaflet-control-container { display: none; }
   font-size: 16px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.95);
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.55);
+  color: color-mix(in srgb, white 95%, transparent);
+  text-shadow: 0 1px 10px var(--schatten-mittel);
 }
 
 /* Der Zeiger nach unten.
@@ -2326,8 +2330,8 @@ body.nav-modus .leaflet-control-container { display: none; }
   border-radius: 50%;
   background: var(--accent-hell);
   box-shadow:
-    0 6px 16px rgba(0, 0, 0, 0.45),
-    0 0 0 4px rgba(0, 0, 0, 0.42);
+    0 6px 16px var(--schatten-mittel),
+    0 0 0 4px var(--schatten-weich);
   animation: marke-nicken 1.9s ease-in-out infinite;
 }
 .hinweis-marke svg {
@@ -2394,14 +2398,14 @@ body.nav-modus .leaflet-control-container { display: none; }
 .garage-platte {
   padding: var(--s4);
   border-radius: var(--r-lg);
-  background: rgba(255, 255, 255, 0.055);
+  background: var(--glas-hauch);
   backdrop-filter: blur(22px) saturate(160%);
   -webkit-backdrop-filter: blur(22px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--glas-hell);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.25),
-    0 12px 34px rgba(0, 0, 0, 0.45);
+    inset 0 1px 0 var(--glas-heller),
+    inset 0 -1px 0 var(--schatten-hauch),
+    0 12px 34px var(--schatten-mittel);
 }
 
 .garage-leer { display: flex; flex-direction: column; gap: var(--s3); }
@@ -2449,7 +2453,7 @@ body.nav-modus .leaflet-control-container { display: none; }
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.62);
+  background: var(--schatten-stark);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
 }
@@ -2475,7 +2479,7 @@ body.nav-modus .leaflet-control-container { display: none; }
   justify-content: space-between;
   gap: var(--s3);
   padding: var(--s4) var(--s4) var(--s3);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+  border-bottom: 1px solid var(--glas-hell);
 }
 .garage-dialog-kopf h3 {
   margin: 0;
@@ -2516,8 +2520,8 @@ body.nav-modus .leaflet-control-container { display: none; }
   font-family: inherit;
   font-size: 15px;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.14),
-    inset 0 2px 5px rgba(0, 0, 0, 0.18);
+    inset 0 1px 0 var(--glas-rand),
+    inset 0 2px 5px var(--schatten-hauch);
 }
 .garage-dialog-inhalt textarea { resize: vertical; line-height: 1.45; }
 .garage-dialog-inhalt input:focus,
@@ -2550,7 +2554,7 @@ body.nav-modus .leaflet-control-container { display: none; }
   align-items: center;
   justify-content: center;
   padding: var(--s4);
-  background: rgba(0, 0, 0, 0.68);
+  background: var(--schatten-stark);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
@@ -2612,8 +2616,8 @@ body.nav-modus .leaflet-control-container { display: none; }
   margin-top: var(--s4);
   padding: var(--s3);
   border-radius: var(--r-md);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--glas-hell);
+  background: var(--glas-hauch);
 }
 .foto-feld-kopf {
   display: flex;
@@ -2628,13 +2632,13 @@ body.nav-modus .leaflet-control-container { display: none; }
 .foto-bild {
   border-radius: var(--r-md);
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--glas-hell);
   /* Schachbrett, damit man sieht, wo das Bild durchsichtig ist. Ohne das
      koennte man nach dem Freistellen nicht beurteilen, ob es geklappt hat. */
-  background-color: #1C1C1C;
+  background-color: var(--surface);
   background-image:
-    linear-gradient(45deg, rgba(255,255,255,0.05) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.05) 75%),
-    linear-gradient(45deg, rgba(255,255,255,0.05) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.05) 75%);
+    linear-gradient(45deg, var(--glas-hauch) 25%, transparent 25%, transparent 75%, var(--glas-hauch) 75%),
+    linear-gradient(45deg, var(--glas-hauch) 25%, transparent 25%, transparent 75%, var(--glas-hauch) 75%);
   background-size: 16px 16px;
   background-position: 0 0, 8px 8px;
 }
@@ -2646,7 +2650,7 @@ body.nav-modus .leaflet-control-container { display: none; }
   display: flex;
   gap: var(--s2);
   padding: var(--s3) var(--s4) var(--s4);
-  border-top: 1px solid rgba(255, 255, 255, 0.10);
+  border-top: 1px solid var(--glas-hell);
 }
 .garage-dialog-fuss .btn.ghost { flex: 0 0 auto; color: var(--danger); }
 
@@ -2662,8 +2666,8 @@ body.nav-modus .leaflet-control-container { display: none; }
   padding: var(--s3);
   margin-bottom: var(--s3);
   border-radius: var(--r-md);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--glas-hell);
+  background: var(--glas-hauch);
 }
 .finder .label { margin: 0; }
 .finder .hint { margin: 0; }
@@ -2677,8 +2681,8 @@ body.nav-modus .leaflet-control-container { display: none; }
   flex: 0 0 auto;
   padding: 6px 10px;
   border-radius: var(--r-sm);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--glas-rand);
+  background: var(--glas-hauch);
   color: var(--muted);
   font-family: var(--schrift-text);
   font-size: 12.5px;
@@ -2686,7 +2690,7 @@ body.nav-modus .leaflet-control-container { display: none; }
   transition: color 0.14s ease, border-color 0.14s ease, background 0.14s ease;
 }
 .marken-chip:hover,
-.modell-chip:hover { color: var(--text); border-color: rgba(255, 255, 255, 0.3); }
+.modell-chip:hover { color: var(--text); border-color: var(--glas-licht); }
 .marken-chip.active,
 .modell-chip.active {
   color: var(--accent-ink);
@@ -2734,7 +2738,7 @@ body.nav-modus .leaflet-control-container { display: none; }
   z-index: 1400;          /* ueber dem Garagen-Dialog (1200) */
   display: flex;
   flex-direction: column;
-  background: #000000;
+  background: var(--bg);
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
 }
@@ -2746,7 +2750,7 @@ body.nav-modus .leaflet-control-container { display: none; }
   justify-content: space-between;
   gap: var(--s3);
   padding: var(--s3) var(--s4);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+  border-bottom: 1px solid var(--glas-hell);
 }
 .frei-kopf h3 {
   margin: 0;
@@ -2797,7 +2801,7 @@ body.nav-modus .leaflet-control-container { display: none; }
 .frei-balken {
   height: 4px;
   border-radius: 2px;
-  background: rgba(255, 255, 255, 0.10);
+  background: var(--glas-hell);
   overflow: hidden;
 }
 .frei-balken-füllung {
@@ -2854,13 +2858,13 @@ body.nav-modus .leaflet-control-container { display: none; }
      der Pinsel bekommt die Bewegung nie zu sehen. */
   touch-action: none;
   -webkit-user-select: none; user-select: none;
-  background-color: #181818;
+  background-color: var(--surface);
   background-image:
-    linear-gradient(45deg, rgba(255,255,255,0.055) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.055) 75%),
-    linear-gradient(45deg, rgba(255,255,255,0.055) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.055) 75%);
+    linear-gradient(45deg, var(--glas-hauch) 25%, transparent 25%, transparent 75%, var(--glas-hauch) 75%),
+    linear-gradient(45deg, var(--glas-hauch) 25%, transparent 25%, transparent 75%, var(--glas-hauch) 75%);
   background-size: 18px 18px;
   background-position: 0 0, 9px 9px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 10px 40px var(--schatten-stark);
 }
 
 .frei-regler { flex: 0 0 auto; padding: 0 var(--s4); }
@@ -2883,7 +2887,7 @@ body.nav-modus .leaflet-control-container { display: none; }
 .frei-zeile .slider {
   flex: 1;
   margin: 0;
-  background: rgba(255, 255, 255, 0.14);
+  background: var(--glas-rand);
 }
 .frei-zeile output {
   flex: 0 0 auto;
@@ -2910,8 +2914,8 @@ body.nav-modus .leaflet-control-container { display: none; }
   gap: 4px;
   padding: 9px 2px;
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glas-hell);
+  background: var(--glas-hauch);
   color: var(--muted);
   cursor: pointer;
   font-family: var(--schrift-display);
@@ -2927,7 +2931,7 @@ body.nav-modus .leaflet-control-container { display: none; }
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.frei-werkzeug:hover:not(:disabled) { color: var(--text); background: rgba(255, 255, 255, 0.09); }
+.frei-werkzeug:hover:not(:disabled) { color: var(--text); background: var(--glas-hell); }
 .frei-werkzeug.active {
   color: var(--accent-ink);
   background: var(--accent);
@@ -3197,7 +3201,7 @@ body.nav-modus .nav-banner,
 body.nav-modus .nav-fuss {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  background: rgba(0, 0, 0, 0.94);
+  background: var(--schatten-voll);
 }
 
 /* ---------- Bedienung waehrend der Fahrt ----------
@@ -3220,7 +3224,7 @@ body.nav-modus .nav-fuss {
   place-items: center;
   border-radius: var(--r-pill);
   border: 1px solid var(--glas-rand);
-  background: rgba(0, 0, 0, 0.94);
+  background: var(--schatten-voll);
   color: var(--text);
   font-family: var(--schrift-display);
   font-size: 26px;
@@ -3257,7 +3261,7 @@ body.nav-modus .nav-fuss {
   z-index: 900;
   padding: 2px 6px;
   border-radius: var(--r-sm);
-  background: rgba(0, 0, 0, 0.55);
+  background: var(--schatten-mittel);
   color: var(--muted);
   font-size: 10px;
 }
