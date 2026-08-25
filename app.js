@@ -359,46 +359,6 @@ async function calculateRoute() {
   showStats(best);
 }
 
-// Wählt aus mehreren Routenvarianten die beste aus - abhängig vom
-// Kurvigkeits-Regler. Bei t=1 (Regler ganz rechts) gewinnt IMMER die
-// kurvigste Variante, egal wie viel länger sie ist - genau das macht
-// die Einstellung "extrem": Umwege werden dann komplett in Kauf genommen.
-// Bei kleinerem t kostet jeder Kilometer Umweg (gegenüber der kürzesten
-// Variante) Punkte vom Kurven-Score, sodass moderatere Routen gewinnen.
-//
-// Sackgassen (siehe sackgassenMeter weiter unten) werden dagegen IMMER
-// hart bestraft, unabhängig vom Regler - sonst wäre die "kurvigste"
-// Variante in den Alpen fast immer eine Sackgassen-Passstraße (die haben
-// besonders viele Haarnadelkurven), egal welche Wegpunkte man wählt. Eine
-// Route, die nur durch stures Hin-und-Zurückfahren kurvig wirkt, soll nie
-// gewinnen: ein Kilometer Sackgasse kostet mehr Punkte, als eine sehr
-// kurvige Strecke überhaupt erreichen kann.
-function pickBestRoute(routes, t) {
-  if (routes.length === 1) return routes[0];
-
-  // Nur der Bereich oberhalb von 15% steuert hier die Auswahl (darunter
-  // greift schon das 'car-fast'-Profil in calculateRoute) - auf 0..1 neu
-  // skalieren, damit 1 wieder "maximal kurvig" bedeutet.
-  const intensität = Math.min(1, Math.max(0, (t - 0.15) / 0.85));
-
-  const minDistance = Math.min(...routes.map(r => r.distance));
-  const UMWEG_KOSTEN_PRO_KM = 6;      // Punkte Kurven-Score, die ein Kilometer Umweg kostet
-  const SACKGASSEN_KOSTEN_PRO_KM = 400; // Punkte Kurven-Score je Kilometer Sackgasse
-  const strafeProKm = (1 - intensität) * UMWEG_KOSTEN_PRO_KM;
-
-  // Bewertung einmal je Route berechnen und merken - sackgassenMeter()
-  // muss die ganze Route durchgehen, das soll nicht bei jedem Vergleich
-  // erneut passieren.
-  const bewertet = routes.map(r => ({
-    route: r,
-    punkte: r.curviness
-      - strafeProKm * ((r.distance - minDistance) / 1000)
-      - (sackgassenMeter(r.coords) / 1000) * SACKGASSEN_KOSTEN_PRO_KM,
-  }));
-
-  return bewertet.reduce((beste, k) => (k.punkte > beste.punkte ? k : beste)).route;
-}
-
 
 /* --- 5. Ortssuche ----------------------------------------------------------
    Nominatim ist der kostenlose Geocoding-Dienst von OpenStreetMap: man
@@ -658,10 +618,11 @@ function hideSearchResults() {
    die Länge mit der Wunschdistanz vergleichen. Passt es nicht gut genug,
    wird der Radius nachjustiert und nochmal versucht.
 
-   Die Suchschleife steht hier, weil sie Eingabefelder liest und das Ergebnis
-   auf die Karte zeichnet. Alles, was sie an reiner Rechnerei braucht, steht
-   in kern.js: randomLoopPoints(), ersatzpunkt(), besterDurchgangspunkt(),
-   sortByBearing(), sackgassenMeter() und curviness().                      */
+   Diese Suche steht als sucheRundtour() in kern.js, weil sie reine
+   Rechnerei ist. Hier bleibt nur, was mit DIESER App zu tun hat: die
+   Eingabefelder lesen, den Draht nach draußen halten (woher Routen kommen,
+   wohin Zwischenstände gehen), aus den nackten Zahlen des Ergebnisses
+   Sätze machen und die Route zeichnen.                                    */
 
 async function generateRoundTrip() {
   if (state.waypoints.length === 0) {
@@ -669,343 +630,56 @@ async function generateRoundTrip() {
     return;
   }
 
-  const start = state.waypoints[0];
-  const fixeZwischenstopps = state.waypoints.slice(1);
   const zielKm = Number(document.getElementById('roundtripKm').value);
-  const richtung = document.getElementById('roundtripRichtung').value || null; // '' -> alle Richtungen
-
   if (!zielKm || zielKm < 10) {
     showToast('Bitte eine Distanz von mindestens 10 km eingeben.');
     return;
   }
 
+  const start = state.waypoints[0];
+  const t = state.curveLevel / 100;
+
+  const profil = {
+    routing: t < 0.15 ? 'car-fast' : 'car-eco',
+    kurvigkeit: t,
+    zwischenstopps: state.waypoints.slice(1),
+    richtung: document.getElementById('roundtripRichtung').value || null, // '' -> alle Richtungen
+  };
+
   setBusy(true);
   hideToast();
 
-  const t = state.curveLevel / 100;
-  const profile = t < 0.15 ? 'car-fast' : 'car-eco';
-
-  // Feste Zwischenstopps "verbrauchen" selbst schon einen Teil der
-  // Zieldistanz (Hin- und wieder Zurückfahren). Statt das nur grob zu
-  // schätzen, fragen wir die echte Strecke dorthin bei BRouter ab - das
-  // liefert gleich zwei Dinge: die genaue Distanz fürs Budget, UND wie
-  // viel Sackgasse dieser Teil schon unvermeidbar mitbringt. Diese Meter
-  // kann die App nicht wegplanen (der Nutzer hat den Punkt bewusst
-  // gesetzt), also darf sie sie auch nicht den Zufallspunkten anlasten.
-  let fixkostenKm = 0;
-  let erlaubteSackgassenMeter = 0;
-  if (fixeZwischenstopps.length > 0) {
-    try {
-      const basisRoute = await fetchRoute([start, ...fixeZwischenstopps, start], profile, 0);
-      fixkostenKm = basisRoute.distance / 1000;
-      erlaubteSackgassenMeter = sackgassenMeter(basisRoute.coords);
-      if (erlaubteSackgassenMeter > 1000) {
-        showToast(`Hinweis: Zu deinem Zwischenstopp führt ca. ${(erlaubteSackgassenMeter / 1000).toFixed(1)} km lang nur eine einzige Straße - die muss hin und zurück gefahren werden.`);
-      }
-    } catch {
-      fixkostenKm = geschätzteFixkostenKm(start, fixeZwischenstopps); // Rückfall auf grobe Schätzung
-    }
-  }
-
-  const budgetFürZufallspunkteKm = Math.max(zielKm * 0.25, zielKm - fixkostenKm);
-
-  // Anders als man denken würde, HILFT eine höhere Punktzahl hier eher als
-  // sie zu schaden - mit mehr Punkten findet BRouter eher Verbindungswege
-  // zwischen den Himmelsrichtungen, die nicht jedes Mal zum Zentrum
-  // zurückführen.
-  const anzahlPunkte = Math.min(4, Math.max(2, Math.round(zielKm / 60)));
-
-  // Erste Schätzung für den Radius. Wichtig: die Route fährt KEINEN Kreis,
-  // sondern ein Vieleck von Zufallspunkt zu Zufallspunkt. Ein Vieleck mit
-  // n Ecken auf einem Kreis mit Radius r ist 2*n*sin(180/n)*r lang - bei
-  // 4 Punkten also nur ca. 5.7*r statt 6.3*r (Kreisumfang). Vorher wurde
-  // mit dem Kreisumfang gerechnet, dadurch fielen die Rundtouren
-  // systematisch zu kurz aus und mussten mühsam nachjustiert werden.
-  const eckenUmfang = 2 * anzahlPunkte * Math.sin(Math.PI / anzahlPunkte);
-
-  // Dazu ein Aufschlag, weil Straßen nie schnurgerade zwischen zwei Punkten
-  // verlaufen - und ein größerer, je kurviger die Route werden soll. Die
-  // Werte sind gemessen, nicht geraten: mit einem größeren Startradius
-  // landen mehr Zufallspunkte in Sackgassentälern, die Reparatur zieht die
-  // Runde dann wieder zusammen, und unterm Strich wird sie KÜRZER.
-  const straßenAufschlag = 1.25 + t * 0.35;
-
-  let radius = (budgetFürZufallspunkteKm * 1000) / (eckenUmfang * straßenAufschlag);
-
-  // Der Radius wird während der Suche mehrfach nachjustiert (kleiner bei
-  // Sackgassen, größer wenn die Runde zu kurz ist). Ohne Grenzen schaukeln
-  // sich diese Korrekturen auf und die Rundtour schrumpft am Ende auf ein
-  // paar Kilometer zusammen. Deshalb darf er nie weit vom Startwert weg.
-  const anfangsRadius = radius;
-  const begrenzeRadius = r => Math.min(anfangsRadius * 2.5, Math.max(anfangsRadius * 0.4, r));
-
-  // Während der Suche reichen zwei Routenvarianten je Versuch statt vier.
-  // Das halbiert die Anfragen an den kostenlosen BRouter-Server und
-  // erlaubt dafür deutlich mehr Versuche - und mehr Versuche sind genau
-  // das, was gegen Sackgassen hilft. Die übrigen Varianten holen wir ganz
-  // am Ende einmalig für die gefundene Konfiguration (Feinschliff unten).
-  const SUCH_VARIANTEN = [0, 1];
-  const MAX_VERSUCHE = 20;
-
-  // So viel doppelt gefahrene Strecke wird noch durchgewunken. Das sind
-  // Wendemanöver an Kreuzungen und Messrauschen, keine echten Sackgassen -
-  // auf einer 200-km-Runde ist das nicht einmal zu sehen. Ohne diese
-  // Toleranz würde ein 400-Meter-Artefakt die ganze Suche blockieren.
-  const SACKGASSEN_TOLERANZ_METER = 500;
-
-  // Ohne feste Zwischenstopps braucht eine Runde mindestens zwei
-  // Zufallspunkte, sonst bleibt keine Rundtour übrig, sondern nur ein Weg
-  // hin und zurück - also selbst eine Sackgasse.
-  const MINDEST_ZUFALLSPUNKTE = fixeZwischenstopps.length > 0 ? 0 : 2;
-
-  // Die Suche macht in jedem Anlauf genau eines von beidem:
-  //
-  //   Sackgassen beseitigen - hat immer Vorrang. Repariert wird dabei der
-  //     ZULETZT probierte Versuch, nicht der bislang beste. Das ist der
-  //     entscheidende Punkt: wird die Runde gerade größer gezogen und
-  //     entsteht dabei eine Sackgasse, bleibt die gewonnene Länge erhalten
-  //     und es wird nur die Sackgasse herausgeschnitten. Vorher wurde so
-  //     ein Versuch komplett verworfen - die Suche kam deshalb nie über
-  //     eine saubere, aber viel zu kurze Runde hinaus.
-  //
-  //   Länge anpassen - nur wenn die Runde sauber ist: die gefundene Form
-  //     wird gleichmäßig größer oder kleiner gezogen.
-  //
-  // "sauber" ist die beste sackgassenfreie Runde, "bester" die beste
-  // überhaupt - letztere nur als Rückfall, falls gar nichts Sauberes
-  // gefunden wird.
-  let bester = null;
-  let sauber = null;
-  let letzter = null;              // Ergebnis des zuletzt probierten Versuchs
-  let skalierVersuche = 0;         // wie oft schon vergeblich an der Länge gedreht wurde
-  const ersetzungen = new Map();   // Punkt -> wie oft er schon ersetzt wurde
-  const gemiedeneZonen = [];       // Spitzen erkannter Sackgassen - dort nie wieder hin
-
-  // Vorrat an Punkten, die nachweislich auf durchgehenden Straßen liegen -
-  // gesammelt aus JEDER bisher berechneten Route. Daraus bedient sich die
-  // Suche, wenn sie einen Punkt ersetzen oder die Runde vergrößern will.
-  // Das ist der Unterschied zwischen "irgendwo ins Gelände zielen" und
-  // "eine Stelle nehmen, an der schon mal eine Straße war".
-  const straßenPool = [];
-  let zufallspunkte = randomLoopPoints(start, radius, anzahlPunkte, richtung, gemiedeneZonen);
-
-  for (let versuch = 0; versuch < MAX_VERSUCHE; versuch++) {
-    setBusyText(`Rundtour wird geprüft (${versuch + 1}/${MAX_VERSUCHE})...`);
-
-    const kandidat = [start, ...sortByBearing(start, [...fixeZwischenstopps, ...zufallspunkte]), start];
-
-    let routes;
-    try {
-      routes = (zufallspunkte.length === 0 || profile === 'car-fast')
-        ? [await fetchRoute(kandidat, profile, 0)]
-        : (await Promise.allSettled(SUCH_VARIANTEN.map(i => fetchRoute(kandidat, profile, i))))
-            .filter(r => r.status === 'fulfilled').map(r => r.value);
-    } catch {
-      routes = [];
-    }
-
-    letzter = null;
-    if (routes.length > 0) {
-      routes.forEach(r => { r.curviness = curviness(r.coords); });
-      const kandidatBest = pickBestRoute(routes, t);
-      const abweichung = Math.abs(kandidatBest.distance - zielKm * 1000) / (zielKm * 1000);
-
-      // Alles an Sackgasse, was über das unvermeidbare Maß der festen
-      // Punkte hinausgeht, geht auf das Konto der Zufallspunkte - und ist
-      // damit reparierbar.
-      const sackgasseM = Math.max(0, sackgassenMeter(kandidatBest.coords) - erlaubteSackgassenMeter);
-
-      // Sauberkeit wiegt weit schwerer als die Wunschlänge: schon ein
-      // einziger Kilometer Sackgasse ist schlimmer als 100% Abweichung.
-      const bewertung = (sackgasseM / 1000) * 1.5 + abweichung;
-
-      letzter = { routes, best: kandidatBest, bewertung, abweichung, sackgasseM, punkte: zufallspunkte };
-      if (!bester || bewertung < bester.bewertung) bester = letzter;
-
-      // Alles, was diese Route an durchgehender Straße abgefahren hat, in
-      // den Vorrat aufnehmen (die Sackgassen-Stücke sind schon aussortiert).
-      if (straßenPool.length < 4000) straßenPool.push(...durchgangsPunkte(kandidatBest.coords));
-
-      if (sackgasseM <= SACKGASSEN_TOLERANZ_METER && (!sauber || abweichung < sauber.abweichung)) {
-        sauber = letzter;
-        skalierVersuche = 0; // die Länge ist besser geworden, also wieder größere Schritte erlauben
-      }
-    }
-
-    // Fertig, sobald die Runde sackgassenfrei ist UND die Länge passt.
-    if (sauber && sauber.abweichung < 0.15) break;
-
-    // Gar keine Route bekommen? Dann lag mindestens ein Zufallspunkt so
-    // weit von jeder Straße entfernt (im Hochgebirge schnell passiert),
-    // dass BRouter abgelehnt hat. Näher an den Start heranrücken - dort
-    // gibt es mehr Straßen.
-    if (routes.length === 0) radius = begrenzeRadius(radius * 0.85);
-
-    // Zwischenbilanz zur Halbzeit: hat sich die Suche in eine viel zu
-    // kleine Runde verrannt, lieber einmal komplett neu ansetzen. Der
-    // Straßen-Vorrat und die bekannten Sackgassen bleiben dabei erhalten -
-    // der zweite Anlauf startet also nicht bei null, sondern weiß schon,
-    // wo Straßen sind und wo nicht.
-    if (versuch === Math.floor(MAX_VERSUCHE / 2) && sauber && sauber.abweichung > 0.4) {
-      radius = anfangsRadius;
-      ersetzungen.clear();
-      zufallspunkte = randomLoopPoints(start, radius, anzahlPunkte, richtung, gemiedeneZonen);
-      continue;
-    }
-
-    if (letzter && letzter.sackgasseM > SACKGASSEN_TOLERANZ_METER && letzter.punkte.length > 0) {
-      // ----- Sackgassen des ZULETZT probierten Versuchs beseitigen -----
-      const schuldige = sackgassenSchuldige(letzter.best.coords, letzter.punkte);
-
-      // Die Spitze jeder erkannten Sackgasse merken - dorthin wird nie
-      // wieder ein Punkt gewürfelt, sonst probiert die Suche dasselbe Tal
-      // immer wieder neu durch.
-      schuldige.forEach(s => gemiedeneZonen.push(s.spitze));
-
-      // ALLE schuldigen Punkte in einem Rutsch reparieren, nicht nur den
-      // schlimmsten. In den Alpen liegen schnell drei Punkte gleichzeitig
-      // in Sackgassentälern - einzeln nacheinander bräuchte das viel zu
-      // viele Anläufe. Der Abzweig-Trick ist dabei sicher: ein Punkt auf
-      // einem Abzweig kann keine neue Sackgasse erzwingen.
-      let neuePunkte = letzter.punkte;
-      let etwasGeändert = false;
-
-      for (const schuld of schuldige) {
-        const fehlversuche = ersetzungen.get(schuld.punkt) || 0;
-
-        if (fehlversuche < 3) {
-          // Den kaputten Punkt auf eine Stelle setzen, die DIESE Route
-          // bereits als durchgehende Straße befahren hat - in derselben
-          // Himmelsrichtung und möglichst gleich weit vom Start weg. Das
-          // hat zwei Vorteile auf einmal: die Sackgasse ist weg, und der
-          // Punkt liegt garantiert auf einer Straße (ein gewürfelter Punkt
-          // landet im Hochgebirge schnell mal auf einem Gletscher, und dann
-          // findet BRouter überhaupt keine Route mehr).
-          //
-          // Mit jedem Fehlversuch rückt der Ersatz näher an den Start:
-          // kleinere Runden sind fast immer sackgassenfrei. So findet die
-          // Suche garantiert irgendwann eine saubere Form - aufziehen kann
-          // sie sie danach immer noch.
-          const schrumpf = [1, 0.85, 0.7][fehlversuche];
-          const altAbstand = haversine(start.lat, start.lon, schuld.punkt.lat, schuld.punkt.lon);
-          const zielWinkel = bearing([start.lon, start.lat], [schuld.punkt.lon, schuld.punkt.lat]);
-          const zielRadius = Math.max(2000, Math.max(radius, altAbstand) * schrumpf);
-
-          const ersatz = besterDurchgangspunkt(
-            start, straßenPool, zielWinkel, zielRadius, gemiedeneZonen) || schuld.abzweig;
-
-          ersetzungen.set(ersatz, fehlversuche + 1);
-          neuePunkte = neuePunkte.map(p => (p === schuld.punkt ? ersatz : p));
-          etwasGeändert = true;
-        } else if (neuePunkte.length > MINDEST_ZUFALLSPUNKTE) {
-          // Letztes Mittel: dieser Punkt liegt hartnäckig in einer Sackgasse
-          // (in den Alpen sind ganze Täler welche) - dann eben ganz ohne ihn.
-          neuePunkte = neuePunkte.filter(p => p !== schuld.punkt);
-          etwasGeändert = true;
-        } else {
-          // Mindestgerüst - streichen ist nicht erlaubt, also neu würfeln.
-          const neu = ersatzpunkt(start, schuld.punkt, radius * 0.7, fehlversuche, gemiedeneZonen);
-          ersetzungen.set(neu, fehlversuche + 1);
-          neuePunkte = neuePunkte.map(p => (p === schuld.punkt ? neu : p));
-          etwasGeändert = true;
-        }
-      }
-
-      // Kein Schuldiger gefunden - komplett neu würfeln, diesmal um die
-      // bekannten Sackgassen herum.
-      zufallspunkte = etwasGeändert
-        ? neuePunkte
-        : randomLoopPoints(start, radius, anzahlPunkte, richtung, gemiedeneZonen);
-    } else if (sauber) {
-      // ----- Sauber, aber die Länge stimmt noch nicht -----
-      // Von der besten sauberen Form ausgehen und sie gleichmäßig größer
-      // oder kleiner ziehen.
-      skalierVersuche++;
-      const rohFaktor = (zielKm * 1000) / sauber.best.distance;
-
-      // Nach vergeblichen Anläufen kleinere Schritte machen - der große
-      // Sprung hat offenbar nicht funktioniert, also vorsichtiger
-      // herantasten statt denselben Sprung nochmal zu probieren.
-      const faktor = Math.min(1.6, Math.max(0.6, 1 + (rohFaktor - 1) / skalierVersuche));
-
-      const mittlererAbstand = sauber.punkte.reduce(
-        (summe, p) => summe + haversine(start.lat, start.lon, p.lat, p.lon), 0) / sauber.punkte.length;
-      radius = begrenzeRadius(mittlererAbstand * faktor);
-
-      // Für jeden Punkt zuerst im Straßen-Vorrat nachsehen, ob dort in
-      // dieser Richtung schon eine passende Stelle auf einer durchgehenden
-      // Straße bekannt ist. Nur wenn der Vorrat nichts hergibt, was weit
-      // genug draußen liegt, wird ins unbekannte Gelände gezielt - sonst
-      // würde jedes Vergrößern wieder in einer Sackgasse enden.
-      // Die kleine Winkelstreuung sorgt dafür, dass nicht zweimal exakt
-      // dasselbe herauskommt, falls sich der Faktor kaum noch ändert.
-      zufallspunkte = sauber.punkte.map(p => {
-        const winkel = bearing([start.lon, start.lat], [p.lon, p.lat]) + (Math.random() * 16 - 8);
-        const wunschAbstand = haversine(start.lat, start.lon, p.lat, p.lon) * faktor;
-
-        const ausVorrat = besterDurchgangspunkt(start, straßenPool, winkel, wunschAbstand, gemiedeneZonen);
-        const vorratAbstand = ausVorrat
-          ? haversine(start.lat, start.lon, ausVorrat.lat, ausVorrat.lon) : 0;
-
-        return (ausVorrat && vorratAbstand >= wunschAbstand * 0.7)
-          ? ausVorrat
-          : destinationPoint(start.lat, start.lon, winkel, wunschAbstand);
-      });
-    } else {
-      // Noch gar keine brauchbare Route - komplett neu würfeln.
-      zufallspunkte = randomLoopPoints(start, radius, anzahlPunkte, richtung, gemiedeneZonen);
-    }
-  }
-
-  // Eine sackgassenfreie Runde hat immer Vorrang - auch wenn ihre Länge
-  // noch nicht perfekt passt.
-  if (sauber) bester = sauber;
-
-  // Feinschliff: für die gefundene Punktkonfiguration noch die beiden
-  // übrigen BRouter-Varianten holen - vielleicht ist eine davon kurviger.
-  // Varianten mit Sackgasse fliegen dabei raus, damit der Feinschliff nicht
-  // wieder eine einbaut.
-  if (bester && bester.sackgasseM <= SACKGASSEN_TOLERANZ_METER
-      && profile !== 'car-fast' && bester.punkte.length > 0) {
-    setBusyText('Kurvigste Variante wird gesucht...');
-
-    const kandidat = [start, ...sortByBearing(start, [...fixeZwischenstopps, ...bester.punkte]), start];
-    const weitere = (await Promise.allSettled([2, 3].map(i => fetchRoute(kandidat, profile, i))))
-      .filter(r => r.status === 'fulfilled').map(r => r.value);
-
-    const sauberVarianten = [...bester.routes, ...weitere].filter(
-      r => Math.max(0, sackgassenMeter(r.coords) - erlaubteSackgassenMeter) <= SACKGASSEN_TOLERANZ_METER);
-
-    if (sauberVarianten.length > 0) {
-      sauberVarianten.forEach(r => { if (r.curviness === undefined) r.curviness = curviness(r.coords); });
-      bester.routes = sauberVarianten;
-      bester.best = pickBestRoute(sauberVarianten, t);
-    }
-  }
+  // Der einzige Draht zwischen der Suche in kern.js und dieser App: woher
+  // die Routen kommen und wohin die Zwischenstaende gehen.
+  const ergebnis = await sucheRundtour(start, zielKm, profil, {
+    holeRoute: fetchRoute,
+    fortschritt: setBusyText,
+    hinweis: showToast,
+  });
 
   setBusy(false);
 
-  if (!bester) {
+  if (!ergebnis) {
     showToast('Rundtour fehlgeschlagen - anderen Startpunkt oder andere Distanz probieren.');
     return;
   }
 
-  // Nur noch möglich, wenn in dieser Gegend schlicht zu wenige Straßen für
-  // eine echte Runde existieren (z.B. ein Startpunkt tief in einem
-  // Alpental). Dann lieber ehrlich sagen, was Sache ist.
-  if (bester.sackgasseM > SACKGASSEN_TOLERANZ_METER) {
-    showToast(`Auch nach ${MAX_VERSUCHE} Versuchen bleiben ca. ${(bester.sackgasseM / 1000).toFixed(1)} km doppelt - hier gibt es offenbar zu wenige Straßen für eine echte Runde. Andere Richtung oder andere Distanz probieren.`);
-  } else if (bester.abweichung >= 0.15) {
-    // Sauber, aber die Wunschlänge war in dieser Gegend nicht erreichbar,
+  // Die Suche liefert nackte Zahlen, die Saetze dazu entstehen hier.
+  if (!ergebnis.sauber) {
+    // Nur noch moeglich, wenn in dieser Gegend schlicht zu wenige Strassen
+    // fuer eine echte Runde existieren (z.B. ein Startpunkt tief in einem
+    // Alpental). Dann lieber ehrlich sagen, was Sache ist.
+    showToast(`Auch nach ${ergebnis.versuche} Versuchen bleiben ca. ${(ergebnis.sackgasseM / 1000).toFixed(1)} km doppelt - hier gibt es offenbar zu wenige Straßen für eine echte Runde. Andere Richtung oder andere Distanz probieren.`);
+  } else if (!ergebnis.laengeStimmt) {
+    // Sauber, aber die Wunschlaenge war in dieser Gegend nicht erreichbar,
     // ohne wieder in Sackgassen zu fahren.
-    showToast(`Sackgassenfreie Runde gefunden, aber nur mit ${Math.round(bester.best.distance / 1000)} km statt ${zielKm} km - mehr geben die durchgehenden Straßen hier nicht her.`);
+    showToast(`Sackgassenfreie Runde gefunden, aber nur mit ${Math.round(ergebnis.beste.distance / 1000)} km statt ${zielKm} km - mehr geben die durchgehenden Straßen hier nicht her.`);
   }
 
-  state.route = bester.best;
-  drawRoutes(bester.routes, bester.best);
-  showStats(bester.best);
+  state.route = ergebnis.beste;
+  drawRoutes(ergebnis.routen, ergebnis.beste);
+  showStats(ergebnis.beste);
 }
-
 
 /* --- 7. Zeichnen und Zahlen anzeigen ------------------------------------ */
 
