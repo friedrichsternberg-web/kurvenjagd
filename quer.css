@@ -146,4 +146,15 @@
     padding-right: var(--s4);
   }
 
+  /* --- 4. Listenbildschirme in Lesebreite -------------------------------------
+     Touren (und spaeter Rechtliches, und der Shop, wenn er wiederkommt)
+     liefen bisher randlos ueber die volle Fensterbreite - eine 1400 Punkte
+     breite Listenzeile liest niemand. Der Inhalt bekommt eine Obergrenze
+     und stellt sich mittig; die Marke dafuer kommt aus design.css. */
+  .listen-screen .start-screen-inner {
+    max-width: var(--inhalt-max);
+    margin-inline: auto;
+    padding-inline: var(--s6);
+  }
+
 }
