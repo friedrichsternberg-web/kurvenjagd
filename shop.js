@@ -14,7 +14,7 @@
      7. Verkabelung
 
    shop.js wird als LETZTES Skript geladen und benutzt Helfer aus den
-   Dateien davor: symbol() und showToast() aus app.js, sicher() und
+   Dateien davor: symbol(), showToast() und escapeHtml() aus app.js,
    verkabele() aus garage.js.
    ========================================================================= */
 
@@ -162,10 +162,10 @@ function kategorieName(schlüssel) {
 function produktMiniBild(produkt) {
   const erstes = produkt.bilder[0];
   if (erstes?.url) {
-    return `<span class="produkt-mini-bild"><img src="${sicher(erstes.url)}"
-      alt="${sicher(produkt.marke + ' ' + produkt.name)}"></span>`;
+    return `<span class="produkt-mini-bild"><img src="${escapeHtml(erstes.url)}"
+      alt="${escapeHtml(produkt.marke + ' ' + produkt.name)}"></span>`;
   }
-  return `<span class="produkt-mini-bild" title="${sicher(kategorieName(produkt.kategorie))}">${symbol(produkt.symbol)}</span>`;
+  return `<span class="produkt-mini-bild" title="${escapeHtml(kategorieName(produkt.kategorie))}">${symbol(produkt.symbol)}</span>`;
 }
 
 /* Was gerade gefiltert wird. kategorie null heisst "Alle". Die Suche
@@ -185,7 +185,7 @@ function zeichneKategorien() {
              data-kategorie="">Alle</button>`,
     ...chips.map(k => `
       <button type="button" class="marken-chip ${shopFilter.kategorie === k.schlüssel ? 'active' : ''}"
-              data-kategorie="${sicher(k.schlüssel)}">${sicher(k.name)}</button>`),
+              data-kategorie="${escapeHtml(k.schlüssel)}">${escapeHtml(k.name)}</button>`),
   ].join('');
 }
 
@@ -215,7 +215,7 @@ function zeichneShop() {
 function zeichneShopVerzeichnis() {
   const behälter = document.getElementById('shopVerzeichnis');
   behälter.innerHTML = SHOP_VERZEICHNIS.map((eintrag, stelle) => `
-    <button type="button" class="marken-chip" data-shop="${stelle}">${sicher(eintrag.name)}</button>`).join('');
+    <button type="button" class="marken-chip" data-shop="${stelle}">${escapeHtml(eintrag.name)}</button>`).join('');
 }
 
 /* Wie oeffneAngebot(), nur fuer die Shop-Startseiten: EINE Stelle fuer
@@ -242,11 +242,11 @@ function zeichneProduktListe() {
       ? 'derzeit kein Angebot'
       : `ab ${euro(ab)} inkl. Versand`;
     return `
-      <li data-produkt="${sicher(produkt.id)}">
+      <li data-produkt="${escapeHtml(produkt.id)}">
         ${produktMiniBild(produkt)}
         <span class="saved-text">
-          <span class="saved-name">${sicher(produkt.marke)} ${sicher(produkt.name)}</span>
-          <span class="saved-meta">${sicher(kategorieName(produkt.kategorie))} <i>&middot;</i> ${abText}</span>
+          <span class="saved-name">${escapeHtml(produkt.marke)} ${escapeHtml(produkt.name)}</span>
+          <span class="saved-meta">${escapeHtml(kategorieName(produkt.kategorie))} <i>&middot;</i> ${abText}</span>
         </span>
       </li>`;
   }).join('');
@@ -280,13 +280,13 @@ function zeichneMerkliste() {
       .toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' });
 
     return `
-      <li data-produkt="${sicher(produkt.id)}">
+      <li data-produkt="${escapeHtml(produkt.id)}">
         ${produktMiniBild(produkt)}
         <span class="saved-text">
-          <span class="saved-name">${sicher(produkt.marke)} ${sicher(produkt.name)}</span>
+          <span class="saved-name">${escapeHtml(produkt.marke)} ${escapeHtml(produkt.name)}</span>
           <span class="saved-meta">Gemerkt am ${datum}${vergleich ? ' <i>&middot;</i> ' + vergleich : ''}</span>
         </span>
-        <button class="del" data-merk-weg="${sicher(produkt.id)}" title="Von der Merkliste nehmen">&times;</button>
+        <button class="del" data-merk-weg="${escapeHtml(produkt.id)}" title="Von der Merkliste nehmen">&times;</button>
       </li>`;
   }).join('');
 }
@@ -389,11 +389,11 @@ function zeichneVorschläge() {
       <h2>F&uuml;r dich</h2>
       <ul class="saved-list">
         ${vorschläge.map(({ produkt, grund }) => `
-          <li data-produkt="${sicher(produkt.id)}">
+          <li data-produkt="${escapeHtml(produkt.id)}">
             ${produktMiniBild(produkt)}
             <span class="saved-text">
-              <span class="saved-name">${sicher(produkt.marke)} ${sicher(produkt.name)}</span>
-              <span class="saved-meta vorschlag-grund">${sicher(grund)}</span>
+              <span class="saved-name">${escapeHtml(produkt.marke)} ${escapeHtml(produkt.name)}</span>
+              <span class="saved-meta vorschlag-grund">${escapeHtml(grund)}</span>
             </span>
           </li>`).join('')}
       </ul>
@@ -430,10 +430,10 @@ function zeichneGarageShop() {
   band.innerHTML = einträge.map(({ produkt, hinweis }) => {
     const ab = günstigstesGesamt(produkt);
     return `
-      <button type="button" class="garage-shop-karte" data-produkt="${sicher(produkt.id)}">
+      <button type="button" class="garage-shop-karte" data-produkt="${escapeHtml(produkt.id)}">
         ${produktMiniBild(produkt)}
-        <span class="garage-shop-name">${sicher(produkt.marke)} ${sicher(produkt.name)}</span>
-        <span class="garage-shop-meta">${sicher(hinweis)}${ab !== null ? ' &middot; ab ' + euro(ab) : ''}</span>
+        <span class="garage-shop-name">${escapeHtml(produkt.marke)} ${escapeHtml(produkt.name)}</span>
+        <span class="garage-shop-meta">${escapeHtml(hinweis)}${ab !== null ? ' &middot; ab ' + euro(ab) : ''}</span>
       </button>`;
   }).join('');
 
@@ -517,9 +517,9 @@ function zeichneProduktSeite() {
   const galerieBilder = produkt.bilder.map(bild => `
     <figure class="galerie-bild">
       ${bild.url
-        ? `<img src="${sicher(bild.url)}" alt="${sicher(produkt.marke + ' ' + produkt.name)}">`
+        ? `<img src="${escapeHtml(bild.url)}" alt="${escapeHtml(produkt.marke + ' ' + produkt.name)}">`
         : `${symbol(produkt.symbol, 'gross')}
-           <figcaption>${sicher(bild.beschriftung)}</figcaption>`}
+           <figcaption>${escapeHtml(bild.beschriftung)}</figcaption>`}
     </figure>`).join('');
 
   const galeriePunkte = produkt.bilder.map((_, stelle) =>
@@ -531,22 +531,22 @@ function zeichneProduktSeite() {
       ${produkt.bilder.length > 1 ? `<div class="galerie-punkte" id="galeriePunkte">${galeriePunkte}</div>` : ''}
     </div>
 
-    <h2 class="produkt-titel">${sicher(produkt.marke)} ${sicher(produkt.name)}</h2>
-    <p class="hint produkt-kategorie">${sicher(kategorieName(produkt.kategorie))}</p>
+    <h2 class="produkt-titel">${escapeHtml(produkt.marke)} ${escapeHtml(produkt.name)}</h2>
+    <p class="hint produkt-kategorie">${escapeHtml(kategorieName(produkt.kategorie))}</p>
 
     ${produkt.groessen.length ? `
       <div class="groessen-reihe">
-        ${produkt.groessen.map(g => `<span class="shop-groesse">${sicher(g)}</span>`).join('')}
+        ${produkt.groessen.map(g => `<span class="shop-groesse">${escapeHtml(g)}</span>`).join('')}
       </div>` : ''}
 
     <div class="stats produkt-daten">
       ${produkt.eigenschaften.map(eigenschaft => `
-        <div class="stat"><span class="k">${sicher(eigenschaft.name)}</span><span class="v">${sicher(eigenschaft.wert)}</span></div>`).join('')}
+        <div class="stat"><span class="k">${escapeHtml(eigenschaft.name)}</span><span class="v">${escapeHtml(eigenschaft.wert)}</span></div>`).join('')}
     </div>
 
     <section class="block">
-      <h2>${sicher(produkt.meinung.titel)}</h2>
-      <p class="meinung-text">${sicher(produkt.meinung.text)}</p>
+      <h2>${escapeHtml(produkt.meinung.titel)}</h2>
+      <p class="meinung-text">${escapeHtml(produkt.meinung.text)}</p>
       <p class="hint">Diese Einsch&auml;tzung stammt von uns und beruht auf
         Herstellerangaben, nicht auf einem eigenen Produkttest.</p>
     </section>
@@ -577,7 +577,7 @@ function zeichneProduktSeite() {
       </details>
     </section>
 
-    <button class="btn ghost merken-knopf" data-merken="${sicher(produkt.id)}">
+    <button class="btn ghost merken-knopf" data-merken="${escapeHtml(produkt.id)}">
       ${merkenKnopfText(produkt.id)}
     </button>`;
 

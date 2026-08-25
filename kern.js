@@ -445,16 +445,6 @@ function ersatzpunkt(start, alterPunkt, radius, fehlversuche = 0, gemiedeneZonen
   }, gemiedeneZonen);
 }
 
-// Schiebt einen Punkt in derselben Himmelsrichtung weiter nach außen oder
-// innen. Gebraucht für den Fall "die Form der Runde ist gut (keine
-// Sackgassen), nur die Länge stimmt noch nicht" - dann soll die Form
-// erhalten bleiben und nur die Größe sich ändern.
-function skalierterPunkt(start, punkt, faktor) {
-  const winkel = bearing([start.lon, start.lat], [punkt.lon, punkt.lat]);
-  const abstand = haversine(start.lat, start.lon, punkt.lat, punkt.lon);
-  return destinationPoint(start.lat, start.lon, winkel, abstand * faktor);
-}
-
 // Punkt, der von (lat, lon) aus in eine Richtung (Grad) und Entfernung
 // (Meter) liegt - die Umkehrung von bearing() oben, Standardformel für
 // Navigation auf einer Kugel.

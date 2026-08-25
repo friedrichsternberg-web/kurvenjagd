@@ -1239,7 +1239,7 @@ function zeichneDatenblatt() {
   const raster = document.getElementById('motorradWerte');
   raster.hidden = werte.length === 0;
   raster.innerHTML = werte
-    .map(eintrag => `<div class="stat"><div class="k">${sicher(eintrag.name)}</div><div class="v">${sicher(eintrag.wert)}</div></div>`)
+    .map(eintrag => `<div class="stat"><div class="k">${escapeHtml(eintrag.name)}</div><div class="v">${escapeHtml(eintrag.wert)}</div></div>`)
     .join('');
 
   // Umschalter zwischen mehreren Maschinen. Bei nur einer waere die Reihe
@@ -1249,7 +1249,7 @@ function zeichneDatenblatt() {
   umschalter.innerHTML = garage.motorräder
     .map((eintrag, platz) => `
       <button class="seg ${platz === aktivesMotorrad ? 'active' : ''}" data-motorrad="${platz}">
-        ${sicher(eintrag.modell || eintrag.marke || 'Maschine ' + (platz + 1))}
+        ${escapeHtml(eintrag.modell || eintrag.marke || 'Maschine ' + (platz + 1))}
       </button>`)
     .join('');
 }
@@ -1259,17 +1259,6 @@ function zahl(wert) {
   const alsZahl = Number(String(wert).replace(/[^\d]/g, ''));
   return Number.isFinite(alsZahl) ? alsZahl.toLocaleString('de-DE') : String(wert);
 }
-
-/* Macht Text sicher, bevor er als HTML eingesetzt wird. Ohne das koennte ein
-   Motorradname mit einem spitzen Klammerzeichen darin die Seite
-   durcheinanderbringen. Der Text kommt zwar von dir selbst - aber sobald
-   Garagen spaeter geteilt werden, kommt er von Fremden. */
-function sicher(text) {
-  return String(text ?? '')
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
 
 /* --- 5. Der Dialog zum Anlegen und Aendern ----------------------------------
    Ein einziges Fenster fuer beides, Motorrad und Ausruestung. Es bekommt von
@@ -1323,7 +1312,7 @@ function öffneMotorradDialog(vorhandenes = null) {
         <div class="finder-marken">
           ${HÄUFIGE_MARKEN.map(marke => `
             <button type="button" class="marken-chip ${vorhandenes?.marke?.toUpperCase() === marke ? 'active' : ''}"
-                    data-marke="${sicher(marke)}">${sicher(markeLesbar(marke))}</button>`).join('')}
+                    data-marke="${escapeHtml(marke)}">${escapeHtml(markeLesbar(marke))}</button>`).join('')}
         </div>
 
         <input type="search" id="feldMarkenSuche" class="search-input"
@@ -1333,7 +1322,7 @@ function öffneMotorradDialog(vorhandenes = null) {
         <div class="dialog-paar">
           <div>
             <label for="feldMarke">Marke</label>
-            <input type="text" id="feldMarke" value="${sicher(vorhandenes?.marke)}">
+            <input type="text" id="feldMarke" value="${escapeHtml(vorhandenes?.marke)}">
           </div>
           <div>
             <label for="feldBaujahr">Baujahr</label>
@@ -1346,7 +1335,7 @@ function öffneMotorradDialog(vorhandenes = null) {
         </div>
 
         <label for="feldModell">Modell</label>
-        <input type="text" id="feldModell" value="${sicher(vorhandenes?.modell)}">
+        <input type="text" id="feldModell" value="${escapeHtml(vorhandenes?.modell)}">
         <div class="finder-modelle" id="modellTreffer" hidden></div>
         <p class="hint" id="finderHinweis">
           W&auml;hl Marke und Baujahr, dann erscheinen hier die Modelle. Die
@@ -1358,11 +1347,11 @@ function öffneMotorradDialog(vorhandenes = null) {
       <div class="dialog-paar">
         <div>
           <label for="feldHubraum">Hubraum in ccm</label>
-          <input type="number" id="feldHubraum" inputmode="numeric" value="${sicher(vorhandenes?.hubraum)}">
+          <input type="number" id="feldHubraum" inputmode="numeric" value="${escapeHtml(vorhandenes?.hubraum)}">
         </div>
         <div>
           <label for="feldLeistung">Leistung in PS</label>
-          <input type="number" id="feldLeistung" inputmode="numeric" value="${sicher(vorhandenes?.leistung)}">
+          <input type="number" id="feldLeistung" inputmode="numeric" value="${escapeHtml(vorhandenes?.leistung)}">
         </div>
       </div>
       <p class="tiny">Hubraum und Leistung f&uuml;llt die App automatisch aus der
@@ -1577,7 +1566,7 @@ async function modelleAnzeigen() {
     }
     const schonGewählt = feldWert('feldModell');
     kasten.innerHTML = modelle
-      .map(modell => `<button type="button" class="modell-chip ${modell === schonGewählt ? 'active' : ''}" data-modell="${sicher(modell)}">${sicher(modell)}</button>`)
+      .map(modell => `<button type="button" class="modell-chip ${modell === schonGewählt ? 'active' : ''}" data-modell="${escapeHtml(modell)}">${escapeHtml(modell)}</button>`)
       .join('');
     hinweis.textContent = `${modelle.length} Modelle gefunden. Steht deins nicht dabei, schreib es selbst ins Feld.`;
   } catch {
@@ -1666,7 +1655,7 @@ async function markenVorschlagen(eingabe) {
     const passende = marken.filter(marke => marke.includes(suchtext)).slice(0, 12);
     treffer.hidden = false;
     treffer.innerHTML = passende.length
-      ? passende.map(marke => `<li data-marke="${sicher(marke)}">${sicher(markeLesbar(marke))}</li>`).join('')
+      ? passende.map(marke => `<li data-marke="${escapeHtml(marke)}">${escapeHtml(markeLesbar(marke))}</li>`).join('')
       : `<li class="empty">Keine Marke gefunden. Du kannst sie unten von Hand eintragen.</li>`;
   } catch {
     treffer.hidden = false;
@@ -2655,16 +2644,9 @@ function freiÜbernehmen() {
    ausser dass ein paar Knoepfe nicht mehr reagierten, und der eigentliche
    Fehler stand am ganz anderen Ende.
 
-   verkabele() meldet fehlende Kennungen in der Konsole und macht weiter. */
-
-function verkabele(kennung, ereignisart, tun) {
-  const element = document.getElementById(kennung);
-  if (!element) {
-    console.warn(`Garage: Element "${kennung}" gibt es nicht (mehr). Verkabelung übersprungen.`);
-    return;
-  }
-  element.addEventListener(ereignisart, tun);
-}
+   verkabele() meldet fehlende Kennungen in der Konsole und macht weiter.
+   Die Funktion selbst steht in app.js, Abschnitt "Kleine Helfer" - konto.js
+   braucht sie ebenfalls und wird vor dieser Datei geladen. */
 
 verkabele('btnMotorradNeu', 'click', () => öffneMotorradDialog(null));
 verkabele('btnMotorradBearbeiten', 'click', () => {

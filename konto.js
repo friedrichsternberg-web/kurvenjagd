@@ -312,21 +312,32 @@ function setzeKontoModus(modus) {
   // Passwort an statt ein neues vorzuschlagen.
   document.getElementById('kontoPasswortEingabe').autocomplete =
     modus === 'anmelden' ? 'current-password' : 'new-password';
-  zeigeKontoMeldung('');
+  zeigeMeldung('kontoMeldung', '');
   zeigeMailErneutKnopf(false);
-  zeigeNamenHinweis('kontoNameHinweis', '');
+  zeigeMeldung('kontoNameHinweis', '');
 }
 
-/* Die Rückmeldung unter einem Namensfeld. Sie hat drei Zustände: leer
-   (nichts gesagt), gut (grün) und schlecht (rot). Beide Namensfelder -
-   beim Anlegen und im Profil - benutzen dieselbe Funktion. */
-function zeigeNamenHinweis(feldId, text, istGut = false) {
-  const feld = document.getElementById(feldId);
+/* Schreibt eine Rueckmeldung in eines der Meldungsfelder der App. Es gibt
+   fuenf davon - unter beiden Namensfeldern, auf dem Anmeldebildschirm, beim
+   neuen Passwort und beim Loeschen des Kontos - und sie verhalten sich alle
+   gleich: leerer Text blendet das Feld aus, sonst steht es da, je nach Art
+   grau, gruen oder rot.
+
+   Hier standen einmal vier fast gleiche Fassungen davon, eine je Feld, drei
+   als eigene Funktion und eine als Pfeilfunktion mitten in einer anderen.
+   Wer an einer etwas aenderte, hatte danach vier Felder, die sich
+   unterschiedlich benehmen.
+
+   Die Art steht als Wort da und nicht als true/false: An der Aufrufstelle
+   liest man "fehler" statt "true", und true hiess in der einen Fassung
+   "gruen" und in der anderen "rot". */
+function zeigeMeldung(feldKennung, text, art = 'neutral') {
+  const feld = document.getElementById(feldKennung);
   if (!feld) return;
   feld.textContent = text;
   feld.hidden = !text;
-  feld.classList.toggle('gut', istGut);
-  feld.classList.toggle('fehler', !!text && !istGut);
+  feld.classList.toggle('gut',    !!text && art === 'gut');
+  feld.classList.toggle('fehler', !!text && art === 'fehler');
 }
 
 /* Prüft einen getippten Namen und schreibt das Ergebnis unter das Feld.
@@ -344,26 +355,19 @@ function prüfeNamenVerzögert(eingabeId, hinweisId) {
   // Solange noch getippt wird, nur die Form prüfen - das geht ohne Netz.
   const geprüft = benutzernameSauber(rohname);
   if (!geprüft.ok) {
-    zeigeNamenHinweis(hinweisId, rohname.trim() ? geprüft.meldung : '');
+    zeigeMeldung(hinweisId, rohname.trim() ? geprüft.meldung : '', 'fehler');
     return;
   }
-  zeigeNamenHinweis(hinweisId, 'Wird geprüft …');
+  zeigeMeldung(hinweisId, 'Wird geprüft …');
 
   namensPrüfungLäuft = setTimeout(async () => {
     const frei = await benutzernameFrei(geprüft.name);
     // Zwischenzeitlich weitergetippt? Dann gilt diese Antwort nicht mehr.
     if (document.getElementById(eingabeId).value.trim() !== geprüft.name) return;
-    if (frei === null) zeigeNamenHinweis(hinweisId, '');   // Netz weg, still bleiben
-    else if (frei) zeigeNamenHinweis(hinweisId, `„${geprüft.name}“ ist frei.`, true);
-    else zeigeNamenHinweis(hinweisId, `„${geprüft.name}“ ist schon vergeben.`);
+    if (frei === null) zeigeMeldung(hinweisId, '');   // Netz weg, still bleiben
+    else if (frei) zeigeMeldung(hinweisId, `„${geprüft.name}“ ist frei.`, 'gut');
+    else zeigeMeldung(hinweisId, `„${geprüft.name}“ ist schon vergeben.`, 'fehler');
   }, 500);
-}
-
-function zeigeKontoMeldung(text, istFehler = false) {
-  const feld = document.getElementById('kontoMeldung');
-  feld.textContent = text;
-  feld.hidden = !text;
-  feld.classList.toggle('fehler', istFehler);
 }
 
 // Der Knopf zum erneuten Senden soll nicht dauerhaft herumstehen, sondern
@@ -424,7 +428,7 @@ function zeigeProfil() {
 
   // Das Feld zum Ändern beim Öffnen immer wieder einklappen.
   document.getElementById('profilNameFeld').hidden = true;
-  zeigeNamenHinweis('profilNameHinweis', '');
+  zeigeMeldung('profilNameHinweis', '');
 
   zeigeBildschirm('profilScreen');
 }
@@ -434,7 +438,7 @@ async function kontoFormularAbsenden() {
   const passwort = document.getElementById('kontoPasswortEingabe').value;
 
   if (!email || !passwort) {
-    zeigeKontoMeldung('Bitte E-Mail und Passwort ausfüllen.', true);
+    zeigeMeldung('kontoMeldung', 'Bitte E-Mail und Passwort ausfüllen.', 'fehler');
     return;
   }
 
@@ -447,23 +451,23 @@ async function kontoFormularAbsenden() {
   if (kontoModus === 'registrieren') {
     const geprüft = benutzernameSauber(document.getElementById('kontoNameEingabe').value);
     if (!geprüft.ok) {
-      zeigeKontoMeldung('Benutzername: ' + geprüft.meldung, true);
+      zeigeMeldung('kontoMeldung', 'Benutzername: ' + geprüft.meldung, 'fehler');
       return;
     }
     benutzername = geprüft.name;
 
-    zeigeKontoMeldung('Benutzername wird geprüft …');
+    zeigeMeldung('kontoMeldung', 'Benutzername wird geprüft …');
     const frei = await benutzernameFrei(benutzername);
     if (frei === false) {
-      zeigeKontoMeldung(`Der Benutzername „${benutzername}“ ist schon vergeben.`, true);
-      zeigeNamenHinweis('kontoNameHinweis', `„${benutzername}“ ist schon vergeben.`);
+      zeigeMeldung('kontoMeldung', `Der Benutzername „${benutzername}“ ist schon vergeben.`, 'fehler');
+      zeigeMeldung('kontoNameHinweis', `„${benutzername}“ ist schon vergeben.`, 'fehler');
       return;
     }
   }
 
   const knopf = document.getElementById('btnKontoAbsenden');
   knopf.disabled = true;
-  zeigeKontoMeldung('Einen Moment...');
+  zeigeMeldung('kontoMeldung', 'Einen Moment...');
 
   const ergebnis = kontoModus === 'anmelden'
     ? await meldeAn(email, passwort)
@@ -477,7 +481,7 @@ async function kontoFormularAbsenden() {
   }
 
   knopf.disabled = false;
-  zeigeKontoMeldung(ergebnis.meldung, !ergebnis.ok);
+  zeigeMeldung('kontoMeldung', ergebnis.meldung, ergebnis.ok ? 'neutral' : 'fehler');
 
   // Genau ein Fall bekommt einen Ausweg angeboten: die Adresse ist noch
   // nicht bestätigt. Dann hilft nur eine neue Mail.
@@ -495,29 +499,21 @@ async function kontoFormularAbsenden() {
 async function passwortNeuAbsenden() {
   const passwort = document.getElementById('passwortNeuEingabe').value;
   const wiederholung = document.getElementById('passwortNeuWiederholung').value;
-  const feld = document.getElementById('passwortNeuMeldung');
-
-  const meldung = (text, istFehler = false) => {
-    feld.textContent = text;
-    feld.hidden = !text;
-    feld.classList.toggle('fehler', istFehler);
-  };
-
-  if (passwort.length < 6) { meldung('Das Passwort braucht mindestens 6 Zeichen.', true); return; }
-  if (passwort !== wiederholung) { meldung('Die beiden Eingaben sind nicht gleich.', true); return; }
+  if (passwort.length < 6) { zeigeMeldung('passwortNeuMeldung', 'Das Passwort braucht mindestens 6 Zeichen.', 'fehler'); return; }
+  if (passwort !== wiederholung) { zeigeMeldung('passwortNeuMeldung', 'Die beiden Eingaben sind nicht gleich.', 'fehler'); return; }
 
   const knopf = document.getElementById('btnPasswortNeuSpeichern');
   knopf.disabled = true;
-  meldung('Einen Moment...');
+  zeigeMeldung('passwortNeuMeldung', 'Einen Moment...');
 
   const ergebnis = await setzeNeuesPasswort(passwort);
   knopf.disabled = false;
 
-  if (!ergebnis.ok) { meldung(ergebnis.meldung, true); return; }
+  if (!ergebnis.ok) { zeigeMeldung('passwortNeuMeldung', ergebnis.meldung, 'fehler'); return; }
 
   document.getElementById('passwortNeuEingabe').value = '';
   document.getElementById('passwortNeuWiederholung').value = '';
-  meldung('');
+  zeigeMeldung('passwortNeuMeldung', '');
   imPasswortWechsel = false;
   zeigeGarage();
   showToast('Passwort geändert. Du bist angemeldet.');
@@ -530,15 +526,15 @@ async function passwortNeuAbsenden() {
    nachdem: angemeldet zum eigenen Profil, abgemeldet zum Anmelden. Ein
    Symbol, zwei Ziele - das ist die Erwartung, die jeder von einem
    Profilsymbol mitbringt. */
-document.getElementById('btnKontoRund').addEventListener('click', () => {
+verkabele('btnKontoRund', 'click', () => {
   if (angemeldeterNutzer) { zeigeProfil(); return; }
   setzeKontoModus('anmelden');
   zeigeBildschirm('kontoScreen');
 });
 
-document.getElementById('btnProfilZurueck').addEventListener('click', zeigeGarage);
+verkabele('btnProfilZurueck', 'click', zeigeGarage);
 
-document.getElementById('btnKontoAbmelden').addEventListener('click', async () => {
+verkabele('btnKontoAbmelden', 'click', async () => {
   await meldeAb();
   // Nach dem Abmelden gehört einem der Profilbildschirm nicht mehr.
   zeigeGarage();
@@ -562,12 +558,10 @@ function profilBildAuswählen(woher) {
   eingabe.click();
 }
 
-document.getElementById('btnKontoBildWaehlen')
-  .addEventListener('click', () => profilBildAuswählen('anmeldung'));
-document.getElementById('btnProfilBild')
-  .addEventListener('click', () => profilBildAuswählen('profil'));
+verkabele('btnKontoBildWaehlen', 'click', () => profilBildAuswählen('anmeldung'));
+verkabele('btnProfilBild', 'click', () => profilBildAuswählen('profil'));
 
-document.getElementById('profilBildEingabe').addEventListener('change', async ereignis => {
+verkabele('profilBildEingabe', 'change', async ereignis => {
   const datei = ereignis.target.files[0];
   if (!datei) return;
 
@@ -615,13 +609,13 @@ document.getElementById('profilBildEingabe').addEventListener('change', async er
 
 /* --- 6b. Benutzernamen prüfen und ändern ---------------------------------- */
 
-document.getElementById('kontoNameEingabe').addEventListener('input',
+verkabele('kontoNameEingabe', 'input',
   () => prüfeNamenVerzögert('kontoNameEingabe', 'kontoNameHinweis'));
 
-document.getElementById('profilNameEingabe').addEventListener('input',
+verkabele('profilNameEingabe', 'input',
   () => prüfeNamenVerzögert('profilNameEingabe', 'profilNameHinweis'));
 
-document.getElementById('btnProfilNameAendern').addEventListener('click', () => {
+verkabele('btnProfilNameAendern', 'click', () => {
   const feld = document.getElementById('profilNameFeld');
   feld.hidden = !feld.hidden;
   if (!feld.hidden) {
@@ -631,23 +625,23 @@ document.getElementById('btnProfilNameAendern').addEventListener('click', () => 
   }
 });
 
-document.getElementById('btnProfilNameSpeichern').addEventListener('click', async () => {
+verkabele('btnProfilNameSpeichern', 'click', async () => {
   const knopf = document.getElementById('btnProfilNameSpeichern');
   knopf.disabled = true;
   const ergebnis = await benutzernameÄndern(document.getElementById('profilNameEingabe').value);
   knopf.disabled = false;
 
-  if (!ergebnis.ok) { zeigeNamenHinweis('profilNameHinweis', ergebnis.meldung); return; }
+  if (!ergebnis.ok) { zeigeMeldung('profilNameHinweis', ergebnis.meldung, 'fehler'); return; }
   document.getElementById('profilName').textContent = eigenesProfil.benutzername;
   document.getElementById('profilNameFeld').hidden = true;
-  zeigeNamenHinweis('profilNameHinweis', '');
+  zeigeMeldung('profilNameHinweis', '');
   aktualisiereKontoAnzeige();
   showToast(ergebnis.meldung);
 });
 
-document.getElementById('btnKontoZurueck').addEventListener('click', zeigeGarage);
+verkabele('btnKontoZurueck', 'click', zeigeGarage);
 
-document.getElementById('btnKontoWechseln').addEventListener('click', () => {
+verkabele('btnKontoWechseln', 'click', () => {
   setzeKontoModus(kontoModus === 'anmelden' ? 'registrieren' : 'anmelden');
 });
 
@@ -657,35 +651,35 @@ document.getElementById('btnKontoWechseln').addEventListener('click', () => {
 // als "zu viele Versuche" vom Server zurückkam. Der Weg über submit ist
 // der richtige, weil er auch die Eingabetaste abdeckt - auf dem Handy
 // zeigt die Tastatur dann "Los" statt einer Zeilenschaltung.
-document.getElementById('kontoFormular').addEventListener('submit', (e) => {
+verkabele('kontoFormular', 'submit', (e) => {
   e.preventDefault();
   kontoFormularAbsenden();
 });
 
-document.getElementById('passwortNeuFormular').addEventListener('submit', (e) => {
+verkabele('passwortNeuFormular', 'submit', (e) => {
   e.preventDefault();
   passwortNeuAbsenden();
 });
 
-document.getElementById('btnPasswortVergessen').addEventListener('click', async () => {
+verkabele('btnPasswortVergessen', 'click', async () => {
   const email = document.getElementById('kontoEmailEingabe').value.trim();
   if (!email) {
-    zeigeKontoMeldung('Bitte zuerst die E-Mail-Adresse eintragen.', true);
+    zeigeMeldung('kontoMeldung', 'Bitte zuerst die E-Mail-Adresse eintragen.', 'fehler');
     return;
   }
   const ergebnis = await passwortVergessen(email);
-  zeigeKontoMeldung(ergebnis.meldung, !ergebnis.ok);
+  zeigeMeldung('kontoMeldung', ergebnis.meldung, ergebnis.ok ? 'neutral' : 'fehler');
   zeigeMailErneutKnopf(false);
 });
 
-document.getElementById('btnMailErneut').addEventListener('click', async () => {
+verkabele('btnMailErneut', 'click', async () => {
   const email = document.getElementById('kontoEmailEingabe').value.trim();
   if (!email) {
-    zeigeKontoMeldung('Bitte zuerst die E-Mail-Adresse eintragen.', true);
+    zeigeMeldung('kontoMeldung', 'Bitte zuerst die E-Mail-Adresse eintragen.', 'fehler');
     return;
   }
   const ergebnis = await bestätigungErneutSenden(email);
-  zeigeKontoMeldung(ergebnis.meldung, !ergebnis.ok);
+  zeigeMeldung('kontoMeldung', ergebnis.meldung, ergebnis.ok ? 'neutral' : 'fehler');
 });
 
 
@@ -960,8 +954,7 @@ async function synchronisiereTouren() {
       showToast('Kein Platz mehr auf dem Gerät - bitte ein paar alte Touren löschen.');
       return;
     }
-    renderSaved();
-    renderTourenListe();
+    zeichneBeideRoutenListen();
   }
 
   const teile = [];
@@ -1081,13 +1074,6 @@ async function löscheKonto(passwort) {
 
 /* --- 9b. Oberfläche zum Löschen ------------------------------------------- */
 
-function zeigeLöschenMeldung(text, istFehler = false) {
-  const feld = document.getElementById('loeschenMeldung');
-  feld.textContent = text;
-  feld.hidden = !text;
-  feld.classList.toggle('fehler', istFehler);
-}
-
 /* Baut den Bildschirm auf und trägt ein, was den Nutzer konkret betrifft.
    Eine allgemeine Warnung liest niemand, "deine 14 Touren" schon.
 
@@ -1109,24 +1095,24 @@ function zeigeKontoLöschen() {
   document.getElementById('kontoLoeschenFrage').hidden = false;
   document.getElementById('kontoGeloeschtFertig').hidden = true;
   document.getElementById('btnKontoLoeschenZurueck').hidden = false;
-  zeigeLöschenMeldung('');
+  zeigeMeldung('loeschenMeldung', '');
 
   zeigeBildschirm('kontoLoeschenScreen');
 }
 
 async function kontoLöschenAbsenden() {
   const passwort = document.getElementById('loeschenPasswort').value;
-  if (!passwort) { zeigeLöschenMeldung('Bitte dein Passwort eintragen.', true); return; }
+  if (!passwort) { zeigeMeldung('loeschenMeldung', 'Bitte dein Passwort eintragen.', 'fehler'); return; }
 
   const knopf = document.getElementById('btnKontoLoeschenAbsenden');
   knopf.disabled = true;
-  zeigeLöschenMeldung('Wird gelöscht...');
+  zeigeMeldung('loeschenMeldung', 'Wird gelöscht...');
 
   const ergebnis = await löscheKonto(passwort);
 
   if (!ergebnis.ok) {
     knopf.disabled = false;
-    zeigeLöschenMeldung(ergebnis.meldung, true);
+    zeigeMeldung('loeschenMeldung', ergebnis.meldung, 'fehler');
     return;
   }
 
@@ -1145,11 +1131,11 @@ async function kontoLöschenAbsenden() {
    Abschnitt 6: Wer nachsehen will, wie das Löschen funktioniert, findet
    alles an einer Stelle. */
 
-document.getElementById('btnKontoLoeschenOeffnen').addEventListener('click', zeigeKontoLöschen);
+verkabele('btnKontoLoeschenOeffnen', 'click', zeigeKontoLöschen);
 
-document.getElementById('btnKontoLoeschenZurueck').addEventListener('click', zeigeGarage);
+verkabele('btnKontoLoeschenZurueck', 'click', zeigeGarage);
 
-document.getElementById('kontoLoeschenFormular').addEventListener('submit', (e) => {
+verkabele('kontoLoeschenFormular', 'submit', (e) => {
   e.preventDefault();
   kontoLöschenAbsenden();
 });
@@ -1157,6 +1143,6 @@ document.getElementById('kontoLoeschenFormular').addEventListener('submit', (e) 
 // Neu laden statt nur umzuschalten: Nach dem Löschen liegen die alten
 // Touren noch im Arbeitsspeicher der Seite. Ein Neustart ist der einzige
 // Weg, der wirklich nichts übriglässt.
-document.getElementById('btnKontoGeloeschtWeiter').addEventListener('click', () => {
+verkabele('btnKontoGeloeschtWeiter', 'click', () => {
   window.location.reload();
 });

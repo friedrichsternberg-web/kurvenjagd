@@ -991,8 +991,9 @@ async function generateRoundTrip() {
 /* --- 6. Zeichnen und Zahlen anzeigen ------------------------------------- */
 
 // Nimmt alle gezeichneten Linien wieder von der Karte. Eigene Funktion,
-// weil das an zwei Stellen gebraucht wird: vor jedem Neuzeichnen und wenn
-// es gar nichts zu zeichnen gibt.
+// weil das an fuenf Stellen gebraucht wird: vor jedem Neuzeichnen, wenn es
+// gar nichts zu zeichnen gibt, beim Start der Navigation, beim Entfernen
+// eines Wegpunkts und beim Leeren des Planers.
 function entferneLinien() {
   state.lines.forEach(l => map.removeLayer(l));
   state.lines = [];
@@ -1259,8 +1260,7 @@ function startNavigation() {
   // Während der Fahrt sind die verworfenen Routen-Alternativen nur
   // Ablenkung - stattdessen zeigen wir gleich gefahrene/verbleibende
   // Strecke getrennt an (siehe aktualisiereRoutenfortschritt).
-  state.lines.forEach(l => map.removeLayer(l));
-  state.lines = [];
+  entferneLinien();
 
   document.body.classList.add('nav-modus');
   aktualisiereLeiste(aktuellerBildschirm());   // Leiste weg, die Navigation braucht den Platz
@@ -2643,8 +2643,7 @@ function speichereRide() {
   }
 
   meldeTourAnServer(neueAusfahrt);
-  renderSaved();
-  renderTourenListe();
+  zeichneBeideRoutenListen();
   showToast('Gespeichert: ' + name);
   rideZurücksetzen();
   zeigeGarage();
@@ -2912,8 +2911,7 @@ function saveRoute() {
   all.unshift(neueTour);
   speichereListe(all);
   meldeTourAnServer(neueTour);
-  renderSaved();
-  renderTourenListe();
+  zeichneBeideRoutenListen();
   showToast('Gespeichert: ' + name);
 }
 
@@ -3021,8 +3019,7 @@ function verkabeleGespeicherteListe(list, { zeigePlanerBeimLaden }) {
         const rest = loadSaved().filter(x => String(x.id) !== e.target.dataset.del);
         speichereListe(rest);
         meldeTourLöschungAnServer(e.target.dataset.del);
-        renderSaved();
-        renderTourenListe();
+        zeichneBeideRoutenListen();
         return;
       }
       const r = loadSaved().find(x => String(x.id) === li.dataset.id);
@@ -3033,29 +3030,41 @@ function verkabeleGespeicherteListe(list, { zeigePlanerBeimLaden }) {
   });
 }
 
-function renderSaved() {
-  const list = document.getElementById('savedList');
-  const all = loadSaved();
-  list.innerHTML = all.length === 0
+/* Zeichnet eine Liste gespeicherter Routen. Es gibt zwei davon, und sie
+   sahen bis auf zwei Kleinigkeiten gleich aus: das Bedienfeld im Planer
+   (#savedList) und der Bildschirm "Meine Touren" (#tourenList). Der
+   Unterschied ist nur, dass ein Klick auf "Meine Touren" zusaetzlich in
+   den Planer wechseln muss - dort ist ja keine Karte zu sehen.
+
+   Frueher standen dafuer zwei fast gleiche Funktionen da. Wer an einer
+   etwas aenderte und die andere vergass, hatte zwei Listen, die
+   unterschiedlich aussehen. */
+function zeichneRoutenListe(listenKennung, zumPlanerWechseln) {
+  const liste = document.getElementById(listenKennung);
+  const gespeicherte = loadSaved();
+  liste.innerHTML = gespeicherte.length === 0
     ? '<li class="empty">Noch nichts gespeichert.</li>'
-    : all.map(gespeicherteRouteHtml).join('');
-  verkabeleGespeicherteListe(list, { zeigePlanerBeimLaden: false });
+    : gespeicherte.map(gespeicherteRouteHtml).join('');
+  verkabeleGespeicherteListe(liste, { zeigePlanerBeimLaden: zumPlanerWechseln });
 }
 
-// Dieselbe Liste wie renderSaved(), nur für den Bildschirm "Meine
-// Touren" - von dort führt ein Klick zusätzlich in den Planer.
-function renderTourenListe() {
-  const list = document.getElementById('tourenList');
-  const all = loadSaved();
-  list.innerHTML = all.length === 0
-    ? '<li class="empty">Noch nichts gespeichert.</li>'
-    : all.map(gespeicherteRouteHtml).join('');
-  verkabeleGespeicherteListe(list, { zeigePlanerBeimLaden: true });
+/* Beide Listen auf einmal. Fast immer sind beide gemeint: Wer eine Route
+   speichert oder loescht, aendert damit den Inhalt von beiden. */
+function zeichneBeideRoutenListen() {
+  zeichneRoutenListe('savedList', false);
+  zeichneRoutenListe('tourenList', true);
 }
 
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c =>
-    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+/* Macht Text sicher, bevor er als HTML eingesetzt wird. Ohne das koennte ein
+   Motorradname mit einem spitzen Klammerzeichen darin die Seite
+   durcheinanderbringen. Die Texte kommen zwar bisher vom Nutzer selbst - aber
+   sobald Routen und Garagen geteilt werden, kommen sie von Fremden.
+
+   Das ?? '' ist wichtig: Ohne es wuerde aus einem leeren Feld die Zeichenkette
+   "undefined", und die staende dann sichtbar im Eingabefeld. */
+function escapeHtml(text) {
+  return String(text ?? '').replace(/[&<>"']/g, zeichen =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[zeichen]));
 }
 
 
@@ -3102,6 +3111,28 @@ function setCurveLevel(level) {
   state.curveLevel = level;
   document.getElementById('curveSlider').value = level;
   document.getElementById('modeHint').textContent = curveLevelHint(level);
+}
+
+/* Meldet einen Zuhoerer an einem Element an, ohne dass ein fehlendes Element
+   alles Weitere zum Absturz bringt.
+
+   Der Grund ist eine Stunde Fehlersuche: Ein einziges getElementById() auf
+   ein Element, das es nicht (mehr) gibt, liefert null, und der Punkt dahinter
+   wirft. Das bricht die Datei an dieser Stelle ab - alles DANACH wird nie
+   angemeldet. Sichtbar war davon nichts ausser dass ein paar Knoepfe nicht
+   mehr reagierten, und der eigentliche Fehler stand am ganz anderen Ende.
+
+   Diese Funktion meldet die fehlende Kennung in der Konsole und macht weiter.
+
+   Sie steht in app.js und nicht in garage.js, weil konto.js sie ebenfalls
+   benutzt und VOR garage.js geladen wird. */
+function verkabele(kennung, ereignisart, tun) {
+  const element = document.getElementById(kennung);
+  if (!element) {
+    console.warn(`Element "${kennung}" gibt es nicht (mehr). Verkabelung übersprungen.`);
+    return;
+  }
+  element.addEventListener(ereignisart, tun);
 }
 
 // Baut ein Symbol aus der Sammlung in index.html. Das <use> verweist auf
@@ -3189,7 +3220,7 @@ function aktuellerBildschirm() {
 }
 
 function zeigeMeineTouren() {
-  renderTourenListe();
+  zeichneRoutenListe('tourenList', true);
   zeigeBildschirm('tourenScreen');
 }
 
@@ -3450,8 +3481,7 @@ document.getElementById('btnUndo').addEventListener('click', () => {
   // Eine Rundtour-Route ist nach dem Entfernen eines Punkts nicht mehr
   // gültig - erst nach erneutem Klick auf "Rundtour generieren" wieder
   // anzeigen, statt eine falsche Route stehen zu lassen.
-  state.lines.forEach(l => map.removeLayer(l));
-  state.lines = [];
+  entferneLinien();
   document.getElementById('statsBlock').hidden = true;
 });
 
@@ -3460,8 +3490,7 @@ document.getElementById('btnClear').addEventListener('click', () => {
   state.waypoints = [];
   suchfelderZurücksetzen();
   state.route = null;
-  state.lines.forEach(l => map.removeLayer(l));
-  state.lines = [];
+  entferneLinien();
   refreshWaypoints();
   document.getElementById('statsBlock').hidden = true;
 });
@@ -3553,7 +3582,7 @@ document.getElementById('fotoAnsicht').addEventListener('click', (e) => {
 });
 
 verkabelePanelSchublade();
-renderSaved();
+zeichneRoutenListe('savedList', false);
 
 // Beim Laden ist der Startbildschirm sichtbar (so steht es im HTML). Die
 // Leiste muss trotzdem einmal ihren Zustand setzen, sonst waere sie zwar
