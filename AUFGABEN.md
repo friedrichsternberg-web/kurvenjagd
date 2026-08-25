@@ -207,8 +207,11 @@ Rechercheberichte zu Markt und Recht liegen im Brain
 ### Der Weg zu den Partnern (Reihenfolge, die am schnellsten trägt)
 
 1. Web-App vorzeigbar + Rechtstexte + Gewerbe (siehe oben).
-2. **AWIN-Registrierung** (5 € Kaution, kommt mit der ersten Auszahlung
-   zurück) → POLO Motorrad beantragen (MID 11475, Programmbetreuung
+   Stand 25.08.2026: Desktop-Fassung steht (`quer.css`), der Demo-Shop ist
+   für die Prüfphase per `SHOP_AKTIV` ausgeblendet. Es fehlen: Impressum/
+   Datenschutz-Bildschirm (braucht Friedrichs Anschrift) und die Domain.
+2. **AWIN-Registrierung — ERLEDIGT, Account angenommen (25.08.2026)**
+   → POLO Motorrad beantragen (MID 11475, Programmbetreuung
    PeakLive, polo-motorrad@peaklive.de) und moto24 (MID 16934).
    POLO läuft trotz Sanierungsverfahren weiter, aber: nicht als einzige
    Einnahmequelle einplanen, kurze Auszahlungszyklen wählen.
@@ -345,15 +348,18 @@ installierte App. Diese Seite gehört zur Webseite und nicht in die App.
 Die `og:`-Angaben in `index.html` sind der Anfang: Sie bestimmen, wie der Link
 in WhatsApp aussieht.
 
-### 10. Eigene Anordnungsdatei fürs Querformat
+### 10. Eigene Anordnungsdatei fürs Querformat — ERLEDIGT (25.08.2026)
 
-`design.css` (Sprache) ist von `style.css` (Anordnung, Hochformat) getrennt.
-Die Webseite bekommt ihre eigene Anordnungsdatei und benutzt **dieselbe**
-`design.css`.
+Sie heißt `quer.css`, lädt nach `style.css` und gilt komplett nur ab
+900×500 Punkten: Kopfleiste oben (dieselbe `#hauptNav`), Garage als
+Zweispalter (Raum links, Datenblatt/Menü rechts), Listen in Lesebreite,
+Aufzeichnen mit Wertefeld als Seitenspalte. Auf dem Handy bleibt sie
+stumm.
 
-Die Regel, damit das trägt: Wer eine Farbe oder ein Maß fest einträgt statt
-eine Marke zu benutzen, baut die Doppelung ein, die die Trennung verhindern
-soll.
+Die Regel, damit das trägt, gilt weiter: Wer eine Farbe oder ein Maß fest
+einträgt statt eine Marke aus `design.css` zu benutzen, baut die Doppelung
+ein, die die Trennung verhindern soll — `pruefe.sh` Regel 2 prüft beide
+Anordnungsdateien.
 
 ---
 
@@ -376,8 +382,8 @@ Datenschutzerklärung, siehe oben.
 
 ## Kleinkram, der irgendwann nervt
 
-- **Versionsnummer.** `?v=` steht an elf Stellen in `index.html` (seit
-  `produkte.js` und `shop.js` dazugekommen sind) und wird
+- **Versionsnummer.** `?v=` steht an 14 Stellen in `index.html` (zuletzt
+  ist `quer.css` dazugekommen) und wird
   von Hand erhöht. Genau dieser Fehler ist beim Bauen schon passiert: Die
   Datei war geändert, die Nummer nicht, der Browser lieferte die alte
   Fassung. Auf einem richtigen Webhoster ersetzen Cache-Kopfzeilen das.

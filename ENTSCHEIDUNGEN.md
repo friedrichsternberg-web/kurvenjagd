@@ -370,3 +370,34 @@ Dialog), `freisteller.js` (Foto vom Hintergrund befreien).
 liest, kommt an 6d vorbei, bevor er 6b sieht.
 
 **Ab jetzt:** Kommt ein Abschnitt dazu, wird umnummeriert. Keine Buchstaben.
+
+## 25.08.2026 — Die Webseite ist dieselbe App, nicht ein zweites Produkt
+
+**Der Anlass:** Der AWIN-Publisher-Account wurde angenommen. Für die
+Bewerbungen bei den Partnerprogrammen prüfen die Netzwerke eine URL von
+Hand – die App musste also am Desktop bestehen können.
+
+**Früher stand in der Doku**, die Webseite werde „später eine eigene Sache
+mit eigenem Design". Das ist gekippt: Ein zweiter Codebestand hätte jede
+künftige Funktion doppelt gekostet. Stattdessen kam die Anordnungsdatei,
+die AUFGABEN.md Punkt 10 immer vorgesehen hat: `quer.css`, komplett in
+einer Bedingung ab 900×500 Punkten. Auf dem Handy bleibt sie stumm, die
+Hochformat-App ist unangetastet.
+
+**Friedrichs Entscheidungen dazu:** Kopfleiste oben statt Seitenleiste
+(Website-Aufbau, den Prüfer erwarten), eigene Domain (registriert er
+selbst), Impressum mit Privatadresse, und der Shop ist für die Prüfphase
+per Schalter aus – „Aber nur ausgeblendet lasse, sodass er jederzeit
+wieder eingeblendet werden kann." Deshalb `SHOP_AKTIV` in app.js statt
+Löschen.
+
+**Warum zwei Grenzen:** Die neue 900×500 beantwortet „Kopfleiste und
+Mehrspalter?", die alte 760 beantwortet „Planer: Seitenleiste oder
+Schublade?". Handy quer (844×390) fällt durch die Höhenbedingung aus dem
+Desktop-Layout und behält sein heutiges Verhalten; ein iPad hochkant
+bleibt beim Hochformat-Layout.
+
+**Nebenbei behoben, weil es beim Umbau auffiel:** Die am Handy gezogene
+Schubladen-Höhe des Planer-Bedienfelds blieb als style-Attribut stehen
+und fror die Desktop-Seitenleiste auf Schubladen-Höhe ein. Der
+resize-Handler räumt sie jetzt beim Wechsel auf das breite Layout.
