@@ -175,4 +175,16 @@
   .ride-panel.bereit,
   .ride-panel.zusammenfassung { max-height: none; }
 
+  /* --- 6. Kleinigkeiten unter der Kopfleiste ----------------------------------
+     Der Toast haengt im Hochformat 16 Punkte unter der Oberkante - hier
+     laege er AUF der Leiste. Er rueckt unter sie; ist die Leiste versteckt
+     (Konto-Bildschirme, Navi-Modus), ist --nav-raum 0 und er sitzt wieder
+     wie gewohnt oben. */
+  .toast { top: calc(var(--nav-raum) + var(--s4)); }
+
+  /* Der Zuschlag fuer die Geraete-Aussparung (Notch) steckt oben bereits
+     in der Leiste - Garagenkopf und Listeninhalt haetten ihn doppelt. */
+  .garage-kopf { padding-top: var(--s4); }
+  .listen-screen .start-screen-inner { padding-top: var(--s5); }
+
 }
