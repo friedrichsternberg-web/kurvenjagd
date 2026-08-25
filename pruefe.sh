@@ -30,3 +30,12 @@ grep -oE '^\.[a-zA-Z0-9_-]+ *\{' style.css | tr -d ' {' | sort | uniq -d
 
 echo "== 6. Versionsnummer in index.html (muss EINE Zeile sein) =="
 grep -o '?v=[0-9]\+' index.html | sort -u
+
+echo "== 7. Selbsttest fuer kern.js =="
+# jsc ist der JavaScript-Motor von macOS und liegt auf jedem Mac.
+JSC=/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Helpers/jsc
+if [ -x "$JSC" ]; then
+  "$JSC" pruefe-kern.js
+else
+  echo "uebersprungen: jsc nicht gefunden"
+fi
