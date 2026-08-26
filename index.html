@@ -62,7 +62,25 @@
        Was ueber ein <meta> NICHT geht: frame-ancestors (verhindert, dass
        jemand die Seite in einen eigenen Rahmen einbaut). Das braucht eine
        echte Kopfzeile vom Server, und GitHub Pages setzt keine. Kommt mit
-       einem eigenen Server oder der nativen Huelle. -->
+       einem eigenen Server oder der nativen Huelle.
+
+       WARUM HIER KEIN upgrade-insecure-requests STEHT, und bitte nicht
+       gutgemeint wieder eintragen:
+
+       Die Regel zwingt jede Datei der Seite auf https. Am 26.08.2026 hat
+       genau das die veroeffentlichte Seite lahmgelegt: Das Zertifikat fuer
+       serpa-app.de war noch nicht ausgestellt, die Seite lief ueber http,
+       und die Regel schickte trotzdem jede CSS- und JS-Datei nach https.
+       Dort scheiterte jede einzelne am fehlenden Zertifikat. Besucher sahen
+       unformatierten Text ohne eine Zeile Programm.
+
+       Und sie schuetzt hier nichts, was nicht ohnehin geschuetzt waere:
+       Alle eigenen Dateien sind relativ verlinkt und folgen damit von
+       selbst dem Protokoll der Seite. Jede fremde Adresse in dieser Liste
+       steht bereits ausdruecklich auf https - ueber http koennte die App
+       also gar keine davon anfragen, die CSP wuerde es verbieten.
+
+       Der Vorgang steht ausfuehrlich in ENTSCHEIDUNGEN.md. -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self';
     base-uri 'self';
@@ -76,7 +94,7 @@
     connect-src 'self' https://brouter.de https://nominatim.openstreetmap.org
                 https://vpic.nhtsa.dot.gov https://de.wikipedia.org https://en.wikipedia.org
                 https://copydwpdqpnwjvknsakz.supabase.co https://cdn.jsdelivr.net;
-    upgrade-insecure-requests">
+    ">
 
   <!-- ===== Die App als App =====
        Diese paar Zeilen sind die Vorstufe zu den Stores und schon fuer sich
@@ -90,7 +108,7 @@
        "orientation": "portrait" im Manifest ist die Ansage, um die es hier
        geht: Diese App ist fuers Hochformat gebaut. Die spaetere Webseite
        bekommt ein eigenes Design fuers Querformat und ein eigenes Manifest. -->
-  <link rel="manifest" href="manifest.webmanifest?v=92">
+  <link rel="manifest" href="manifest.webmanifest?v=93">
 
   <!-- Faerbt die Statusleiste des Handys in die Grundflaeche der App, damit
        oben kein fremder heller Streifen stehen bleibt. -->
@@ -103,7 +121,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Serpa">
-  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=92">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=93">
 
   <!-- Fuer die spaetere Webseite und geteilte Routen: So sieht der Link aus,
        wenn ihn jemand in WhatsApp oder Instagram einfuegt. Ohne das steht
@@ -168,12 +186,12 @@
                    die spaetere Webseite genauso benutzen.
        style.css   die Anordnung DIESER App, ausgelegt auf Hochformat. Die
                    Webseite bekommt dafuer eine eigene Datei. -->
-  <link rel="stylesheet" href="design.css?v=92">
-  <link rel="stylesheet" href="style.css?v=92">
+  <link rel="stylesheet" href="design.css?v=93">
+  <link rel="stylesheet" href="style.css?v=93">
   <!-- Die Anordnung fuer breite Bildschirme. Laedt NACH style.css und
        ueberschreibt dessen Hochformat-Anordnung nur dann, wenn das Fenster
        mindestens 900x500 Punkte hat - auf dem Handy bleibt sie stumm. -->
-  <link rel="stylesheet" href="quer.css?v=92">
+  <link rel="stylesheet" href="quer.css?v=93">
 </head>
 <body>
 
@@ -1709,16 +1727,16 @@
   <!-- ZUERST, denn alle anderen benutzen geraet.* beim Laden. Hier steht der
        gesamte Zugriff aufs Geraet - Standort, Speicher, Dateien. Beim Umzug
        in die Stores ist das die einzige Datei, die sich aendert. -->
-  <script src="geraet.js?v=92"></script>
+  <script src="geraet.js?v=93"></script>
   <!-- Der Rechenteil: Kurvigkeit, Sackgassen, Rundtour-Punkte, GPX. Muss VOR
        app.js stehen, weil app.js diese Funktionen beim Routen aufruft. Die
        spaetere Webseite im Querformat laedt genau diese Datei ebenfalls und
        rechnet damit exakt so wie die App. -->
-  <script src="kern.js?v=92"></script>
-  <script src="app.js?v=92"></script>
+  <script src="kern.js?v=93"></script>
+  <script src="app.js?v=93"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=92"></script>
+  <script src="konto.js?v=93"></script>
   <!-- Die Garage in drei Teilen. Die Reihenfolge ist nicht beliebig:
 
        finder.js       zuerst, weil zeichneGarage() am Ende von garage.js
@@ -1730,19 +1748,19 @@
 
        Alle drei nach app.js, weil sie verkleinereFoto(), showToast() und
        verkabele() von dort benutzen. -->
-  <script src="finder.js?v=92"></script>
-  <script src="garage.js?v=92"></script>
-  <script src="freisteller.js?v=92"></script>
+  <script src="finder.js?v=93"></script>
+  <script src="garage.js?v=93"></script>
+  <script src="freisteller.js?v=93"></script>
   <!-- Der Demo-Produktkatalog (nur Daten) und die Shop-Logik. produkte.js
        muss vor shop.js stehen, und beide nach garage.js, weil shop.js
        dessen verkabele() mitbenutzt. -->
-  <script src="produkte.js?v=92"></script>
-  <script src="shop.js?v=92"></script>
+  <script src="produkte.js?v=93"></script>
+  <script src="shop.js?v=93"></script>
   <!-- Die Besuchszaehlung. Zuletzt, weil sie nichts kann, was jemand anders
        braucht - und nach konto.js, weil sie die dort stehende Serveradresse
        und den oeffentlichen Schluessel mitbenutzt, statt beides ein zweites
        Mal aufzuschreiben. Sie meldet nur eine Summe und legt nichts auf dem
        Geraet ab; die Begruendung steht ausfuehrlich im Kopf der Datei. -->
-  <script src="besucher.js?v=92"></script>
+  <script src="besucher.js?v=93"></script>
 </body>
 </html>

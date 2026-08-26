@@ -476,3 +476,42 @@ Das ist genau die Fähigkeit, die die App braucht, und sie kommt in rund
 Die Lehre taugt über diesen Fall hinaus: Eine Überwachung soll das messen,
 was die App tatsächlich tut. Ein Ping auf irgendeine erreichbare Adresse
 desselben Servers beantwortet eine Frage, die niemand gestellt hat.
+
+## 26.08.2026 — upgrade-insecure-requests raus: die Regel hatte die Seite lahmgelegt
+
+**Der Fund.** Friedrich schickte einen Screenshot von serpa-app.de: nackter
+Text, schwarze Klötze statt Symbolen, keine Gestaltung, keine Funktion.
+Sichtbar waren sogar Bereiche, die eigentlich versteckt sind – der Shop zum
+Beispiel, den `SHOP_AKTIV = false` ausblendet.
+
+**Die Ursache** war nicht die App, sondern eine gutgemeinte Zeile in der
+Sicherheitsregel: `upgrade-insecure-requests` zwingt jede Datei einer Seite
+auf https. Das Zertifikat für die Domain war zu diesem Zeitpunkt noch nicht
+ausgestellt, die Seite lief also über http – und die Regel schickte
+trotzdem jede CSS- und JS-Datei nach https, wo jede einzelne am fehlenden
+Zertifikat scheiterte. Der Browser meldete `ERR_CERT_COMMON_NAME_INVALID`,
+und zwar für jede Datei der App.
+
+Angekommen ist nur das nackte HTML. Genau das war auf dem Screenshot zu
+sehen.
+
+**Warum die Regel ersatzlos wegfällt und nicht nur vorübergehend.** Sie
+schützt hier nichts, was nicht ohnehin geschützt wäre:
+
+- Alle eigenen Dateien sind relativ verlinkt (`app.js?v=93`) und folgen
+  damit von selbst dem Protokoll der Seite. Läuft die Seite über https,
+  laufen sie über https – ganz ohne die Regel.
+- Jede fremde Adresse in der Erlaubnisliste steht bereits ausdrücklich auf
+  `https://`. Eine http-Anfrage nach draußen würde die Regel gar nicht
+  brauchen, um zu scheitern; die Liste selbst verbietet sie.
+
+Die Zeile war also reine Absicherung gegen einen Fall, den es im Projekt
+nicht gibt, und hatte dafür einen sehr realen Schaden. Ein Kommentar an
+ihrer Stelle in `index.html` erklärt das, damit sie niemand gutgemeint
+wieder einträgt.
+
+**Die Lehre, die über den Fall hinausgeht:** Eine Sicherheitsregel, die
+eine Voraussetzung erzwingt, die noch nicht erfüllt ist, macht aus einem
+fehlenden Zertifikat einen Totalausfall. Wer so eine Regel setzt, muss
+prüfen, was passiert, solange die Voraussetzung fehlt – und nicht erst,
+wenn alles steht.
