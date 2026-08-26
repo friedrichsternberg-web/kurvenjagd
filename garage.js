@@ -303,6 +303,18 @@ function rahmenMessen(bildElement) {
         links: l / b, rechts: (r + 1) / b, oben: o / h, unten: (u + 1) / h,
         boden: boden.map(wert => wert < 0 ? -1 : wert / (h - 1 || 1)),
       };
+    } else {
+      /* KEIN einziger sichtbarer Punkt im ganzen Messbild. Das ist entweder
+         ein wirklich leeres Bild - oder eines, dessen Pixel der Browser
+         noch nicht entpackt hatte: drawImage zeichnet dann stillschweigend
+         nichts, so will es die Spezifikation, ein Fehler kommt nie.
+
+         Beides darf NICHT in den Merkspeicher. Einmal falsch gemerkt,
+         stuende die Maschine bis zum Neuladen der Seite auf ihrer
+         Bildkante statt auf den Raedern (der Fall vom 26.08.2026, siehe
+         ENTSCHEIDUNGEN.md). Ohne Eintrag misst der naechste Aufruf neu,
+         und dann sind die Pixel da. */
+      return null;
     }
   } catch {
     /* Kann die Leinwand nicht gelesen werden - etwa weil das Bild von einem
@@ -580,8 +592,21 @@ function zeichneBuehne() {
 
   /* Liegt das Bild schon im Zwischenspeicher, meldet sich onload je nach
      Browser gar nicht mehr. Dann sofort rechnen - sonst bliebe die Maschine
-     beim Umschalten zwischen zwei Maschinen auf dem Platz der vorigen. */
-  if (bild.complete && bild.naturalWidth) setzeBuehnenPlatz();
+     beim Umschalten zwischen zwei Maschinen auf dem Platz der vorigen.
+
+     decode() statt einer blossen complete-Abfrage, und der Unterschied ist
+     kein Feinschliff: complete sagt nur "die Daten sind da", nicht "die
+     Pixel sind entpackt". Wer in dieser Luecke misst, misst ein leeres
+     Bild (siehe rahmenMessen). decode() loest erst aus, wenn wirklich
+     gezeichnet werden kann - im Zwischenspeicher-Fall praktisch sofort. */
+  if (bild.decode) {
+    bild.decode().then(() => setzeBuehnenPlatz()).catch(() => {
+      /* decode() scheitert bei kaputten Bilddaten - darum kuemmert sich
+         schon bild.onerror weiter oben, hier ist nichts zu tun. */
+    });
+  } else if (bild.complete && bild.naturalWidth) {
+    setzeBuehnenPlatz();
+  }
 
   setzeBuehnenPlatz();
 }

@@ -602,3 +602,34 @@ Die Reihenfolge gilt für beide Formate, es ist dieselbe Leiste. Technisch
 hängt nichts an der Position: Alle Verkabelung läuft über data-ziel, kein
 Selektor und kein Skript greift über einen Index zu (am 26.08. eigens
 nachgeprüft).
+
+## 26.08.2026 — Warum ein eigenes Motorrad neben dem Teller stehen konnte
+
+Friedrich meldete, beim Hinzufügen eines Bikes sei die automatische
+Platzierung „kaputt bzw. verschoben". Vier parallele Code-Leser haben die
+komplette Kette geprüft, und die Rechnung selbst ist unschuldig: Die
+Platzierung hängt ausschließlich an Bilddaten und Teller-Ankern, nicht am
+Fensterformat, und landete im Test in beiden Formaten auf den Pixel genau.
+
+**Der echte Fehler saß im Merkspeicher der Messung.** `rahmenMessen()`
+zeichnet das Foto auf eine kleine Leinwand und sucht die Räder. Zeichnet
+`drawImage` aber ein Bild, dessen Daten zwar da, dessen Pixel vom Browser
+noch nicht entpackt sind, malt es stillschweigend NICHTS - die
+Spezifikation sieht dafür keinen Fehler vor. Ergebnis: null sichtbare
+Punkte, als „ganzes Bild ohne Räder" gedeutet und **dauerhaft gecacht**.
+Die Maschine stand dann bis zum Neuladen der Seite auf ihrer Bildkante
+statt auf den Rädern, in falscher Größe.
+
+Zwei Riegel dagegen, beide in garage.js:
+
+1. Eine Messung, die KEINEN einzigen sichtbaren Punkt findet, wandert
+   nicht mehr in den Merkspeicher - der nächste Aufruf misst neu, und dann
+   sind die Pixel da.
+2. `zeichneBuehne()` wartet mit `decode()` darauf, dass die Pixel wirklich
+   entpackt sind, statt sich auf `complete` zu verlassen - `complete`
+   sagt nur „die Daten sind da", nicht „es kann gezeichnet werden".
+
+Der Fall ist ein Muster wert: Ein stiller Fehlschlag (drawImage malt
+nichts und sagt es niemandem) plus ein Cache ergibt einen Fehler, der
+zufällig auftritt und dann klebt. Wer einen Messwert cacht, muss sich
+fragen, ob ein leeres Ergebnis wirklich ein Ergebnis ist.
