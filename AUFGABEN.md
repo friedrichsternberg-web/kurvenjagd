@@ -1,4 +1,4 @@
-# Kurvenjagd – was noch kommt
+# Serpa – was noch kommt
 
 Diese Liste steht neben dem Code, weil sie sich mit dem Code ändert. Sie
 sammelt nicht jede Idee, sondern die Dinge, die **später deutlich teurer
@@ -181,7 +181,7 @@ Garage, Produktseite mit Preisvergleich, Merkliste. Alles Beispieldaten,
 die Angebotsplätze heißen bewusst "Partner-Shop A/B/C" – keine echten
 Händler mit erfundenen Preisen, keine erfundenen Shop-Namen. Die
 Rechercheberichte zu Markt und Recht liegen im Brain
-(`Projekte/Kurvenjagd.md`, Abschnitt vom 24.08.2026).
+(`Projekte/Serpa.md`, Abschnitt vom 24.08.2026).
 
 ### Bevor echte Angebote laufen dürfen (Pflicht, sonst Abmahnrisiko)
 

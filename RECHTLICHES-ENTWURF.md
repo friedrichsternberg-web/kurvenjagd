@@ -65,7 +65,7 @@ Verantwortlicher
 [Vorname Nachname], [Anschrift], [E-Mail]
 
 Kurzfassung
-Kurvenjagd funktioniert ohne Konto und speichert deine Routen, deine
+Serpa funktioniert ohne Konto und speichert deine Routen, deine
 Garage und deine Merkliste zunächst nur auf deinem Gerät. Ein Konto ist
 freiwillig. Die App zeigt keine Werbung, setzt keine Cookies und
 enthält keine Analyse- oder Tracking-Dienste.
