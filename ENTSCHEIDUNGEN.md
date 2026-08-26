@@ -583,3 +583,22 @@ gemessene Abweichung unter 1,5 von 255 bleibt. Das halbiert die Dateien
 (512er von 459 auf 208 KB), ohne dass am gebürsteten Metall Streifen
 entstehen. Nur `img/app-icon-quelle.png` bleibt in vollen Farben: 1024
 Punkte, genau das Maß, das Apple später für den App Store verlangt.
+
+## 26.08.2026 — Die Garage rückt im Menü an die erste Stelle
+
+**Gekippt** wird eine dokumentierte Absicht: Die Garage stand bewusst in der
+MITTE der unteren Leiste, weil die Mitte auf einem Handy die Stelle ist,
+die der Daumen am leichtesten trifft (so stand es als Kommentar in
+index.html an der Leiste).
+
+Friedrichs Entscheidung vom 26.08.2026: Die Garage kommt ganz nach links,
+an die erste Stelle. Das Argument dafür ist mindestens so gut wie das alte:
+Die Garage ist der Startbildschirm, und der erste Platz im Menü sagt genau
+das. Seit die Leiste im Querformat als Kopfzeile oben liegt, liest sie sich
+außerdem wie ein Webseitenmenü - und dort erwartet man den Startpunkt vorn,
+nicht in der Mitte.
+
+Die Reihenfolge gilt für beide Formate, es ist dieselbe Leiste. Technisch
+hängt nichts an der Position: Alle Verkabelung läuft über data-ziel, kein
+Selektor und kein Skript greift über einen Index zu (am 26.08. eigens
+nachgeprüft).
