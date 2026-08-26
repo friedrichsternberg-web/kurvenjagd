@@ -90,7 +90,7 @@
        "orientation": "portrait" im Manifest ist die Ansage, um die es hier
        geht: Diese App ist fuers Hochformat gebaut. Die spaetere Webseite
        bekommt ein eigenes Design fuers Querformat und ein eigenes Manifest. -->
-  <link rel="manifest" href="manifest.webmanifest?v=91">
+  <link rel="manifest" href="manifest.webmanifest?v=92">
 
   <!-- Faerbt die Statusleiste des Handys in die Grundflaeche der App, damit
        oben kein fremder heller Streifen stehen bleibt. -->
@@ -103,7 +103,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Serpa">
-  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=91">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=92">
 
   <!-- Fuer die spaetere Webseite und geteilte Routen: So sieht der Link aus,
        wenn ihn jemand in WhatsApp oder Instagram einfuegt. Ohne das steht
@@ -168,12 +168,12 @@
                    die spaetere Webseite genauso benutzen.
        style.css   die Anordnung DIESER App, ausgelegt auf Hochformat. Die
                    Webseite bekommt dafuer eine eigene Datei. -->
-  <link rel="stylesheet" href="design.css?v=91">
-  <link rel="stylesheet" href="style.css?v=91">
+  <link rel="stylesheet" href="design.css?v=92">
+  <link rel="stylesheet" href="style.css?v=92">
   <!-- Die Anordnung fuer breite Bildschirme. Laedt NACH style.css und
        ueberschreibt dessen Hochformat-Anordnung nur dann, wenn das Fenster
        mindestens 900x500 Punkte hat - auf dem Handy bleibt sie stumm. -->
-  <link rel="stylesheet" href="quer.css?v=91">
+  <link rel="stylesheet" href="quer.css?v=92">
 </head>
 <body>
 
@@ -871,8 +871,9 @@
             Serpa funktioniert ohne Konto und speichert deine Routen, deine
             Garage und deine Einstellungen zun&auml;chst nur auf deinem
             Ger&auml;t. Ein Konto ist freiwillig. Die App zeigt keine Werbung,
-            setzt keine Cookies und enth&auml;lt keine Analyse- oder
-            Tracking-Dienste.
+            setzt keine Cookies und bindet keinen fremden Analysedienst ein.
+            Wie oft die Seite aufgerufen wird, z&auml;hlen wir selbst &ndash;
+            aber nur als Summe, ohne dich wiederzuerkennen (Punkt 8).
           </p>
 
           <p class="label">1. Hosting</p>
@@ -950,7 +951,31 @@
             Touren, Profil und das Konto selbst entfernt.
           </p>
 
-          <p class="label">8. Deine Rechte</p>
+          <p class="label">8. Besuchsz&auml;hlung</p>
+          <p>
+            Um zu sehen, ob die Seite &uuml;berhaupt gefunden wird,
+            z&auml;hlen wir Seitenaufrufe. Beim &Ouml;ffnen meldet die App
+            an unsere eigene Datenbank bei Supabase (Region Stockholm, EU)
+            genau drei Angaben: das Datum, die Geräteart (Handy, Tablet oder
+            Desktop) und den Hostnamen der Seite, von der du kamst, etwa
+            &bdquo;google.de&ldquo; oder &bdquo;direkt&ldquo;. Daraus wird
+            ein Z&auml;hler erh&ouml;ht.
+          </p>
+          <p>
+            Es entsteht dabei kein Eintrag &uuml;ber dich: Wir speichern
+            weder deine IP-Adresse noch eine Kennung, setzen kein Cookie und
+            legen nichts auf deinem Ger&auml;t ab. Zwei Besuche derselben
+            Person sind f&uuml;r uns nicht als solche erkennbar. In der
+            Datenbank steht am Ende nur eine Zeile der Form
+            &bdquo;26.08.2026, google.de, Handy, 12 Aufrufe&ldquo;.
+            Rechtsgrundlage ist unser berechtigtes Interesse an einer
+            Reichweitenmessung ohne Personenbezug (Art. 6 Abs. 1 lit. f
+            DSGVO). Eine Einwilligung ist daf&uuml;r nicht erforderlich,
+            weil auf deinem Endger&auml;t nichts gespeichert oder ausgelesen
+            wird (&sect; 25 TDDDG).
+          </p>
+
+          <p class="label">9. Deine Rechte</p>
           <p>
             Du hast das Recht auf Auskunft, Berichtigung, L&ouml;schung,
             Einschr&auml;nkung der Verarbeitung, Daten&uuml;bertragbarkeit
@@ -960,7 +985,7 @@
             das Recht auf Akteneinsicht Brandenburg.
           </p>
 
-          <p class="tiny">Stand: 25.08.2026</p>
+          <p class="tiny">Stand: 26.08.2026</p>
         </div>
       </details>
     </div>
@@ -1684,16 +1709,16 @@
   <!-- ZUERST, denn alle anderen benutzen geraet.* beim Laden. Hier steht der
        gesamte Zugriff aufs Geraet - Standort, Speicher, Dateien. Beim Umzug
        in die Stores ist das die einzige Datei, die sich aendert. -->
-  <script src="geraet.js?v=91"></script>
+  <script src="geraet.js?v=92"></script>
   <!-- Der Rechenteil: Kurvigkeit, Sackgassen, Rundtour-Punkte, GPX. Muss VOR
        app.js stehen, weil app.js diese Funktionen beim Routen aufruft. Die
        spaetere Webseite im Querformat laedt genau diese Datei ebenfalls und
        rechnet damit exakt so wie die App. -->
-  <script src="kern.js?v=91"></script>
-  <script src="app.js?v=91"></script>
+  <script src="kern.js?v=92"></script>
+  <script src="app.js?v=92"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=91"></script>
+  <script src="konto.js?v=92"></script>
   <!-- Die Garage in drei Teilen. Die Reihenfolge ist nicht beliebig:
 
        finder.js       zuerst, weil zeichneGarage() am Ende von garage.js
@@ -1705,13 +1730,19 @@
 
        Alle drei nach app.js, weil sie verkleinereFoto(), showToast() und
        verkabele() von dort benutzen. -->
-  <script src="finder.js?v=91"></script>
-  <script src="garage.js?v=91"></script>
-  <script src="freisteller.js?v=91"></script>
+  <script src="finder.js?v=92"></script>
+  <script src="garage.js?v=92"></script>
+  <script src="freisteller.js?v=92"></script>
   <!-- Der Demo-Produktkatalog (nur Daten) und die Shop-Logik. produkte.js
        muss vor shop.js stehen, und beide nach garage.js, weil shop.js
        dessen verkabele() mitbenutzt. -->
-  <script src="produkte.js?v=91"></script>
-  <script src="shop.js?v=91"></script>
+  <script src="produkte.js?v=92"></script>
+  <script src="shop.js?v=92"></script>
+  <!-- Die Besuchszaehlung. Zuletzt, weil sie nichts kann, was jemand anders
+       braucht - und nach konto.js, weil sie die dort stehende Serveradresse
+       und den oeffentlichen Schluessel mitbenutzt, statt beides ein zweites
+       Mal aufzuschreiben. Sie meldet nur eine Summe und legt nichts auf dem
+       Geraet ab; die Begruendung steht ausfuehrlich im Kopf der Datei. -->
+  <script src="besucher.js?v=92"></script>
 </body>
 </html>

@@ -43,6 +43,7 @@ Dateien. Das ist auch der Grund für die 5-MB-Grenze und dafür, dass
 | **vpic.nhtsa.dot.gov** | Motorradmodelle im Finder | Marke und Baujahr, keine Nutzerdaten | USA |
 | **Supabase** (`copydwpdqpnwjvknsakz`) | Konten, Profile, geteilte Touren, Fotos | E-Mail, Benutzername, Profilbild, Touren, Fotos | EU (Schweden, `eu-north-1`) |
 | **de/en.wikipedia.org** | Hubraum und Leistung aus der Infobox des Modells | Marke + Modell als Suchtext, IP-Adresse | USA/weltweit (Wikimedia) |
+| **Supabase** (dieselbe Datenbank) | Besuchszählung, siehe unten | Datum, Geräteart, Hostname der Herkunftsseite | EU (Schweden) |
 
 **Ungenutzt, aber im Code vorbereitet:** `carimagesapi.com` und
 `api.api-ninjas.com`. Beide haben keinen Schlüssel und werden nicht
@@ -173,6 +174,12 @@ Ausfahrten anderer Leute mit.
   weiter oben in einem eigenen Abschnitt. Das gehört in die
   Datenschutzerklärung, weil es die Auskunft über das Recht auf Löschung
   konkret beantwortet.
+- **Die Besuchszählung** steht als Punkt 8 in der Erklärung. Rechtsgrundlage
+  ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einer
+  Reichweitenmessung), und sie trägt nur, solange kein Personenbezug
+  entsteht. Wer der Zählung eines Tages eine Kennung, eine IP oder einen
+  Wiedererkennungswert hinzufügt, kippt genau diese Grundlage und braucht
+  dann ein Einwilligungsbanner.
 - Kommt Werbung dazu, kommt ein ganzer Abschnitt dazu: welches Netzwerk,
   welche Kennungen, wie der Nutzer widersprechen kann.
 
@@ -204,12 +211,40 @@ Datenschutzerklärung:
 - Der oben angekündigte Werbe-Abschnitt wird fällig: Netzwerk, Kennungen,
   Widerspruch.
 
+## Die Besuchszählung (seit 26.08.2026)
+
+Beim Öffnen der Seite meldet `besucher.js` an die eigene Supabase-Datenbank
+drei Angaben: das Datum, die Geräteart (`handy`, `tablet`, `desktop`, aus
+der kurzen Fensterseite) und den **Hostnamen** der Herkunftsseite
+(`google.de`, sonst `direkt`). Daraus wird in der Tabelle `besuche` ein
+Zähler erhöht.
+
+Was dabei bewusst NICHT passiert, und darauf beruht die ganze Konstruktion:
+
+- keine IP-Adresse, keine Kennung, kein Cookie, nichts auf dem Gerät –
+  deshalb greift § 25 TDDDG nicht und es braucht kein Einwilligungsbanner
+- keine Zeile je Besucher, nur Summen je Tag – deshalb entsteht kein
+  Personenbezug, und zwei Besuche derselben Person sind nicht als solche
+  erkennbar
+- nie die volle Herkunfts-Adresse, nur ihr Hostname – eine
+  Suchmaschinen-Adresse kann den Suchbegriff enthalten, der Hostname nicht
+- nicht auf `localhost` – sonst misst die Zählung hauptsächlich die eigene
+  Entwicklung
+
+Der Preis: Es sind Seitenaufrufe, keine Besucher. Wer zweimal lädt, zählt
+zweimal. Das ist die ehrliche Kehrseite davon, niemanden wiederzuerkennen,
+und steht im Dashboard genauso da.
+
+Wer hier etwas ändert, ändert Punkt 8 der Datenschutzerklärung in
+`index.html` mit.
+
 ## Was die App NICHT tut
 
 Bewusst festgehalten, weil es in der Erklärung ausdrücklich stehen darf:
 
-- keine Analyse, kein Tracking, keine Zählpixel – auch der Shop zählt
-  keine Klicks
+- kein fremder Analysedienst, kein Tracking, keine Zählpixel, kein
+  Wiedererkennen zwischen zwei Besuchen – auch der Shop zählt keine Klicks
+  (die eigene Besuchszählung oben zählt nur Summen)
 - **Die Bewegungssensoren werden nur während einer Aufzeichnung gelesen**
   und nur, wenn der Nutzer den Nullpunkt gesetzt hat. Die Werte bleiben
   auf dem Gerät; gespeichert wird von einer Fahrt nur die größte

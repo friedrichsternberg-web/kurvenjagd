@@ -426,3 +426,53 @@ zurückgenommen.
 warten bis `dig +short serpa-app.de` die GitHub-Adressen zeigt, DANN die
 CNAME-Datei und die Custom Domain bei GitHub. `og:url` und `canonical`
 dürfen schon vorher auf die neue Domain zeigen, das schadet nicht.
+
+## 26.08.2026 — Besuchszählung: selbst gebaut statt GoatCounter oder Plausible
+
+**Gewählt:** eine eigene Tabelle in der bereits vorhandenen
+Supabase-Datenbank, gefüllt von `besucher.js`. **Verworfen:** GoatCounter
+(kostenlos, aber die kostenlose Stufe ist ausdrücklich für nicht-kommerzielle
+Seiten gedacht, und Serpa soll Provisionen einbringen) und Plausible
+(9 €/Monat, technisch tadellos, aber ein weiterer Empfänger in der
+Datenschutzerklärung für eine Zahl, die die eigene Datenbank auch liefert).
+
+Der Ausschlag gab nicht der Preis, sondern die Bauform. Ein fremder
+Zähldienst ist ein Dritter, dem jeder Besucher begegnet, bevor er
+irgendetwas getan hat. Die eigene Lösung schickt dieselbe Anfrage an einen
+Server, mit dem die App ohnehin spricht.
+
+**Die entscheidende Bauentscheidung: keine Zeile je Besucher, nur Summen.**
+In der Tabelle steht `26.08.2026 | google.de | handy | 12` und sonst nichts.
+Das ist bewusst weniger, als technisch ginge, und zwar an zwei Stellen
+zugleich:
+
+- Es wird nichts auf dem Gerät abgelegt, kein Cookie und kein Eintrag im
+  Browserspeicher. Damit greift § 25 TDDDG nicht, und es braucht kein
+  Einwilligungsbanner.
+- Es entsteht kein Personenbezug: keine IP, keine Kennung, kein
+  Wiedererkennen. Damit trägt Art. 6 Abs. 1 lit. f DSGVO.
+
+Der Preis dafür ist echt und wird nicht schöngerechnet: Es sind
+**Seitenaufrufe, keine Besucher**. Wer zweimal lädt, zählt zweimal. Ein
+Zähler für einzelne Personen wäre nur mit einem Wiedererkennungsmerkmal zu
+haben, und genau das soll es nicht geben.
+
+Eine Sitzung später ist das leicht wieder aufzuweichen. Deshalb hier
+festgehalten: Wer der Zählung eine Kennung, eine IP oder einen Hash daraus
+hinzufügt, kippt beide Rechtsgrundlagen gleichzeitig und braucht dann ein
+Einwilligungsbanner vor dem ersten Aufruf.
+
+## 26.08.2026 — Der BRouter-Ping im Dashboard war die falsche Frage
+
+Das Dashboard maß BRouter über `/brouter/profile/car-eco` und zeigte
+konstant rund 1,1 Sekunden. Das sah nach einem lahmen Server aus, war aber
+der Endpunkt zum Hochladen eigener Profile — die Zeit entstand dort, nicht
+auf dem Weg.
+
+Jetzt wird eine echte, sehr kurze Route berechnet (zwei Punkte in Berlin).
+Das ist genau die Fähigkeit, die die App braucht, und sie kommt in rund
+170 Millisekunden zurück. Der Server steht bei Hetzner in Falkenstein.
+
+Die Lehre taugt über diesen Fall hinaus: Eine Überwachung soll das messen,
+was die App tatsächlich tut. Ein Ping auf irgendeine erreichbare Adresse
+desselben Servers beantwortet eine Frage, die niemand gestellt hat.
