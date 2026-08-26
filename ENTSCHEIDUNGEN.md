@@ -515,3 +515,29 @@ eine Voraussetzung erzwingt, die noch nicht erfüllt ist, macht aus einem
 fehlenden Zertifikat einen Totalausfall. Wer so eine Regel setzt, muss
 prüfen, was passiert, solange die Voraussetzung fehlt – und nicht erst,
 wenn alles steht.
+
+## 26.08.2026 — Der DNS-Check bei GitHub hing, und was ihn löste
+
+Das Zertifikat für serpa-app.de kam einen Tag nach dem DNS-Test immer noch
+nicht. In den Pages-Einstellungen stand der Grund: **„DNS Check in
+Progress"** und der Zertifikatsvorgang bei **1 von 3**. GitHub wartete auf
+einen eigenen DNS-Test, der nicht fertig wurde – obwohl die Einträge
+korrekt waren und über Google, Cloudflare und die INWX-Namensserver
+unabhängig geprüft wurden. Als Ursache ausgeschlossen: keine
+AAAA-Einträge, keine CAA-Einträge.
+
+**Die Lösung:** in Settings → Pages die Custom Domain einmal entfernen und
+sofort wieder eintragen. Danach sprang der Check auf „DNS check
+successful", „Enforce HTTPS" wurde anhakbar und war es bereits, und das
+Zertifikat war da. Ausgestellt hatte Let's Encrypt es übrigens schon um
+13:02 UTC – GitHub hatte es nur nicht aktiviert, weil der Check hing.
+
+**Die Falle dabei, und die ist wichtig:** „Remove" löscht die
+`CNAME`-Datei aus dem Repository. Zwischen Entfernen und Wiedereintragen
+lieferte GitHub für die Domain rund eine Minute lang „Site not found".
+GitHub legt die Datei beim Speichern selbst wieder an (zwei Commits,
+„Delete CNAME" und „Create CNAME"), man muss danach also lokal einmal
+`git pull` machen, sonst laufen die Stände auseinander.
+
+Wer das noch einmal braucht: erst prüfen, ob es wirklich hängt (Seite neu
+laden, Zustand bleibt), und den kurzen Ausfall einplanen.
