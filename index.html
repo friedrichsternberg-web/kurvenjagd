@@ -105,10 +105,37 @@
        die native Huelle - Name, Farben und Symbole werden dort aus denselben
        Dateien erzeugt. Wer sie jetzt richtig setzt, setzt sie einmal.
 
-       "orientation": "portrait" im Manifest ist die Ansage, um die es hier
-       geht: Diese App ist fuers Hochformat gebaut. Die spaetere Webseite
-       bekommt ein eigenes Design fuers Querformat und ein eigenes Manifest. -->
-  <link rel="manifest" href="manifest.webmanifest?v=94">
+       "orientation" steht im Manifest auf "any", seit die Fassung fuers
+       Querformat dazugekommen ist. Vorher stand dort "portrait" - das war
+       richtig, solange es nur das Hochformat gab, und wurde falsch in dem
+       Moment, in dem quer.css die App auf breiten Bildschirmen ordentlich
+       anordnet. Beides ist dieselbe App unter derselben Adresse.
+
+       WELCHES SYMBOL WO GILT, denn das entscheiden drei verschiedene Stellen:
+
+         Android und Chrome    nehmen die Liste "icons" aus dem Manifest.
+         iPhone und iPad       ignorieren sie und nehmen apple-touch-icon.
+         Der Reiter im Browser nimmt rel="icon".
+
+       Deshalb steht dasselbe Bild hier dreimal. Wer eines vergisst, bekommt
+       an genau dieser Stelle ein graues Ersatzsymbol - und merkt es oft
+       erst, wenn jemand die App auf den Startbildschirm legt.
+
+       DAS "?symbol=2" IM MANIFEST ist etwas anderes als das "?v=" hier und
+       darf nicht mit ihm mitwachsen. Ein Handy, auf dem die App schon liegt,
+       behaelt sein einmal geholtes Symbol, solange dessen Adresse gleich
+       bleibt - beim Wechsel vom alten orangen Platzhalter auf das jetzige
+       Symbol waere sonst bei allen Bestandsnutzern das alte stehen
+       geblieben. Die Zahl wird also nur dann hochgezaehlt, wenn sich das
+       Symbol wirklich aendert, und JSON erlaubt keine Kommentare - deshalb
+       steht die Erklaerung hier. -->
+  <link rel="manifest" href="manifest.webmanifest?v=95">
+
+  <!-- Das Symbol im Reiter des Browsers. Zwei Groessen, damit der Browser
+       nehmen kann, was er gerade braucht: das kleine fuer den Reiter, das
+       grosse fuer Lesezeichen und die Kachel auf der Startseite. -->
+  <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png?v=95">
+  <link rel="icon" type="image/png" sizes="192x192" href="img/icon-192.png?v=95">
 
   <!-- Faerbt die Statusleiste des Handys in die Grundflaeche der App, damit
        oben kein fremder heller Streifen stehen bleibt. -->
@@ -121,7 +148,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Serpa">
-  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=94">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=95">
 
   <!-- Fuer die spaetere Webseite und geteilte Routen: So sieht der Link aus,
        wenn ihn jemand in WhatsApp oder Instagram einfuegt. Ohne das steht
@@ -186,12 +213,12 @@
                    die spaetere Webseite genauso benutzen.
        style.css   die Anordnung DIESER App, ausgelegt auf Hochformat. Die
                    Webseite bekommt dafuer eine eigene Datei. -->
-  <link rel="stylesheet" href="design.css?v=94">
-  <link rel="stylesheet" href="style.css?v=94">
+  <link rel="stylesheet" href="design.css?v=95">
+  <link rel="stylesheet" href="style.css?v=95">
   <!-- Die Anordnung fuer breite Bildschirme. Laedt NACH style.css und
        ueberschreibt dessen Hochformat-Anordnung nur dann, wenn das Fenster
        mindestens 900x500 Punkte hat - auf dem Handy bleibt sie stumm. -->
-  <link rel="stylesheet" href="quer.css?v=94">
+  <link rel="stylesheet" href="quer.css?v=95">
 </head>
 <body>
 
@@ -1727,16 +1754,16 @@
   <!-- ZUERST, denn alle anderen benutzen geraet.* beim Laden. Hier steht der
        gesamte Zugriff aufs Geraet - Standort, Speicher, Dateien. Beim Umzug
        in die Stores ist das die einzige Datei, die sich aendert. -->
-  <script src="geraet.js?v=94"></script>
+  <script src="geraet.js?v=95"></script>
   <!-- Der Rechenteil: Kurvigkeit, Sackgassen, Rundtour-Punkte, GPX. Muss VOR
        app.js stehen, weil app.js diese Funktionen beim Routen aufruft. Die
        spaetere Webseite im Querformat laedt genau diese Datei ebenfalls und
        rechnet damit exakt so wie die App. -->
-  <script src="kern.js?v=94"></script>
-  <script src="app.js?v=94"></script>
+  <script src="kern.js?v=95"></script>
+  <script src="app.js?v=95"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=94"></script>
+  <script src="konto.js?v=95"></script>
   <!-- Die Garage in drei Teilen. Die Reihenfolge ist nicht beliebig:
 
        finder.js       zuerst, weil zeichneGarage() am Ende von garage.js
@@ -1748,19 +1775,19 @@
 
        Alle drei nach app.js, weil sie verkleinereFoto(), showToast() und
        verkabele() von dort benutzen. -->
-  <script src="finder.js?v=94"></script>
-  <script src="garage.js?v=94"></script>
-  <script src="freisteller.js?v=94"></script>
+  <script src="finder.js?v=95"></script>
+  <script src="garage.js?v=95"></script>
+  <script src="freisteller.js?v=95"></script>
   <!-- Der Demo-Produktkatalog (nur Daten) und die Shop-Logik. produkte.js
        muss vor shop.js stehen, und beide nach garage.js, weil shop.js
        dessen verkabele() mitbenutzt. -->
-  <script src="produkte.js?v=94"></script>
-  <script src="shop.js?v=94"></script>
+  <script src="produkte.js?v=95"></script>
+  <script src="shop.js?v=95"></script>
   <!-- Die Besuchszaehlung. Zuletzt, weil sie nichts kann, was jemand anders
        braucht - und nach konto.js, weil sie die dort stehende Serveradresse
        und den oeffentlichen Schluessel mitbenutzt, statt beides ein zweites
        Mal aufzuschreiben. Sie meldet nur eine Summe und legt nichts auf dem
        Geraet ab; die Begruendung steht ausfuehrlich im Kopf der Datei. -->
-  <script src="besucher.js?v=94"></script>
+  <script src="besucher.js?v=95"></script>
 </body>
 </html>

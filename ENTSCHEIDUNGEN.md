@@ -541,3 +541,45 @@ GitHub legt die Datei beim Speichern selbst wieder an (zwei Commits,
 
 Wer das noch einmal braucht: erst prüfen, ob es wirklich hängt (Seite neu
 laden, Zustand bleibt), und den kurzen Ausfall einplanen.
+
+## 26.08.2026 — Das App-Symbol: dasselbe Bild an drei Stellen
+
+Bis heute lag im Ordner ein oranger Platzhalter mit einem Fahrrad-Piktogramm
+(ausgerechnet ein Fahrrad). Ersetzt durch Friedrichs fertiges Symbol: eine
+gebürstete Metallplatte mit Höhenlinien, darin ein dunkles Naked Bike auf
+einer kurvigen Straße.
+
+**Warum dasselbe Bild dreimal eingebunden ist.** Das ist keine Redundanz,
+sondern drei getrennte Zuständigkeiten:
+
+| Wer fragt | Woher er nimmt |
+|---|---|
+| Android, Chrome | die Liste `icons` im Manifest |
+| iPhone, iPad | `<link rel="apple-touch-icon">`, das Manifest ignoriert Apple hier bis heute |
+| Der Reiter im Browser | `<link rel="icon">` |
+
+Fehlt eine der drei, erscheint an genau dieser Stelle ein graues
+Ersatzsymbol — und das merkt man oft erst, wenn jemand die App auf den
+Startbildschirm legt. Der Reiter-Link fehlte bisher ganz.
+
+**Das maskierbare Symbol hat absichtlich einen Rand.** Android schneidet
+daraus je nach Gerät einen Kreis, ein abgerundetes Quadrat oder einen
+Tropfen. Ohne Rand wäre der silberne Rahmen des Symbols das Erste, was
+verschwindet. Deshalb sitzt das Motiv dort auf 78 Prozent der Fläche, dem
+Wert der von Android vorgegebenen sicheren Zone, und der Rest ist dunkel.
+
+**`?symbol=2` im Manifest ist nicht dasselbe wie `?v=` in `index.html` und
+darf nicht mit ihm mitwachsen.** Ein Handy, auf dem die App bereits liegt,
+behält sein einmal geholtes Symbol, solange dessen Adresse gleich bleibt —
+ohne diese Zahl wäre bei allen Bestandsnutzern das orange Fahrrad stehen
+geblieben. Sie wird nur hochgezählt, wenn sich das Symbol wirklich ändert.
+Da JSON keine Kommentare erlaubt, steht die Erklärung im Kopf von
+`index.html`.
+
+**Zu den Dateigrößen.** Die Vorlage war ein 1254er PNG mit knapp 3 MB. Jede
+Größe wird zweimal gespeichert, mit vollen Farben und mit einer auf 256
+Farben verkleinerten Palette, und es gewinnt die kleinere — solange die
+gemessene Abweichung unter 1,5 von 255 bleibt. Das halbiert die Dateien
+(512er von 459 auf 208 KB), ohne dass am gebürsteten Metall Streifen
+entstehen. Nur `img/app-icon-quelle.png` bleibt in vollen Farben: 1024
+Punkte, genau das Maß, das Apple später für den App Store verlangt.
