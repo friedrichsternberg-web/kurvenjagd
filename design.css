@@ -235,6 +235,12 @@
      entscheidet die Anordnung: im Hochformat unten (style.css), im
      Querformat oben (quer.css) - der Platzhalter ist derselbe. */
   --nav-h: 58px;
+  /* Im Querformat ist dieselbe Leiste die Kopfzeile einer Webseite und
+     darf mehr Gewicht haben als eine Daumenleiste - quer.css legt --nav-h
+     innerhalb seines Media-Blocks auf diesen Wert um. Alles Weitere folgt
+     von selbst, weil Margen, Hoehenformeln und der Toast an --nav-h
+     rechnen. */
+  --nav-h-quer: 80px;
   --nav-raum: 0px;
 
   /* Masse fuer breite Bildschirme. Hier und nicht in quer.css, weil eine

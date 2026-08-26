@@ -36,16 +36,24 @@
      Webseite. Alles an ihr (Eintraege, Leuchten, Verkabelung, das
      Verstecken im Navi-Modus) bleibt der bestehende Code. */
 
+  /* Die Leiste ist hier hoeher als im Hochformat (--nav-h-quer statt der
+     58 Punkte, definiert in design.css): Als Kopf einer Webseite darf sie
+     Gewicht haben, waehrend sie als Daumenleiste unten so flach wie
+     moeglich sein soll. Der Umweg ueber die Marke ist Absicht - Margen,
+     Hoehenformeln und der Toast rechnen alle mit --nav-h, und so waechst
+     alles gemeinsam, statt dass der Inhalt unter die Leiste rutscht. */
+  :root { --nav-h: var(--nav-h-quer); }
+
   .haupt-nav {
     top: 0;
     bottom: auto;
     height: calc(var(--nav-h) + env(safe-area-inset-top));
     padding-top: env(safe-area-inset-top);
     padding-bottom: 0;
-    padding-inline: var(--s5);
+    padding-inline: var(--s6);
     justify-content: flex-start;
     align-items: center;
-    gap: var(--s2);
+    gap: var(--s3);
     border-top: 0;
     border-bottom: 1px solid var(--glas-hell);
     /* Kante unten rund statt oben, Schatten nach unten statt nach oben -
@@ -57,29 +65,32 @@
   }
 
   /* Aus den gestapelten Daumen-Tabs werden Reiheneintraege: Symbol und
-     Wort nebeneinander, nur so breit wie ihr Inhalt. */
+     Wort nebeneinander, nur so breit wie ihr Inhalt. Schrift und Symbole
+     sind auf die hoehere Leiste abgestimmt - die 11px-Beschriftung der
+     Daumenleiste waere hier oben verloren. */
   .nav-tab {
     flex: 0 0 auto;
     flex-direction: row;
     gap: var(--s2);
-    padding: 0 var(--s3);
+    padding: 0 var(--s4);
     height: 100%;
-    font-size: 13px;
+    font-size: 16px;
+    letter-spacing: 0.06em;
   }
-  .nav-tab .ic { width: 18px; height: 18px; }
+  .nav-tab .ic { width: 24px; height: 24px; }
 
   /* Der Schriftzug mit Untertitel, zweizeilig wie der Kopf des Planers.
      Die Zeilen stehen eng beieinander (line-height 1), damit beide in die
-     58 Punkte hohe Leiste passen. */
+     Leiste passen; die Groessen sind auf --nav-h-quer abgestimmt. */
   .nav-marke {
     display: inline-flex;
     flex-direction: column;
     justify-content: center;
-    margin-right: var(--s5);
+    margin-right: var(--s6);
   }
   .nav-marke-name {
     font-family: var(--schrift-display);
-    font-size: 21px;
+    font-size: 28px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -87,8 +98,8 @@
     color: var(--text);
   }
   .nav-marke-sub {
-    font-size: 11px;
-    line-height: 1.3;
+    font-size: 13px;
+    line-height: 1.4;
     color: var(--muted);
   }
 
