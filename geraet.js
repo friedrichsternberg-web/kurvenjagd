@@ -1,5 +1,5 @@
 /* ============================================================================
-   Kurvenjagd - Zugriff auf das Gerät
+   Serpa - Zugriff auf das Gerät
 
    In dieser Datei steht ALLES, was die App am Gerät selbst anfasst: Standort,
    Bildschirmsperre, Speicher, Dateien herausgeben, Teilen.

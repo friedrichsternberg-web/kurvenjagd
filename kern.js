@@ -1,5 +1,5 @@
 /* ============================================================================
-   Kurvenjagd - kern.js: der Rechenteil
+   Serpa - kern.js: der Rechenteil
 
    Hier steht alles, was mit Koordinaten rechnet und dabei NICHTS von der
    Oberfläche weiß. Keine Zeile in dieser Datei fasst document, map, state,
@@ -412,7 +412,7 @@ function pickBestRoute(routes, t) {
 
 /* --- 3. Rundtour ------------------------------------------------------------
    Es gibt keinen kostenlosen Dienst, der auf Zuruf eine Rundtour ab einem
-   Punkt liefert - deshalb würfelt Kurvenjagd sich die Zwischenpunkte selbst
+   Punkt liefert - deshalb würfelt Serpa sich die Zwischenpunkte selbst
    zusammen und lässt BRouter eine Route durch sie hindurch legen.
 
    In diesem Abschnitt steht beides: das Verteilen und Verschieben der Punkte
@@ -928,13 +928,13 @@ function zieheRundeAuf(start, punkte, faktor, straßenPool, gemiedeneZonen) {
 // Baut aus den Streckenpunkten einer Route (Format [[lon, lat, höhe], ...],
 // so liefert BRouter sie) den vollständigen Inhalt einer GPX-Datei.
 // Der Name erscheint später im Navi als Bezeichnung der Tour.
-function baueGpx(coords, name = 'Kurvenjagd-Tour') {
+function baueGpx(coords, name = 'Serpa-Tour') {
   const pts = coords.map(c =>
     `      <trkpt lat="${c[1].toFixed(6)}" lon="${c[0].toFixed(6)}">${
       c[2] !== undefined ? `<ele>${c[2]}</ele>` : ''}</trkpt>`).join('\n');
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<gpx version="1.1" creator="Kurvenjagd" xmlns="http://www.topografix.com/GPX/1/1">
+<gpx version="1.1" creator="Serpa" xmlns="http://www.topografix.com/GPX/1/1">
   <trk>
     <name>${name}</name>
     <trkseg>

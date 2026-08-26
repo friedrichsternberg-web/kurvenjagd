@@ -1,5 +1,5 @@
 /* ============================================================================
-   Kurvenjagd - die Logik der App
+   Serpa - die Logik der App
    ----------------------------------------------------------------------------
    Grober Ablauf:
      1) Karte anzeigen
@@ -2581,6 +2581,13 @@ document.addEventListener('visibilitychange', () => {
 
 /* --- 16. Speichern (im Browser) ----------------------------------------- */
 
+/* Die Speicherschluessel tragen weiter den alten Namen "kurvenjagd", obwohl
+   die App inzwischen Serpa heisst. Das ist Absicht und darf NICHT
+   nachgezogen werden: Der Schluessel ist die Adresse der Daten im Browser.
+   Wer ihn umbenennt, findet die Routen und die Garage aller bestehenden
+   Nutzer nicht mehr - sie waeren nicht geloescht, aber unerreichbar. Ein
+   Umzug braeuchte eine Umschreibe-Funktion beim ersten Start; solange es
+   die nicht gibt, bleibt der Name. */
 const STORE = 'kurvenjagd.routen';
 
 function loadSaved() {
@@ -2807,7 +2814,7 @@ function exportGpx() {
 
   // Wie die Datei beim Nutzer landet, entscheidet geraet.js - im Browser ein
   // Download, in der späteren App das Teilen-Blatt des Systems.
-  geraet.dateiAnbieten('kurvenjagd-tour.gpx',
+  geraet.dateiAnbieten('serpa-tour.gpx',
                        baueGpx(state.route.coords),
                        'application/gpx+xml');
 }

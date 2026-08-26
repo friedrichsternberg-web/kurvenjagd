@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /* ============================================================================
-   Kurvenjagd - Anordnung der App (Hochformat)
+   Serpa - Anordnung der App (Hochformat)
 
    Diese Datei beschreibt, WIE DIE SEITEN AUFGEBAUT sind: die Schublade, die
    untere Leiste, die Garage, der Freisteller, die Karte.
@@ -712,7 +712,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   gap: 20px;
 }
 
-/* .brand-title: der Name "Kurvenjagd" mit dem Punkt in der Signalfarbe davor - wird
+/* .brand-title: der Name "Serpa" mit dem Punkt in der Signalfarbe davor - wird
    sowohl im Bedienfeld-Header als auch auf dem Startbildschirm genutzt. */
 .brand-title {
   margin: 0;

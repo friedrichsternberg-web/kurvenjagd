@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Kurvenjagd - Konto und Verbindung zum Server (Supabase)
+   Serpa - Konto und Verbindung zum Server (Supabase)
 
    Warum es diese Datei überhaupt gibt: Bis jetzt liegt alles, was die App
    speichert, im localStorage - also im Handy des Nutzers eingesperrt. Für

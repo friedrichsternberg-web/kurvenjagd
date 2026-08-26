@@ -293,7 +293,7 @@ function zeichneMerkliste() {
 
 
 /* --- 5. "Fuer dich": Vorschlaege aus der Garage -----------------------------
-   Das ist der Gedanke hinter dem ganzen Shop: Kurvenjagd weiss aus der
+   Das ist der Gedanke hinter dem ganzen Shop: Serpa weiss aus der
    Garage, welches Motorrad jemand faehrt und welche Ausruestung er schon
    hat - eine allgemeine Preissuchmaschine weiss das nicht. Drei Regeln,
    der Reihe nach, bis drei Vorschlaege zusammen sind:
