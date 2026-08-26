@@ -68,16 +68,28 @@
   }
   .nav-tab .ic { width: 18px; height: 18px; }
 
-  /* Der Schriftzug: dieselbe Stimme wie die Ueberschriften der App. */
+  /* Der Schriftzug mit Untertitel, zweizeilig wie der Kopf des Planers.
+     Die Zeilen stehen eng beieinander (line-height 1), damit beide in die
+     58 Punkte hohe Leiste passen. */
   .nav-marke {
-    display: inline;
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-right: var(--s5);
+  }
+  .nav-marke-name {
     font-family: var(--schrift-display);
-    font-size: 22px;
+    font-size: 21px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
+    line-height: 1;
     color: var(--text);
-    margin-right: var(--s5);
+  }
+  .nav-marke-sub {
+    font-size: 11px;
+    line-height: 1.3;
+    color: var(--muted);
   }
 
   /* Der rechte Bereich: schiebt sich selbst an den Rand. */
