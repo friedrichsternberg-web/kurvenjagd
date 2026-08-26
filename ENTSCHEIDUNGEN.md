@@ -401,3 +401,28 @@ bleibt beim Hochformat-Layout.
 Schubladen-Höhe des Planer-Bedienfelds blieb als style-Attribut stehen
 und fror die Desktop-Seitenleiste auf Schubladen-Höhe ein. Der
 resize-Handler räumt sie jetzt beim Wechsel auf das breite Layout.
+
+## 25.08.2026 — Die App heißt Serpa, und die CNAME-Falle
+
+**Der Name.** Die Domain serpa-app.de war gekauft, die App hieß Kurvenjagd.
+Friedrichs Entscheidung: Die App heißt jetzt Serpa. Umbenannt ist alles
+Sichtbare (Titel, Schriftzug, Manifest, geteilte Links, GPX-Ersteller).
+
+**Nicht umbenannt sind die Speicherschlüssel** `kurvenjagd.routen`,
+`kurvenjagd.garage`, `kurvenjagd.shop`, `kurvenjagd.neigungBasis` und
+`kurvenjagd.profilbild.wartend`. Der Schlüssel ist die Adresse der Daten im
+Browser: Wer ihn ändert, findet Routen und Garage aller bestehenden Nutzer
+nicht mehr. Sie wären nicht gelöscht, aber unerreichbar. Ein Umzug bräuchte
+eine Umschreibe-Funktion beim ersten Start.
+
+**Die CNAME-Falle.** Die CNAME-Datei wanderte ins Repository, bevor das DNS
+bei INWX eingerichtet war. GitHub Pages stellt daraufhin sofort die eigene
+Domain ein und leitet die alte Adresse per 301 dorthin um. Das DNS zeigte
+aber noch auf den Parkplatz des Registrars (185.181.104.242), also lief die
+Umleitung ins Leere: Die App war unter **beiden** Adressen tot. Sofort
+zurückgenommen.
+
+**Die Reihenfolge, die gilt:** erst die vier A-Einträge bei INWX, dann
+warten bis `dig +short serpa-app.de` die GitHub-Adressen zeigt, DANN die
+CNAME-Datei und die Custom Domain bei GitHub. `og:url` und `canonical`
+dürfen schon vorher auf die neue Domain zeigen, das schadet nicht.
