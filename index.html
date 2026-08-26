@@ -579,6 +579,13 @@
         </div>
       </div>
 
+      <!-- Die Pflichtangaben. Dezent im Fuss, wie auf jeder Webseite, aber
+           lesbar und auf dem Startbildschirm - von hier aus ist es aus der
+           ganzen App ein Tipp auf "Garage" und ein zweiter hierher. -->
+      <p class="rechts-fuss">
+        <button class="linkbtn" id="btnRechtlichesGarage">Impressum &amp; Datenschutz</button>
+      </p>
+
     </div>
   </div>
 
@@ -640,6 +647,13 @@
         <span id="kontoWechselText">Noch kein Konto?</span>
         <button class="linkbtn" id="btnKontoWechseln">Konto anlegen</button>
       </p>
+
+      <!-- Auf diesem Bildschirm ist die untere Leiste ausgeblendet, die
+           Garage waere also nicht in einem Tipp erreichbar. Deshalb hier
+           ein eigener Weg zu den Pflichtangaben. -->
+      <p class="rechts-fuss">
+        <button class="linkbtn" id="btnRechtlichesKonto">Impressum &amp; Datenschutz</button>
+      </p>
     </div>
   </div>
 
@@ -685,6 +699,7 @@
       </div>
 
       <div class="profil-liste">
+        <button class="linkbtn" id="btnRechtlichesProfil">Rechtliches</button>
         <button class="linkbtn" id="btnKontoAbmelden">Abmelden</button>
         <!-- Beide Stores verlangen zwingend, dass man sein Konto INNERHALB
              der App loeschen kann - nicht per Mail, nicht ueber ein
@@ -784,6 +799,168 @@
         </p>
         <button class="btn" id="btnKontoGeloeschtWeiter">Zur Garage</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ===== Rechtliches: Impressum und Datenschutzerklaerung =====
+       Pflicht nach § 5 DDG und Art. 13 DSGVO, sobald die App oeffentlich
+       erreichbar ist. Beides muss "leicht erkennbar, unmittelbar
+       erreichbar und staendig verfuegbar" sein - in der Praxis heisst
+       das: von jedem Bildschirm mit hoechstens zwei Tipps, unter einem
+       Wort, das jeder versteht.
+
+       Deshalb fuehren drei Wege hierher: die Fusszeile unter dem
+       Garagen-Menue (die Garage ist der Startbildschirm), der Eintrag im
+       Profil und ein Link auf dem Anmeldebildschirm - auf den beiden
+       Konto-Bildschirmen ist die Leiste naemlich ausgeblendet, von dort
+       waere die Garage sonst nicht in einem Tipp erreichbar.
+
+       Der Text steht als Entwurf mit Begruendungen in
+       RECHTLICHES-ENTWURF.md. Aendert sich, was die App verschickt
+       (DATEN.md), aendert sich auch dieser Text - eine
+       Datenschutzerklaerung, die etwas anderes behauptet als der Code
+       tut, ist schlimmer als keine. ===== -->
+  <div id="rechtlichesScreen" class="start-screen listen-screen" hidden>
+    <div class="start-screen-inner">
+      <button class="btn ghost back-btn" id="btnRechtlichesZurueck">&larr; Zur&uuml;ck</button>
+      <h2>Rechtliches</h2>
+
+      <details class="block accordion" id="impressumBlock">
+        <summary>Impressum</summary>
+        <div class="rechts-text">
+          <p class="label">Angaben gem&auml;&szlig; &sect; 5 DDG</p>
+          <p>
+            Friedrich Sternberg<br>
+            Max-Wundel-Stra&szlig;e 7<br>
+            14469 Potsdam
+          </p>
+          <p>Kontakt: <a href="mailto:kontakt@serpa-app.de">kontakt@serpa-app.de</a></p>
+
+          <!-- Der MStV-Absatz gilt fuer eigene redaktionelle Einschaetzungen.
+               Die gibt es erst wieder, wenn der Shop eingeschaltet wird
+               ("Unsere Einschaetzung"), aber ein benannter Verantwortlicher
+               schadet nie und muss dann nicht nachgereicht werden. -->
+          <p class="label">Verantwortlich f&uuml;r journalistisch-redaktionelle
+            Inhalte gem&auml;&szlig; &sect; 18 Abs. 2 MStV</p>
+          <p>Friedrich Sternberg, Anschrift wie oben</p>
+
+          <p class="label">Verbraucherstreitbeilegung</p>
+          <!-- KEIN Link auf die EU-Streitbeilegungsplattform: Die ist seit
+               Juli 2025 abgeschaltet, der Link selbst waere abmahnbar. -->
+          <p>
+            Wir sind nicht verpflichtet und nicht bereit, an
+            Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle
+            teilzunehmen.
+          </p>
+        </div>
+      </details>
+
+      <details class="block accordion" id="datenschutzBlock">
+        <summary>Datenschutzerkl&auml;rung</summary>
+        <div class="rechts-text">
+          <p class="label">Verantwortlicher</p>
+          <p>
+            Friedrich Sternberg, Max-Wundel-Stra&szlig;e 7, 14469 Potsdam,
+            <a href="mailto:kontakt@serpa-app.de">kontakt@serpa-app.de</a>
+          </p>
+
+          <p class="label">Kurzfassung</p>
+          <p>
+            Serpa funktioniert ohne Konto und speichert deine Routen, deine
+            Garage und deine Einstellungen zun&auml;chst nur auf deinem
+            Ger&auml;t. Ein Konto ist freiwillig. Die App zeigt keine Werbung,
+            setzt keine Cookies und enth&auml;lt keine Analyse- oder
+            Tracking-Dienste.
+          </p>
+
+          <p class="label">1. Hosting</p>
+          <p>
+            Die App wird &uuml;ber GitHub Pages ausgeliefert (GitHub, Inc.,
+            USA). Beim Aufruf verarbeitet GitHub technisch notwendige
+            Verbindungsdaten, darunter die IP-Adresse (Art. 6 Abs. 1 lit. f
+            DSGVO).
+          </p>
+
+          <p class="label">2. Daten auf deinem Ger&auml;t</p>
+          <p>
+            Routen, aufgezeichnete Ausfahrten samt Fotos, deine Garage und
+            deine Einstellungen liegen im lokalen Speicher deines Browsers.
+            Sie verlassen dein Ger&auml;t nicht, solange du kein Konto
+            benutzt. L&ouml;schen kannst du sie jederzeit &uuml;ber die App
+            oder die Browserdaten.
+          </p>
+
+          <p class="label">3. Karte, Routenberechnung, Ortssuche</p>
+          <p>
+            Zum Anzeigen der Karte l&auml;dt die App Kartenbilder von
+            OpenStreetMap (openstreetmap.org, EU). Der angefragte
+            Kartenausschnitt kann dabei mittelbar deinen Aufenthaltsort
+            erkennen lassen. F&uuml;r die Routenberechnung gehen die von dir
+            gesetzten Wegpunkte an BRouter (brouter.de, Deutschland).
+            F&uuml;r die Ortssuche geht der eingetippte Suchbegriff an
+            Nominatim (openstreetmap.org, EU). Rechtsgrundlage jeweils
+            Art. 6 Abs. 1 lit. b DSGVO (Bereitstellung der von dir
+            angeforderten Funktion).
+          </p>
+
+          <p class="label">4. Standort</p>
+          <p>
+            Deinen GPS-Standort fragt die App nur, wenn du eine Funktion
+            startest, die ihn braucht (Karte zentrieren, Navigation,
+            Aufzeichnen). Die Freigabe erteilst du im Browser
+            beziehungsweise Betriebssystem und kannst sie dort jederzeit
+            entziehen. Aufgezeichnete Strecken bleiben auf dem Ger&auml;t
+            beziehungsweise in deinem Konto (Punkt 7).
+          </p>
+
+          <p class="label">5. Motorrad-Finder und technische Daten</p>
+          <p>
+            W&auml;hlst du im Motorrad-Finder Marke und Modell, fragt die App
+            die Fahrzeugdatenbank der US-Verkehrsbeh&ouml;rde NHTSA
+            (vpic.nhtsa.dot.gov, USA) und f&uuml;r technische Daten die
+            Wikipedia (de.wikipedia.org / en.wikipedia.org) an.
+            &Uuml;bertragen werden die Suchbegriffe und deine IP-Adresse. Das
+            passiert nur auf deine Eingabe hin (Art. 6 Abs. 1 lit. b DSGVO).
+          </p>
+
+          <p class="label">6. Foto freistellen</p>
+          <p>
+            Stellst du ein eigenes Motorradfoto frei, l&auml;dt die App dazu
+            einmalig eine Programmbibliothek vom Dienst jsDelivr
+            (cdn.jsdelivr.net, Betreiber ProspectOne, Polen);
+            dabei wird deine IP-Adresse &uuml;bertragen. Das Foto selbst
+            verl&auml;sst dein Ger&auml;t nicht - gerechnet wird
+            ausschlie&szlig;lich in deinem Browser. Das passiert nur, wenn
+            du das Freistellen startest (Art. 6 Abs. 1 lit. b DSGVO).
+          </p>
+
+          <p class="label">7. Konto (freiwillig)</p>
+          <p>
+            Legst du ein Konto an, speichert unser Auftragsverarbeiter
+            Supabase (Region Stockholm, EU) deine E-Mail-Adresse, deinen
+            Benutzernamen, auf Wunsch ein Profilbild sowie die Touren und
+            Fotos, die du hochl&auml;dst (Art. 6 Abs. 1 lit. b DSGVO). Fotos
+            liegen in einem nicht &ouml;ffentlichen Speicher und sind nur
+            &uuml;ber kurzlebige, signierte Links abrufbar. Profilbilder
+            sind &ouml;ffentlich lesbar, damit sie sp&auml;ter neben
+            geteilten Touren erscheinen k&ouml;nnen. Du kannst dein Konto in
+            der App jederzeit selbst l&ouml;schen; dabei werden Fotos,
+            Touren, Profil und das Konto selbst entfernt.
+          </p>
+
+          <p class="label">8. Deine Rechte</p>
+          <p>
+            Du hast das Recht auf Auskunft, Berichtigung, L&ouml;schung,
+            Einschr&auml;nkung der Verarbeitung, Daten&uuml;bertragbarkeit
+            und Widerspruch (Art. 15&ndash;21 DSGVO) sowie das Recht auf
+            Beschwerde bei einer Datenschutzaufsichtsbeh&ouml;rde, f&uuml;r
+            uns die Landesbeauftragte f&uuml;r den Datenschutz und f&uuml;r
+            das Recht auf Akteneinsicht Brandenburg.
+          </p>
+
+          <p class="tiny">Stand: 25.08.2026</p>
+        </div>
+      </details>
     </div>
   </div>
 

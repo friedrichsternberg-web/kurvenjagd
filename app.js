@@ -2900,14 +2900,15 @@ function symbol(name, zusatz = '') {
    zeigeBildschirm() alles und blendet nichts ein. Die App zeigt dann eine
    schwarze Flaeche, ohne einen Fehler zu melden. */
 const BILDSCHIRME = [
-  'garageScreen', 'tourenScreen', 'app', 'rideScreen',
+  'garageScreen', 'tourenScreen', 'app', 'rideScreen', 'rechtlichesScreen',
   'shopScreen', 'shopProduktScreen',
   'kontoScreen', 'profilScreen', 'passwortNeuScreen', 'kontoLoeschenScreen',
 ];
 
 // Bildschirme, die die untere Leiste ausblenden: alles rund ums Konto.
 // Dort geht es um eine Sache, die man zu Ende bringt.
-const BILDSCHIRME_OHNE_LEISTE = ['kontoScreen', 'profilScreen', 'passwortNeuScreen', 'kontoLoeschenScreen'];
+const BILDSCHIRME_OHNE_LEISTE = ['kontoScreen', 'profilScreen', 'passwortNeuScreen',
+                                 'kontoLoeschenScreen', 'rechtlichesScreen'];
 
 // Blendet genau einen Bildschirm ein und alle anderen aus, und bringt die
 // untere Leiste auf denselben Stand.
@@ -2987,6 +2988,25 @@ function zeigeShop() {
   if (!SHOP_AKTIV) { zeigeGarage(); return; }
   if (typeof zeichneShop === 'function') zeichneShop();
   zeigeBildschirm('shopScreen');
+}
+
+/* Impressum und Datenschutzerklaerung.
+
+   Der Bildschirm merkt sich, von wo er geoeffnet wurde, damit der
+   Zurueck-Knopf dorthin zurueckfuehrt und nicht stur in die Garage - wer
+   beim Anmelden kurz die Datenschutzerklaerung nachliest, will danach
+   weiter anmelden. Dasselbe Muster wie bei der Produktseite des Shops. */
+let rechtlichesHerkunft = 'garageScreen';
+
+function zeigeRechtliches(herkunft) {
+  rechtlichesHerkunft = herkunft || aktuellerBildschirm();
+  zeigeBildschirm('rechtlichesScreen');
+}
+
+function zurückVomRechtlichen() {
+  if (rechtlichesHerkunft === 'profilScreen') { zeigeProfil(); return; }
+  if (rechtlichesHerkunft === 'kontoScreen') { zeigeBildschirm('kontoScreen'); return; }
+  zeigeGarage();
 }
 
 function zeigeRideScreen() {
@@ -3307,6 +3327,15 @@ function wendeShopSchalterAn() {
   document.getElementById('btnStartTouren').classList.add('kachel--breit');
 }
 wendeShopSchalterAn();
+
+/* Drei Wege zu den Pflichtangaben. Mehr als zwei Tipps darf es von keinem
+   Bildschirm aus sein - das ist die Anforderung "unmittelbar erreichbar"
+   aus § 5 DDG. Von der Garage aus einer, von allem mit unterer Leiste
+   zwei, und die beiden Konto-Bildschirme haben ihren eigenen Weg. */
+verkabele('btnRechtlichesGarage', 'click', () => zeigeRechtliches('garageScreen'));
+verkabele('btnRechtlichesKonto', 'click', () => zeigeRechtliches('kontoScreen'));
+verkabele('btnRechtlichesProfil', 'click', () => zeigeRechtliches('profilScreen'));
+verkabele('btnRechtlichesZurueck', 'click', zurückVomRechtlichen);
 // Den Zurueck-Knopf der Produktseite verkabelt shop.js selbst: Wohin er
 // fuehrt, haengt davon ab, ob man aus dem Shop oder aus der Garage kam -
 // und das weiss nur shop.js.

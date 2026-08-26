@@ -80,6 +80,28 @@
 
 .back-btn { margin-bottom: var(--s5); }
 
+/* ---------- Rechtliches ----------
+   Der Fusszeilen-Link zu Impressum und Datenschutz. Dezent wie auf jeder
+   Webseite, aber bewusst NICHT unlesbar: Die Angaben muessen "leicht
+   erkennbar" sein (§ 5 DDG). Wer sie kleiner oder blasser macht als hier,
+   erzeugt genau die Angreifbarkeit, die er vermeiden wollte. */
+.rechts-fuss {
+  margin: var(--s5) 0 var(--s3);
+  text-align: center;
+}
+.rechts-fuss .linkbtn {
+  font-size: 13px;
+  color: var(--muted);
+}
+.rechts-fuss .linkbtn:hover { color: var(--text); }
+
+/* Der Lauftext der Rechtstexte. Etwas enger gesetzt als der Rest der App,
+   weil hier am Stueck gelesen wird statt auf einen Blick erfasst. */
+.rechts-text { font-size: 14px; line-height: 1.6; }
+.rechts-text p { margin: 0 0 var(--s3); }
+.rechts-text .label { margin-top: var(--s4); }
+.rechts-text a { color: var(--accent-hell); }
+
 /* ---------- Untere Navigationsleiste ----------
    Fest am unteren Rand. Die Bildschirme darueber bekommen ihre Hoehe
    ueber calc(100% - var(--nav-raum)), damit nichts hinter der Leiste
