@@ -104,9 +104,27 @@ function bestimmeGeraeteart() {
 function meldeBesuch() {
   if (ZAEHLE_NICHT_AUF.includes(location.hostname)) return;
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return;
-  // Seiten, die im Hintergrund vorgeladen werden, hat niemand angesehen.
-  if (document.visibilityState !== 'visible') return;
 
+  /* Eine Seite, die im Hintergrund geöffnet wurde, hat noch niemand
+     angesehen. Sie deshalb gar nicht zu zählen wäre aber zu streng: Wer
+     Suchergebnisse mit Befehlstaste in neue Tabs öffnet, sieht sie sehr wohl
+     an, nur eben eine Minute später. Der würde dauerhaft fehlen.
+
+     Deshalb wird nicht verworfen, sondern gewartet - auf genau den Moment,
+     in dem jemand hinschaut. Der eigentliche Zweck bleibt erhalten:
+     Vorschau-Abrufe und Roboter, die nie jemand ansieht, zählen nie. */
+  if (document.visibilityState !== 'visible') {
+    document.addEventListener('visibilitychange', function zaehleBeimHinschauen() {
+      if (document.visibilityState !== 'visible') return;
+      document.removeEventListener('visibilitychange', zaehleBeimHinschauen);
+      sendeZaehlung();
+    });
+    return;
+  }
+  sendeZaehlung();
+}
+
+function sendeZaehlung() {
   fetch(SUPABASE_URL + '/rest/v1/rpc/zaehle_besuch', {
     method: 'POST',
     headers: {
