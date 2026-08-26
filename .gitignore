@@ -46,3 +46,9 @@ Bild We*.png
 # Sie gehoeren nicht in die App - was daraus gebraucht wird, liegt in img/.
 Design Inspro/
 fonts 2/
+
+# Das Betreiber-Dashboard bleibt lokal: In seine STECKPLAETZE kommen
+# spaeter Zugaenge (AWIN, Besucherzaehler), und das Repository ist
+# oeffentlich. Es ist bewusst EINE Datei ohne Abhaengigkeiten - ein
+# Doppelklick im Finder genuegt.
+dashboard.html
