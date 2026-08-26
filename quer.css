@@ -148,7 +148,13 @@
      bei jeder Spaltenbreite von selbst neu. */
   .garage-screen {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(380px, 480px);
+    /* Halbe und halbe, Friedrichs Ansage vom 26.08.2026: Der Raum ist das
+       Schaufenster und die Spalte das Menue, keines ordnet sich dem anderen
+       unter. Vorher war die Spalte auf 480 Punkte gedeckelt - der Raum
+       wurde dadurch so breit, dass das hochformatige Werkstattbild nur
+       noch als schmaler, stark vergroesserter Streifen zu sehen war. Je
+       schmaler der Raum, desto mehr Werkstatt zeigt derselbe Ausschnitt. */
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     grid-template-rows: minmax(0, 1fr);
     overflow: hidden;   /* das Scrollen uebernimmt die rechte Spalte */
   }
@@ -160,14 +166,46 @@
 
   /* Die rechte Spalte scrollt fuer sich. Der -20px-Ueberlapp des
      Hochformats (die Platte schiebt sich dort unter den Raum) ergibt
-     nebeneinander keinen Sinn. */
+     nebeneinander keinen Sinn.
+
+     "safe center" heisst: Ist der Inhalt niedriger als die Spalte, steht
+     er mittig statt oben angeklebt - die halbe Bildschirmseite soll
+     gefuellt wirken, nicht wie eine Liste mit Leere darunter. Waechst der
+     Inhalt ueber die Spalte hinaus (Datenblatt samt Justierung), sorgt
+     das "safe" dafuer, dass oben nichts unerreichbar abgeschnitten wird,
+     sondern normal gescrollt werden kann. */
   .garage-inhalt {
     overflow-y: auto;
     min-height: 0;
     margin-top: 0;
-    padding-top: var(--s4);
-    padding-right: var(--s4);
+    justify-content: safe center;
+    gap: var(--s4);
+    padding: var(--s5) var(--s7);
   }
+
+  /* Die Menue-Kacheln wachsen mit ihrer halben Bildschirmseite mit: Die
+     Hochformat-Groessen (116 Punkte Mindesthoehe, 18px-Titeldeckel) sind
+     fuer eine Handybreite gedacht und wirkten hier wie Briefmarken auf
+     einem Poster. */
+  .garage-menue-raster { gap: var(--s4); }
+  .kachel {
+    /* clamp() heisst: mindestens die 116 Punkte des Hochformats, hoechstens
+       168, dazwischen ein Fuenftel der Fensterhoehe. So fuellen die Kacheln
+       einen grossen Bildschirm, ohne auf einem kleinen Laptop die Spalte
+       zum Scrollen zu zwingen. */
+    min-height: clamp(116px, 21vh, 168px);
+    padding: var(--s4);
+  }
+  /* Die Deckel wachsen mit dem Fenster: Am 900er-Rand ist die halbe
+     Bildschirmseite schmaler als ein Handy quer, dort waere 21px zu laut. */
+  .kachel-titel { font-size: clamp(15px, 1.7vw, 21px); }
+  .kachel-sub { font-size: clamp(13px, 1.15vw, 15px); }
+
+  /* Dieselbe Stufe fuer das Datenblatt, wenn ein eigenes Motorrad da ist:
+     Name und Werte duerfen auf der halben Seite groesser sprechen als auf
+     dem Handy. */
+  .motorrad-kopf h3 { font-size: 29px; }
+  .stat .v { font-size: 24px; }
 
   /* --- 4. Listenbildschirme in Lesebreite -------------------------------------
      Touren (und spaeter Rechtliches, und der Shop, wenn er wiederkommt)
