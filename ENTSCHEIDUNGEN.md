@@ -633,3 +633,32 @@ Der Fall ist ein Muster wert: Ein stiller Fehlschlag (drawImage malt
 nichts und sagt es niemandem) plus ein Cache ergibt einen Fehler, der
 zufällig auftritt und dann klebt. Wer einen Messwert cacht, muss sich
 fragen, ob ein leeres Ergebnis wirklich ein Ergebnis ist.
+
+## 26.08.2026 — Die Garage teilt sich den Desktop halbe und halbe
+
+**Gekippt:** Im Querformat war die Menuespalte der Garage auf höchstens
+480 Punkte gedeckelt (`minmax(380px, 480px)`), der Werkstattraum bekam den
+ganzen Rest. Die 900×500-Grenze von quer.css war sogar daraus hergeleitet:
+rund 420 Punkte Raum plus 380 Punkte Spalte.
+
+Friedrichs Ansage vom 26.08.2026: **halbe und halbe.** Der Raum ist das
+Schaufenster und die Spalte das Menü, keines ordnet sich unter.
+
+Der Deckel hatte einen unerwarteten Nebeneffekt, der erst beim Messen
+auffiel: Je BREITER der Raum, desto WENIGER Werkstatt sieht man. Das
+Werkstattbild ist hochformatig (1296×2731), und der cover-Maßstab richtet
+sich bei einem breiten Raum nach der Breite - bei 1440 Punkten Fenster
+waren nur noch 38 Prozent der Bildhöhe sichtbar, Regale und Wände wirkten
+riesig, alles sah „hineingezoomt und verschoben" aus (Friedrichs Meldung).
+Mit der halben Breite stieg der sichtbare Anteil auf 50 Prozent. Die
+50/50-Teilung ist also nicht nur Geschmack, sie entschärft auch die
+Geometrie.
+
+Dazu gehört: Die Spalte füllt ihre Hälfte jetzt aus (Inhalt mittig per
+`safe center`, Kacheln und Schriften wachsen per clamp() zwischen
+Handy-Maß und Desktop-Maß). Eine Lehre aus der Prüfrunde desselben Tages:
+Die Werte-Vergrößerung des Datenblatts braucht die id im Selektor
+(`#garageDatenblatt .stat .v`), weil style.css mit einer id arbeitet und
+gegen eine id jeder reine Klassen-Selektor verliert - ein nacktes
+`.stat .v` hätte stattdessen die Statistiken von Ride und Planer
+vergrößert und das Datenblatt unverändert gelassen.

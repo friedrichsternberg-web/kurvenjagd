@@ -12,10 +12,11 @@
 
      Fensterbreite mindestens 900 Punkte UND Hoehe mindestens 500.
 
-   Warum diese Werte: Der Garagen-Zweispalter braucht rund 420 Punkte Raum
-   plus 380 Punkte Inhaltsspalte, darunter quetscht er. Ein iPad hochkant
-   (768-834 Punkte breit) bleibt dadurch beim Hochformat-Layout - ein
-   Hochformat-Geraet bekommt die Hochformat-Anordnung. Die Hoehengrenze
+   Warum diese Werte: Die Garage teilt sich den Bildschirm halbe und halbe,
+   und eine Haelfte unter 450 Punkten traegt weder den Werkstattraum noch
+   die Menuespalte ordentlich. Ein iPad hochkant (768-834 Punkte breit)
+   bleibt dadurch beim Hochformat-Layout - ein Hochformat-Geraet bekommt
+   die Hochformat-Anordnung. Die Hoehengrenze
    nimmt die Handys im Querformat heraus (844x390 bis 932x440): Dort waere
    eine Kopfleiste bei 390 Punkten Resthoehe kein Gewinn, und der Planer
    hat fuer diesen Fall laengst seine Seitenleiste.
@@ -148,12 +149,12 @@
      bei jeder Spaltenbreite von selbst neu. */
   .garage-screen {
     display: grid;
-    /* Halbe und halbe, Friedrichs Ansage vom 26.08.2026: Der Raum ist das
-       Schaufenster und die Spalte das Menue, keines ordnet sich dem anderen
-       unter. Vorher war die Spalte auf 480 Punkte gedeckelt - der Raum
-       wurde dadurch so breit, dass das hochformatige Werkstattbild nur
-       noch als schmaler, stark vergroesserter Streifen zu sehen war. Je
-       schmaler der Raum, desto mehr Werkstatt zeigt derselbe Ausschnitt. */
+    /* Halbe und halbe: Der Raum ist das Schaufenster und die Spalte das
+       Menue, keines ordnet sich dem anderen unter. Die gleiche Teilung ist
+       zugleich die bessere fuer das hochformatige Werkstattbild - je
+       schmaler der Raum, desto mehr Werkstatt zeigt derselbe Ausschnitt.
+       Was hier vorher stand und warum es gekippt wurde: ENTSCHEIDUNGEN.md,
+       26.08.2026. */
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     grid-template-rows: minmax(0, 1fr);
     overflow: hidden;   /* das Scrollen uebernimmt die rechte Spalte */
@@ -191,8 +192,10 @@
   .kachel {
     /* clamp() heisst: mindestens die 116 Punkte des Hochformats, hoechstens
        168, dazwischen ein Fuenftel der Fensterhoehe. So fuellen die Kacheln
-       einen grossen Bildschirm, ohne auf einem kleinen Laptop die Spalte
-       zum Scrollen zu zwingen. */
+       einen grossen Bildschirm, ohne auf einem kleinen Laptop unnoetig
+       Scrollweg zu erzeugen. (An der 900x500-Ecke scrollt die Spalte
+       trotzdem - dort ist schlicht mehr Inhalt als Hoehe da, und genau
+       dafuer hat sie ihr overflow-y.) */
     min-height: clamp(116px, 21vh, 168px);
     padding: var(--s4);
   }
@@ -203,9 +206,14 @@
 
   /* Dieselbe Stufe fuer das Datenblatt, wenn ein eigenes Motorrad da ist:
      Name und Werte duerfen auf der halben Seite groesser sprechen als auf
-     dem Handy. */
+     dem Handy. Die Werte-Regel traegt die id davor, und das ist kein
+     Schmuck: style.css setzt die Groesse als "#garageDatenblatt .stat .v",
+     und gegen eine id verliert jeder reine Klassen-Selektor - egal in
+     welcher Datei er steht. Ein nacktes ".stat .v" haette ausserdem die
+     Statistikbloecke von Ride und Planer mitvergroessert, die dieselbe
+     Klasse tragen. */
   .motorrad-kopf h3 { font-size: 29px; }
-  .stat .v { font-size: 24px; }
+  #garageDatenblatt .stat .v { font-size: 24px; }
 
   /* --- 4. Listenbildschirme in Lesebreite -------------------------------------
      Touren (und spaeter Rechtliches, und der Shop, wenn er wiederkommt)
