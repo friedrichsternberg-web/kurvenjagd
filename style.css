@@ -1357,7 +1357,18 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   text-transform: uppercase;
   letter-spacing: 0.06em; font-size: 15px; color: var(--muted); }
 .ride-status { text-align: center; margin: 0 0 12px; }
-.ride-titel { margin: 0 0 12px; font-size: 18px; color: var(--metall-glanz); }
+/* Dieselbe Handschrift wie .garage-titel und die Ueberschriften der
+   Startbildschirme: Anzeigeschrift, Versalien, Silberton. Nur kleiner - der
+   Ride-Titel steht in einem Bedienfeld und nicht auf einer ganzen Seite. */
+.ride-titel {
+  margin: 0 0 12px;
+  font-family: var(--schrift-display);
+  font-weight: 700;
+  font-size: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--metall-glanz);
+}
 
 /* Laeuft die Aufzeichnung gerade nicht, soll das auf einen Blick klar sein. */
 .ride-panel.pausiert .ride-tempo-wert { color: var(--muted); }
