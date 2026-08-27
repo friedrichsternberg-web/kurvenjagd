@@ -11,7 +11,7 @@
    darauf sieht man, welche Stellen schon durchsichtig sind.
 
    Aufbau dieser Datei:
-     1. Die Automatik (Kantenerkennung, Minimax-Ausbreitung, Modell)
+     1. Die Automatik (das Modell u2netp)
      2. Der Freisteller als Werkzeug (Pinsel, Radierer, Rueckgaengig)
      3. Die Bodenlinie - wo die Reifen den Boden beruehren
      4. Verkabelung
@@ -25,211 +25,43 @@
 /* ============================================================================
    Freisteller - den Hintergrund vom Motorrad trennen
 
-   WAS HIER GEMESSEN WURDE, damit niemand die Zahlen fuer geraten haelt:
-   An sechs Testfaellen mit bekannter Wahrheit (dasselbe freigestellte
-   Motorrad auf Himmelsverlauf, Bergpanorama und Asphalt montiert, je in
-   heller und schwarzer Lackierung) wurden vier Verfahren durchgerechnet.
+   EIN Verfahren, nicht zwei: u2netp, ein kleines neuronales Netz, das
+   gelernt hat, das auffaelligste Objekt eines Bildes zu finden. Auf einem
+   Motorradfoto ist das die Maschine. Wie es geladen wird und warum
+   ausgerechnet dieses Modell, steht unten bei MODELL_DATEI.
 
-   Der bisherige Ansatz - Flutfuellung von den vier Ecken mit fester
-   Farbtoleranz - scheitert an genau zwei Dingen: Ein Himmelsverlauf
-   aendert die Farbe ueber das Bild staerker als jede Toleranz zulaesst,
-   und dieselbe Toleranz reicht andererseits aus, um in den Tank zu laufen.
+   Bis zum 27.08.2026 lag daneben ein klassisches Verfahren aus Kantensuche
+   und Minimax-Ausbreitung, das ansprang, wenn das Modell nicht kam. Es ist
+   raus - die Messwerte und die Begruendung stehen in ENTSCHEIDUNGEN.md.
 
-   ---------------------------------------------------------------------------
-   1. DIE AUTOMATIK: Minimax-Ausbreitung
+   WAS AUCH DAS MODELL NICHT KANN: Ein schwarzes Motorrad vor dunklem
+   Asphalt hat streckenweise gar keine Kante. Dafuer gibt es die Pinsel, und
+   deshalb faellt der Freisteller ohne Modell auch nicht aus - er verliert
+   nur seine Automatik.
 
-   Der Gedanke, auf den es ankommt:
-
-       Die Kosten eines Weges sind die GROESSTE Kante darauf,
-       nicht die Summe der Farbschritte.
-
-   Ein Himmelsverlauf aendert die Farbe insgesamt stark, von Punkt zu Punkt
-   aber kaum - die groesste Kante auf dem Weg bleibt klein, die Front laeuft
-   glatt hindurch. Die Kante zum Motorrad ist ein Sprung, dort steigt der
-   Hoechstwert schlagartig und die Front bleibt stehen. Genau diese Trennung
-   ist ueber die Farbe allein nicht zu haben.
-
-   Das Verfahren heisst Image Foresting Transform und ist im Kern eine
-   Wasserscheide, die von Saatpunkten aus waechst.
-
-   Gemessen mit Schwelle 14: Das Motorrad bleibt in ALLEN sechs Faellen zu
-   94 bis 100 Prozent erhalten. Beim Himmelsverlauf liegt die Ueberdeckung
-   mit der Wahrheit bei 91 Prozent (der alte Ansatz kam auf 88, wobei er
-   Loecher ins Motorrad riss). Vor Bergen bleibt viel Hintergrund stehen -
-   was dann noch steht, wird von Hand wegradiert.
-
-   Hoehere Schwellen tragen mehr ab, fressen aber die Maschine an: bei 22
-   sind es beim schwarzen Motorrad auf Asphalt nur noch 49 Prozent, bei 34
-   nur 27. Deshalb steht die Automatik bewusst auf der sicheren Seite.
-
-   ---------------------------------------------------------------------------
-   2. WARUM ES KEINEN ZAUBERSTAB GIBT
-
-   Nicht aus technischen Gruenden, sondern wegen der Bedienung: Seit die
-   Automatik ueber ein Modell laeuft, das WEISS, wie ein Motorrad aussieht,
-   bleibt so wenig stehen, dass sich der Aufwand nicht lohnt - erst ein
-   Werkzeug waehlen, dann einen Regler verstehen, dann zielen. Radieren kann
-   jeder sofort. Die Messwerte dazu stehen in ENTSCHEIDUNGEN.md.
-
-   ---------------------------------------------------------------------------
-   3. WAS KEIN VERFAHREN KANN
-
-   Ein schwarzes Motorrad vor dunklem Asphalt hat streckenweise gar keine
-   Kante. Dort ist physikalisch nichts zu trennen, und keine Einstellung
-   aendert daran etwas. Genau dafuer gibt es die Pinsel.
+   KEIN ZAUBERSTAB, und das aus Bedienungsgruenden: Seit die Automatik das
+   Modell benutzt, bleibt so wenig stehen, dass sich der Aufwand nicht lohnt
+   - erst ein Werkzeug waehlen, dann einen Regler verstehen, dann zielen.
+   Radieren kann jeder sofort.
    ============================================================================ */
 
-/* ZWEI Groessen, und das ist wichtig:
-
-   ANZEIGE UND MASKE laufen in voller Fotogroesse (hoechstens 1000 Punkte
-   Kante). Kleiner darf es nicht sein: Auf einem iPhone mit dreifacher
+/* ANZEIGE UND MASKE laufen in voller Fotogroesse, hoechstens 1000 Punkte
+   Kante. Kleiner darf es nicht sein: Auf einem iPhone mit dreifacher
    Punktdichte wird das Bild auf gut 1100 Geraetepunkte aufgeblasen - eine
    kleinere Maske macht den Editor unscharf und den Pinsel grober als noetig.
 
-   GERECHNET wird die Automatik weiter auf einer verkleinerten Fassung. Die
-   Kantensuche und die Minimax-Ausbreitung kosten dort ein Viertel der Zeit,
-   und feiner braucht es die Kantenkarte nicht - sie ist ohnehin ein weiches
-   Feld. Die fertige Maske wird einmal hochgezogen. */
+   Das Modell rechnet auf 320 Punkten (MODELL_KANTE), aber das ist seine
+   eigene Vorgabe und hat mit dieser Zahl hier nichts zu tun. */
 const FREI_ANZEIGEKANTE = 1000;
-const FREI_RECHENKANTE  = 480;
-
-const FREI_AUTOMATIK_SCHWELLE = 14;   // gemessen: sicherster Wert
 
 // Alles, was der Freisteller gerade in der Hand hat.
 let frei = null;
 
-/* Kantenstaerke nach Scharr, je Farbkanal, Ergebnis als ganze Zahl 0..1020.
-   Scharr statt Sobel, weil der bei SCHRAEGEN Kanten deutlich genauer liegt -
-   und eine Motorradkontur ist fast ueberall schraeg. Kostet dasselbe.
+/* --- 1. Die Automatik: das Modell -------------------------------------------
 
-   Vorher wird leicht geglaettet, sonst bleibt die Front schon im Rauschen
-   einer Wiese haengen. */
-function freiKanten(d, breite, hoehe) {
-  const weich = new Float32Array(breite * hoehe * 3);
-  for (let y = 0; y < hoehe; y++) {
-    for (let x = 0; x < breite; x++) {
-      const i = y * breite + x;
-      for (let k = 0; k < 3; k++) {
-        let summe = 0, zahl = 0;
-        for (let dy = -1; dy <= 1; dy++) {
-          const yy = y + dy; if (yy < 0 || yy >= hoehe) continue;
-          for (let dx = -1; dx <= 1; dx++) {
-            const xx = x + dx; if (xx < 0 || xx >= breite) continue;
-            summe += d[(yy * breite + xx) * 4 + k]; zahl++;
-          }
-        }
-        weich[i * 3 + k] = summe / zahl;
-      }
-    }
-  }
-
-  const E = new Int32Array(breite * hoehe);
-  const hole = (x, y, k) =>
-    weich[(Math.min(hoehe - 1, Math.max(0, y)) * breite + Math.min(breite - 1, Math.max(0, x))) * 3 + k];
-
-  for (let y = 0; y < hoehe; y++) {
-    for (let x = 0; x < breite; x++) {
-      let groesste = 0;
-      for (let k = 0; k < 3; k++) {
-        const gx = (3 * (hole(x+1,y-1,k) - hole(x-1,y-1,k))
-                 + 10 * (hole(x+1,y  ,k) - hole(x-1,y  ,k))
-                  + 3 * (hole(x+1,y+1,k) - hole(x-1,y+1,k))) / 32;
-        const gy = (3 * (hole(x-1,y+1,k) - hole(x-1,y-1,k))
-                 + 10 * (hole(x  ,y+1,k) - hole(x  ,y-1,k))
-                  + 3 * (hole(x+1,y+1,k) - hole(x+1,y-1,k))) / 32;
-        const w = Math.abs(gx) + Math.abs(gy);
-        if (w > groesste) groesste = w;
-      }
-      E[y * breite + x] = Math.min(1020, Math.round(groesste * 4));
-    }
-  }
-  return E;
-}
-
-/* Waechst von den Saatpunkten aus und liefert fuer jeden Punkt, wie gross die
-   groesste Kante auf dem guenstigsten Weg dorthin ist.
-
-   ZWEI FALLEN, beide beim Bauen zugeschnappt:
-
-   1. Der Listenkopf muss in JEDEM Schleifendurchlauf neu gelesen werden.
-      Weil die Kosten beim Minimax oft gleich bleiben, landen neue Punkte im
-      GERADE bearbeiteten Fach. Wer den Kopf einmal in eine Variable liest,
-      verliert sie stillschweigend.
-
-   2. Jede Einsortierung braucht einen EIGENEN Eintrag. Ein Punkt wird
-      mehrfach eingereiht, mit immer kleineren Kosten. Teilen sich alle
-      Eintraege dasselbe "naechster"-Feld am Punkt, zeigt der alte Eintrag
-      nach der zweiten Einsortierung in die neue Liste - die Verkettung
-      schliesst sich zum Kreis und die Schleife laeuft ewig. Genau daran hat
-      sich der Prüfstand beim ersten Versuch aufgehaengt. */
-function freiMinimax(E, breite, hoehe, saaten) {
-  const anzahl = breite * hoehe;
-  const FAECHER = 1024;
-  const kosten = new Int32Array(anzahl).fill(0x7fffffff);
-  const kopf = new Int32Array(FAECHER).fill(-1);
-
-  const grenze = anzahl * 4 + saaten.length + 8;   // hoechstens 4 Entspannungen je Punkt
-  const eintragStelle = new Int32Array(grenze);
-  const eintragNaechster = new Int32Array(grenze);
-  let anzahlEintraege = 0;
-
-  const einreihen = (s, k) => {
-    if (anzahlEintraege >= grenze) return;
-    eintragStelle[anzahlEintraege] = s;
-    eintragNaechster[anzahlEintraege] = kopf[k];
-    kopf[k] = anzahlEintraege++;
-  };
-
-  for (const s of saaten) if (kosten[s] !== 0) { kosten[s] = 0; einreihen(s, 0); }
-
-  for (let fach = 0; fach < FAECHER; fach++) {
-    while (kopf[fach] !== -1) {          // siehe Falle 1: hier neu lesen
-      const eintrag = kopf[fach];
-      kopf[fach] = eintragNaechster[eintrag];
-      const s = eintragStelle[eintrag];
-      if (kosten[s] !== fach) continue;  // veralteter Eintrag
-
-      const x = s % breite, y = (s - x) / breite;
-      if (x > 0)          { const n = s-1;      const w = fach > E[n] ? fach : E[n]; if (w < kosten[n]) { kosten[n] = w; einreihen(n, w); } }
-      if (x < breite - 1) { const n = s+1;      const w = fach > E[n] ? fach : E[n]; if (w < kosten[n]) { kosten[n] = w; einreihen(n, w); } }
-      if (y > 0)          { const n = s-breite; const w = fach > E[n] ? fach : E[n]; if (w < kosten[n]) { kosten[n] = w; einreihen(n, w); } }
-      if (y < hoehe - 1)  { const n = s+breite; const w = fach > E[n] ? fach : E[n]; if (w < kosten[n]) { kosten[n] = w; einreihen(n, w); } }
-    }
-  }
-  return kosten;
-}
-
-// Maske glaetten: Einzelpunkte weg, Nadelstiche zu, Kante weich.
-function freiGlaetten(maske, breite, hoehe) {
-  const kopie = new Uint8Array(maske.length);
-  for (let runde = 0; runde < 2; runde++) {
-    kopie.set(maske);
-    for (let y = 1; y < hoehe - 1; y++) {
-      for (let x = 1; x < breite - 1; x++) {
-        const i = y * breite + x;
-        let voll = 0;
-        for (let dy = -1; dy <= 1; dy++)
-          for (let dx = -1; dx <= 1; dx++)
-            if (kopie[i + dy * breite + dx] > 127) voll++;
-        maske[i] = voll >= 5 ? 255 : 0;
-      }
-    }
-  }
-}
-
-
-/* --- 1b. Der Freisteller mit Modell ----------------------------------------
-
-   HIER LIEGT DER EIGENTLICHE SPRUNG. Alles Vorherige rechnet mit Kanten und
-   Farben - es weiss nicht, was ein Motorrad IST. Deshalb blieb bei einem Foto
-   vor Bergen der halbe Hintergrund stehen, und ein Flugzeug am Himmel wurde
-   ordentlich freigestellt, weil es rechnerisch genauso ein Objekt ist.
-
-   u2netp ist ein kleines neuronales Netz, das gelernt hat, das AUFFAELLIGSTE
-   Objekt eines Bildes zu finden. Auf einem Motorradfoto ist das die Maschine.
    Nachgemessen an drei Bildern, darunter ein schwarzes Motorrad auf dunklem
-   Asphalt - der Fall, an dem jedes klassische Verfahren scheitern MUSS, weil
-   dort schlicht keine Kante ist: sauber getrennt.
+   Asphalt - der Fall, an dem jedes Verfahren ohne Modell scheitern MUSS,
+   weil dort schlicht keine Kante ist: sauber getrennt.
 
    WARUM AUSGERECHNET DIESES MODELL, und das war die entscheidende Frage:
 
@@ -246,8 +78,9 @@ function freiGlaetten(maske, breite, hoehe) {
    beides im Zwischenspeicher des Browsers. Geladen wird erst, wenn jemand
    wirklich auf Automatik drueckt, nicht beim Start der App.
 
-   FAELLT ES AUS - kein Netz, Bibliothek blockiert - springt das klassische
-   Verfahren ein. Das ist kein Beiwerk: Ohne Netz waere der Knopf sonst tot. */
+   Das Foto verlaesst dabei das Geraet NICHT: Gerechnet wird als
+   WebAssembly im Browser (siehe executionProviders unten). Geladen wird nur
+   das Modell und die Bibliothek. */
 
 const MODELL_DATEI = 'modell/u2netp.onnx';
 const ORT_BIBLIOTHEK = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/ort.min.js';
@@ -498,15 +331,6 @@ function öffneFreisteller(datenUrl, sofortAutomatik = false) {
     stift.drawImage(bild, 0, 0, breite, hoehe);
     const bilddaten = stift.getImageData(0, 0, breite, hoehe);
 
-    // Die verkleinerte Fassung fuer die Rechnerei.
-    const kFaktor = Math.min(1, FREI_RECHENKANTE / Math.max(breite, hoehe));
-    const kBreite = Math.max(1, Math.round(breite * kFaktor));
-    const kHoehe  = Math.max(1, Math.round(hoehe * kFaktor));
-    const kleinLeinwand = document.createElement('canvas');
-    kleinLeinwand.width = kBreite; kleinLeinwand.height = kHoehe;
-    kleinLeinwand.getContext('2d', { willReadFrequently: true })
-                 .drawImage(bild, 0, 0, kBreite, kHoehe);
-
     frei = {
       quelle: datenUrl,
       breite, hoehe,
@@ -518,12 +342,6 @@ function öffneFreisteller(datenUrl, sofortAutomatik = false) {
          denn durchsichtige Bildpunkte lesen sich als Schwarz, und die Maske
          haette sie wieder auf sichtbar gesetzt. */
       maske: maskeAusDurchsichtigkeit(bilddaten.data, breite * hoehe),
-      klein: {
-        breite: kBreite, hoehe: kHoehe,
-        farben: kleinLeinwand.getContext('2d', { willReadFrequently: true })
-                             .getImageData(0, 0, kBreite, kHoehe).data,
-        kanten: null,                  // erst bei Bedarf, das Rechnen dauert
-      },
       verlauf: [],                     // fuer Rueckgaengig
       werkzeug: 'radierer',
       pinsel: 26,
@@ -546,14 +364,6 @@ function schließeFreisteller() {
   neuesFotoImFluss = false;
   freiFortschrittAus();
   frei = null;
-}
-
-// Die Kantenkarte wird erst berechnet, wenn sie zum ersten Mal gebraucht
-// wird - und dann behalten. Sie haengt nur am Bild, nicht an der Maske.
-function freiKantenkarte() {
-  const k = frei.klein;
-  if (!k.kanten) k.kanten = freiKanten(k.farben, k.breite, k.hoehe);
-  return k.kanten;
 }
 
 // Zeichnet das Bild mit der aktuellen Maske. Ein Ausschnitt reicht, wenn nur
@@ -624,10 +434,17 @@ function freiFortschrittAus() {
   document.getElementById('freiBalken').style.width = '0';
 }
 
-/* Die Automatik. Erst das Modell, und nur wenn das nicht geht, das
-   klassische Verfahren. Waehrend geladen wird, muss zu sehen sein, dass
-   etwas passiert - beim ersten Mal dauert es einige Sekunden, und ohne
-   Rueckmeldung wirkt das wie ein Absturz. */
+/* Die Automatik: das Modell, und sonst nichts. Geht es nicht, sagt die App
+   das - und die Pinsel bleiben. Waehrend geladen wird, muss zu sehen sein,
+   dass etwas passiert: Beim ersten Mal dauert es einige Sekunden, und ohne
+   Rueckmeldung wirkt das wie ein Absturz.
+
+   WARUM ES KEINEN ZWEITEN WEG MEHR GIBT: Hier sprang bis zum 27.08.2026 ein
+   klassisches Verfahren ein (Kantensuche, Minimax-Ausbreitung). Die
+   Begruendung und die Messwerte stehen in ENTSCHEIDUNGEN.md. Kurz: Es hat
+   auf echten Fotos so wenig getroffen, dass es niemandem half - und weil es
+   still ansprang, sah der Nutzer nur ein schlechtes Ergebnis statt eines
+   Hinweises, dass gerade etwas fehlt. */
 async function freiAutomatik() {
   const knopf = document.getElementById('btnFreiAutomatik');
   if (knopf.disabled) return;
@@ -652,60 +469,17 @@ async function freiAutomatik() {
     showToast(`Freigestellt, ${weg} % entfernt. Reste kannst du wegradieren.`);
   } catch (fehler) {
     if (!frei) return;
-    // Ohne Netz oder mit blockierter Bibliothek: das klassische Verfahren.
-    showToast('Modell nicht erreichbar, nehme das einfache Verfahren.');
-    freiFortschritt('Einfaches Verfahren', null);
-    await kurzDurchatmen();
-    freiAutomatikKlassisch();
+    /* Kein Netz, blockierte Bibliothek, zu wenig Speicher. Die Meldung sagt
+       BEIDES: dass es nicht ging, und dass die Arbeit trotzdem weitergeht -
+       radieren kann man auch ohne Modell. */
+    showToast('Automatik nicht möglich – keine Verbindung? Radier den Hintergrund von Hand weg.');
+    console.warn('Freisteller: Modell nicht verfügbar.', fehler);
   } finally {
     freiFortschrittAus();
     beschriftung.textContent = vorher;
     knopf.disabled = false;
     freiKnöpfeAnzeigen();
   }
-}
-
-function freiAutomatikKlassisch() {
-  const k = frei.klein;
-  const E = freiKantenkarte();
-
-  const saaten = [];
-  for (let x = 0; x < k.breite; x++) saaten.push(x, (k.hoehe - 1) * k.breite + x);
-  for (let y = 0; y < k.hoehe; y++) saaten.push(y * k.breite, y * k.breite + k.breite - 1);
-
-  const kosten = freiMinimax(E, k.breite, k.hoehe, saaten);
-
-  // Ergebnis in der kleinen Fassung aufraeumen, danach hochziehen.
-  const kleinMaske = new Uint8Array(k.breite * k.hoehe);
-  for (let s = 0; s < k.breite * k.hoehe; s++) {
-    kleinMaske[s] = kosten[s] <= FREI_AUTOMATIK_SCHWELLE ? 0 : 255;
-  }
-  freiGlaetten(kleinMaske, k.breite, k.hoehe);
-
-  // Auf die Anzeigegroesse ziehen, mit Zwischenrechnen fuer weiche Kanten.
-  const sx = k.breite / frei.breite, sy = k.hoehe / frei.hoehe;
-  for (let y = 0; y < frei.hoehe; y++) {
-    for (let x = 0; x < frei.breite; x++) {
-      const fx = Math.min(k.breite - 1.001, x * sx), fy = Math.min(k.hoehe - 1.001, y * sy);
-      const x0 = fx | 0, y0 = fy | 0, tx = fx - x0, ty = fy - y0;
-      const a = kleinMaske[y0*k.breite + x0] * (1-tx) * (1-ty)
-              + kleinMaske[y0*k.breite + x0+1] * tx * (1-ty)
-              + kleinMaske[(y0+1)*k.breite + x0] * (1-tx) * ty
-              + kleinMaske[(y0+1)*k.breite + x0+1] * tx * ty;
-      // Nur wegnehmen, nie zurueckholen - was der Nutzer schon von Hand
-      // entfernt hat, bleibt entfernt.
-      if (a < 128) frei.maske[y*frei.breite + x] = 0;
-    }
-  }
-
-  freiAufräumen();
-  const einzelteile = freiNurHauptobjekt();
-
-  const weg = zähleDurchsichtig();
-  const dazu = einzelteile > 0 ? ` ${einzelteile} freistehende Teile mit weg.` : '';
-  showToast(weg < 4
-    ? 'Kaum etwas gefunden. Radier den Hintergrund von Hand weg.'
-    : `Automatik fertig, ${weg} % entfernt.${dazu} Den Rest wegradieren.`);
 }
 
 function zähleDurchsichtig() {
@@ -812,64 +586,6 @@ function freiAufräumen(nurInseln = false) {
 }
 
 // Bildschirmpunkt in Bildpunkt umrechnen.
-/* Behält nur das Hauptobjekt und wirft freistehende Einzelteile weg.
-
-   Der Anlass ist ein echtes Bild: Auf dem Foto steht ein Flugzeug am
-   Himmel. Die Automatik trägt den Himmel ringsum ab, das Flugzeug bleibt als
-   Insel stehen - richtig gerechnet, aber unbrauchbar.
-
-   Die Annahme, die das löst, und sie ist speziell für Motorradfotos richtig:
-   Das Motorrad ist der mit Abstand GRÖSSTE zusammenhängende Bereich, der
-   übrigbleibt. Alles, was deutlich kleiner ist und nirgends daran hängt, ist
-   Beiwerk - ein Flugzeug, ein Zaunpfahl, ein Grasbüschel.
-
-   Nicht ganz weggeworfen wird, was mindestens ein Sechstel des Hauptteils
-   misst. Ein abgesetzter Spiegel oder ein Koffer kann so gross sein, und den
-   still zu schlucken wäre schlimmer als ein Flugzeug zu viel. */
-function freiNurHauptobjekt() {
-  const { breite, hoehe, maske } = frei;
-  const anzahl = breite * hoehe;
-  const besucht = new Uint8Array(anzahl);
-  const bereiche = [];
-
-  for (let start = 0; start < anzahl; start++) {
-    if (besucht[start] || maske[start] <= 127) continue;
-    const teile = [];
-    const stapel = [start];
-    besucht[start] = 1;
-    while (stapel.length) {
-      const s = stapel.pop();
-      teile.push(s);
-      const x = s % breite, y = (s - x) / breite;
-      if (x > 0          && !besucht[s-1]      && maske[s-1]      > 127) { besucht[s-1]=1;      stapel.push(s-1); }
-      if (x < breite - 1 && !besucht[s+1]      && maske[s+1]      > 127) { besucht[s+1]=1;      stapel.push(s+1); }
-      if (y > 0          && !besucht[s-breite] && maske[s-breite] > 127) { besucht[s-breite]=1; stapel.push(s-breite); }
-      if (y < hoehe - 1  && !besucht[s+breite] && maske[s+breite] > 127) { besucht[s+breite]=1; stapel.push(s+breite); }
-    }
-    bereiche.push(teile);
-  }
-
-  if (bereiche.length < 2) return 0;
-  const groesster = Math.max(...bereiche.map(b => b.length));
-  const grenze = groesster / 6;
-
-  let entfernt = 0;
-  for (const teile of bereiche) {
-    if (teile.length >= grenze) continue;
-    for (const s of teile) maske[s] = 0;
-    entfernt++;
-  }
-  freiZeichnen();
-  return entfernt;
-}
-
-/* Bildschirmpunkt in Bildpunkt umrechnen.
-
-   Der Umweg ueber das tatsaechlich gezeichnete Rechteck ist noetig, weil die
-   Leinwand in ihrem Kasten mittig sitzen kann und dann oben/unten oder
-   links/rechts ein Streifen frei bleibt. Rechnet man stumpf gegen den Kasten,
-   liegt der Pinsel auf dem Handy daneben - je nach Seitenverhaeltnis um
-   dutzende Punkte. Genau das hat das Radieren dort unbrauchbar gemacht. */
 function freiPunkt(ereignis) {
   const schau = document.getElementById('freiLeinwand');
   const kasten = schau.getBoundingClientRect();
