@@ -75,7 +75,50 @@
   font-size: 26px;
   text-transform: uppercase;
   letter-spacing: 0.02em;
+  color: var(--metall-glanz);
 }
+/* --- Die Wortmarke ---------------------------------------------------------
+   Der Schriftzug als Bild, darunter der Untertitel. Steht auf dem Anmelde-
+   und dem Rechtliches-Bildschirm; im Querformat zusaetzlich in der
+   Kopfleiste, wo quer.css die Masse anpasst.
+
+   Der Untertitel ist Volltonfarbe, KEIN Verlaufstext - Grundsatz 2 der
+   Designsprache (siehe Kopf von design.css). Die Metallwirkung kommt aus
+   der Farbe selbst, die aus dem Logo gemessen ist, und aus der weiten
+   Laufweite. Bei dieser Schriftgroesse waere ein Verlauf ohnehin kaum zu
+   sehen, waere aber ein gebrochener Grundsatz. */
+.wortmarke {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s2);
+  margin: 0 0 var(--s5);
+}
+.wortmarke-bild {
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+}
+.wortmarke-sub {
+  font-family: var(--schrift-display);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  /* Weit gesperrt, damit die kurze Zeile die Breite des Schriftzugs
+     aufnimmt statt darunter zu verschwinden. */
+  letter-spacing: 0.22em;
+  /* Der Zeichenabstand haengt rechts am letzten Buchstaben und schoebe die
+     Zeile sonst nach links aus der Mitte. */
+  text-indent: 0.22em;
+  line-height: 1;
+  color: var(--metall);
+}
+
+/* Auf den Listenbildschirmen (Rechtliches) stehen Ueberschrift und Inhalt
+   links - eine mittige Wortmarke darueber haenge in der Luft. */
+.listen-screen .wortmarke { align-items: flex-start; }
+
 .start-screen-inner .saved-list { text-align: left; }
 
 .back-btn { margin-bottom: var(--s5); }
@@ -736,6 +779,10 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 
 /* .brand-title: der Name "Serpa" mit dem Punkt in der Signalfarbe davor - wird
    sowohl im Bedienfeld-Header als auch auf dem Startbildschirm genutzt. */
+/* Die Ueberschriften tragen den Silberton des Schriftzugs (--metall-glanz)
+   statt des blaustichigen --text. Der Unterschied ist fein und soll es sein:
+   Er nimmt dem Bild die zwei Handschriften, ohne dass jemand sagen koennte,
+   woran es liegt. Bedienbares bleibt unberuehrt - das ist blau. */
 .brand-title {
   margin: 0;
   font-family: var(--schrift-display);
@@ -744,6 +791,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   text-transform: uppercase;
   letter-spacing: 0.02em;
   line-height: 1.05;
+  color: var(--metall-glanz);
 }
 .brand-title::before {
   content: "";
@@ -1230,7 +1278,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   text-transform: uppercase;
   letter-spacing: 0.06em; font-size: 15px; color: var(--muted); }
 .ride-status { text-align: center; margin: 0 0 12px; }
-.ride-titel { margin: 0 0 12px; font-size: 18px; }
+.ride-titel { margin: 0 0 12px; font-size: 18px; color: var(--metall-glanz); }
 
 /* Laeuft die Aufzeichnung gerade nicht, soll das auf einen Blick klar sein. */
 .ride-panel.pausiert .ride-tempo-wert { color: var(--muted); }
@@ -1975,6 +2023,7 @@ body.nav-modus .leaflet-control-container { display: none; }
   line-height: 1;
   letter-spacing: 0.01em;
   text-transform: uppercase;
+  color: var(--metall-glanz);
   text-shadow: 0 2px 14px var(--schatten-tief);
 }
 .garage-sub {

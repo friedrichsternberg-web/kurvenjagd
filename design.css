@@ -189,6 +189,22 @@
   --glas-heller: rgba(255, 255, 255, 0.20);   /* gedrueckt / hervorgehoben */
   --glas-licht:  rgba(255, 255, 255, 0.32);   /* obere Lichtkante (inset) */
 
+  /* Metall. Die Wortmarke ist gerendertes, gebuerstetes Metall - vollstaendig
+     neutral, ohne jeden Farbstich (gemessene Saettigung 0,03). Text und
+     Nebentext der App tragen dagegen einen Blaustich bei 220 Grad, und genau
+     daher ruehrt der Eindruck, dass Schriftzug und Oberflaeche zwei
+     Handschriften sind. Diese drei Toene sind aus dem Logo gemessen und
+     schliessen die Luecke.
+
+     WAS METALL NICHT IST: eine Signalfarbe. Was metallisch ist, ist
+     Beschriftung - eine Ueberschrift, ein Untertitel, nie ein Knopf. RAL 5005
+     bleibt allein zustaendig fuer alles, was man antippen kann. Wer das
+     aufweicht, nimmt der Signalfarbe ihre Bedeutung (siehe oben) und dem
+     Nutzer die Auskunft, was ueberhaupt bedienbar ist. */
+  --metall:       #9D9997;   /* Beschriftung mit Markenbezug, 7,4:1 auf Schwarz */
+  --metall-glanz: #DDD9D9;   /* Ueberschriften und Lichtkanten, 15:1 */
+  --metall-tief:  #726E6C;   /* nur Grosses und Dekoratives, 4,2:1 */
+
   /* Dasselbe in Schwarz: Schatten unter Glasflaechen, Schleier ueber Fotos.
      Sechs Stufen statt fuenf, weil Schwarz einen weiteren Bereich abdecken
      muss - vom kaum merklichen Schatten bis zur fast deckenden Abdeckung

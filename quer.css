@@ -80,28 +80,30 @@
   }
   .nav-tab .ic { width: 24px; height: 24px; }
 
-  /* Der Schriftzug mit Untertitel, zweizeilig wie der Kopf des Planers.
-     Die Zeilen stehen eng beieinander (line-height 1), damit beide in die
-     Leiste passen; die Groessen sind auf --nav-h-quer abgestimmt. */
+  /* Der Schriftzug als Bild, darunter der Untertitel. Beides zusammen misst
+     rund 46 Punkte und sitzt damit ruhig in der 80 Punkte hohen Leiste.
+
+     Der Schriftzug ist hier deutlich kleiner als auf den Anmelde- und
+     Rechtliches-Bildschirmen (dort 220 Punkte, siehe style.css) - eine
+     Kopfleiste soll die Marke zeigen, nicht mit ihr auftrumpfen. */
   .nav-marke {
     display: inline-flex;
     flex-direction: column;
     justify-content: center;
+    align-items: flex-start;
+    gap: var(--s1);
     margin-right: var(--s6);
   }
-  .nav-marke-name {
-    font-family: var(--schrift-display);
-    font-size: 28px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    line-height: 1;
-    color: var(--text);
+  .nav-marke .wortmarke-bild {
+    width: 148px;
+    max-width: none;
   }
-  .nav-marke-sub {
-    font-size: 13px;
-    line-height: 1.4;
-    color: var(--muted);
+  .nav-marke .wortmarke-sub {
+    /* Kleiner als auf den grossen Bildschirmen, aber mit derselben weiten
+       Laufweite - so bleibt die Zeile genauso breit wie der Schriftzug. */
+    font-size: 10px;
+    letter-spacing: 0.19em;
+    text-indent: 0.19em;
   }
 
   /* Der rechte Bereich: schiebt sich selbst an den Rand. */
@@ -111,6 +113,14 @@
     gap: var(--s3);
     margin-left: auto;
   }
+
+  /* Derselbe Gedanke wie beim Konto-Knopf gleich darunter: Der Planer-Kopf
+     traegt den Namen "Serpa" als Ueberschrift - im Querformat steht der
+     Schriftzug aber schon in der Kopfleiste direkt darueber, und beides
+     zugleich im Bild ist eine Dopplung. Die Unterzeile "Routenplaner"
+     bleibt, sie sagt ja etwas anderes. Im Hochformat gibt es keine
+     Kopfleiste, dort bleibt der Name stehen. */
+  .panel-header .brand-title { display: none; }
 
   /* Der runde Konto-Knopf im Garagenkopf waere der ZWEITE Konto-Knopf im
      Bild - die Leiste hat schon einen. Der Neu-laden-Knopf daneben bleibt:

@@ -642,6 +642,14 @@
   <div id="kontoScreen" class="start-screen" hidden>
     <div class="start-screen-inner">
       <button class="btn ghost back-btn" id="btnKontoZurueck">&larr; Zurück</button>
+      <!-- Der Schriftzug steht hier, weil auf diesem Bildschirm die Leiste
+           ausgeblendet ist (app.js, BILDSCHIRME_OHNE_LEISTE) - er doppelt
+           sich also nie mit dem in der Kopfleiste. Fuer Pruefer und neue
+           Nutzer ist das oft der erste Bildschirm ueberhaupt. -->
+      <p class="wortmarke">
+        <img class="wortmarke-bild" src="img/logo-serpa.webp?v=101" alt="Serpa" width="800" height="155">
+        <span class="wortmarke-sub">Deine Motorradapp</span>
+      </p>
       <h2 id="kontoTitel">Anmelden</h2>
       <p class="sub">
         Zum Planen brauchst du kein Konto. Erst fürs Teilen von Routen und
@@ -870,6 +878,10 @@
   <div id="rechtlichesScreen" class="start-screen listen-screen" hidden>
     <div class="start-screen-inner">
       <button class="btn ghost back-btn" id="btnRechtlichesZurueck">&larr; Zur&uuml;ck</button>
+      <p class="wortmarke">
+        <img class="wortmarke-bild" src="img/logo-serpa.webp?v=101" alt="Serpa" width="800" height="155">
+        <span class="wortmarke-sub">Deine Motorradapp</span>
+      </p>
       <h2>Rechtliches</h2>
 
       <details class="block accordion" id="impressumBlock">
@@ -1616,8 +1628,8 @@
          sitzt DIESELBE Leiste oben und liest sich als Kopf einer Webseite.
          Im Hochformat blendet .nur-quer (style.css) beides aus. -->
     <span class="nav-marke nur-quer" aria-hidden="true">
-      <span class="nav-marke-name">Serpa</span>
-      <span class="nav-marke-sub">Deine Motorradapp</span>
+      <img class="wortmarke-bild" src="img/logo-serpa.webp?v=101" alt="" width="800" height="155">
+      <span class="wortmarke-sub">Deine Motorradapp</span>
     </span>
     <!-- Die Garage steht VORN: Sie ist der Startbildschirm, und der erste
          Platz sagt das auch. Die Reihenfolge hier gilt fuer beide Formate,
