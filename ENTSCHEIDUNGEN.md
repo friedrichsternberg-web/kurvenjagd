@@ -733,3 +733,42 @@ Dazu ein Abschnitt „Stand der Entwicklung" im Rechtlichen: was läuft, was
 fehlt, dass Daten zunächst nur im Browser liegen und man sich unterwegs
 nicht allein auf die App verlassen soll. Das ist gegenüber Nutzern fair und
 gegenüber Prüfern ehrlicher als ein Abzeichen ohne Erklärung.
+
+## 26.08.2026 — Sicherheitsdurchgang: 17 von 27 Befunden behoben
+
+Ein eigener Bericht (`SICHERHEIT.md`, bewusst nicht im Repository) hatte 27
+Befunde aufgelistet. Sie wurden Punkt für Punkt geprüft und abgearbeitet. Vier
+Dinge sind über den Tag hinaus wichtig:
+
+**Die Falle, die keiner der Befunde beschrieb.** `revoke execute ... from anon`
+meldet Erfolg und wirkt trotzdem nicht: Postgres gibt jeder Funktion
+automatisch das Ausführungsrecht an die Sammelrolle PUBLIC, und `anon` erbt es
+darüber. In der Rechteliste steht das als `=X/postgres`, ohne Rollennamen –
+leicht zu übersehen. Aufgefallen ist es nur, weil die Behebung **nachgeprüft**
+wurde: Die angeblich gesperrte Funktion antwortete weiter. Seither tragen alle
+acht Funktionen erst ein `revoke ... from public` und dann ausdrückliche
+`grant`s. Die Lehre gilt allgemein: Eine Absicherung, die man nicht
+nachgeprüft hat, ist keine.
+
+**Metall der Sicherheit: prüfen an der Tür, nicht im Haus.** Der schwerste
+Befund war, dass Serverdaten ungeprüft zu App-Zustand werden und in
+HTML-Attribute wandern. Die Lösung ist `pruefeTour()` in `kern.js`, und ihre
+Bauart ist der eigentliche Punkt: Sie übernimmt die bekannten Felder
+**einzeln** statt das Rohobjekt zu kopieren. Beim Kopieren käme jedes
+zusätzliche Feld mit, das sich jemand ausgedacht hat. Dazu werden Bilder mit
+`createElement` gesetzt statt als Zeichenkette geschrieben – `element.src`
+setzt eine Eigenschaft, dort lässt sich kein `onerror=` unterbringen.
+
+**Die Standortabfrage wandert an den Anlass.** Sie hing am Seitenaufruf, der
+Berechtigungsdialog stand in der ersten Sekunde da. Das widersprach nicht nur
+der eigenen Datenschutzerklärung, es ist auch praktisch schlecht: Was ohne
+erkennbaren Anlass gefragt wird, lehnen Leute ab – und auf iOS ist die
+Freigabe danach dauerhaft weg, auch für die Navigation, für die man sie
+wirklich braucht. Jetzt fragt die App beim ersten Öffnen des Planers.
+
+**Ein Schutz, den niemand geplant hat, und der deshalb dokumentiert gehört.**
+Alle vier Foto-Wege der App gehen durch `verkleinereFoto()`, also über eine
+Leinwand. Dabei verlieren die Bilder ihren EXIF-Block – GPS-Koordinaten der
+Aufnahme, Uhrzeit, Kameramodell. Das ist ein Nebeneffekt des Verkleinerns.
+Wer eines Tages einen Weg baut, der eine Datei direkt hochlädt, hebt diesen
+Schutz auf, ohne es zu merken.

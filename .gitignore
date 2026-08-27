@@ -40,6 +40,16 @@ _git_muell/
 # schon einmal in diesem Projekt, siehe *.pdf weiter unten.
 Bild We*.png
 
+# Der Sicherheitsbericht. Er beschreibt Lücken, von denen einige noch OFFEN
+# sind (A8, A9, B3/B4) - in einem öffentlichen Repository wäre das eine
+# Anleitung. Er gehört in dieselbe Schublade wie CLAUDE.md und dashboard.html:
+# nützlich, aber nicht für alle.
+#
+# Wenn eines Tages jeder Befund behoben ist, spricht nichts mehr dagegen, ihn
+# zu veröffentlichen - offen gelegte Sicherheitsarbeit schafft Vertrauen. Bis
+# dahin bleibt er hier.
+SICHERHEIT.md
+
 # Die Vorlagen, aus denen Symbol und Schriftzug gerechnet werden. Zusammen
 # 4,6 MB, und die App braucht keine davon: Was gebraucht wird, liegt fertig
 # in img/ (app-icon-quelle.png und logo-quelle.png sind die Archivfassungen
