@@ -772,3 +772,37 @@ Leinwand. Dabei verlieren die Bilder ihren EXIF-Block – GPS-Koordinaten der
 Aufnahme, Uhrzeit, Kameramodell. Das ist ein Nebeneffekt des Verkleinerns.
 Wer eines Tages einen Weg baut, der eine Datei direkt hochlädt, hebt diesen
 Schutz auf, ohne es zu merken.
+
+## 26.08.2026 — Standort, Passwörter, Fremdanmeldung
+
+**Der Standort wird jetzt nur noch gefragt, wo er gebraucht wird.** Die
+Abfrage hing ursprünglich am Seitenaufruf, dann – nach dem ersten
+Sicherheitsdurchgang – am Öffnen des Planers. Beides war zu früh: Wer eine
+Karte öffnet, will eine Karte sehen, nicht zwingend seinen Standort
+preisgeben. Jetzt fragt die App an vier Stellen, und an allen vieren hat der
+Nutzer selbst gedrückt: der neue Knopf auf der Planer-Karte, „Aktueller
+Standort" in der Ortssuche, Navigation, Aufzeichnen. Nachgemessen mit einem
+Zähler auf `getCurrentPosition`: null Abfragen beim Öffnen.
+
+**Passwörter: 10 Zeichen, Buchstaben und Ziffern.** Dazu „Secure password
+change" – wer sein Passwort ändern will, braucht eine Anmeldung aus den
+letzten 24 Stunden. Das ist gegen das Szenario aus Befund B1 (gestohlenes
+Token) sogar wirksamer als der Abgleich gegen bekannte Leaks, und der ist
+bei Supabase ohnehin dem Pro-Plan vorbehalten (25 $/Monat).
+
+**Google und Apple: gebaut, aber ausgeschaltet.** Der Code ist vollständig
+und getestet, die Knöpfe erscheinen, sobald `ANMELDUNG_ANBIETER` in
+`konto.js` auf `true` steht. Ausgeschaltet sind sie, weil beide Anbieter
+Zugangsdaten verlangen, die niemand nebenbei besorgt: Google eine
+OAuth-Client-ID aus der Cloud Console (kostenlos, aber ein eigenes Projekt),
+Apple das Developer Program für 99 US-Dollar im Jahr.
+
+Dasselbe Muster wie beim Shop: Ein Knopf, der auf eine Fehlerseite führt,
+ist schlimmer als kein Knopf. Was zum Einschalten fehlt, steht ausführlich
+am Schalter selbst – einschließlich der Callback-Adresse, die bei Google
+einzutragen ist.
+
+**Zu Apple, damit die Frage später nicht überrascht:** Für die Webseite ist
+„Sign in with Apple" freiwillig. Zwingend wird es erst, wenn die App in den
+App Store geht UND dort einen anderen Anbieter-Login anbietet – Apple
+verlangt dann seinen eigenen daneben.
