@@ -294,7 +294,25 @@
 
 html, body {
   margin: 0;
+  /* DIE HOEHE, AN DER ALLES ANDERE HAENGT. Jedes
+     height: calc(100% - var(--nav-raum)) im Projekt rechnet von hier aus.
+
+     Warum nicht schlicht 100 Prozent: Auf dem Handy gibt es ZWEI
+     Bildschirmhoehen. Die grosse gilt mit eingefahrener Adresszeile, die
+     kleine mit ausgefahrener - und "100%" meint immer die GROSSE. Steht die
+     Adresszeile aber im Bild, rechnet die ganze App mit mehr Platz, als sie
+     hat: Der Inhalt schiebt sich unter die Leiste am unteren Rand, und
+     darunter bleibt ein Streifen stehen.
+
+     dvh ist die Hoehe, die gerade wirklich da ist. Sie aendert sich beim
+     Ein- und Ausfahren der Adresszeile, und genau das ist hier richtig.
+     Der Garagenraum bleibt davon unberuehrt, der rechnet bewusst in svh
+     (siehe --garage-raum-hoehe in style.css).
+
+     Die 100% davor sind der Rueckfall fuer Browser, die dvh nicht kennen -
+     sie ueberlesen die zweite Zeile einfach. */
   height: 100%;
+  height: 100dvh;
   background: var(--bg);
   color: var(--text);
   font-family: var(--schrift-text);

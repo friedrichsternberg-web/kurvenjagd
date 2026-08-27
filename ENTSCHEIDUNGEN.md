@@ -843,3 +843,68 @@ Mit dem getippten Namen ist auch `.brand-title` samt blauem Punkt aus
 `style.css` verschwunden. Die Regel `.start-screen-inner .brand-title` war
 schon seit dem Logo-Einbau ohne Wirkung: Auf jenen Bildschirmen steht
 längst die Wortmarke.
+
+## 27.08.2026 — Ein Freisteller statt zwei, und weniger Text
+
+**Das klassische Verfahren im Freisteller ist raus.** Neben dem Modell lag
+seit dem 19.08.2026 ein zweiter Weg: Kantenstärke nach Scharr, dann eine
+Minimax-Ausbreitung von den Bildrändern her (Image Foresting Transform),
+Schwelle 14. Er sprang ein, wenn das Modell nicht geladen werden konnte.
+
+Die Messwerte, die ihn damals gerechtfertigt haben, bleiben festgehalten:
+An sechs Testfällen blieb das Motorrad zu 94 bis 100 Prozent erhalten, beim
+Himmelsverlauf lag die Überdeckung mit der Wahrheit bei 91 Prozent. Höhere
+Schwellen trugen mehr ab, fraßen aber die Maschine an — bei 22 blieben vom
+schwarzen Motorrad auf Asphalt nur 49 Prozent, bei 34 noch 27.
+
+**Was die Zahlen nicht zeigten:** Vor Bergen und in Einfahrten bleibt so
+viel Hintergrund stehen, dass der Nutzer praktisch alles von Hand wegradiert.
+Friedrich hat es an echten Fotos ausprobiert — „das andere Tool funktioniert
+wirklich gar nicht". Dazu kommt der eigentliche Schaden: Der Rückfall sprang
+**still** an. Wer ein schlechtes Ergebnis sah, hielt die Automatik für
+kaputt, statt zu erfahren, dass gerade etwas fehlt.
+
+Jetzt gibt es nur noch u2netp. Geht es nicht, sagt die App das und die
+Pinsel bleiben: „Automatik nicht möglich – keine Verbindung? Radier den
+Hintergrund von Hand weg." Mit dem Verfahren sind rund 210 Zeilen gefallen
+(`freiKanten`, `freiMinimax`, `freiGlaetten`, `freiKantenkarte`,
+`freiNurHauptobjekt`, die verkleinerte Rechenfassung `frei.klein`).
+`freiNurHauptobjekt` ging mit, weil nur der klassische Weg sie rief — das
+Modell sucht von sich aus das auffälligste Objekt und lässt keine Inseln
+stehen, die es wegzuräumen gäbe.
+
+**Der Neu-laden-Knopf im Garagenkopf ist weg**, samt `geraet.frischLaden()`.
+Er hängte einen Zeitstempel an die Adresse, weil das für den Browser eine
+andere Seite ist und er sie wirklich vom Server holen muss.
+
+Der Grund für ihn bestand: Wer die App vom Startbildschirm öffnet, hat keine
+Adresszeile — dort hilft nicht einmal das Schließen der App gegen den
+Zwischenspeicher. Das ist mit dem Knopf wieder offen. Kommt es zurück, ist
+die Funktion in der Git-Historie dieses Datums vollständig.
+
+**Weniger Text auf zwei Bildschirmen.** In der Garage fällt „Deine Maschine
+und deine Ausrüstung" weg — vier Zeilen im Kopf waren zu viel, seit der
+Schriftzug dazukam, und die Bühne gewinnt die Höhe zurück. Beim Aufzeichnen
+bleibt vom Erklärtext nur der erste Satz; „Motor aus" ist raus, weil es für
+die Messung nichts ändert. Die Zeile unter dem Nullpunkt-Knopf steht jetzt
+nur noch da, wenn sie etwas zu sagen hat: Ohne gesetzten Nullpunkt bleibt
+sie leer, statt die Schätzung aus dem GPS zu erklären — eine Auskunft, aus
+der niemand eine Entscheidung ableitet.
+
+## 27.08.2026 — Die Höhe rechnet in dvh statt in Prozent
+
+`html, body` standen auf `height: 100%`. Auf dem Handy meint das die
+**große** Bildschirmhöhe, die nur bei eingefahrener Adresszeile gilt. Steht
+die Adresszeile im Bild, rechnet die ganze App mit mehr Platz, als sie hat:
+Der Inhalt schiebt sich unter die Leiste am unteren Rand — auf Friedrichs
+Screenshot war das Feld „Zielpunkt suchen" halb verdeckt — und darunter
+bleibt ein Streifen stehen.
+
+Jetzt steht dort `height: 100dvh` mit `100%` als Rückfall davor. `dvh` ist
+die Höhe, die gerade wirklich da ist. Weil jedes
+`height: calc(100% - var(--nav-raum))` im Projekt von dieser einen Stelle
+aus rechnet, wirkt die Änderung überall.
+
+Der Garagenraum bleibt bewusst bei `svh` (`--garage-raum-hoehe`): Er soll
+sich beim Ein- und Ausfahren der Adresszeile NICHT ändern, sonst bekäme das
+Raumbild bei jedem Scrollen einen anderen Ausschnitt.
