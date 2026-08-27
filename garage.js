@@ -1194,14 +1194,25 @@ function zeichneFotoVorschau() {
 
   const verändert = dialogFotoOriginal && dialogFoto !== dialogFotoOriginal;
 
+  /* Das Vorschaubild wird gesetzt, nicht geschrieben - derselbe Grund wie
+     bei der Fotogalerie in app.js (SICHERHEIT.md, Befund B1). Das Foto
+     stammt zwar aus der eigenen Dateiauswahl und ist immer eine
+     data:-Adresse; die Bauart "src=${...}" in einer Zeichenkette ist aber
+     genau die, die spaeter jemand kopiert, wenn er eine fremde Quelle
+     anzeigen will. */
   kasten.innerHTML = `
-    <div class="foto-bild"><img src="${dialogFoto}" alt=""></div>
+    <div class="foto-bild"></div>
     <div class="foto-knöpfe">
       <button type="button" class="btn ghost klein" id="btnFreistellen">${verändert ? 'Nachbessern' : 'Hintergrund entfernen'}</button>
       <button type="button" class="btn ghost klein" id="btnFotoAusrichten">Position anpassen</button>
       ${verändert ? '<button type="button" class="btn ghost klein" id="btnFotoZurück">Original zurück</button>' : ''}
       <button type="button" class="btn ghost klein" id="btnFotoWeg">Foto entfernen</button>
     </div>`;
+  const vorschauBild = document.createElement('img');
+  vorschauBild.alt = '';
+  if (/^data:image\/(jpeg|png|webp);base64,/.test(dialogFoto)) vorschauBild.src = dialogFoto;
+  kasten.querySelector('.foto-bild').append(vorschauBild);
+
   hinweis.innerHTML = verändert
     ? 'Sieht das Ergebnis zerfranst aus, hol dir mit "Original zur&uuml;ck" das unver&auml;nderte Foto wieder.'
     : 'Der Hintergrund wird beim Aussuchen von selbst entfernt. Am besten wirkt '

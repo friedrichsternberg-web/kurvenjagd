@@ -129,13 +129,13 @@
        geblieben. Die Zahl wird also nur dann hochgezaehlt, wenn sich das
        Symbol wirklich aendert, und JSON erlaubt keine Kommentare - deshalb
        steht die Erklaerung hier. -->
-  <link rel="manifest" href="manifest.webmanifest?v=103">
+  <link rel="manifest" href="manifest.webmanifest?v=104">
 
   <!-- Das Symbol im Reiter des Browsers. Zwei Groessen, damit der Browser
        nehmen kann, was er gerade braucht: das kleine fuer den Reiter, das
        grosse fuer Lesezeichen und die Kachel auf der Startseite. -->
-  <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png?v=103">
-  <link rel="icon" type="image/png" sizes="192x192" href="img/icon-192.png?v=103">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png?v=104">
+  <link rel="icon" type="image/png" sizes="192x192" href="img/icon-192.png?v=104">
 
   <!-- Faerbt die Statusleiste des Handys in die Grundflaeche der App, damit
        oben kein fremder heller Streifen stehen bleibt. -->
@@ -148,7 +148,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Serpa">
-  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=103">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=104">
 
   <!-- Fuer die spaetere Webseite und geteilte Routen: So sieht der Link aus,
        wenn ihn jemand in WhatsApp oder Instagram einfuegt. Ohne das steht
@@ -213,12 +213,12 @@
                    die spaetere Webseite genauso benutzen.
        style.css   die Anordnung DIESER App, ausgelegt auf Hochformat. Die
                    Webseite bekommt dafuer eine eigene Datei. -->
-  <link rel="stylesheet" href="design.css?v=103">
-  <link rel="stylesheet" href="style.css?v=103">
+  <link rel="stylesheet" href="design.css?v=104">
+  <link rel="stylesheet" href="style.css?v=104">
   <!-- Die Anordnung fuer breite Bildschirme. Laedt NACH style.css und
        ueberschreibt dessen Hochformat-Anordnung nur dann, wenn das Fenster
        mindestens 900x500 Punkte hat - auf dem Handy bleibt sie stumm. -->
-  <link rel="stylesheet" href="quer.css?v=103">
+  <link rel="stylesheet" href="quer.css?v=104">
 </head>
 <body>
 
@@ -654,7 +654,7 @@
            Nutzer ist das oft der erste Bildschirm ueberhaupt. -->
       <p class="wortmarke">
         <span class="wortmarke-zeile">
-          <img class="wortmarke-bild" src="img/logo-serpa.webp?v=103" alt="Serpa" width="800" height="155">
+          <img class="wortmarke-bild" src="img/logo-serpa.webp?v=104" alt="Serpa" width="800" height="155">
           <span class="alpha-schild" title="Fr&uuml;he Fassung: Es wird noch gebaut, Funktionen k&ouml;nnen sich &auml;ndern.">Alpha</span>
         </span>
         <span class="wortmarke-sub">Deine Motorradapp</span>
@@ -889,7 +889,7 @@
       <button class="btn ghost back-btn" id="btnRechtlichesZurueck">&larr; Zur&uuml;ck</button>
       <p class="wortmarke">
         <span class="wortmarke-zeile">
-          <img class="wortmarke-bild" src="img/logo-serpa.webp?v=103" alt="Serpa" width="800" height="155">
+          <img class="wortmarke-bild" src="img/logo-serpa.webp?v=104" alt="Serpa" width="800" height="155">
           <span class="alpha-schild" title="Fr&uuml;he Fassung: Es wird noch gebaut, Funktionen k&ouml;nnen sich &auml;ndern.">Alpha</span>
         </span>
         <span class="wortmarke-sub">Deine Motorradapp</span>
@@ -984,7 +984,11 @@
             deine Einstellungen liegen im lokalen Speicher deines Browsers.
             Sie verlassen dein Ger&auml;t nicht, solange du kein Konto
             benutzt. L&ouml;schen kannst du sie jederzeit &uuml;ber die App
-            oder die Browserdaten.
+            oder die Browserdaten. <strong>Das Abmelden l&ouml;scht sie
+            nicht</strong> &ndash; es trennt nur die Verbindung zum Server,
+            damit du beim kurzen Abmelden nichts verlierst. Wer sich ein
+            Ger&auml;t mit anderen teilt, l&ouml;scht seine Touren also
+            zus&auml;tzlich in der App.
           </p>
 
           <p class="label">3. Karte, Routenberechnung, Ortssuche</p>
@@ -999,12 +1003,21 @@
             Art. 6 Abs. 1 lit. b DSGVO (Bereitstellung der von dir
             angeforderten Funktion).
           </p>
+          <p>
+            W&auml;hrend der Navigation kommt eines dazu: Weichst du von der
+            Route ab, berechnet die App sie neu &ndash; und dabei geht
+            <strong>deine aktuelle Position</strong> als Startpunkt an
+            BRouter, nicht nur die von dir gesetzten Wegpunkte. Die
+            Koordinaten werden dabei auf etwa einen Meter gerundet.
+          </p>
 
           <p class="label">4. Standort</p>
           <p>
             Deinen GPS-Standort fragt die App nur, wenn du eine Funktion
-            startest, die ihn braucht (Karte zentrieren, Navigation,
-            Aufzeichnen). Die Freigabe erteilst du im Browser
+            startest, die ihn braucht: beim ersten &Ouml;ffnen des Planers
+            (einmalig, um die Karte auf deine Gegend zu zentrieren), bei der
+            Navigation und beim Aufzeichnen. Beim blo&szlig;en Aufrufen der
+            Seite fragt sie nicht. Die Freigabe erteilst du im Browser
             beziehungsweise Betriebssystem und kannst sie dort jederzeit
             entziehen. Aufgezeichnete Strecken bleiben auf dem Ger&auml;t
             beziehungsweise in deinem Konto (Punkt 7).
@@ -1292,7 +1305,7 @@
 
         <!-- Eigene Notizen zur Tour -->
         <p class="hint ride-abschnitt">Notizen zur Tour</p>
-        <textarea id="rideNotizen" class="search-input ride-notizen" rows="3"
+        <textarea id="rideNotizen" maxlength="2000" class="search-input ride-notizen" rows="3"
                   placeholder="Wie war die Strecke? Was ist dir aufgefallen?"></textarea>
 
         <!-- Fotos: unterwegs aufgenommene erscheinen hier automatisch,
@@ -1575,11 +1588,11 @@
          Arbeit benutzt, nennt sie trotzdem. -->
     <footer>
       <p class="tiny">
-        Karte &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>-Mitwirkende &middot;
-        Routing <a href="https://brouter.de" target="_blank">BRouter</a><br>
-        Freisteller: <a href="https://github.com/xuebinqin/U-2-Net" target="_blank">U&sup2;-Net</a>
+        Karte &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>-Mitwirkende &middot;
+        Routing <a href="https://brouter.de" target="_blank" rel="noopener noreferrer">BRouter</a><br>
+        Freisteller: <a href="https://github.com/xuebinqin/U-2-Net" target="_blank" rel="noopener noreferrer">U&sup2;-Net</a>
         von Qin u.&nbsp;a. (Apache&nbsp;2.0) &middot;
-        Technische Daten aus <a href="https://de.wikipedia.org" target="_blank">Wikipedia</a> (CC&nbsp;BY-SA)
+        Technische Daten aus <a href="https://de.wikipedia.org" target="_blank" rel="noopener noreferrer">Wikipedia</a> (CC&nbsp;BY-SA)
       </p>
     </footer>
 
@@ -1666,7 +1679,7 @@
          Im Hochformat blendet .nur-quer (style.css) beides aus. -->
     <span class="nav-marke nur-quer" aria-hidden="true">
       <span class="wortmarke-zeile">
-        <img class="wortmarke-bild" src="img/logo-serpa.webp?v=103" alt="" width="800" height="155">
+        <img class="wortmarke-bild" src="img/logo-serpa.webp?v=104" alt="" width="800" height="155">
         <span class="alpha-schild">Alpha</span>
       </span>
       <span class="wortmarke-sub">Deine Motorradapp</span>
@@ -1807,16 +1820,16 @@
   <!-- ZUERST, denn alle anderen benutzen geraet.* beim Laden. Hier steht der
        gesamte Zugriff aufs Geraet - Standort, Speicher, Dateien. Beim Umzug
        in die Stores ist das die einzige Datei, die sich aendert. -->
-  <script src="geraet.js?v=103"></script>
+  <script src="geraet.js?v=104"></script>
   <!-- Der Rechenteil: Kurvigkeit, Sackgassen, Rundtour-Punkte, GPX. Muss VOR
        app.js stehen, weil app.js diese Funktionen beim Routen aufruft. Die
        spaetere Webseite im Querformat laedt genau diese Datei ebenfalls und
        rechnet damit exakt so wie die App. -->
-  <script src="kern.js?v=103"></script>
-  <script src="app.js?v=103"></script>
+  <script src="kern.js?v=104"></script>
+  <script src="app.js?v=104"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=103"></script>
+  <script src="konto.js?v=104"></script>
   <!-- Die Garage in drei Teilen. Die Reihenfolge ist nicht beliebig:
 
        finder.js       zuerst, weil zeichneGarage() am Ende von garage.js
@@ -1828,19 +1841,19 @@
 
        Alle drei nach app.js, weil sie verkleinereFoto(), showToast() und
        verkabele() von dort benutzen. -->
-  <script src="finder.js?v=103"></script>
-  <script src="garage.js?v=103"></script>
-  <script src="freisteller.js?v=103"></script>
+  <script src="finder.js?v=104"></script>
+  <script src="garage.js?v=104"></script>
+  <script src="freisteller.js?v=104"></script>
   <!-- Der Demo-Produktkatalog (nur Daten) und die Shop-Logik. produkte.js
        muss vor shop.js stehen, und beide nach garage.js, weil shop.js
        dessen verkabele() mitbenutzt. -->
-  <script src="produkte.js?v=103"></script>
-  <script src="shop.js?v=103"></script>
+  <script src="produkte.js?v=104"></script>
+  <script src="shop.js?v=104"></script>
   <!-- Die Besuchszaehlung. Zuletzt, weil sie nichts kann, was jemand anders
        braucht - und nach konto.js, weil sie die dort stehende Serveradresse
        und den oeffentlichen Schluessel mitbenutzt, statt beides ein zweites
        Mal aufzuschreiben. Sie meldet nur eine Summe und legt nichts auf dem
        Geraet ab; die Begruendung steht ausfuehrlich im Kopf der Datei. -->
-  <script src="besucher.js?v=103"></script>
+  <script src="besucher.js?v=104"></script>
 </body>
 </html>

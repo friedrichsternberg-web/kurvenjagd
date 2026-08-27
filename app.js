@@ -112,13 +112,33 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>',
 }).addTo(map);
 
-// Beim Start einmalig den eigenen Standort abfragen und die Karte dorthin
-// zentrieren - reine Orientierungshilfe, im Unterschied zu
-// "Aktueller Standort" in der Ortssuche wird dabei KEIN Wegpunkt gesetzt.
-// Scheitert die Abfrage (kein GPS, Berechtigung verweigert, ...), bleibt
-// es einfach bei der Standardansicht - ohne Fehlermeldung, das waere beim
-// Start unnoetig aufdringlich.
+/* Einmalig den eigenen Standort abfragen und die Karte dorthin zentrieren -
+   reine Orientierungshilfe, im Unterschied zu "Aktueller Standort" in der
+   Ortssuche wird dabei KEIN Wegpunkt gesetzt. Scheitert die Abfrage (kein
+   GPS, Berechtigung verweigert, ...), bleibt es einfach bei der
+   Standardansicht - ohne Fehlermeldung, das waere unnoetig aufdringlich.
+
+   WANN SIE LAEUFT, und das ist der Punkt: beim ersten Wechsel in den Planer,
+   nicht beim Aufruf der Seite. Frueher stand der Aufruf auf oberster Ebene
+   und feuerte bei jedem Seitenaufruf - der Berechtigungsdialog des Browsers
+   stand in der ersten Sekunde da, bevor irgendetwas erklaert war.
+
+   Zwei Gruende sprechen dagegen, und der zweite ist der wichtigere:
+
+     1. Die Datenschutzerklaerung sagt zu, den Standort NUR auf eine Aktion
+        hin zu erfragen. Eine Erklaerung, die etwas anderes behauptet als
+        der Code tut, ist schlimmer als keine.
+     2. Eine Berechtigung, die ohne erkennbaren Anlass abgefragt wird, lehnen
+        Leute ab - und auf iOS ist sie danach dauerhaft weg, auch fuer die
+        Navigation, fuer die man sie wirklich braucht. Im richtigen Moment
+        gefragt, wird sie erteilt.
+
+   Siehe SICHERHEIT.md, Befund C1.                                        */
+let standortSchonGezeigt = false;
+
 function zeigeEigenenStandortBeimStart() {
+  if (standortSchonGezeigt) return;
+  standortSchonGezeigt = true;
   if (!geraet.standortDa()) return;
 
   geraet.standortEinmal(
@@ -138,7 +158,6 @@ function zeigeEigenenStandortBeimStart() {
     { enableHighAccuracy: false, timeout: 8000 }
   );
 }
-zeigeEigenenStandortBeimStart();
 
 // Ein Klick auf die Karte setzt nur dann einen Wegpunkt, wenn der
 // Klick-Modus über den Button "Beliebigen Punkt auf der Karte anklicken"
@@ -303,7 +322,16 @@ function renderWaypointList() {
    Wir bauen eine URL, holen GeoJSON und lesen Länge, Zeit und Höhe aus.   */
 
 function brouterUrl(points, profile, altIdx) {
-  const pts = points.map(w => `${w.lon.toFixed(6)},${w.lat.toFixed(6)}`).join('|');
+  /* Fuenf Nachkommastellen statt sechs. Sechs loesen auf etwa 11 Zentimeter
+     auf, fuenf auf rund einen Meter - an keiner Route aendert das etwas, ein
+     Routenplaner braucht diese Genauigkeit nicht.
+
+     Wohl aber der Datenschutz: Stammt der erste Wegpunkt aus "Aktueller
+     Standort", stuende die Haustuer auf elf Zentimeter genau in der Adresse
+     einer fremden Anfrage - und zwar im Frageteil, der ueblicherweise in
+     Serverprotokollen landet. curviness() holt vier Varianten, es sind also
+     vier Anfragen je Berechnung. Siehe SICHERHEIT.md, Befund C3. */
+  const pts = points.map(w => `${w.lon.toFixed(5)},${w.lat.toFixed(5)}`).join('|');
 
   // consider_town/avoid_motorways/avoid_toll sind Profil-Parameter von
   // BRouter (live getestet, siehe Git-Historie) - direkt an das jeweilige
@@ -2398,8 +2426,23 @@ const FOTO_MAX_ANZAHL = 12;    // pro Ausfahrt, damit der Speicher nicht überl�
    Tourfotos duerfen kraeftig gepresst werden (viele Bilder, kleiner
    Speicher), das Garagenfoto nicht - es ist das Schaustueck der Seite und
    wird gross angezeigt, da faellt jede Kompressionsstufe auf. */
+/* Die Grenze steht VOR dem Bilddecoder, und das ist der Punkt: accept="image/*"
+   am Dateifeld ist ein Filter im Auswahldialog, keine Pruefung - jede Datei
+   laesst sich dort auch von Hand waehlen. Ein Bild mit kleiner Datei und
+   riesigen Pixelmassen reisst den Tab weg, und zwar mitten in einer laufenden
+   Aufzeichnung, die dann verloren ist. Siehe SICHERHEIT.md, Befund B7. */
+const FOTO_DATEI_HOECHSTENS = 25 * 1024 * 1024;   // 25 MB, ein Handyfoto hat 2 bis 5
+
 function verkleinereFoto(datei, maxKante = FOTO_MAX_KANTE, guete = FOTO_QUALITÄT) {
   return new Promise((fertig, fehler) => {
+    if (!datei || !String(datei.type || '').startsWith('image/')) {
+      fehler(new Error('Das ist keine Bilddatei'));
+      return;
+    }
+    if (datei.size > FOTO_DATEI_HOECHSTENS) {
+      fehler(new Error('Das Bild ist zu groß'));
+      return;
+    }
     const url = geraet.adresseFür(datei);
     const bild = new Image();
 
@@ -2464,22 +2507,53 @@ function fotoEntfernen(id) {
 // das Bild sei nicht angekommen.
 // Beide Galerien haben ein Kreuz zum Entfernen, weil die Fotos bis zum
 // Speichern noch bearbeitbar sind.
+/* Welche Bildquellen die App ueberhaupt anzeigt.
+
+   Zwei sind erlaubt: ein Bild, das im Browser selbst entstanden ist
+   (data:-Adresse aus leinwand.toDataURL), und eine Adresse vom eigenen
+   Server. Alles andere wird stillschweigend nicht gesetzt - dann bleibt das
+   Bild leer, und das ist allemal besser als eine Adresse, die jemand
+   Fremdes bestimmt hat. */
+function istErlaubteBildquelle(quelle) {
+  if (typeof quelle !== 'string') return false;
+  if (/^data:image\/(jpeg|png|webp);base64,/.test(quelle)) return true;
+  return typeof SUPABASE_URL === 'string' && SUPABASE_URL && quelle.startsWith(SUPABASE_URL);
+}
+
 function zeichneFotoGalerie() {
   ['rideFotosLive', 'rideFotos'].forEach(bereichsId => {
     const galerie = document.getElementById(bereichsId);
     if (!galerie) return;
 
-    galerie.innerHTML = ride.fotos.map(f => `
-      <div class="foto-kachel">
-        <img src="${f.bild}" alt="Foto der Ausfahrt" data-bild="${f.id}">
-        <button class="foto-loeschen" data-loeschen="${f.id}" title="Foto entfernen">&times;</button>
-      </div>`).join('');
+    /* Gebaut statt zusammengeschrieben, und das ist kein Stilfrage:
+       Frueher stand hier innerHTML mit src="${f.bild}" darin. Solange die
+       Fotos aus der eigenen Kamera kommen, geht das gut - sie sind immer
+       "data:image/jpeg;base64,...". Kommt eine Tour eines Tages von jemand
+       anderem (Fahrplan Schritt 5 und 6), genuegt ein Anfuehrungszeichen im
+       Feld, um ein onerror= daneben zu haengen und damit das Anmelde-Token
+       des Betrachters abzugreifen. Siehe SICHERHEIT.md, Befund B1.
 
-    galerie.querySelectorAll('[data-bild]').forEach(el => {
-      el.addEventListener('click', () => zeigeFotoGross(el.getAttribute('src')));
-    });
-    galerie.querySelectorAll('[data-loeschen]').forEach(el => {
-      el.addEventListener('click', () => fotoEntfernen(el.dataset.loeschen));
+       element.src = "..." setzt eine EIGENSCHAFT, kein HTML. Dort laesst
+       sich gar kein Attribut unterbringen, egal was in der Zeichenkette
+       steht. */
+    galerie.textContent = '';
+    ride.fotos.forEach(f => {
+      const kachel = document.createElement('div');
+      kachel.className = 'foto-kachel';
+
+      const bild = document.createElement('img');
+      bild.alt = 'Foto der Ausfahrt';
+      if (istErlaubteBildquelle(f.bild)) bild.src = f.bild;
+      bild.addEventListener('click', () => zeigeFotoGross(f.bild));
+
+      const weg = document.createElement('button');
+      weg.className = 'foto-loeschen';
+      weg.title = 'Foto entfernen';
+      weg.textContent = '\u00d7';
+      weg.addEventListener('click', () => fotoEntfernen(f.id));
+
+      kachel.append(bild, weg);
+      galerie.append(kachel);
     });
   });
 }
@@ -2960,6 +3034,10 @@ function zeigeMeineTouren() {
 
 function zeigePlaner() {
   zeigeBildschirm('app');
+  // Hier und nicht beim Seitenaufruf: Wer den Planer oeffnet, will eine
+  // Karte sehen - das ist der Anlass, den es fuer die Standortfrage
+  // braucht. Die Funktion laeuft nur beim ersten Mal.
+  zeigeEigenenStandortBeimStart();
   // Erst NACH dem Einblenden ruft Leaflet die tatsächliche Größe des
   // Kartenbereichs ab - ohne diesen Aufruf bliebe die Karte auf die
   // Größe von vor dem Verstecken "eingefroren".

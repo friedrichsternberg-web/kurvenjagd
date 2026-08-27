@@ -153,13 +153,26 @@ const STANDARD_BILD = 'img/bike-standard.webp';
    freigestellte Motorradbilder, kostenlos aber mit Wasserzeichen, ohne
    Wasserzeichen 49 $ im Monat. ACHTUNG, der Aufruf unten folgt deren
    Dokumentation, konnte mangels Schluessel aber nie ausprobiert werden. */
-const BILD_API_SCHLÜSSEL = '';   // ACHTUNG: mit Schluessel auch die CSP in index.html ergaenzen
+/* ACHTUNG: Hier gehoert KEIN Schluessel hin.
+
+   Diese Datei liegt oeffentlich auf GitHub - wer sie liest, hat den
+   Schluessel. Bei carimagesapi.com wandert er zusaetzlich als Teil der
+   Adresse in fremde Serverprotokolle.
+
+   Dienste mit Schluessel gehoeren hinter eine Supabase Edge Function, so wie
+   es das Loeschen des Kontos schon vormacht: Dort liegt das Geheimnis in
+   einer Umgebungsvariable und steht nie im ausgelieferten Text.
+
+   Und falls doch einmal einer hier landet: Dann auch die Erlaubnisliste in
+   index.html ergaenzen, sonst laeuft alles wie gewohnt und nur die eine
+   Anfrage kommt nie an. Siehe SICHERHEIT.md, Befund B8. */
+const BILD_API_SCHLÜSSEL = '';
 
 /* Datenquelle fuer Hubraum und Leistung.
    api-ninjas.com/api/motorcycles, kostenloser Schluessel nach Anmeldung.
    Liefert Felder wie displacement: "649.0 ccm (39.60 cubic inches)" und
    power: "52.3 HP (38.2 kW) @ 8000 RPM". Ebenfalls ungetestet. */
-const DATEN_API_SCHLÜSSEL = '';  // ACHTUNG: mit Schluessel auch die CSP in index.html ergaenzen
+const DATEN_API_SCHLÜSSEL = '';   // siehe die Warnung beim Bild-Schluessel oben
 
 // Welches Bild auf der Buehne steht. Eigenes Foto schlaegt Datenbank,
 // Datenbank schlaegt Standardbild.

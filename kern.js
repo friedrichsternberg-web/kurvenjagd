@@ -925,6 +925,26 @@ function zieheRundeAuf(start, punkte, faktor, straßenPool, gemiedeneZonen) {
    als Download im Browser oder über das Teilen-Blatt des Systems -
    entscheidet geraet.dateiAnbieten(), aufgerufen von exportGpx() in app.js. */
 
+/* Macht Text sicher, bevor er in eine XML-Datei geschrieben wird.
+
+   Das ist kein Vorgriff auf etwas Fernes, sondern die Behebung eines Fehlers,
+   der heute schon zuschlaegt: Ein Tourname mit kaufmaennischem Und darin -
+   "Eifel & Mosel" - erzeugt ungueltiges XML. In XML beginnt mit dem Und eine
+   Sonderfolge; steht es nackt da, ist die ganze Datei kaputt. Manche Navis
+   zeigen sie dann gar nicht an, andere verschlucken die Tour still.
+
+   Sobald Touren geteilt werden, kommt der zweite Grund dazu: Ein Name von
+   einem Fremden koennte das XML sonst verlassen und die Datei umbauen. Was
+   eine fremde Navi-Software damit macht, hat niemand in der Hand.        */
+function xmlSicher(text) {
+  return String(text ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
 // Baut aus den Streckenpunkten einer Route (Format [[lon, lat, höhe], ...],
 // so liefert BRouter sie) den vollständigen Inhalt einer GPX-Datei.
 // Der Name erscheint später im Navi als Bezeichnung der Tour.
@@ -936,7 +956,7 @@ function baueGpx(coords, name = 'Serpa-Tour') {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <gpx version="1.1" creator="Serpa" xmlns="http://www.topografix.com/GPX/1/1">
   <trk>
-    <name>${name}</name>
+    <name>${xmlSicher(name)}</name>
     <trkseg>
 ${pts}
     </trkseg>
@@ -1156,4 +1176,80 @@ function neuerVorzeichenWaechter(nötigeTreffer = 5) {
     faktor() { return faktor; },
     stehtFest() { return entschieden; },
   };
+}
+
+
+/* --- Was vom Server kommt, ist erst einmal fremd ----------------------------
+
+   Diese Funktion steht am Anfang der Kette, die aus einer Zeile in der
+   Datenbank eine Tour in der App macht. Heute kann dort nur landen, was der
+   Nutzer selbst hochgeladen hat - die Zugriffsregeln lassen niemanden fremde
+   Zeilen lesen. Mit dem Teilen von Routen (Fahrplan Schritt 5 und 6) aendert
+   sich genau das, und dann ist der Inhalt einer Tour eine Zuschrift von einem
+   Fremden.
+
+   Was daran gefaehrlich ist, steht ausfuehrlich in SICHERHEIT.md unter B1.
+   Die Kurzfassung: Landet ein Anfuehrungszeichen in einem Feld, das spaeter
+   in ein HTML-Attribut geschrieben wird, laesst sich daran fremder Code
+   haengen - und der liest das Anmelde-Token des Betrachters aus.
+
+   DIE HALTUNG DIESER FUNKTION: nicht reparieren, nicht raten. Wer eine
+   kaputte Tour schickt, hat keinen Anspruch darauf, dass wir sie verstehen.
+   Es gibt genau zwei Ergebnisse - eine saubere Tour oder null.
+
+   Sie steht in kern.js, weil sie keine Oberflaeche anfasst und sich damit in
+   pruefe-kern.js testen laesst. Genau dafuer ist diese Datei da.           */
+
+const TOUR_NAME_HOECHSTENS = 120;      // Zeichen, alles darueber ist keine Absicht
+const TOUR_PUNKTE_HOECHSTENS = 20000;  // Streckenpunkte; eine Tagestour hat ~5000
+
+/* Ein einzelner Punkt: zwei Zahlen in ihrem gueltigen Bereich, sonst nichts.
+   NaN und Unendlich faengt Number.isFinite mit ab - beide wuerden sonst
+   spaeter beim Rechnen still danebengehen statt laut zu scheitern. */
+function istPunkt(wert) {
+  return !!wert && typeof wert === 'object'
+    && Number.isFinite(wert.lat) && wert.lat >= -90  && wert.lat <= 90
+    && Number.isFinite(wert.lon) && wert.lon >= -180 && wert.lon <= 180;
+}
+
+/* Nimmt eine Liste von Punkten und gibt eine neue zurueck, in der NUR die
+   beiden Zahlen stehen. Das ist der eigentliche Schutz: Alles Unbekannte
+   faellt weg, weil es gar nicht erst uebernommen wird. */
+function säubrePunkte(liste) {
+  if (!Array.isArray(liste)) return [];
+  return liste.filter(istPunkt)
+              .slice(0, TOUR_PUNKTE_HOECHSTENS)
+              .map(p => ({ lat: p.lat, lon: p.lon }));
+}
+
+function pruefeTour(rohdaten) {
+  if (!rohdaten || typeof rohdaten !== 'object' || Array.isArray(rohdaten)) return null;
+
+  // Ohne Kennung laesst sich eine Tour nicht einsortieren.
+  const id = typeof rohdaten.id === 'string' ? rohdaten.id.slice(0, 80) : '';
+  if (!id) return null;
+
+  const punkte = säubrePunkte(rohdaten.waypoints);
+  const strecke = säubrePunkte(rohdaten.track);
+  // Eine Tour ohne einen einzigen gueltigen Punkt ist keine Tour.
+  if (!punkte.length && !strecke.length) return null;
+
+  /* Die Felder werden EINZELN uebernommen, nicht mit dem Spread-Operator aus
+     dem Rohobjekt kopiert. Der Unterschied ist der ganze Punkt: Beim Kopieren
+     kaeme jedes zusaetzliche Feld mit, das sich jemand ausgedacht hat. */
+  const sauber = {
+    id,
+    name: typeof rohdaten.name === 'string'
+      ? rohdaten.name.slice(0, TOUR_NAME_HOECHSTENS) : 'Tour',
+    waypoints: punkte,
+    track: strecke,
+  };
+
+  // Die Zahlen sind freiwillig - fehlen sie, fehlen sie eben.
+  if (Number.isFinite(rohdaten.distance))  sauber.distance  = rohdaten.distance;
+  if (Number.isFinite(rohdaten.curviness)) sauber.curviness = rohdaten.curviness;
+  if (Number.isFinite(rohdaten.zeit))      sauber.zeit      = rohdaten.zeit;
+  if (typeof rohdaten.aufgezeichnet === 'boolean') sauber.aufgezeichnet = rohdaten.aufgezeichnet;
+
+  return sauber;
 }

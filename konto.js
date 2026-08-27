@@ -543,7 +543,19 @@ verkabele('btnKontoAbmelden', 'click', async () => {
   await meldeAb();
   // Nach dem Abmelden gehört einem der Profilbildschirm nicht mehr.
   zeigeGarage();
-  showToast('Abgemeldet.');
+
+  /* Der Zusatz ist kein Geplauder, sondern eine Auskunft, die sonst niemand
+     bekommt: Abmelden trennt die Verbindung zum Server, räumt aber NICHT den
+     Speicher des Browsers. Touren und Garage bleiben liegen - gewollt, denn
+     die App funktioniert ohne Konto weiter und niemand soll beim Abmelden
+     versehentlich seine Aufzeichnungen verlieren.
+
+     Auf einem geteilten Gerät ist das aber genau das, was man wissen will:
+     Eine Tour ist eine Liste von Koordinaten mit Zeitstempeln, also die
+     Auskunft darüber, wo jemand war. Wer den Rechner mit anderen teilt,
+     bekommt hier den Hinweis, statt es selbst herausfinden zu müssen.
+     Siehe SICHERHEIT.md, Befund C5. */
+  showToast('Abgemeldet. Deine Touren bleiben auf diesem Gerät gespeichert.');
 });
 
 
@@ -928,7 +940,12 @@ async function tourInCloudLöschen(id) {
       .remove(dateien.map(d => `${angemeldeterNutzer.id}/${id}/${d.name}`));
   }
 
-  await backend.from('touren').delete().eq('id', String(id));
+  await backend.from('touren').delete()
+    .eq('id', String(id))
+    // Zwei Schlösser an einer Tür: Die Zugriffsregel in der Datenbank fängt
+    // fremde Kennungen ohnehin ab. Wird sie beim Bau des Teilens einmal
+    // gelockert, löschte diese Zeile ohne den Zusatz fremde Touren mit.
+    .eq('nutzer_id', angemeldeterNutzer.id);
 }
 
 // Holt die Touren vom Server und führt sie mit den lokalen zusammen.
@@ -945,9 +962,19 @@ async function synchronisiereTouren() {
   const lokaleKennungen = new Set(lokal.map(t => String(t.id)));
   const serverKennungen = new Set(data.map(z => z.id));
 
-  // Was nur auf dem Server liegt, kommt dazu. Bei Touren, die es auf
-  // beiden Seiten gibt, gewinnt die lokale Fassung - nur sie hat die Fotos.
-  const neuVomServer = data.filter(z => !lokaleKennungen.has(z.id)).map(z => z.daten);
+  /* Was nur auf dem Server liegt, kommt dazu. Bei Touren, die es auf
+     beiden Seiten gibt, gewinnt die lokale Fassung - nur sie hat die Fotos.
+
+     JEDE Zeile geht durch pruefeTour() aus kern.js, und was nicht durchkommt,
+     wird weggeworfen statt repariert. Heute kann hier nur landen, was der
+     Nutzer selbst hochgeladen hat; sobald Routen geteilt werden, ist der
+     Inhalt einer Tour eine Zuschrift von einem Fremden - siehe SICHERHEIT.md,
+     Befund B1. Die Prüfung jetzt einzubauen kostet nichts und erspart es,
+     sie später an einer Stelle zu vergessen. */
+  const neuVomServer = data
+    .filter(z => !lokaleKennungen.has(z.id))
+    .map(z => pruefeTour(z.daten))
+    .filter(Boolean);
 
   // Was nur lokal liegt, wandert hoch. Das ist zugleich der Umzug der
   // Touren, die vor dem ersten Anmelden entstanden sind.
