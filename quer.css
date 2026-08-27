@@ -210,9 +210,10 @@
     padding: var(--s4);
   }
   /* Die Deckel wachsen mit dem Fenster: Am 900er-Rand ist die halbe
-     Bildschirmseite schmaler als ein Handy quer, dort waere 21px zu laut. */
-  .kachel-titel { font-size: clamp(15px, 1.7vw, 21px); }
-  .kachel-sub { font-size: clamp(13px, 1.15vw, 15px); }
+     Bildschirmseite schmaler als ein Handy quer, dort waere 27px zu laut.
+     Die Stufe liegt hoeher als im Hochformat, weil die Kachel seit dem
+     27.08.2026 nur noch den Namen traegt und der Platz sonst leer bliebe. */
+  .kachel-titel { font-size: clamp(18px, 2.1vw, 27px); }
 
   /* Dieselbe Stufe fuer das Datenblatt, wenn ein eigenes Motorrad da ist:
      Name und Werte duerfen auf der halben Seite groesser sprechen als auf

@@ -485,11 +485,17 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 .kachel-text { display: flex; flex-direction: column; gap: 3px; }
 .kachel-titel {
   font-family: var(--schrift-display);
-  /* clamp() heisst: mindestens 13px, hoechstens 18px, dazwischen 4.1% der
-     Bildschirmbreite. Damit passt "ROUTENPLANER" auf ein iPhone SE genauso
-     in eine Zeile wie auf ein grosses Geraet - eine feste Groesse hatte hier
-     um genau einen Pixel nicht gereicht und das Wort zerrissen. */
-  font-size: clamp(13px, 4.1vw, 18px);
+  /* clamp() heisst: mindestens 16px, hoechstens 24px, dazwischen 5.4% der
+     Bildschirmbreite. Damit passt "RIDE AUFZEICHNEN" - der laengste der vier
+     Namen - auf einem iPhone SE noch in zwei Zeilen, ohne dass ein Wort
+     zerrissen wird.
+
+     Die Kachel traegt seit dem 27.08.2026 nur noch diesen Namen, keine
+     Unterzeile mehr. Der frei gewordene Platz geht in die Schriftgroesse:
+     Auf einem Startbildschirm, der aus vier Wegen besteht, muessen die vier
+     Namen von weitem lesbar sein - erklaeren tut sie ohnehin erst der
+     Bildschirm dahinter. */
+  font-size: clamp(16px, 4.8vw, 24px);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0;
@@ -499,17 +505,15 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
      nicht passt. "anywhere" hatte mitten im Wort getrennt (ROUTENPL/ANER). */
   overflow-wrap: break-word;
 }
-.kachel-sub {
-  font-size: 13px;
-  color: color-mix(in srgb, white 85%, transparent);
-  line-height: 1.35;
-  text-shadow: 0 1px 6px var(--schatten-voll);
-  padding-right: 30px;   /* nur die Unterzeile laeuft in den Pfeil hinein */
-}
 
+/* Der Pfeil sitzt OBEN rechts, nicht unten. Der Kachelinhalt steht am
+   unteren Rand (justify-content: flex-end an .kachel), ein Pfeil unten rechts
+   nahm dem Namen also genau dort Breite weg, wo er sie braucht - so knapp,
+   dass "ROUTENPLANER" mitten im Wort zerriss. Oben ist die Ecke ohnehin
+   leer. */
 .kachel-pfeil {
   position: absolute;
-  right: var(--s3); bottom: var(--s3);
+  right: var(--s3); top: var(--s3);
   color: var(--accent-hell);
   font-size: 20px;
   line-height: 1;
