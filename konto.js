@@ -37,6 +37,40 @@ const SUPABASE_URL = 'https://copydwpdqpnwjvknsakz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_d7pxVkeMCqwhFsLrupDovA_ag2SmffE';
 
 
+/* --- 1b. Anmeldung über Google und Apple ----------------------------------
+
+   Der Code dafür ist fertig, die Knöpfe sind gebaut - sie sind nur so lange
+   ausgeblendet, bis der jeweilige Anbieter in Supabase eingerichtet ist.
+   Dasselbe Muster wie SHOP_AKTIV in app.js: ein `true`, und alles ist da.
+
+   WAS ZUM EINSCHALTEN FEHLT, und beides muss Friedrich selbst besorgen -
+   es verlangt ein Konto anzulegen und Zugangsdaten einzutragen:
+
+     google: In der Google Cloud Console ein Projekt anlegen, unter
+             "APIs & Dienste > Anmeldedaten" eine OAuth-Client-ID für
+             Webanwendungen erstellen. Als autorisierte Weiterleitungs-URI
+             gehört dort genau diese Adresse hinein:
+
+               https://copydwpdqpnwjvknsakz.supabase.co/auth/v1/callback
+
+             Client-ID und Client-Secret dann in Supabase unter
+             Authentication > Sign In / Providers > Google eintragen.
+             Kostenlos.
+
+     apple:  Verlangt das Apple Developer Program (99 US-Dollar im Jahr).
+             Dort eine Service ID und einen Sign-in-with-Apple-Key anlegen,
+             dieselbe Callback-Adresse hinterlegen. Für die Webseite ist es
+             freiwillig; ZWINGEND wird es erst, wenn die App in den App
+             Store geht UND dort einen anderen Anbieter-Login anbietet -
+             Apple verlangt dann seinen eigenen daneben.
+
+   Ist ein Anbieter eingerichtet, hier auf true stellen. Sonst nichts. */
+const ANMELDUNG_ANBIETER = {
+  google: false,
+  apple: false,
+};
+
+
 /* --- 2. Verbindung aufbauen ---------------------------------------------- */
 
 // createClient() baut noch keine Netzwerkverbindung auf, es merkt sich nur
@@ -64,7 +98,10 @@ const FEHLER_ÜBERSETZUNG = {
   'Invalid login credentials': 'E-Mail oder Passwort stimmt nicht.',
   'Email not confirmed': 'Bitte zuerst den Bestätigungslink in der E-Mail anklicken.',
   'User already registered': 'Für diese E-Mail gibt es schon ein Konto. Nutze "Anmelden".',
-  'Password should be at least 6 characters.': 'Das Passwort braucht mindestens 6 Zeichen.',
+  'Password should be at least 6 characters.': 'Das Passwort braucht mindestens 10 Zeichen.',
+  'Password should be at least 10 characters.': 'Das Passwort braucht mindestens 10 Zeichen.',
+  'Password should contain at least one character of each: abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ, 0123456789.':
+    'Das Passwort braucht Buchstaben UND Ziffern.',
   'Unable to validate email address: invalid format': 'Das sieht nicht nach einer E-Mail-Adresse aus.',
   'For security purposes, you can only request this after 60 seconds.':
     'Zu viele Versuche. Bitte eine Minute warten.',
@@ -118,6 +155,32 @@ async function meldeAn(email, passwort) {
 
 async function meldeAb() {
   await backend.auth.signOut();
+}
+
+/* Anmeldung über einen fremden Anbieter (Google, Apple).
+
+   Der Ablauf ist ein anderer als bei E-Mail und Passwort: Die Seite wird
+   verlassen, der Anbieter fragt den Nutzer, und danach kommt er auf dieselbe
+   Adresse zurück - mit einem Token im Gepäck. Den Rest erledigt
+   onAuthStateChange weiter unten, dieselbe Stelle wie bei jeder anderen
+   Anmeldung. Es gibt hier also bewusst kein "danach passiert X".
+
+   redirectTo wird zur Laufzeit aus der aufgerufenen Adresse gebildet - so
+   funktioniert es auf localhost genauso wie unter serpa-app.de, ohne dass
+   im Code eine feste Adresse steht. Beide müssen in Supabase unter
+   Authentication > URL Configuration als erlaubt eingetragen sein, sonst
+   weist der Server die Rückkehr ab. */
+async function meldeAnMitAnbieter(anbieter) {
+  if (!backendVerfügbar()) {
+    return { ok: false, meldung: 'Ohne Serververbindung geht das nicht.' };
+  }
+  const { error } = await backend.auth.signInWithOAuth({
+    provider: anbieter,
+    options: { redirectTo: window.location.origin + window.location.pathname },
+  });
+  if (error) return { ok: false, meldung: übersetzeFehler(error.message) };
+  // Kein Erfolgsfall: Der Browser ist an dieser Stelle schon unterwegs.
+  return { ok: true, meldung: '' };
 }
 
 // Schickt eine Mail mit Link zum Neusetzen des Passworts. redirectTo sagt,
@@ -498,7 +561,7 @@ async function kontoFormularAbsenden() {
 async function passwortNeuAbsenden() {
   const passwort = document.getElementById('passwortNeuEingabe').value;
   const wiederholung = document.getElementById('passwortNeuWiederholung').value;
-  if (passwort.length < 6) { zeigeMeldung('passwortNeuMeldung', 'Das Passwort braucht mindestens 6 Zeichen.', 'fehler'); return; }
+  if (passwort.length < 10) { zeigeMeldung('passwortNeuMeldung', 'Das Passwort braucht mindestens 10 Zeichen.', 'fehler'); return; }
   if (passwort !== wiederholung) { zeigeMeldung('passwortNeuMeldung', 'Die beiden Eingaben sind nicht gleich.', 'fehler'); return; }
 
   const knopf = document.getElementById('btnPasswortNeuSpeichern');
@@ -538,6 +601,33 @@ verkabele('btnKontoRund', 'click', öffneKontoOderProfil);
 verkabele('btnKontoLeiste', 'click', öffneKontoOderProfil);
 
 verkabele('btnProfilZurueck', 'click', zeigeGarage);
+
+/* Die Anbieter-Knöpfe. Sie stehen im HTML, werden aber nur eingeblendet,
+   wenn der Anbieter oben eingeschaltet ist - sonst schickte der Knopf den
+   Nutzer auf eine Fehlerseite von Supabase. */
+function wendeAnbieterSchalterAn() {
+  const block = document.getElementById('kontoAnbieter');
+  if (!block) return;
+  let sichtbar = 0;
+  for (const anbieter of ['google', 'apple']) {
+    const knopf = document.getElementById('btnAnmelden' + anbieter[0].toUpperCase() + anbieter.slice(1));
+    if (!knopf) continue;
+    knopf.hidden = !ANMELDUNG_ANBIETER[anbieter];
+    if (ANMELDUNG_ANBIETER[anbieter]) sichtbar++;
+  }
+  // Ohne einen einzigen Anbieter ist auch die Trennlinie "oder" sinnlos.
+  block.hidden = sichtbar === 0;
+}
+
+verkabele('btnAnmeldenGoogle', 'click', async () => {
+  const ergebnis = await meldeAnMitAnbieter('google');
+  if (!ergebnis.ok) zeigeMeldung('kontoMeldung', ergebnis.meldung, 'fehler');
+});
+verkabele('btnAnmeldenApple', 'click', async () => {
+  const ergebnis = await meldeAnMitAnbieter('apple');
+  if (!ergebnis.ok) zeigeMeldung('kontoMeldung', ergebnis.meldung, 'fehler');
+});
+wendeAnbieterSchalterAn();
 
 verkabele('btnKontoAbmelden', 'click', async () => {
   await meldeAb();

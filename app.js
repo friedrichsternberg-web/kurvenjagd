@@ -118,12 +118,19 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
    GPS, Berechtigung verweigert, ...), bleibt es einfach bei der
    Standardansicht - ohne Fehlermeldung, das waere unnoetig aufdringlich.
 
-   WANN SIE LAEUFT, und das ist der Punkt: beim ersten Wechsel in den Planer,
-   nicht beim Aufruf der Seite. Frueher stand der Aufruf auf oberster Ebene
-   und feuerte bei jedem Seitenaufruf - der Berechtigungsdialog des Browsers
-   stand in der ersten Sekunde da, bevor irgendetwas erklaert war.
+   WANN SIE LAEUFT: nur auf Knopfdruck. Nirgends sonst.
 
-   Zwei Gruende sprechen dagegen, und der zweite ist der wichtigere:
+   Der Weg dorthin ging ueber zwei Stufen, und beide Zwischenstaende waren
+   falsch. Zuerst stand der Aufruf auf oberster Ebene und feuerte bei JEDEM
+   Seitenaufruf - der Berechtigungsdialog des Browsers stand in der ersten
+   Sekunde da, bevor irgendetwas erklaert war. Dann hing er am ersten
+   Wechsel in den Planer; besser, aber immer noch ungefragt: Wer den Planer
+   oeffnet, will eine Karte sehen, nicht zwingend seinen Standort preisgeben.
+
+   Jetzt fragt die App nur noch dort, wo der Standort tatsaechlich gebraucht
+   wird: bei diesem Knopf, bei "Aktueller Standort" in der Ortssuche, bei der
+   Navigation und beim Aufzeichnen. Zwei Gruende, und der zweite ist der
+   wichtigere:
 
      1. Die Datenschutzerklaerung sagt zu, den Standort NUR auf eine Aktion
         hin zu erfragen. Eine Erklaerung, die etwas anderes behauptet als
@@ -134,18 +141,24 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         gefragt, wird sie erteilt.
 
    Siehe SICHERHEIT.md, Befund C1.                                        */
-let standortSchonGezeigt = false;
+let standortMarker = null;
 
-function zeigeEigenenStandortBeimStart() {
-  if (standortSchonGezeigt) return;
-  standortSchonGezeigt = true;
+function zeigeEigenenStandort() {
+  if (!geraet.standortDa()) {
+    showToast('Dieses Gerät oder dieser Browser unterstützt keine Standortermittlung.');
+    return;
+  }
   if (!geraet.standortDa()) return;
 
+  setBusy(true);
   geraet.standortEinmal(
     (pos) => {
+      setBusy(false);
       const { latitude, longitude } = pos.coords;
       map.setView([latitude, longitude], 12);
-      L.marker([latitude, longitude], {
+      // Nur EIN Marker: Beim zweiten Druck wandert er, statt sich zu stapeln.
+      if (standortMarker) map.removeLayer(standortMarker);
+      standortMarker = L.marker([latitude, longitude], {
         icon: L.divIcon({
           className: '',
           html: `<div class="standort-marker"></div>`,
@@ -154,7 +167,12 @@ function zeigeEigenenStandortBeimStart() {
         }),
       }).addTo(map);
     },
-    () => {}, // stilles Scheitern - Standardansicht bleibt einfach stehen
+    (fehler) => {
+      setBusy(false);
+      // Anders als frueher wird das Scheitern gemeldet: Wer den Knopf
+      // drueckt, hat gefragt und verdient eine Antwort.
+      showToast('Standort nicht verfügbar: ' + fehler.message);
+    },
     { enableHighAccuracy: false, timeout: 8000 }
   );
 }
@@ -3034,10 +3052,6 @@ function zeigeMeineTouren() {
 
 function zeigePlaner() {
   zeigeBildschirm('app');
-  // Hier und nicht beim Seitenaufruf: Wer den Planer oeffnet, will eine
-  // Karte sehen - das ist der Anlass, den es fuer die Standortfrage
-  // braucht. Die Funktion laeuft nur beim ersten Mal.
-  zeigeEigenenStandortBeimStart();
   // Erst NACH dem Einblenden ruft Leaflet die tatsächliche Größe des
   // Kartenbereichs ab - ohne diesen Aufruf bliebe die Karte auf die
   // Größe von vor dem Verstecken "eingefroren".
@@ -3350,6 +3364,7 @@ document.getElementById('btnNavStop').addEventListener('click', stopNavigation);
 document.getElementById('btnNavPlus').addEventListener('click', () => navZoom(1));
 document.getElementById('btnNavMinus').addEventListener('click', () => navZoom(-1));
 document.getElementById('btnNavZentrieren').addEventListener('click', navZentrieren);
+verkabele('btnMeinStandort', 'click', zeigeEigenenStandort);
 verkabeleNaviWisch();
 
 // Untere Leiste: jeder Eintrag fuehrt auf seinen Bildschirm. Der Weg

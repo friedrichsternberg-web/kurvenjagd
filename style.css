@@ -115,6 +115,45 @@
   color: var(--metall);
 }
 
+/* --- Anmeldung ueber Google und Apple --------------------------------------
+   Die Knoepfe sind bewusst ruhig gehalten (ghost, kein Farbfeld): Der
+   Hauptweg ist die Anmeldung mit E-Mail darueber, diese beiden sind das
+   Angebot daneben. */
+.konto-anbieter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+  margin-top: var(--s4);
+}
+
+/* Ein "oder" mit einer Linie links und rechts. Der Strich entsteht aus zwei
+   Pseudo-Elementen, die sich den Platz teilen - so bleibt er immer genau so
+   lang, wie neben dem Wort Platz ist. */
+.konto-oder {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.konto-oder::before,
+.konto-oder::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--glas-rand);
+}
+
+.anbieter-knopf {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
+}
+
 /* --- Das Alpha-Abzeichen ----------------------------------------------------
    Die App ist eine fruehe Fassung: Der Routenplaner, die Garage und das
    Aufzeichnen laufen, das eigentliche Ziel - der Community-Teil - fehlt
@@ -3336,6 +3375,28 @@ body.nav-modus .nav-fuss {
   flex-direction: column;
   gap: var(--s2);
 }
+/* Der Standort-Knopf auf der Planer-Karte. Sitzt unten rechts ueber den
+   Leaflet-Bedienelementen, aber ausserhalb der Karte selbst - dieselbe
+   Ueberlegung wie bei den Navi-Knoepfen daneben. */
+.karten-knopf {
+  position: absolute;
+  right: var(--s4);
+  bottom: var(--s4);
+  z-index: 400;
+  width: 44px; height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--glas-rand);
+  background: var(--schatten-voll);
+  backdrop-filter: blur(12px);
+  color: var(--text);
+  cursor: pointer;
+}
+.karten-knopf:active { background: var(--glas-heller); }
+/* Im Navi-Modus uebernehmen die grossen Knoepfe daneben. */
+body.nav-modus .karten-knopf { display: none; }
+
 .nav-rund {
   width: 48px; height: 48px;
   display: grid;
