@@ -2191,36 +2191,45 @@ function starteNeigungsMessung() {
 /* Zeigt an, woran man gerade ist. Wird beim Oeffnen des Bildschirms
    gerufen, damit ein frueher gesetzter Nullpunkt sichtbar ist - sonst
    waere nicht zu erkennen, ob die App ihn noch kennt. */
-function neigungStatusAnzeigen() {
+/* Schreibt die Zeile unter dem Nullpunkt-Knopf - oder blendet sie aus.
+   Ohne Text bleibt sie WEG statt leer stehenzubleiben: Ein leerer Absatz
+   nimmt trotzdem seinen Abstand mit und reisst ein Loch in den Kasten. */
+function zeigeNeigungsMeldung(text) {
   const meldung = document.getElementById('neigungStatus');
   if (!meldung) return;
+  meldung.textContent = text || '';
+  meldung.hidden = !text;
+}
+
+function neigungStatusAnzeigen() {
   if (!ride.neigung.basis) ride.neigung.basis = geraet.lies(NEIGUNG_BASIS);
-  if (ride.neigung.basis?.u) {
-    const wann = new Date(ride.neigung.basis.angelegtAm);
-    meldung.textContent = 'Nullpunkt gesetzt am '
-      + wann.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' })
-      + '. Hat sich die Halterung verstellt, setz ihn neu.';
-  } else {
-    meldung.textContent = 'Ohne Nullpunkt wird die Schräglage grob aus dem GPS geschätzt.';
-  }
+  /* Ohne gesetzten Nullpunkt steht hier NICHTS. Frueher stand da, dass die
+     Schraeglage dann aus dem GPS geschaetzt wird - eine Auskunft, aus der
+     niemand eine Entscheidung ableitet: Der Knopf darueber sagt schon, was
+     zu tun ist, und wer ihn nicht drueckt, faehrt trotzdem los. */
+  if (!ride.neigung.basis?.u) { zeigeNeigungsMeldung(''); return; }
+
+  const wann = new Date(ride.neigung.basis.angelegtAm);
+  zeigeNeigungsMeldung('Nullpunkt gesetzt am '
+    + wann.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' })
+    + '. Hat sich die Halterung verstellt, setz ihn neu.');
 }
 
 async function neigungNullpunktSetzen() {
-  const meldung = document.getElementById('neigungStatus');
   const erlaubt = await geraet.neigungErlauben();
   if (!erlaubt) {
-    meldung.textContent = 'Kein Zugriff auf die Bewegungssensoren. Die Schräglage '
-      + 'wird dann grob aus dem GPS geschätzt - die Aufzeichnung läuft normal.';
+    zeigeNeigungsMeldung('Kein Zugriff auf die Bewegungssensoren. Die Schräglage '
+      + 'wird dann grob aus dem GPS geschätzt - die Aufzeichnung läuft normal.');
     ride.neigung.basis = null;
     return;
   }
   if (!geraet.neigungDa()) {
-    meldung.textContent = 'Dieses Gerät liefert keine Bewegungsdaten. '
-      + 'Die Schräglage wird grob aus dem GPS geschätzt.';
+    zeigeNeigungsMeldung('Dieses Gerät liefert keine Bewegungsdaten. '
+      + 'Die Schräglage wird grob aus dem GPS geschätzt.');
     return;
   }
 
-  meldung.textContent = 'Messe … bitte zwei Sekunden ruhig halten.';
+  zeigeNeigungsMeldung('Messe … bitte zwei Sekunden ruhig halten.');
   const proben = [];
   const horcher = geraet.neigungVerfolgen(m => proben.push(m));
 
@@ -2228,17 +2237,17 @@ async function neigungNullpunktSetzen() {
   geraet.neigungLoslassen(horcher);
 
   if (!proben.length) {
-    meldung.textContent = 'Es kamen keine Sensordaten an. Die Schräglage wird aus dem GPS geschätzt.';
+    zeigeNeigungsMeldung('Es kamen keine Sensordaten an. Die Schräglage wird aus dem GPS geschätzt.');
     return;
   }
   const basis = kalibriereNeigung(proben);
-  if (basis.fehler) { meldung.textContent = basis.fehler; return; }
+  if (basis.fehler) { zeigeNeigungsMeldung(basis.fehler); return; }
 
   ride.neigung.basis = basis;
   geraet.schreib(NEIGUNG_BASIS, basis);
-  meldung.textContent = basis.warnung
+  zeigeNeigungsMeldung(basis.warnung
     ? 'Nullpunkt gesetzt. ' + basis.warnung
-    : 'Nullpunkt gesetzt. Die Schräglage wird jetzt aus den Bewegungssensoren gemessen.';
+    : 'Nullpunkt gesetzt. Die Schräglage wird jetzt aus den Bewegungssensoren gemessen.');
 }
 
 function beendeNeigungsMessung() {
@@ -3387,20 +3396,6 @@ document.querySelectorAll('.nav-tab').forEach(knopf => {
    er fuehrt, haengt davon ab, ob jemand angemeldet ist - und das weiss nur
    konto.js. Der Textlink am Fuss der Startseite, auf den hier frueher
    weitergereicht wurde, ist mit dem Umzug des Kontos ins Profil entfallen. */
-
-/* Neu laden. Die Rueckfrage ist kein Zierrat: Eine laufende Aufzeichnung
-   liegt im Arbeitsspeicher und ist nach dem Neuladen weg. Wer versehentlich
-   darauf tippt, waehrend eine Ausfahrt mitlaeuft, verliert sie sonst - und
-   das ist der einzige Fall in dieser App, in dem ein Fehlgriff etwas
-   kostet, das sich nicht wiederholen laesst. */
-document.getElementById('btnNeuLaden').addEventListener('click', ereignis => {
-  if (ride.aktiv || nav.aktiv) {
-    const was = ride.aktiv ? 'Aufzeichnung' : 'Navigation';
-    if (!confirm(`Es läuft gerade eine ${was}. Beim Neuladen geht sie verloren. Trotzdem neu laden?`)) return;
-  }
-  ereignis.currentTarget.classList.add('laedt');
-  geraet.frischLaden();
-});
 
 document.getElementById('btnStartPlaner').addEventListener('click', zeigePlaner);
 document.getElementById('btnStartTouren').addEventListener('click', zeigeMeineTouren);

@@ -197,7 +197,7 @@
    Punkte Hoehe; die Buehne rechnet ihre Groesse ohnehin aus dem, was
    uebrigbleibt (setzeBuehnenPlatz in garage.js). */
 .wortmarke-garage {
-  margin: 0 0 var(--s2);
+  margin: 0 0 var(--s3);
 }
 .wortmarke-garage .wortmarke-bild { width: 104px; }
 
@@ -379,16 +379,8 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 }
 .glas-rund.blass:hover { background: var(--glas-hell); color: var(--text); }
 
-/* Wenn das Neuladen laeuft, dreht sich der Pfeil - sonst tippt man und ist
-   sich einen Wimpernschlag lang nicht sicher, ob etwas passiert ist. */
-.glas-rund.laedt .ic { animation: knopf-drehen 0.8s linear infinite; }
-@keyframes knopf-drehen {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
-
 /* ---------- Kopfzeile ----------
-   Die beiden runden Knoepfe oben rechts (Neu laden, Konto). Sie duerfen nie
+   Der runde Knopf oben rechts (Konto). Er darf nie
    schrumpfen - lieber bricht der Schriftzug daneben um, als dass eine
    Trefferflaeche kleiner wird. */
 .kopf-knoepfe {
@@ -2126,12 +2118,6 @@ body.nav-modus .leaflet-control-container { display: none; }
   text-transform: uppercase;
   color: var(--metall-glanz);
   text-shadow: 0 2px 14px var(--schatten-tief);
-}
-.garage-sub {
-  margin: 4px 0 0;
-  color: var(--muted);
-  font-size: 12.5px;
-  text-shadow: 0 1px 8px var(--schatten-tief);
 }
 
 /* ---------- Die Buehne mit dem Motorrad ----------

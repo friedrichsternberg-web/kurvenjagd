@@ -123,11 +123,10 @@
   .panel-header .wortmarke-kopf { display: none; }
   .nur-hoch { display: none; }
 
-  /* Der runde Konto-Knopf im Garagenkopf waere der ZWEITE Konto-Knopf im
-     Bild - die Leiste hat schon einen. Der Neu-laden-Knopf daneben bleibt:
-     Am Rechner gibt es zwar F5, aber wer die Seite vom Startbildschirm
-     eines Tablets oeffnet, hat keine Adresszeile. */
-  .kopf-knoepfe #btnKontoRund { display: none; }
+  /* Der Konto-Knopf im Garagenkopf waere der ZWEITE im Bild - die Leiste
+     hat schon einen. Seit der Neu-laden-Knopf daneben weg ist, bleibt vom
+     Kasten nichts uebrig, also geht er ganz. */
+  .kopf-knoepfe { display: none; }
 
   /* --- 2. Der Platz unter der Leiste -----------------------------------------
      Im Hochformat lassen die Bildschirme mit height: calc(100% - --nav-raum)

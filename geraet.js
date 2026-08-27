@@ -197,34 +197,6 @@ const geraet = {
     }
   },
 
-  /* --- Die App neu laden ---------------------------------------------------
-     Warum das nicht einfach location.reload() ist, und der Grund ist
-     handfest: Die App liegt auf GitHub Pages, und das erlaubt Browsern,
-     jede Datei zehn Minuten lang zwischenzuspeichern. Ein gewöhnliches
-     Neuladen holt sich in dieser Zeit dieselbe Fassung aus dem
-     Zwischenspeicher zurück - man drückt, und es passiert scheinbar nichts.
-     Auf dem Startbildschirm eines Handys ist das noch hartnäckiger, weil
-     dort nicht einmal das Schließen der App den Speicher leert.
-
-     Deshalb bekommt die Adresse einen frischen Zeitstempel angehängt. Für
-     den Browser ist "index.html?frisch=1755..." eine ANDERE Adresse, er
-     muss sie also wirklich vom Server holen. Steht dort eine höhere
-     Versionsnummer hinter den Skripten, sind auch die neu - genau der
-     Zweck des "?v=" in index.html.
-
-     replace() statt eines gewöhnlichen Sprungs: Sonst sammelt jeder Druck
-     einen weiteren Eintrag in der Zurück-Liste an.
-
-     In der nativen Hülle später fällt der Umweg weg. Dort liegen die
-     Dateien im Programm selbst, es gibt keinen Zwischenspeicher, den man
-     überlisten müsste. */
-  frischLaden() {
-    if (this.istNativ()) { location.reload(); return; }
-    const adresse = new URL(location.href);
-    adresse.searchParams.set('frisch', String(Date.now()));
-    location.replace(adresse.toString());
-  },
-
   async inZwischenablage(text) {
     try {
       await navigator.clipboard.writeText(text);

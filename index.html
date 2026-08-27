@@ -285,13 +285,6 @@
       <symbol id="icon-ab-ziel" viewBox="0 0 24 24">
         <path d="M6 21V4"/><path d="M6 5h12l-3 3.5 3 3.5H6"/>
       </symbol>
-      <!-- Der Kreispfeil fuers Neuladen. Die Ecke oben rechts ist die
-           Pfeilspitze: Sie oeffnet sich entgegen der Laufrichtung, dadurch
-           liest man sie als Spitze, obwohl es nur zwei Striche sind. -->
-      <symbol id="icon-neu" viewBox="0 0 24 24">
-        <path d="M20.2 14.6A8.6 8.6 0 1 1 17.6 5.4L21.4 9.2"/>
-        <path d="M21.4 4.4v4.8h-4.8"/>
-      </symbol>
       <symbol id="icon-kamera" viewBox="0 0 24 24">
         <path d="M4 8h2.8l1.4-2h7.6L17.2 8H20a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/>
         <circle cx="12" cy="13.5" r="3.4"/>
@@ -436,23 +429,10 @@
             </span>
           </p>
           <h2 class="garage-titel">Meine Garage</h2>
-          <p class="garage-sub">Deine Maschine und deine Ausr&uuml;stung.</p>
         </div>
-        <!-- Zwei Knoepfe nebeneinander. Beide sind gleich GROSS - ein
-             Knopf, dessen Zweck das Erreichbarsein ist, darf nicht der
-             kleinste auf dem Bildschirm sein. Die Rangfolge macht
-             stattdessen die Farbe: Das Neuladen ist blasser, das Konto
-             bleibt der hellere von beiden.
-
-             Warum es diesen Knopf ueberhaupt gibt: Wer die App vom
-             Startbildschirm des Handys oeffnet, hat keine Adresszeile und
-             damit auch keinen Neu-laden-Knopf des Browsers. Selbst die App
-             zu schliessen hilft nicht immer, weil der Zwischenspeicher das
-             ueberlebt. Siehe geraet.frischLaden(). -->
+        <!-- Nur noch das Konto. Der Neu-laden-Knopf, der hier daneben
+             stand, ist am 27.08.2026 entfallen (ENTSCHEIDUNGEN.md). -->
         <div class="kopf-knoepfe">
-          <button class="glas-rund blass" id="btnNeuLaden" title="App neu laden" aria-label="App neu laden">
-            <svg class="ic gross"><use href="#icon-neu"></use></svg>
-          </button>
           <button class="glas-rund" id="btnKontoRund" title="Konto" aria-label="Konto">
             <!-- Ist ein Profilbild da, tritt es an die Stelle des Symbols
                  und fuellt den Knopf ganz aus. konto.js schaltet um. -->
@@ -1273,24 +1253,27 @@
       <div id="rideBereit">
         <h2 class="ride-titel">Ausfahrt aufzeichnen</h2>
         <p class="hint">
-          Zeichnet deine tatsächlich gefahrene Strecke per GPS auf. Während
-          der Fahrt siehst du alle Werte live, Fotos kannst du unterwegs
-          hinzufügen. Notizen schreibst du am Ende dazu.
+          Zeichnet deine tatsächlich gefahrene Strecke per GPS auf.
         </p>
         <!-- Schraeglage. Der Knopf steht VOR dem Starten, weil der
              Nullpunkt im Stand gesetzt werden muss - und weil die Erlaubnis
              fuer die Bewegungssensoren auf dem iPhone aus einer echten
              Fingerbewegung heraus erfragt werden muss. Wer ihn ueberspringt,
              zeichnet trotzdem auf; die Schraeglage kommt dann grob aus dem
-             GPS. -->
+             GPS - das steht bewusst nicht mehr dabei, weil es niemanden zu
+             einer Entscheidung braucht. -->
         <div class="neigung-block">
           <p class="hint">
-            <strong>Schr&auml;glage messen?</strong> Stell das Motorrad senkrecht
-            hin, Motor aus, Handy in der Halterung &ndash; und tippe dann auf
-            &bdquo;Nullpunkt setzen&ldquo;. Das dauert zwei Sekunden.
+            <strong>Schr&auml;glage messen?</strong> Stell dein Motorrad senkrecht
+            hin, klemm das Handy in die Halterung und tippe auf
+            &bdquo;Nullpunkt setzen&ldquo;.
           </p>
           <button class="btn ghost" id="btnNeigungNullpunkt">Nullpunkt setzen</button>
-          <p class="hint" id="neigungStatus">Ohne Nullpunkt wird die Schr&auml;glage grob aus dem GPS gesch&auml;tzt.</p>
+          <!-- Startet leer und bleibt es, solange es nichts zu sagen gibt.
+               Gefuellt wird die Zeile nur von neigungStatusAnzeigen() in
+               app.js: wenn ein Nullpunkt gesetzt ist, oder wenn beim Setzen
+               etwas schiefging. -->
+          <p class="hint" id="neigungStatus" hidden></p>
         </div>
 
         <div class="row">
