@@ -231,6 +231,17 @@
 .rechts-text .label { margin-top: var(--s4); }
 .rechts-text a { color: var(--accent-hell); }
 
+/* Der Alpha-Hinweis ueber den Akkordeons. Als einziger Text dort steht er
+   offen da, deshalb bekommt er weniger Gewicht als eine Ueberschrift und
+   mehr als eine Fussnote: Nebentextfarbe, aber volle Zeilenhoehe. */
+.rechts-alpha {
+  margin: 0 0 var(--s4);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.rechts-alpha a { color: var(--accent-hell); }
+
 /* ---------- Untere Navigationsleiste ----------
    Fest am unteren Rand. Die Bildschirme darueber bekommen ihre Hoehe
    ueber calc(100% - var(--nav-raum)), damit nichts hinter der Leiste

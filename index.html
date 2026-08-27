@@ -680,14 +680,15 @@
         <span class="wortmarke-sub">Deine Motorradapp</span>
       </p>
       <h2 id="kontoTitel">Anmelden</h2>
-      <p class="sub">
-        Zum Planen brauchst du kein Konto. Erst fürs Teilen von Routen und
-        für Verabredungen zu Ausfahrten.
-      </p>
 
       <form id="kontoFormular" class="konto-formular">
         <label for="kontoEmailEingabe">E-Mail</label>
-        <input type="email" id="kontoEmailEingabe" autocomplete="email" placeholder="du@beispiel.de">
+        <!-- Ohne Platzhalter: Die Beschriftung darueber sagt schon, was
+             hineingehoert, und ein grauer Beispieltext im Feld wird auf dem
+             Handy regelmaessig fuer eine bereits ausgefuellte Adresse
+             gehalten. Beim Passwort bleibt er stehen, dort traegt er eine
+             Angabe, die sonst nirgends steht. -->
+        <input type="email" id="kontoEmailEingabe" autocomplete="email">
 
         <label for="kontoPasswortEingabe">Passwort</label>
         <input type="password" id="kontoPasswortEingabe" autocomplete="current-password" placeholder="mindestens 10 Zeichen">
@@ -933,6 +934,18 @@
       </p>
       <h2>Rechtliches</h2>
 
+      <!-- Der einzige Satz, der NICHT im Akkordeon steht. Zwei Dinge muessen
+           ankommen, ohne dass jemand etwas aufklappt: dass die App eine fruehe
+           Fassung ist, und wohin Fehler gemeldet werden koennen. Der Halbsatz
+           zur Navigation bleibt bewusst drin - bei einer App, der man
+           unterwegs folgt, ist er der einzige Haftungshinweis, den es gibt. -->
+      <p class="rechts-alpha">
+        Serpa ist eine fr&uuml;he Fassung (Alpha) &ndash; es k&ouml;nnen Fehler
+        auftreten, verlass dich unterwegs nicht allein auf die App. F&auml;llt
+        dir etwas auf:
+        <a href="mailto:kontakt@serpa-app.de">kontakt@serpa-app.de</a>
+      </p>
+
       <details class="block accordion" id="impressumBlock">
         <summary>Impressum</summary>
         <div class="rechts-text">
@@ -959,31 +972,6 @@
             Wir sind nicht verpflichtet und nicht bereit, an
             Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle
             teilzunehmen.
-          </p>
-        </div>
-      </details>
-
-      <details class="block accordion" id="entwicklungBlock">
-        <summary>Stand der Entwicklung</summary>
-        <div class="rechts-text">
-          <p>
-            Serpa ist eine <strong>fr&uuml;he Fassung</strong>. Der
-            Routenplaner, die Garage, das Aufzeichnen von Ausfahrten und die
-            Konten funktionieren. Das eigentliche Ziel der App &ndash; sich
-            spontan zum gemeinsamen Fahren zu verabreden &ndash; ist noch
-            nicht gebaut.
-          </p>
-          <p>
-            Was das f&uuml;r dich hei&szlig;t: Funktionen k&ouml;nnen sich
-            &auml;ndern oder wieder verschwinden, und es k&ouml;nnen Fehler
-            auftreten. Deine Routen und deine Garage liegen zun&auml;chst nur
-            in deinem Browser; wer sie sicher aufbewahren will, legt ein Konto
-            an oder l&auml;dt seine Touren als GPX-Datei herunter. Verlass
-            dich unterwegs nicht allein auf die App.
-          </p>
-          <p>
-            Wenn dir etwas auff&auml;llt, schreib gern an
-            <a href="mailto:kontakt@serpa-app.de">kontakt@serpa-app.de</a>.
           </p>
         </div>
       </details>
@@ -1072,12 +1060,13 @@
 
           <p class="label">6. Foto freistellen</p>
           <p>
-            Stellst du ein eigenes Motorradfoto frei, l&auml;dt die App dazu
-            einmalig eine Programmbibliothek vom Dienst jsDelivr
-            (cdn.jsdelivr.net, Betreiber ProspectOne, Polen);
-            dabei wird deine IP-Adresse &uuml;bertragen. Das Foto selbst
-            verl&auml;sst dein Ger&auml;t nicht - gerechnet wird
-            ausschlie&szlig;lich in deinem Browser. Das passiert nur, wenn
+            Stellst du ein eigenes Motorradfoto frei, erkennt ein gelerntes
+            Modell die Maschine im Bild. Dazu l&auml;dt die App einmalig eine
+            Programmbibliothek vom Dienst jsDelivr (cdn.jsdelivr.net,
+            Betreiber ProspectOne, Polen); dabei wird deine IP-Adresse
+            &uuml;bertragen. Das Foto selbst verl&auml;sst dein Ger&auml;t
+            nicht &ndash; gerechnet wird ausschlie&szlig;lich in deinem
+            Browser, und wir bekommen es nie zu sehen. Das passiert nur, wenn
             du das Freistellen startest (Art. 6 Abs. 1 lit. b DSGVO).
           </p>
 
@@ -1129,7 +1118,49 @@
             das Recht auf Akteneinsicht Brandenburg.
           </p>
 
-          <p class="tiny">Stand: 26.08.2026</p>
+          <p class="tiny">Stand: 27.08.2026</p>
+        </div>
+      </details>
+
+      <!-- Offenlegung nach Artikel 50 der KI-Verordnung (EU) 2024/1689, in
+           Kraft seit dem 02.08.2026.
+
+           WARUM UEBERHAUPT: Die Pflicht trifft den Betreiber, der Inhalte
+           veroeffentlicht, die einer Person faelschlicherweise als echt
+           erscheinen koennten. Das sind hier der Werkstattraum und die
+           Beispielmaschine - beide fotorealistisch, beide erfunden. Symbol
+           und Schriftzug fallen wahrscheinlich NICHT darunter (eine Grafik
+           haelt niemand fuer eine Aufnahme), stehen aber mit dabei: Sie
+           auszunehmen haette einen Halbsatz Begruendung gekostet und die
+           Angabe angreifbar gemacht.
+
+           WARUM HIER UND NICHT AM BILD: Fuer gestalterische Werke laesst
+           Artikel 50 Absatz 4 die Offenlegung ausdruecklich "in
+           angemessener Weise" zu, die die Darstellung nicht beeintraechtigt.
+           Ein Schriftzug quer ueber die Garage waere das Gegenteil.
+
+           NICHT genannt werden muss der Freisteller: Artikel 50 Absatz 2
+           nimmt Systeme aus, die eine unterstuetzende Funktion fuer die
+           Standardbearbeitung ausueben und die Eingabe nicht wesentlich
+           veraendern. Hintergrund entfernen ist genau das. Er steht hier
+           trotzdem, weil die Frage "rechnet da jemand an meinem Foto?"
+           ohnehin aufkommt und eine Antwort verdient. -->
+      <details class="block accordion" id="kiBlock">
+        <summary>K&uuml;nstlich erzeugte Bilder</summary>
+        <div class="rechts-text">
+          <p>
+            Ein Teil der Bilder dieser App wurde mit einem KI-Bildgenerator
+            erstellt: das App-Symbol, der Schriftzug &bdquo;Serpa&ldquo;, der
+            Werkstattraum der Garage und die Beispielmaschine, die dort steht,
+            solange du kein eigenes Foto hinterlegt hast. Sie zeigen keine
+            wirklichen Orte, Gegenst&auml;nde oder Personen.
+          </p>
+          <p>
+            Stellst du dein eigenes Foto frei, trennt ein gelerntes Modell
+            (U&sup2;-Net) die Maschine vom Hintergrund. Es rechnet
+            ausschlie&szlig;lich auf deinem Ger&auml;t und ver&auml;ndert dein
+            Bild nicht dar&uuml;ber hinaus &ndash; es erfindet nichts hinzu.
+          </p>
         </div>
       </details>
     </div>
