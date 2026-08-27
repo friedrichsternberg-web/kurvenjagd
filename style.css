@@ -115,6 +115,48 @@
   color: var(--metall);
 }
 
+/* --- Das Alpha-Abzeichen ----------------------------------------------------
+   Die App ist eine fruehe Fassung: Der Routenplaner, die Garage und das
+   Aufzeichnen laufen, das eigentliche Ziel - der Community-Teil - fehlt
+   noch ganz. Wer das nicht weiss, haelt Fehlendes fuer kaputt.
+
+   Als Blechschild und nicht als bunter Aufkleber: Die Designsprache erlaubt
+   genau EINE Signalfarbe, und die gehoert dem Bedienbaren. Helles Blech auf
+   dunklem Grund faellt trotzdem sofort auf - es ist der hoechste Kontrast,
+   den die App ueberhaupt kennt. */
+.alpha-schild {
+  align-self: center;
+  padding: 2px var(--s2);
+  border-radius: var(--r-sm);
+  background: var(--pass-schild);
+  color: var(--pass-schild-ink);
+  font-family: var(--schrift-display);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  text-indent: 0.12em;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+/* Die Zeile aus Schriftzug und Abzeichen. Der Untertitel haengt darunter
+   und richtet sich weiter am Schriftzug aus, nicht am Abzeichen. */
+.wortmarke-zeile {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+}
+
+/* Am Garagenkopf sitzt dasselbe Abzeichen neben der Ueberschrift - das ist
+   der Startbildschirm, und im Hochformat der einzige Ort, an dem es
+   ueberhaupt zu sehen ist (dort gibt es keine Kopfleiste). */
+.garage-titel-zeile {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+}
+
 /* Auf den Listenbildschirmen (Rechtliches) stehen Ueberschrift und Inhalt
    links - eine mittige Wortmarke darueber haenge in der Luft. */
 .listen-screen .wortmarke { align-items: flex-start; }

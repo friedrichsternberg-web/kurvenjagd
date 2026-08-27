@@ -227,8 +227,14 @@
   --danger-tief:  #D93A32;
   --danger-ink:   #1A0605;   /* Schrift AUF dem roten Knopf */
 
-  /* Das Schild an einem Pass: helles Blech, dunkle Schrift. Umgekehrt zum
-     Rest der App, deshalb braucht es eigene Marken statt --text/--bg. */
+  /* Ein Schild aus hellem Blech mit dunkler Schrift. Umgekehrt zum Rest der
+     App, deshalb braucht es eigene Marken statt --text/--bg.
+
+     Zwei Verwendungen, beide aus derselben Idee: der Passname auf der Karte
+     und das Alpha-Abzeichen an der Wortmarke. Ein Blechschild faellt auf
+     dunklem Grund sofort auf, ohne eine zweite Signalfarbe einzufuehren -
+     RAL 5005 bleibt allein zustaendig fuer alles Bedienbare, und ein
+     Abzeichen ist kein Knopf. */
   --pass-schild:     #D8D2C4;
   --pass-schild-ink: #2A2620;
 

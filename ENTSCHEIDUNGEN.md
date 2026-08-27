@@ -704,3 +704,32 @@ wurde die Volltonfarbe aus dem Logo plus weite Laufweite in Versalien. Bei
 12 Punkten Schriftgröße wäre ein Verlauf ohnehin kaum zu sehen, ein
 gebrochener Grundsatz aber schon. Wer ihn eines Tages doch will, ändert
 damit die Designsprache und schreibt es hierhin.
+
+## 26.08.2026 — Das Alpha-Abzeichen: ein Blechschild, kein bunter Aufkleber
+
+Die App sagt jetzt sichtbar, dass sie eine frühe Fassung ist. Der Grund ist
+handfest: Routenplaner, Garage, Aufzeichnen und Konten laufen, aber das
+eigentliche Ziel — sich spontan zum gemeinsamen Fahren verabreden — ist noch
+gar nicht gebaut. Wer das nicht weiß, hält Fehlendes für kaputt.
+
+**Warum ein Blechschild und keine Warnfarbe.** Naheliegend wäre ein
+Abzeichen in Orange oder Gelb gewesen, aber die Designsprache erlaubt genau
+EINE Signalfarbe, und die gehört dem Bedienbaren (RAL 5005). Eine zweite
+hätte die erste entwertet. Stattdessen nutzt das Abzeichen die bereits
+vorhandenen Marken `--pass-schild` / `--pass-schild-ink` — helles Blech mit
+dunkler Schrift, bisher der Passname auf der Karte. Das ist der höchste
+Kontrast, den die App überhaupt kennt, fällt also auf dunklem Grund sofort
+auf, und es bleibt aus der Motorradwelt gegriffen statt aus dem
+Warnschilder-Baukasten. Der Kommentar an der Marke nennt jetzt beide
+Verwendungen.
+
+**Vier Stellen**, und die vierte ist die wichtigste: an der Wortmarke
+(Kopfleiste, Anmeldung, Rechtliches) und am Garagenkopf. Ohne die letzte
+wäre das Abzeichen auf dem Handy überhaupt nie zu sehen — dort gibt es keine
+Kopfleiste, und die Wortmarke erscheint nur auf zwei Bildschirmen, die man
+im Alltag selten öffnet.
+
+Dazu ein Abschnitt „Stand der Entwicklung" im Rechtlichen: was läuft, was
+fehlt, dass Daten zunächst nur im Browser liegen und man sich unterwegs
+nicht allein auf die App verlassen soll. Das ist gegenüber Nutzern fair und
+gegenüber Prüfern ehrlicher als ein Abzeichen ohne Erklärung.
