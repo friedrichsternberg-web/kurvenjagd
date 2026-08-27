@@ -129,13 +129,13 @@
        geblieben. Die Zahl wird also nur dann hochgezaehlt, wenn sich das
        Symbol wirklich aendert, und JSON erlaubt keine Kommentare - deshalb
        steht die Erklaerung hier. -->
-  <link rel="manifest" href="manifest.webmanifest?v=101">
+  <link rel="manifest" href="manifest.webmanifest?v=102">
 
   <!-- Das Symbol im Reiter des Browsers. Zwei Groessen, damit der Browser
        nehmen kann, was er gerade braucht: das kleine fuer den Reiter, das
        grosse fuer Lesezeichen und die Kachel auf der Startseite. -->
-  <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png?v=101">
-  <link rel="icon" type="image/png" sizes="192x192" href="img/icon-192.png?v=101">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png?v=102">
+  <link rel="icon" type="image/png" sizes="192x192" href="img/icon-192.png?v=102">
 
   <!-- Faerbt die Statusleiste des Handys in die Grundflaeche der App, damit
        oben kein fremder heller Streifen stehen bleibt. -->
@@ -148,7 +148,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Serpa">
-  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=101">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=102">
 
   <!-- Fuer die spaetere Webseite und geteilte Routen: So sieht der Link aus,
        wenn ihn jemand in WhatsApp oder Instagram einfuegt. Ohne das steht
@@ -213,12 +213,12 @@
                    die spaetere Webseite genauso benutzen.
        style.css   die Anordnung DIESER App, ausgelegt auf Hochformat. Die
                    Webseite bekommt dafuer eine eigene Datei. -->
-  <link rel="stylesheet" href="design.css?v=101">
-  <link rel="stylesheet" href="style.css?v=101">
+  <link rel="stylesheet" href="design.css?v=102">
+  <link rel="stylesheet" href="style.css?v=102">
   <!-- Die Anordnung fuer breite Bildschirme. Laedt NACH style.css und
        ueberschreibt dessen Hochformat-Anordnung nur dann, wenn das Fenster
        mindestens 900x500 Punkte hat - auf dem Handy bleibt sie stumm. -->
-  <link rel="stylesheet" href="quer.css?v=101">
+  <link rel="stylesheet" href="quer.css?v=102">
 </head>
 <body>
 
@@ -647,7 +647,7 @@
            sich also nie mit dem in der Kopfleiste. Fuer Pruefer und neue
            Nutzer ist das oft der erste Bildschirm ueberhaupt. -->
       <p class="wortmarke">
-        <img class="wortmarke-bild" src="img/logo-serpa.webp?v=101" alt="Serpa" width="800" height="155">
+        <img class="wortmarke-bild" src="img/logo-serpa.webp?v=102" alt="Serpa" width="800" height="155">
         <span class="wortmarke-sub">Deine Motorradapp</span>
       </p>
       <h2 id="kontoTitel">Anmelden</h2>
@@ -879,7 +879,7 @@
     <div class="start-screen-inner">
       <button class="btn ghost back-btn" id="btnRechtlichesZurueck">&larr; Zur&uuml;ck</button>
       <p class="wortmarke">
-        <img class="wortmarke-bild" src="img/logo-serpa.webp?v=101" alt="Serpa" width="800" height="155">
+        <img class="wortmarke-bild" src="img/logo-serpa.webp?v=102" alt="Serpa" width="800" height="155">
         <span class="wortmarke-sub">Deine Motorradapp</span>
       </p>
       <h2>Rechtliches</h2>
@@ -1628,7 +1628,7 @@
          sitzt DIESELBE Leiste oben und liest sich als Kopf einer Webseite.
          Im Hochformat blendet .nur-quer (style.css) beides aus. -->
     <span class="nav-marke nur-quer" aria-hidden="true">
-      <img class="wortmarke-bild" src="img/logo-serpa.webp?v=101" alt="" width="800" height="155">
+      <img class="wortmarke-bild" src="img/logo-serpa.webp?v=102" alt="" width="800" height="155">
       <span class="wortmarke-sub">Deine Motorradapp</span>
     </span>
     <!-- Die Garage steht VORN: Sie ist der Startbildschirm, und der erste
@@ -1767,16 +1767,16 @@
   <!-- ZUERST, denn alle anderen benutzen geraet.* beim Laden. Hier steht der
        gesamte Zugriff aufs Geraet - Standort, Speicher, Dateien. Beim Umzug
        in die Stores ist das die einzige Datei, die sich aendert. -->
-  <script src="geraet.js?v=101"></script>
+  <script src="geraet.js?v=102"></script>
   <!-- Der Rechenteil: Kurvigkeit, Sackgassen, Rundtour-Punkte, GPX. Muss VOR
        app.js stehen, weil app.js diese Funktionen beim Routen aufruft. Die
        spaetere Webseite im Querformat laedt genau diese Datei ebenfalls und
        rechnet damit exakt so wie die App. -->
-  <script src="kern.js?v=101"></script>
-  <script src="app.js?v=101"></script>
+  <script src="kern.js?v=102"></script>
+  <script src="app.js?v=102"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
-  <script src="konto.js?v=101"></script>
+  <script src="konto.js?v=102"></script>
   <!-- Die Garage in drei Teilen. Die Reihenfolge ist nicht beliebig:
 
        finder.js       zuerst, weil zeichneGarage() am Ende von garage.js
@@ -1788,19 +1788,19 @@
 
        Alle drei nach app.js, weil sie verkleinereFoto(), showToast() und
        verkabele() von dort benutzen. -->
-  <script src="finder.js?v=101"></script>
-  <script src="garage.js?v=101"></script>
-  <script src="freisteller.js?v=101"></script>
+  <script src="finder.js?v=102"></script>
+  <script src="garage.js?v=102"></script>
+  <script src="freisteller.js?v=102"></script>
   <!-- Der Demo-Produktkatalog (nur Daten) und die Shop-Logik. produkte.js
        muss vor shop.js stehen, und beide nach garage.js, weil shop.js
        dessen verkabele() mitbenutzt. -->
-  <script src="produkte.js?v=101"></script>
-  <script src="shop.js?v=101"></script>
+  <script src="produkte.js?v=102"></script>
+  <script src="shop.js?v=102"></script>
   <!-- Die Besuchszaehlung. Zuletzt, weil sie nichts kann, was jemand anders
        braucht - und nach konto.js, weil sie die dort stehende Serveradresse
        und den oeffentlichen Schluessel mitbenutzt, statt beides ein zweites
        Mal aufzuschreiben. Sie meldet nur eine Summe und legt nichts auf dem
        Geraet ab; die Begruendung steht ausfuehrlich im Kopf der Datei. -->
-  <script src="besucher.js?v=101"></script>
+  <script src="besucher.js?v=102"></script>
 </body>
 </html>

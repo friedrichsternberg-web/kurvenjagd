@@ -662,3 +662,45 @@ Die Werte-Vergrößerung des Datenblatts braucht die id im Selektor
 gegen eine id jeder reine Klassen-Selektor verliert - ein nacktes
 `.stat .v` hätte stattdessen die Statistiken von Ride und Planer
 vergrößert und das Datenblatt unverändert gelassen.
+
+## 26.08.2026 — Der Schriftzug kommt ins Bild, und was das fürs Design heißt
+
+Friedrich hat neben dem überarbeiteten App-Symbol einen **Schriftzug**
+entworfen: „SERPA" als gerendertes, gebürstetes Metall mit derselben
+Höhenlinien-Gravur wie das Symbol. Bis dahin war die Wortmarke getippter
+Text in Barlow Condensed.
+
+**Freigestellt über die Helligkeit, nicht über eine Schwelle.** Die Vorlage
+hat keinen Alphakanal, ihr Grund ist dunkelgrau (RGB 16–31) — auf der
+schwarzen Grundfläche der App wäre das ein sichtbarer Kasten. Ein harter
+Schnitt an einer Schwelle hätte die dunklen Kanten des Metalls mit
+weggefressen. Stattdessen wird die Helligkeit selbst zur Deckkraft: Alles
+unter 28 verschwindet, darüber steigt sie bis 90 an. Glanzlichter bleiben
+voll deckend, die dunklen Gravurlinien werden durchsichtig — was auf dunklem
+Grund genau richtig aussieht, weil dort ohnehin Dunkel liegt. Gemessen: 30
+Prozent der Fläche werden ganz durchsichtig, 39 Prozent bleiben voll.
+
+**Die Design-Abstimmung: Metall ist Beschriftung, Blau ist Bedienung.**
+Zur Wahl standen drei Tiefen — nur das Logo einsetzen, Metallik ergänzen,
+oder Silber zur Leitfarbe machen. Friedrich hat die mittlere gewählt, und
+das ist auch die richtige: Silber hat auf dunklem Grund zu wenig
+Signalwirkung. Wäre alles metallisch, sähe man nicht mehr, was anklickbar
+ist. Drei neue Marken (`--metall`, `--metall-glanz`, `--metall-tief`), aus
+dem Logo gemessen, tragen deshalb nur Überschriften und den Untertitel. Die
+sechs Akzentmarken und ihre 58 Verwendungen bleiben unberührt.
+
+Der Grund, warum die Abstimmung überhaupt nötig war, ließ sich messen: Das
+Logo ist **vollständig neutral** (Sättigung 0,03), `--text` und `--muted`
+tragen dagegen einen Blaustich bei Hue 220°. Daher rührte der Eindruck von
+zwei Handschriften. Nebenbei ist `#9D9997` mit 7,4:1 sogar
+kontraststärker als das bisherige `--muted` mit 6,7:1.
+
+**Kein Verlaufstext, auch nicht hier.** Der Untertitel „Deine Motorradapp"
+sollte „im gleichen Stil" wie das Logo stehen. Naheliegend wäre ein
+Metallverlauf per `background-clip: text` gewesen — aber Grundsatz 2 der
+Designsprache im Kopf von `design.css` lautet wörtlich „Kein Verlaufstext,
+kein Neonleuchten", und projektweit gab es dafür null Vorkommen. Gewählt
+wurde die Volltonfarbe aus dem Logo plus weite Laufweite in Versalien. Bei
+12 Punkten Schriftgröße wäre ein Verlauf ohnehin kaum zu sehen, ein
+gebrochener Grundsatz aber schon. Wer ihn eines Tages doch will, ändert
+damit die Designsprache und schreibt es hierhin.

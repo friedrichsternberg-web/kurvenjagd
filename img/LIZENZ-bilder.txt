@@ -32,5 +32,26 @@ hintergrund-weich.jpg, kacheln/
   kacheln/garage.jpg (die weggefallene Garage-Kachel). Sie liegen weiter
   in der Git-Historie.
 
-icon-*.png, apple-touch-icon.png
-  Aus der eigenen SVG-Symbolsammlung der App gerendert (Platzhalter).
+icon-*.png, apple-touch-icon.png, favicon-32.png, app-icon-quelle.png
+  Das App-Symbol: eine gebuerstete Metallplatte mit Hoehenlinien, darin ein
+  dunkles Naked Bike auf kurviger Strasse. Entworfen von Friedrich Sternberg
+  im August 2026 mit einem KI-Bildgenerator, ueberarbeitet am 26.08.2026.
+  Alle Groessen sind aus derselben Vorlage gerechnet; app-icon-quelle.png
+  ist die Quelle in vollen Farben (1024 Punkte, das Mass fuer den App
+  Store). Kein fremdes Markenzeichen im Bild, die Maschine ist kein Abbild
+  eines real erhaeltlichen Modells.
+
+  Hier stand bis zum 26.08.2026 "Aus der eigenen SVG-Symbolsammlung der App
+  gerendert (Platzhalter)" - das war ein oranges Fahrrad-Piktogramm und
+  stimmt seither nicht mehr.
+
+logo-serpa.webp, logo-quelle.png
+  Der Schriftzug "SERPA" als gerendertes, gebuerstetes Metall mit derselben
+  Hoehenlinien-Gravur wie das Symbol. Entworfen von Friedrich Sternberg im
+  August 2026 mit einem KI-Bildgenerator. Keine fremde Schriftlizenz
+  beruehrt: Die Buchstaben sind Teil des gerenderten Bildes, nicht mit einer
+  Schriftdatei gesetzt.
+
+  Die ausgelieferte Fassung ist freigestellt (die Helligkeit der Vorlage
+  wurde zum Alphakanal) und auf 800 Punkte verkleinert; logo-quelle.png ist
+  dieselbe Freistellung in voller Aufloesung, 2000 x 388.
