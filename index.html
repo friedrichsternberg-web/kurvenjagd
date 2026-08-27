@@ -424,13 +424,18 @@
 
       <header class="garage-kopf">
         <div>
-          <!-- Das Abzeichen sitzt hier, weil die Garage der Startbildschirm
-               ist - und im Hochformat der einzige Ort, an dem es ueberhaupt
-               zu sehen waere: Dort gibt es keine Kopfleiste mit Wortmarke. -->
-          <div class="garage-titel-zeile">
-            <h2 class="garage-titel">Meine Garage</h2>
-            <span class="alpha-schild" title="Fr&uuml;he Fassung: Es wird noch gebaut, Funktionen k&ouml;nnen sich &auml;ndern.">Alpha</span>
-          </div>
+          <!-- Schriftzug und Abzeichen stehen NUR im Hochformat hier. Die
+               Garage ist der Startbildschirm, und ohne Kopfleiste waere das
+               Handy sonst der einzige Weg durch die App, auf dem die Marke
+               nirgends auftaucht. Im Querformat traegt die Leiste oben
+               beides - dort waere es die zweite Ausgabe im selben Bild. -->
+          <p class="wortmarke-garage nur-hoch">
+            <span class="wortmarke-zeile">
+              <img class="wortmarke-bild" src="img/logo-serpa.webp?v=106" alt="Serpa" width="800" height="155">
+              <span class="alpha-schild" title="Fr&uuml;he Fassung: Es wird noch gebaut, Funktionen k&ouml;nnen sich &auml;ndern.">Alpha</span>
+            </span>
+          </p>
+          <h2 class="garage-titel">Meine Garage</h2>
           <p class="garage-sub">Deine Maschine und deine Ausr&uuml;stung.</p>
         </div>
         <!-- Zwei Knoepfe nebeneinander. Beide sind gleich GROSS - ein
@@ -1392,7 +1397,14 @@
 
     <header class="panel-header">
       <div>
-        <h1 class="brand-title">Serpa</h1>
+        <!-- Der Schriftzug als Bild, nicht als getippter Name. Im Hochformat
+             gibt es keine Kopfleiste, also ist dieser Kopf der einzige Ort im
+             Planer, an dem die Marke ueberhaupt auftritt - dann soll sie
+             dieselbe sein wie ueberall sonst. Im Querformat blendet quer.css
+             ihn aus, dort steht der Schriftzug schon in der Leiste darueber. -->
+        <h1 class="wortmarke-kopf">
+          <img class="wortmarke-bild" src="img/logo-serpa.webp?v=106" alt="Serpa" width="800" height="155">
+        </h1>
         <p class="sub">Routenplaner</p>
       </div>
       <button class="back-to-start" id="btnZumStartmenü" title="Zur Garage">&larr;</button>

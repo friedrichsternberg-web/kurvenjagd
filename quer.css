@@ -114,13 +114,14 @@
     margin-left: auto;
   }
 
-  /* Derselbe Gedanke wie beim Konto-Knopf gleich darunter: Der Planer-Kopf
-     traegt den Namen "Serpa" als Ueberschrift - im Querformat steht der
-     Schriftzug aber schon in der Kopfleiste direkt darueber, und beides
-     zugleich im Bild ist eine Dopplung. Die Unterzeile "Routenplaner"
-     bleibt, sie sagt ja etwas anderes. Im Hochformat gibt es keine
-     Kopfleiste, dort bleibt der Name stehen. */
-  .panel-header .brand-title { display: none; }
+  /* Alles, was die Marke ein ZWEITES Mal ins Bild braechte. Der Grundsatz
+     ist ueberall derselbe: Im Querformat traegt die Kopfleiste den
+     Schriftzug und das Abzeichen, also verschwindet beides ueberall dort,
+     wo es im Hochformat einspringen musste - im Planer-Kopf und im
+     Garagenkopf. Die Unterzeile "Routenplaner" bleibt stehen, sie sagt ja
+     etwas anderes als der Name. */
+  .panel-header .wortmarke-kopf { display: none; }
+  .nur-hoch { display: none; }
 
   /* Der runde Konto-Knopf im Garagenkopf waere der ZWEITE Konto-Knopf im
      Bild - die Leiste hat schon einen. Der Neu-laden-Knopf daneben bleibt:

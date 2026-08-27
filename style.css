@@ -187,14 +187,19 @@
   gap: var(--s2);
 }
 
-/* Am Garagenkopf sitzt dasselbe Abzeichen neben der Ueberschrift - das ist
-   der Startbildschirm, und im Hochformat der einzige Ort, an dem es
-   ueberhaupt zu sehen ist (dort gibt es keine Kopfleiste). */
-.garage-titel-zeile {
-  display: flex;
-  align-items: center;
-  gap: var(--s3);
+/* Der Schriftzug ueber der Garagen-Ueberschrift, mit dem Abzeichen daneben.
+   Er steht NUR im Hochformat (siehe .nur-hoch), denn im Querformat traegt
+   die Kopfleiste beides schon.
+
+   Klein gehalten - 104 Punkte, gut ein Drittel der Anmeldegroesse: Der
+   Schriftzug soll die Seite als Serpa ausweisen, nicht mit "Meine Garage"
+   um die Aufmerksamkeit streiten. Das kostet den Raum darunter rund 20
+   Punkte Hoehe; die Buehne rechnet ihre Groesse ohnehin aus dem, was
+   uebrigbleibt (setzeBuehnenPlatz in garage.js). */
+.wortmarke-garage {
+  margin: 0 0 var(--s2);
 }
+.wortmarke-garage .wortmarke-bild { width: 104px; }
 
 /* Auf den Listenbildschirmen (Rechtliches) stehen Ueberschrift und Inhalt
    links - eine mittige Wortmarke darueber haenge in der Luft. */
@@ -240,6 +245,12 @@
    BEWUSST eine Klasse und nicht das hidden-Attribut: hidden gewinnt per
    !important (design.css) und liesse sich aus quer.css nicht aufheben. */
 .nur-quer { display: none; }
+
+/* Das Gegenstueck: Elemente, die es nur im Hochformat gibt, weil die
+   Kopfleiste des Querformats dieselbe Sache schon zeigt (der Schriftzug im
+   Garagenkopf). Hier steht bewusst keine Regel - quer.css schaltet sie aus,
+   und Sichtbarkeit ist der richtige Grundzustand: Wer die Klasse vergisst
+   nachzuziehen, sieht es sofort, statt dass etwas spurlos fehlt. */
 
 .haupt-nav {
   position: fixed;
@@ -858,32 +869,19 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   gap: 20px;
 }
 
-/* .brand-title: der Name "Serpa" mit dem Punkt in der Signalfarbe davor - wird
-   sowohl im Bedienfeld-Header als auch auf dem Startbildschirm genutzt. */
-/* Die Ueberschriften tragen den Silberton des Schriftzugs (--metall-glanz)
-   statt des blaustichigen --text. Der Unterschied ist fein und soll es sein:
-   Er nimmt dem Bild die zwei Handschriften, ohne dass jemand sagen koennte,
-   woran es liegt. Bedienbares bleibt unberuehrt - das ist blau. */
-.brand-title {
-  margin: 0;
-  font-family: var(--schrift-display);
-  font-weight: 700;
-  font-size: 24px;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  line-height: 1.05;
-  color: var(--metall-glanz);
+/* Der Schriftzug im Planer-Kopf, im Hochformat der einzige Auftritt der
+   Marke im Planer (siehe ENTSCHEIDUNGEN.md, 27.08.2026).
+
+   Die Hoehe kommt aus der Breite: Das Logo ist 5,16-mal so breit wie hoch,
+   140 Punkte ergeben also rund 27 - dasselbe Mass, auf das der Kopf
+   ausgelegt ist. */
+.wortmarke-kopf {
+  /* Der Abstand nach unten steht hier und nicht an .sub darunter: Die Klasse
+     .sub traegt an acht weiteren Stellen Text, die von dieser Zeile nichts
+     wissen. */
+  margin: 0 0 var(--s1);
 }
-.brand-title::before {
-  content: "";
-  display: inline-block;
-  width: 10px; height: 10px;
-  border-radius: 50%;
-  background: var(--accent);
-  margin-right: 8px;
-  vertical-align: middle;
-}
-.start-screen-inner .brand-title { font-size: 32px; }
+.wortmarke-kopf .wortmarke-bild { width: 140px; }
 .sub { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
 
 .block h2 {

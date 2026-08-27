@@ -806,3 +806,40 @@ einzutragen ist.
 „Sign in with Apple" freiwillig. Zwingend wird es erst, wenn die App in den
 App Store geht UND dort einen anderen Anbieter-Login anbietet – Apple
 verlangt dann seinen eigenen daneben.
+
+## 27.08.2026 — Der Schriftzug kommt aufs Handy
+
+Beim Einbau des Logos am 26.08.2026 bekam nur das Querformat den
+Schriftzug: Er sitzt dort in der Kopfleiste, und die gibt es im Hochformat
+nicht. Auf dem Handy blieb die Marke damit an genau einer Stelle stehen –
+im Planer-Kopf, als getippter Name „Serpa" mit einem blauen Punkt davor.
+Das war die Schreibweise aus der Zeit, als es noch kein Bild-Logo gab. Wer
+die App auf dem Handy benutzte, sah das neue Logo nie.
+
+**Jetzt trägt das Hochformat den Schriftzug an zwei Stellen.** Im
+Planer-Kopf ersetzt er den getippten Namen eins zu eins, bei gleicher Höhe –
+der Kopf behält sein Maß, die Unterzeile „Routenplaner" bleibt stehen. Im
+Garagenkopf steht er neu über der Überschrift, klein gehalten mit 104
+Punkten: Die Garage ist der Startbildschirm, und ohne ihn wäre das Handy
+der einzige Weg durch die App, auf dem die Marke nirgends auftaucht.
+
+**Verworfen: eine eigene Kopfleiste fürs Hochformat.** Sie hätte den
+Schriftzug auf jedem Bildschirm gezeigt, aber auf einem Handy ist
+senkrechter Platz das Knappste, was es gibt – und die Garagenbühne rechnet
+ihre Größe aus dem, was übrigbleibt. Eine Marke, die auf jedem Bildschirm
+mitläuft, ist außerdem ein Muster von Webseiten, nicht von Apps: Dort steht
+das Logo im Symbol auf dem Startbildschirm und im Startbild, nicht als
+ständige Zeile über allem.
+
+**Nebenbei zwei Dopplungen gefallen.** Das Alpha-Abzeichen stand im
+Querformat zweimal im Bild – in der Kopfleiste und im Garagenkopf. Im
+Garagenkopf gehört es jetzt zum Schriftzug und verschwindet mit ihm, sobald
+die Kopfleiste übernimmt. Dafür gibt es `.nur-hoch` als Gegenstück zum
+schon vorhandenen `.nur-quer`: sichtbar als Grundzustand, ausgeschaltet von
+`quer.css`. Sichtbarkeit ist bewusst der Grundzustand – wer die Klasse
+vergisst nachzuziehen, sieht es sofort, statt dass etwas spurlos fehlt.
+
+Mit dem getippten Namen ist auch `.brand-title` samt blauem Punkt aus
+`style.css` verschwunden. Die Regel `.start-screen-inner .brand-title` war
+schon seit dem Logo-Einbau ohne Wirkung: Auf jenen Bildschirmen steht
+längst die Wortmarke.
