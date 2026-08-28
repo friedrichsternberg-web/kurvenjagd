@@ -11,7 +11,7 @@ Deshalb die Regel: **Kommt ein Dienst dazu, bekommt er hier eine Zeile.**
 Nachträglich herauszufinden, welcher Aufruf welche Daten mitnimmt, ist ein
 verlorener Nachmittag.
 
-Stand: 24.08.2026
+Stand: 28.08.2026
 
 ---
 
@@ -52,8 +52,17 @@ eingetragen.
 
 ### Der eigene Standort
 
-Wird über `geraet.js` geholt und **nirgendwohin geschickt**. Er bleibt im
-Gerät, wird auf der Karte gezeigt und für die Aufzeichnung mitgeschrieben.
+Wird über `geraet.js` geholt und bleibt im Gerät: auf der Karte gezeigt, für
+die Aufzeichnung mitgeschrieben, sonst nichts.
+
+**Zwei Ausnahmen, beide auf eine Handlung des Nutzers hin.** Tippt er im
+Reiter „Entdecken" auf *Mein Standort*, gehen die Koordinaten als Mittelpunkt
+der Umkreissuche an die eigene Datenbank; gespeichert werden sie dort nicht.
+Und stellt er eine Tour öffentlich, fragt die App einmalig bei Nominatim nach
+dem Namen der Gegend – mit dem auf drei Nachkommastellen (etwa hundert Meter)
+gerundeten Startpunkt und auf der groben Ebene `zoom=10`, also Landkreis oder
+Stadt.
+
 Eine aufgezeichnete Ausfahrt kann der Nutzer selbst auf den Server legen –
 das ist dann seine Entscheidung, nicht die der App.
 
@@ -128,24 +137,75 @@ Nutzerkennung kommt aus dem geprüften Anmelde-Token, nicht aus der Anfrage.
 nichts mehr wiederherstellbar, und genau das steht dem Nutzer vorher auch so
 auf dem Bildschirm.
 
-### Geteilte Routen und Ausfahrten
+### Öffentlich geteilte Touren (seit 28.08.2026)
 
-Beides gibt es heute noch nicht - in der Datenbank steht nur `touren`. Die
-Regel wird trotzdem jetzt festgelegt, damit die späteren Tabellen sich
-danach richten müssen und nicht nachträglich umgebaut werden:
+Tabelle `geteilte_touren`. Sie entsteht **nur**, wenn der Nutzer im
+Speichern-Dialog oder über das Weltsymbol in seiner Liste einen Schalter
+umlegt; Grundstellung ist aus.
 
-- **Geteilte Routen bleiben bestehen**, der Bezug zum Absender verschwindet.
-  Eine geplante Strecke ist ein Streckenverlauf und keine Angabe über eine
-  Person. Wer den Link schon hat, verliert nichts.
+| Spalte | Inhalt |
+|---|---|
+| `nutzer_id` | wer sie geteilt hat, Fremdschlüssel auf `auth.users` mit `ON DELETE CASCADE` |
+| `quelle_id` | die Kennung der Tour auf dem Gerät, damit ein zweites Veröffentlichen dieselbe Zeile trifft |
+| `name`, `beschreibung` | vom Nutzer, 120 bzw. 600 Zeichen |
+| `daten` | die abgespeckte Tour aus `oeffentlicheTour()` in `kern.js` |
+| `start_lat`, `start_lon` | Startpunkt, Grundlage der Umkreissuche |
+| `ort` | grober Name der Gegend, einmalig bei Nominatim geholt |
+| `entfernung_m`, `kurvigkeit`, `aufgezeichnet` | für die Übersicht |
+
+**Was NICHT in `daten` steht, und das ist der Punkt:** keine Fotos, keine
+Notizen, keine Höchstgeschwindigkeit, keine Schräglage, kein Zeitpunkt der
+Fahrt. `oeffentlicheTour()` zählt einzeln auf, was hinausgeht, statt
+einzeln zu entfernen, was drinbleiben soll.
+
+Bei einer **Aufzeichnung** fallen vorn und hinten je 300 bis 900 Meter weg,
+bei jeder Veröffentlichung neu gewürfelt. Warum gewürfelt, steht in
+`ENTSCHEIDUNGEN.md` zum 28.08.2026. Bei einer **geplanten Route** geht das
+nicht – dort ist der Startpunkt vollständig sichtbar, und der Dialog sagt
+das vorher.
+
+Gelesen wird ausschließlich über zwei Datenbankfunktionen:
+`touren_in_der_naehe` (ohne Konto aufrufbar, ohne Streckenpunkte) und
+`geteilte_tour_holen` (nur angemeldet, mit Streckenpunkten).
+
+Rechtsgrundlage ist die **Einwilligung** (Art. 6 Abs. 1 lit. a DSGVO). Der
+Widerruf ist das Zurückstellen auf privat, und dabei wird die Zeile
+**gelöscht**, nicht versteckt.
+
+Dazu die Tabelle `meldungen`: Tour, Melder (darf `NULL` sein), Grund,
+erledigt-Haken. Sie hat **keine einzige Zugriffsregel** – über den
+öffentlichen Schlüssel kommt niemand an sie heran. Geschrieben wird nur über
+`tour_melden()`, gelesen wird sie im Supabase-Dashboard.
+
+### Was beim Löschen des Kontos mit geteilten Touren passiert
+
+**Sie verschwinden mit.** `ON DELETE CASCADE` auf `auth.users` erledigt das,
+die Edge Function muss dafür nichts tun.
+
+Hier stand bis zum 28.08.2026 die Gegenregel: geteilte Routen sollten
+bestehen bleiben und nur den Bezug zur Person verlieren. Sie war für
+**per Link** geteilte Routen gedacht, wo ein Empfänger den Link schon hat.
+Für einen öffentlichen Bereich trägt sie nicht: Wer sein Konto löscht,
+erwartet, dass seine öffentlichen Beiträge weg sind, und eine aufgezeichnete
+Ausfahrt ist die Bewegung eines Menschen und nicht bloß eine Linie.
+
+**Was der Löschung entgeht:** Kopien, die andere Nutzer über „Zu meinen
+Touren" übernommen haben. Die liegen auf deren Geräten. Das steht so in
+Punkt 9 der Datenschutzerklärung und in den Regeln fürs Teilen, weil ein
+Widerruf, dessen Grenzen man verschweigt, keiner ist.
+
+### Gemeinsame Ausfahrten (gibt es noch nicht)
+
+Die Regel steht jetzt fest, damit die spätere Tabelle sich danach richtet:
+
 - **Ausfahrten mit Zusagen bleiben bestehen**, der Veranstalter wird zu
   "Gelöschter Nutzer". Eine Verabredung gehört nicht dem Veranstalter
   allein; wer zugesagt hat, hat sich darauf eingestellt.
 - **Eigene Zusagen bei fremden Ausfahrten verschwinden.**
 
-Was das für den Bau heißt: Die Spalte mit dem Veranstalter beziehungsweise
-dem Absender muss `NULL` annehmen können und darf **nicht** auf
-`ON DELETE CASCADE` stehen, sonst reißt das Löschen eines Kontos die
-Ausfahrten anderer Leute mit.
+Was das für den Bau heißt: Die Spalte mit dem Veranstalter muss `NULL`
+annehmen können und darf **nicht** auf `ON DELETE CASCADE` stehen, sonst
+reißt das Löschen eines Kontos die Ausfahrten anderer Leute mit.
 
 ---
 

@@ -17,12 +17,12 @@ auf einen eigenen Bildschirm: Aufzählung dessen, was verschwindet, Abfrage
 des Passworts, dann Fotos, Touren, Auth-Konto und die lokalen Daten.
 
 Was wobei passiert, steht in `DATEN.md` unter "Was beim Löschen des Kontos
-passiert". Dort steht auch die Regel für geteilte Routen und Ausfahrten:
-Beides bleibt bestehen, der Bezug zur Person verschwindet. Gebaut ist davon
-nichts, weil es beides noch nicht gibt — die Regel steht dort, damit die
-späteren Tabellen sich danach richten. **Wichtig für später:** die Spalte
-mit dem Veranstalter darf nicht auf `ON DELETE CASCADE` stehen, sonst reißt
-ein gelöschtes Konto die Ausfahrten anderer Leute mit.
+passiert". **Öffentlich geteilte Touren verschwinden mit** — das erledigt
+`ON DELETE CASCADE` auf `auth.users`, die Edge Function muss dafür nichts
+tun. Für **gemeinsame Ausfahrten** gilt später das Gegenteil: Die Spalte mit
+dem Veranstalter darf nicht auf `ON DELETE CASCADE` stehen, sonst reißt ein
+gelöschtes Konto die Verabredungen anderer Leute mit. Beide Regeln samt
+Begründung stehen in `DATEN.md`.
 
 Die Edge Function `konto-loeschen` liegt seit dem 20.08.2026 auf dem Server
 (Version 1, JWT-Prüfung an). Der Quelltext steht daneben in
@@ -60,6 +60,51 @@ einziges Konto.
 Geht bei Schritt 3 etwas schief, steht der Grund im Dashboard unter
 **Edge Functions → konto-loeschen → Logs**. Die App zeigt dem Nutzer
 absichtlich nur einen kurzen Satz, die Einzelheiten bleiben auf dem Server.
+
+### 1b. Öffentliche Touren: was noch fehlt (seit 28.08.2026)
+
+Gebaut ist der ganze Weg — Schalter, Dialog, Umkreissuche, Melden, die
+Rechtstexte. **Nicht eingespielt ist die Datenbank.** Ohne sie zeigt der
+Reiter „Entdecken" nur den leeren Zustand, und Teilen scheitert stumm.
+
+**Zuerst, sonst läuft nichts:**
+
+1. `supabase/migrationen/01-geteilte-touren.sql` im Supabase-Dashboard unter
+   **SQL Editor** einfügen und ausführen. Die Datei läuft von oben nach
+   unten durch und legt nichts doppelt an.
+2. Danach unter **Advisors > Security** nachsehen, ob Supabase etwas an den
+   neuen Funktionen bemängelt.
+3. Mit zwei Konten prüfen: teilen, im anderen Konto finden, übernehmen,
+   zurücknehmen — und dass die Tour danach wirklich weg ist.
+
+**Danach, und alles davon ist Handarbeit von dir, nicht Code:**
+
+- **Altersabfrage beim Anlegen des Kontos.** Die Regeln fürs Teilen sagen
+  „mindestens 16" (Art. 8 DSGVO, Deutschland hat die Grenze nicht
+  abgesenkt). Gefragt wird beim Registrieren bisher nicht. Ein Häkchen im
+  Formular in `konto.js` reicht rechtlich; gebaut ist es noch nicht.
+- **Meldungen ansehen.** Sie landen in der Tabelle `meldungen` und werden
+  heute nur im Supabase-Dashboard sichtbar. Eine Zeile im `dashboard.html`
+  wäre der nächste sinnvolle Schritt, sonst merkst du eine Meldung erst,
+  wenn du zufällig hinsiehst.
+- **Antworten auf Meldungen.** Artikel 16 Absatz 5 und Artikel 17 der
+  Verordnung (EU) 2022/2065 verlangen eine Rückmeldung an den Melder und
+  eine Begründung an den, dessen Inhalt entfernt wurde. Beides geht
+  vorerst von Hand per E-Mail. Solange es wenige Meldungen sind, ist das in
+  Ordnung; es muss nur wirklich passieren.
+- **Verzeichnis von Verarbeitungstätigkeiten** (Art. 30 DSGVO). Ein Blatt
+  Papier, keine Software: welche Daten, wozu, wie lange, wer bekommt sie.
+  Es ist schon heute fällig, mit den öffentlichen Touren erst recht.
+- **Auftragsverarbeitungsvertrag mit Supabase** (Art. 28 DSGVO). Supabase
+  stellt einen bereit, er muss aber aktiv abgeschlossen werden. Für GitHub
+  Pages dasselbe prüfen.
+- **Gewerbeanmeldung.** Mit fremden Inhalten und geplanter Werbung ist der
+  Betrieb kaum noch als privat zu erklären. Steht ohnehin an (siehe Shop).
+
+**Bewusst NICHT in der ersten Fassung**, damit es nicht als Lücke gilt:
+Fotos an geteilten Touren (der Behälter `tourfotos` müsste dafür geöffnet
+werden, und fremde Gesichter auf Bildern sind ein eigenes Thema), Nutzer
+blockieren, Kommentare, Bestenlisten jeder Art.
 
 ### 2. Impressum und Datenschutzerklärung — vertagt, App bleibt online
 
@@ -382,14 +427,23 @@ Datenschutzerklärung, siehe oben.
 
 ## Kleinkram, der irgendwann nervt
 
-- **Versionsnummer.** `?v=` steht an 14 Stellen in `index.html` (zuletzt
-  ist `quer.css` dazugekommen) und wird
+- **Versionsnummer.** `?v=` steht an 23 Stellen in `index.html` (zuletzt
+  ist `touren.js` dazugekommen) und wird
   von Hand erhöht. Genau dieser Fehler ist beim Bauen schon passiert: Die
   Datei war geändert, die Nummer nicht, der Browser lieferte die alte
   Fassung. Auf einem richtigen Webhoster ersetzen Cache-Kopfzeilen das.
 - **Nominatim** (Ortssuche) erlaubt keine starke Nutzung und verlangt
   Namensnennung. Mit echten Nutzern in einem Store ist das eine Grenze, die
-  man planen muss.
+  man planen muss. Seit dem 28.08.2026 kommt ein zweiter Aufruf dazu: die
+  Rückwärtssuche nach dem Namen der Gegend beim Veröffentlichen einer Tour.
+  Sie läuft einmal je Veröffentlichung, nicht je Ansicht — trotzdem zählt
+  sie auf dasselbe Kontingent.
+- **Vier Dateien sind über die 1200-Zeilen-Grenze** (Regel 4): `app.js`
+  3542, `garage.js` 1537, `konto.js` 1281, `kern.js` 1423, dazu `style.css`
+  und `index.html`. Bei `kern.js` liegt die Fuge sichtbar da: alles ab „Was
+  vom Server kommt, ist erst einmal fremd" ist ein eigenes Thema und könnte
+  als `fremd.js` daneben stehen. Das ist ein Umbau und gehört nicht in
+  denselben Schritt wie eine neue Funktion — deshalb steht es hier.
 - **Rote Meldungen in der Konsole beim Routen.** BRouter antwortet mit 400,
   wenn es zu einem Streckenpaar die angefragte Alternative gar nicht gibt.
   `curviness()` holt vier Varianten und nimmt, was zurückkommt - das ist so

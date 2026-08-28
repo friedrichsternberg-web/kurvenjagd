@@ -2729,10 +2729,9 @@ function meldeTourLöschungAnServer(id) {
    dieselbe Absicherung wie bei der Garage und beim Server: Der Planer soll
    auch dann laufen, wenn eine Zusatzdatei ausfaellt. */
 function frageTourAn(vorgaben, weiter) {
-  if (typeof öffneTourSpeichernDialog === 'function') {
-    öffneTourSpeichernDialog({ ...vorgaben, weiter });
-    return;
-  }
+  if (typeof öffneTourSpeichernDialog === 'function'
+      && öffneTourSpeichernDialog({ ...vorgaben, weiter })) return;
+
   const name = prompt(vorgaben.titel + ':', vorgaben.namensVorschlag);
   if (name) weiter({ name, beschreibung: '', oeffentlich: false });
 }

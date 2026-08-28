@@ -908,3 +908,98 @@ aus rechnet, wirkt die Änderung überall.
 Der Garagenraum bleibt bewusst bei `svh` (`--garage-raum-hoehe`): Er soll
 sich beim Ein- und Ausfahren der Adresszeile NICHT ändern, sonst bekäme das
 Raumbild bei jedem Scrollen einen anderen Ausschnitt.
+
+## 28.08.2026 — Touren öffentlich teilen
+
+Der erste Teil, in dem Nutzer etwas füreinander hinterlassen. Aus „Meine
+Touren" wird ein Bildschirm mit zwei Reitern: **Meine** und **Entdecken**.
+
+### Eigene Tabelle statt eines Hakens an `touren`
+
+Naheliegend wäre eine Spalte `oeffentlich boolean` an der bestehenden
+Tabelle gewesen. **Verworfen.** In `touren.daten` steckt die ganze Tour, und
+das schließt die privaten Notizen und die Pfade zu den privaten Fotos ein.
+Ein Haken an dieser Zeile hätte all das mitveröffentlicht.
+
+Mit `geteilte_touren` ist das Veröffentlichen eine bewusste, abgespeckte
+Kopie. Was hineinkommt, entscheidet `oeffentlicheTour()` in `kern.js` — und
+zwar durch **Aufzählen**, nicht durch Weglassen. Ein Feld, das einer Tour
+später dazukommt, landet damit nie versehentlich im Netz.
+
+### Die Regel aus DATEN.md gilt hier nicht mehr
+
+Dort stand seit dem 24.08.2026: „Geteilte Routen bleiben bestehen, der Bezug
+zum Absender verschwindet." Sie war für per Link geteilte Routen gedacht.
+
+**Für einen öffentlichen Bereich gilt sie nicht.** Zwei Gründe. Wer sein
+Konto löscht, erwartet, dass seine öffentlichen Beiträge verschwinden — das
+ist die Erwartung, gegen die man nicht bauen sollte. Und eine aufgezeichnete
+Ausfahrt ist keine bloße Linie, sondern die Bewegung eines Menschen;
+sie anonymisiert stehenzulassen wäre die schwächere Antwort auf Artikel 17
+DSGVO. `geteilte_touren.nutzer_id` steht deshalb auf `ON DELETE CASCADE`.
+
+### Der Schutzabstand wird gewürfelt, nicht festgelegt
+
+Erste Fassung: Von einer Aufzeichnung fallen vorn und hinten je 300 Meter
+weg. **Nachgebessert am selben Tag.** Bei einem festen Abstand liegen die
+sichtbaren Anfangspunkte aller Touren desselben Fahrers auf einem Kreis um
+seine Haustür, und der Mittelpunkt eines Kreises lässt sich aus drei Punkten
+ausrechnen. Genau so wurden 2023 an der KU Leuven die Schutzzonen von Strava
+aufgelöst.
+
+Jetzt sind es 300 bis 900 Meter, bei jeder Veröffentlichung neu gewürfelt.
+Aus dem Kreis wird ein Ring. Es bleibt ein Schutz gegen das Versehen, und
+genau das steht auch in der Datenschutzerklärung.
+
+**Nicht in die Datenbank verlegt.** Der Einwand war, ein veränderter Browser
+könne die Kürzung umgehen. Er kann — aber nur bei der eigenen Spur. Dieser
+Schnitt schützt den Nutzer vor der eigenen Unachtsamkeit, nicht vor sich
+selbst.
+
+### Geplante Routen werden nicht gekürzt
+
+Ihre Wegpunkte **sind** die Route; ein abgeschnittener Start wäre eine
+andere Strecke. Der Startpunkt ist dort vollständig sichtbar, und der Dialog
+sagt das in einem Satz, bevor der Schalter umgelegt wird. Eine ehrliche
+Warnung ist besser als ein Schutz, der die Funktion kaputtmacht.
+
+### Die Übersicht sieht jeder, die Strecke nur Angemeldete
+
+Zwei Datenbankfunktionen statt einer Leseregel. `touren_in_der_naehe` darf
+auch ohne Konto aufgerufen werden und liefert Name, Gegend, Länge,
+Kurvigkeit und Verfasser — keinen einzigen Streckenpunkt. `geteilte_tour_holen`
+verlangt eine Anmeldung.
+
+**Verworfen: alles öffentlich lesbar.** Ein Bestand aus GPS-Spuren, den jeder
+Krabbler in einer Anfrage mitnehmen kann, ist keine gute Idee.
+**Verworfen: alles hinter der Anmeldung.** Dann sähe die App beim ersten
+Öffnen tot aus, und genau das soll sie nicht. Der Schnitt zwischen
+Schaufenster und Ware liegt richtig.
+
+### Was bewusst NICHT mitgeht
+
+Höchstgeschwindigkeit und größte Schräglage. Beide stehen in jeder
+aufgezeichneten Ausfahrt, und beide wären der Anfang einer Bestenliste.
+Eine Bestenliste auf öffentlichen Straßen will diese App nicht — das ist
+keine juristische Vorsicht, sondern eine Haltung.
+
+Ebenso wenig: Notizen, Fotos und der Zeitpunkt der Fahrt.
+
+### Der Dialog gehört jetzt der ganzen App
+
+`öffneDialog()` in `garage.js` rief am Ende fest `zeichneGarage()` auf. Für
+eine Tour ist das die falsche Antwort, und die Garage wäre dabei unsichtbar
+gewesen — ihre Bühnenrechnung hätte lauter Nullen bekommen. Stattdessen gibt
+es jetzt einen Rückruf `danach`. Die Kennungen im HTML heißen weiter
+`garageDialog`; sie umzubenennen hieße zwanzig Fundstellen anzufassen, ohne
+dass etwas besser liefe.
+
+### Nebenbei repariert: jede Aufzeichnung fiel durchs Raster
+
+`pruefeTour()` in `kern.js` prüfte die Spur mit `säubrePunkte()`, und die
+sucht nach `.lat` und `.lon`. Eine Spur steht aber als `[Länge, Breite, Höhe]`
+da. Ergebnis: Jede aufgezeichnete Ausfahrt, die vom Server kam, wurde
+klaglos verworfen — auf einem zweiten Gerät kam sie nie an. Lautlos, weil
+eine leere Liste aussieht wie eine Tour ohne Aufzeichnung. Jetzt gibt es
+`säubreSpur()` daneben, mit Selbsttest.
+

@@ -192,6 +192,15 @@ async function zieheTourZurueck(tourId) {
 
 // Die Felder des Dialogs. aufgezeichnet entscheidet ueber den Hinweis
 // darunter, weil nur eine Aufzeichnung beschnitten werden kann.
+/* Beide Wege laufen ueber oeffneDialog() und feldWert() aus garage.js. Faellt
+   diese Datei aus, gibt es kein Fenster - dann darf hier nichts passieren
+   statt eines Absturzes, der die Liste mitreisst. */
+function dialogVerfuegbar() {
+  if (typeof öffneDialog === 'function' && typeof feldWert === 'function') return true;
+  showToast('Das Fenster zum Teilen lässt sich gerade nicht öffnen.');
+  return false;
+}
+
 function teilenFelderHtml({ name, beschreibung, oeffentlich, aufgezeichnet, mitName }) {
   return `
     ${mitName ? `
@@ -222,8 +231,14 @@ function teilenFelderHtml({ name, beschreibung, oeffentlich, aufgezeichnet, mitN
 
 /* Wird beim Speichern einer neuen Tour gerufen. weiter() bekommt Name,
    Beschreibung und den Stand des Schalters und legt die Tour dann an -
-   app.js entscheidet, was das genau heisst. */
+   app.js entscheidet, was das genau heisst.
+
+   Gibt zurueck, ob das Fenster wirklich aufgegangen ist. app.js faellt sonst
+   auf das nackte prompt() zurueck - eine Tour, die sich nicht speichern
+   laesst, weil eine andere Datei fehlt, waere der schlechtere Ausgang. */
 function öffneTourSpeichernDialog({ titel, namensVorschlag, aufgezeichnet, weiter }) {
+  if (!dialogVerfuegbar()) return false;
+
   öffneDialog({
     titel,
     felder: teilenFelderHtml({
@@ -243,11 +258,14 @@ function öffneTourSpeichernDialog({ titel, namensVorschlag, aufgezeichnet, weit
   });
 
   sperreSchalterOhneKonto('Zum Teilen brauchst du ein Konto. Speichern geht auch ohne.');
+  return true;
 }
 
 /* Wird ueber das Weltsymbol in der eigenen Liste gerufen: eine Tour, die es
    schon gibt, oeffentlich stellen oder zuruecknehmen. */
 function öffneTeilenDialog(tour) {
+  if (!dialogVerfuegbar()) return;
+
   const stehtOeffentlich = tourIstOeffentlich(tour.id);
 
   öffneDialog({
