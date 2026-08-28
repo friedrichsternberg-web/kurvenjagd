@@ -326,9 +326,13 @@ function zeigeLage() {
   const zeile = document.getElementById('entdeckenLage');
   if (!zeile) return;
   // textContent, nicht innerHTML: Der Ortsname kommt von Nominatim.
-  zeile.textContent = entdeckenMitte
+  if (!entdeckenMitte) {
+    zeile.textContent = 'Ohne Ort siehst du die zuletzt geteilten Touren.';
+    return;
+  }
+  zeile.textContent = entdeckenMitte.name
     ? `Touren, die in der Nähe von ${entdeckenMitte.name} starten.`
-    : 'Ohne Ort siehst du die zuletzt geteilten Touren.';
+    : 'Touren, die in deiner Nähe starten.';
 }
 
 async function sucheEntdeckenOrt() {
@@ -353,10 +357,13 @@ async function sucheEntdeckenOrt() {
   }
 }
 
+/* name ist der Ortsname fuer den Hinweis darunter und fuer das Suchfeld.
+   Beim eigenen Standort gibt es keinen - dann bleibt das Feld leer, statt
+   dort "dein Standort" hineinzuschreiben, wo ein Ortsname hingehoert. */
 function setzeEntdeckenMitte(lat, lon, name) {
   entdeckenMitte = { lat, lon, name };
   document.getElementById('entdeckenTreffer').hidden = true;
-  document.getElementById('entdeckenOrt').value = name;
+  document.getElementById('entdeckenOrt').value = name || '';
   zeigeLage();
   zeichneEntdecken();
 }
@@ -366,7 +373,7 @@ function holeEntdeckenStandort() {
 
   showToast('Standort wird geholt …');
   geraet.standortEinmal(
-    pos => setzeEntdeckenMitte(pos.coords.latitude, pos.coords.longitude, 'deinem Standort'),
+    pos => setzeEntdeckenMitte(pos.coords.latitude, pos.coords.longitude, null),
     () => showToast('Der Standort ließ sich nicht bestimmen.'),
   );
 }
