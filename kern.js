@@ -1222,6 +1222,29 @@ function säubrePunkte(liste) {
               .map(p => ({ lat: p.lat, lon: p.lon }));
 }
 
+/* Eine aufgezeichnete Spur hat ein ANDERES Format als die Wegpunkte. Sie
+   kommt vom GPS-Empfaenger und steht als [Laenge, Breite, Hoehe] da - in
+   genau dieser Reihenfolge, weil Leaflet und die GPX-Datei sie so erwarten.
+   Wegpunkte dagegen sind Objekte mit .lat und .lon.
+
+   Deshalb braucht die Spur eine eigene Pruefung: säubrePunkte() sucht nach
+   .lat und .lon und wirft eine Spur restlos weg - lautlos, denn eine leere
+   Liste sieht aus wie eine Tour ohne Aufzeichnung. Siehe ENTSCHEIDUNGEN.md
+   zum 28.08.2026.
+
+   Die Hoehe ist freiwillig. Fehlt sie, bleibt der Platz leer statt mit einer
+   erfundenen Null besetzt zu werden: Ein Hoehenprofil aus lauter Nullen
+   sieht aus wie eine Messung und ist keine. */
+function säubreSpur(liste) {
+  if (!Array.isArray(liste)) return [];
+  return liste
+    .filter(p => Array.isArray(p)
+                 && Number.isFinite(p[0]) && p[0] >= -180 && p[0] <= 180
+                 && Number.isFinite(p[1]) && p[1] >= -90  && p[1] <= 90)
+    .slice(0, TOUR_PUNKTE_HOECHSTENS)
+    .map(p => (Number.isFinite(p[2]) ? [p[0], p[1], p[2]] : [p[0], p[1]]));
+}
+
 function pruefeTour(rohdaten) {
   if (!rohdaten || typeof rohdaten !== 'object' || Array.isArray(rohdaten)) return null;
 
@@ -1230,7 +1253,7 @@ function pruefeTour(rohdaten) {
   if (!id) return null;
 
   const punkte = säubrePunkte(rohdaten.waypoints);
-  const strecke = säubrePunkte(rohdaten.track);
+  const strecke = säubreSpur(rohdaten.track);
   // Eine Tour ohne einen einzigen gueltigen Punkt ist keine Tour.
   if (!punkte.length && !strecke.length) return null;
 
@@ -1246,10 +1269,129 @@ function pruefeTour(rohdaten) {
   };
 
   // Die Zahlen sind freiwillig - fehlen sie, fehlen sie eben.
-  if (Number.isFinite(rohdaten.distance))  sauber.distance  = rohdaten.distance;
-  if (Number.isFinite(rohdaten.curviness)) sauber.curviness = rohdaten.curviness;
-  if (Number.isFinite(rohdaten.zeit))      sauber.zeit      = rohdaten.zeit;
+  if (Number.isFinite(rohdaten.distance))   sauber.distance   = rohdaten.distance;
+  if (Number.isFinite(rohdaten.curviness))  sauber.curviness  = rohdaten.curviness;
+  if (Number.isFinite(rohdaten.time))       sauber.time       = rohdaten.time;
+  if (Number.isFinite(rohdaten.ascend))     sauber.ascend     = rohdaten.ascend;
+  if (Number.isFinite(rohdaten.curveLevel)) sauber.curveLevel = rohdaten.curveLevel;
   if (typeof rohdaten.aufgezeichnet === 'boolean') sauber.aufgezeichnet = rohdaten.aufgezeichnet;
 
+  /* Eine Rundtour speichert ihre Zufallspunkte nicht, nur den Start und die
+     Wunschlaenge - beim Laden wird neu gewuerfelt. Kommen diese drei Angaben
+     nicht mit durch, wird aus einer geteilten Rundtour beim Empfaenger eine
+     Strecke mit einem einzigen Wegpunkt, und die laesst sich nicht zeichnen. */
+  if (rohdaten.roundtrip === true) {
+    sauber.roundtrip = true;
+    if (Number.isFinite(rohdaten.roundtripKm)) sauber.roundtripKm = rohdaten.roundtripKm;
+    if (Object.prototype.hasOwnProperty.call(RICHTUNGS_WINKEL, rohdaten.roundtripRichtung)) {
+      sauber.roundtripRichtung = rohdaten.roundtripRichtung;
+    }
+  }
+
   return sauber;
+}
+
+
+/* --- Was oeffentlich wird, wird vorher beschnitten --------------------------
+
+   Eine geplante Route ist ein Streckenverlauf. Eine AUFZEICHNUNG ist etwas
+   anderes: Sie beginnt dort, wo der Fahrer wirklich losgefahren ist, und das
+   ist ueberdurchschnittlich oft die eigene Haustuer. Wer sie oeffentlich
+   stellt, gibt damit ungewollt seine Adresse preis.
+
+   Deshalb faellt vor dem Veroeffentlichen an beiden Enden ein Stueck weg.
+   300 Meter sind mit Absicht knapp: Sie verwischen die Hausnummer und lassen
+   die Strecke ganz. Ein Radius, der ein ganzes Dorf verbergen soll, macht
+   die geteilte Tour unbrauchbar. Es ist ein Schutz gegen das Versehen und
+   keiner gegen einen entschlossenen Verfolger - genau so steht es auch im
+   Dialog, in dem der Nutzer den Schalter umlegt.
+
+   Geplante Routen werden NICHT beschnitten: Ihre Wegpunkte SIND die Route,
+   ein abgeschnittener Start waere eine andere Strecke. Dort bleibt nur der
+   Hinweis vor dem Veroeffentlichen.                                        */
+
+const SPUR_SCHUTZ_METER = 300;
+
+function kuerzeSpurEnden(spur, meter = SPUR_SCHUTZ_METER) {
+  if (!Array.isArray(spur) || spur.length < 2) return [];
+
+  // Gemessen wird die Luftlinie zum jeweiligen Ende, nicht die gefahrene
+  // Strecke. Wer die ersten 300 gefahrenen Meter im Kreis um den Block
+  // faehrt, steht danach immer noch vor seiner Haustuer.
+  const weitGenug = (a, b) => haversine(a[1], a[0], b[1], b[0]) >= meter;
+
+  let vorn = 0;
+  while (vorn < spur.length && !weitGenug(spur[0], spur[vorn])) vorn++;
+
+  /* Die Suche von hinten hoert bei "vorn" auf. Ohne diese Grenze verliert
+     eine RUNDTOUR alles: Ihr Ende liegt wieder am Start, also waere auch
+     der erste Punkt nah am letzten, und die Schleife liefe bis unter null
+     durch. */
+  let hinten = spur.length - 1;
+  const letzter = spur[spur.length - 1];
+  while (hinten > vorn && !weitGenug(letzter, spur[hinten])) hinten--;
+
+  // Eine Fahrt, die kuerzer ist als zweimal der Schutzabstand, bleibt hier
+  // ohne einen einzigen Punkt uebrig. Dann gibt es nichts zu teilen, und
+  // diese Funktion sagt das mit einer leeren Liste - was daraus folgt,
+  // entscheidet der Aufrufer.
+  return hinten > vorn ? spur.slice(vorn, hinten + 1) : [];
+}
+
+/* Der Punkt, an dem eine Tour beginnt. Danach sucht die Umkreissuche.
+
+   Eine Tour ist eine Linie, eine Umkreissuche braucht aber einen Punkt. Der
+   Startpunkt ist die ehrlichste Vereinfachung - und deshalb sagt die
+   Oberflaeche auch "Touren, die in deiner Naehe starten" und nicht
+   "Touren in deiner Naehe". */
+function startPunktVon(tour) {
+  if (!tour) return null;
+
+  const spur = säubreSpur(tour.track);
+  if (spur.length) return { lat: spur[0][1], lon: spur[0][0] };
+
+  const punkte = säubrePunkte(tour.waypoints);
+  if (punkte.length) return { lat: punkte[0].lat, lon: punkte[0].lon };
+
+  return null;
+}
+
+/* Macht aus einer gespeicherten Tour die Fassung, die oeffentlich werden darf.
+
+   Dieselbe Haltung wie in pruefeTour(), nur in die andere Richtung: Es wird
+   einzeln uebernommen, was hinaus SOLL, statt einzeln entfernt, was
+   drinbleiben soll. Ein Feld, das einer Tour irgendwann neu hinzugefuegt
+   wird, landet damit nie aus Versehen im Netz.
+
+   Was ausdruecklich NICHT mitgeht: die Fotos, die eigenen Notizen, die
+   Hoechstgeschwindigkeit und die groesste Schraeglage. Fotos und Notizen
+   sind privat. Tempo und Schraeglage waeren der Anfang einer Bestenliste,
+   und eine Bestenliste auf oeffentlichen Strassen will diese App nicht.
+
+   Gibt null zurueck, wenn nach dem Beschneiden nichts Zeigbares uebrig ist. */
+function oeffentlicheTour(tour) {
+  if (!tour) return null;
+
+  const aufgezeichnet = !!tour.aufgezeichnet;
+  const spur   = aufgezeichnet ? kuerzeSpurEnden(säubreSpur(tour.track)) : [];
+  const punkte = aufgezeichnet ? [] : säubrePunkte(tour.waypoints);
+  if (!spur.length && !punkte.length) return null;
+
+  const oeffentlich = { aufgezeichnet, waypoints: punkte, track: spur };
+
+  if (Number.isFinite(tour.distance))   oeffentlich.distance   = tour.distance;
+  if (Number.isFinite(tour.curviness))  oeffentlich.curviness  = tour.curviness;
+  if (Number.isFinite(tour.time))       oeffentlich.time       = tour.time;
+  if (Number.isFinite(tour.ascend))     oeffentlich.ascend     = tour.ascend;
+  if (Number.isFinite(tour.curveLevel)) oeffentlich.curveLevel = tour.curveLevel;
+
+  if (tour.roundtrip === true) {
+    oeffentlich.roundtrip = true;
+    if (Number.isFinite(tour.roundtripKm)) oeffentlich.roundtripKm = tour.roundtripKm;
+    if (Object.prototype.hasOwnProperty.call(RICHTUNGS_WINKEL, tour.roundtripRichtung)) {
+      oeffentlich.roundtripRichtung = tour.roundtripRichtung;
+    }
+  }
+
+  return oeffentlich;
 }

@@ -280,10 +280,16 @@ prüfeFall('ohne einen einzigen gueltigen Punkt wird abgewiesen',
   const t = pruefeTour({ id: 'a', name: langerName, waypoints: [{ lat: 1, lon: 2 }] });
   prüfeFall('der Name wird gekuerzt', t.name.length === 120);
 
-  const vielePunkte = [];
-  for (let i = 0; i < 25000; i++) vielePunkte.push({ lat: 50, lon: 10 });
-  const t2 = pruefeTour({ id: 'a', track: vielePunkte });
+  // Die Spur wird im Format des GPS-Empfaengers geprueft: [Laenge, Breite].
+  const vieleSpurpunkte = [];
+  for (let i = 0; i < 25000; i++) vieleSpurpunkte.push([10, 50]);
+  const t2 = pruefeTour({ id: 'a', track: vieleSpurpunkte });
   prüfeFall('die Streckenpunkte werden gedeckelt', t2.track.length === 20000);
+
+  const vieleWegpunkte = [];
+  for (let i = 0; i < 25000; i++) vieleWegpunkte.push({ lat: 50, lon: 10 });
+  const t3 = pruefeTour({ id: 'a', waypoints: vieleWegpunkte });
+  prüfeFall('die Wegpunkte werden gedeckelt', t3.waypoints.length === 20000);
 })();
 
 // --- Was gut ist, kommt unveraendert durch --------------------------------
@@ -291,7 +297,7 @@ prüfeFall('ohne einen einzigen gueltigen Punkt wird abgewiesen',
   const echt = {
     id: 'tour-1', name: 'Harz-Runde',
     waypoints: [{ lat: 51.8, lon: 10.6 }, { lat: 51.9, lon: 10.7 }],
-    track: [{ lat: 51.8, lon: 10.6 }],
+    track: [[10.6, 51.8, 340]],
     distance: 12345, curviness: 280, aufgezeichnet: true,
   };
   const t = pruefeTour(echt);
@@ -320,3 +326,111 @@ prüfeFall('normaler Name bleibt unveraendert',
   prüfeFall('der Name steht maskiert in der Datei',
     gpx.indexOf('Eifel &amp; &lt;Mosel&gt;') > -1);
 })();
+
+
+/* --- säubreSpur(): eine Aufzeichnung hat ein anderes Format ----------------
+   Bis zum 28.08.2026 lief die Spur durch säubrePunkte() und wurde dabei
+   restlos verworfen. Diese Pruefungen halten fest, dass beide Formate
+   nebeneinander bestehen und keines das andere frisst.                     */
+(function () {
+  const spur = [[9.95, 49.79, 200], [9.96, 49.80]];
+  const s = säubreSpur(spur);
+  prüfeFall('eine Spur ueberlebt die Pruefung', s.length === 2);
+  prüfeFall('die Hoehe bleibt, wo es eine gibt', s[0][2] === 200);
+  prüfeFall('ohne Hoehe bleiben zwei Zahlen', s[1].length === 2);
+
+  prüfeFall('vertauschte Bereiche fallen weg',
+    säubreSpur([[200, 49.79]]).length === 0);
+  prüfeFall('Wegpunkt-Objekte sind keine Spur',
+    säubreSpur([{ lat: 49.79, lon: 9.95 }]).length === 0);
+  prüfeFall('Spur-Punkte sind keine Wegpunkte',
+    säubrePunkte([[9.95, 49.79]]).length === 0);
+
+  const t = pruefeTour({ id: 'a1', name: 'Ausfahrt', aufgezeichnet: true,
+                         track: spur, waypoints: [] });
+  prüfeFall('eine aufgezeichnete Tour kommt jetzt durch', t !== null);
+  prüfeFall('ihre Spur ist vollstaendig', t.track.length === 2);
+})();
+
+
+/* --- kuerzeSpurEnden(): Haustuer verwischen, Strecke lassen --------------- */
+(function () {
+  // Eine gerade Fahrt nach Osten: gut 30 Punkte im Abstand von je rund
+  // 70 Metern, macht etwa 2,2 Kilometer.
+  const gerade = [];
+  for (let i = 0; i < 32; i++) gerade.push([9.95 + i * 0.001, 49.79]);
+
+  const gekuerzt = kuerzeSpurEnden(gerade);
+  prüfeFall('von der geraden Fahrt bleibt etwas uebrig', gekuerzt.length > 0);
+  prüfeFall('der Anfang ist weg', gekuerzt[0][0] > gerade[0][0]);
+  prüfeFall('das Ende ist weg',
+    gekuerzt[gekuerzt.length - 1][0] < gerade[gerade.length - 1][0]);
+  prüfeFall('der erste bleibende Punkt liegt mindestens 300 m vom Start',
+    haversine(49.79, gerade[0][0], 49.79, gekuerzt[0][0]) >= 300);
+  prüfeFall('der letzte bleibende Punkt liegt mindestens 300 m vom Ziel',
+    haversine(49.79, gerade[gerade.length - 1][0],
+              49.79, gekuerzt[gekuerzt.length - 1][0]) >= 300);
+
+  // Eine Runde, die wieder am Start endet. Ohne die Grenze in der Schleife
+  // von hinten bliebe hier nichts uebrig - das ist der Fall, der die Grenze
+  // ueberhaupt noetig macht.
+  const runde = [];
+  for (let i = 0; i <= 36; i++) {
+    const winkel = (i / 36) * 2 * Math.PI;
+    runde.push([9.95 + 0.02 * Math.sin(winkel), 49.79 + 0.013 * (1 - Math.cos(winkel))]);
+  }
+  prüfeFall('eine Rundtour verliert nicht ihre ganze Spur',
+    kuerzeSpurEnden(runde).length > 10);
+
+  // Zu kurz zum Teilen: 200 Meter am Stueck.
+  prüfeFall('eine sehr kurze Fahrt bleibt leer',
+    kuerzeSpurEnden([[9.95, 49.79], [9.9528, 49.79]]).length === 0);
+  prüfeFall('eine leere Spur bleibt leer', kuerzeSpurEnden([]).length === 0);
+})();
+
+
+/* --- oeffentlicheTour(): es geht nur hinaus, was hinaus soll -------------- */
+(function () {
+  const gerade = [];
+  for (let i = 0; i < 32; i++) gerade.push([9.95 + i * 0.001, 49.79]);
+
+  const ausfahrt = oeffentlicheTour({
+    id: 'x', name: 'Feierabendrunde', aufgezeichnet: true,
+    track: gerade, waypoints: [],
+    distance: 2200, curviness: 310, time: 300, maxKmh: 187,
+    neigung: { links: 41, rechts: 38 },
+    notizen: 'Bei Kilometer 3 steht immer die Polizei',
+    fotos: [{ id: 1, pfad: 'geheim/1.jpg' }],
+  });
+  prüfeFall('die Notizen bleiben zu Hause', ausfahrt.notizen === undefined);
+  prüfeFall('die Fotos bleiben zu Hause', ausfahrt.fotos === undefined);
+  prüfeFall('die Hoechstgeschwindigkeit geht nicht mit', ausfahrt.maxKmh === undefined);
+  prüfeFall('die Schraeglage geht nicht mit', ausfahrt.neigung === undefined);
+  prüfeFall('der Name gehoert nicht in die Daten', ausfahrt.name === undefined);
+  prüfeFall('die Kurvigkeit geht mit', ausfahrt.curviness === 310);
+  prüfeFall('die Spur ist beschnitten', ausfahrt.track.length < gerade.length);
+
+  const geplant = oeffentlicheTour({
+    id: 'y', aufgezeichnet: false,
+    waypoints: [{ lat: 49.79, lon: 9.95 }, { lat: 49.9, lon: 10.1 }],
+    roundtrip: true, roundtripKm: 150, roundtripRichtung: 'sued',
+  });
+  prüfeFall('eine geplante Route behaelt ihre Wegpunkte', geplant.waypoints.length === 2);
+  prüfeFall('die Rundtour bleibt eine Rundtour', geplant.roundtrip === true);
+  prüfeFall('die Wunschlaenge geht mit', geplant.roundtripKm === 150);
+  prüfeFall('eine erfundene Himmelsrichtung faellt weg',
+    geplant.roundtripRichtung === undefined);
+
+  prüfeFall('eine zu kurze Aufzeichnung laesst sich nicht teilen',
+    oeffentlicheTour({ aufgezeichnet: true, track: [[9.95, 49.79], [9.9528, 49.79]] }) === null);
+  prüfeFall('nichts drin, nichts raus', oeffentlicheTour(null) === null);
+})();
+
+
+/* --- startPunktVon(): worauf die Umkreissuche zeigt ----------------------- */
+prüfeFall('bei einer Aufzeichnung zaehlt der erste Spurpunkt',
+  startPunktVon({ track: [[9.95, 49.79, 200]] }).lat === 49.79);
+prüfeFall('bei einer geplanten Route zaehlt der erste Wegpunkt',
+  startPunktVon({ waypoints: [{ lat: 51.8, lon: 10.6 }] }).lon === 10.6);
+prüfeFall('ohne Punkte gibt es keinen Startpunkt',
+  startPunktVon({ waypoints: [], track: [] }) === null);
