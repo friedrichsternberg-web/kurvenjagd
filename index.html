@@ -691,6 +691,38 @@
             </span>
             <span id="kontoBildText">Bild ausw&auml;hlen</span>
           </button>
+
+          <!-- Das Haeckchen erledigt zwei Dinge auf einmal.
+
+               ERSTENS die Altersgrenze: Das oeffentliche Teilen laeuft auf
+               eine Einwilligung hinaus (Art. 6 Abs. 1 lit. a DSGVO), und
+               eine Einwilligung ist nach Art. 8 DSGVO erst ab 16 wirksam -
+               Deutschland hat die Oeffnungsklausel auf 13 nicht genutzt.
+               Die Bestaetigung verschiebt die Grenze nicht, sie ist die
+               "angemessene Anstrengung" nach Art. 8 Abs. 2.
+
+               ZWEITENS die Einbeziehung der Regeln fuers Teilen: Nach
+               Paragraf 305 Abs. 2 BGB gelten sie nur mit ausdruecklichem
+               Hinweis, zumutbarer Kenntnisnahme und Einverstaendnis. Ein
+               Link im Fuss reicht dafuer nicht sicher.
+
+               Es steht in #kontoNeuFelder und damit NUR beim Anlegen. Beim
+               Anmelden noch einmal zu fragen waere sinnlos - zugestimmt
+               wird einmal, und der Zeitpunkt steht danach im Profil.
+
+               Der Knopf zu den Regeln liegt NEBEN dem <label>, nicht darin:
+               Ein Klick auf etwas innerhalb eines Labels schaltet das
+               Kaestchen mit um, und wer nur nachlesen will, haette damit
+               ungewollt zugestimmt. -->
+          <div class="zustimmung">
+            <input type="checkbox" id="kontoZustimmung">
+            <p class="zustimmung-text">
+              <label for="kontoZustimmung">Ich bin mindestens 16 Jahre alt und
+                akzeptiere die</label>
+              <button type="button" class="linkbtn" id="btnRegelnLesen">Regeln
+                f&uuml;rs Teilen</button>.
+            </p>
+          </div>
         </div>
 
         <p id="kontoMeldung" class="konto-meldung" hidden></p>

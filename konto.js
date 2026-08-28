@@ -121,7 +121,7 @@ function übersetzeFehler(meldung) {
    damit die Oberfläche weiter unten nicht selbst mit Supabase-Antworten
    hantieren muss. */
 
-async function registriere(email, passwort, benutzername) {
+async function registriere(email, passwort, benutzername, regelnZugestimmt) {
   /* Der Benutzername reist als Anmeldedatum mit. In der Datenbank hängt am
      Anlegen eines Kontos ein Auslöser (neues_profil_anlegen), der daraus
      das Profil baut.
@@ -131,10 +131,14 @@ async function registriere(email, passwort, benutzername) {
      gar keine Sitzung. Ohne Sitzung darf niemand in die Tabelle schreiben,
      und der Name wäre weg, bis der Nutzer seine Mail liest. So legt der
      Server das Profil im selben Atemzug an wie das Konto. */
+  /* Die Zustimmung reist als schlichtes Ja mit, OHNE Zeitangabe. Den
+     Zeitstempel setzt der Auslöser in der Datenbank mit now() - ein Datum
+     aus dem Browser wäre kein Nachweis, weil der Browser jedes behaupten
+     könnte, und Art. 7 Abs. 1 DSGVO legt die Beweislast beim Betreiber ab. */
   const { data, error } = await backend.auth.signUp({
     email,
     password: passwort,
-    options: { data: { benutzername } },
+    options: { data: { benutzername, regeln_zugestimmt: !!regelnZugestimmt } },
   });
   if (error) return { ok: false, meldung: übersetzeFehler(error.message) };
 
@@ -373,8 +377,11 @@ function setzeKontoModus(modus) {
     modus === 'anmelden' ? 'Konto anlegen' : 'Anmelden';
   // Das Zurücksetzen des Passworts ergibt nur beim Anmelden Sinn.
   document.getElementById('btnPasswortVergessen').hidden = modus !== 'anmelden';
-  // Benutzername und Profilbild werden nur beim ANLEGEN abgefragt.
+  // Benutzername, Profilbild und die Zustimmung werden nur beim ANLEGEN
+  // abgefragt. Der Haken geht dabei zurück auf aus: Eine Zustimmung, die
+  // aus einem früheren Durchgang stehen bleibt, ist keine.
   document.getElementById('kontoNeuFelder').hidden = modus !== 'registrieren';
+  document.getElementById('kontoZustimmung').checked = false;
   // Das Passwortfeld meint je nach Modus etwas anderes. Sagt man das dem
   // Browser nicht, bietet der Passwortspeicher beim Anlegen das ALTE
   // Passwort an statt ein neues vorzuschlagen.
@@ -523,6 +530,14 @@ async function kontoFormularAbsenden() {
     }
     benutzername = geprüft.name;
 
+    /* Ohne Haken kein Konto. Die Prüfung steht VOR der Serverabfrage zum
+       Namen: Wer sie nicht besteht, soll nicht erst warten müssen. */
+    if (!document.getElementById('kontoZustimmung').checked) {
+      zeigeMeldung('kontoMeldung',
+        'Bitte bestätige die Regeln fürs Teilen und dein Mindestalter.', 'fehler');
+      return;
+    }
+
     zeigeMeldung('kontoMeldung', 'Benutzername wird geprüft …');
     const frei = await benutzernameFrei(benutzername);
     if (frei === false) {
@@ -538,7 +553,8 @@ async function kontoFormularAbsenden() {
 
   const ergebnis = kontoModus === 'anmelden'
     ? await meldeAn(email, passwort)
-    : await registriere(email, passwort, benutzername);
+    : await registriere(email, passwort, benutzername,
+                        document.getElementById('kontoZustimmung').checked);
 
   /* Ein beim Anlegen ausgesuchtes Bild wartet auf dem Gerät, bis es eine
      Sitzung gibt - siehe WARTENDES_BILD. Gespeichert wird es erst jetzt,

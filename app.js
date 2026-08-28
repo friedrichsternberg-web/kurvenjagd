@@ -3490,6 +3490,18 @@ wendeShopSchalterAn();
    zwei, und die beiden Konto-Bildschirme haben ihren eigenen Weg. */
 verkabele('btnRechtlichesGarage', 'click', () => zeigeRechtliches('garageScreen'));
 verkabele('btnRechtlichesKonto', 'click', () => zeigeRechtliches('kontoScreen'));
+
+/* Der Knopf neben dem Zustimmungshaken im Registrierformular. Er fuehrt ins
+   Rechtliche und klappt dort den richtigen Abschnitt auf - sonst landet man
+   auf einer Seite mit fuenf zugeklappten Bloecken und sucht. Zurueck geht es
+   auf den Anmeldebildschirm, das erledigt zurueckVomRechtlichen(). */
+verkabele('btnRegelnLesen', 'click', () => {
+  zeigeRechtliches('kontoScreen');
+  const block = document.getElementById('teilenRegelnBlock');
+  if (!block) return;
+  block.open = true;
+  block.scrollIntoView({ block: 'start' });
+});
 verkabele('btnRechtlichesProfil', 'click', () => zeigeRechtliches('profilScreen'));
 verkabele('btnRechtlichesZurueck', 'click', zurückVomRechtlichen);
 // Den Zurueck-Knopf der Produktseite verkabelt shop.js selbst: Wohin er

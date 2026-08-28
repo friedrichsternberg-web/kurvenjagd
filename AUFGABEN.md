@@ -72,6 +72,11 @@ Reiter „Entdecken" nur den leeren Zustand, und Teilen scheitert stumm.
 1. `supabase/migrationen/01-geteilte-touren.sql` im Supabase-Dashboard unter
    **SQL Editor** einfügen und ausführen. Die Datei läuft von oben nach
    unten durch und legt nichts doppelt an.
+1b. Danach `02-zustimmung-und-alter.sql` genauso. Sie hängt eine Spalte
+   `regeln_zugestimmt_am` an `profile` und erweitert den Auslöser
+   `neues_profil_anlegen` um eine Zeile. **Bis dahin geht die Zustimmung
+   im Formular ins Leere** — der Haken wird geprüft, aber nirgends
+   festgehalten.
 2. Danach unter **Advisors > Security** nachsehen, ob Supabase etwas an den
    neuen Funktionen bemängelt.
 3. Mit zwei Konten prüfen: teilen, im anderen Konto finden, übernehmen,
@@ -79,10 +84,12 @@ Reiter „Entdecken" nur den leeren Zustand, und Teilen scheitert stumm.
 
 **Danach, und alles davon ist Handarbeit von dir, nicht Code:**
 
-- **Altersabfrage beim Anlegen des Kontos.** Die Regeln fürs Teilen sagen
-  „mindestens 16" (Art. 8 DSGVO, Deutschland hat die Grenze nicht
-  abgesenkt). Gefragt wird beim Registrieren bisher nicht. Ein Häkchen im
-  Formular in `konto.js` reicht rechtlich; gebaut ist es noch nicht.
+- **Die drei bestehenden Konten haben keine Zustimmung.** Der Haken kam am
+  28.08.2026, die Konten sind älter — bei ihnen bleibt
+  `regeln_zugestimmt_am` auf `NULL`. Da es deine eigenen Testkonten sind,
+  reicht es, das zu wissen. Kämen echte Nutzer dazu, bräuchte es einen
+  Nachfrage-Bildschirm beim nächsten Anmelden. Nachsehen lässt es sich mit
+  `select benutzername, regeln_zugestimmt_am from profile;`
 - **Meldungen ansehen.** Sie landen in der Tabelle `meldungen` und werden
   heute nur im Supabase-Dashboard sichtbar. Eine Zeile im `dashboard.html`
   wäre der nächste sinnvolle Schritt, sonst merkst du eine Meldung erst,

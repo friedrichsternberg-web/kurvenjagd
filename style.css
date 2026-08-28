@@ -725,6 +725,46 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   gap: 6px;
 }
 
+/* Der Zustimmungshaken. Der Vorsatz .konto-formular steht davor, weil
+   dieselbe Datei ein paar Zeilen hoeher "input { padding: 12px 14px }" fuer
+   die Textfelder setzt - ohne ihn waere das Kaestchen so gross wie ein
+   Eingabefeld. */
+.zustimmung {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s2);
+  margin: var(--s3) 0 0;
+  padding: var(--s3);
+  border-radius: var(--r-sm);
+  background: var(--glas-hauch);
+  border: 1px solid var(--glas-hell);
+}
+.konto-formular .zustimmung input {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  padding: 0;
+  box-shadow: none;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+/* Beschriftung und Knopf stehen in EINEM Absatz und sollen wie ein Satz
+   lesen. Deshalb bekommt das <label> hier die Textfarbe zurueck, die
+   .konto-formular label auf Grau setzt - grau waere hier ein Nebentext, und
+   das ist es nicht. */
+.zustimmung-text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.konto-formular .zustimmung-text label {
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+}
+.zustimmung-text .linkbtn { font-size: 13px; }
+
 .konto-meldung {
   margin: 4px 0 0;
   font-size: 13px;
