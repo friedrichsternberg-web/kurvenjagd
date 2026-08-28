@@ -69,3 +69,8 @@ fonts 2/
 # oeffentlich. Es ist bewusst EINE Datei ohne Abhaengigkeiten - ein
 # Doppelklick im Finder genuegt.
 dashboard.html
+
+# Der Posteingang fuers Dashboard. Wird von einem Hintergrund-Auftrag alle
+# zehn Minuten neu geschrieben und enthaelt Absender und Betreffzeilen -
+# gehoert damit in dieselbe Schublade wie dashboard.html selbst.
+post.json
