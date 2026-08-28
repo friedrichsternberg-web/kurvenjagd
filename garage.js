@@ -968,17 +968,29 @@ function zahl(wert) {
    Ein einziges Fenster fuer beides, Motorrad und Ausruestung. Es bekommt von
    aussen gesagt, welche Felder es zeigt und was beim Speichern passieren
    soll. So gibt es nicht zwei fast gleiche Fenster, die auseinanderlaufen,
-   sobald eines geaendert wird. */
+   sobald eines geaendert wird.
+
+   Inzwischen ist es das Fenster der ganzen App: touren.js baut damit den
+   Dialog zum Teilen. Die Kennungen im HTML tragen weiter den Namen der
+   Garage, weil das Umbenennen zwanzig Fundstellen aendern wuerde, ohne dass
+   irgendetwas davon besser laeuft.
+
+   Genau daher kommt der Rueckruf "danach": Frueher rief der Speichern-Knopf
+   fest zeichneGarage() auf. Fuer eine Tour ist das die falsche Antwort - und
+   die Garage waehrenddessen unsichtbar, was ihre Buehnenrechnung mit lauter
+   Nullen fuettern wuerde. */
 
 let dialogSpeichern = null;
 let dialogLöschen = null;
+let dialogDanach = null;
 
-function öffneDialog({ titel, felder, beimSpeichern, beimLöschen = null }) {
+function öffneDialog({ titel, felder, beimSpeichern, beimLöschen = null, danach = zeichneGarage }) {
   document.getElementById('garageDialogTitel').textContent = titel;
   document.getElementById('garageDialogInhalt').innerHTML = felder;
   document.getElementById('btnGarageDialogLöschen').hidden = !beimLöschen;
   dialogSpeichern = beimSpeichern;
   dialogLöschen = beimLöschen;
+  dialogDanach = danach;
 
   document.getElementById('garageDialog').hidden = false;
   document.getElementById('garageDialogInhalt').scrollTop = 0;
@@ -988,6 +1000,7 @@ function schließeDialog() {
   document.getElementById('garageDialog').hidden = true;
   dialogSpeichern = null;
   dialogLöschen = null;
+  dialogDanach = null;
 }
 
 // Kleiner Helfer: liest ein Feld aus dem Dialog und gibt den Text ohne
@@ -1370,17 +1383,22 @@ verkabele('motorradUmschalter', 'click', ereignis => {
 });
 
 
-// Der Dialog: Speichern, Loeschen, Schliessen.
+/* Der Dialog: Speichern, Loeschen, Schliessen.
+
+   Der Rueckruf wird VOR dem Schliessen weggelegt - schließeDialog() raeumt
+   ihn ja gerade weg. */
 verkabele('btnGarageDialogSpeichern', 'click', () => {
   if (dialogSpeichern && dialogSpeichern() === false) return;   // false = offen lassen
+  const danach = dialogDanach;
   schließeDialog();
-  zeichneGarage();
+  if (danach) danach();
 });
 
 verkabele('btnGarageDialogLöschen', 'click', () => {
   if (dialogLöschen && dialogLöschen() === false) return;
+  const danach = dialogDanach;
   schließeDialog();
-  zeichneGarage();
+  if (danach) danach();
 });
 
 verkabele('btnGarageDialogZu', 'click', schließeDialog);

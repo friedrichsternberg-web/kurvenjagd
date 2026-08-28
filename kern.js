@@ -1299,20 +1299,46 @@ function pruefeTour(rohdaten) {
    ist ueberdurchschnittlich oft die eigene Haustuer. Wer sie oeffentlich
    stellt, gibt damit ungewollt seine Adresse preis.
 
-   Deshalb faellt vor dem Veroeffentlichen an beiden Enden ein Stueck weg.
-   300 Meter sind mit Absicht knapp: Sie verwischen die Hausnummer und lassen
-   die Strecke ganz. Ein Radius, der ein ganzes Dorf verbergen soll, macht
-   die geteilte Tour unbrauchbar. Es ist ein Schutz gegen das Versehen und
-   keiner gegen einen entschlossenen Verfolger - genau so steht es auch im
-   Dialog, in dem der Nutzer den Schalter umlegt.
+   Deshalb faellt vor dem Veroeffentlichen an beiden Enden ein Stueck weg:
+   zwischen 300 und 900 Metern, bei jeder Tour neu ausgewuerfelt. Warum
+   ausgewuerfelt und nicht fest, steht bei schutzAbstand() weiter unten - es
+   ist der Unterschied zwischen einem Kreis und einem Ring.
+
+   Nach oben ist die Spanne knapp gehalten: Ein Abstand, der ein ganzes Dorf
+   verbergen soll, macht die geteilte Tour unbrauchbar. Es ist ein Schutz
+   gegen das Versehen und keiner gegen einen entschlossenen Verfolger -
+   genau so steht es auch im Dialog, in dem der Nutzer den Schalter umlegt.
+
+   WARUM IM BROWSER UND NICHT IN DER DATENBANK: Weil ein veraenderter Browser
+   nur die eigene Spur ungekuerzt hochladen koennte, nicht die eines anderen.
+   Dieser Schnitt schuetzt den Nutzer vor der eigenen Unachtsamkeit, nicht
+   vor sich selbst.
 
    Geplante Routen werden NICHT beschnitten: Ihre Wegpunkte SIND die Route,
    ein abgeschnittener Start waere eine andere Strecke. Dort bleibt nur der
    Hinweis vor dem Veroeffentlichen.                                        */
 
-const SPUR_SCHUTZ_METER = 300;
+const SPUR_SCHUTZ_MINDESTENS = 300;
+const SPUR_SCHUTZ_HOECHSTENS = 900;
 
-function kuerzeSpurEnden(spur, meter = SPUR_SCHUTZ_METER) {
+/* Wie weit abgeschnitten wird, ist bei jeder Veroeffentlichung anders.
+
+   Das ist keine Spielerei. Bei einem FESTEN Abstand liegen die sichtbaren
+   Anfangspunkte aller Touren desselben Fahrers auf einem Kreis um seine
+   Haustuer - und der Mittelpunkt eines Kreises laesst sich aus drei Punkten
+   ausrechnen. Genau so wurden 2023 an der KU Leuven die Schutzzonen von
+   Strava aufgeloest. Ein wechselnder Abstand macht aus dem Kreis einen Ring,
+   und aus der Rechnung eine Schaetzung.
+
+   Es bleibt ein Schutz gegen das Versehen. Wer viele Touren desselben
+   Menschen sammelt, kommt der Gegend trotzdem nahe - das steht so auch in
+   den Regeln fuers Teilen. */
+function schutzAbstand() {
+  return SPUR_SCHUTZ_MINDESTENS
+       + Math.random() * (SPUR_SCHUTZ_HOECHSTENS - SPUR_SCHUTZ_MINDESTENS);
+}
+
+function kuerzeSpurEnden(spur, meter = SPUR_SCHUTZ_MINDESTENS) {
   if (!Array.isArray(spur) || spur.length < 2) return [];
 
   // Gemessen wird die Luftlinie zum jeweiligen Ende, nicht die gefahrene
@@ -1373,7 +1399,7 @@ function oeffentlicheTour(tour) {
   if (!tour) return null;
 
   const aufgezeichnet = !!tour.aufgezeichnet;
-  const spur   = aufgezeichnet ? kuerzeSpurEnden(säubreSpur(tour.track)) : [];
+  const spur   = aufgezeichnet ? kuerzeSpurEnden(säubreSpur(tour.track), schutzAbstand()) : [];
   const punkte = aufgezeichnet ? [] : säubrePunkte(tour.waypoints);
   if (!spur.length && !punkte.length) return null;
 

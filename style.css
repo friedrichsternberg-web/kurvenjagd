@@ -1241,6 +1241,222 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 }
 .del:hover { color: var(--danger); }
 
+/* ---------- Touren: "Meine" und "Entdecken" ----------
+   Der Umschalter ist derselbe .segmented wie im Planer. Er steht direkt
+   unter der Ueberschrift, damit auf einen Blick klar ist, dass dieser
+   Bildschirm zwei Inhalte hat - und nicht einen mit einer Zusatzleiste. */
+.touren-umschalter { margin: 0 0 var(--s4); }
+
+/* Der Satz ueber dem Entdecken-Teil. Er steht bewusst NUR dort: In der
+   eigenen Liste hat er nichts zu suchen, dort weiss man schon, was man hat. */
+.mitmach-satz {
+  margin: 0 0 var(--s4);
+  padding: var(--s3);
+  border-radius: var(--r-sm);
+  background: var(--glas-hauch);
+  border: 1px solid var(--glas-hell);
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.entdecken-zeile { align-items: center; }
+/* Der Umkreis nimmt nur die Breite, die er braucht - "Mein Standort"
+   daneben ist der laengere Text und soll den Rest bekommen. */
+.entdecken-umkreis { flex: 0 0 auto; width: auto; }
+
+/* Der kleine Knopf in der eigenen Liste, der eine Tour oeffentlich stellt.
+   Grau heisst privat, blau heisst oeffentlich - dieselbe Sprache wie
+   ueberall sonst: Was leuchtet, ist an. */
+.teilen-knopf {
+  flex: 0 0 auto;
+  display: flex;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0 2px;
+}
+.teilen-knopf:hover { color: var(--text); }
+.teilen-knopf.oeffentlich { color: var(--accent-hell); }
+
+/* ---------- Eine geteilte Tour ----------
+   Mehr Zeilen als eine eigene Tour: Es steht ein Mensch dahinter, und der
+   gehoert nach oben. Deshalb keine Zeile wie in .saved-list, sondern eine
+   Karte - Kopf mit Name und Bild, dann die Tour, dann die Zahlen. */
+.geteilt-liste { list-style: none; margin: var(--s4) 0 0; padding: 0; }
+
+.geteilt {
+  display: block;
+  padding: var(--s3);
+  border-radius: var(--r-md);
+  margin-bottom: var(--s2);
+  background: var(--glas-hauch);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border: 1px solid var(--glas-hell);
+  box-shadow:
+    inset 0 1px 0 var(--glas-heller),
+    inset 0 -1px 0 var(--schatten-hauch);
+}
+
+.geteilt-kopf {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  margin-bottom: var(--s2);
+}
+
+/* Bild und Ersatzbuchstabe teilen sich die Masse, damit die Kopfzeile
+   gleich hoch bleibt, ob jemand ein Profilbild hat oder nicht. */
+.geteilt-bild, .geteilt-buchstabe {
+  flex: 0 0 auto;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--glas-rand);
+}
+.geteilt-bild { object-fit: cover; background: var(--surface-2); }
+.geteilt-buchstabe {
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-family: var(--schrift-display);
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.geteilt-nutzer {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+}
+.geteilt-weg {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-family: var(--schrift-display);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.05em;
+}
+
+/* Der Tourname traegt die Anzeigeschrift, wie jede Ueberschrift im Haus.
+   Er ist das, wonach man in der Liste sucht. */
+.geteilt-name {
+  margin: 0 0 4px;
+  font-family: var(--schrift-display);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--metall-glanz);
+}
+
+/* Das Motorrad-Zeichen steht IN der Zeile mit dem Namen. .saved-marke ist
+   ein Flex-Kasten und damit ein eigener Block - in einer Listenzeile ist das
+   richtig, in einer Ueberschrift wirft es den Namen eine Zeile tiefer. */
+.geteilt-name .saved-marke {
+  display: inline-flex;
+  vertical-align: -2px;
+  margin-right: 6px;
+}
+
+/* Hoechstens drei Zeilen Beschreibung. Wer mehr schreibt, bekommt sie
+   beim Oeffnen der Tour zu sehen - in der Liste wuerde ein Aufsatz alle
+   anderen Touren nach unten schieben. */
+.geteilt-text {
+  margin: 0 0 var(--s2);
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.geteilt-fuss {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  margin-top: var(--s3);
+}
+.geteilt-fuss .btn { flex: 0 0 auto; }
+/* "Melden" wird nach rechts geschoben und bleibt leise. Es soll erreichbar
+   sein, aber nicht so aussehen, als waere es der uebliche naechste Schritt. */
+.geteilt-melden { margin-left: auto; font-size: 12px; }
+
+/* ---------- Der Schalter im Teilen-Dialog ----------
+   Das Kaestchen sitzt oben und der Text daneben, nicht darunter: Ein
+   Schalter, dessen Erklaerung erst nach zwei Zeilen anfaengt, wird
+   angetippt, bevor sie gelesen ist. */
+/* Beide Selektoren tragen .garage-dialog-inhalt vor sich her, und das ist
+   kein Zierrat: Dort steht "input { width: 100% }" fuer die Textfelder des
+   Dialogs. Ohne den Vorsatz gewaenne diese Regel gegen die hier, und aus
+   dem Kaestchen wuerde eine bildschirmbreite Flaeche. */
+.garage-dialog-inhalt .teilen-schalter {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s2);
+  margin: var(--s4) 0 0;
+  padding: var(--s3);
+  border-radius: var(--r-sm);
+  background: var(--glas-hauch);
+  border: 1px solid var(--glas-hell);
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+}
+.garage-dialog-inhalt .teilen-schalter input {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  margin: 1px 0 0;
+  padding: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+/* Der Textblock daneben muss schrumpfen duerfen. Ohne min-width:0 nimmt er
+   die Breite seines laengsten Wortes als Untergrenze und schiebt sich aus
+   dem Fenster heraus. */
+.teilen-schalter > span {
+  flex: 1;
+  min-width: 0;
+}
+.teilen-schalter-titel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  color: var(--text);
+}
+.teilen-schalter-text {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.teilen-schalter input:disabled + span .teilen-schalter-titel { color: var(--muted); }
+/* Der Hinweis zum Startpunkt steht unter dem Schalter und nicht darin -
+   er gilt auch dann, wenn der Schalter aus bleibt und die Tour spaeter
+   doch geteilt wird. */
+.teilen-hinweis { margin-top: var(--s2); }
+
+.geteilt-leer {
+  margin: var(--s5) 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+  text-align: center;
+}
+
 /* ---------- Statistik ---------- */
 .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .stat {

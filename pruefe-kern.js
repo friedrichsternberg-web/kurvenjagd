@@ -355,12 +355,13 @@ prüfeFall('normaler Name bleibt unveraendert',
 
 /* --- kuerzeSpurEnden(): Haustuer verwischen, Strecke lassen --------------- */
 (function () {
-  // Eine gerade Fahrt nach Osten: gut 30 Punkte im Abstand von je rund
-  // 70 Metern, macht etwa 2,2 Kilometer.
+  // Eine gerade Fahrt nach Osten: 120 Punkte im Abstand von je rund
+  // 70 Metern, macht etwa 8,5 Kilometer. Lang genug, dass auch der groesste
+  // Schutzabstand (zweimal 900 m) noch reichlich uebrig laesst.
   const gerade = [];
-  for (let i = 0; i < 32; i++) gerade.push([9.95 + i * 0.001, 49.79]);
+  for (let i = 0; i < 120; i++) gerade.push([9.95 + i * 0.001, 49.79]);
 
-  const gekuerzt = kuerzeSpurEnden(gerade);
+  const gekuerzt = kuerzeSpurEnden(gerade, 300);
   prüfeFall('von der geraden Fahrt bleibt etwas uebrig', gekuerzt.length > 0);
   prüfeFall('der Anfang ist weg', gekuerzt[0][0] > gerade[0][0]);
   prüfeFall('das Ende ist weg',
@@ -380,7 +381,19 @@ prüfeFall('normaler Name bleibt unveraendert',
     runde.push([9.95 + 0.02 * Math.sin(winkel), 49.79 + 0.013 * (1 - Math.cos(winkel))]);
   }
   prüfeFall('eine Rundtour verliert nicht ihre ganze Spur',
-    kuerzeSpurEnden(runde).length > 10);
+    kuerzeSpurEnden(runde, 300).length > 10);
+
+  // Der ausgewuerfelte Abstand bleibt in seinen Grenzen, sonst waere die
+  // Kuerzung entweder wirkungslos oder frisst kurze Fahrten auf.
+  let kleinster = Infinity, groesster = 0;
+  for (let i = 0; i < 200; i++) {
+    const wert = schutzAbstand();
+    kleinster = Math.min(kleinster, wert);
+    groesster = Math.max(groesster, wert);
+  }
+  prüfeFall('der Schutzabstand bleibt ueber 300 m', kleinster >= 300);
+  prüfeFall('der Schutzabstand bleibt unter 900 m', groesster <= 900);
+  prüfeFall('der Schutzabstand ist nicht immer derselbe', groesster - kleinster > 100);
 
   // Zu kurz zum Teilen: 200 Meter am Stueck.
   prüfeFall('eine sehr kurze Fahrt bleibt leer',
@@ -392,7 +405,7 @@ prüfeFall('normaler Name bleibt unveraendert',
 /* --- oeffentlicheTour(): es geht nur hinaus, was hinaus soll -------------- */
 (function () {
   const gerade = [];
-  for (let i = 0; i < 32; i++) gerade.push([9.95 + i * 0.001, 49.79]);
+  for (let i = 0; i < 120; i++) gerade.push([9.95 + i * 0.001, 49.79]);
 
   const ausfahrt = oeffentlicheTour({
     id: 'x', name: 'Feierabendrunde', aufgezeichnet: true,

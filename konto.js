@@ -155,6 +155,11 @@ async function meldeAn(email, passwort) {
 
 async function meldeAb() {
   await backend.auth.signOut();
+  // Was der Vorgänger geteilt hatte, geht die nächste Sitzung nichts an.
+  // ladeGeteilteTouren() leert die Merkliste und hört danach auf, weil ja
+  // niemand mehr angemeldet ist - deshalb reicht derselbe Aufruf wie beim
+  // Anmelden.
+  if (typeof ladeGeteilteTouren === 'function') ladeGeteilteTouren();
 }
 
 /* Anmeldung über einen fremden Anbieter (Google, Apple).
@@ -883,6 +888,12 @@ if (backendVerfügbar()) {
       // Abgeglichen wird in beiden Fällen. Erst jetzt macht das Sinn -
       // vorher wüsste die Datenbank nicht, wessen Touren gemeint sind.
       synchronisiereTouren();
+      // Und dazu, welche der eigenen Touren gerade öffentlich stehen. Ohne
+      // das trüge die Liste "Meine" nach dem Anmelden lauter graue
+      // Weltsymbole, obwohl die Touren längst geteilt sind. Die Prüfung auf
+      // typeof ist dieselbe Absicherung wie überall: touren.js wird NACH
+      // dieser Datei geladen und könnte fehlen.
+      if (typeof ladeGeteilteTouren === 'function') ladeGeteilteTouren();
     }
 
     /* Das Profil bei JEDER Anmeldung holen, auch beim bloßen Öffnen der

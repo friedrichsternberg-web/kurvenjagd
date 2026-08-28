@@ -249,6 +249,11 @@
         <path d="M9 4 3.5 6.3v13.4L9 17.4l6 2.3 5.5-2.3V4L15 6.3 9 4Z"/>
         <path d="M9 4v13.4M15 6.3v13.4"/>
       </symbol>
+      <symbol id="icon-welt" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="8.6"/>
+        <path d="M3.4 12h17.2"/>
+        <path d="M12 3.4c2.3 2.4 3.5 5.3 3.5 8.6s-1.2 6.2-3.5 8.6c-2.3-2.4-3.5-5.3-3.5-8.6S9.7 5.8 12 3.4Z"/>
+      </symbol>
       <symbol id="icon-profil" viewBox="0 0 24 24">
         <circle cx="12" cy="8" r="3.8"/>
         <path d="M4.5 20c0-3.6 3.4-5.6 7.5-5.6s7.5 2 7.5 5.6"/>
@@ -604,7 +609,7 @@
             <span class="kachel-inhalt">
               <svg class="ic gross kachel-symbol"><use href="#icon-touren"></use></svg>
               <span class="kachel-text">
-                <span class="kachel-titel">Meine Touren</span>
+                <span class="kachel-titel">Touren</span>
               </span>
             </span>
             <span class="kachel-pfeil" aria-hidden="true">&rarr;</span>
@@ -937,6 +942,21 @@
             Inhalte gem&auml;&szlig; &sect; 18 Abs. 2 MStV</p>
           <p>Friedrich Sternberg, Anschrift wie oben</p>
 
+          <!-- Sobald Nutzer Inhalte veroeffentlichen koennen, ist Serpa ein
+               Hostingdienst im Sinne der Verordnung (EU) 2022/2065. Die
+               Artikel 11 und 12 verlangen dann eine benannte Stelle - je
+               eine fuer Behoerden und fuer Nutzer. Bei einem Einzelanbieter
+               ist das dieselbe Adresse; sie muss nur dastehen, damit
+               niemand suchen muss. -->
+          <p class="label">Kontaktstelle nach Artikel 11 und 12 der
+            Verordnung (EU) 2022/2065 (Digital Services Act)</p>
+          <p>
+            F&uuml;r Beh&ouml;rden und f&uuml;r Nutzer:
+            <a href="mailto:kontakt@serpa-app.de">kontakt@serpa-app.de</a>,
+            Anschrift wie oben. Verfahrenssprache ist Deutsch, Englisch ist
+            ebenfalls m&ouml;glich.
+          </p>
+
           <p class="label">Verbraucherstreitbeilegung</p>
           <!-- KEIN Link auf die EU-Streitbeilegungsplattform: Die ist seit
                Juli 2025 abgeschaltet, der Link selbst waere abmahnbar. -->
@@ -964,7 +984,9 @@
             Ger&auml;t. Ein Konto ist freiwillig. Die App zeigt keine Werbung,
             setzt keine Cookies und bindet keinen fremden Analysedienst ein.
             Wie oft die Seite aufgerufen wird, z&auml;hlen wir selbst &ndash;
-            aber nur als Summe, ohne dich wiederzuerkennen (Punkt 8).
+            aber nur als Summe, ohne dich wiederzuerkennen (Punkt 8). Eine
+            Tour wird nur dann &ouml;ffentlich, wenn du daf&uuml;r einen
+            Schalter umlegst (Punkt 9).
           </p>
 
           <p class="label">1. Hosting</p>
@@ -1080,7 +1102,54 @@
             wird (&sect; 25 TDDDG).
           </p>
 
-          <p class="label">9. Deine Rechte</p>
+          <p class="label">9. Touren, die du &ouml;ffentlich teilst</p>
+          <p>
+            Beim Speichern einer Tour und sp&auml;ter jederzeit &uuml;ber das
+            Weltsymbol in deiner Liste kannst du sie &ouml;ffentlich stellen.
+            Sichtbar werden dann dein Benutzername, dein Profilbild, der Name
+            der Tour, deine Beschreibung und der Streckenverlauf. Die
+            &Uuml;bersicht &ndash; Name, Gegend, L&auml;nge, Kurvigkeit und
+            wer die Tour geteilt hat &ndash; ist auch ohne Konto sichtbar. Den
+            Streckenverlauf selbst bekommt nur, wer angemeldet ist.
+          </p>
+          <p>
+            Rechtsgrundlage ist deine Einwilligung (Art. 6 Abs. 1 lit. a
+            DSGVO). Du erteilst sie mit dem Schalter und widerrufst sie,
+            indem du die Tour wieder auf privat stellst; sie wird dann von
+            unserem Server gel&ouml;scht. Das L&ouml;schen deines Kontos
+            entfernt alle deine &ouml;ffentlichen Touren mit.
+          </p>
+          <p>
+            <strong>Zwei Dinge, die du vorher wissen solltest.</strong> Von
+            einer aufgezeichneten Ausfahrt schneiden wir Anfang und Ende ab,
+            zwischen 300 und 900 Metern und jedes Mal unterschiedlich weit,
+            damit nicht deine Haust&uuml;r darauf zu sehen ist. Das
+            sch&uuml;tzt vor dem Versehen, nicht vor jemandem, der viele
+            deiner Touren sammelt und vergleicht. Bei einer geplanten Route
+            geht das nicht, denn ihre Wegpunkte sind die Route &ndash; dort
+            ist dein Startpunkt vollst&auml;ndig sichtbar. Und: Andere
+            k&ouml;nnen eine &ouml;ffentliche Tour in ihre eigene Liste
+            &uuml;bernehmen. Diese Kopie liegt danach auf deren
+            Ger&auml;ten, und dein Widerruf erreicht sie nicht mehr.
+          </p>
+          <p>
+            Nicht mit ver&ouml;ffentlicht werden deine Notizen, deine Fotos,
+            deine H&ouml;chstgeschwindigkeit, deine gr&ouml;&szlig;te
+            Schr&auml;glage und der Zeitpunkt der Fahrt. Serpa f&uuml;hrt
+            bewusst keine Bestenliste.
+          </p>
+          <p>
+            Damit du Touren in deiner N&auml;he findest, schickt die App den
+            gew&auml;hlten Ort oder deinen Standort als Koordinaten an unsere
+            Datenbank bei Supabase. Gespeichert werden sie dort nicht. Den
+            Namen der Gegend, der neben einer geteilten Tour steht, holen wir
+            beim Ver&ouml;ffentlichen einmalig bei Nominatim
+            (openstreetmap.org, EU) &ndash; mit dem auf etwa hundert Meter
+            gerundeten Startpunkt und nur auf der groben Ebene von Landkreis
+            oder Stadt.
+          </p>
+
+          <p class="label">10. Deine Rechte</p>
           <p>
             Du hast das Recht auf Auskunft, Berichtigung, L&ouml;schung,
             Einschr&auml;nkung der Verarbeitung, Daten&uuml;bertragbarkeit
@@ -1090,7 +1159,105 @@
             das Recht auf Akteneinsicht Brandenburg.
           </p>
 
-          <p class="tiny">Stand: 27.08.2026</p>
+          <p class="tiny">Stand: 28.08.2026</p>
+        </div>
+      </details>
+
+      <!-- Nutzungsbedingungen fuer den oeffentlichen Teil.
+
+           WARUM ES SIE GEBEN MUSS: Mit dem Schalter "oeffentlich teilen"
+           speichert Serpa Inhalte fremder Menschen und gibt sie weiter -
+           damit ist es ein Hostingdienst nach der Verordnung (EU) 2022/2065.
+           Artikel 14 verlangt dann Bedingungen in klarer Sprache: was
+           erlaubt ist, wie eingeschritten wird, wie man sich wehrt.
+
+           WARUM SIE HIER STEHEN UND NICHT AUF EINER EIGENEN SEITE: Sie
+           gelten nur fuer diesen einen Teil der App. Wer nur eine Route
+           plant, geht keinen Vertrag ein - und ein Bildschirm voll
+           Bedingungen vor der ersten Karte waere genau die Huerde, die
+           diese App nicht haben soll.
+
+           DIE STORES verlangen dasselbe: Google Play (User Generated
+           Content) und Apple (Review Guideline 1.2) nehmen keine App mit
+           oeffentlichen Nutzerinhalten ohne Bedingungen, Meldeweg und die
+           Moeglichkeit, Inhalte zu entfernen. -->
+      <details class="block accordion" id="teilenRegelnBlock">
+        <summary>Regeln f&uuml;rs Teilen</summary>
+        <div class="rechts-text">
+          <p>
+            Diese Regeln gelten f&uuml;r alles, was du in Serpa
+            &ouml;ffentlich stellst: Tournamen, Beschreibungen und die Touren
+            selbst. Wer nur plant, aufzeichnet und nichts teilt, den betreffen
+            sie nicht.
+          </p>
+
+          <p class="label">Wer teilen darf</p>
+          <p>
+            Wer ein Konto hat und mindestens 16 Jahre alt ist. Unter 16
+            d&uuml;rfen wir deine Daten ohne Einwilligung deiner Eltern nicht
+            in dieser Form verarbeiten (Art. 8 DSGVO).
+          </p>
+
+          <p class="label">Was du zusicherst</p>
+          <p>
+            Dass die Tour deine ist und du sie teilen darfst. Dass in Name
+            und Beschreibung keine anderen Menschen genannt oder erkennbar
+            gemacht werden, die damit nicht einverstanden sind.
+          </p>
+
+          <p class="label">Was nicht geht</p>
+          <p>
+            Beleidigungen, Hetze, Werbung, offensichtlich erfundene Touren.
+            Routen, die absichtlich &uuml;ber gesperrte oder verbotene Wege
+            f&uuml;hren, und alles, was zum Rasen auffordert. Serpa
+            ver&ouml;ffentlicht deshalb nie deine H&ouml;chstgeschwindigkeit
+            und nie deine Schr&auml;glage, und es gibt keine Bestenliste.
+          </p>
+
+          <p class="label">Was dir geh&ouml;rt und was du uns erlaubst</p>
+          <p>
+            Deine Tour bleibt deine. Du erlaubst uns nur, sie in der App zu
+            zeigen und anderen Nutzern zum Ansehen, Laden und
+            &Uuml;bernehmen bereitzustellen &ndash; unentgeltlich und
+            solange sie &ouml;ffentlich steht. Nimmst du sie zur&uuml;ck,
+            endet diese Erlaubnis. Kopien, die andere bereits in ihre eigene
+            Liste &uuml;bernommen haben, k&ouml;nnen wir nicht
+            zur&uuml;ckholen.
+          </p>
+
+          <p class="label">Melden</p>
+          <p>
+            An jeder &ouml;ffentlichen Tour steht &bdquo;Melden&ldquo;. Das
+            geht auch ohne Konto. Genauso kannst du an
+            <a href="mailto:kontakt@serpa-app.de">kontakt@serpa-app.de</a>
+            schreiben; nenne dabei die Tour und was an ihr nicht stimmt.
+            Jede Meldung wird von Hand angesehen. Bist du dabei angemeldet
+            oder hinterl&auml;sst du eine Adresse, sagen wir dir, was wir
+            entschieden haben (Art. 16 der Verordnung (EU) 2022/2065).
+          </p>
+
+          <p class="label">Wenn etwas entfernt wird</p>
+          <p>
+            Wir k&ouml;nnen eine Tour verbergen oder l&ouml;schen, wenn sie
+            gegen diese Regeln oder gegen geltendes Recht verst&ouml;&szlig;t.
+            Wer sie geteilt hat, erf&auml;hrt per E-Mail, was entfernt wurde
+            und warum, und kann uns widersprechen (Art. 17 derselben
+            Verordnung). Bei wiederholten Verst&ouml;&szlig;en k&ouml;nnen
+            wir ein Konto sperren.
+          </p>
+
+          <p class="label">Wof&uuml;r wir nicht geradestehen</p>
+          <p>
+            Geteilte Touren sind Vorschl&auml;ge von anderen
+            Motorradfahrern, keine gepr&uuml;ften Strecken. Ob ein Weg
+            befahrbar, erlaubt und sicher ist, musst du selbst beurteilen; es
+            gilt die Stra&szlig;enverkehrsordnung und nicht die Linie auf dem
+            Bildschirm. F&uuml;r fremde Inhalte haften wir erst, wenn wir von
+            ihnen erfahren und dann nicht handeln (Art. 6 derselben
+            Verordnung).
+          </p>
+
+          <p class="tiny">Stand: 28.08.2026</p>
         </div>
       </details>
 
@@ -1138,11 +1305,16 @@
     </div>
   </div>
 
-  <!-- ===== Meine Touren: eigener Bildschirm mit der Liste gespeicherter
-       Routen, direkt über die untere Leiste erreichbar. Dieselben Routen sind
-       auch im Bedienfeld des Planers unten zu sehen (siehe #savedList) -
-       diese Liste hier ist nur ein schnellerer Weg dorthin, ohne erst den
-       Planer öffnen zu müssen. ===== -->
+  <!-- ===== Touren: zwei Teile auf EINEM Bildschirm.
+
+       "Meine" ist die Liste der gespeicherten Routen - dieselben, die auch
+       im Bedienfeld des Planers unten stehen (#savedList). "Entdecken"
+       zeigt, was andere oeffentlich gestellt haben.
+
+       Warum zwei Reiter und nicht zwei Bildschirme: Es ist dieselbe Sache
+       aus zwei Blickrichtungen, und die untere Leiste hat nur fuenf
+       Plaetze. Der Umschalter ist derselbe .segmented wie im Planer bei der
+       Planungsart - ein Muster im Haus, nicht zwei. ===== -->
   <div id="tourenScreen" class="start-screen listen-screen" hidden>
     <div class="start-screen-inner">
       <!-- Kein Zurueck-Knopf mehr: die untere Leiste ist auf diesem
@@ -1151,8 +1323,53 @@
            bleibt im HTML, damit die Verkabelung in app.js nicht ins Leere
            greift, ist aber ausgeblendet. -->
       <button class="btn ghost back-btn" id="btnTourenZurueck" hidden>&larr; Zurück</button>
-      <h2>Meine Touren</h2>
-      <ul id="tourenList" class="saved-list"></ul>
+      <h2>Touren</h2>
+
+      <div class="segmented touren-umschalter" id="tourenUmschalter">
+        <button class="seg active" data-touren-teil="meine">Meine</button>
+        <button class="seg" data-touren-teil="entdecken">Entdecken</button>
+      </div>
+
+      <div id="tourenTeilMeine">
+        <ul id="tourenList" class="saved-list"></ul>
+      </div>
+
+      <div id="tourenTeilEntdecken" hidden>
+        <p class="mitmach-satz">
+          Serpa f&auml;ngt gerade erst an. Jede Tour, die du hier
+          hinstellst, ist eine mehr, die jemand am Wochenende fahren kann.
+        </p>
+
+        <!-- Gesucht wird mit derselben Ortssuche wie im Planer (Nominatim),
+             nur mit eigener Verkabelung: Dort setzt ein Treffer einen
+             Wegpunkt, hier verschiebt er den Mittelpunkt der Umkreissuche. -->
+        <div class="such-feld search-wrap">
+          <span class="label">Wo suchst du?</span>
+          <input type="text" id="entdeckenOrt" class="search-input"
+                 placeholder="Ort oder Gegend" autocomplete="off" enterkeyhint="search">
+          <button type="button" class="such-knopf" id="btnEntdeckenSuche" aria-label="Suchen">
+            <svg class="ic klein"><use href="#icon-lupe"></use></svg>
+          </button>
+          <ul class="search-results" id="entdeckenTreffer" hidden></ul>
+        </div>
+
+        <div class="row entdecken-zeile">
+          <button class="btn ghost klein" id="btnEntdeckenStandort">
+            <svg class="ic klein"><use href="#icon-standort"></use></svg>
+            Mein Standort
+          </button>
+          <select id="entdeckenUmkreis" class="search-input entdecken-umkreis" aria-label="Umkreis">
+            <option value="25">25 km</option>
+            <option value="50">50 km</option>
+            <option value="100" selected>100 km</option>
+            <option value="250">250 km</option>
+          </select>
+        </div>
+
+        <p class="hint" id="entdeckenLage"></p>
+
+        <ul id="entdeckenListe" class="geteilt-liste"></ul>
+      </div>
     </div>
   </div>
 
@@ -1905,6 +2122,13 @@
   <script src="finder.js?v=108"></script>
   <script src="garage.js?v=108"></script>
   <script src="freisteller.js?v=108"></script>
+
+  <!-- Touren teilen und entdecken. NACH garage.js, weil es dessen
+       oeffneDialog() fuer den Teilen-Dialog mitbenutzt, und nach konto.js,
+       weil ohne Anmeldung nichts zu teilen ist. Faellt diese Datei aus,
+       bleibt der Bildschirm "Touren" das, was er vorher war: die eigene
+       Liste. Der Reiter "Entdecken" waere dann still. -->
+  <script src="touren.js?v=108"></script>
   <!-- Der Demo-Produktkatalog (nur Daten) und die Shop-Logik. produkte.js
        muss vor shop.js stehen, und beide nach garage.js, weil shop.js
        dessen verkabele() mitbenutzt. -->

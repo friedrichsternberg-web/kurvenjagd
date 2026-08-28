@@ -2385,10 +2385,16 @@ function beendeRide() {
 }
 
 function speichereRide() {
-  const s = rideStats();
   const datum = (ride.gestartetAm || new Date()).toLocaleDateString('de-DE');
-  const name = prompt('Name der Ausfahrt:', 'Ausfahrt vom ' + datum);
-  if (!name) return;
+  frageTourAn({
+    titel: 'Ausfahrt speichern',
+    namensVorschlag: 'Ausfahrt vom ' + datum,
+    aufgezeichnet: true,
+  }, angaben => legeAusfahrtAb(angaben));
+}
+
+function legeAusfahrtAb({ name, beschreibung, oeffentlich }) {
+  const s = rideStats();
 
   const alle = loadSaved();
   const neueAusfahrt = {
@@ -2424,6 +2430,7 @@ function speichereRide() {
   meldeTourAnServer(neueAusfahrt);
   zeichneBeideRoutenListen();
   showToast('Gespeichert: ' + name);
+  teileTourWennGewollt(neueAusfahrt, beschreibung, oeffentlich);
   rideZurücksetzen();
   zeigeGarage();
 }
@@ -2713,14 +2720,44 @@ function meldeTourAnServer(tour) {
 
 function meldeTourLöschungAnServer(id) {
   if (typeof tourInCloudLöschen === 'function') tourInCloudLöschen(id);
+  // Eine geloeschte Tour darf nicht oeffentlich stehenbleiben.
+  if (typeof zieheTourZurueck === 'function') zieheTourZurueck(id);
+}
+
+/* Fragt nach Name, Beschreibung und dem Schalter "oeffentlich". Den Dialog
+   dazu baut touren.js. Fehlt die Datei, bleibt es beim nackten prompt() -
+   dieselbe Absicherung wie bei der Garage und beim Server: Der Planer soll
+   auch dann laufen, wenn eine Zusatzdatei ausfaellt. */
+function frageTourAn(vorgaben, weiter) {
+  if (typeof öffneTourSpeichernDialog === 'function') {
+    öffneTourSpeichernDialog({ ...vorgaben, weiter });
+    return;
+  }
+  const name = prompt(vorgaben.titel + ':', vorgaben.namensVorschlag);
+  if (name) weiter({ name, beschreibung: '', oeffentlich: false });
+}
+
+// Stellt eine gerade gespeicherte Tour oeffentlich, falls der Schalter im
+// Dialog an war. Die Antwort kommt vom Server und deshalb erst spaeter.
+function teileTourWennGewollt(tour, beschreibung, oeffentlich) {
+  if (!oeffentlich || typeof stelleTourOeffentlich !== 'function') return;
+  stelleTourOeffentlich(tour, beschreibung).then(ergebnis => {
+    showToast(ergebnis.meldung);
+    zeichneBeideRoutenListen();
+  });
 }
 
 function saveRoute() {
   if (!state.route) return;
 
-  const name = prompt('Name der Route:', 'Tour vom ' + new Date().toLocaleDateString('de-DE'));
-  if (!name) return;
+  frageTourAn({
+    titel: 'Route speichern',
+    namensVorschlag: 'Tour vom ' + new Date().toLocaleDateString('de-DE'),
+    aufgezeichnet: false,
+  }, angaben => legeRouteAb(angaben));
+}
 
+function legeRouteAb({ name, beschreibung, oeffentlich }) {
   const istRundtour = state.planMode === 'rundtour';
 
   const all = loadSaved();
@@ -2744,12 +2781,13 @@ function saveRoute() {
   meldeTourAnServer(neueTour);
   zeichneBeideRoutenListen();
   showToast('Gespeichert: ' + name);
+  teileTourWennGewollt(neueTour, beschreibung, oeffentlich);
 }
 
 // HTML für eine Zeile in einer Liste gespeicherter Routen - genutzt sowohl
 // im Bedienfeld des Planers (#savedList) als auch auf dem Bildschirm
 // "Meine Touren" (#tourenList), damit beide gleich aussehen.
-function gespeicherteRouteHtml(r) {
+function gespeicherteRouteHtml(r, mitTeilen = false) {
   // Aufgezeichnete Ausfahrten stehen in derselben Liste wie geplante
   // Routen - das kleine Motorrad-Zeichen macht auf einen Blick klar,
   // welche davon wirklich gefahren wurde.
@@ -2769,13 +2807,26 @@ function gespeicherteRouteHtml(r) {
      geteilt werden, kommt sie vom Server und damit von Fremden. Ein
      Anfuehrungszeichen darin wuerde reichen, um aus dem Attribut
      auszubrechen und eigenes HTML einzuschleusen. */
+  /* Das Weltsymbol steht NUR auf dem Bildschirm "Touren", nicht im
+     Bedienfeld des Planers: Dort ist die Liste eine Abkuerzung zum Laden
+     einer Route, und ein Knopf mit Folgen fuer die Oeffentlichkeit gehoert
+     nicht neben eine Abkuerzung. Blau heisst oeffentlich, grau heisst
+     privat - dieselbe Sprache wie ueberall: Was leuchtet, ist an. */
+  const oeffentlich = mitTeilen && typeof tourIstOeffentlich === 'function'
+                      && tourIstOeffentlich(r.id);
+  const teilen = mitTeilen ? `
+      <button class="teilen-knopf ${oeffentlich ? 'oeffentlich' : ''}"
+              data-teile="${escapeHtml(r.id)}"
+              title="${oeffentlich ? 'Steht öffentlich' : 'Tour teilen'}"
+              aria-label="Teilen">${symbol('welt', 'klein')}</button>` : '';
+
   return `
     <li data-id="${escapeHtml(r.id)}">
       ${marke}
       <span class="saved-text">
         <span class="saved-name">${escapeHtml(r.name)}</span>
         <span class="saved-meta">${kmText} <i>&middot;</i> ${kurvenText}${datum ? ' <i>&middot;</i> ' + datum : ''}</span>
-      </span>
+      </span>${teilen}
       <button class="del" data-del="${escapeHtml(r.id)}" title="Löschen">&times;</button>
     </li>`;
 }
@@ -2851,15 +2902,28 @@ function ladeGespeicherteRoute(r) {
 function verkabeleGespeicherteListe(list, { zeigePlanerBeimLaden }) {
   list.querySelectorAll('li').forEach(li => {
     li.addEventListener('click', (e) => {
-      if (e.target.dataset.del) {
-        const rest = loadSaved().filter(x => String(x.id) !== e.target.dataset.del);
+      /* closest() statt e.target.dataset: Der Teilen-Knopf enthaelt ein
+         Symbol, und ein Klick landet dann auf dem <svg> darin statt auf dem
+         Knopf. Beim Kreuz zum Loeschen faellt das nicht auf, weil es nur
+         ein Zeichen ist - deshalb hat es hier jahrelang gereicht. */
+      const geloescht = e.target.closest('[data-del]');
+      if (geloescht) {
+        const rest = loadSaved().filter(x => String(x.id) !== geloescht.dataset.del);
         speichereListe(rest);
-        meldeTourLöschungAnServer(e.target.dataset.del);
+        meldeTourLöschungAnServer(geloescht.dataset.del);
         zeichneBeideRoutenListen();
         return;
       }
+
+      const geteilt = e.target.closest('[data-teile]');
       const r = loadSaved().find(x => String(x.id) === li.dataset.id);
       if (!r) return;
+
+      if (geteilt) {
+        if (typeof öffneTeilenDialog === 'function') öffneTeilenDialog(r);
+        return;
+      }
+
       if (zeigePlanerBeimLaden) zeigePlaner(); // Karte muss sichtbar sein, bevor gezeichnet wird
       ladeGespeicherteRoute(r);
     });
@@ -2878,9 +2942,11 @@ function verkabeleGespeicherteListe(list, { zeigePlanerBeimLaden }) {
 function zeichneRoutenListe(listenKennung, zumPlanerWechseln) {
   const liste = document.getElementById(listenKennung);
   const gespeicherte = loadSaved();
+  // Das Weltsymbol gehoert auf den Bildschirm "Touren", nicht ins Bedienfeld.
+  const mitTeilen = listenKennung === 'tourenList';
   liste.innerHTML = gespeicherte.length === 0
     ? '<li class="empty">Noch nichts gespeichert.</li>'
-    : gespeicherte.map(gespeicherteRouteHtml).join('');
+    : gespeicherte.map(tour => gespeicherteRouteHtml(tour, mitTeilen)).join('');
   verkabeleGespeicherteListe(liste, { zeigePlanerBeimLaden: zumPlanerWechseln });
 }
 
@@ -3055,7 +3121,10 @@ function aktuellerBildschirm() {
 }
 
 function zeigeMeineTouren() {
-  zeichneRoutenListe('tourenList', true);
+  // touren.js weiss, welcher der beiden Reiter offen ist. Fehlt die Datei,
+  // bleibt es bei der eigenen Liste - so wie vor dem Teilen.
+  if (typeof zeichneTourenBildschirm === 'function') zeichneTourenBildschirm();
+  else zeichneRoutenListe('tourenList', true);
   zeigeBildschirm('tourenScreen');
 }
 
