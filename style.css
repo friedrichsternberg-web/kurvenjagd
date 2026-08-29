@@ -1489,6 +1489,25 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
    doch geteilt wird. */
 .teilen-hinweis { margin-top: var(--s2); }
 
+/* Der kleine Umschalter zwischen den Herkuenften. Schmaler als der grosse
+   Reiter-Umschalter darueber, damit die Rangordnung sichtbar bleibt:
+   erst Meine/Entdecken, darunter die Herkunft. */
+.quellen-umschalter { margin: var(--s3) 0 var(--s4); }
+.quellen-umschalter .seg { padding: 6px 0; font-size: 12.5px; }
+
+/* Die Zwischenzeile, wenn die Serpa-Liste nach Bundesland geordnet ist.
+   Bewusst keine Karte: Sie gliedert nur und soll nicht anklickbar wirken. */
+.geteilt-gruppe {
+  margin: var(--s4) 0 var(--s2);
+  font-family: var(--schrift-display);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.geteilt-gruppe:first-child { margin-top: 0; }
+
 .geteilt-leer {
   margin: var(--s5) 0;
   color: var(--muted);

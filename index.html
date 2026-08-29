@@ -1281,9 +1281,12 @@
           <p class="label">Wof&uuml;r wir nicht geradestehen</p>
           <p>
             Geteilte Touren sind Vorschl&auml;ge von anderen
-            Motorradfahrern, keine gepr&uuml;ften Strecken. Ob ein Weg
-            befahrbar, erlaubt und sicher ist, musst du selbst beurteilen; es
-            gilt die Stra&szlig;enverkehrsordnung und nicht die Linie auf dem
+            Motorradfahrern, keine gepr&uuml;ften Strecken. Auch die Touren
+            unter &bdquo;Von Serpa&ldquo; sind Streckenvorschl&auml;ge
+            entlang bekannter Stra&szlig;en &ndash; ob ein Weg gerade
+            befahrbar, erlaubt und sicher ist, wissen wir nicht. Das musst
+            du selbst beurteilen; es gilt die
+            Stra&szlig;enverkehrsordnung und nicht die Linie auf dem
             Bildschirm. F&uuml;r fremde Inhalte haften wir erst, wenn wir von
             ihnen erfahren und dann nicht handeln (Art. 6 derselben
             Verordnung).
@@ -1367,11 +1370,6 @@
       </div>
 
       <div id="tourenTeilEntdecken" hidden>
-        <p class="mitmach-satz">
-          Serpa f&auml;ngt gerade erst an. Jede Tour, die du hier
-          hinstellst, ist eine mehr, die jemand am Wochenende fahren kann.
-        </p>
-
         <!-- Gesucht wird mit derselben Ortssuche wie im Planer (Nominatim),
              nur mit eigener Verkabelung: Dort setzt ein Treffer einen
              Wegpunkt, hier verschiebt er den Mittelpunkt der Umkreissuche. -->
@@ -1400,7 +1398,27 @@
 
         <p class="hint" id="entdeckenLage"></p>
 
-        <ul id="entdeckenListe" class="geteilt-liste"></ul>
+        <!-- Zwei Herkuenfte, sauber getrennt: die redaktionellen Touren von
+             Serpa selbst und das, was Nutzer geteilt haben. Getrennt, weil
+             es ehrlich ist - eine Redaktionstour als Nutzerbeitrag
+             auszugeben waere Irrefuehrung (Paragraf 5 UWG), und umgekehrt
+             soll niemand raetseln, wer hinter einer Strecke steht. -->
+        <div class="segmented quellen-umschalter" id="entdeckenQuelle">
+          <button class="seg active" data-quelle="serpa">Von Serpa</button>
+          <button class="seg" data-quelle="community">Community</button>
+        </div>
+
+        <div id="entdeckenSerpa">
+          <ul id="serpaListe" class="geteilt-liste"></ul>
+        </div>
+
+        <div id="entdeckenCommunity" hidden>
+          <p class="mitmach-satz">
+            Serpa f&auml;ngt gerade erst an. Jede Tour, die du hier
+            hinstellst, ist eine mehr, die jemand am Wochenende fahren kann.
+          </p>
+          <ul id="entdeckenListe" class="geteilt-liste"></ul>
+        </div>
       </div>
     </div>
   </div>
@@ -2159,7 +2177,11 @@
        oeffneDialog() fuer den Teilen-Dialog mitbenutzt, und nach konto.js,
        weil ohne Anmeldung nichts zu teilen ist. Faellt diese Datei aus,
        bleibt der Bildschirm "Touren" das, was er vorher war: die eigene
-       Liste. Der Reiter "Entdecken" waere dann still. -->
+       Liste. Der Reiter "Entdecken" waere dann still.
+
+       serpa-touren.js davor: reine Daten (die redaktionelle
+       Tourensammlung), dasselbe Muster wie produkte.js vor shop.js. -->
+  <script src="serpa-touren.js?v=108"></script>
   <script src="touren.js?v=108"></script>
   <!-- Der Demo-Produktkatalog (nur Daten) und die Shop-Logik. produkte.js
        muss vor shop.js stehen, und beide nach garage.js, weil shop.js

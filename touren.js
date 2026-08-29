@@ -52,6 +52,11 @@ let entdeckenMitte = null;
 // Welcher der beiden Reiter zu sehen ist.
 let tourenTeil = 'meine';
 
+// Und im Entdecken-Teil: welche Herkunft. 'serpa' sind die redaktionellen
+// Touren aus serpa-touren.js, 'community' das, was Nutzer geteilt haben.
+// Grundstellung ist 'serpa', weil dort vom ersten Tag an etwas steht.
+let entdeckenQuelle = 'serpa';
+
 
 /* --- 2. Der Weg zum Server ------------------------------------------------
    Alle Funktionen hier pruefen zuerst, ob es ueberhaupt eine Verbindung
@@ -327,7 +332,9 @@ function zeigeLage() {
   if (!zeile) return;
   // textContent, nicht innerHTML: Der Ortsname kommt von Nominatim.
   if (!entdeckenMitte) {
-    zeile.textContent = 'Ohne Ort siehst du die zuletzt geteilten Touren.';
+    zeile.textContent = entdeckenQuelle === 'serpa'
+      ? 'Ohne Ort siehst du alle Touren, nach Bundesland geordnet.'
+      : 'Ohne Ort siehst du die zuletzt geteilten Touren.';
     return;
   }
   zeile.textContent = entdeckenMitte.name
@@ -460,7 +467,12 @@ function entdeckenLeerHtml() {
     </li>`;
 }
 
-async function zeichneEntdecken() {
+function zeichneEntdecken() {
+  if (entdeckenQuelle === 'serpa') zeichneSerpaTouren();
+  else zeichneCommunityTouren();
+}
+
+async function zeichneCommunityTouren() {
   const liste = document.getElementById('entdeckenListe');
   liste.innerHTML = '<li class="geteilt-leer">Wird geladen …</li>';
 
@@ -468,6 +480,154 @@ async function zeichneEntdecken() {
   liste.innerHTML = (daten && daten.length)
     ? daten.map(geteilteTourHtml).join('')
     : entdeckenLeerHtml();
+}
+
+
+/* --- 6b. Die Touren von Serpa selbst ---------------------------------------
+
+   Redaktionelle Strecken aus serpa-touren.js: bekannte Motorradstrassen,
+   von uns als Wegpunktfolgen hinterlegt. Es gibt sie aus einem ehrlichen
+   Grund als EIGENEN Unterpunkt und nicht als Eintraege in der Community:
+   Eine Redaktionstour als Nutzerbeitrag auszugeben waere Irrefuehrung.
+
+   Die Daten sind rein oertlich - kein Server, kein Konto. Beim Antippen
+   rechnet der Planer die Strecke ueber BRouter nach, genau wie bei einer
+   gespeicherten eigenen Route. Die km- und Grad-Angaben in der Liste sind
+   deshalb Circa-Werte aus einer Vorabrechnung; nach dem Laden stehen die
+   frisch gerechneten daneben. */
+
+function serpaTourenDa() {
+  return typeof SERPA_TOUREN !== 'undefined' && Array.isArray(SERPA_TOUREN);
+}
+
+// Aus der kompakten Datenzeile wird eine Tour, wie die App sie kennt.
+function serpaTourAlsTour(eintrag) {
+  return {
+    id: eintrag.id,
+    name: eintrag.name,
+    waypoints: eintrag.punkte.map(p => ({ lat: p[0], lon: p[1] })),
+    // Ganz rechts auf dem Kurvenregler: Zwischen den engen Wegpunkten
+    // bleibt BRouter kaum Spielraum, aber wo er einen hat, soll er die
+    // kurvige Variante nehmen - dafuer stehen diese Touren ja da.
+    curveLevel: 100,
+    roundtrip: false,
+    distance: eintrag.km * 1000,
+    curviness: eintrag.grad,
+    geteiltVon: 'Serpa',
+  };
+}
+
+/* Eine Zeile der Serpa-Liste. Dieselbe Karte wie in der Community, damit
+   beide Herkuenfte gleich lesbar sind - nur der Kopf traegt das App-Symbol
+   statt eines Profilbilds, und es gibt kein "Melden": Der Meldeweg ist
+   fuer fremde Inhalte da, fuer die eigenen gibt es das Impressum. */
+function serpaTourHtml(eintrag, wegKm) {
+  const wo = [
+    escapeHtml(eintrag.gegend),
+    Number.isFinite(wegKm) ? Math.round(wegKm) + ' km weg' : '',
+  ].filter(Boolean).join(' · ');
+
+  return `
+    <li class="geteilt">
+      <div class="geteilt-kopf">
+        <img class="geteilt-bild" src="img/favicon-32.png" alt=""
+             width="32" height="32" loading="lazy">
+        <span class="geteilt-nutzer">Serpa</span>
+        <span class="geteilt-weg">${wo}</span>
+      </div>
+      <p class="geteilt-name">${escapeHtml(eintrag.name)}</p>
+      <p class="geteilt-text">${escapeHtml(eintrag.text)}</p>
+      <p class="saved-meta">ca. ${Math.round(eintrag.km)} km <i>·</i> ${Math.round(eintrag.grad)} Grad/km</p>
+      <div class="geteilt-fuss">
+        <button class="btn klein" data-oeffne="${escapeHtml(eintrag.id)}">Auf die Karte</button>
+        <button class="btn ghost klein" data-uebernimm="${escapeHtml(eintrag.id)}">Zu meinen Touren</button>
+      </div>
+    </li>`;
+}
+
+function zeichneSerpaTouren() {
+  const liste = document.getElementById('serpaListe');
+  if (!serpaTourenDa()) {
+    liste.innerHTML = '<li class="geteilt-leer">Die Tourensammlung ließ sich nicht laden.</li>';
+    return;
+  }
+
+  const umkreis = Number(document.getElementById('entdeckenUmkreis').value) || 100;
+
+  if (entdeckenMitte) {
+    // Mit Ort: nach Startpunkt-Entfernung filtern und sortieren, wie in
+    // der Community. haversine() kommt aus kern.js und liefert Meter.
+    const passend = SERPA_TOUREN
+      .map(eintrag => ({
+        eintrag,
+        wegKm: haversine(entdeckenMitte.lat, entdeckenMitte.lon,
+                         eintrag.punkte[0][0], eintrag.punkte[0][1]) / 1000,
+      }))
+      .filter(zeile => zeile.wegKm <= umkreis)
+      .sort((a, b) => a.wegKm - b.wegKm);
+
+    liste.innerHTML = passend.length
+      ? passend.map(zeile => serpaTourHtml(zeile.eintrag, zeile.wegKm)).join('')
+      : '<li class="geteilt-leer">Im gewählten Umkreis startet keine Serpa-Tour. Vergrößere den Umkreis.</li>';
+    return;
+  }
+
+  /* Ohne Ort: alle Touren, nach Bundesland gruppiert. Die Daten stehen in
+     der Datei bereits nach Bundesland sortiert - hier wird nur eine
+     Zwischenzeile eingezogen, wo ein neues beginnt. */
+  const teile = [];
+  let letztesLand = null;
+  for (const eintrag of SERPA_TOUREN) {
+    if (eintrag.land !== letztesLand) {
+      teile.push(`<li class="geteilt-gruppe">${escapeHtml(eintrag.land)}</li>`);
+      letztesLand = eintrag.land;
+    }
+    teile.push(serpaTourHtml(eintrag, null));
+  }
+  liste.innerHTML = teile.join('');
+}
+
+function öffneSerpaTour(kennung) {
+  if (!serpaTourenDa()) return;
+  const eintrag = SERPA_TOUREN.find(e => e.id === kennung);
+  if (!eintrag) return;
+
+  zeigePlaner();
+  ladeGespeicherteRoute(serpaTourAlsTour(eintrag));
+  showToast(`„${eintrag.name}“ wird berechnet …`);
+}
+
+function uebernimmSerpaTour(kennung) {
+  if (!serpaTourenDa()) return;
+  const eintrag = SERPA_TOUREN.find(e => e.id === kennung);
+  if (!eintrag) return;
+
+  // Eine eigene Kennung, wie beim Uebernehmen aus der Community: In der
+  // eigenen Liste ist es eine eigene Tour, die man umbenennen, aendern
+  // und selbst teilen darf.
+  const eigene = { ...serpaTourAlsTour(eintrag), id: Date.now(),
+                   aufgenommenAm: new Date().toISOString() };
+
+  const alle = loadSaved();
+  alle.unshift(eigene);
+  if (!speichereListe(alle)) {
+    showToast('Kein Platz mehr auf dem Gerät - bitte ein paar alte Touren löschen.');
+    return;
+  }
+  if (typeof meldeTourAnServer === 'function') meldeTourAnServer(eigene);
+  zeichneBeideRoutenListen();
+  showToast(`„${eintrag.name}“ liegt jetzt bei deinen Touren.`);
+}
+
+function zeigeEntdeckenQuelle(quelle) {
+  entdeckenQuelle = quelle;
+  document.querySelectorAll('#entdeckenQuelle .seg').forEach(knopf => {
+    knopf.classList.toggle('active', knopf.dataset.quelle === quelle);
+  });
+  document.getElementById('entdeckenSerpa').hidden = quelle !== 'serpa';
+  document.getElementById('entdeckenCommunity').hidden = quelle !== 'community';
+  zeigeLage();
+  zeichneEntdecken();
 }
 
 
@@ -603,6 +763,18 @@ verkabele('entdeckenTreffer', 'click', ereignis => {
 
 verkabele('btnEntdeckenStandort', 'click', holeEntdeckenStandort);
 verkabele('entdeckenUmkreis', 'change', zeichneEntdecken);
+
+verkabele('entdeckenQuelle', 'click', ereignis => {
+  const knopf = ereignis.target.closest('.seg');
+  if (knopf) zeigeEntdeckenQuelle(knopf.dataset.quelle);
+});
+
+verkabele('serpaListe', 'click', ereignis => {
+  const knopf = ereignis.target.closest('button');
+  if (!knopf) return;
+  if (knopf.dataset.oeffne)    öffneSerpaTour(knopf.dataset.oeffne);
+  if (knopf.dataset.uebernimm) uebernimmSerpaTour(knopf.dataset.uebernimm);
+});
 
 /* Ein Zuhoerer fuer die ganze Liste statt einer je Zeile: Die Zeilen werden
    bei jeder Suche neu gebaut, einzelne Zuhoerer muessten jedes Mal wieder
