@@ -3191,11 +3191,18 @@ function vorschauBildHtml(tour) {
   const bild = linienBild(tourLinie(tour));
   if (!bild) return '';
 
+  /* Erst die Gravur, dann die Route: Im SVG gilt die Reihenfolge im
+     Dokument, spaeter Gezeichnetes liegt oben. Die Ringe muessen also
+     zuerst kommen, sonst laegen sie ueber der Linie. */
+  const gravur = bild.gravur
+    .map(ring => `<path class="vorschau-gravur" d="${ring}"/>`).join('');
+
   return `
     <span class="tour-vorschau" aria-hidden="true">
       <svg viewBox="0 0 ${bild.breite} ${bild.hoehe}" preserveAspectRatio="xMidYMid meet">
+        ${gravur}
         <path class="vorschau-linie" d="${bild.pfad}"/>
-        <circle class="vorschau-start" cx="${bild.start.x}" cy="${bild.start.y}" r="4.5"/>
+        <circle class="vorschau-start" cx="${bild.start.x}" cy="${bild.start.y}" r="5"/>
       </svg>
     </span>`;
 }

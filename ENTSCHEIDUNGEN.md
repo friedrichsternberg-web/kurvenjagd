@@ -1061,3 +1061,121 @@ gibt: Die Strecke einer aufgezeichneten Ausfahrt soll nur mit Konto zu
 holen sein. Wer künftig eine Funktion absichert, prüft mit
 `has_function_privilege()` nach und nicht damit, dass die
 `revoke`-Zeile im SQL steht.
+
+## 30.08.2026 — Wegpunkte lassen sich einzeln entfernen und tauschen
+
+Bis dahin gab es zwei Knöpfe: „Letzten entfernen" und „Alles löschen". Wer
+sich beim zweiten von fünf Zwischenzielen vertippt hatte, musste drei
+Punkte löschen und neu setzen. Jetzt trägt jede Zeile ihre eigenen drei
+Knöpfe: hoch, runter, weg.
+
+### Pfeile statt Ziehen
+
+**Verworfen: Drag-and-drop.** Naheliegend, und auf dem Desktop auch
+angenehm. Auf dem Handy sitzt diese Liste in einer Schublade, die selbst
+scrollt — ein Ziehen darin muss die App von einem Scrollversuch
+unterscheiden, und das geht regelmäßig schief. Man will nach unten wischen
+und hat einen Wegpunkt verschoben. Zwei Pfeile treffen immer, auch mit
+Handschuhen, und brauchen keine Bibliothek.
+
+### Die Pfeile an den Enden bleiben stehen
+
+Der erste Punkt kann nicht nach oben, der letzte nicht nach unten. Beide
+Knöpfe werden deshalb blass und unbenutzbar, statt zu verschwinden: Eine
+Zeile, die plötzlich einen Knopf weniger hat, ist schmaler als die
+anderen, und die ganze Liste zappelt beim Umsortieren.
+
+### Was mit den Ortsnamen passiert
+
+Oben stehen Start und Ziel als Namen („Baden-Baden"), die Liste führt
+Koordinaten. Wird durch Löschen oder Tauschen ein **anderer** Punkt zum
+ersten oder letzten, behauptet das Suchfeld etwas, das nicht mehr stimmt.
+Es wird dann geleert. Ein leeres Feld ist ehrlicher als ein falscher
+Ortsname, und den Namen neu zu erfinden geht nicht — die App weiß nur die
+Koordinate.
+
+### „Letzten entfernen" ist weggefallen
+
+Jede Zeile hat ihr eigenes Kreuz, auch die letzte. Zwei Wege für dieselbe
+Sache nebeneinander verwirren nur — dieselbe Begründung wie beim
+Zurück-Knopf auf dem Bildschirm „Touren".
+
+## 30.08.2026 — Größere Schrift auf den Tourenkarten
+
+Die Karten waren fertig, lasen sich aber wie eine Liste und nicht wie ein
+Feed. Vier Änderungen, alle in dieselbe Richtung:
+
+- Das **Bundesland** über einer Gruppe war 12 Punkte grau — eine
+  Beischrift. Es gliedert aber die ganze Liste und ist damit eine
+  Überschrift: jetzt 17 Punkte im Metallton der übrigen Überschriften.
+- Die **Gegend** rechts oben („Nordschwarzwald") beantwortet zusammen mit
+  der Entfernung die erste Frage beim Überfliegen. Auch sie war grau, jetzt
+  Metall und 14 statt 12 Punkte.
+- **Tourname** 19 statt 16, **Beschreibung** 14,5 statt 13.
+- Die Knöpfe hießen „Auf die Karte" und „Zu meinen Touren". Beides
+  beschreibt den Weg statt das Ergebnis. Jetzt „Tour öffnen" und
+  „Tour speichern".
+
+## 30.08.2026 — Der Hintergrund des Vorschaubilds
+
+Hinter der Route liegen jetzt vier Höhenlinien auf einer gebürsteten
+Platte. Vier Entwürfe standen zur Wahl, jeder aus drei Blickwinkeln
+bewertet (Lesbarkeit, Haltung, Rechenaufwand).
+
+### Warum Höhenlinien
+
+Das App-Symbol und der Schriftzug SERPA sind gebürstetes Metall mit einer
+Höhenlinien-Gravur. Genau dieses Material liegt jetzt unter der Route,
+statt daneben eine zweite Bildsprache aufzumachen.
+
+Die Linien sind **kein Muster von der Stange**: Sie entstehen aus der
+konvexen Hülle der Tour selbst, viermal nach außen versetzt. Jede Tour
+bekommt dadurch ihre eigene Gravur, und weil die Ringe die Route
+umschließen statt sie zu kreuzen, bleibt die Mitte frei.
+
+### Drei Anläufe für den Versatz, zwei davon falsch
+
+**Erster Anlauf: ein Faktor.** Die Hülle vom Mittelpunkt aus um 1,12
+vergrößern. Klingt sauber, ist bei runden Touren auch richtig — und bricht
+bei langgestreckten. Eine Passauffahrt oder eine Fahrt von A nach B hat als
+Hülle einen Splitter; quer dazu liegt der Mittelpunkt zwei Punkte von der
+Kante entfernt, ein Faktor 1,12 gäbe dort ein Viertel Bildpunkt Abstand.
+Alle vier Ringe lägen unter der Linie. Ein Prüfer hat das vorgerechnet, und
+der Selbsttest hat es bestätigt.
+
+**Zweiter Anlauf: fester Abstand, radial vom Mittelpunkt.** Behebt das
+Problem nicht. Bei einem Splitter zeigt die Richtung vom Mittelpunkt zu
+einer Ecke am oberen Rand fast waagerecht — die Ecke wandert zur Seite
+statt nach oben.
+
+**Jetzt: jede KANTE entlang ihrer eigenen Normalen verschoben**, die neuen
+Ecken als Schnittpunkte der verschobenen Kanten. Dann stimmt der Abstand
+überall, egal wie die Tour liegt. Nachgemessen über alle 13 Serpa-Touren:
+engster Abstand 16,0 Bildpunkte bei einer 2,6 Punkte starken Linie.
+
+**Und an den spitzen Ecken ein Bogen, keine Fase.** Auch das erst im
+dritten Anlauf: Eine gerade Fase zwischen den beiden versetzten Punkten
+schneidet als Sehne durch genau den Bereich, den sie freihalten soll — an
+der Spitze blieben zwei statt sechzehn Punkte. Ein Bogen mit dem Radius des
+Abstands hält ihn dagegen überall ein.
+
+### Was der Selbsttest festhält
+
+Nicht nur, dass es aussieht wie gedacht, sondern die Zusage selbst: Jeder
+Punkt der gezeichneten Route liegt innerhalb des innersten Rings — geprüft
+an einer Acht, die sich selbst kreuzt, und an einer langgestreckten Tour.
+Die zweite Prüfung misst gegen die KANTEN des Rings, nicht gegen seine
+Ecken: Bei einem langgestreckten Umriss liegen die Ecken weit auseinander,
+die Kante dazwischen aber dicht an der Route.
+
+### Die Platte
+
+Vier CSS-Lagen: eine Vignette, die den Blick in der Mitte hält, ein Glanz
+quer über die Fläche wie bei jeder Glasfläche der App, und zwei
+Strichlagen mit **unterschiedlichem** Abstand (4 und 9 Punkte). Der
+Unterschied ist Absicht — ein einzelnes regelmäßiges Raster flimmert auf
+Bildschirmen mit krummem Zoom.
+
+Eine neue Marke in `design.css`: `--gravur-linie` bei 5,5 Prozent Weiß.
+Sie ist mit Absicht schwächer als jede Glaskante der App; die schwächste
+davon ist fast doppelt so hell. Der Streckenverlauf ist die Hauptsache.

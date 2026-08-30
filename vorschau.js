@@ -122,6 +122,194 @@ function vorschauLinie(linie, hoechstens = 90) {
    baueGpx() in kern.js, das auch nur den Text liefert und nicht die Datei
    schreibt.                                                                */
 
+/* --- 2b. Die Gravur im Hintergrund -----------------------------------------
+
+   Hinter der Route liegen vier Hoehenlinien. Sie sind kein Ornament von der
+   Stange, sondern entstehen aus der Tour selbst: aus ihrer konvexen Huelle,
+   viermal vom Mittelpunkt aus nach aussen gestaffelt und weich gerundet.
+   Jede Tour bekommt dadurch ihre eigene Gravur.
+
+   WARUM ES DIESE BILDSPRACHE IST: Das App-Symbol und der Schriftzug SERPA
+   sind gebuerstetes Metall mit einer Hoehenlinien-Gravur. Genau dieses
+   Material liegt hier unter der Route, statt daneben eine zweite
+   Bildsprache aufzumachen.
+
+   WARUM DIE ROUTE TROTZDEM LESBAR BLEIBT, und das ist der eigentliche
+   Kniff: Eine konvexe Huelle enthaelt die ganze Route. Vergroessert man
+   sie vom eigenen Mittelpunkt aus, liegt selbst der innerste Ring
+   vollstaendig ausserhalb - ein Kreuzen ist geometrisch ausgeschlossen,
+   nicht bloss unwahrscheinlich. Der Hintergrund KANN die Linie nicht
+   ueberdecken.
+
+   Die Ringe laufen absichtlich ueber den Bildrand hinaus. Das <svg>
+   schneidet sie dort ab, und das sieht aus wie eine Karte, deren
+   Hoehenlinien am Blattrand enden.                                       */
+
+/* Die vier Abstaende, in Bildpunkten gemessen und NICHT als Faktor.
+
+   Ein Faktor waere die naheliegende Loesung und ist falsch. Bei einer
+   langgestreckten Tour - einer Passauffahrt, einer Fahrt entlang eines
+   Flusses, einer Strecke von A nach B - ist die Huelle ein Splitter. Quer
+   zur Laengsachse liegt der Mittelpunkt dann zwei, drei Punkte von der
+   Kante entfernt, und ein Faktor 1,12 gaebe dort ein Viertel Bildpunkt
+   Abstand: Alle vier Ringe laegen unter der Route statt um sie herum.
+
+   Ein fester Abstand haengt dagegen nicht an der Form. Das Bild ist immer
+   auf 320 Punkte lange Kante normiert (siehe VORSCHAU_KANTE), die Zahlen
+   bedeuten also ueberall dasselbe. */
+const GRAVUR_ABSTAENDE = [16, 40, 70, 106];
+
+/* Die konvexe Huelle nach Andrew's Monotone Chain: nach x sortieren,
+   einmal unten und einmal oben entlanglaufen und dabei jede Ecke
+   wegwerfen, die nach innen knickt. Uebrig bleibt der Umriss, meist acht
+   bis fuenfzehn Ecken. */
+function konvexeHuelle(punkte) {
+  if (punkte.length < 3) return [];
+
+  const sortiert = punkte.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const kreuz = (o, a, b) =>
+    (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+
+  const haelfte = (liste) => {
+    const rand = [];
+    for (const punkt of liste) {
+      while (rand.length >= 2
+             && kreuz(rand[rand.length - 2], rand[rand.length - 1], punkt) <= 0) rand.pop();
+      rand.push(punkt);
+    }
+    rand.pop();          // die letzte Ecke gehoert der anderen Haelfte
+    return rand;
+  };
+
+  const huelle = haelfte(sortiert).concat(haelfte(sortiert.slice().reverse()));
+  return huelle.length >= 3 ? huelle : [];
+}
+
+/* Macht aus einem Vieleck eine weiche geschlossene Kurve (Catmull-Rom).
+   Die beiden Steuerpunkte je Kante kommen aus den NACHBARECKEN - dadurch
+   laeuft die Kurve durch jede Ecke, biegt aber weich ein statt zu knicken.
+   Eine Hoehenlinie hat keine Ecken.
+
+   Gerundet wird auf ganze Zahlen: Eine Hoehenlinie misst niemand nach, und
+   es spart rund ein Fuenftel des Pfadtextes. */
+function weicherRing(ecken, glaette = 0.22) {
+  const anzahl = ecken.length;
+  const bei = (i) => ecken[((i % anzahl) + anzahl) % anzahl];
+  const rund = (p) => Math.round(p * 10) / 10;
+
+  let pfad = 'M' + rund(bei(0)[0]) + ' ' + rund(bei(0)[1]);
+  for (let i = 0; i < anzahl; i++) {
+    const vor = bei(i - 1), von = bei(i), nach = bei(i + 1), danach = bei(i + 2);
+    const c1 = [von[0] + (nach[0] - vor[0]) * glaette,
+                von[1] + (nach[1] - vor[1]) * glaette];
+    const c2 = [nach[0] - (danach[0] - von[0]) * glaette,
+                nach[1] - (danach[1] - von[1]) * glaette];
+    pfad += `C${rund(c1[0])} ${rund(c1[1])},${rund(c2[0])} ${rund(c2[1])},`
+          + `${rund(nach[0])} ${rund(nach[1])}`;
+  }
+  return pfad + 'Z';
+}
+
+/* Schiebt ein konvexes Vieleck um einen festen Abstand nach aussen.
+
+   NICHT vom Mittelpunkt aus, und das ist der ganze Punkt: Bei einer
+   langgestreckten Tour zeigt die Richtung vom Mittelpunkt zu einer Ecke am
+   oberen Rand fast waagerecht - die Ecke wandert dann nach der Seite statt
+   nach oben, und quer zur Route bleibt kein Abstand. Genau daran ist die
+   erste Fassung gescheitert.
+
+   Stattdessen wird JEDE KANTE entlang ihrer eigenen Normalen verschoben
+   und die neuen Ecken als Schnittpunkte der verschobenen Kanten berechnet.
+   Dann stimmt der Abstand ueberall, egal wie die Tour liegt.
+
+   Die Grenze bei spitzen Ecken: Laufen zwei Kanten fast parallel
+   aufeinander zu, liegt ihr Schnittpunkt beliebig weit draussen und es
+   entstuende ein langer Dorn. Ab dem Vierfachen des Abstands wird deshalb
+   abgeschnitten - aus der Spitze wird eine Fase. */
+function versetzteHuelle(huelle, abstand) {
+  const anzahl = huelle.length;
+  const mitteX = huelle.reduce((s, p) => s + p[0], 0) / anzahl;
+  const mitteY = huelle.reduce((s, p) => s + p[1], 0) / anzahl;
+
+  // Je Kante: ein Punkt darauf und ihre nach aussen zeigende Normale.
+  const kanten = [];
+  for (let i = 0; i < anzahl; i++) {
+    const von = huelle[i], nach = huelle[(i + 1) % anzahl];
+    const dx = nach[0] - von[0], dy = nach[1] - von[1];
+    const laenge = Math.hypot(dx, dy) || 1e-9;
+
+    // Von den beiden Normalen die nehmen, die vom Mittelpunkt wegzeigt.
+    let nx = dy / laenge, ny = -dx / laenge;
+    const mittex = (von[0] + nach[0]) / 2, mittey = (von[1] + nach[1]) / 2;
+    if (nx * (mittex - mitteX) + ny * (mittey - mitteY) < 0) { nx = -nx; ny = -ny; }
+
+    kanten.push({ px: von[0] + nx * abstand, py: von[1] + ny * abstand, nx, ny });
+  }
+
+  /* Die neue Ecke i ist der Schnittpunkt der verschobenen Kanten i-1 und i.
+     Zwei Geraden in Normalenform, geloest ueber die Determinante. */
+  const ecken = [];
+  for (let i = 0; i < anzahl; i++) {
+    const a = kanten[(i - 1 + anzahl) % anzahl], b = kanten[i];
+    const ecke = huelle[i];
+    const nenner = a.nx * b.ny - a.ny * b.nx;
+
+    /* Ein BOGEN um die Ecke, nicht eine Spitze und nicht eine gerade Fase.
+
+       Zwei Anlaeufe davor waren falsch. Ein gemittelter Punkt laesst die
+       Ecke fast stehen, weil die beiden Normalen an einer spitzen Ecke
+       nahezu entgegengesetzt zeigen und sich aufheben. Eine gerade Fase
+       zwischen den beiden versetzten Punkten schneidet als Sehne durch
+       den Bereich, den sie freihalten soll - an einer langgestreckten
+       Tour blieben davon zwei statt sechzehn Punkte Abstand.
+
+       Ein Bogen mit dem Radius des Abstands haelt ihn dagegen ueberall
+       ein. Fuenf Zwischenschritte reichen: Was danach noch eckig waere,
+       rundet weicherRing() ohnehin. */
+    const bogen = () => {
+      const vonWinkel = Math.atan2(a.ny, a.nx);
+      let spanne = Math.atan2(b.ny, b.nx) - vonWinkel;
+      // Immer den kurzen Weg herum, sonst laeuft der Bogen aussen um das
+      // ganze Vieleck.
+      while (spanne >  Math.PI) spanne -= 2 * Math.PI;
+      while (spanne < -Math.PI) spanne += 2 * Math.PI;
+
+      for (let schritt = 0; schritt <= 5; schritt++) {
+        const w = vonWinkel + spanne * (schritt / 5);
+        ecken.push([ecke[0] + Math.cos(w) * abstand, ecke[1] + Math.sin(w) * abstand]);
+      }
+    };
+
+    // Fast parallele Kanten: kein brauchbarer Schnittpunkt. Die Normalen
+    // sind dort nahezu gleich, ein einzelner Punkt genuegt.
+    if (Math.abs(nenner) < 1e-6) {
+      ecken.push([ecke[0] + b.nx * abstand, ecke[1] + b.ny * abstand]);
+      continue;
+    }
+
+    const ca = a.nx * a.px + a.ny * a.py;
+    const cb = b.nx * b.px + b.ny * b.py;
+    const x = (ca * b.ny - cb * a.ny) / nenner;
+    const y = (a.nx * cb - b.nx * ca) / nenner;
+
+    // Der Dorn-Riegel: zu weit draussen heisst runden statt spitzen.
+    if (Math.hypot(x - ecke[0], y - ecke[1]) > abstand * 2.5) bogen();
+    else ecken.push([x, y]);
+  }
+  return ecken;
+}
+
+/* Die vier Ringe als Pfadtexte. Leere Liste, wenn die Tour keine brauchbare
+   Huelle hergibt - dann bleibt der Hintergrund eben glatt. */
+function gravurRinge(bild) {
+  const huelle = konvexeHuelle(bild);
+  if (!huelle.length) return [];
+
+  return GRAVUR_ABSTAENDE.map(abstand =>
+    weicherRing(versetzteHuelle(huelle, abstand)));
+}
+
+
 /* Die laengere Seite des Bildes. Die kuerzere ergibt sich aus der Form der
    Tour - siehe die Begruendung in linienBild(). */
 const VORSCHAU_KANTE = 320;
@@ -176,6 +364,7 @@ function linienBild(linie, rand = 12) {
 
   return {
     pfad: 'M' + bild.map(p => p[0] + ' ' + p[1]).join('L'),
+    gravur: gravurRinge(bild),
     breite: +breite.toFixed(1),
     hoehe: +hoehe.toFixed(1),
     start: { x: bild[0][0], y: bild[0][1] },

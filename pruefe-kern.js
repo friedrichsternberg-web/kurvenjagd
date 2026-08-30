@@ -528,3 +528,94 @@ prüfeFall('ohne Punkte gibt es keinen Startpunkt',
 
   prüfeFall('zu wenige Punkte ergeben kein Bild', linienBild([[10, 50]]) === null);
 })();
+
+
+/* --- Die Gravur: sie umschliesst die Route und kreuzt sie nie ------------- */
+(function () {
+  // Ein Quadrat und ein Punkt in seiner Mitte. Die Huelle muss die vier
+  // Ecken finden und den Mittelpunkt verwerfen.
+  const huelle = konvexeHuelle([[0, 0], [10, 0], [10, 10], [0, 10], [5, 5]]);
+  prüfeFall('die Huelle findet die vier Ecken', huelle.length === 4);
+  prüfeFall('der innere Punkt faellt weg',
+    !huelle.some(p => p[0] === 5 && p[1] === 5));
+
+  prüfeFall('zu wenige Punkte ergeben keine Huelle', konvexeHuelle([[0, 0], [1, 1]]).length === 0);
+
+  // Ein weicher Ring aus einem Vieleck: geschlossen, nur Kurvenstuecke.
+  const ring = weicherRing([[0, 0], [10, 0], [10, 10], [0, 10]]);
+  prüfeFall('der Ring ist geschlossen', ring.charAt(ring.length - 1) === 'Z');
+  prüfeFall('der Ring besteht aus Kurven', ring.split('C').length === 5);
+  prüfeFall('im Ring stehen nur gueltige Zahlen', !/(NaN|Infinity)/.test(ring));
+
+  /* Der eigentliche Punkt: JEDER Gravurring muss vollstaendig AUSSERHALB
+     der Route liegen. Geprueft an einer echten Form - einer Acht, die sich
+     selbst kreuzt und damit alles andere als konvex ist. */
+  const acht = [];
+  for (let i = 0; i <= 120; i++) {
+    const w = i / 120 * 2 * Math.PI;
+    acht.push([9.0 + 0.05 * Math.sin(2 * w), 50.0 + 0.04 * Math.sin(w)]);
+  }
+  const bild = linienBild(acht);
+  prüfeFall('es entstehen vier Ringe', bild.gravur.length === 4);
+
+  // Punkt-in-Vieleck ueber den Strahlensatz: Wie oft kreuzt ein Strahl
+  // nach rechts die Kanten? Ungerade heisst drinnen.
+  function drinnen(punkt, ecken) {
+    let drin = false;
+    for (let i = 0, j = ecken.length - 1; i < ecken.length; j = i++) {
+      const [xi, yi] = ecken[i], [xj, yj] = ecken[j];
+      if ((yi > punkt[1]) !== (yj > punkt[1])
+          && punkt[0] < (xj - xi) * (punkt[1] - yi) / (yj - yi) + xi) drin = !drin;
+    }
+    return drin;
+  }
+
+  // Die Ecken des innersten Rings nachbauen und pruefen, dass jeder Punkt
+  // der gezeichneten Route darin liegt.
+  const punkte = bild.pfad.slice(1).split('L').map(s => s.split(' ').map(Number));
+  const h = konvexeHuelle(punkte);
+  const innerster = versetzteHuelle(h, 16);
+
+  prüfeFall('jeder Routenpunkt liegt innerhalb des innersten Rings',
+    punkte.every(p => drinnen(p, innerster)));
+
+  /* DER FALL, DER EINEN FAKTOR ZERREISST: eine langgestreckte Tour. Die
+     Huelle ist ein Splitter, der Mittelpunkt liegt quer nur ein paar
+     Punkte von der Kante entfernt. Mit einem Faktor 1,12 bekaeme der
+     innerste Ring dort Bruchteile eines Bildpunktes Abstand und laege
+     unter der Linie. Mit festem Abstand haelt er ihn ueberall. */
+  const langgestreckt = [];
+  for (let i = 0; i <= 100; i++) {
+    langgestreckt.push([9.0 + i * 0.004, 50.0 + 0.004 * Math.sin(i / 5)]);
+  }
+  const schmal = linienBild(langgestreckt);
+  const schmalPunkte = schmal.pfad.slice(1).split('L').map(s => s.split(' ').map(Number));
+  const sh = konvexeHuelle(schmalPunkte);
+  const schmalRing = versetzteHuelle(sh, 16);
+
+  /* Der kuerzeste Abstand von irgendeinem Routenpunkt zu irgendeiner KANTE
+     des innersten Rings. Gegen die Ecken zu messen genuegt nicht: Bei einem
+     langgestreckten Umriss liegen die Ecken weit auseinander, die Kante
+     dazwischen aber dicht an der Route. */
+  const zurStrecke = (p, a, b) => {
+    const dx = b[0] - a[0], dy = b[1] - a[1];
+    const q = (dx || dy) ? Math.max(0, Math.min(1,
+      ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / (dx * dx + dy * dy))) : 0;
+    return Math.hypot(p[0] - (a[0] + q * dx), p[1] - (a[1] + q * dy));
+  };
+  let engste = Infinity;
+  for (const p of schmalPunkte) {
+    for (let i = 0; i < schmalRing.length; i++) {
+      engste = Math.min(engste, zurStrecke(p, schmalRing[i],
+                                           schmalRing[(i + 1) % schmalRing.length]));
+    }
+  }
+  prüfeFall('auch bei einer langgestreckten Tour bleibt Luft zur Route', engste > 8);
+  prüfeFall('und jeder ihrer Punkte liegt trotzdem im Ring',
+    schmalPunkte.every(p => drinnen(p, schmalRing)));
+
+  // Eine Tour ohne Flaeche darf nicht abstuerzen.
+  const gerade = linienBild([[9, 50], [9.1, 50], [9.2, 50]]);
+  prüfeFall('eine gerade Tour ergibt eine gueltige Antwort',
+    gerade === null || Array.isArray(gerade.gravur));
+})();
