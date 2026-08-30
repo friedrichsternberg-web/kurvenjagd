@@ -38,7 +38,7 @@ Dateien. Das ist auch der Grund für die 5-MB-Grenze und dafür, dass
 | Dienst | Wofür | Was mitgeht | Sitz |
 |---|---|---|---|
 | **brouter.de** | Routenberechnung | Wegpunkte als Koordinaten | Deutschland |
-| **tile.openstreetmap.org** | Kartenbilder | Kartenausschnitt, damit indirekt der Aufenthaltsort | EU |
+| **tile.openstreetmap.org** | Kartenbilder, auch als Vorschaubild auf den Tourenkarten (seit 30.08.2026) | Kartenausschnitt, damit indirekt der Aufenthaltsort | EU |
 | **nominatim.openstreetmap.org** | Ortssuche | der eingetippte Suchbegriff | EU |
 | **vpic.nhtsa.dot.gov** | Motorradmodelle im Finder | Marke und Baujahr, keine Nutzerdaten | USA |
 | **Supabase** (`copydwpdqpnwjvknsakz`) | Konten, Profile, geteilte Touren, Fotos | E-Mail, Benutzername, Profilbild, Touren, Fotos | EU (Schweden, `eu-north-1`) |
@@ -49,6 +49,16 @@ Dateien. Das ist auch der Grund für die 5-MB-Grenze und dafür, dass
 `api.api-ninjas.com`. Beide haben keinen Schlüssel und werden nicht
 aufgerufen. Bevor einer davon scharf geschaltet wird, gehört er hier
 eingetragen.
+
+### Die Vorschaubilder auf den Tourenkarten (seit 30.08.2026)
+
+Jede Tourenkarte in den Listen trägt einen kleinen Kartenausschnitt vom
+selben Kachelserver wie die große Karte. Die Ausschnitte zeigen die Lage
+der **Touren**, nicht den Standort des Nutzers; der Kachelserver erfährt
+also, welche Gegenden man sich ansieht, nicht wo man ist. Geladen wird
+träge – nur die Karten, die tatsächlich ins Bild scrollen, holen ihre
+Kacheln. Punkt 3 der Datenschutzerklärung (Kartenbilder von OpenStreetMap)
+deckt das ab.
 
 ### Der eigene Standort
 

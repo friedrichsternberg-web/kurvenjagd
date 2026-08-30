@@ -1324,85 +1324,72 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 .del:hover { color: var(--danger); }
 
 /* ---------- Das Vorschaubild einer Tour ----------
-   Der gezeichnete Streckenverlauf, oben auf jeder Tourenkarte. Kein
-   Kartenbild: warum nicht, steht ausfuehrlich im Kopf von vorschau.js.
+   Ein echter Kartenausschnitt mit der Route darauf, oben auf jeder
+   Tourenkarte. Welche Kacheln und welcher Zoom, rechnet vorschau.js aus;
+   app.js setzt sie als <image> in ein <svg>.
 
-   Es sitzt buendig in der Karte, ohne eigenen Rand, und traegt die
-   Rundungen nur oben - so wie ein Bild in einem Beitrag. Das Seitenband
-   16:9 kommt aus vorschau.js und steht hier noch einmal, damit die Flaeche
-   ihren Platz schon hat, bevor das SVG darin gezeichnet ist. */
+   Der Rahmen ist flacher als 16:9 (640 zu 280): Das Bild soll den Beitrag
+   anfuehren, nicht ausfuellen. Es sitzt buendig in der Karte, ohne eigenen
+   Rand, mit den Rundungen nur oben - wie ein Bild in einem Beitrag. */
 .tour-vorschau {
+  position: relative;
   display: block;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 640 / 280;
   margin: calc(-1 * var(--s3)) calc(-1 * var(--s3)) var(--s3);
   border-radius: var(--r-md) var(--r-md) 0 0;
   overflow: hidden;
+  /* Der Grund hinter den Kacheln: sichtbar nur, solange sie laden - und
+     als Flaeche, falls sie es nicht tun. Die Route liegt dann trotzdem da. */
+  background: var(--raum-dunkel);
   border-bottom: 1px solid var(--glas-hell);
-
-  /* Vier Lagen, von oben nach unten gelesen - eine gebuerstete Platte,
-     auf der die Route liegt:
-
-     1. Die Vignette. Sie dunkelt die Ecken ab und haelt den Blick in der
-        Mitte, wo die Route liegt. Sie dient der Lesbarkeit, nicht dem
-        Effekt - der Unterschied, den Grundsatz 1 in design.css meint.
-     2. Der Glanz quer ueber die Flaeche, wie ihn design.css fuer jede
-        Glasflaeche beschreibt: hell oben links, ausklingend nach unten.
-     3. und 4. Der Schliff. Zwei Strichlagen mit UNTERSCHIEDLICHEM Abstand
-        (4 und 9 Punkte), damit kein regelmaessiges Raster entsteht - ein
-        einzelnes Raster flimmert auf Bildschirmen mit krummem Zoom.
-
-     color-mix() statt fester Werte: Diese vier Lagen brauchen Toene, die
-     schwaecher sind als jede Marke - eine eigene Marke je Lage waere ein
-     halbes Dutzend Marken, die nirgends sonst vorkommen. CLAUDE.md laesst
-     color-mix genau dafuer zu. */
-  background:
-    radial-gradient(115% 85% at 50% 42%,
-      transparent 38%, color-mix(in srgb, black 45%, transparent) 100%),
-    linear-gradient(148deg,
-      color-mix(in srgb, white 6%, transparent) 0%,
-      transparent 46%,
-      color-mix(in srgb, black 12%, transparent) 100%),
-    repeating-linear-gradient(103deg,
-      color-mix(in srgb, white 2.2%, transparent) 0 1px,
-      transparent 1px 4px),
-    repeating-linear-gradient(103deg,
-      color-mix(in srgb, white 1.4%, transparent) 0 1px,
-      transparent 1px 9px),
-    var(--raum-dunkel);
 }
 .tour-vorschau svg { display: block; width: 100%; height: 100%; }
 
-/* Die Hoehenlinien hinter der Route. Sie koennen die Linie nicht
-   ueberdecken - der geometrische Grund steht in vorschau.js, und
-   pruefe-kern.js haelt ihn fest.
-
-   non-scaling-stroke: Das <svg> wird auf die Kartenbreite hochskaliert,
-   und ohne diese Angabe waechst die Strichstaerke mit. Eine Gravur, die
-   auf dem Tablet dreimal so dick ist wie auf dem Handy, ist keine. */
-.vorschau-gravur {
-  fill: none;
-  stroke: var(--gravur-linie);
-  stroke-width: 1;
-  vector-effect: non-scaling-stroke;
+/* Die Kartenkacheln werden in die dunkle Oberflaeche eingebettet: etwas
+   dunkler, etwas entfaerbt, damit die Karte Auskunft bleibt und nicht als
+   grelle weisse Flaeche den Feed zerschneidet. Die Werte sind von Hand
+   abgestimmt - hell genug, dass man Waelder, Orte und Strassen erkennt. */
+.vorschau-karte {
+  filter: grayscale(0.35) brightness(0.72) contrast(1.02);
 }
 
-/* Der Strich traegt die Signalfarbe, aber als Linie und nicht als Flaeche -
-   er ist keine Schaltflaeche. Der weiche Schein darunter loest ihn vom
-   dunklen Grund, ohne ihn zu verbreitern. */
-.vorschau-linie {
+/* Die Route in zwei Strichen uebereinander: erst ein heller Saum, dann das
+   Blau. Der Saum loest die Linie von der Karte - Strassen sind dort selbst
+   farbig, und Blau auf Blau (Fluesse!) braucht eine Kante. */
+.vorschau-saum {
   fill: none;
-  stroke: var(--accent-hell);
-  stroke-width: 2.6;
+  stroke: var(--text);
+  stroke-width: 7.5;
   stroke-linecap: round;
   stroke-linejoin: round;
-  filter: drop-shadow(0 0 5px var(--accent-tief));
+  opacity: 0.85;
+}
+.vorschau-linie {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 /* Der Anfangspunkt. Er beantwortet die Frage, in welche Richtung die Runde
    laeuft - bei einem geschlossenen Kringel sonst nicht zu erkennen. */
 .vorschau-start {
   fill: var(--accent-glanz);
   stroke: var(--accent-ink);
-  stroke-width: 1.6;
+  stroke-width: 2;
+}
+
+/* Die Namensnennung, unten rechts im Bild. OpenStreetMap verlangt sie
+   ueberall, wo seine Karten zu sehen sind - dieselbe Pflicht, die auf der
+   grossen Karte die Leaflet-Ecke erfuellt. */
+.vorschau-osm {
+  position: absolute;
+  right: 6px;
+  bottom: 4px;
+  font-size: 9px;
+  color: var(--muted);
+  text-shadow: 0 1px 2px var(--schatten-stark);
+  pointer-events: none;
 }
 
 /* Eine eigene Tour auf dem Bildschirm "Touren" ist eine Karte wie eine

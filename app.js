@@ -3065,6 +3065,7 @@ function zeichneRoutenListe(listenKennung, zumPlanerWechseln) {
     ? '<li class="empty">Noch nichts gespeichert.</li>'
     : gespeicherte.map(tour => gespeicherteRouteHtml(tour, mitTeilen)).join('');
   verkabeleGespeicherteListe(liste, { zeigePlanerBeimLaden: zumPlanerWechseln });
+  beobachteVorschauen(liste);
 }
 
 /* Beide Listen auf einmal. Fast immer sind beide gemeint: Wer eine Route
@@ -3176,35 +3177,89 @@ function tourLinie(tour) {
   return [];
 }
 
-/* Das Vorschaubild als fertiges HTML. Die Rechnung dahinter steht in
-   vorschau.js; hier wird sie nur in ein <svg> gesetzt.
+/* Das Vorschaubild als fertiges HTML: ein echter Kartenausschnitt mit der
+   Route darauf. Die Rechnung - welcher Zoom, welche Kacheln, wohin jeder
+   Punkt - steht in vorschau.js; hier wird sie in ein <svg> gesetzt.
 
-   Das Bild traegt aria-hidden: Ein Strich ohne Massstab und ohne Ortsnamen
-   sagt einem Screenreader nichts, was nicht zwei Zeilen weiter unten
-   ohnehin als Text steht. Es ist Schmuck mit Informationswert fuers Auge,
-   keine eigene Angabe.
+   Die Kacheln sind <image>-Elemente IM SVG, keine <img> daneben: So
+   skaliert der Browser Karte und Route gemeinsam ueber die viewBox, und
+   beide bleiben deckungsgleich, egal wie breit die Karte angezeigt wird.
 
-   Faellt vorschau.js aus oder hat die Tour zu wenige Punkte, kommt ein
-   leerer Text zurueck und die Karte hat schlicht kein Bild. */
+   Geladen wird traege: Die Kacheladresse steht zunaechst in data-quelle,
+   und erst wenn die Karte in die Naehe des Bildschirms scrollt, setzt
+   beobachteVorschauen() sie scharf. Ohne das wuerden beim Oeffnen der
+   Liste alle dreissig Karten auf einmal ihre Kacheln holen - der
+   Kachelserver ist ein freier Dienst, und wer nur die ersten drei Touren
+   ansieht, soll auch nur drei laden.
+
+   Der Vermerk unten rechts ist Pflicht, nicht Zierrat: OpenStreetMap
+   verlangt die Namensnennung ueberall dort, wo seine Karten zu sehen sind.
+
+   Das Bild traegt aria-hidden: Ein Kartenausschnitt ohne Beschriftung sagt
+   einem Screenreader nichts, was nicht zwei Zeilen weiter als Text steht. */
 function vorschauBildHtml(tour) {
-  if (typeof linienBild !== 'function') return '';
-  const bild = linienBild(tourLinie(tour));
+  if (typeof kartenBild !== 'function') return '';
+  const bild = kartenBild(tourLinie(tour));
   if (!bild) return '';
 
-  /* Erst die Gravur, dann die Route: Im SVG gilt die Reihenfolge im
-     Dokument, spaeter Gezeichnetes liegt oben. Die Ringe muessen also
-     zuerst kommen, sonst laegen sie ueber der Linie. */
-  const gravur = bild.gravur
-    .map(ring => `<path class="vorschau-gravur" d="${ring}"/>`).join('');
+  const kacheln = bild.kacheln.map(k =>
+    `<image data-quelle="https://tile.openstreetmap.org/${k.zoom}/${k.x}/${k.y}.png"
+            x="${k.links}" y="${k.oben}" width="256" height="256"/>`).join('');
 
+  /* Zwei Striche uebereinander: erst ein heller, etwas breiterer, dann der
+     blaue. Der helle Saum loest die Route von der Karte - Strassen sind
+     dort selbst farbig, und Blau auf Blau (Fluesse!) braucht eine Kante. */
   return `
     <span class="tour-vorschau" aria-hidden="true">
-      <svg viewBox="0 0 ${bild.breite} ${bild.hoehe}" preserveAspectRatio="xMidYMid meet">
-        ${gravur}
+      <svg viewBox="0 0 ${bild.breite} ${bild.hoehe}" preserveAspectRatio="xMidYMid slice">
+        <g class="vorschau-karte">${kacheln}</g>
+        <path class="vorschau-saum" d="${bild.pfad}"/>
         <path class="vorschau-linie" d="${bild.pfad}"/>
-        <circle class="vorschau-start" cx="${bild.start.x}" cy="${bild.start.y}" r="5"/>
+        <circle class="vorschau-start" cx="${bild.start.x}" cy="${bild.start.y}" r="6"/>
       </svg>
+      <span class="vorschau-osm">&copy; OpenStreetMap</span>
     </span>`;
+}
+
+/* Setzt die Kacheladressen scharf, sobald eine Karte in die Naehe des
+   Bildschirms kommt. EIN Beobachter fuer die ganze App - er wird nach
+   jedem Neuzeichnen einer Liste auf deren Karten angesetzt.
+
+   Der Vorsprung von 300 Punkten laedt die naechste Karte schon an, waehrend
+   man auf die vorige schaut - so scrollt man nie auf eine graue Flaeche.
+
+   Faellt der Beobachter aus (sehr alte Browser), laedt alles sofort - das
+   ist der Zustand von vorher, kein Schaden. */
+const vorschauBeobachter = ('IntersectionObserver' in window)
+  ? new IntersectionObserver((eintraege) => {
+      eintraege.forEach(eintrag => {
+        if (!eintrag.isIntersecting) return;
+        ladeVorschau(eintrag.target);
+        vorschauBeobachter.unobserve(eintrag.target);
+      });
+    }, { rootMargin: '300px' })
+  : null;
+
+function ladeVorschau(karte) {
+  karte.querySelectorAll('image[data-quelle]').forEach(kachel => {
+    kachel.setAttribute('href', kachel.dataset.quelle);
+    kachel.removeAttribute('data-quelle');
+  });
+}
+
+function beobachteVorschauen(behaelter) {
+  if (!behaelter) return;
+  behaelter.querySelectorAll('.tour-vorschau').forEach((karte, i) => {
+    if (!karte.querySelector('image[data-quelle]')) return;
+
+    /* Die ersten drei Karten laden SOFORT, ohne auf den Beobachter zu
+       warten: Sie sind beim Aufbau der Liste praktisch immer im Bild, und
+       der Beobachter meldet sich erst mit dem naechsten gezeichneten
+       Frame - in einem eben erst geoeffneten Reiter also spaeter, als der
+       Blick dort ankommt. Der Beobachter uebernimmt den Rest der Liste. */
+    if (i < 3 || !vorschauBeobachter) ladeVorschau(karte);
+    else vorschauBeobachter.observe(karte);
+  });
 }
 
 // Baut ein Symbol aus der Sammlung in index.html. Das <use> verweist auf

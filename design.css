@@ -205,19 +205,6 @@
   --metall-glanz: #DDD9D9;   /* Ueberschriften und Lichtkanten, 15:1 */
   --metall-tief:  #726E6C;   /* nur Grosses und Dekoratives, 4,2:1 */
 
-  /* Die Hoehenlinien im Vorschaubild einer Tour.
-
-     Sie sind mit Absicht SCHWAECHER als jede Glaskante der App - die
-     schwaechste davon (--glas-hauch) ist fast doppelt so hell. Der Grund
-     steht in vorschau.js: Der Streckenverlauf ist die Hauptsache, die
-     Gravur ist das Material darunter. Wer diesen Wert anhebt, dreht das
-     Verhaeltnis um.
-
-     Warum eine eigene Marke und nicht --glas-hauch: Beide waeren heute
-     dicht beieinander, meinen aber Verschiedenes. Eine Glasflaeche und
-     eine Gravur duerfen sich getrennt nachjustieren lassen. */
-  --gravur-linie: rgba(255, 255, 255, 0.055);
-
   /* Dasselbe in Schwarz: Schatten unter Glasflaechen, Schleier ueber Fotos.
      Sechs Stufen statt fuenf, weil Schwarz einen weiteren Bereich abdecken
      muss - vom kaum merklichen Schatten bis zur fast deckenden Abdeckung

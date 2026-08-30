@@ -503,6 +503,7 @@ async function zeichneCommunityTouren() {
   liste.innerHTML = (daten && daten.length)
     ? daten.map(geteilteTourHtml).join('')
     : entdeckenLeerHtml();
+  if (typeof beobachteVorschauen === 'function') beobachteVorschauen(liste);
 }
 
 
@@ -593,6 +594,7 @@ function zeichneSerpaTouren() {
     liste.innerHTML = passend.length
       ? passend.map(zeile => serpaTourHtml(zeile.eintrag, zeile.wegKm)).join('')
       : '<li class="geteilt-leer">Im gewählten Umkreis startet keine Serpa-Tour. Vergrößere den Umkreis.</li>';
+    if (typeof beobachteVorschauen === 'function') beobachteVorschauen(liste);
     return;
   }
 
@@ -609,6 +611,7 @@ function zeichneSerpaTouren() {
     teile.push(serpaTourHtml(eintrag, null));
   }
   liste.innerHTML = teile.join('');
+  if (typeof beobachteVorschauen === 'function') beobachteVorschauen(liste);
 }
 
 function öffneSerpaTour(kennung) {

@@ -17,7 +17,7 @@
    herbeiführen kann.                                                      */
 
 if (typeof sucheRundtour === 'undefined') load('kern.js');
-if (typeof linienBild === 'undefined') load('vorschau.js');
+if (typeof kartenBild === 'undefined') load('vorschau.js');
 
 // jsc kennt print(), der Browser kennt console.log(). Auf print() darf hier
 // nicht geprüft werden: Im Browser gibt es das auch, dort öffnet es aber
@@ -474,148 +474,71 @@ prüfeFall('ohne Punkte gibt es keinen Startpunkt',
 })();
 
 
-/* --- linienBild(): die Form stimmt, der Rahmen haelt ---------------------- */
+/* --- kartenBild(): der Kartenausschnitt hinter der Route ------------------ */
 (function () {
-  // Ein Quadrat von einem Zehntelgrad Kantenlaenge, weit im Norden. Dort
-  // ist ein Laengengrad deutlich schmaler als ein Breitengrad - ohne die
-  // Stauchung wuerde das Quadrat im Bild zum liegenden Rechteck.
-  const quadrat = [[10.0, 54.0], [10.1, 54.0], [10.1, 54.1], [10.0, 54.1], [10.0, 54.0]];
-  const bild = linienBild(quadrat);
+  if (typeof kartenBild === 'undefined') load('vorschau.js');
 
-  prüfeFall('es kommt ein Pfad heraus', typeof bild.pfad === 'string' && bild.pfad[0] === 'M');
-  prüfeFall('der Pfad hat so viele Punkte wie die Linie',
-    bild.pfad.split('L').length === quadrat.length);
+  // Eine Harzrunde: ein Rechteck von rund 20 mal 11 Kilometern.
+  const runde = [[10.5, 51.75], [10.8, 51.75], [10.8, 51.85], [10.5, 51.85], [10.5, 51.75]];
+  const bild = kartenBild(runde);
 
-  // Alle Punkte muessen im Bild liegen.
-  const zahlen = bild.pfad.slice(1).split('L').map(s => s.split(' ').map(Number));
-  prüfeFall('kein Punkt liegt ausserhalb des Bildes',
-    zahlen.every(([x, y]) => x >= 0 && x <= bild.breite && y >= 0 && y <= bild.hoehe));
+  prüfeFall('es kommt ein Bild heraus', !!bild && typeof bild.pfad === 'string');
+  prüfeFall('der Zoom ist eine ganze Zahl im erlaubten Bereich',
+    Number.isInteger(bild.zoom) && bild.zoom >= 5 && bild.zoom <= 13);
+  prüfeFall('im Pfad stehen nur gueltige Zahlen', !/(NaN|Infinity)/.test(bild.pfad));
 
-  // Die Stauchung macht aus dem Quadrat im Bild wieder ein Quadrat:
-  // 0,1 Grad Laenge sind bei 54 Grad Breite nur cos(54) so breit wie
-  // 0,1 Grad Breite. Die Seiten muessen sich also wie cos(54) verhalten.
-  const xs = zahlen.map(p => p[0]), ys = zahlen.map(p => p[1]);
-  const seitenVerhaeltnis = (Math.max(...xs) - Math.min(...xs))
-                          / (Math.max(...ys) - Math.min(...ys));
-  prüfeFall('die Laenge wird mit dem Kosinus der Breite gestaucht',
-    Math.abs(seitenVerhaeltnis - Math.cos(54 * Math.PI / 180)) < 0.02);
+  // Alle Streckenpunkte liegen im Rahmen, mit Luft zum Rand.
+  const punkte = bild.pfad.slice(1).split('L').map(s => s.split(' ').map(Number));
+  prüfeFall('jeder Streckenpunkt liegt im Rahmen',
+    punkte.every(([x, y]) => x >= 0 && x <= bild.breite && y >= 0 && y <= bild.hoehe));
+
+  /* Die Kacheln muessen den Rahmen LUECKENLOS fuellen: Fuer jeden Punkt
+     eines groben Rasters muss eine Kachel da sein, die ihn abdeckt. */
+  let allesBedeckt = true;
+  for (let px = 0; px < bild.breite; px += 40) {
+    for (let py = 0; py < bild.hoehe; py += 40) {
+      const bedeckt = bild.kacheln.some(k =>
+        px >= k.links && px < k.links + 256 && py >= k.oben && py < k.oben + 256);
+      if (!bedeckt) allesBedeckt = false;
+    }
+  }
+  prüfeFall('die Kacheln fuellen den Rahmen ohne Luecke', allesBedeckt);
 
   // Norden gehoert nach oben: Der noerdlichste Punkt hat das kleinste y.
-  const nordIndex = quadrat.reduce((b, p, i) => p[1] > quadrat[b][1] ? i : b, 0);
+  const nordIndex = runde.reduce((b, p, i) => p[1] > runde[b][1] ? i : b, 0);
   prüfeFall('Norden liegt oben im Bild',
-    zahlen[nordIndex][1] === Math.min(...ys));
+    punkte[nordIndex][1] === Math.min(...punkte.map(p => p[1])));
+
+  // Der Rahmen liegt mittig: links und rechts bleibt etwa gleich viel Luft.
+  const xs = punkte.map(p => p[0]);
+  prüfeFall('die Tour sitzt waagerecht in der Mitte',
+    Math.abs(Math.min(...xs) - (bild.breite - Math.max(...xs))) < 2);
+
+  /* Eine kleine Feierabendrunde (3 km) darf nicht auf Wohnzimmerzoom
+     springen: Bei 13 ist Schluss, auch wenn mehr passen wuerde. */
+  const klein = kartenBild([[10.50, 51.80], [10.53, 51.80], [10.53, 51.82], [10.50, 51.80]]);
+  prüfeFall('der Zoom ist nach oben gedeckelt', klein.zoom <= 13);
+
+  // Eine grosse Tour (250 km) braucht einen kleinen Zoom - und passt.
+  const gross = kartenBild([[7.0, 49.5], [10.0, 49.5], [10.0, 51.0], [7.0, 49.5]]);
+  const grossPunkte = gross.pfad.slice(1).split('L').map(s => s.split(' ').map(Number));
+  prüfeFall('auch eine grosse Tour passt in den Rahmen',
+    grossPunkte.every(([x, y]) => x >= 0 && x <= gross.breite && y >= 0 && y <= gross.hoehe));
 
   prüfeFall('Start und Ziel sind vermerkt',
     Number.isFinite(bild.start.x) && Number.isFinite(bild.ziel.y));
 
-  // Der Rahmen umschliesst die Linie: Die laengere Seite misst die volle
-  // Kante, die kuerzere entsprechend weniger. Bei diesem Quadrat ist die
-  // Hoehe die laengere Seite, weil die Breite gestaucht wird.
-  prüfeFall('die laengere Seite fuellt den Rahmen aus',
-    Math.abs(Math.max(bild.breite, bild.hoehe) - (320 + 24)) < 1);
-  prüfeFall('die kuerzere Seite ist entsprechend schmaler',
-    bild.breite < bild.hoehe);
+  // Zwei identische Punkte haben keine Ausdehnung - das darf nicht durch
+  // null teilen und nicht ueber den Zoomdeckel hinaus.
+  const punktfoermig = kartenBild([[10, 50], [10, 50]]);
+  prüfeFall('eine Tour ohne Ausdehnung ergibt gueltige Zahlen',
+    punktfoermig === null || (!/(NaN|Infinity)/.test(punktfoermig.pfad) && punktfoermig.zoom <= 13));
 
-  // Ein liegendes Rechteck muss anders herum herauskommen.
-  const liegend = linienBild([[10.0, 50.0], [10.4, 50.0], [10.4, 50.05], [10.0, 50.0]]);
-  prüfeFall('ein liegendes Rechteck wird breiter als hoch',
-    liegend.breite > liegend.hoehe);
+  prüfeFall('ein einzelner Punkt ergibt kein Bild', kartenBild([[10, 50]]) === null);
+  prüfeFall('nichts drin, nichts raus', kartenBild(null) === null);
 
-  // Eine Linie ohne Ausdehnung darf nicht durch null teilen.
-  const punktförmig = linienBild([[10, 50], [10, 50], [10, 50]]);
-  prüfeFall('eine Linie ohne Ausdehnung ergibt gueltige Zahlen',
-    punktförmig === null || !/(NaN|Infinity)/.test(punktförmig.pfad));
-
-  prüfeFall('zu wenige Punkte ergeben kein Bild', linienBild([[10, 50]]) === null);
-})();
-
-
-/* --- Die Gravur: sie umschliesst die Route und kreuzt sie nie ------------- */
-(function () {
-  // Ein Quadrat und ein Punkt in seiner Mitte. Die Huelle muss die vier
-  // Ecken finden und den Mittelpunkt verwerfen.
-  const huelle = konvexeHuelle([[0, 0], [10, 0], [10, 10], [0, 10], [5, 5]]);
-  prüfeFall('die Huelle findet die vier Ecken', huelle.length === 4);
-  prüfeFall('der innere Punkt faellt weg',
-    !huelle.some(p => p[0] === 5 && p[1] === 5));
-
-  prüfeFall('zu wenige Punkte ergeben keine Huelle', konvexeHuelle([[0, 0], [1, 1]]).length === 0);
-
-  // Ein weicher Ring aus einem Vieleck: geschlossen, nur Kurvenstuecke.
-  const ring = weicherRing([[0, 0], [10, 0], [10, 10], [0, 10]]);
-  prüfeFall('der Ring ist geschlossen', ring.charAt(ring.length - 1) === 'Z');
-  prüfeFall('der Ring besteht aus Kurven', ring.split('C').length === 5);
-  prüfeFall('im Ring stehen nur gueltige Zahlen', !/(NaN|Infinity)/.test(ring));
-
-  /* Der eigentliche Punkt: JEDER Gravurring muss vollstaendig AUSSERHALB
-     der Route liegen. Geprueft an einer echten Form - einer Acht, die sich
-     selbst kreuzt und damit alles andere als konvex ist. */
-  const acht = [];
-  for (let i = 0; i <= 120; i++) {
-    const w = i / 120 * 2 * Math.PI;
-    acht.push([9.0 + 0.05 * Math.sin(2 * w), 50.0 + 0.04 * Math.sin(w)]);
-  }
-  const bild = linienBild(acht);
-  prüfeFall('es entstehen vier Ringe', bild.gravur.length === 4);
-
-  // Punkt-in-Vieleck ueber den Strahlensatz: Wie oft kreuzt ein Strahl
-  // nach rechts die Kanten? Ungerade heisst drinnen.
-  function drinnen(punkt, ecken) {
-    let drin = false;
-    for (let i = 0, j = ecken.length - 1; i < ecken.length; j = i++) {
-      const [xi, yi] = ecken[i], [xj, yj] = ecken[j];
-      if ((yi > punkt[1]) !== (yj > punkt[1])
-          && punkt[0] < (xj - xi) * (punkt[1] - yi) / (yj - yi) + xi) drin = !drin;
-    }
-    return drin;
-  }
-
-  // Die Ecken des innersten Rings nachbauen und pruefen, dass jeder Punkt
-  // der gezeichneten Route darin liegt.
-  const punkte = bild.pfad.slice(1).split('L').map(s => s.split(' ').map(Number));
-  const h = konvexeHuelle(punkte);
-  const innerster = versetzteHuelle(h, 16);
-
-  prüfeFall('jeder Routenpunkt liegt innerhalb des innersten Rings',
-    punkte.every(p => drinnen(p, innerster)));
-
-  /* DER FALL, DER EINEN FAKTOR ZERREISST: eine langgestreckte Tour. Die
-     Huelle ist ein Splitter, der Mittelpunkt liegt quer nur ein paar
-     Punkte von der Kante entfernt. Mit einem Faktor 1,12 bekaeme der
-     innerste Ring dort Bruchteile eines Bildpunktes Abstand und laege
-     unter der Linie. Mit festem Abstand haelt er ihn ueberall. */
-  const langgestreckt = [];
-  for (let i = 0; i <= 100; i++) {
-    langgestreckt.push([9.0 + i * 0.004, 50.0 + 0.004 * Math.sin(i / 5)]);
-  }
-  const schmal = linienBild(langgestreckt);
-  const schmalPunkte = schmal.pfad.slice(1).split('L').map(s => s.split(' ').map(Number));
-  const sh = konvexeHuelle(schmalPunkte);
-  const schmalRing = versetzteHuelle(sh, 16);
-
-  /* Der kuerzeste Abstand von irgendeinem Routenpunkt zu irgendeiner KANTE
-     des innersten Rings. Gegen die Ecken zu messen genuegt nicht: Bei einem
-     langgestreckten Umriss liegen die Ecken weit auseinander, die Kante
-     dazwischen aber dicht an der Route. */
-  const zurStrecke = (p, a, b) => {
-    const dx = b[0] - a[0], dy = b[1] - a[1];
-    const q = (dx || dy) ? Math.max(0, Math.min(1,
-      ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / (dx * dx + dy * dy))) : 0;
-    return Math.hypot(p[0] - (a[0] + q * dx), p[1] - (a[1] + q * dy));
-  };
-  let engste = Infinity;
-  for (const p of schmalPunkte) {
-    for (let i = 0; i < schmalRing.length; i++) {
-      engste = Math.min(engste, zurStrecke(p, schmalRing[i],
-                                           schmalRing[(i + 1) % schmalRing.length]));
-    }
-  }
-  prüfeFall('auch bei einer langgestreckten Tour bleibt Luft zur Route', engste > 8);
-  prüfeFall('und jeder ihrer Punkte liegt trotzdem im Ring',
-    schmalPunkte.every(p => drinnen(p, schmalRing)));
-
-  // Eine Tour ohne Flaeche darf nicht abstuerzen.
-  const gerade = linienBild([[9, 50], [9.1, 50], [9.2, 50]]);
-  prüfeFall('eine gerade Tour ergibt eine gueltige Antwort',
-    gerade === null || Array.isArray(gerade.gravur));
+  // Jede Kachel traegt gueltige Namen fuer ihren Zoom.
+  prüfeFall('die Kachelnamen liegen im gueltigen Bereich',
+    bild.kacheln.every(k => k.x >= 0 && k.y >= 0
+      && k.x < Math.pow(2, k.zoom) && k.y < Math.pow(2, k.zoom)));
 })();

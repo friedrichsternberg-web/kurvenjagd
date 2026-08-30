@@ -1179,3 +1179,60 @@ Bildschirmen mit krummem Zoom.
 Eine neue Marke in `design.css`: `--gravur-linie` bei 5,5 Prozent Weiß.
 Sie ist mit Absicht schwächer als jede Glaskante der App; die schwächste
 davon ist fast doppelt so hell. Der Streckenverlauf ist die Hauptsache.
+
+## 30.08.2026 — Die Gravur ist tot, es lebe die Karte
+
+Die Höhenlinien-Gravur vom selben Tag hat den Praxistest beim einzigen
+Prüfer nicht bestanden, auf den es ankommt: Friedrich fand sie nicht
+passend. Das Vorschaubild ist jetzt ein **echter Kartenausschnitt** —
+dieselben OpenStreetMap-Kacheln wie auf der großen Karte, als stehendes
+Bild hinter der Route.
+
+### Warum das Argument von gestern nicht mehr zog
+
+Gegen Kacheln sprach: „mehrere hundert Anfragen je Feed". Das stimmte nur
+für die naive Fassung. Zwei Dinge entkräften es:
+
+- **Der ganze Tour-Rahmen braucht Zoom 8 bis 10**, und dort passt eine
+  Tour in sechs bis acht Kacheln, nicht in dreißig.
+- **Geladen wird träge**: Die Kacheladressen stehen zunächst nur als
+  `data-quelle` im SVG, ein IntersectionObserver setzt sie scharf, wenn
+  die Karte in die Nähe des Bildschirms scrollt (300 Punkte Vorsprung).
+  Wer nur drei Touren ansieht, lädt nur drei Karten. Die ersten drei je
+  Liste laden sofort — der Beobachter meldet sich erst mit dem nächsten
+  gezeichneten Frame, und so lange soll die oberste Karte nicht grau sein.
+
+Damit liegt der Feed in der Größenordnung von ein paar Sekunden Bewegung
+auf der großen Karte. Die Kacheln kommen vom selben Server, den die App
+ohnehin nutzt, die CSP kannte ihn schon, und `DATEN.md` vermerkt den
+neuen Verwendungsort.
+
+### Technik
+
+`kartenBild()` in vorschau.js rechnet Web Mercator: den größten Zoom, bei
+dem die Tour samt Rand in den Rahmen passt (5 bis 13), die Kachelnamen,
+und jeden Streckenpunkt in Bildkoordinaten. Die Kacheln sitzen als
+`<image>` **im** SVG, nicht als `<img>` daneben — so skaliert der Browser
+Karte und Route gemeinsam über die viewBox, und beide bleiben
+deckungsgleich bei jeder Anzeigebreite.
+
+Die Route trägt einen hellen Saum unter dem Blau: Straßen auf der Karte
+sind selbst farbig, und Blau auf Blau (Flüsse) braucht eine Kante. Die
+Kacheln werden per CSS-Filter leicht gedimmt und entfärbt, damit die
+Karte in der dunklen Oberfläche liegt statt sie zu zerschneiden.
+
+Der Rahmen ist flacher als vorher (640 zu 280 statt 16:9) — „das Bild
+insgesamt etwas kleiner" war Teil des Auftrags, und ein Bild, das den
+Beitrag anführt statt ausfüllt, liest sich ohnehin besser.
+
+Unten rechts im Bild steht „© OpenStreetMap" — dieselbe Namensnennung,
+die auf der großen Karte die Leaflet-Ecke erfüllt, und sie ist Pflicht.
+
+### Was mit dem Höhenprofil ist
+
+Als zweite Idee stand ein Höhenprofil im Raum. Es verlor gegen die Karte
+aus zwei Gründen: Hinter einer kartenförmigen Linie wäre ein Profil eine
+zweite, fremde Kurve im selben Bild. Und die gespeicherten Vorschaulinien
+tragen keine Höhen — sie müssten für alle Touren neu geholt werden. Der
+Planer zeigt das Profil nach dem Berechnen ohnehin. Falls es je in die
+Karten soll, dann als schmaler Streifen unter dem Bild, nicht dahinter.
