@@ -468,8 +468,8 @@ function geteilteTourHtml(zeile) {
       ${zeile.beschreibung ? `<p class="geteilt-text">${escapeHtml(zeile.beschreibung)}</p>` : ''}
       <p class="saved-meta">${kmText} <i>·</i> ${kurven}</p>
       <div class="geteilt-fuss">
-        <button class="btn klein" data-oeffne="${escapeHtml(zeile.id)}">Auf die Karte</button>
-        <button class="btn ghost klein" data-uebernimm="${escapeHtml(zeile.id)}">Zu meinen Touren</button>
+        <button class="btn klein" data-oeffne="${escapeHtml(zeile.id)}">Tour öffnen</button>
+        <button class="btn ghost klein" data-uebernimm="${escapeHtml(zeile.id)}">Tour speichern</button>
         <button class="linkbtn geteilt-melden" data-melde="${escapeHtml(zeile.id)}">Melden</button>
       </div>
     </li>`;
@@ -563,8 +563,8 @@ function serpaTourHtml(eintrag, wegKm) {
       <p class="geteilt-text">${escapeHtml(eintrag.text)}</p>
       <p class="saved-meta">ca. ${Math.round(eintrag.km)} km <i>·</i> ${Math.round(eintrag.grad)} Grad/km</p>
       <div class="geteilt-fuss">
-        <button class="btn klein" data-oeffne="${escapeHtml(eintrag.id)}">Auf die Karte</button>
-        <button class="btn ghost klein" data-uebernimm="${escapeHtml(eintrag.id)}">Zu meinen Touren</button>
+        <button class="btn klein" data-oeffne="${escapeHtml(eintrag.id)}">Tour öffnen</button>
+        <button class="btn ghost klein" data-uebernimm="${escapeHtml(eintrag.id)}">Tour speichern</button>
       </div>
     </li>`;
 }

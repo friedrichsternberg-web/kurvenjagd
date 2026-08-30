@@ -327,11 +327,104 @@ function renderWaypointList() {
     return;
   }
 
+  /* Jede Zeile traegt ihre eigenen Knoepfe: hoch, runter, weg. Bis zum
+     30.08.2026 liess sich nur der LETZTE Punkt entfernen - wer sich beim
+     zweiten von fuenf Zwischenzielen vertippt hatte, musste drei loeschen
+     und neu setzen.
+
+     WARUM PFEILE UND KEIN ZIEHEN: Diese Liste sitzt auf dem Handy in einer
+     Schublade, die selbst scrollt. Ein Ziehen darin muss die App von
+     einem Scrollversuch unterscheiden, und das geht regelmaessig schief -
+     man will nach unten wischen und hat einen Wegpunkt verschoben. Zwei
+     Pfeile treffen immer, auch mit Handschuhen.
+
+     Die Pfeile an den Enden bleiben stehen und werden nur unbenutzbar,
+     statt zu verschwinden: Eine Zeile, die ploetzlich einen Knopf weniger
+     hat, verschiebt alle anderen. */
+  const letzter = state.waypoints.length - 1;
   list.innerHTML = state.waypoints.map((wp, i) => `
     <li>
       <span class="wp-num">${waypointLabel(i)}</span>
       <span class="wp-coord">${wp.lat.toFixed(4)}, ${wp.lon.toFixed(4)}</span>
+      <span class="wp-knoepfe">
+        <button class="wp-knopf" data-hoch="${i}" ${i === 0 ? 'disabled' : ''}
+                title="Nach oben" aria-label="Punkt ${i + 1} nach oben">&uarr;</button>
+        <button class="wp-knopf" data-runter="${i}" ${i === letzter ? 'disabled' : ''}
+                title="Nach unten" aria-label="Punkt ${i + 1} nach unten">&darr;</button>
+        <button class="wp-knopf wp-weg" data-weg="${i}"
+                title="Entfernen" aria-label="Punkt ${i + 1} entfernen">&times;</button>
+      </span>
     </li>`).join('');
+}
+
+/* --- Wegpunkte umsortieren und einzeln entfernen --------------------------
+
+   Die drei Funktionen hier teilen sich zwei Sorgen, und beide sind der
+   Grund, warum sie nicht je drei Zeilen lang sind:
+
+   ERSTENS die Suchfelder. Oben stehen Start und Ziel als NAMEN da
+   ("Baden-Baden"), waehrend die Liste Koordinaten fuehrt. Wird der erste
+   oder der letzte Punkt ein anderer, behauptet das Feld etwas, das nicht
+   mehr stimmt. Dann wird es geleert - ein leeres Feld ist ehrlicher als
+   ein falscher Ortsname.
+
+   ZWEITENS die Navigation. Laeuft sie gerade, gehoert sie beendet, bevor
+   sich die Route unter ihr veraendert.                                    */
+
+// Vergisst den Ortsnamen an einem Ende, wenn dort ein anderer Punkt landet.
+function vergissSuchfeld(index) {
+  if (index === 0 && startGesetzt) {
+    startGesetzt = false;
+    document.getElementById('sucheStart').value = '';
+  }
+  if (index === state.waypoints.length - 1 && zielGesetzt) {
+    zielGesetzt = false;
+    document.getElementById('sucheZiel').value = '';
+  }
+}
+
+/* Was nach jeder Aenderung an der Punktliste passiert. Bei Punkt-zu-Punkt
+   wird neu gerechnet, sobald zwei Punkte dastehen. Bei einer Rundtour
+   NICHT: Ihre Zufallspunkte muessten neu gewuerfelt werden, und eine
+   stehengebliebene alte Linie waere eine Route, die es nicht mehr gibt. */
+function nachWegpunktAenderung() {
+  refreshWaypoints();
+
+  if (state.planMode === 'punkt' && state.waypoints.length >= 2) {
+    calculateRoute();
+    return;
+  }
+  entferneLinien();
+  document.getElementById('statsBlock').hidden = true;
+}
+
+function entferneWegpunkt(index) {
+  if (index < 0 || index >= state.waypoints.length) return;
+  if (nav.aktiv) stopNavigation();
+
+  vergissSuchfeld(index);
+  state.waypoints.splice(index, 1);
+  if (state.waypoints.length === 0) suchfelderZurücksetzen();
+
+  nachWegpunktAenderung();
+}
+
+// richtung ist -1 fuer hoch und +1 fuer runter.
+function tauscheWegpunkt(index, richtung) {
+  const ziel = index + richtung;
+  if (index < 0 || ziel < 0 || ziel >= state.waypoints.length) return;
+  if (nav.aktiv) stopNavigation();
+
+  // BEIDE Enden pruefen: Ein Tausch zwischen dem ersten und dem zweiten
+  // Punkt aendert den Start, einer am anderen Ende das Ziel.
+  vergissSuchfeld(index);
+  vergissSuchfeld(ziel);
+
+  const merker = state.waypoints[index];
+  state.waypoints[index] = state.waypoints[ziel];
+  state.waypoints[ziel] = merker;
+
+  nachWegpunktAenderung();
 }
 
 
@@ -3467,32 +3560,21 @@ document.getElementById('optMaut').addEventListener('change', (e) => {
 });
 document.getElementById('optPoi').addEventListener('change', (e) => setPoiAktiv(e.target.checked));
 
-document.getElementById('btnUndo').addEventListener('click', () => {
-  if (nav.aktiv) stopNavigation(); // Route ändert sich gleich - laufende Navigation wäre sonst inkonsistent
-  state.waypoints.pop();
+/* Ein Zuhoerer fuer die ganze Liste statt einer je Knopf: Die Zeilen
+   werden bei jeder Aenderung neu gebaut, einzelne Zuhoerer muessten also
+   jedes Mal wieder angebunden werden - und wer das einmal vergisst, hat
+   eine Liste, in der nichts mehr reagiert.
 
-  /* Der entfernte letzte Punkt kann das gesetzte Ziel gewesen sein - dann
-     muss auch das Zielfeld wieder leer sein, sonst behauptet es etwas,
-     das auf der Karte nicht mehr existiert. Dasselbe fuer den Start,
-     wenn gar nichts mehr uebrig ist. */
-  if (zielGesetzt) {
-    zielGesetzt = false;
-    document.getElementById('sucheZiel').value = '';
-  }
-  if (state.waypoints.length === 0) suchfelderZurücksetzen();
+   Der Knopf "Letzten entfernen" ist damit weggefallen. Jede Zeile hat ihr
+   eigenes Kreuz, auch die letzte; zwei Wege fuer dieselbe Sache
+   nebeneinander verwirren nur. */
+verkabele('wpList', 'click', ereignis => {
+  const knopf = ereignis.target.closest('button');
+  if (!knopf || knopf.disabled) return;
 
-  refreshWaypoints();
-
-  if (state.planMode === 'punkt' && state.waypoints.length >= 2) {
-    calculateRoute();
-    return;
-  }
-
-  // Eine Rundtour-Route ist nach dem Entfernen eines Punkts nicht mehr
-  // gültig - erst nach erneutem Klick auf "Rundtour generieren" wieder
-  // anzeigen, statt eine falsche Route stehen zu lassen.
-  entferneLinien();
-  document.getElementById('statsBlock').hidden = true;
+  if (knopf.dataset.weg    !== undefined) entferneWegpunkt(Number(knopf.dataset.weg));
+  if (knopf.dataset.hoch   !== undefined) tauscheWegpunkt(Number(knopf.dataset.hoch), -1);
+  if (knopf.dataset.runter !== undefined) tauscheWegpunkt(Number(knopf.dataset.runter), 1);
 });
 
 document.getElementById('btnClear').addEventListener('click', () => {

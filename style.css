@@ -1259,18 +1259,60 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   font-weight: 700;
   display: flex; align-items: center; justify-content: center;
 }
-.wp-coord { color: var(--muted); font-variant-numeric: tabular-nums; }
+.wp-coord {
+  flex: 1;
+  min-width: 0;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Die drei Knoepfe je Wegpunkt: hoch, runter, weg. Sie sitzen rechts und
+   halten ihren Platz, auch wenn einer davon unbenutzbar ist - eine Zeile,
+   die ploetzlich schmaler wird, laesst die ganze Liste zappeln.
+
+   36 Punkte Kantenlaenge sind kein Zufall: Das ist die Groesse, die auch
+   mit Handschuhen noch trifft. Die Zeichen darin sind kleiner, der Rest
+   ist Trefferflaeche. */
+.wp-knoepfe {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 2px;
+}
+.wp-knopf {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.14s ease, color 0.14s ease;
+}
+.wp-knopf:hover { background: var(--glas-hell); color: var(--text); }
+.wp-knopf:active { background: var(--glas-heller); }
+.wp-weg:hover { color: var(--danger); }
+/* Unbenutzbar heisst hier blass, nicht weg: Der Platz bleibt, damit die
+   Zeilen untereinander stehen. */
+.wp-knopf:disabled { opacity: 0.22; cursor: default; background: transparent; }
 
 .saved-list li { cursor: pointer; justify-content: space-between; align-items: center; gap: var(--s3); }
 .saved-list li:hover { background: var(--glas-hell); }
 .saved-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .saved-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+/* Auf dem Bildschirm "Touren" ist die eigene Tour eine Karte, kein
+   Listeneintrag - der Name traegt dort dieselbe Groesse wie bei einer
+   geteilten Tour. Im schmalen Bedienfeld des Planers bleibt er klein. */
+.tour-karte .saved-name { font-size: 17px; font-weight: 600; }
 .saved-marke { flex: 0 0 auto; display: flex; color: var(--accent-hell); }
 .saved-meta i { font-style: normal; opacity: 0.45; margin: 0 2px; }
 .saved-meta {
   color: var(--muted);
   font-family: var(--schrift-display);
-  font-size: 12px;
+  font-size: 13.5px;
   font-weight: 600;
   letter-spacing: 0.05em;
   font-variant-numeric: tabular-nums;
@@ -1355,7 +1397,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   background: var(--glas-hauch);
   border: 1px solid var(--glas-hell);
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14.5px;
   line-height: 1.55;
 }
 
@@ -1412,7 +1454,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
    gleich hoch bleibt, ob jemand ein Profilbild hat oder nicht. */
 .geteilt-bild, .geteilt-buchstabe {
   flex: 0 0 auto;
-  width: 32px; height: 32px;
+  width: 38px; height: 38px;
   border-radius: 50%;
   border: 1px solid var(--glas-rand);
 }
@@ -1423,7 +1465,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   background: var(--surface-2);
   color: var(--muted);
   font-family: var(--schrift-display);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -1434,25 +1476,28 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 500;
 }
+/* Gegend und Entfernung. Sie beantworten die erste Frage beim
+   Ueberfliegen - "wo ist das, und komme ich da hin?" - und stehen deshalb
+   im Metallton und nicht im Grau des Nebentextes. */
 .geteilt-weg {
   flex: 0 0 auto;
-  color: var(--muted);
+  color: var(--metall);
   font-family: var(--schrift-display);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
 }
 
 /* Der Tourname traegt die Anzeigeschrift, wie jede Ueberschrift im Haus.
    Er ist das, wonach man in der Liste sucht. */
 .geteilt-name {
-  margin: 0 0 4px;
+  margin: 0 0 6px;
   font-family: var(--schrift-display);
-  font-size: 16px;
+  font-size: 19px;
   font-weight: 700;
   letter-spacing: 0.02em;
   color: var(--metall-glanz);
@@ -1473,8 +1518,8 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 .geteilt-text {
   margin: 0 0 var(--s2);
   color: var(--muted);
-  font-size: 13px;
-  line-height: 1.5;
+  font-size: 14.5px;
+  line-height: 1.55;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -1488,9 +1533,12 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   margin-top: var(--s3);
 }
 .geteilt-fuss .btn { flex: 0 0 auto; }
+/* Die Karte hat Platz - hier muessen die Knoepfe nicht so schmal sein wie
+   in einer Werkzeugleiste. */
+.geteilt-fuss .btn.klein { padding: 9px 15px; font-size: 14px; }
 /* "Melden" wird nach rechts geschoben und bleibt leise. Es soll erreichbar
    sein, aber nicht so aussehen, als waere es der uebliche naechste Schritt. */
-.geteilt-melden { margin-left: auto; font-size: 12px; }
+.geteilt-melden { margin-left: auto; font-size: 13px; }
 
 /* ---------- Der Schalter im Teilen-Dialog ----------
    Das Kaestchen sitzt oben und der Text daneben, nicht darunter: Ein
@@ -1558,21 +1606,26 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 
 /* Die Zwischenzeile, wenn die Serpa-Liste nach Bundesland geordnet ist.
    Bewusst keine Karte: Sie gliedert nur und soll nicht anklickbar wirken. */
+/* Die Zwischenzeile gliedert die ganze Liste und ist damit eine
+   Ueberschrift, keine Beischrift. Sie traegt deshalb den Metallton der
+   uebrigen Ueberschriften statt des Grautons fuer Nebentext, und sie ist
+   gross genug, dass man beim Scrollen im Vorbeigehen sieht, in welchem
+   Bundesland man gerade ist. */
 .geteilt-gruppe {
-  margin: var(--s4) 0 var(--s2);
+  margin: var(--s5) 0 var(--s3);
   font-family: var(--schrift-display);
-  font-size: 12px;
+  font-size: 17px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--muted);
+  letter-spacing: 0.07em;
+  color: var(--metall-glanz);
 }
 .geteilt-gruppe:first-child { margin-top: 0; }
 
 .geteilt-leer {
   margin: var(--s5) 0;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14.5px;
   line-height: 1.55;
   text-align: center;
 }
