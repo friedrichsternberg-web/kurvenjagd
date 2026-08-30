@@ -67,20 +67,31 @@ Gebaut ist der ganze Weg — Schalter, Dialog, Umkreissuche, Melden, die
 Rechtstexte. **Nicht eingespielt ist die Datenbank.** Ohne sie zeigt der
 Reiter „Entdecken" nur den leeren Zustand, und Teilen scheitert stumm.
 
-**Zuerst, sonst läuft nichts:**
+**Die Datenbank steht seit dem 30.08.2026.** Beide SQL-Dateien sind
+eingespielt, die Tabellen `geteilte_touren` und `meldungen` gibt es, die
+Spalte `regeln_zugestimmt_am` an `profile` auch. Bis dahin scheiterte jeder
+Teilen-Versuch — die Tabelle fehlte schlicht, und die App meldete
+irreführend „Netz prüfen". Diese Meldung unterscheidet die Fälle jetzt.
 
-1. `supabase/migrationen/01-geteilte-touren.sql` im Supabase-Dashboard unter
-   **SQL Editor** einfügen und ausführen. Die Datei läuft von oben nach
-   unten durch und legt nichts doppelt an.
-1b. Danach `02-zustimmung-und-alter.sql` genauso. Sie hängt eine Spalte
-   `regeln_zugestimmt_am` an `profile` und erweitert den Auslöser
-   `neues_profil_anlegen` um eine Zeile. **Bis dahin geht die Zustimmung
-   im Formular ins Leere** — der Haken wird geprüft, aber nirgends
-   festgehalten.
-2. Danach unter **Advisors > Security** nachsehen, ob Supabase etwas an den
-   neuen Funktionen bemängelt.
-3. Mit zwei Konten prüfen: teilen, im anderen Konto finden, übernehmen,
-   zurücknehmen — und dass die Tour danach wirklich weg ist.
+**Eine Falle, die dabei aufgeflogen ist und die für JEDE künftige Funktion
+gilt:** Supabase vergibt neuen Funktionen über `ALTER DEFAULT PRIVILEGES`
+ausdrückliche Rechte an `anon` und `authenticated`. Ein
+`revoke all ... from public` nimmt nur das Recht weg, das *alle* haben —
+die beiden namentlichen Grants bleiben stehen. `geteilte_tour_holen` war
+deshalb trotz `grant ... to authenticated` weiter ohne Konto aufrufbar,
+also genau die Grenze offen, wegen der es die Funktion überhaupt gibt.
+Nachprüfen lässt sich das nur so:
+
+```sql
+select p.proname, r.rolname
+from pg_proc p, pg_roles r
+where has_function_privilege(r.rolname, p.oid, 'EXECUTE')
+  and r.rolname in ('anon','authenticated')
+  and p.pronamespace = 'public'::regnamespace;
+```
+
+**Noch zu prüfen:** Mit zwei Konten teilen, im anderen Konto finden,
+übernehmen, zurücknehmen — und dass die Tour danach wirklich weg ist.
 
 **Danach, und alles davon ist Handarbeit von dir, nicht Code:**
 

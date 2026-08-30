@@ -1281,6 +1281,65 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 }
 .del:hover { color: var(--danger); }
 
+/* ---------- Das Vorschaubild einer Tour ----------
+   Der gezeichnete Streckenverlauf, oben auf jeder Tourenkarte. Kein
+   Kartenbild: warum nicht, steht ausfuehrlich im Kopf von vorschau.js.
+
+   Es sitzt buendig in der Karte, ohne eigenen Rand, und traegt die
+   Rundungen nur oben - so wie ein Bild in einem Beitrag. Das Seitenband
+   16:9 kommt aus vorschau.js und steht hier noch einmal, damit die Flaeche
+   ihren Platz schon hat, bevor das SVG darin gezeichnet ist. */
+.tour-vorschau {
+  display: block;
+  aspect-ratio: 16 / 9;
+  margin: calc(-1 * var(--s3)) calc(-1 * var(--s3)) var(--s3);
+  border-radius: var(--r-md) var(--r-md) 0 0;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 50% 0%, var(--glas-hell), transparent 70%),
+    var(--raum-dunkel);
+  border-bottom: 1px solid var(--glas-hell);
+}
+.tour-vorschau svg { display: block; width: 100%; height: 100%; }
+
+/* Der Strich traegt die Signalfarbe, aber als Linie und nicht als Flaeche -
+   er ist keine Schaltflaeche. Der weiche Schein darunter loest ihn vom
+   dunklen Grund, ohne ihn zu verbreitern. */
+.vorschau-linie {
+  fill: none;
+  stroke: var(--accent-hell);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 5px var(--accent-tief));
+}
+/* Der Anfangspunkt. Er beantwortet die Frage, in welche Richtung die Runde
+   laeuft - bei einem geschlossenen Kringel sonst nicht zu erkennen. */
+.vorschau-start {
+  fill: var(--accent-glanz);
+  stroke: var(--accent-ink);
+  stroke-width: 1.6;
+}
+
+/* Eine eigene Tour auf dem Bildschirm "Touren" ist eine Karte wie eine
+   geteilte, keine Zeile. Die Zeile aus .saved-list wandert dafuer unter
+   das Bild und behaelt ihre Anordnung. */
+/* Der Vorsatz .saved-list ist noetig und kein Zierrat: Weiter oben steht
+   ".saved-list li { display: flex }" fuer die schmale Zeile im Planer.
+   Ohne den Vorsatz gewaenne diese Regel, und das Vorschaubild saesse links
+   NEBEN dem Text statt darueber. */
+.saved-list li.tour-karte {
+  display: block;
+  padding: var(--s3);
+  border-radius: var(--r-md);
+  margin-bottom: var(--s2);
+}
+.tour-karte-zeile {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
 /* ---------- Touren: "Meine" und "Entdecken" ----------
    Der Umschalter ist derselbe .segmented wie im Planer. Er steht direkt
    unter der Ueberschrift, damit auf einen Blick klar ist, dass dieser
@@ -1339,6 +1398,8 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
     inset 0 1px 0 var(--glas-heller),
     inset 0 -1px 0 var(--schatten-hauch);
 }
+
+.geteilt .tour-vorschau { margin-bottom: var(--s3); }
 
 .geteilt-kopf {
   display: flex;

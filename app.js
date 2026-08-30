@@ -2774,6 +2774,10 @@ function legeRouteAb({ name, beschreibung, oeffentlich }) {
     roundtripRichtung: istRundtour ? document.getElementById('roundtripRichtung').value : undefined,
     distance: state.route.distance,
     curviness: state.route.curviness,
+    // Die ausgeduennte Linie fuers Vorschaubild. Ohne sie muesste die
+    // Liste die Route erst neu berechnen, um einen Strich zu zeichnen.
+    vorschau: typeof vorschauSpeichern === 'function'
+      ? vorschauSpeichern(state.route.coords) : undefined,
   };
   all.unshift(neueTour);
   speichereListe(all);
@@ -2819,14 +2823,35 @@ function gespeicherteRouteHtml(r, mitTeilen = false) {
               title="${oeffentlich ? 'Steht öffentlich' : 'Tour teilen'}"
               aria-label="Teilen">${symbol('welt', 'klein')}</button>` : '';
 
-  return `
+  /* Zwei Gestalten fuer dieselbe Liste. Im Bedienfeld des Planers
+     (#savedList) bleibt es die schmale Zeile - dort ist die Liste eine
+     Abkuerzung zum Laden, und ein Bild je Eintrag draengte die Karte weg.
+     Auf dem Bildschirm "Touren" wird daraus eine Karte mit Vorschaubild,
+     genau wie bei den geteilten Touren daneben. Eine eigene Tour soll
+     nicht schlechter aussehen als eine fremde. */
+  if (!mitTeilen) {
+    return `
     <li data-id="${escapeHtml(r.id)}">
       ${marke}
       <span class="saved-text">
         <span class="saved-name">${escapeHtml(r.name)}</span>
         <span class="saved-meta">${kmText} <i>&middot;</i> ${kurvenText}${datum ? ' <i>&middot;</i> ' + datum : ''}</span>
-      </span>${teilen}
+      </span>
       <button class="del" data-del="${escapeHtml(r.id)}" title="Löschen">&times;</button>
+    </li>`;
+  }
+
+  return `
+    <li class="tour-karte" data-id="${escapeHtml(r.id)}">
+      ${vorschauBildHtml(r)}
+      <span class="tour-karte-zeile">
+        ${marke}
+        <span class="saved-text">
+          <span class="saved-name">${escapeHtml(r.name)}</span>
+          <span class="saved-meta">${kmText} <i>&middot;</i> ${kurvenText}${datum ? ' <i>&middot;</i> ' + datum : ''}</span>
+        </span>${teilen}
+        <button class="del" data-del="${escapeHtml(r.id)}" title="Löschen">&times;</button>
+      </span>
     </li>`;
 }
 
@@ -3034,6 +3059,52 @@ function verkabele(kennung, ereignisart, tun) {
     return;
   }
   element.addEventListener(ereignisart, tun);
+}
+
+/* Welche Linie eine Tour fuer ihr Vorschaubild hergibt. Drei Herkuenfte,
+   in dieser Reihenfolge:
+
+     vorschau   die beim Speichern abgelegte, ausgeduennte Route. Das ist
+                der Normalfall bei geplanten Touren seit dem 30.08.2026.
+     track      die aufgezeichnete Spur. Sie liegt ohnehin vollstaendig da.
+     waypoints  der Notnagel fuer Touren von vorher: nur die gesetzten
+                Punkte, verbunden durch Geraden. Das ist keine Route,
+                sondern ihr Geruest - aber es zeigt immerhin, wohin es
+                geht, und ist besser als eine leere Flaeche.
+
+   Herausgegeben wird durchgehend [Laenge, Breite], das Format der Spur. */
+function tourLinie(tour) {
+  if (!tour) return [];
+  if (Array.isArray(tour.vorschau) && tour.vorschau.length > 1) return tour.vorschau;
+  if (Array.isArray(tour.track) && tour.track.length > 1) return tour.track;
+  if (Array.isArray(tour.waypoints) && tour.waypoints.length > 1) {
+    return tour.waypoints.map(w => [w.lon, w.lat]);
+  }
+  return [];
+}
+
+/* Das Vorschaubild als fertiges HTML. Die Rechnung dahinter steht in
+   vorschau.js; hier wird sie nur in ein <svg> gesetzt.
+
+   Das Bild traegt aria-hidden: Ein Strich ohne Massstab und ohne Ortsnamen
+   sagt einem Screenreader nichts, was nicht zwei Zeilen weiter unten
+   ohnehin als Text steht. Es ist Schmuck mit Informationswert fuers Auge,
+   keine eigene Angabe.
+
+   Faellt vorschau.js aus oder hat die Tour zu wenige Punkte, kommt ein
+   leerer Text zurueck und die Karte hat schlicht kein Bild. */
+function vorschauBildHtml(tour) {
+  if (typeof linienBild !== 'function') return '';
+  const bild = linienBild(tourLinie(tour));
+  if (!bild) return '';
+
+  return `
+    <span class="tour-vorschau" aria-hidden="true">
+      <svg viewBox="0 0 ${bild.breite} ${bild.hoehe}" preserveAspectRatio="xMidYMid meet">
+        <path class="vorschau-linie" d="${bild.pfad}"/>
+        <circle class="vorschau-start" cx="${bild.start.x}" cy="${bild.start.y}" r="4.5"/>
+      </svg>
+    </span>`;
 }
 
 // Baut ein Symbol aus der Sammlung in index.html. Das <use> verweist auf

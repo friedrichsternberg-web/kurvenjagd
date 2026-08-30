@@ -42,6 +42,18 @@ create table if not exists public.geteilte_touren (
   start_lat     double precision not null,
   start_lon     double precision not null,
   ort           text,
+  /* Die ausgeduennte Linie fuers Vorschaubild in der Uebersicht: rund
+     neunzig Punkte als [Laenge, Breite], erzeugt von vorschauSpeichern()
+     in vorschau.js.
+
+     WARUM SIE IN DER UEBERSICHT MITGEHT, obwohl die Strecke es nicht tut:
+     Sie zeigt die FORM einer Tour, nicht ihren Verlauf. Aus neunzig
+     Punkten laesst sich nicht navigieren, und bei einer Aufzeichnung sind
+     die Enden vorher abgeschnitten. Der Startpunkt und der Name der
+     Gegend stehen ohnehin schon in der Uebersicht - der Strich verraet
+     also nichts, was nicht danebensteht, und macht aus einer Liste aus
+     Text einen Feed, den man ueberfliegen kann. */
+  vorschau      jsonb,
   entfernung_m  integer,
   kurvigkeit    integer,
   aufgezeichnet boolean not null default false,
@@ -56,6 +68,8 @@ create table if not exists public.geteilte_touren (
     check (ort is null or char_length(ort) <= 120),
   constraint geteilte_touren_groesse
     check (pg_column_size(daten) < 400000),
+  constraint geteilte_touren_vorschau_groesse
+    check (vorschau is null or pg_column_size(vorschau) < 8000),
   constraint geteilte_touren_lage
     check (start_lat between -90 and 90 and start_lon between -180 and 180)
 );
@@ -163,6 +177,7 @@ returns table (
   erstellt_am   timestamptz,
   benutzername  text,
   bild_pfad     text,
+  vorschau      jsonb,
   weg_km        double precision
 )
 language sql
@@ -180,6 +195,7 @@ as $$
   roh as (
     select g.id, g.name, g.beschreibung, g.ort, g.entfernung_m, g.kurvigkeit,
            g.aufgezeichnet, g.erstellt_am, p.benutzername, p.bild_pfad,
+           g.vorschau,
            -- Luftlinie nach der Plattkarten-Naeherung: ein Breitengrad sind
            -- ueberall 111,195 km, ein Laengengrad schrumpft zum Pol hin mit
            -- dem Kosinus der Breite. Fuer ein paar hundert Kilometer ist der
@@ -198,7 +214,7 @@ as $$
   )
   select roh.id, roh.name, roh.beschreibung, roh.ort, roh.entfernung_m,
          roh.kurvigkeit, roh.aufgezeichnet, roh.erstellt_am,
-         roh.benutzername, roh.bild_pfad, roh.weg_km
+         roh.benutzername, roh.bild_pfad, roh.vorschau, roh.weg_km
   from roh
   where roh.weg_km is null or roh.weg_km <= (select km from e)
   order by roh.weg_km asc nulls last, roh.erstellt_am desc
@@ -260,6 +276,23 @@ revoke all on function public.touren_in_der_naehe(double precision, double preci
 revoke all on function public.geteilte_tour_holen(uuid) from public;
 grant execute on function public.touren_in_der_naehe(double precision, double precision, integer, integer) to anon, authenticated;
 grant execute on function public.geteilte_tour_holen(uuid) to authenticated;
+
+/* Und jetzt die Zeile, ohne die das alles wirkungslos waere.
+
+   Supabase vergibt neuen Funktionen ueber ALTER DEFAULT PRIVILEGES
+   ausdrueckliche Rechte an anon und authenticated. Ein "revoke from public"
+   nimmt nur das Recht weg, das ALLE haben - die beiden namentlichen
+   Grants bleiben davon unberuehrt. Wer nur "from public" widerruft und
+   danach "to authenticated" vergibt, glaubt, er habe anon ausgesperrt,
+   und hat gar nichts getan.
+
+   Die Rolle muss also beim Namen genannt werden. Nachgeprueft wird das
+   mit has_function_privilege(), nicht mit dem blossen Vorhandensein der
+   Zeilen oben. */
+revoke execute on function public.geteilte_tour_holen(uuid) from anon;
+
+-- Ausloeser-Funktionen haben in der Schnittstelle nichts verloren.
+revoke execute on function public.geteilte_touren_grenze() from anon, authenticated;
 
 
 /* --- 5. Melden -----------------------------------------------------------

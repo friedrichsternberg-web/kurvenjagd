@@ -1003,3 +1003,61 @@ klaglos verworfen — auf einem zweiten Gerät kam sie nie an. Lautlos, weil
 eine leere Liste aussieht wie eine Tour ohne Aufzeichnung. Jetzt gibt es
 `säubreSpur()` daneben, mit Selbsttest.
 
+## 30.08.2026 — Jede Tour bekommt ein Bild
+
+Die Listen waren Text. Jetzt trägt jede Tour oben ihren gezeichneten
+Streckenverlauf, in der eigenen Liste wie im Feed.
+
+### Ein gezeichneter Strich, kein Kartenbild
+
+**Verworfen: echte Kartenkacheln je Tour.** Bei dreißig Touren im Feed sind
+das mehrere hundert Anfragen bei OpenStreetMap, allein fürs Aufklappen. Für
+einen freien Dienst unverschämt, auf dem Handy langsam, und jede Kachel
+verrät dem Kartenserver, wohin der Nutzer gerade schaut.
+
+Der Strich steckt dagegen schon in den Daten: keine Anfrage, sofort da,
+funktioniert ohne Netz. Und er zeigt genau das, worauf es beim Überfliegen
+ankommt — die Form. Eine Runde sieht aus wie eine Runde, und wo es kurvig
+wird, sieht man es am Gekritzel.
+
+### Der Rahmen umschließt die Linie
+
+Erste Fassung: die Linie in einen festen 16:9-Kasten setzen und zentrieren.
+**Am selben Tag nachgebessert.** Eine hochkant liegende Tour wie der
+Nordschwarzwald füllte damit nur einen schmalen Streifen in der Mitte,
+links und rechts blieb die Fläche leer. Jetzt umschließt der Rahmen die
+Linie, und jede Tour bekommt die volle Höhe oder die volle Breite.
+Derselbe Maßstab auf beiden Achsen, die Form stimmt also weiter.
+
+### Douglas-Peucker, nicht jeder n-te Punkt
+
+Eine Aufzeichnung hat bis zu 20000 Punkte, das Bild braucht sechzig. Jeden
+n-ten zu nehmen wäre einfacher gewesen und hätte die Kehren verschluckt.
+Douglas-Peucker behält die Ecken und wirft die Geraden weg: Aus hundert
+Punkten auf einer schnurgeraden Allee werden zwei, eine Serpentine
+überlebt vollständig.
+
+Mit eigenem Stapel statt Rekursion. Bei einer Linie, in der jeder Punkt
+zählt, ginge die Rekursion so tief wie die Liste lang ist, und der Browser
+bricht mit einem Überlauf ab.
+
+### Eine eigene Datei
+
+`vorschau.js` statt `kern.js`. Die Regel sagt: keine Datei über 1200
+Zeilen, und wird sie länger, hat sie mehr als ein Thema. `kern.js` reißt
+die Grenze längst. Das Zeichnen einer Vorschau ist ein eigenes Thema —
+also daneben statt hinein.
+
+### Die Falle bei den Rechten
+
+Beim Einspielen der Datenbank ist aufgefallen, dass `geteilte_tour_holen`
+trotz `revoke all ... from public` und `grant ... to authenticated` weiter
+ohne Konto aufrufbar war. Supabase vergibt neuen Funktionen über
+`ALTER DEFAULT PRIVILEGES` **namentliche** Rechte an `anon` und
+`authenticated`; ein Widerruf gegen `public` fasst die nicht an.
+
+Damit stand genau die Grenze offen, wegen der es die Funktion überhaupt
+gibt: Die Strecke einer aufgezeichneten Ausfahrt soll nur mit Konto zu
+holen sein. Wer künftig eine Funktion absichert, prüft mit
+`has_function_privilege()` nach und nicht damit, dass die
+`revoke`-Zeile im SQL steht.

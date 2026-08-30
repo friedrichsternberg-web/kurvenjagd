@@ -146,6 +146,15 @@ async function stelleTourOeffentlich(tour, beschreibung) {
     start_lat: start.lat,
     start_lon: start.lon,
     ort: await benenneGegend(start),
+    /* Die ausgeduennte Linie fuers Vorschaubild im Feed. Sie zeigt die
+       FORM der Tour, nicht ihren Verlauf: rund neunzig Punkte statt
+       mehrerer tausend, und bei einer Aufzeichnung sind die Enden vorher
+       ohnehin abgeschnitten. Damit kommt die Uebersicht ohne Strecke aus
+       und trotzdem nicht ohne Bild. */
+    vorschau: typeof vorschauSpeichern === 'function'
+      ? vorschauSpeichern(inhalt.track.length ? inhalt.track
+                          : inhalt.waypoints.map(w => [w.lon, w.lat]))
+      : null,
     entfernung_m: Math.round(tour.distance || 0),
     kurvigkeit: Math.round(tour.curviness || 0),
     aufgezeichnet: !!tour.aufgezeichnet,
@@ -155,9 +164,19 @@ async function stelleTourOeffentlich(tour, beschreibung) {
     // 23514 ist der Postgres-Code fuer eine verletzte Pruefbedingung. Hier
     // kann das nur die Obergrenze von 50 Touren je Konto sein.
     if (error.code === '23514') {
-      return { ok: false, meldung: 'Du hast schon 50 Touren geteilt. Nimm erst eine zurueck.' };
+      return { ok: false, meldung: 'Du hast schon 50 Touren geteilt. Nimm erst eine zurück.' };
     }
-    return { ok: false, meldung: 'Die Tour liess sich nicht teilen. Netz pruefen und noch einmal.' };
+
+    /* PGRST205 heisst: Diese Tabelle kennt der Server nicht. Das ist kein
+       Netzproblem, sondern eine nicht eingespielte Datenbank - und genau
+       das muss die Meldung sagen. Eine Aufforderung, das Netz zu pruefen,
+       schickt sonst jemanden auf die falsche Fährte, der stundenlang am
+       WLAN sucht, während das SQL unangetastet im Ordner liegt. */
+    if (error.code === 'PGRST205' || error.code === '42P01') {
+      return { ok: false, meldung: 'Das Teilen ist auf dem Server noch nicht eingerichtet.' };
+    }
+
+    return { ok: false, meldung: 'Die Tour ließ sich nicht teilen. Netz prüfen und noch einmal.' };
   }
 
   geteilteTouren.set(String(tour.id), beschreibung || '');
@@ -434,8 +453,12 @@ function geteilteTourHtml(zeile) {
     Number.isFinite(zeile.weg_km) ? Math.round(zeile.weg_km) + ' km weg' : '',
   ].filter(Boolean).join(' · ');
 
+  /* Die Uebersicht vom Server bringt eine ausgeduennte Linie mit, aber
+     keine Strecke. Das reicht fuer den Strich und haelt die Antwort klein -
+     die Begruendung steht im SQL bei der Spalte "vorschau". */
   return `
     <li class="geteilt" data-tour="${escapeHtml(zeile.id)}">
+      ${vorschauBildHtml({ vorschau: zeile.vorschau })}
       <div class="geteilt-kopf">
         ${nutzerBildHtml(zeile)}
         <span class="geteilt-nutzer">${escapeHtml(zeile.benutzername)}</span>
@@ -529,6 +552,7 @@ function serpaTourHtml(eintrag, wegKm) {
 
   return `
     <li class="geteilt">
+      ${vorschauBildHtml({ vorschau: eintrag.vorschau, waypoints: eintrag.punkte.map(p => ({ lat: p[0], lon: p[1] })) })}
       <div class="geteilt-kopf">
         <img class="geteilt-bild" src="img/favicon-32.png" alt=""
              width="32" height="32" loading="lazy">
@@ -607,6 +631,9 @@ function uebernimmSerpaTour(kennung) {
   // und selbst teilen darf.
   const eigene = { ...serpaTourAlsTour(eintrag), id: Date.now(),
                    aufgenommenAm: new Date().toISOString() };
+  // Damit die uebernommene Tour in der eigenen Liste sofort ihr Bild hat
+  // und nicht erst nach dem ersten Berechnen.
+  if (Array.isArray(eintrag.vorschau)) eigene.vorschau = eintrag.vorschau;
 
   const alle = loadSaved();
   alle.unshift(eigene);

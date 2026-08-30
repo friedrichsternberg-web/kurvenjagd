@@ -17,6 +17,7 @@
    herbeiführen kann.                                                      */
 
 if (typeof sucheRundtour === 'undefined') load('kern.js');
+if (typeof linienBild === 'undefined') load('vorschau.js');
 
 // jsc kennt print(), der Browser kennt console.log(). Auf print() darf hier
 // nicht geprüft werden: Im Browser gibt es das auch, dort öffnet es aber
@@ -447,3 +448,83 @@ prüfeFall('bei einer geplanten Route zaehlt der erste Wegpunkt',
   startPunktVon({ waypoints: [{ lat: 51.8, lon: 10.6 }] }).lon === 10.6);
 prüfeFall('ohne Punkte gibt es keinen Startpunkt',
   startPunktVon({ waypoints: [], track: [] }) === null);
+
+
+/* --- vorschauLinie(): ausduennen, ohne die Form zu verlieren --------------- */
+(function () {
+  // Eine Zickzacklinie: 400 Punkte, jeder zweite ausgelenkt. Hier zaehlt
+  // JEDER Punkt, das Verfahren darf also nicht einfach alles wegwerfen.
+  const zickzack = [];
+  for (let i = 0; i < 400; i++) zickzack.push([9.0 + i * 0.001, 50.0 + (i % 2) * 0.004]);
+  const duenn = vorschauLinie(zickzack, 90);
+  prüfeFall('die Zickzacklinie wird auf die Obergrenze gebracht', duenn.length <= 90);
+  prüfeFall('sie behaelt ihren Anfang', duenn[0][0] === zickzack[0][0]);
+  prüfeFall('sie behaelt ihr Ende',
+    duenn[duenn.length - 1][0] === zickzack[zickzack.length - 1][0]);
+
+  // Eine schnurgerade Linie schrumpft auf ihre zwei Enden - genau das ist
+  // der Zweck des Verfahrens.
+  const gerade = [];
+  for (let i = 0; i < 400; i++) gerade.push([9.0 + i * 0.001, 50.0]);
+  prüfeFall('aus einer Geraden werden zwei Punkte', vereinfacheLinie(gerade, 0.0001).length === 2);
+
+  // Kurze Linien bleiben unangetastet.
+  prüfeFall('eine kurze Linie bleibt ganz', vorschauLinie(gerade.slice(0, 5), 90).length === 5);
+  prüfeFall('nichts drin, nichts raus', vorschauLinie(null, 90).length === 0);
+})();
+
+
+/* --- linienBild(): die Form stimmt, der Rahmen haelt ---------------------- */
+(function () {
+  // Ein Quadrat von einem Zehntelgrad Kantenlaenge, weit im Norden. Dort
+  // ist ein Laengengrad deutlich schmaler als ein Breitengrad - ohne die
+  // Stauchung wuerde das Quadrat im Bild zum liegenden Rechteck.
+  const quadrat = [[10.0, 54.0], [10.1, 54.0], [10.1, 54.1], [10.0, 54.1], [10.0, 54.0]];
+  const bild = linienBild(quadrat);
+
+  prüfeFall('es kommt ein Pfad heraus', typeof bild.pfad === 'string' && bild.pfad[0] === 'M');
+  prüfeFall('der Pfad hat so viele Punkte wie die Linie',
+    bild.pfad.split('L').length === quadrat.length);
+
+  // Alle Punkte muessen im Bild liegen.
+  const zahlen = bild.pfad.slice(1).split('L').map(s => s.split(' ').map(Number));
+  prüfeFall('kein Punkt liegt ausserhalb des Bildes',
+    zahlen.every(([x, y]) => x >= 0 && x <= bild.breite && y >= 0 && y <= bild.hoehe));
+
+  // Die Stauchung macht aus dem Quadrat im Bild wieder ein Quadrat:
+  // 0,1 Grad Laenge sind bei 54 Grad Breite nur cos(54) so breit wie
+  // 0,1 Grad Breite. Die Seiten muessen sich also wie cos(54) verhalten.
+  const xs = zahlen.map(p => p[0]), ys = zahlen.map(p => p[1]);
+  const seitenVerhaeltnis = (Math.max(...xs) - Math.min(...xs))
+                          / (Math.max(...ys) - Math.min(...ys));
+  prüfeFall('die Laenge wird mit dem Kosinus der Breite gestaucht',
+    Math.abs(seitenVerhaeltnis - Math.cos(54 * Math.PI / 180)) < 0.02);
+
+  // Norden gehoert nach oben: Der noerdlichste Punkt hat das kleinste y.
+  const nordIndex = quadrat.reduce((b, p, i) => p[1] > quadrat[b][1] ? i : b, 0);
+  prüfeFall('Norden liegt oben im Bild',
+    zahlen[nordIndex][1] === Math.min(...ys));
+
+  prüfeFall('Start und Ziel sind vermerkt',
+    Number.isFinite(bild.start.x) && Number.isFinite(bild.ziel.y));
+
+  // Der Rahmen umschliesst die Linie: Die laengere Seite misst die volle
+  // Kante, die kuerzere entsprechend weniger. Bei diesem Quadrat ist die
+  // Hoehe die laengere Seite, weil die Breite gestaucht wird.
+  prüfeFall('die laengere Seite fuellt den Rahmen aus',
+    Math.abs(Math.max(bild.breite, bild.hoehe) - (320 + 24)) < 1);
+  prüfeFall('die kuerzere Seite ist entsprechend schmaler',
+    bild.breite < bild.hoehe);
+
+  // Ein liegendes Rechteck muss anders herum herauskommen.
+  const liegend = linienBild([[10.0, 50.0], [10.4, 50.0], [10.4, 50.05], [10.0, 50.0]]);
+  prüfeFall('ein liegendes Rechteck wird breiter als hoch',
+    liegend.breite > liegend.hoehe);
+
+  // Eine Linie ohne Ausdehnung darf nicht durch null teilen.
+  const punktförmig = linienBild([[10, 50], [10, 50], [10, 50]]);
+  prüfeFall('eine Linie ohne Ausdehnung ergibt gueltige Zahlen',
+    punktförmig === null || !/(NaN|Infinity)/.test(punktförmig.pfad));
+
+  prüfeFall('zu wenige Punkte ergeben kein Bild', linienBild([[10, 50]]) === null);
+})();
