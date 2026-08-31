@@ -238,22 +238,11 @@
   }
 
   /* --- 5. Aufzeichnen als Zweispalter -----------------------------------------
-     Karte links in voller Groesse, das Wertefeld als feste Spalte rechts.
-     Im Hochformat ist das Feld eine Schublade UNTER der Karte mit
-     Hoehendeckeln je Zustand (55/70/88dvh) - nebeneinander gilt beides
-     nicht mehr: Die Spalte ist immer voll hoch und scrollt selbst. */
-  .ride-screen { flex-direction: row; }
-  .ride-panel {
-    flex: 0 0 var(--spalte-ride);
-    height: 100%;
-    max-height: none;
-    border-top: 0;
-    border-left: 1px solid var(--glas-hell);
-    border-radius: 0;
-    padding-bottom: var(--s4);
-  }
-  .ride-panel.bereit,
-  .ride-panel.zusammenfassung { max-height: none; }
+     Steht seit dem 31.08.2026 in style.css unter "min-width: 761px" und
+     nicht mehr hier. Grund: Die Frage "ist genug Breite fuer zwei Spalten?"
+     ist dieselbe, die der Planer stellt, und der beantwortet sie mit 761.
+     Hier haette sie erst ab 900 x 500 gegolten - und ein Handy im Liegen
+     faellt durch die Hoehengrenze, obwohl es breit genug ist. */
 
   /* --- 6. Kleinigkeiten unter der Kopfleiste ----------------------------------
      Der Toast haengt im Hochformat 16 Punkte unter der Oberkante - hier

@@ -327,30 +327,26 @@ function renderWaypointList() {
     return;
   }
 
-  /* Jede Zeile traegt ihre eigenen Knoepfe: hoch, runter, weg. Bis zum
-     30.08.2026 liess sich nur der LETZTE Punkt entfernen - wer sich beim
-     zweiten von fuenf Zwischenzielen vertippt hatte, musste drei loeschen
-     und neu setzen.
+  /* Jede Zeile traegt einen Griff zum Verschieben und ein Kreuz zum
+     Entfernen. Gezogen wird nur am GRIFF, nicht an der ganzen Zeile: Die
+     Liste sitzt auf dem Handy in einer Schublade, die selbst scrollt, und
+     wer die ganze Zeile greifbar macht, verschiebt beim Scrollversuch
+     versehentlich einen Wegpunkt. Am Griff ist die Absicht eindeutig, und
+     der Rest der Liste scrollt weiter wie gewohnt.
 
-     WARUM PFEILE UND KEIN ZIEHEN: Diese Liste sitzt auf dem Handy in einer
-     Schublade, die selbst scrollt. Ein Ziehen darin muss die App von
-     einem Scrollversuch unterscheiden, und das geht regelmaessig schief -
-     man will nach unten wischen und hat einen Wegpunkt verschoben. Zwei
-     Pfeile treffen immer, auch mit Handschuhen.
-
-     Die Pfeile an den Enden bleiben stehen und werden nur unbenutzbar,
-     statt zu verschwinden: Eine Zeile, die ploetzlich einen Knopf weniger
-     hat, verschiebt alle anderen. */
-  const letzter = state.waypoints.length - 1;
+     Der Griff ist zugleich ein Knopf: Wer ihn mit der Tastatur anspringt,
+     sortiert mit den Pfeiltasten. Ziehen ist fuer Finger und Maus da,
+     nicht fuer jeden. */
   list.innerHTML = state.waypoints.map((wp, i) => `
     <li>
       <span class="wp-num">${waypointLabel(i)}</span>
       <span class="wp-coord">${wp.lat.toFixed(4)}, ${wp.lon.toFixed(4)}</span>
       <span class="wp-knoepfe">
-        <button class="wp-knopf" data-hoch="${i}" ${i === 0 ? 'disabled' : ''}
-                title="Nach oben" aria-label="Punkt ${i + 1} nach oben">&uarr;</button>
-        <button class="wp-knopf" data-runter="${i}" ${i === letzter ? 'disabled' : ''}
-                title="Nach unten" aria-label="Punkt ${i + 1} nach unten">&darr;</button>
+        <button class="wp-knopf wp-griff" data-griff="${i}"
+                title="Ziehen zum Verschieben"
+                aria-label="Punkt ${i + 1} verschieben: ziehen oder Pfeiltasten">
+          <svg class="ic" aria-hidden="true"><use href="#icon-griff"></use></svg>
+        </button>
         <button class="wp-knopf wp-weg" data-weg="${i}"
                 title="Entfernen" aria-label="Punkt ${i + 1} entfernen">&times;</button>
       </span>
@@ -425,6 +421,136 @@ function tauscheWegpunkt(index, richtung) {
   state.waypoints[ziel] = merker;
 
   nachWegpunktAenderung();
+}
+
+/* Einen Punkt von einem Platz auf einen anderen umhaengen. Der Unterschied
+   zum Tauschen: Beim Tauschen wechseln zwei Punkte die Plaetze, hier
+   ruecken alle dazwischen um eins weiter - das ist es, was beim Ziehen
+   ueber mehrere Zeilen passiert. */
+function verschiebeWegpunkt(von, nach) {
+  const letzter = state.waypoints.length - 1;
+  if (von === nach || von < 0 || nach < 0 || von > letzter || nach > letzter) return;
+  if (nav.aktiv) stopNavigation();
+
+  // Wie beim Tauschen: Beruehrt der Umzug ein Ende, stimmt das Suchfeld
+  // dort nicht mehr mit dem Punkt ueberein.
+  vergissSuchfeld(von);
+  vergissSuchfeld(nach);
+
+  const [punkt] = state.waypoints.splice(von, 1);
+  state.waypoints.splice(nach, 0, punkt);
+
+  nachWegpunktAenderung();
+}
+
+
+/* --- Wegpunkte mit dem Finger umsortieren ---------------------------------
+
+   Alle Zeilen der Liste sind gleich hoch. Deshalb braucht das Ziehen keine
+   Trefferpruefung gegen jede einzelne Zeile: Eine Division sagt, um wie
+   viele Plaetze der Finger den Punkt bisher verschoben hat. Die anderen
+   Zeilen ruecken um genau eine Zeilenhoehe zur Seite und zeigen so die
+   Luecke, in der der Punkt landen wird.
+
+   Weiterreichende Ueberlegungen dazu stehen in ENTSCHEIDUNGEN.md
+   (31.08.2026), unter anderem, warum die Pfeiltasten geblieben sind. */
+
+const WEGPUNKT_ROLLRAND = 44;   // so nah am Rand rollt die Schublade mit
+let wegpunktZug = null;         // laeuft ein Ziehen, steht hier sein Zustand
+
+function beginneWegpunktZiehen(ereignis) {
+  const griff = ereignis.target.closest('[data-griff]');
+  if (!griff || ereignis.button > 0) return;
+
+  const zeile = griff.closest('li');
+  const zeilen = [...zeile.parentNode.children];
+  if (zeilen.length < 2) return;   // ein einzelner Punkt laesst sich nirgends hinschieben
+
+  const behaelter = document.getElementById('panelScroll');
+  wegpunktZug = {
+    index: zeilen.indexOf(zeile),
+    zeile, zeilen, behaelter,
+    // Gemessen statt geraten: Der Abstand zweier Zeilen ist Hoehe PLUS
+    // Zwischenraum, und beides steht in style.css, nicht hier.
+    schritt: zeilen[1].getBoundingClientRect().top - zeilen[0].getBoundingClientRect().top,
+    startY: ereignis.clientY,
+    startRollen: behaelter ? behaelter.scrollTop : 0,
+    versatz: 0,
+  };
+  zeile.classList.add('wp-gegriffen');
+  griff.setPointerCapture(ereignis.pointerId);
+}
+
+function zieheWegpunkt(ereignis) {
+  const zug = wegpunktZug;
+  if (!zug) return;
+  rolleSchubladeBeimZiehen(zug, ereignis.clientY);
+
+  // Rollt die Schublade unter dem Finger weg, muss die Zeile das mitmachen -
+  // sonst bliebe sie relativ zum Fenster stehen statt am Finger.
+  const gerollt = zug.behaelter ? zug.behaelter.scrollTop - zug.startRollen : 0;
+  const weg = ereignis.clientY - zug.startY + gerollt;
+  zug.zeile.style.transform = `translateY(${weg.toFixed(1)}px)`;
+
+  const versatz = Math.min(zug.zeilen.length - 1 - zug.index,
+                           Math.max(-zug.index, Math.round(weg / zug.schritt)));
+  if (versatz === zug.versatz) return;
+  zug.versatz = versatz;
+  zeigeWegpunktLuecke(zug);
+}
+
+function zeigeWegpunktLuecke(zug) {
+  const ziel = zug.index + zug.versatz;
+  zug.zeilen.forEach((zeile, i) => {
+    if (i === zug.index) return;
+    let rueckt = 0;
+    if (zug.versatz > 0 && i > zug.index && i <= ziel) rueckt = -zug.schritt;
+    if (zug.versatz < 0 && i < zug.index && i >= ziel) rueckt = zug.schritt;
+    zeile.style.transform = rueckt ? `translateY(${rueckt.toFixed(1)}px)` : '';
+  });
+}
+
+/* Ohne das kaeme man bei acht Wegpunkten nie von unten nach oben: Die
+   Schublade ist kuerzer als die Liste, und der Finger kann nicht ueber
+   ihren Rand hinaus.
+
+   Gerollt wird nur in die Richtung, in die auch gezogen wird. Sonst
+   passierte genau das Falsche: Die unterste sichtbare Zeile liegt selbst im
+   unteren Randstreifen - sie anzufassen wuerde die Liste sofort nach unten
+   rollen, obwohl man nach oben will. Der tote Bereich von vier Punkten
+   haelt sie ausserdem still, solange nur gehalten und nicht gezogen wird. */
+function rolleSchubladeBeimZiehen(zug, y) {
+  if (!zug.behaelter) return;
+  const weg = y - zug.startY;
+  if (Math.abs(weg) < 4) return;
+
+  const platz = zug.behaelter.getBoundingClientRect();
+  if (weg < 0 && y < platz.top + WEGPUNKT_ROLLRAND) zug.behaelter.scrollTop -= 8;
+  if (weg > 0 && y > platz.bottom - WEGPUNKT_ROLLRAND) zug.behaelter.scrollTop += 8;
+}
+
+function beendeWegpunktZiehen() {
+  const zug = wegpunktZug;
+  if (!zug) return;
+  wegpunktZug = null;
+
+  zug.zeile.classList.remove('wp-gegriffen');
+  zug.zeilen.forEach((zeile) => { zeile.style.transform = ''; });
+
+  // verschiebeWegpunkt baut die Liste ohnehin neu - die aufgeraeumten
+  // Verschiebungen oben sind fuer den Fall, dass sich gar nichts aendert.
+  if (zug.versatz !== 0) verschiebeWegpunkt(zug.index, zug.index + zug.versatz);
+}
+
+/* Derselbe Weg fuer die Tastatur. Die Liste wird beim Verschieben neu
+   gebaut, deshalb muss der Griff danach von Hand wieder den Fokus
+   bekommen - sonst ginge die zweite Pfeiltaste ins Leere. */
+function verschiebeWegpunktPerTaste(index, richtung) {
+  const ziel = index + richtung;
+  if (ziel < 0 || ziel >= state.waypoints.length) return;
+  tauscheWegpunkt(index, richtung);
+  const griff = document.querySelector(`[data-griff="${ziel}"]`);
+  if (griff) griff.focus();
 }
 
 
@@ -3634,9 +3760,23 @@ verkabele('wpList', 'click', ereignis => {
   const knopf = ereignis.target.closest('button');
   if (!knopf || knopf.disabled) return;
 
-  if (knopf.dataset.weg    !== undefined) entferneWegpunkt(Number(knopf.dataset.weg));
-  if (knopf.dataset.hoch   !== undefined) tauscheWegpunkt(Number(knopf.dataset.hoch), -1);
-  if (knopf.dataset.runter !== undefined) tauscheWegpunkt(Number(knopf.dataset.runter), 1);
+  if (knopf.dataset.weg !== undefined) entferneWegpunkt(Number(knopf.dataset.weg));
+});
+
+/* Das Ziehen haengt an derselben Liste. pointermove und pointerup landen
+   dank setPointerCapture (beginneWegpunktZiehen) beim Griff und steigen von
+   dort hierher auf - ein Zuhoerer am Fenster ist deshalb nicht noetig. */
+verkabele('wpList', 'pointerdown',   beginneWegpunktZiehen);
+verkabele('wpList', 'pointermove',   zieheWegpunkt);
+verkabele('wpList', 'pointerup',     beendeWegpunktZiehen);
+verkabele('wpList', 'pointercancel', beendeWegpunktZiehen);
+
+verkabele('wpList', 'keydown', ereignis => {
+  const griff = ereignis.target.closest('[data-griff]');
+  if (!griff) return;
+  const index = Number(griff.dataset.griff);
+  if (ereignis.key === 'ArrowUp')   { ereignis.preventDefault(); verschiebeWegpunktPerTaste(index, -1); }
+  if (ereignis.key === 'ArrowDown') { ereignis.preventDefault(); verschiebeWegpunktPerTaste(index,  1); }
 });
 
 document.getElementById('btnClear').addEventListener('click', () => {

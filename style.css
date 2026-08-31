@@ -299,12 +299,14 @@
    Saum, das dunkle Band und die laufende Mittellinie. Der Saum ist noetig,
    weil das Band fast so dunkel ist wie der Berg - ohne ihn verschwaende die
    Strasse im Hang. */
+/* Weichgezeichnet wird der Schein NICHT hier, sondern ueber einen echten
+   SVG-Filter (baueFilterHtml in start.js). Der Grund steht dort: WebKit
+   wendet "filter: blur()" auf Kindelementen eines SVG gar nicht an. */
 .film-strasse-schein {
   fill: none;
   stroke: var(--metall);
   stroke-linecap: round;
   opacity: 0.16;
-  filter: blur(18px);
 }
 .film-strasse-saum {
   fill: none;
@@ -322,10 +324,9 @@
   stroke-linecap: round;
 }
 
-.film-pass-schein {
-  fill: var(--metall);
-  filter: blur(26px);
-}
+/* Nur der kleine Kern, kein Lichthof darum. Der Hof war ein voll deckender
+   grauer Kreis, sobald der Weichzeichner nicht ankam - siehe
+   ENTSCHEIDUNGEN.md, 31.08.2026. */
 .film-pass-kern { fill: var(--metall-glanz); }
 
 /* Der Schriftzug im Film. Er benutzt dasselbe Bild und denselben Untertitel
@@ -1517,6 +1518,39 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
    Zeilen untereinander stehen. */
 .wp-knopf:disabled { opacity: 0.22; cursor: default; background: transparent; }
 
+/* Der Griff zum Umsortieren.
+
+   "touch-action: none" ist hier das Entscheidende: Ohne diese Zeile nimmt
+   der Browser jedes Wischen als Scrollen der Schublade, und der Griff
+   bekaeme die Bewegung nie zu sehen. Sie steht NUR am Griff - ueber dem
+   Rest der Liste soll die Schublade weiter scrollen. Dieselbe Ueberlegung
+   steht am Pinsel des Freistellers und am Griff der Schublade selbst. */
+.wp-griff {
+  cursor: grab;
+  touch-action: none;
+}
+.wp-griff:active { cursor: grabbing; }
+.wp-griff .ic { width: 17px; height: 17px; }
+
+/* Waehrend gezogen wird, darf in der Liste nichts markiert werden - sonst
+   faerbt sich beim Ziehen mit der Maus die halbe Zeile blau. */
+.wp-list li {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Die gegriffene Zeile hebt sich ab und folgt dem Finger OHNE Nachlauf -
+   deshalb hier ausdruecklich keine Uebergangszeit. Die anderen Zeilen
+   behalten ihre und ruecken dadurch sanft zur Seite. */
+.wp-list li.wp-gegriffen {
+  position: relative;
+  z-index: 2;
+  transition: none;
+  background: var(--glas-hell);
+  border-color: var(--glas-rand);
+  box-shadow: 0 10px 24px var(--schatten-mittel);
+}
+
 .saved-list li { cursor: pointer; justify-content: space-between; align-items: center; gap: var(--s3); }
 .saved-list li:hover { background: var(--glas-hell); }
 .saved-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
@@ -2022,6 +2056,36 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 
 .ride-abschnitt { margin-top: 16px; margin-bottom: 6px; }
 .ride-notizen { resize: vertical; min-height: 70px; font-family: inherit; line-height: 1.45; }
+
+/* Ab derselben Breite, ab der auch der Planer zweispaltig wird, steht das
+   Wertefeld NEBEN der Karte statt unter ihr - rechts, weil es im HTML nach
+   der Karte kommt.
+
+   Warum die 761 und nicht die 900 aus quer.css: Das sind zwei verschiedene
+   Fragen. quer.css beantwortet "gehoert die Leiste nach oben?", diese Grenze
+   hier "ist genug Breite fuer zwei Spalten?" - dieselbe Frage, die der
+   Planer mit derselben Zahl beantwortet (siehe fensterIstSchmal in app.js).
+   Vorher hing der Ride-Zweispalter an der 900 aus quer.css; auf dem Handy im
+   Liegen (844 breit, 390 hoch) hatte der Planer damit seine Seitenleiste,
+   Ride aber eine Schublade, die fast die ganze Karte verdeckte.
+
+   Die Spalte ist hoechstens 45 Prozent breit: Bei 761 Punkten waeren die
+   vollen 380 fast die Haelfte des Fensters, und die Karte ist beim
+   Aufzeichnen das Wichtigere. */
+@media (min-width: 761px) {
+  .ride-screen { flex-direction: row; }
+  .ride-panel {
+    flex: 0 0 min(var(--spalte-ride), 45%);
+    height: 100%;
+    max-height: none;
+    border-top: 0;
+    border-left: 1px solid var(--glas-hell);
+    border-radius: 0;
+    padding-bottom: max(var(--s4), env(safe-area-inset-bottom));
+  }
+  .ride-panel.bereit,
+  .ride-panel.zusammenfassung { max-height: none; }
+}
 
 /* ---------- Fotos ---------- */
 .foto-hinzu-btn { flex: 0 0 auto; padding: 4px 10px; font-size: 12px; }

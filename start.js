@@ -176,7 +176,7 @@ function baueStrasseHtml(abschnitt, nummer, quer) {
   const breite = abschnitt.breite * (quer ? QUER_STRICH : 1);
   const zug = 'pathLength="1" stroke-dasharray="1 1" stroke-dashoffset="1"';
   return `<g class="film-strasse" data-abschnitt="${nummer}" opacity="0">`
-    + `<path class="film-strasse-schein film-zug" d="${d}" stroke-width="${(breite * 2.3).toFixed(1)}" ${zug}/>`
+    + `<path class="film-strasse-schein film-zug" filter="url(#filmSchein)" d="${d}" stroke-width="${(breite * 2.3).toFixed(1)}" ${zug}/>`
     + `<path class="film-strasse-saum film-zug"   d="${d}" stroke-width="${(breite + 3.5).toFixed(1)}" ${zug}/>`
     + `<path class="film-strasse-band film-zug"   d="${d}" stroke-width="${breite.toFixed(1)}" ${zug}/>`
     + `<path class="film-strasse-mitte" d="${d}" stroke-width="${Math.max(1.6, breite * 0.09).toFixed(1)}"`
@@ -185,11 +185,14 @@ function baueStrasseHtml(abschnitt, nummer, quer) {
     + `</g>`;
 }
 
+/* Am oberen Ende der Strasse steht ein einzelnes Licht - das Ziel, auf das
+   der Film zulaeuft. Es ist bewusst nur dieser kleine Punkt: Ein grosser
+   Lichthof lag hier einmal davor und ist am 31.08.2026 herausgeflogen
+   (siehe ENTSCHEIDUNGEN.md). */
 function bauePassHtml(quer) {
   const x = quer ? Math.round((PASS.x + QUER_VERSATZ_X) * QUER_DEHNUNG) : PASS.x;
   const y = quer ? PASS.y - QUER_VERSATZ_Y : PASS.y;
   return `<g class="film-pass" opacity="0">`
-    + `<circle class="film-pass-schein" cx="${x}" cy="${y}" r="52"/>`
     + `<circle class="film-pass-kern" cx="${x}" cy="${y}" r="7"/>`
     + `</g>`;
 }
@@ -208,11 +211,30 @@ function baueStaffelHtml(flanke, nummer, quer) {
     + `</g>`;
 }
 
+/* Der Weichzeichner fuer den Schein der Strasse.
+
+   Er steht als echter SVG-Filter hier und NICHT als "filter: blur()" in
+   style.css, weil WebKit CSS-Filter nur auf das aeussere <svg> anwendet, nicht
+   auf Kreise und Pfade darin (WebKit-Fehler 246106, seit Oktober 2022 offen).
+   Auf dem iPhone fiel der Weichzeichner deshalb ersatzlos aus und aus dem
+   Schein wurde ein hartes graues Band - am Mac war davon nichts zu sehen.
+
+   Die Filterflaeche muss groesser sein als der Pfad selbst (die -30 Prozent),
+   sonst schneidet der Filter seinen eigenen Schein an der Kante ab. */
+function baueFilterHtml() {
+  return `<defs>`
+    + `<filter id="filmSchein" x="-30%" y="-30%" width="160%" height="160%">`
+    + `<feGaussianBlur stdDeviation="18"/>`
+    + `</filter>`
+    + `</defs>`;
+}
+
 function baueBuehne(buehne) {
   const quer = istQuerformat();
   buehne.setAttribute('viewBox', quer ? QUER_RAHMEN : HOCH_RAHMEN);
   buehne.setAttribute('preserveAspectRatio', 'xMidYMid slice');
-  buehne.innerHTML = baueSterneHtml(quer)
+  buehne.innerHTML = baueFilterHtml()
+    + baueSterneHtml(quer)
     + FLANKEN.map((flanke, nummer) => baueStaffelHtml(flanke, nummer, quer)).join('');
 }
 

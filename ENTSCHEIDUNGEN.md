@@ -1310,3 +1310,127 @@ zwei Sätze, die auseinanderlaufen.
 Auftrag lautete „bei jedem Start sichtbar". Falls die drei Sekunden
 irgendwann stören: Der Ausstieg wäre eine Bedingung in `starteStartfilm()`,
 kein Umbau.
+
+## 31.08.2026 — Vier Nachbesserungen, eine davon war ein Safari-Fehler
+
+### Der graue Kreis am Ende des Startfilms
+
+Am oberen Ende der Passstraße saß ein Lichtschein: ein Kreis mit Radius 52
+in `--metall`, weichgezeichnet über `filter: blur(26px)`. Auf dem iPhone war
+davon nichts weich — dort stand eine **voll deckende graue Scheibe** im Bild.
+
+Die Ursache ist kein Gestaltungsfehler, sondern eine Lücke in WebKit:
+**CSS-Filter werden dort nur auf das äußere `<svg>` angewandt, nicht auf
+Kreise und Pfade darin** (WebKit-Fehler 246106, gemeldet am 05.10.2022, bis
+heute offen; dazu 261806 für iOS 17). `caniuse` führt CSS-Filter für Safari
+pauschal als unterstützt und kennt diese Einschränkung nicht — darauf ist
+also kein Verlass. Am Mac fällt es nie auf, auf dem Telefon sofort.
+
+Betroffen waren **zwei** Stellen: der Lichthof am Pass und der Schein unter
+der Straße. Der zweite fiel weniger auf, weil er nur 16 Prozent deckt — er
+war trotzdem falsch: statt eines Scheins lag ein doppelt so breites graues
+Band mit sauberer Kante unter der Straße.
+
+**Jetzt:** Der Lichthof ist ersatzlos weg, es bleibt der kleine Kern als
+Ziellicht. Der Straßenschein bekommt einen **echten SVG-Filter**
+(`<filter><feGaussianBlur>`, `baueFilterHtml()` in start.js) — das ist
+SVG-1.1-Grundausstattung und wirkt in jedem Browser auf Kindelementen. Die
+Filterfläche ist bewusst 60 Prozent größer als der Pfad, sonst schneidet der
+Filter seinen eigenen Schein an der Kante ab.
+
+**Regel daraus:** In einem SVG nie `filter: blur()` aus dem Stylesheet.
+
+### „Ride" wird zweispaltig, sobald der Planer es auch wird
+
+Der Zweispalter fürs Aufzeichnen stand in `quer.css` und galt damit erst ab
+900 × 500. Der Planer entscheidet dieselbe Frage seit jeher mit der 760 in
+`style.css` (Spiegel: `fensterIstSchmal()` in app.js). Folge: Auf dem Handy
+im Liegen — 844 breit, 390 hoch — bekam der Planer seine Seitenleiste, Ride
+aber weiter die Schublade, die fast die ganze Karte verdeckte.
+
+**Jetzt** steht der Ride-Zweispalter in `style.css` unter
+`@media (min-width: 761px)`, quer.css Abschnitt 5 verweist nur noch dorthin.
+Die Spalte ist höchstens 45 Prozent breit: Bei 761 Punkten wären die vollen
+380 fast die Hälfte des Fensters, und beim Aufzeichnen ist die Karte das
+Wichtigere.
+
+Die beiden Grenzen bleiben getrennt, das ist keine Aufweichung: quer.css
+beantwortet „gehört die Leiste nach oben?", die 761 „ist genug Breite für
+zwei Spalten?". Das Handy im Liegen ist der Fall, in dem die Antworten
+auseinandergehen.
+
+**Nicht angefasst:** Das Bedienfeld des Planers sitzt links, das von Ride
+rechts. Beide auf dieselbe Seite zu holen wäre eine eigene Entscheidung,
+sie stand nicht zur Debatte.
+
+### Wegpunkte werden gezogen statt gepfeilt
+
+Bis heute hatte jede Zeile zwei Pfeile, hoch und runter. Im Quelltext stand
+dazu ausdrücklich „WARUM PFEILE UND KEIN ZIEHEN": Die Liste sitzt in einer
+Schublade, die selbst scrollt, und ein Ziehen darin müsste die App von einem
+Scrollversuch unterscheiden.
+
+Das Argument war richtig, die Schlussfolgerung zu breit. **Es gilt nur, wenn
+die ganze Zeile greifbar ist.** Gezogen wird jetzt an einem eigenen Griff
+rechts; nur er trägt `touch-action: none`, über dem Rest der Liste scrollt
+die Schublade weiter wie gewohnt. Dieselbe Trennung gibt es im Projekt
+schon zweimal: am Griff der Schublade und am Pinsel des Freistellers.
+
+Drei Dinge, die nicht offensichtlich sind:
+
+- **Alle Zeilen sind gleich hoch.** Deshalb braucht das Ziehen keine
+  Trefferprüfung gegen jede Zeile — eine Division sagt, um wie viele Plätze
+  verschoben wurde. Der Zeilenabstand wird zu Beginn *gemessen*, nicht als
+  Zahl im Code geführt: er steht in style.css und soll dort bleiben.
+- **Gerollt wird nur in Zugrichtung.** Die unterste sichtbare Zeile liegt
+  selbst im unteren Randstreifen; ohne diese Bedingung würde die Liste beim
+  bloßen Anfassen nach unten wegrollen, obwohl man nach oben will. Das ist
+  beim Prüfen aufgefallen, nicht beim Entwerfen.
+- **Die Pfeiltasten bleiben.** Der Griff ist ein Knopf; wer ihn mit der
+  Tastatur anspringt, sortiert mit Hoch und Runter, und der Fokus wandert
+  mit. Ziehen ist für Finger und Maus da, nicht für jeden.
+
+`verschiebeWegpunkt()` ist neu neben `tauscheWegpunkt()` — beim Tauschen
+wechseln zwei Punkte die Plätze, beim Verschieben rücken alle dazwischen um
+eins weiter. Über mehrere Zeilen hinweg ist das nicht dasselbe.
+
+### Unscharfe Ortsnamen: geprüft, und die naheliegende Abhilfe taugt nicht
+
+**Die Ursache** ist der Klassiker: `tile.openstreetmap.org` liefert
+256er-Rasterkacheln, ein iPhone-Bildschirm hat dreifache Punktdichte. Aus
+256 Bildpunkten werden 768 Gerätepunkte — dreifach hochgerechnet. Die
+Oberfläche daneben wird in voller Auflösung gezeichnet und steht gestochen
+da; dieser Kontrast auf demselben Bildschirm ist der Grund, warum es so
+deutlich auffällt. Kein CSS der App zeichnet weich; im Navi-Modus kommt
+allerdings die Kartendrehung als **zweite**, unabhängige Weichzeichnung dazu.
+
+**Die eine schlüssellose Stellschraube** ist Leaflets `detectRetina`. Es
+holt Kacheln einer Zoomstufe tiefer und zeichnet sie halb so groß — aus
+dreifachem wird anderthalbfaches Hochrechnen. Nachgestellt und angesehen
+(dreifach vergrößerte Gegenüberstellung, derselbe Ausschnitt): Die Namen
+werden schärfer und **halb so hoch**. Aus „weich, aber lesbar" wird „scharf,
+aber winzig". Für einen Blick beim Fahren ist das der schlechtere Tausch.
+
+Dazu käme der Preis: **genau viermal so viele Kachelanfragen** an einen
+spendenfinanzierten Server, im Navi-Modus 80 bis 100 je Ansicht statt 20 bis
+25, fortlaufend während der Fahrt. Die Tile Usage Policy verbietet das
+nicht — es sind Kacheln des gerade angesehenen Ausschnitts, kein Bulk
+Download —, sagt aber: „We may block access, without notice, if your usage
+degrades the service."
+
+**Also nicht eingebaut.** Es ist eine Zeile, falls die Entscheidung je
+anders ausfällt.
+
+**Verworfen wurden außerdem:** Ein Kachelserver mit @2x-Kacheln — alles
+Kostenlose und Schlüssellose (openstreetmap.de/.fr, CyclOSM, OpenTopoMap,
+memomaps) liefert 256er; alles mit Retina verlangt ein Konto, und ein
+Schlüssel im Quelltext einer offenen Webseite ist keiner.
+`maxNativeZoom` — das ist dieselbe Schraube andersherum und macht die Karte
+nachweislich unschärfer, nicht schärfer.
+
+**Der richtige Weg sind Vektorkacheln** (MapLibre GL, dazu
+`vector.openstreetmap.org` oder OpenFreeMap, beide ohne Schlüssel). Dort
+wird die Beschriftung erst im Browser gesetzt, also immer in voller
+Geräteauflösung — und dieselbe Umstellung löste die Drehung im Navi-Modus
+gleich mit, die heute über CSS läuft. Das ist ein eigener Auftrag, er steht
+in AUFGABEN.md.

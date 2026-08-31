@@ -473,6 +473,51 @@ Datenschutzerklärung, siehe oben.
   Lässt sich im Simulator erzeugen, wenn die Hülle steht.
 - **`fonts 2/` und `Design Inspro/`** liegen unbenutzt im Projektordner und
   können weg.
+- **Ortsnamen auf der Karte sind auf dem Handy unscharf** (geprüft am
+  31.08.2026). Raster-Kacheln mit 256 Punkten auf einem Bildschirm mit
+  dreifacher Punktdichte — dreifach hochgerechnet. Die eine schlüssellose
+  Stellschraube (`detectRetina`) macht die Namen zwar schärfer, aber halb so
+  hoch und kostet viermal so viele Kachelanfragen; die Gegenüberstellung
+  steht in ENTSCHEIDUNGEN.md, das Ergebnis war „nicht einbauen".
+
+## Vektorkacheln statt Rasterkacheln (offen seit 31.08.2026)
+
+Zwei Probleme mit einer Ursache, und beide lösen sich mit demselben Schritt:
+
+1. **Die Beschriftung ist auf dem Handy unscharf.** 256er-Rasterkacheln auf
+   einem Bildschirm mit dreifacher Punktdichte werden dreifach hochgerechnet.
+   Mit Rasterkacheln von `tile.openstreetmap.org` ist das nicht zu beheben,
+   die Abwägung steht in ENTSCHEIDUNGEN.md (31.08.2026).
+2. **Die Kartendrehung im Navi-Modus** läuft heute über ein CSS-`rotate` auf
+   einem Kartenquadrat mit der Bildschirmdiagonale. Das rechnet die ohnehin
+   aufgeblasene Kachelfläche ein zweites Mal um — also Unschärfe auf
+   Unschärfe, ausgerechnet beim Fahren.
+
+Vektorkacheln enthalten Geometrie und Text als **Daten**. Die Beschriftung
+wird erst im Browser gesetzt, also immer in voller Geräteauflösung, bei jeder
+Zoomstufe und in jedem Drehwinkel — und die Drehung kann die Kartenschicht
+selbst übernehmen, statt sie über CSS zu erzwingen.
+
+**Kostenlos und ohne Schlüssel** gibt es sie: `vector.openstreetmap.org`
+(eigener Dienst der OSM Foundation, eigene Nutzungsordnung, Stand April 2025
+noch nicht endgültig) und OpenFreeMap (keine Registrierung, keine Schlüssel,
+keine Obergrenze; spendenfinanziert von einer Einzelperson).
+
+**Der Aufwand ist das Problem, nicht die Kosten.** Es braucht MapLibre GL JS
+(rund 800 KB, ein WebGL-Renderer), eine Style-Datei, Glyphen und Sprites,
+dazu die CSP in `index.html` um Kachel- und Glyphen-Host und `worker-src
+blob:`. Zwei Wege:
+
+- **Brücke** (`maplibre-gl-leaflet`): Leaflet bleibt, MapLibre zeichnet nur
+  die Basiskarte darunter. Alle 21 Abschnitte in app.js bleiben unangetastet
+  — dafür hängen zwei Kartenbibliotheken gleichzeitig im Speicher.
+- **Umzug:** `L.marker`, `L.polyline`, `L.popup` und die CSS-Drehung fallen
+  weg und müssen neu geschrieben werden.
+
+Beim Ersetzen von Leaflet.Rotate (siehe unten) hat MapLibre schon einmal
+verloren, weil es „die gesamte Kartenschicht ausgetauscht hätte". Der
+Unterschied heute: Es löste zwei Probleme statt einem. Ein eigener Tag, kein
+Nebenbei — und **nicht in app.js**, die ist längst über der Zeilengrenze.
 
 ---
 
