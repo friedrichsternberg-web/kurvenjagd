@@ -1434,3 +1434,40 @@ wird die Beschriftung erst im Browser gesetzt, also immer in voller
 Geräteauflösung — und dieselbe Umstellung löste die Drehung im Navi-Modus
 gleich mit, die heute über CSS läuft. Das ist ein eigener Auftrag, er steht
 in AUFGABEN.md.
+
+## 31.08.2026, spaeter Abend — Sechs Nachbesserungen nach dem Ansehen
+
+Friedrich hat alles vom Vormittag auf dem Geraet angesehen. Was daraufhin
+gekippt ist:
+
+- **Auch der kleine Lichtpunkt am Pass ist raus.** Erst fiel der große
+  Lichthof (WebKit-Fehler, siehe oben), jetzt auch der Kern: Die Straße
+  endet einfach in der Kammscharte. Das Passlicht war eine Idee des
+  Entwurfs, nicht der App.
+- **Das Ride-Feld sitzt jetzt LINKS**, auf derselben Seite wie das
+  Bedienfeld des Planers — Friedrichs Ansage nach dem Ansehen; der Eintrag
+  vom Vormittag („Feld rechts, nicht angefasst") ist damit überholt.
+  Gedreht per `row-reverse`, die Reihenfolge im HTML bleibt: beim Vorlesen
+  weiter zuerst die Karte.
+- **Der Griff zum Umsortieren ist wieder weg.** Die ganze Zeile ist jetzt
+  greifbar: Maus zieht sofort, der Finger hält einen halben Takt (400 ms)
+  und zieht dann — wer sofort wischt, scrollt wie gewohnt. Das ist die
+  Unterscheidung, die Karten-Apps treffen, und sie braucht zwei Dinge, die
+  man leicht falsch macht: KEIN `touch-action: none` auf den Zeilen (sonst
+  stirbt das Scrollen), stattdessen ein nicht-passiver `touchmove`-Zuhörer,
+  der NUR während eines laufenden Zugs `preventDefault()` ruft — Pointer
+  Events allein können dem Browser das Scrollen nicht verbieten. Die
+  Pfeiltasten auf der fokussierten Zeile bleiben der Tastaturweg.
+- **Touren- und Garage-Bildschirm sind schwarz** statt des
+  weichgezeichneten Fotos. Der Touren-Feed ist voller Kartenbilder, das
+  Foto dahinter machte ihn unruhig. In der Garage läuft das Raumbild unten
+  über eine Maske weich ins Schwarz aus (`mask-image`, letzte 14 Prozent) —
+  eine Maske statt eines aufgelegten Verlaufs, weil der Boden des Fotos
+  nicht schwarz ist und ein Verlauf seine Farbe raten müsste.
+- **Die Kacheln haben feste Seitenverhältnisse** (3:2, die breite 2:1) und
+  je einen gewählten Ausschnitt. Vorher hing die Kachelform an der
+  Fensterbreite, und aus den 4:3-Fotos wurde mal ein Band, mal ein Turm.
+- **Der Rechtliches-Vorspann ist kürzer** (kein Gedankenstrich, der
+  Haftungshalbsatz „verlass dich unterwegs nicht allein auf die App"
+  bleibt), und die vier Akkordeons haben Luft zwischeneinander — nur auf
+  diesem Bildschirm, im Planer stapeln sie weiter dicht.

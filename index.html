@@ -287,11 +287,6 @@
         <path d="M3.4 12h17.2"/>
         <path d="M12 3.4c2.3 2.4 3.5 5.3 3.5 8.6s-1.2 6.2-3.5 8.6c-2.3-2.4-3.5-5.3-3.5-8.6S9.7 5.8 12 3.4Z"/>
       </symbol>
-      <!-- Der Griff zum Umsortieren: drei Linien, wie ihn jede Liste
-           benutzt, in der man Zeilen verschieben kann. -->
-      <symbol id="icon-griff" viewBox="0 0 24 24">
-        <path d="M5 8.5h14M5 12h14M5 15.5h14"/>
-      </symbol>
       <symbol id="icon-profil" viewBox="0 0 24 24">
         <circle cx="12" cy="8" r="3.8"/>
         <path d="M4.5 20c0-3.6 3.4-5.6 7.5-5.6s7.5 2 7.5 5.6"/>
@@ -623,7 +618,7 @@
       <div id="garageMenue" class="garage-menue">
         <h3 class="garage-menue-kopf">Was willst du fahren?</h3>
         <div class="garage-menue-raster">
-          <button class="kachel" id="btnStartPlaner" style="--kachel-bild: url('img/kacheln/routenplaner.jpg')">
+          <button class="kachel" id="btnStartPlaner" style="--kachel-bild: url('img/kacheln/routenplaner.jpg'); --kachel-lage: center 40%">
             <span class="kachel-inhalt">
               <svg class="ic gross kachel-symbol"><use href="#icon-route"></use></svg>
               <span class="kachel-text">
@@ -633,7 +628,7 @@
             <span class="kachel-pfeil" aria-hidden="true">&rarr;</span>
           </button>
 
-          <button class="kachel" id="btnStartRide" style="--kachel-bild: url('img/kacheln/aufzeichnen.jpg')">
+          <button class="kachel" id="btnStartRide" style="--kachel-bild: url('img/kacheln/aufzeichnen.jpg'); --kachel-lage: center 35%">
             <span class="kachel-inhalt">
               <svg class="ic gross kachel-symbol"><use href="#icon-aufnahme"></use></svg>
               <span class="kachel-text">
@@ -643,7 +638,7 @@
             <span class="kachel-pfeil" aria-hidden="true">&rarr;</span>
           </button>
 
-          <button class="kachel" id="btnStartTouren" style="--kachel-bild: url('img/kacheln/touren.jpg')">
+          <button class="kachel" id="btnStartTouren" style="--kachel-bild: url('img/kacheln/touren.jpg'); --kachel-lage: center 30%">
             <span class="kachel-inhalt">
               <svg class="ic gross kachel-symbol"><use href="#icon-touren"></use></svg>
               <span class="kachel-text">
@@ -987,9 +982,8 @@
            zur Navigation bleibt bewusst drin - bei einer App, der man
            unterwegs folgt, ist er der einzige Haftungshinweis, den es gibt. -->
       <p class="rechts-alpha">
-        Serpa ist eine fr&uuml;he Fassung (Alpha) &ndash; es k&ouml;nnen Fehler
-        auftreten, verlass dich unterwegs nicht allein auf die App. F&auml;llt
-        dir etwas auf:
+        Serpa ist eine fr&uuml;he Fassung (Alpha). Verlass dich unterwegs
+        nicht allein auf die App. F&auml;llt dir etwas auf:
         <a href="mailto:kontakt@serpa-app.de">kontakt@serpa-app.de</a>
       </p>
 

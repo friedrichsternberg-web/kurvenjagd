@@ -324,10 +324,6 @@
   stroke-linecap: round;
 }
 
-/* Nur der kleine Kern, kein Lichthof darum. Der Hof war ein voll deckender
-   grauer Kreis, sobald der Weichzeichner nicht ankam - siehe
-   ENTSCHEIDUNGEN.md, 31.08.2026. */
-.film-pass-kern { fill: var(--metall-glanz); }
 
 /* Der Schriftzug im Film. Er benutzt dasselbe Bild und denselben Untertitel
    wie die App - deshalb kann er am Ende an seinen Platz in der Oberflaeche
@@ -454,12 +450,19 @@
    offen da, deshalb bekommt er weniger Gewicht als eine Ueberschrift und
    mehr als eine Fussnote: Nebentextfarbe, aber volle Zeilenhoehe. */
 .rechts-alpha {
-  margin: 0 0 var(--s4);
+  margin: 0 0 var(--s5);
   font-size: 13px;
   line-height: 1.6;
   color: var(--muted);
 }
 .rechts-alpha a { color: var(--accent-hell); }
+
+/* Auf dem Rechtliches-Bildschirm stehen vier Akkordeons untereinander und
+   sonst nichts - sie duerfen atmen, statt wie im Bedienfeld des Planers
+   dicht zu stapeln. Nur hier: Auf den anderen Bildschirmen sind die
+   Akkordeons Teil eines vollen Formulars, dort zaehlt jeder Punkt Hoehe. */
+#rechtlichesScreen .accordion { margin: 0 0 var(--s4); }
+#rechtlichesScreen .accordion summary { padding: var(--s1) 0; }
 
 /* ---------- Untere Navigationsleiste ----------
    Fest am unteren Rand. Die Bildschirme darueber bekommen ihre Hoehe
@@ -627,7 +630,12 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 /* Eine Kachel ueber beide Spalten - fuer eine ungerade Kachelzahl, damit
    im Raster keine Luecke bleibt. Gesetzt wird die Klasse von
    wendeShopSchalterAn() in app.js. */
-.kachel--breit { grid-column: 1 / -1; }
+.kachel--breit {
+  grid-column: 1 / -1;
+  /* Ueber beide Spalten waere 3:2 ein Riese - 2:1 ist das breiteste
+     Verhaeltnis, bei dem vom Passfoto noch ein ganzer Kehrenzug bleibt. */
+  aspect-ratio: 2 / 1;
+}
 .kachel {
   position: relative;
   overflow: hidden;
@@ -636,6 +644,11 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   flex-direction: column;
   justify-content: flex-end;
   min-height: 116px;
+  /* Festes Seitenverhaeltnis statt einer reinen Mindesthoehe: Die Fotos sind
+     4:3, und eine Kachel, deren Form von der Fensterbreite abhaengt, schnitt
+     daraus mal ein Band, mal einen Turm. Bei 3:2 zeigt das Bild fast seine
+     ganze Hoehe - der Ausschnitt bleibt auf jedem Geraet derselbe. */
+  aspect-ratio: 3 / 2;
   padding: var(--s3);
   border-radius: var(--r-lg);
   border: 1px solid var(--glas-rand);
@@ -744,6 +757,9 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
    senkrecht zentriert, und ueber die volle Breite. Ein Formular in der
    Mitte wirkt ruhig, eine Liste in der Mitte wirkt verloren. */
 .listen-screen { align-items: stretch; justify-content: flex-start; text-align: left; overflow-y: auto; }
+/* Der Touren-Bildschirm ist ein Feed voller Kartenbilder - das Foto
+   dahinter macht ihn nur unruhig. Rechtliches und Konto behalten es. */
+#tourenScreen { background: var(--bg); }
 .listen-screen .start-screen-inner {
   width: 100%;
   padding: var(--s5) var(--s4);
@@ -1518,25 +1534,20 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
    Zeilen untereinander stehen. */
 .wp-knopf:disabled { opacity: 0.22; cursor: default; background: transparent; }
 
-/* Der Griff zum Umsortieren.
+/* Die ganze Zeile laesst sich anfassen (Maus: ziehen, Finger: halten und
+   ziehen - die Unterscheidung trifft beginneWegpunktZiehen in app.js).
+   Hier steht bewusst KEIN touch-action: Die Schublade soll ueber der Liste
+   weiter scrollen; das Scrollen unterbindet waehrend eines laufenden Zugs
+   ein touchmove-Zuhoerer in app.js.
 
-   "touch-action: none" ist hier das Entscheidende: Ohne diese Zeile nimmt
-   der Browser jedes Wischen als Scrollen der Schublade, und der Griff
-   bekaeme die Bewegung nie zu sehen. Sie steht NUR am Griff - ueber dem
-   Rest der Liste soll die Schublade weiter scrollen. Dieselbe Ueberlegung
-   steht am Pinsel des Freistellers und am Griff der Schublade selbst. */
-.wp-griff {
+   user-select, damit sich beim Ziehen mit der Maus nicht die halbe Zeile
+   blau faerbt; touch-callout, damit iOS beim Halten kein
+   Kopieren-Menue aufklappt - das Halten IST hier der Befehl. */
+.wp-list li[data-punkt] {
   cursor: grab;
-  touch-action: none;
-}
-.wp-griff:active { cursor: grabbing; }
-.wp-griff .ic { width: 17px; height: 17px; }
-
-/* Waehrend gezogen wird, darf in der Liste nichts markiert werden - sonst
-   faerbt sich beim Ziehen mit der Maus die halbe Zeile blau. */
-.wp-list li {
   -webkit-user-select: none;
   user-select: none;
+  -webkit-touch-callout: none;
 }
 
 /* Die gegriffene Zeile hebt sich ab und folgt dem Finger OHNE Nachlauf -
@@ -2058,8 +2069,8 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 .ride-notizen { resize: vertical; min-height: 70px; font-family: inherit; line-height: 1.45; }
 
 /* Ab derselben Breite, ab der auch der Planer zweispaltig wird, steht das
-   Wertefeld NEBEN der Karte statt unter ihr - rechts, weil es im HTML nach
-   der Karte kommt.
+   Wertefeld NEBEN der Karte statt unter ihr - links, auf derselben Seite
+   wie das Bedienfeld des Planers.
 
    Warum die 761 und nicht die 900 aus quer.css: Das sind zwei verschiedene
    Fragen. quer.css beantwortet "gehoert die Leiste nach oben?", diese Grenze
@@ -2073,13 +2084,17 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
    vollen 380 fast die Haelfte des Fensters, und die Karte ist beim
    Aufzeichnen das Wichtigere. */
 @media (min-width: 761px) {
-  .ride-screen { flex-direction: row; }
+  /* row-reverse, weil im HTML die Karte zuerst steht: Das Feld rueckt damit
+     nach LINKS, auf dieselbe Seite wie das Bedienfeld des Planers. Die
+     Reihenfolge im Dokument bleibt unangetastet - beim Vorlesen kommt
+     weiter zuerst die Karte, dann das Feld. */
+  .ride-screen { flex-direction: row-reverse; }
   .ride-panel {
     flex: 0 0 min(var(--spalte-ride), 45%);
     height: 100%;
     max-height: none;
     border-top: 0;
-    border-left: 1px solid var(--glas-hell);
+    border-right: 1px solid var(--glas-hell);
     border-radius: 0;
     padding-bottom: max(var(--s4), env(safe-area-inset-bottom));
   }
@@ -2650,15 +2665,11 @@ body.nav-modus .leaflet-control-container { display: none; }
   -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
-  background:
-    linear-gradient(to bottom,
-      var(--schatten-weich) 0%,
-      var(--schatten-stark) 40%,
-      var(--schatten-tief) 70%,
-      var(--schatten-voll) 100%),
-    /* "scroll" statt "fixed": Ein festgenagelter Hintergrund in einem
-       selbst scrollenden Kasten flackert auf iOS und verrutscht. */
-    url('img/hintergrund-weich.jpg') center / cover no-repeat scroll;
+  /* Reines Schwarz statt des weichgezeichneten Fotos: Unter dem Raum haengen
+     Suchknopf und Kacheln, und die stehen ruhiger auf der Grundflaeche der
+     App als auf einem zweiten Bild. Den Uebergang macht die Blende unten
+     am Raum (.garage-raum). */
+  background: var(--bg);
 }
 
 /* ---------- Der Raum ----------
@@ -2678,6 +2689,14 @@ body.nav-modus .leaflet-control-container { display: none; }
   flex-direction: column;
   overflow: hidden;
   background: var(--bg);
+  /* Die Blende: Das Raumbild laeuft unten weich ins Schwarz der Seite aus,
+     statt an einer Kante zu enden. Eine Maske statt eines aufgelegten
+     Verlaufs, damit wirklich die Seite durchscheint - der Boden des Fotos
+     ist nicht schwarz, ein Verlauf darueber muesste seine Farbe raten.
+     Die letzten sechs Prozent sind ganz durchsichtig, die Maschine steht
+     hoeher und bleibt unangetastet. */
+  -webkit-mask-image: linear-gradient(to bottom, black 86%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 86%, transparent 100%);
 }
 
 /* Schicht 1: das Raumbild. Groesse und Lage rechnet zeichneBuehne() aus und

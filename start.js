@@ -95,10 +95,6 @@ const STRASSE = [
     breite: 11, von: 0.78, bis: 1.0,  flanke: 0 },
 ];
 
-/* Das Licht am oberen Ende der Strasse - das Ziel, auf das der Film
-   zulaeuft. */
-const PASS = { x: 578, y: 1052 };
-
 /* Sterne als Bruchteile des sichtbaren Rahmens (0 bis 1), nicht als feste
    Punkte: Nur so sitzen sie in beiden Formaten im Himmel. Der dritte Wert
    ist der Halbmesser, der vierte der Versatz beim Flimmern. */
@@ -185,18 +181,6 @@ function baueStrasseHtml(abschnitt, nummer, quer) {
     + `</g>`;
 }
 
-/* Am oberen Ende der Strasse steht ein einzelnes Licht - das Ziel, auf das
-   der Film zulaeuft. Es ist bewusst nur dieser kleine Punkt: Ein grosser
-   Lichthof lag hier einmal davor und ist am 31.08.2026 herausgeflogen
-   (siehe ENTSCHEIDUNGEN.md). */
-function bauePassHtml(quer) {
-  const x = quer ? Math.round((PASS.x + QUER_VERSATZ_X) * QUER_DEHNUNG) : PASS.x;
-  const y = quer ? PASS.y - QUER_VERSATZ_Y : PASS.y;
-  return `<g class="film-pass" opacity="0">`
-    + `<circle class="film-pass-kern" cx="${x}" cy="${y}" r="7"/>`
-    + `</g>`;
-}
-
 /* Eine Staffel: erst die Flanke, dann die Strasse auf ihrer Schulter. Die
    NAECHSTE, naehere Staffel wird darueber gezeichnet und verschluckt das
    untere Ende dieser Strasse - daher der Eindruck, sie liege im Gelaende. */
@@ -207,7 +191,6 @@ function baueStaffelHtml(flanke, nummer, quer) {
     + `<path class="film-flanke film-flanke-${nummer + 1}" d="${d}"/>`
     + `<path class="film-grat" d="${d}" opacity="${flanke.kante}"/>`
     + (nummerImWeg >= 0 ? baueStrasseHtml(STRASSE[nummerImWeg], nummerImWeg, quer) : '')
-    + (nummer === 0 ? bauePassHtml(quer) : '')
     + `</g>`;
 }
 
@@ -255,11 +238,6 @@ function zeigeBergwelt(zeit) {
     staffel.setAttribute('opacity', bewege(zeit, beginn, 1.0, 0, 1).toFixed(3));
   });
   startfilmTeile.glut.style.opacity = bewege(zeit, FILM.bergAn, 1.5, 0, 1).toFixed(3);
-
-  /* Das Passlicht atmet leicht, sobald die Strasse oben ankommt. */
-  const passe = bewege(zeit, FILM.marke - 0.1, 0.6, 0, 1)
-              * (0.7 + 0.3 * Math.sin(zeit * 2.4));
-  startfilmTeile.pass.forEach((licht) => licht.setAttribute('opacity', passe.toFixed(3)));
 }
 
 function zeigeStrasse(zeit) {
@@ -445,7 +423,6 @@ function starteStartfilm() {
   baueBuehne(startfilmTeile.buehne);
   startfilmTeile.staffeln = [...startfilmTeile.buehne.querySelectorAll('.film-staffel')];
   startfilmTeile.strassen = [...startfilmTeile.buehne.querySelectorAll('.film-strasse')];
-  startfilmTeile.pass     = [...startfilmTeile.buehne.querySelectorAll('.film-pass')];
 
   const beginn = performance.now();
   function naechstesBild(jetzt) {

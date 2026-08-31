@@ -327,26 +327,21 @@ function renderWaypointList() {
     return;
   }
 
-  /* Jede Zeile traegt einen Griff zum Verschieben und ein Kreuz zum
-     Entfernen. Gezogen wird nur am GRIFF, nicht an der ganzen Zeile: Die
+  /* Jede Zeile laesst sich ANFASSEN und verschieben - die ganze Zeile, kein
+     eigener Griff. Mit der Maus reicht Ziehen, mit dem Finger kurz halten
+     und dann ziehen. Das Halten ist die Unterscheidung zum Scrollen: Die
      Liste sitzt auf dem Handy in einer Schublade, die selbst scrollt, und
-     wer die ganze Zeile greifbar macht, verschiebt beim Scrollversuch
-     versehentlich einen Wegpunkt. Am Griff ist die Absicht eindeutig, und
-     der Rest der Liste scrollt weiter wie gewohnt.
+     ein sofortiges Ziehen wuerde jeden Scrollversuch zum Umsortieren
+     machen. Die Einzelheiten stehen bei beginneWegpunktZiehen().
 
-     Der Griff ist zugleich ein Knopf: Wer ihn mit der Tastatur anspringt,
-     sortiert mit den Pfeiltasten. Ziehen ist fuer Finger und Maus da,
-     nicht fuer jeden. */
+     tabindex macht die Zeile mit der Tastatur erreichbar: Dann sortieren
+     die Pfeiltasten. */
   list.innerHTML = state.waypoints.map((wp, i) => `
-    <li>
+    <li data-punkt="${i}" tabindex="0"
+        aria-label="Punkt ${i + 1}: halten und ziehen zum Verschieben, oder Pfeiltasten">
       <span class="wp-num">${waypointLabel(i)}</span>
       <span class="wp-coord">${wp.lat.toFixed(4)}, ${wp.lon.toFixed(4)}</span>
       <span class="wp-knoepfe">
-        <button class="wp-knopf wp-griff" data-griff="${i}"
-                title="Ziehen zum Verschieben"
-                aria-label="Punkt ${i + 1} verschieben: ziehen oder Pfeiltasten">
-          <svg class="ic" aria-hidden="true"><use href="#icon-griff"></use></svg>
-        </button>
         <button class="wp-knopf wp-weg" data-weg="${i}"
                 title="Entfernen" aria-label="Punkt ${i + 1} entfernen">&times;</button>
       </span>
@@ -446,6 +441,13 @@ function verschiebeWegpunkt(von, nach) {
 
 /* --- Wegpunkte mit dem Finger umsortieren ---------------------------------
 
+   Die ganze Zeile ist der Griff. Damit das nicht mit dem Scrollen der
+   Schublade zusammenstoesst, gilt: Mit der MAUS beginnt das Ziehen sofort
+   bei der ersten Bewegung (eine Maus scrollt nicht durch Ziehen). Mit dem
+   FINGER muss die Zeile erst einen halben Takt gehalten werden - wer sofort
+   wischt, scrollt wie gewohnt, wer haelt, hebt die Zeile an. Das ist
+   dieselbe Unterscheidung, die auch Karten-Apps treffen.
+
    Alle Zeilen der Liste sind gleich hoch. Deshalb braucht das Ziehen keine
    Trefferpruefung gegen jede einzelne Zeile: Eine Division sagt, um wie
    viele Plaetze der Finger den Punkt bisher verschoben hat. Die anderen
@@ -455,14 +457,15 @@ function verschiebeWegpunkt(von, nach) {
    Weiterreichende Ueberlegungen dazu stehen in ENTSCHEIDUNGEN.md
    (31.08.2026), unter anderem, warum die Pfeiltasten geblieben sind. */
 
-const WEGPUNKT_ROLLRAND = 44;   // so nah am Rand rollt die Schublade mit
-let wegpunktZug = null;         // laeuft ein Ziehen, steht hier sein Zustand
+const WEGPUNKT_ROLLRAND = 44;    // so nah am Rand rollt die Schublade mit
+const WEGPUNKT_HALTEZEIT = 400;  // so lange haelt der Finger, bis die Zeile abhebt
+let wegpunktZug = null;          // laeuft ein Ziehen, steht hier sein Zustand
 
 function beginneWegpunktZiehen(ereignis) {
-  const griff = ereignis.target.closest('[data-griff]');
-  if (!griff || ereignis.button > 0) return;
+  const zeile = ereignis.target.closest('li[data-punkt]');
+  if (!zeile || ereignis.button > 0) return;
+  if (ereignis.target.closest('button')) return;   // das Kreuz bleibt ein Knopf
 
-  const zeile = griff.closest('li');
   const zeilen = [...zeile.parentNode.children];
   if (zeilen.length < 2) return;   // ein einzelner Punkt laesst sich nirgends hinschieben
 
@@ -476,14 +479,49 @@ function beginneWegpunktZiehen(ereignis) {
     startY: ereignis.clientY,
     startRollen: behaelter ? behaelter.scrollTop : 0,
     versatz: 0,
+    aktiv: false,
+    wecker: 0,
   };
-  zeile.classList.add('wp-gegriffen');
-  griff.setPointerCapture(ereignis.pointerId);
+
+  if (ereignis.pointerType === 'mouse') {
+    // Die Maus hebt sofort ab - .aktiv wird bei der ersten Bewegung wahr.
+    hebeWegpunktAn(ereignis);
+  } else {
+    // Der Finger muss halten. Bewegt er sich vorher, war es ein
+    // Scrollversuch: Der Browser uebernimmt und meldet pointercancel,
+    // zieheWegpunkt() raeumt den Wecker ueber die 8-Punkte-Grenze ab.
+    wegpunktZug.wecker = window.setTimeout(() => {
+      if (wegpunktZug && !wegpunktZug.aktiv) hebeWegpunktAn(ereignis, true);
+    }, WEGPUNKT_HALTEZEIT);
+  }
+}
+
+/* Ab hier ist es ein Ziehen, kein Scrollen mehr. setPointerCapture leitet
+   alle weiteren Meldungen dieses Zeigers auf die Zeile, egal wohin der
+   Finger wandert; der touchmove-Deckel unten haelt derweil den Browser
+   davon ab, doch noch zu scrollen. */
+function hebeWegpunktAn(ereignis, sichtbar) {
+  wegpunktZug.aktiv = true;
+  wegpunktZug.zeile.classList.add('wp-gegriffen');
+  wegpunktZug.zeile.setPointerCapture(ereignis.pointerId);
+  // Beim Halten gibt es noch keine Bewegung - die Zeile hebt trotzdem
+  // sichtbar ab, damit klar ist: Jetzt darf gezogen werden.
+  if (sichtbar) wegpunktZug.zeile.style.transform = 'translateY(0)';
 }
 
 function zieheWegpunkt(ereignis) {
   const zug = wegpunktZug;
   if (!zug) return;
+
+  if (!zug.aktiv) {
+    // Der Finger ist losgewandert, bevor der Wecker klingelte: scrollen
+    // lassen und den angefangenen Zug vergessen.
+    if (Math.abs(ereignis.clientY - zug.startY) > 8) {
+      window.clearTimeout(zug.wecker);
+      wegpunktZug = null;
+    }
+    return;
+  }
   rolleSchubladeBeimZiehen(zug, ereignis.clientY);
 
   // Rollt die Schublade unter dem Finger weg, muss die Zeile das mitmachen -
@@ -533,6 +571,8 @@ function beendeWegpunktZiehen() {
   const zug = wegpunktZug;
   if (!zug) return;
   wegpunktZug = null;
+  window.clearTimeout(zug.wecker);
+  if (!zug.aktiv) return;   // losgelassen, bevor der Wecker klingelte
 
   zug.zeile.classList.remove('wp-gegriffen');
   zug.zeilen.forEach((zeile) => { zeile.style.transform = ''; });
@@ -543,14 +583,14 @@ function beendeWegpunktZiehen() {
 }
 
 /* Derselbe Weg fuer die Tastatur. Die Liste wird beim Verschieben neu
-   gebaut, deshalb muss der Griff danach von Hand wieder den Fokus
+   gebaut, deshalb muss die Zeile danach von Hand wieder den Fokus
    bekommen - sonst ginge die zweite Pfeiltaste ins Leere. */
 function verschiebeWegpunktPerTaste(index, richtung) {
   const ziel = index + richtung;
   if (ziel < 0 || ziel >= state.waypoints.length) return;
   tauscheWegpunkt(index, richtung);
-  const griff = document.querySelector(`[data-griff="${ziel}"]`);
-  if (griff) griff.focus();
+  const zeile = document.querySelector(`li[data-punkt="${ziel}"]`);
+  if (zeile) zeile.focus();
 }
 
 
@@ -3764,17 +3804,25 @@ verkabele('wpList', 'click', ereignis => {
 });
 
 /* Das Ziehen haengt an derselben Liste. pointermove und pointerup landen
-   dank setPointerCapture (beginneWegpunktZiehen) beim Griff und steigen von
+   dank setPointerCapture (hebeWegpunktAn) bei der Zeile und steigen von
    dort hierher auf - ein Zuhoerer am Fenster ist deshalb nicht noetig. */
 verkabele('wpList', 'pointerdown',   beginneWegpunktZiehen);
 verkabele('wpList', 'pointermove',   zieheWegpunkt);
 verkabele('wpList', 'pointerup',     beendeWegpunktZiehen);
 verkabele('wpList', 'pointercancel', beendeWegpunktZiehen);
 
+/* Der Deckel auf dem Scrollen, NUR waehrend ein Zug laeuft. Pointer-Meldungen
+   koennen dem Browser das Scrollen nicht verbieten; das kann allein ein
+   nicht-passiver touchmove-Zuhoerer. Vor dem Abheben (waehrend der Finger
+   noch haelt) greift er nicht - da soll die Schublade ja scrollen duerfen. */
+document.getElementById('wpList').addEventListener('touchmove', (ereignis) => {
+  if (wegpunktZug && wegpunktZug.aktiv) ereignis.preventDefault();
+}, { passive: false });
+
 verkabele('wpList', 'keydown', ereignis => {
-  const griff = ereignis.target.closest('[data-griff]');
-  if (!griff) return;
-  const index = Number(griff.dataset.griff);
+  const zeile = ereignis.target.closest('li[data-punkt]');
+  if (!zeile) return;
+  const index = Number(zeile.dataset.punkt);
   if (ereignis.key === 'ArrowUp')   { ereignis.preventDefault(); verschiebeWegpunktPerTaste(index, -1); }
   if (ereignis.key === 'ArrowDown') { ereignis.preventDefault(); verschiebeWegpunktPerTaste(index,  1); }
 });
