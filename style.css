@@ -201,6 +201,224 @@
 }
 .wortmarke-garage .wortmarke-bild { width: 104px; }
 
+
+/* ---------- Der Startfilm ---------------------------------------------------
+   Drei Sekunden Bergwelt vor der App, gespielt von start.js. Hier steht nur,
+   WIE die Teile aussehen und wo sie liegen; WANN sich etwas bewegt, steht
+   ausschliesslich im Skript. Zwei Ausnahmen, beide mit Grund: das Flimmern
+   der Sterne und der Einzug der Leiste laufen als Keyframes, weil sie sich
+   wiederholen beziehungsweise genau einmal ablaufen und dafuer kein
+   Bild-fuer-Bild-Rechnen brauchen.
+
+   Die Fassung fuers Querformat steht in quer.css. */
+
+.startfilm {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;   /* ueber allem, auch ueber Dialogen (hoechster Wert sonst: 2000) */
+  background: var(--bg);
+  overflow: hidden;
+  cursor: pointer;   /* ein Tipp ueberspringt den Film */
+  /* Die Reissleine: Sollte start.js gar nicht laufen - Skriptfehler, alter
+     Browser, blockiertes JavaScript -, raeumt diese Animation die schwarze
+     Flaeche nach 3,6 Sekunden von selbst weg. Ohne sie saehe man in dem Fall
+     nur noch Schwarz. Das Skript schaltet sie als Erstes ab und uebernimmt. */
+  animation: startfilmReissleine 3.6s linear forwards;
+}
+@keyframes startfilmReissleine {
+  0%, 88% { opacity: 1; visibility: visible; }
+  100%    { opacity: 0; visibility: hidden; }
+}
+
+/* Die Kamera: eine einzige langsame Rueckfahrt ueber den ganzen Film, am
+   Ende weicht sie in die Unschaerfe zurueck - genau so, wie in der App die
+   Fotos hinter dem Glas liegen. */
+.startfilm-kamera {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 42%;
+  will-change: transform, filter, opacity;
+}
+.startfilm-buehne {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Das Licht hinter dem Grat. Es liegt UNTER den Bergen und macht aus der
+   schwarzen Flaeche einen Himmel, gegen den sich die Kaemme abheben. */
+.startfilm-glut {
+  position: absolute;
+  left: 50%;
+  top: 47%;
+  width: 170%;
+  height: 120%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  background: radial-gradient(ellipse at 50% 58%,
+    color-mix(in srgb, var(--metall-tief) 42%, transparent) 0%,
+    color-mix(in srgb, var(--metall-tief) 13%, transparent) 38%,
+    transparent 70%);
+}
+
+/* Die Vignette zieht die Raender ins Schwarz. Sie ist der Grund, warum der
+   Film in jedem Seitenverhaeltnis funktioniert: Was am Rand abgeschnitten
+   wird, ist ohnehin schon dunkel. */
+.startfilm-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 68% 68% at 50% 44%,
+    transparent 52%, color-mix(in srgb, black 95%, transparent) 100%);
+}
+
+.film-stern {
+  fill: var(--nacht-stern);
+  opacity: 0;
+  animation: filmSternFlimmern 4.2s ease-in-out infinite;
+}
+@keyframes filmSternFlimmern {
+  0%   { opacity: 0; }
+  22%  { opacity: 0.29; }
+  60%  { opacity: 0.13; }
+  100% { opacity: 0.29; }
+}
+
+.film-flanke-1 { fill: var(--nacht-1); }
+.film-flanke-2 { fill: var(--nacht-2); }
+.film-flanke-3 { fill: var(--nacht-3); }
+.film-flanke-4 { fill: var(--nacht-4); }
+.film-grat {
+  fill: none;
+  stroke: var(--nacht-grat);
+  stroke-width: 1.6;
+}
+
+/* Die Strasse in vier Lagen uebereinander: ein weicher Schein, ein heller
+   Saum, das dunkle Band und die laufende Mittellinie. Der Saum ist noetig,
+   weil das Band fast so dunkel ist wie der Berg - ohne ihn verschwaende die
+   Strasse im Hang. */
+.film-strasse-schein {
+  fill: none;
+  stroke: var(--metall);
+  stroke-linecap: round;
+  opacity: 0.16;
+  filter: blur(18px);
+}
+.film-strasse-saum {
+  fill: none;
+  stroke: color-mix(in srgb, var(--nacht-stern) 32%, transparent);
+  stroke-linecap: round;
+}
+.film-strasse-band {
+  fill: none;
+  stroke: var(--raum-dunkel);
+  stroke-linecap: round;
+}
+.film-strasse-mitte {
+  fill: none;
+  stroke: var(--metall);
+  stroke-linecap: round;
+}
+
+.film-pass-schein {
+  fill: var(--metall);
+  filter: blur(26px);
+}
+.film-pass-kern { fill: var(--metall-glanz); }
+
+/* Der Schriftzug im Film. Er benutzt dasselbe Bild und denselben Untertitel
+   wie die App - deshalb kann er am Ende an seinen Platz in der Oberflaeche
+   fahren, statt dort nur zufaellig aehnlich auszusehen. */
+.startfilm-marke {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 30%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s5);
+  opacity: 0;
+  transform-origin: 50% 0%;
+  will-change: transform, opacity, filter;
+}
+.startfilm-logo {
+  position: relative;
+  display: block;
+  width: 64%;
+  max-width: 420px;
+  filter: drop-shadow(0 26px 50px color-mix(in srgb, black 75%, transparent));
+}
+.startfilm-logo .wortmarke-bild {
+  width: 100%;
+  max-width: none;
+}
+/* Der Lichtstreifen wischt einmal ueber das Metall. Die Maske ist das Logo
+   selbst, damit das Licht nur auf dem Schriftzug liegt und nicht als heller
+   Balken quer durchs Bild faehrt. */
+.startfilm-glanz {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  mix-blend-mode: screen;
+  -webkit-mask-image: url(img/logo-serpa.webp);
+  mask-image: url(img/logo-serpa.webp);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  background: linear-gradient(102deg,
+    transparent 38%,
+    color-mix(in srgb, white 90%, transparent) 50%,
+    transparent 62%);
+  background-size: 260% 100%;
+  background-repeat: no-repeat;
+}
+/* Dieselbe Zeile wie .wortmarke-sub, nur groesser. Die Laufweite hier ist
+   der Endwert; waehrend des Films zieht start.js sie von 0,5em darauf
+   zusammen. Der Endwert steht trotzdem hier, damit die Zeile auch dann
+   richtig steht, wenn gar kein Film laeuft (weniger Bewegung eingestellt). */
+.startfilm-sub {
+  font-family: var(--schrift-display);
+  font-size: 15px;
+  font-weight: 600;
+  text-transform: uppercase;
+  line-height: 1;
+  letter-spacing: 0.32em;
+  text-indent: 0.32em;
+  color: var(--metall);
+  opacity: 0;
+}
+
+/* Der Film im Liegen. Die Grenze steht AUSNAHMSWEISE hier und nicht in
+   quer.css, und zwar aus einem Grund: quer.css beantwortet die Frage, ob
+   die Leiste oben stehen soll (ab 900x500). Hier geht es um die Form eines
+   Bildes - ein Handy im Liegen braucht das liegende Bild, auch wenn die
+   Leiste unten bleibt. Dieselbe Zahl steht in start.js in
+   istQuerformat(); wer eine aendert, muss die andere nachziehen, sonst
+   sitzt der Schriftzug ueber der falschen Bergkette. */
+@media (min-aspect-ratio: 23/20) {
+  .startfilm-marke { top: 13%; }
+  .startfilm-logo {
+    width: 34%;
+    max-width: 520px;
+  }
+  .startfilm-sub { font-size: 17px; }
+}
+
+/* Der letzte halbe Takt: Waehrend der Film durchsichtig wird, faehrt die
+   Leiste der App von unten herein. Die Klasse setzt start.js an <body> und
+   nimmt sie danach wieder weg. */
+.film-einzug .haupt-nav {
+  animation: filmNavHerein 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes filmNavHerein {
+  from { transform: translateY(100%); opacity: 0; }
+}
+
+
 /* Auf den Listenbildschirmen (Rechtliches) stehen Ueberschrift und Inhalt
    links - eine mittige Wortmarke darueber haenge in der Luft. */
 .listen-screen .wortmarke { align-items: flex-start; }

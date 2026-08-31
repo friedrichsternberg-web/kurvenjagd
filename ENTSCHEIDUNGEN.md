@@ -1236,3 +1236,77 @@ zweite, fremde Kurve im selben Bild. Und die gespeicherten Vorschaulinien
 tragen keine Höhen — sie müssten für alle Touren neu geholt werden. Der
 Planer zeigt das Profil nach dem Berechnen ohnehin. Falls es je in die
 Karten soll, dann als schmaler Streifen unter dem Bild, nicht dahinter.
+
+## 31.08.2026 — Der Startfilm: aus Claude Design in die App
+
+Friedrich hat die App-Startanimation in Claude Design entworfen (Projekt
+„Serpa App-Startanimation", vier Runden). Der Entwurf liegt dort als
+React-Komponente `serpa-splash.jsx` auf einer eigenen Laufzeit
+(`useComposition`, `animate`, `interpolate`) und rechnet in einem festen
+Rahmen von 1080 × 1920.
+
+**Übernommen wurde die Gestaltung, nicht der Code.** Die App hat keinen
+Bauschritt und kein React – eine Portierung wäre eine Neuschreibung
+gewesen, egal wie man es dreht. Also wurde neu geschrieben, was der
+Entwurf beschreibt: `start.js`, reines SVG und CSS, angetrieben von einer
+Bildschleife. Die Pfaddaten der vier Bergstaffeln und der drei
+Straßenabschnitte sind 1:1 aus dem Entwurf, ebenso der Zeitplan
+(Bergwelt 0,8 s – Passstraße 0,9 s – Marke 0,8 s – App 0,5 s) und die
+Signalfarbe, die Friedrich dort auf Metall statt Blau gestellt hatte.
+
+### Der Schluss ist eine Übergabe, keine Überblendung
+
+Der Entwurf ließ am Ende eine **nachgebaute** Tab-Leiste hereinfahren und
+die Wortmarke an eine gedachte Kopfzeile andocken. In der App gibt es
+beides schon. Deshalb sucht `planeAndocken()` das echte Logo in der
+Oberfläche – im Querformat in der Kopfleiste, im Hochformat über der
+Garagen-Überschrift –, misst dessen Platz und fährt die Filmwortmarke
+genau dorthin, während der Film durchsichtig wird. Darunter steht
+dasselbe Bild schon an derselben Stelle. Die echte Leiste fährt dabei
+herein (`.film-einzug`).
+
+Das ist der Unterschied zwischen „Vorspann vor der App" und „Anfang der
+App".
+
+### Zwei Formate aus einer Beschreibung
+
+Das Bild ist stehend entworfen. Fürs Querformat wäre ein zweiter Satz
+Pfade der naheliegende Weg gewesen – und die zweite Stelle, die man beim
+Nachbessern vergisst. Stattdessen rechnet `rechneAufQuerformat()` dieselben
+Punkte um: Der Himmel wird bis y=700 abgeschnitten, der Rest auf die volle
+Breite gezogen (Faktor 1,66). Die Berge werden dadurch flacher und breiter,
+die Kehren weiter — genau, wie eine Bergkette im Liegen aussehen soll. Die
+Sterne rücken zusammen, sonst lägen sie hinter den Bergen.
+
+Die Grenze dafür steht **nicht** in quer.css, sondern als
+`min-aspect-ratio: 23/20` in style.css und als `istQuerformat()` in
+start.js. Grund: quer.css beantwortet die Frage, ob die Leiste oben stehen
+soll (ab 900 × 500). Hier geht es um die Form eines Bildes, und ein Handy
+im Liegen braucht das liegende Bild, auch wenn die Leiste unten bleibt.
+
+### Drei Sicherungen
+
+- **Ein Tipp überspringt** den Film.
+- **Weniger Bewegung** im Betriebssystem heißt: kein Film, nur kurz der
+  Schriftzug.
+- **Die Reißleine.** Läuft `start.js` gar nicht – Skriptfehler, alter
+  Browser –, räumt eine CSS-Animation die schwarze Fläche nach 3,6
+  Sekunden von selbst weg. Ohne sie wäre ein Fehler in `start.js` ein
+  Totalausfall der Seite, und genau das darf eine Verzierung nie sein.
+  Das Skript schaltet sie als Erstes ab und übernimmt.
+
+### Was verworfen wurde
+
+**Das Motorrad in der Animation.** Stand in Runde 2 drin, kam in Runde 3
+wieder raus (Friedrichs Entscheidung im Design-Projekt): Das Bild aus der
+Garage ist eine Dreiviertelansicht von vorn, die Fahrt die Kehren herunter
+braucht eine Seiten- oder Rückansicht. Ohne das passende Bild wirkt es
+aufgeklebt.
+
+**Ein eigenes Bild fürs Querformat.** Siehe oben – zwei Sätze Pfade sind
+zwei Sätze, die auseinanderlaufen.
+
+**Den Film seltener zeigen** (etwa nur beim ersten Besuch am Tag). Der
+Auftrag lautete „bei jedem Start sichtbar". Falls die drei Sekunden
+irgendwann stören: Der Ausstieg wäre eine Bedingung in `starteStartfilm()`,
+kein Umbau.

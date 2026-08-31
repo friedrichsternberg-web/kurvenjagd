@@ -222,6 +222,39 @@
 </head>
 <body>
 
+  <!-- ===== Startfilm =====
+       Drei Sekunden vor der App: Bergstaffeln treten aus dem Schwarz
+       hervor, eine Passstrasse schlaengelt sich nach oben, die Wortmarke
+       kommt aus der Tiefe - und faehrt zum Schluss genau auf den Platz, an
+       dem sie in der App ohnehin steht. Deshalb steht das Logo hier auch
+       nicht als Nachbildung, sondern als DASSELBE Bild mit derselben
+       Klasse: Am Ende uebernimmt die Oberflaeche einfach.
+
+       Warum ganz oben und mit dem Skript direkt dahinter: Der Film muss im
+       ersten gezeichneten Bild schon da sein, sonst blitzt die App kurz auf
+       und wird dann verdeckt. start.js braucht vom Rest der Seite nichts.
+
+       Ein Tipp ueberspringt den Film. Wer im Betriebssystem weniger
+       Bewegung eingestellt hat, bekommt nur kurz den Schriftzug. Und wenn
+       das Skript gar nicht laeuft, raeumt style.css die Flaeche nach 3,6
+       Sekunden von selbst weg (.startfilm, "Reissleine"). ===== -->
+  <div id="startfilm" class="startfilm" aria-hidden="true">
+    <div class="startfilm-kamera" id="startfilmKamera">
+      <div class="startfilm-glut" id="startfilmGlut"></div>
+      <svg class="startfilm-buehne" id="startfilmBuehne"></svg>
+      <div class="startfilm-vignette"></div>
+    </div>
+    <div class="startfilm-marke" id="startfilmMarke">
+      <span class="startfilm-logo">
+        <img class="wortmarke-bild" src="img/logo-serpa.webp?v=108" alt=""
+             width="800" height="155" fetchpriority="high">
+        <span class="startfilm-glanz" id="startfilmGlanz"></span>
+      </span>
+      <span class="startfilm-sub" id="startfilmSub">Deine Motorradapp</span>
+    </div>
+  </div>
+  <script src="start.js?v=108"></script>
+
   <!-- ===== Symbolsammlung =====
        Alle Symbole der App an einer Stelle, als SVG statt als Emoji.
        Warum nicht Emoji: Sie sehen auf jedem Geraet anders aus (Apple,

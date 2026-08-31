@@ -22,8 +22,8 @@
 # Was das Skript NICHT pruefen kann und trotzdem gilt: neue Namen deutsch
 # mit dem Verb vorn (zeichneRoutenListe, nicht renderRouteList).
 
-APP="app.js garage.js finder.js freisteller.js konto.js touren.js serpa-touren.js shop.js kern.js vorschau.js produkte.js besucher.js index.html"
-JS="app.js garage.js finder.js freisteller.js konto.js touren.js serpa-touren.js shop.js kern.js vorschau.js geraet.js produkte.js besucher.js"
+APP="app.js garage.js finder.js freisteller.js konto.js touren.js serpa-touren.js shop.js kern.js vorschau.js start.js produkte.js besucher.js index.html"
+JS="app.js garage.js finder.js freisteller.js konto.js touren.js serpa-touren.js shop.js kern.js vorschau.js start.js geraet.js produkte.js besucher.js"
 
 echo "== 1. Geraetezugriff gehoert nur in geraet.js =="
 grep -nE '(navigator\.|localStorage\.|sessionStorage\.|indexedDB\.|URL\.(create|revoke)ObjectURL)' $APP \

@@ -205,6 +205,23 @@
   --metall-glanz: #DDD9D9;   /* Ueberschriften und Lichtkanten, 15:1 */
   --metall-tief:  #726E6C;   /* nur Grosses und Dekoratives, 4,2:1 */
 
+  /* Die Nachtseite. Sie hat genau EINEN Ort: den Startfilm (start.js), die
+     Bergwelt der ersten drei Sekunden. Vier Staffeln, jede dunkler als die
+     davor - die Tiefe entsteht allein aus diesem Gefaelle, nicht aus
+     Perspektive. Die Toene liegen unter --surface, sind also dunkler als
+     jede Flaeche der App: Der Film soll aus dem Schwarz kommen, nicht auf
+     ihm liegen.
+
+     Sie stehen hier und nicht in style.css, weil auch der Film die
+     Designsprache benutzt (Grenze 2) - und weil eine Datei mit sechs
+     Farbnamen leichter nachzustimmen ist als ein Dutzend Fundstellen. */
+  --nacht-1:     #141A23;   /* fernste Staffel, noch etwas Himmel darin */
+  --nacht-2:     #0D1219;
+  --nacht-3:     #080C11;
+  --nacht-4:     #04060A;   /* naechste Staffel, fast Schwarz */
+  --nacht-grat:  #AFC0D4;   /* das kalte Licht auf den Kammlinien */
+  --nacht-stern: #DDE4EC;
+
   /* Dasselbe in Schwarz: Schatten unter Glasflaechen, Schleier ueber Fotos.
      Sechs Stufen statt fuenf, weil Schwarz einen weiteren Bereich abdecken
      muss - vom kaum merklichen Schatten bis zur fast deckenden Abdeckung

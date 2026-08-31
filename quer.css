@@ -267,4 +267,14 @@
   .garage-kopf { padding-top: var(--s4); }
   .listen-screen .start-screen-inner { padding-top: var(--s5); }
 
+  /* --- 7. Der Startfilm im Liegen ---------------------------------------------
+     Das liegende BILD des Films haengt an der Form des Fensters, nicht an
+     dieser Grenze - es steht deshalb in style.css unter
+     "min-aspect-ratio: 23/20" und gilt auch dem Handy im Liegen. Hier bleibt
+     nur, was wirklich von DIESER Anordnung abhaengt: Die Leiste haengt im
+     Querformat oben, also faehrt sie auch von oben herein statt von unten. */
+  @keyframes filmNavHerein {
+    from { transform: translateY(-100%); opacity: 0; }
+  }
+
 }
