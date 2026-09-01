@@ -118,6 +118,18 @@ where has_function_privilege(r.rolname, p.oid, 'EXECUTE')
   Pages dasselbe prüfen.
 - **Gewerbeanmeldung.** Mit fremden Inhalten und geplanter Werbung ist der
   Betrieb kaum noch als privat zu erklären. Steht ohnehin an (siehe Shop).
+- **Fremde Marken in den KI-Bildern suchen** (aus der Rechtsprüfung vom
+  01.09.2026). Bildgeneratoren bauen gern Markenformen nach. Einmal durch
+  alle erzeugten Bilder gehen: Steht auf einer Werkzeugkiste im
+  Werkstattraum ein Schriftzug? Trägt die Beispielmaschine eine erkennbare
+  Tankform? Auch zufällige Ähnlichkeit ist abmahnfähig, und die Haftung
+  liegt beim Verwender, nicht beim Generator. Einmalig, halbe Stunde.
+- **Herkunft von `img/bike-standard.webp` klären.** In
+  `img/LIZENZ-bilder.txt` steht dazu nur „aus einem von Friedrich Sternberg
+  gelieferten Bild". Falls die Vorlage nicht selbst fotografiert oder
+  erzeugt wurde, ist das ein **echtes** Urheberrecht — und damit ein
+  größeres Bildrisiko als alles am KI-Act, wo nach der Prüfung vom
+  01.09.2026 gar keine Pflicht besteht. Die Zeile gehört präzisiert.
 
 **Bewusst NICHT in der ersten Fassung**, damit es nicht als Lücke gilt:
 Fotos an geteilten Touren (der Behälter `tourfotos` müsste dafür geöffnet

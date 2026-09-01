@@ -1586,3 +1586,51 @@ Dazu Plausibilitätsgrenzen für die neu durchgelassenen Zahlen: Tempo über
 400 km/h und Schräglage über 90° fallen weg. Gegen den eigenen Rekorder
 braucht es das nicht, der begrenzt selbst – aber `pruefeTour()` ist die
 Stelle, an der Fremdes hereinkommt, und dort gehört es hin.
+
+## 01.09.2026 — KI-Kennzeichnung: geprüft, kein Wasserzeichen nötig
+
+Friedrichs Frage: Muss nach dem EU AI Act ein sichtbares Wasserzeichen an
+die KI-Bilder, oder reicht der Abschnitt unter „Rechtliches"?
+
+**Antwort: Es reicht — und zwar nicht knapp, sondern weil überhaupt keine
+Pflicht besteht.** Geprüft an den Leitlinien der EU-Kommission zu Artikel 50
+(C(2026) 5054 final vom 20.07.2026, im Volltext).
+
+Die Kennzeichnungspflicht des Betreibers gilt nur für **Deepfakes**, und
+Artikel 3 Nummer 60 definiert die eng: Der Inhalt muss bestehenden Personen,
+Gegenständen oder Orten ähneln **und** einer Person fälschlich als echt
+erscheinen. Die Leitlinien zerlegen das in vier Kriterien, die alle zugleich
+erfüllt sein müssen, und nennen als Gegenbeispiel wörtlich erfundene
+Umgebungen in Videospielen. Der Werkstattraum ist genau das. Fotorealismus
+allein genügt ausdrücklich nicht. Symbol und Schriftzug sind ohnehin heraus
+(Bedienoberflächen-Grafik). Die maschinenlesbare Kennzeichnung nach Artikel
+50 Absatz 2 trifft den **Anbieter** des Generators, also OpenAI — nicht den,
+der ein Bild damit erzeugt.
+
+Der Freisteller (U²-Net) fällt unter die Ausnahme für Systeme, die die
+Eingabe nicht wesentlich verändern; die Leitlinien führen das Entfernen von
+Hintergründen wörtlich als Beispiel auf.
+
+### Was dabei aufgefallen ist: die Begründung im Code war falsch
+
+Der Kommentar über dem KI-Abschnitt in `index.html` nahm an, Werkstattraum
+und Beispielmaschine **seien** Deepfakes, und stützte die zurückhaltende
+Platzierung auf die Kunstausnahme. Beides trägt nicht: Ein
+Oberflächen-Hintergrund ist funktional, und funktional motivierte Werke
+schließen die Leitlinien von der Kunstausnahme aus.
+
+Schlimmer als falsch war es widersprüchlich. Wären die Bilder Deepfakes,
+würde ein zugeklapptes Akkordeon im Rechtliches-Bildschirm die Pflicht
+gerade **nicht** erfüllen — die Leitlinien nennen „leicht zu übersehen" und
+„in den Nutzungsbedingungen versteckt" ausdrücklich als untauglich. Die alte
+Begründung hätte also die eigene Umsetzung widerlegt.
+
+Neu steht dort: Der Hinweis ist **freiwillig**, deshalb ist die Form frei.
+Und der Merksatz für später: Sollte sich die Einschätzung je ändern, muss der
+Hinweis dorthin, wo man ihn beim Ansehen des Bildes bemerkt — nicht ins
+Rechtliche.
+
+Zwei Folgeaufgaben stehen in AUFGABEN.md: die Bilder einmal auf fremde
+Marken absuchen, und die Herkunft von `img/bike-standard.webp` klären. Das
+zweite ist das größere Risiko — dort geht es um ein echtes Urheberrecht,
+nicht um eine Pflicht, die es nicht gibt.
