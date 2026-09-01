@@ -3937,16 +3937,25 @@ body.nav-modus .leaflet-control-container { display: none; }
   height: 58px;
   display: grid;
   place-items: center;
+  position: relative;         /* Anker fuer das Foto, siehe unten */
   border: 1px solid var(--glas-rand);
   border-radius: var(--r-sm);
   background: var(--glas-hell);
 }
 .produkt-mini-bild .ic { width: 30px; height: 30px; color: var(--accent-hell); }
+/* Das Foto wird absolut in den Kasten gespannt statt mit height:100%
+   in den Fluss gestellt: Ein Prozent-Mass loest sich im Raster am
+   Seitenverhaeltnis des Bildes auf, und das Foto ragte dann unten aus
+   dem Kasten heraus - mitten in die Beschriftung. Absolut verankert
+   kann es gar nicht anders, als in den Kasten zu passen. */
 .produkt-mini-bild img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: contain;
   border-radius: var(--r-sm);
+  background: var(--accent-ink);   /* die Fotos kommen auf weissem Grund */
 }
 
 .produkt-titel { margin: 0; }
@@ -4737,3 +4746,54 @@ body.nav-modus .karten-knopf { display: none; }
   }
   .reifen-preis { margin-right: auto; }
 }
+
+/* Produktfoto in der Angebotszeile. Die Fotos kommen vom Bildserver des
+   Netzwerks auf weissem Grund - deshalb bekommt der Rahmen hier Weiss
+   statt Glas, sonst schwebte ein weisses Quadrat in einem grauen Kasten. */
+.reifen-foto {
+  background: var(--accent-ink);
+  overflow: hidden;
+}
+.reifen-foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: var(--r-sm);
+}
+
+/* Die Zeile, die die Produktfotos anbietet, solange die Einwilligung
+   fehlt. Ruhig gehalten: Sie erklaert, warum die Fotos aus sind, und
+   draengt nicht. */
+.reifen-bilder-hinweis {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  padding: var(--s2) var(--s3);
+  margin: 0 0 var(--s3);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--glas-hell);
+  background: var(--glas-hauch);
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.reifen-bilder-hinweis .btn { flex: 0 0 auto; white-space: nowrap; }
+
+/* Das Anzeige-Kennzeichen an der Reifen-Leiste der Garage. Neutral statt
+   des warnenden Orange des Demo-Vermerks: Es kennzeichnet Werbung, es
+   warnt nicht vor ihr. */
+.garage-shop-anzeige {
+  margin-left: 6px;
+  padding: 1px 8px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--glas-hell);
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+/* Die Einladungs-Karte, solange noch keine Reifengroesse gemerkt ist. Sie
+   ist die einzige Karte der Leiste und darf deshalb breiter sein - eine
+   einzelne 108er-Karte saehe verloren aus. */
+.garage-reifen-einladung { flex: 0 0 auto; max-width: 300px; }
+.garage-reifen-einladung .garage-shop-name { -webkit-line-clamp: 3; }

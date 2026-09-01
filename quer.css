@@ -331,6 +331,33 @@
      zweit, das Gesamtbild und der Rueckblick bleiben untereinander. */
   #statsKacheln, #statsZeitWerte { grid-template-columns: repeat(3, 1fr); }
 
+  /* Die Reifen-Leiste der Garage braucht rund 150 Punkte Hoehe. In der
+     knappen Querformat-Ecke (900x500) kaeme sie nur unter, wenn die Garage
+     wieder scrollte - und dass sie das nicht tut, war eine ausdrueckliche
+     Anforderung. Also weicht die Leiste, nicht die Regel: Unterhalb von
+     720 Punkten Hoehe bleibt sie weg, die Kachel "Reifen" fuehrt ja
+     ebenfalls hin. Im Hochformat gilt das alles nicht, dort scrollt die
+     Garage ohnehin. */
+  @media (max-height: 719px) {
+    #garageReifen { display: none; }
+    /* Die Reifen-KACHEL rueckt dafuer neben die Stats: Ohne die Leiste
+       ist sie hier der einzige Weg zu den Reifen, aber als dritte Reihe
+       ueber die volle Breite draengte sie Impressum-Link und Kacheln
+       uebereinander. Als fuenfte Kachel in der zweiten Reihe kostet sie
+       keine eigene Reihe - die zweite Reihe teilt sich dann zu dritt. */
+    .garage-menue-raster { grid-template-columns: repeat(4, 1fr); }
+    .kachel { grid-column: auto / span 2; }
+    #btnStartReifen { grid-column: auto / span 1; aspect-ratio: auto; }
+    #btnStartStats { grid-column: auto / span 1; }
+    /* Nur die Erklaerung faellt weg - das Wort "Anzeige" bleibt stehen.
+       Eine Kachel, die in den Partner-Bereich fuehrt, darf in keiner
+       Fenstergroesse unmarkiert sein. */
+    #btnStartReifen .kachel-zusatz-erklaerung { display: none; }
+    /* Die beiden Einzelspalten sind schmal - die grosse Kachelschrift
+       braeche dort mitten im Wort um. */
+    #btnStartStats .kachel-titel, #btnStartReifen .kachel-titel { font-size: 15px; }
+  }
+
   /* --- 8. Reifen: Kopf und Groessenwahl nebeneinander -------------------------
      Im Hochformat stehen sie untereinander, weil nichts anderes hinpasst.
      Liegend waeren das zwei breite Baender mit viel Luft darin - also

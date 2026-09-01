@@ -302,17 +302,30 @@ die erste Stelle der App, an der Geld fließt – und die erste, an der eine
 fremde Firma etwas über einen Nutzer erfährt. Deshalb steht hier genau,
 was wann wohin geht.
 
-**Beim Anzeigen der Liste: nichts.** Der Katalog liegt als
-`reifen-katalog.json` neben der App auf GitHub Pages und wird von dort
-geladen wie jede andere Datei der App. Es gibt **keine Produktbilder vom
-Händler**, kein Zählpixel, kein Skript des Partners. Das ist eine bewusste
-Entscheidung: Die Bilder im AWIN-Feed liegen auf `productserve.com`, und
-sie einzubinden hieße, die IP-Adresse jedes Besuchers dorthin zu tragen,
-bevor er irgendetwas angeklickt hat.
+**Beim Anzeigen der Liste ohne Einwilligung: nichts.** Der Katalog liegt
+als `reifen-katalog.js` neben der App auf GitHub Pages und wird von dort
+geladen wie jede andere Datei der App. Statt der Produktfotos zeichnet die
+App ihr eigenes Reifensymbol; Zählpixel oder Skripte des Partners gibt es
+nicht.
+
+**Nach der Einwilligung kommen die Produktfotos dazu.** Sie liegen auf dem
+Bilddienst des Netzwerks (`images2.productserve.com`, Awin) und werden von
+dort direkt in die Seite geladen — dabei geht die IP-Adresse des Geräts an
+diesen Dienst, je sichtbarem Foto eine Anfrage. Genau deshalb sind die
+Fotos hinter dieselbe Einwilligung gelegt wie die Provisionslinks: Vor dem
+„Einverstanden" schreibt `reifen.js` keine einzige productserve-Adresse in
+die Seite, und nach einem Widerruf verschwinden sie wieder. Die
+Erlaubnisliste der Seite (CSP in `index.html`) führt die Adresse
+ausdrücklich auf. Die Fotos selbst sind unverändert übernommene Bilder des
+Händlers aus dem Partnerprogramm — die Adressen sind vom Netzwerk signiert
+und stehen so im Produktdatenfeed.
 
 **Woher der Katalog kommt:** `reifen-import.py` holt den Produktdatenfeed
 von AWIN – auf Friedrichs Rechner, nicht in der App. Der dafür nötige
-Schlüssel liegt in `.awin-schluessel` und steht in `.gitignore`.
+Schlüssel liegt in `.awin-schluessel` und steht in `.gitignore`. Das
+Ergebnis ist eine JS-Datei (kein JSON), die die App bei Bedarf als Skript
+nachlädt — so funktioniert der Reifen-Bereich auch dann, wenn die Seite
+ohne Server direkt aus einer Datei geöffnet wird.
 
 **Beim Klick auf ein Angebot** öffnet sich zuerst eine Frage
 (`partnerBlatt`), einmalig. Erst nach „Einverstanden" öffnet der Link:
@@ -322,6 +335,7 @@ Schlüssel liegt in `.awin-schluessel` und steht in `.gitignore`.
 | Empfänger | Was ankommt | Grundlage |
 |---|---|---|
 | Awin AG, Berlin (`awin1.com`) | IP-Adresse, User-Agent, unsere Publisher-Nummer 3056191, die Produktnummer; gesetzt wird eine Kennung mit 30 Tagen Laufzeit | Einwilligung, § 25 Abs. 1 TDDDG + Art. 6 Abs. 1 lit. a DSGVO |
+| Awin (`images2.productserve.com`) | IP-Adresse und User-Agent bei jedem geladenen Produktfoto — erst nach der Einwilligung, siehe oben | dasselbe |
 | reifencom GmbH, Hannover | alles, was der Browser beim Aufruf des Shops überträgt; was dort an Cookies gesetzt wird, liegt beim Händler | dasselbe |
 
 **Was zu uns zurückfließt:** nur Summen im AWIN-Konto – Klicks, Verkäufe,

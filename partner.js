@@ -75,7 +75,7 @@ function partnerNach(id) {
 
    a) Der PRODUKTLINK (pclick) fuehrt auf genau einen Artikel. Die Nummer
       dahinter steht im Produktdatenfeed und ist nur dort zu bekommen -
-      deshalb steht sie in reifen-katalog.json bei jedem Reifen.
+      deshalb steht sie in reifen-katalog.js bei jedem Reifen.
 
    b) Der DEEPLINK (cread) fuehrt auf eine beliebige Seite des Haendlers.
       Den brauchen wir fuer alles, was kein einzelner Artikel ist: die
@@ -227,16 +227,30 @@ verkabele('btnPartnerJa', 'click', () => {
   if (blatt) blatt.hidden = true;
   gemerktesPartnerZiel = null;
 
-  if (!setzePartnerStand('ja')) return;
+  /* Der Link oeffnet auch dann, wenn das MERKEN scheitert (voller
+     Geraetespeicher): Eingewilligt hat der Nutzer in diesem Moment
+     unstrittig, nur die Erinnerung daran liess sich nicht ablegen. Den
+     zugesagten Klick zu verschlucken waere die falsche Strafe - der
+     Toast aus setzePartnerStand() meldet das Speicherproblem, und beim
+     naechsten Angebot kommt die Frage eben wieder. */
+  const gemerkt = setzePartnerStand('ja');
   zeichnePartnerStand();
+  /* Mit der gemerkten Zustimmung duerfen die Produktbilder erscheinen -
+     also alles neu zeichnen, was welche zeigt. reifen.js laedt NACH
+     dieser Datei, deshalb die typeof-Pruefung: Fehlt es, gibt es auch
+     nichts zu zeichnen. */
+  if (gemerkt) {
+    if (typeof zeichneReifenAlles === 'function' && reifenKatalog) zeichneReifenAlles();
+    if (typeof zeichneGarageReifen === 'function') zeichneGarageReifen();
+  }
   if (ziel) geraet.öffneExtern(ziel);
 });
 
 verkabele('btnPartnerNein', 'click', () => {
-  // "Nein" wird ebenfalls gemerkt - sonst stuende die Frage bei jedem
-  // Angebot wieder da, und das ist genau die Belaestigung, die eine
-  // Einwilligung wertlos macht. Widerrufen und erneut zustimmen geht
-  // ueber "Rechtliches".
+  /* Auch "Nein" wird abgelegt - fuer die Statuszeile unter "Rechtliches".
+     Am Verhalten aendert es nichts: Wer spaeter wieder ein Angebot
+     antippt, bekommt die Frage erneut, denn ohne Einwilligung darf der
+     Link nun einmal nicht oeffnen. Genau so steht es auch im Blatt. */
   setzePartnerStand('nein');
   schliessePartnerBlatt();
   zeichnePartnerStand();

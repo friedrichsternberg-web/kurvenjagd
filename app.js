@@ -3543,6 +3543,10 @@ function zeigeGarage() {
   // Die kleine Shop-Leiste unten stammt aus shop.js - gleiche Absicherung
   // wie bei der Garage selbst: Fehlt die Datei, fehlt nur die Leiste.
   if (typeof zeichneGarageShop === 'function') zeichneGarageShop();
+  // Dasselbe fuer die Reifen-Leiste aus reifen.js. Der Aufruf hier ist
+  // auch der Weg, auf dem eine gerade eingetragene Groesse in der Garage
+  // ankommt - man kommt ja durch diese Funktion zurueck.
+  if (typeof zeichneGarageReifen === 'function') zeichneGarageReifen();
 }
 
 /* Der Shop. zeichneShop() steht in shop.js, das wie garage.js NACH dieser

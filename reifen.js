@@ -9,12 +9,13 @@
      4. Zeichnen: Held, Groessenwahl, Liste
      5. Der Klick nach draussen
      6. Verkabelung
+     7. Die Reifen-Leiste in der Garage
 
    WIE DIE DATEN HIERHER KOMMEN: reifen-import.py holt den Produktfeed von
-   AWIN und schreibt reifen-katalog.json. Diese Datei liest die App - erst
-   dann, wenn jemand den Reifen-Bildschirm oeffnet, nicht beim Start. Das
-   sind ueber 3800 Reifen; sie beim Start mitzuladen waere Verschwendung
-   fuer alle, die nie hierherkommen.
+   AWIN und schreibt reifen-katalog.js. Diese Datei laedt die App als
+   Skript nach - erst bei Bedarf, nicht beim Start. Das sind ueber 3800
+   Reifen; sie beim Start mitzuladen waere Verschwendung fuer alle, die
+   nie hierherkommen.
 
    WARUM ES KEIN PREISVERGLEICH IST: Es gibt genau einen Haendler. Etwas
    als Vergleich aufzumachen, was keiner ist, waere irrefuehrend - deshalb
@@ -48,9 +49,11 @@
      z  Felgendurchmesser in Zoll   (17)
      l  'v' vorn, 'h' hinten, 'b' ohne Angabe des Haendlers
      p  Preis in Euro
-     k  Versandkosten in Euro */
+     k  Versandkosten in Euro
+     f  Pfadrest des Produktbilds (null: keines)
+     g  Signatur des Bildservers dazu */
 
-const REIFEN_KATALOG_DATEI = 'reifen-katalog.json';
+const REIFEN_KATALOG_DATEI = 'reifen-katalog.js';
 
 // Ab wann der Stand als alt gilt und die App das dazusagt. Zwei Wochen:
 // Reifenpreise bewegen sich langsam, aber ein Monat alte Zahlen als
@@ -70,18 +73,60 @@ function reifenKatalogAdresse() {
   return frage ? `${REIFEN_KATALOG_DATEI}?${frage}` : REIFEN_KATALOG_DATEI;
 }
 
+/* Der Katalog kommt als <script>-Element, nicht per fetch(). Der Grund
+   ist praktisch: fetch() ist gesperrt, wenn die Seite ohne Server direkt
+   aus einer Datei geoeffnet wird - ein nachgeladenes Skript laeuft
+   ueberall, wo die App selbst laeuft. Genau daran ist die erste Fassung
+   beim Testen gescheitert.
+
+   Nachgeladen wird trotzdem erst bei Bedarf: Die Datei traegt fast
+   viertausend Reifen, und wer nie hierherkommt, soll sie nicht mitladen. */
 function ladeReifenKatalog() {
   if (reifenAbruf) return reifenAbruf;
-  reifenAbruf = fetch(reifenKatalogAdresse())
-    .then(antwort => {
-      if (!antwort.ok) throw new Error(`Katalog nicht erreichbar (${antwort.status})`);
-      return antwort.json();
-    })
-    .then(daten => {
-      reifenKatalog = daten;
-      return daten;
-    });
+  reifenAbruf = new Promise((gelungen, gescheitert) => {
+    if (typeof REIFEN_KATALOG !== 'undefined') { gelungen(REIFEN_KATALOG); return; }
+    const element = document.createElement('script');
+    element.src = reifenKatalogAdresse();
+    element.onload = () => {
+      element.remove();
+      if (typeof REIFEN_KATALOG === 'undefined') {
+        gescheitert(new Error('Katalogdatei ohne Inhalt'));
+        return;
+      }
+      gelungen(REIFEN_KATALOG);
+    };
+    element.onerror = () => {
+      element.remove();
+      gescheitert(new Error('Katalog nicht erreichbar'));
+    };
+    document.head.appendChild(element);
+  }).then(daten => {
+    reifenKatalog = daten;
+    return daten;
+  });
   return reifenAbruf;
+}
+
+/* Die Adresse eines Produktbilds, zusammengesetzt aus dem gespeicherten
+   Pfadrest (f) und der Signatur (g). Die Bilder liegen auf dem Bildserver
+   des Partnernetzwerks - jede Adresse ist dort signiert, und die Signatur
+   haengt nur an der Quelle, nicht an der Groesse (nachgemessen, siehe
+   reifen-import.py). Deshalb koennen wir hier die Groesse frei waehlen.
+
+   GEZEIGT werden die Bilder erst nach der Einwilligung: Der Abruf traegt
+   die IP-Adresse zum Netzwerk, und genau dafuer holt partner.js vorher
+   das Einverstaendnis ein. Ohne Einwilligung zeichnet die App ihr Symbol. */
+function reifenBildAdresse(reifen, groesse) {
+  if (!reifen.f || !reifen.g || !reifenKatalog?.bildBasis) return null;
+  return 'https://images2.productserve.com/?w=' + groesse + '&h=' + groesse
+    + '&bg=white&trim=5&t=letterbox&url='
+    + encodeURIComponent('ssl:' + reifenKatalog.bildBasis + reifen.f)
+    + '&feedId=' + encodeURIComponent(reifenKatalog.feed || '')
+    + '&k=' + encodeURIComponent(reifen.g);
+}
+
+function reifenBilderErlaubt() {
+  return typeof partnerFreigegeben === 'function' && partnerFreigegeben();
 }
 
 function reifenMarke(reifen) {
@@ -248,7 +293,22 @@ function zeigeReifen() {
   zeigeBildschirm('reifenScreen');
   document.getElementById('reifenScreen').scrollTop = 0;
 
-  if (reifenKatalog) { zeichneReifenAlles(); return; }
+  if (reifenKatalog) {
+    // Lade- und Fehlerhinweis gehoeren weg, auch auf diesem Weg: Der
+    // Katalog kann nach einem gescheiterten Versuch ueber die
+    // Garage-Leiste doch noch angekommen sein - dann stuende der Kasten
+    // "Nochmal versuchen" sonst fuer immer ueber einer Liste, die
+    // laengst funktioniert.
+    document.getElementById('reifenLaden').hidden = true;
+    document.getElementById('reifenFehler').hidden = true;
+    // Und zuerst die gemerkte Groesse der AKTUELLEN Maschine holen: Wer
+    // zwischendurch das Motorrad gewechselt hat oder die Seite neu laedt,
+    // soll seine Groesse sehen - nicht den letzten Stand der Auswahl.
+    holeMassInDieWahl();
+    rueckeAufVorhandenesMass();
+    zeichneReifenAlles();
+    return;
+  }
 
   document.getElementById('reifenLaden').hidden = false;
   document.getElementById('reifenFehler').hidden = true;
@@ -350,9 +410,18 @@ function reifenZeileHtml(reifen) {
   const lage = reifen.l === 'v' ? 'Vorderreifen'
     : reifen.l === 'h' ? 'Hinterreifen' : 'vorn oder hinten';
 
+  /* Das Foto kommt in doppelter Groesse (128 fuer 64 Punkte), damit es
+     auf Bildschirmen mit hoher Punktdichte scharf ist. loading="lazy",
+     weil sonst beim Oeffnen alle dreissig Bilder auf einmal starten. */
+  const bildAdresse = reifenBilderErlaubt() ? reifenBildAdresse(reifen, 128) : null;
+  const bildFeld = bildAdresse
+    ? `<span class="reifen-symbol reifen-foto"><img src="${escapeHtml(bildAdresse)}"
+         alt="" loading="lazy" width="64" height="64"></span>`
+    : `<span class="reifen-symbol" aria-hidden="true">${symbol('reifen')}</span>`;
+
   return `
     <li class="reifen-karte">
-      <span class="reifen-symbol" aria-hidden="true">${symbol('reifen')}</span>
+      ${bildFeld}
       <span class="reifen-text">
         <span class="reifen-marke">${escapeHtml(reifenMarke(reifen))}</span>
         <span class="reifen-modell">${escapeHtml(reifen.n)}</span>
@@ -371,6 +440,11 @@ function zeichneReifenListe() {
   const liste = document.getElementById('reifenListe');
   const kopf = document.getElementById('reifenListeKopf');
   const mehr = document.getElementById('btnReifenMehr');
+  // Solange die Bilder nicht freigegeben sind, steht ueber der Liste das
+  // Angebot, sie freizuschalten - dieselbe Einwilligung wie fuer die
+  // Links, nur von der anderen Seite betreten.
+  const hinweis = document.getElementById('reifenBilderHinweis');
+  if (hinweis) hinweis.hidden = reifenBilderErlaubt();
   const treffer = reifenTreffer().sort((a, b) => (a.p + a.k) - (b.p + b.k));
   const groesse = `${reifenWahl.b}/${reifenWahl.q} R${reifenWahl.z}`;
   const lage = reifenWahl.lage === 'v' ? 'vorne' : 'hinten';
@@ -421,6 +495,7 @@ function öffneReifenStartseite() {
    des Shops. */
 
 verkabele('reifenMass', 'change', ereignis => {
+  if (!reifenKatalog) return;
   const feld = ereignis.target;
   if (feld.id === 'reifenBreite') reifenWahl.b = Number(feld.value);
   else if (feld.id === 'reifenQuer') reifenWahl.q = Number(feld.value);
@@ -439,6 +514,7 @@ verkabele('reifenMass', 'change', ereignis => {
 });
 
 verkabele('reifenLage', 'click', ereignis => {
+  if (!reifenKatalog) return;
   const knopf = ereignis.target.closest('.seg[data-lage]');
   if (!knopf || knopf.dataset.lage === reifenWahl.lage) return;
   reifenWahl.lage = knopf.dataset.lage;
@@ -449,6 +525,7 @@ verkabele('reifenLage', 'click', ereignis => {
 });
 
 verkabele('reifenMarken', 'click', ereignis => {
+  if (!reifenKatalog) return;
   const chip = ereignis.target.closest('.marken-chip');
   if (!chip) return;
   reifenWahl.marke = chip.dataset.marke === '' ? null : Number(chip.dataset.marke);
@@ -466,6 +543,116 @@ verkabele('btnReifenMehr', 'click', () => {
   zeichneReifenListe();
 });
 
+verkabele('btnReifenBilder', 'click', () => {
+  // Dieselbe Frage wie vor dem ersten Klick nach draussen, nur ohne Ziel:
+  // Nach "Einverstanden" oeffnet sich nichts, die Bilder erscheinen.
+  if (typeof öffnePartnerBlatt === 'function') öffnePartnerBlatt();
+});
+
 verkabele('btnReifenShop', 'click', öffneReifenStartseite);
 verkabele('btnReifenZurueck', 'click', () => zeigeGarage());
 verkabele('btnReifenNochmal', 'click', zeigeReifen);
+verkabele('btnGarageReifenAlle', 'click', () => {
+  if (typeof zeigeReifen === 'function') zeigeReifen();
+});
+
+verkabele('garageReifenBand', 'click', ereignis => {
+  // Jede Karte fuehrt auf den Reifen-Bildschirm, nicht direkt zum Shop:
+  // Dort stehen Einwilligung, Kennzeichnung und die ganze Liste - eine
+  // Karte in der Garage ist die Einladung, nicht schon der Klick nach
+  // draussen.
+  if (ereignis.target.closest('[data-reifen-band]')) zeigeReifen();
+});
+
+
+/* --- 7. Die Reifen-Leiste in der Garage --------------------------------------
+   Dieselbe Form wie die Shop-Leiste "Shop fuer dich" (shop.js,
+   zeichneGarageShop): eine Platte mit wischbarer Kartenreihe. Sie war von
+   Anfang an fuer die Garage gedacht - jetzt traegt sie das erste echte
+   Programm.
+
+   Drei Zustaende:
+     - kein Motorrad in der Garage: die Platte bleibt verborgen. Ohne
+       Maschine gibt es nichts Persoenliches zu zeigen, und eine
+       Werbeleiste fuer niemanden waere genau die Sorte Shop, die diese
+       App nicht sein soll.
+     - Motorrad, aber noch keine Reifengroesse: EINE Karte, die zur
+       Groesseneingabe einlaedt. Dafuer braucht es den Katalog nicht.
+     - Groesse gespeichert: die guenstigsten Angebote vorn und hinten,
+       je Karte mit Bild (nach Einwilligung), Namen und Preis. Erst
+       HIER wird der Katalog nachgeladen - beim ersten Zeichnen der
+       Garage, nicht beim Start der App. */
+
+const GARAGE_REIFEN_JE_LAGE = 4;
+
+function gemerkteMasseDerMaschine() {
+  return reifenMasse[maschinenSchluessel()] || null;
+}
+
+function garageReifenKarteHtml(reifen, lageText) {
+  const bildAdresse = reifenBilderErlaubt() ? reifenBildAdresse(reifen, 200) : null;
+  const bild = bildAdresse
+    ? `<span class="produkt-mini-bild"><img src="${escapeHtml(bildAdresse)}" alt="" loading="lazy"></span>`
+    : `<span class="produkt-mini-bild">${symbol('reifen')}</span>`;
+  return `
+    <button type="button" class="garage-shop-karte" data-reifen-band>
+      ${bild}
+      <span class="garage-shop-name">${escapeHtml(reifenMarke(reifen))} ${escapeHtml(reifen.n)}</span>
+      <span class="garage-shop-meta">${lageText} &middot; ${preisText(reifen.p + reifen.k)}</span>
+    </button>`;
+}
+
+// Die guenstigsten Reifen einer Lage in der gemerkten Groesse.
+function garageReifenAuswahl(lage) {
+  const mass = gemerktesMass(lage);
+  return reifenKatalog.reifen
+    .filter(reifen => reifen.b === mass[0] && reifen.q === mass[1]
+                   && reifen.z === mass[2]
+                   && (reifen.l === 'b' || reifen.l === lage))
+    .sort((a, b) => (a.p + a.k) - (b.p + b.k))
+    .slice(0, GARAGE_REIFEN_JE_LAGE);
+}
+
+function zeichneGarageReifen() {
+  const platte = document.getElementById('garageReifen');
+  const band = document.getElementById('garageReifenBand');
+  if (!platte || !band) return;
+
+  const motorrad = (typeof motorradAktiv === 'function') ? motorradAktiv() : null;
+  if (!motorrad) { platte.hidden = true; return; }
+
+  const maschine = `${motorrad.marke || ''} ${motorrad.modell || ''}`.trim() || 'Maschine';
+
+  // Noch keine Groesse gemerkt: die Einladung, ohne den Katalog zu laden.
+  if (!gemerkteMasseDerMaschine()) {
+    band.innerHTML = `
+      <button type="button" class="garage-shop-karte garage-reifen-einladung" data-reifen-band>
+        <span class="produkt-mini-bild">${symbol('reifen')}</span>
+        <span class="garage-shop-name">Welche Reifen passen auf deine ${escapeHtml(maschine)}?</span>
+        <span class="garage-shop-meta">Gr&ouml;&szlig;e eintragen &rarr;</span>
+      </button>`;
+    platte.hidden = false;
+    return;
+  }
+
+  // Groesse da: Katalog holen (einmalig) und die Karten zeichnen. Bis er
+  // da ist, bleibt die Platte verborgen - eine leere Leiste mit
+  // Ladehinweis waere auf dem Startbildschirm nur Unruhe.
+  if (!reifenKatalog) {
+    ladeReifenKatalog().then(() => zeichneGarageReifen()).catch(() => { platte.hidden = true; });
+    return;
+  }
+
+  const karten = [
+    ...garageReifenAuswahl('v').map(reifen => garageReifenKarteHtml(reifen, 'Vorne')),
+    ...garageReifenAuswahl('h').map(reifen => garageReifenKarteHtml(reifen, 'Hinten')),
+  ];
+  if (!karten.length) { platte.hidden = true; return; }
+  band.innerHTML = karten.join('');
+  platte.hidden = false;
+}
+
+/* Einmal beim Laden zeichnen - aus demselben Grund wie am Ende von
+   shop.js: Die Garage ist der erste Bildschirm, und ihr zeichneGarage()
+   ist schon gelaufen, bevor diese Datei geladen war. */
+zeichneGarageReifen();

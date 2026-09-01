@@ -46,7 +46,11 @@
        img-src 'self' data: blob: ...
          data: fuer die verkleinerten Fotos, blob: fuer Bilder aus der
          Dateiauswahl, dazu die Kartenkacheln und der Bilderspeicher des
-         Kontos.
+         Kontos. images2.productserve.com ist der Bildserver des
+         Partnernetzwerks AWIN: die Produktfotos im Reifen-Bereich. Die
+         CSP kann nicht nach Einwilligung unterscheiden - das tut
+         reifen.js, das die Adressen erst nach der Zustimmung in die
+         Seite schreibt. Diese Zeile erlaubt sie nur, sie laedt nichts.
 
        connect-src
          Jede Adresse, die die App im Hintergrund fragt: BRouter fuer
@@ -90,7 +94,7 @@
     worker-src 'self' blob:;
     style-src 'self' 'unsafe-inline';
     font-src 'self';
-    img-src 'self' data: blob: https://tile.openstreetmap.org https://copydwpdqpnwjvknsakz.supabase.co;
+    img-src 'self' data: blob: https://tile.openstreetmap.org https://copydwpdqpnwjvknsakz.supabase.co https://images2.productserve.com;
     connect-src 'self' https://brouter.de https://nominatim.openstreetmap.org
                 https://vpic.nhtsa.dot.gov https://de.wikipedia.org https://en.wikipedia.org
                 https://copydwpdqpnwjvknsakz.supabase.co https://cdn.jsdelivr.net;
@@ -626,6 +630,21 @@
         <div class="garage-shop-band" id="garageShopBand"></div>
       </div>
 
+      <!-- Die Reifen-Leiste: dieselbe Form wie die Shop-Leiste darueber,
+           nur mit echten Angeboten aus dem Partnerprogramm von reifen.com.
+           Statt des Demo-Vermerks traegt sie deshalb die
+           Anzeige-Kennzeichnung - sie zeigt Preise ausserhalb des
+           Reifen-Bildschirms, dessen Offenlegung hier nicht zu sehen ist.
+           Gefuellt von reifen.js (zeichneGarageReifen); ohne Motorrad in
+           der Garage bleibt die Platte verborgen. -->
+      <div id="garageReifen" class="garage-platte garage-shop" hidden>
+        <div class="garage-shop-kopf">
+          <h3>Reifen f&uuml;r dich <span class="garage-shop-anzeige">Anzeige</span></h3>
+          <button class="linkbtn" id="btnGarageReifenAlle">Alle ansehen &rarr;</button>
+        </div>
+        <div class="garage-shop-band" id="garageReifenBand"></div>
+      </div>
+
       <!-- Das Menue. Seit die Garage der Startbildschirm ist, wohnen die
            Wege in die uebrigen Bereiche hier unten: erst die eigene
            Maschine, dann der Shop, dann das, was man sonst vorhat. Eine
@@ -688,7 +707,11 @@
               <svg class="ic gross kachel-symbol"><use href="#icon-reifen"></use></svg>
               <span class="kachel-text">
                 <span class="kachel-titel">Reifen</span>
-                <span class="kachel-zusatz">Passend zu deiner Maschine &middot; Anzeige</span>
+                <!-- Die Erklaerung steckt in einem eigenen span, damit die
+                     enge Querformat-Ecke (quer.css) nur SIE ausblenden
+                     kann - das Wort "Anzeige" muss auf der Kachel stehen
+                     bleiben, in jeder Groesse. -->
+                <span class="kachel-zusatz"><span class="kachel-zusatz-erklaerung">Passend zu deiner Maschine &middot; </span>Anzeige</span>
               </span>
             </span>
             <span class="kachel-pfeil" aria-hidden="true">&rarr;</span>
@@ -1073,13 +1096,13 @@
        gemerkt, getrennt fuer vorn und hinten.
 
        WAS HIER NICHT STEHT: kein Preisvergleich (es gibt genau einen
-       Haendler, alles andere waere vorgetaeuscht), keine Sterne (dazu
-       fehlt eine nachpruefbare Quelle) und keine Produktfotos vom
-       Haendler - die kaemen von einem fremden Server und wuerden die
-       IP-Adresse jedes Besuchers dorthin tragen, noch bevor er irgendetwas
-       angeklickt hat.
+       Haendler, alles andere waere vorgetaeuscht) und keine Sterne (dazu
+       fehlt eine nachpruefbare Quelle). Produktfotos gibt es - aber erst
+       nach der Einwilligung: Sie liegen auf dem Bildserver des
+       Partnernetzwerks, und der Abruf traegt die IP-Adresse dorthin.
+       Vorher zeichnet die App ihr eigenes Reifensymbol.
 
-       Die leeren Behaelter fuellt reifen.js aus reifen-katalog.json.
+       Die leeren Behaelter fuellt reifen.js aus reifen-katalog.js.
        Die Links baut partner.js, und dort steht auch die Einwilligung,
        die vor dem ersten Klick nach draussen kommt. ===== -->
   <div id="reifenScreen" class="start-screen listen-screen" hidden>
@@ -1118,6 +1141,16 @@
         <button class="btn ghost klein" id="btnReifenNochmal">Nochmal versuchen</button>
       </div>
 
+      <!-- Solange die Partner-Einwilligung fehlt, zeigt die Liste das
+           gezeichnete Symbol statt der Produktfotos - die Fotos kommen vom
+           Bildserver des Netzwerks, und der Abruf traegt die IP-Adresse
+           dorthin. Diese Zeile bietet die Freischaltung an; sie oeffnet
+           dasselbe Einwilligungs-Blatt wie der erste Klick nach draussen. -->
+      <div class="reifen-bilder-hinweis" id="reifenBilderHinweis" hidden>
+        <span>Produktfotos kommen vom Partnernetzwerk und sind darum noch aus.</span>
+        <button class="btn ghost klein" id="btnReifenBilder">Fotos anzeigen</button>
+      </div>
+
       <div class="finder-marken reifen-marken" id="reifenMarken"></div>
       <p class="reifen-treffer" id="reifenListeKopf"></p>
       <ul class="saved-list reifen-liste" id="reifenListe"></ul>
@@ -1150,9 +1183,11 @@
         <p class="tiny">
           Preise inklusive Mehrwertsteuer. Motorradreifen liefert
           reifen.com frachtfrei innerhalb Deutschlands. Ma&szlig;geblich ist
-          der Preis, den der Shop beim Kauf anzeigt. Alle genannten
-          Marken- und Produktnamen sind Eigentum der jeweiligen
-          Rechteinhaber und dienen hier allein der Beschreibung.
+          der Preis, den der Shop beim Kauf anzeigt. Produktfotos stammen
+          von reifen.com und werden unver&auml;ndert &uuml;ber das
+          Partnernetzwerk eingebunden. Alle genannten Marken- und
+          Produktnamen sind Eigentum der jeweiligen Rechteinhaber und
+          dienen hier allein der Beschreibung.
         </p>
         <button class="btn ghost klein" id="btnReifenShop">Zu reifen.com (Anzeige)</button>
       </section>
@@ -1467,21 +1502,30 @@
             &bdquo;Anzeige&ldquo; gekennzeichnet.
           </p>
           <p>
-            <strong>Solange du nichts anklickst, geht nichts an AWIN oder
-            reifen.com.</strong> Die Reifendaten liegen als Datei auf
-            demselben Server wie die App und werden von dort geladen; wir
-            binden keine Produktbilder, keine Z&auml;hlpixel und kein
-            Skript des Partners ein.
+            <strong>Ohne deine Zustimmung geht nichts an AWIN oder
+            reifen.com.</strong> Namen, Gr&ouml;&szlig;en und Preise liegen
+            als Datei auf demselben Server wie die App und werden von dort
+            geladen; Z&auml;hlpixel oder Skripte des Partners gibt es
+            nicht. Statt der Produktfotos siehst du zun&auml;chst ein
+            gezeichnetes Symbol.
           </p>
           <p>
-            Tippst du auf ein Angebot, fragt die App <b>einmalig</b>, ob du
-            einverstanden bist. Erst danach &ouml;ffnet der Link. Er
-            f&uuml;hrt &uuml;ber awin1.com; dort werden deine IP-Adresse
-            und eine Kennung verarbeitet, an der ein Kauf innerhalb von
-            <b>30 Tagen</b> uns zugeordnet wird. Wir erfahren dabei nicht,
-            wer etwas gekauft hat oder was &ndash; nur Summen.
-            Rechtsgrundlage ist deine Einwilligung nach &sect; 25 Abs. 1
-            TDDDG und Art. 6 Abs. 1 lit. a DSGVO.
+            Beim ersten Angebot &ndash; oder wenn du die Produktfotos
+            einschalten willst &ndash; fragt die App, ob du Partner-Angebote
+            zul&auml;sst. Ein Ja merkt sie sich, die Frage kommt dann nicht
+            wieder; ein Nein gilt f&uuml;r den Moment, und beim n&auml;chsten
+            Angebot fragt sie erneut. Erst nach deinem Ja passiert
+            zweierlei:
+            Die <b>Produktfotos</b> werden vom Bilddienst des Netzwerks
+            (images2.productserve.com, Awin) geladen, wobei deine
+            IP-Adresse dorthin &uuml;bertragen wird. Und ein Klick auf ein
+            Angebot f&uuml;hrt &uuml;ber awin1.com; dort werden deine
+            IP-Adresse und eine Kennung verarbeitet, an der ein Kauf
+            innerhalb von <b>30 Tagen</b> uns zugeordnet wird. Wir erfahren
+            dabei nicht, wer etwas angesehen oder gekauft hat &ndash; nur
+            Summen. Rechtsgrundlage ist deine Einwilligung nach
+            &sect; 25 Abs. 1 TDDDG und Art. 6 Abs. 1 lit. a DSGVO; nach
+            einem Widerruf verschwinden die Fotos wieder.
           </p>
           <p>
             Auf deinem Ger&auml;t merkt sich die App nur, <em>ob</em> und
@@ -2354,19 +2398,24 @@
   <div id="partnerBlatt" class="partner-schleier" hidden>
     <div class="partner-blatt glas" role="dialog" aria-modal="true"
          aria-labelledby="partnerBlattTitel">
-      <h3 id="partnerBlattTitel">Zum Shop weitergehen?</h3>
+      <h3 id="partnerBlattTitel">Partner-Angebote zulassen?</h3>
       <p class="hint">
-        Du verl&auml;sst Serpa und landest bei <b>reifen.com</b>. Der Link
-        l&auml;uft &uuml;ber unser Partnernetzwerk <b>AWIN</b>, das dort
-        eine Kennung setzt: Kaufst du innerhalb von 30 Tagen etwas, wird
-        uns eine Provision gutgeschrieben. <b>Am Preis &auml;ndert das
-        nichts.</b>
+        Die Reifen-Angebote kommen von <b>reifen.com</b> &uuml;ber unser
+        Partnernetzwerk <b>AWIN</b>. L&auml;sst du sie zu, passieren zwei
+        Dinge: Die <b>Produktfotos</b> werden vom Bildserver des Netzwerks
+        geladen, und ein Klick auf ein Angebot f&uuml;hrt &uuml;ber einen
+        Link, an dem das Netzwerk eine Kennung setzt &ndash; kaufst du
+        innerhalb von 30 Tagen etwas, wird uns eine Provision
+        gutgeschrieben. <b>Am Preis &auml;ndert das nichts.</b>
       </p>
       <p class="hint">
-        Serpa erf&auml;hrt dabei nicht, was du kaufst &ndash; nur, dass
-        insgesamt etwas vermittelt wurde. Wir merken uns deine Antwort,
-        damit die Frage nicht bei jedem Angebot wiederkommt. Zur&uuml;cknehmen
-        kannst du sie jederzeit unter &bdquo;Impressum &amp; Datenschutz&ldquo;.
+        Serpa erf&auml;hrt dabei nicht, was du dir ansiehst oder kaufst
+        &ndash; nur, dass insgesamt etwas vermittelt wurde. Sagst du Ja,
+        merken wir uns das und fragen nicht wieder; zur&uuml;cknehmen
+        kannst du es jederzeit unter &bdquo;Impressum &amp;
+        Datenschutz&ldquo;. Ein Nein gilt f&uuml;r den Moment &ndash; beim
+        n&auml;chsten Angebot fragen wir wieder, denn ohne deine Zustimmung
+        &ouml;ffnet der Link nicht.
       </p>
       <div class="partner-knoepfe">
         <button class="btn ghost" id="btnPartnerNein">Nein, hier bleiben</button>

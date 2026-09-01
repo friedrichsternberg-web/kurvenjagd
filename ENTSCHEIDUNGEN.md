@@ -1788,3 +1788,58 @@ Kachelausschnitte jetzt ausdrücklich mit.
 **Was NICHT entschieden ist:** ob das live geht. Affiliate-Einnahmen sind
 gewerblich, die Gewerbeanmeldung fehlt. Das steht in `AUFGABEN.md` und ist
 der Punkt, an dem es hängt — nicht am Code.
+
+## 01.09.2026 (abends) — Reifen in der Garage, echte Produktfotos, Ladeweg
+
+Drei Nachbesserungen am Reifen-Bereich vom Vormittag, alle auf Friedrichs
+Rückmeldung hin.
+
+**Die Reifen-Leiste in der Garage.** Der Vormittagsstand hatte nur die
+Kachel; jetzt gibt es zusätzlich die Platte „Reifen für dich" — dieselbe
+Form wie die Leiste „Shop für dich", die seit dem Abschalten des
+Demo-Shops verborgen liegt. Genau dafür war diese Form gedacht. Drei
+Zustände: ohne Motorrad bleibt sie weg, ohne gemerkte Größe lädt EINE
+Karte zur Größeneingabe ein (dafür braucht es den Katalog nicht), mit
+Größe zeigt sie die günstigsten Angebote vorn und hinten. Statt des
+Demo-Vermerks trägt der Kopf die Anzeige-Kennzeichnung — die Leiste zeigt
+echte Preise außerhalb des Reifen-Bildschirms. In der engen
+Querformat-Ecke (unter 720 Punkten Höhe) weicht die Leiste, weil die
+Garage dort nicht scrollen darf; die Reifen-Kachel rückt dann neben die
+Stats-Kachel, damit keine dritte Kachelreihe entsteht.
+
+**Echte Produktfotos, hinter der Einwilligung.** Am Vormittag hieß es
+„keine Produktbilder vom Händler", wegen der IP-Frage. Friedrich wollte
+sie, „soweit rechtlich irgendwie möglich" — und der Weg dahin ist sauber:
+Die Fotos werden unverändert vom Bilddienst des Netzwerks geladen
+(images2.productserve.com), also genau so, wie das Partnerprogramm sie
+für Publisher bereitstellt. Urheberrechtlich ist das der sicherste Weg
+(unverändert, aus der lizenzierten Quelle, nichts selbst gehostet). Das
+Datenschutzproblem löst die Reihenfolge: Vor der Einwilligung schreibt
+die App keine einzige Foto-Adresse in die Seite und zeichnet ihr Symbol;
+die Zeile „Fotos anzeigen" öffnet dasselbe Einwilligungs-Blatt wie der
+erste Klick nach draußen. Nach einem Widerruf verschwinden die Fotos
+wieder. Datenschutzerklärung Punkt 10, das Blatt und DATEN.md sind
+entsprechend umgeschrieben; die CSP führt die Adresse jetzt auf.
+
+Technisch nötig war eine Messung: Die Foto-Adressen im Feed sind
+signiert (&k=…), nachbauen ließ sich nichts — aber die Signatur hängt
+nur an der Quelle, nicht an der Bildgröße. Deshalb speichert der Katalog
+je Reifen Pfadrest und Signatur, und die App setzt die Adresse in der
+Größe zusammen, die sie braucht.
+
+**Der Katalog ist jetzt eine JS-Datei, kein JSON.** Die erste Fassung
+holte reifen-katalog.json per fetch() — und genau das ist beim ersten
+Test auf Friedrichs Rechner gescheitert (Angebote luden nicht, die
+Größenwahl blieb leer, weil sie ihre Werte aus dem Katalog bezieht).
+fetch() ist gesperrt, wenn die Seite ohne Server direkt aus einer Datei
+geöffnet wird; ein nachgeladenes <script> läuft überall, wo die App
+selbst läuft. reifen-import.py schreibt darum jetzt reifen-katalog.js
+mit einer Konstante, und reifen.js hängt die Datei bei Bedarf als
+Skript ein. Dazu ein Fund am Rande: height:100% auf einem Bild im
+Raster löst sich am Seitenverhältnis auf statt am Kasten — die Fotos
+ragten in die Beschriftung, jetzt sind sie absolut im Kasten verankert.
+
+**Beim Testen gilt ab jetzt:** ?test=1 an der Adresse umgeht nur das
+HTML, nicht die ?v=109-Dateien dahinter — die hält der Browser fest.
+Der Testserver im Scratchpad sendet deshalb „Cache-Control: no-store".
+Für die Veröffentlichung ändert sich nichts, dort zählt weiter ?v=.

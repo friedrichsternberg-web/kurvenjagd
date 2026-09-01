@@ -274,9 +274,11 @@ angenommen (AWIN-Programm 7605, Publisher 3056191). Der Bildschirm
 Motorradreifen mit echten Preisen und echten Provisionslinks.
 
 Was gebaut wurde: `partner.js` (Partnerliste, Linkbau, Einwilligung, die
-EINE Klickstelle), `reifen.js` (Bildschirm), `reifen-katalog.json`
-(Daten) und `reifen-import.py` (holt den AWIN-Feed). Alles Weitere in
-`DATEN.md` und `ENTSCHEIDUNGEN.md`, Eintrag vom 01.09.2026.
+EINE Klickstelle), `reifen.js` (Bildschirm und die Leiste „Reifen für
+dich" in der Garage), `reifen-katalog.js` (Daten) und `reifen-import.py`
+(holt den AWIN-Feed). Echte Produktfotos kommen nach der Einwilligung
+vom Bilddienst des Netzwerks. Alles Weitere in `DATEN.md` und
+`ENTSCHEIDUNGEN.md`, Einträge vom 01.09.2026.
 
 ### Was Friedrich noch tun muss, bevor das live geht
 

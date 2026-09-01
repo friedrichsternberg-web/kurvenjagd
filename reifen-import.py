@@ -58,10 +58,24 @@ FEED_ADRESSE = (
     '/fid/' + FEED + '/format/csv/language/de/delimiter/%2C/compression/gzip'
     '/columns/aw_product_id%2Cbrand_name%2Cproduct_name%2Cdimensions'
     '%2Csearch_price%2Cdelivery_cost%2Cin_stock%2Cdelivery_time'
-    '%2Cmerchant_product_category_path/'
+    '%2Cmerchant_product_category_path%2Caw_image_url%2Cmerchant_image_url/'
 )
 
-ZIEL = 'reifen-katalog.json'
+# Eine JS-Datei, kein JSON. Grund: Die App laedt den Katalog als
+# <script>-Element nach, nicht per fetch() - das funktioniert auch dann,
+# wenn die Seite ohne Server direkt aus einer Datei geoeffnet wird
+# (fetch ist dort gesperrt, script nicht).
+ZIEL = 'reifen-katalog.js'
+
+# Die Produktbilder liegen auf dem Bildserver des Netzwerks
+# (images2.productserve.com). Jede Adresse traegt eine SIGNATUR (&k=...),
+# ohne die der Server 403 liefert - nachbauen kann man sie nicht.
+# Gemessen am 01.09.2026: Die Signatur haengt nur an der QUELLE, nicht an
+# der Groesse (w=70 und w=400 tragen dieselbe). Deshalb speichern wir je
+# Reifen nur den Pfadrest und die Signatur, und die App setzt die Adresse
+# in der Groesse zusammen, die sie gerade braucht.
+BILD_PRAEFIX = 'https://www.reifen.com/images/thumbs/'
+SIGNATUR = re.compile(r'[?&]k=([0-9a-f]{40})')
 
 # Nur was reifen.com selbst als Motorradreifen fuehrt. Autoreifen tragen
 # dasselbe Groessenmuster (205/55 R16) - ohne diese Pruefung landeten sie
@@ -147,10 +161,24 @@ def kurzname(name):
     return re.sub(r'\s+', ' ', ohne_kuerzel).strip()
 
 
+def bild_feld(zeile):
+    """Pfadrest und Signatur des Produktbilds, oder (None, None).
+
+    Beides zusammen ergibt in der App wieder die signierte Adresse. Ein
+    Reifen ohne Bild bekommt in der App das gezeichnete Symbol."""
+    haendler_bild = zeile.get('merchant_image_url', '')
+    netz_bild = zeile.get('aw_image_url', '')
+    unterschrift = SIGNATUR.search(netz_bild)
+    if not haendler_bild.startswith(BILD_PRAEFIX) or not unterschrift:
+        return None, None
+    return haendler_bild[len(BILD_PRAEFIX):], unterschrift.group(1)
+
+
 def katalog_bauen(zeilen):
     marken = []
     reifen = []
     uebersprungen = 0
+    ohne_bild = 0
 
     for zeile in zeilen:
         if not zeile['merchant_product_category_path'].startswith(KATEGORIE):
@@ -171,6 +199,9 @@ def katalog_bauen(zeilen):
             marken.append(marke)
 
         name = zeile['product_name'].strip()
+        bild_pfad, bild_signatur = bild_feld(zeile)
+        if bild_pfad is None:
+            ohne_bild += 1
         reifen.append({
             'i': zeile['aw_product_id'],
             'm': marken.index(marke),
@@ -186,6 +217,10 @@ def katalog_bauen(zeilen):
             # frachtfrei, aber das kann sich aendern, und ein Preis ohne
             # Versand waere irrefuehrend (BGH "Froogle").
             'k': round(float(zeile['delivery_cost'] or 0), 2),
+            # Produktbild: Pfadrest hinter BILD_PRAEFIX und die Signatur.
+            # None heisst: kein Bild, die App zeichnet ihr Symbol.
+            'f': bild_pfad,
+            'g': bild_signatur,
         })
 
     # Guenstigster zuerst. Die App sortiert selbst, aber ein sortierter
@@ -193,12 +228,15 @@ def katalog_bauen(zeilen):
     reifen.sort(key=lambda eintrag: eintrag['p'])
     print(f'  {len(reifen)} Motorradreifen, {len(marken)} Marken')
     print(f'  {uebersprungen} uebersprungen (Zoll-, Quad- und Slickmasse)')
+    print(f'  {ohne_bild} ohne Produktbild')
 
     return {
         'stand': date.today().isoformat(),
         'haendler': HAENDLER,
         'publisher': PUBLISHER,
         'mid': MID,
+        'feed': FEED,
+        'bildBasis': BILD_PRAEFIX.replace('https://', ''),
         'marken': marken,
         'reifen': reifen,
     }
@@ -212,7 +250,14 @@ def main():
         sys.exit(f'Nur {len(katalog["reifen"])} Reifen - das sieht nach einem '
                  'kaputten Feed aus. Der alte Katalog bleibt stehen.')
     with open(ZIEL, 'w', encoding='utf-8') as datei:
+        datei.write(
+            '/* REIFEN-KATALOG - GENERIERTE DATEI, nicht von Hand anfassen.\n'
+            '   Erzeugt von reifen-import.py aus dem AWIN-Produktdatenfeed\n'
+            '   von reifen.com. Was die Kurzfelder bedeuten, steht im Kopf\n'
+            '   von reifen.js. */\n'
+            'const REIFEN_KATALOG = ')
         json.dump(katalog, datei, ensure_ascii=False, separators=(',', ':'))
+        datei.write(';\n')
     print(f'{ZIEL} geschrieben ({os.path.getsize(ZIEL) // 1024} KB).')
     print('Nicht vergessen: in ENTSCHEIDUNGEN.md steht, wann zuletzt '
           'importiert wurde.')
