@@ -1245,6 +1245,12 @@ function säubreSpur(liste) {
     .map(p => (Number.isFinite(p[2]) ? [p[0], p[1], p[2]] : [p[0], p[1]]));
 }
 
+const TEMPO_HOECHSTENS = 400;   // km/h; darueber ist es keine Messung mehr
+
+function imBereich(wert, klein, gross) {
+  return Number.isFinite(wert) && wert >= klein && wert <= gross;
+}
+
 function pruefeTour(rohdaten) {
   if (!rohdaten || typeof rohdaten !== 'object' || Array.isArray(rohdaten)) return null;
 
@@ -1284,17 +1290,35 @@ function pruefeTour(rohdaten) {
     const zeitpunkt = Date.parse(rohdaten.gefahrenAm);
     if (Number.isFinite(zeitpunkt)) sauber.gefahrenAm = new Date(zeitpunkt).toISOString();
   }
-  if (Number.isFinite(rohdaten.schnittKmh)) sauber.schnittKmh = rohdaten.schnittKmh;
-  if (Number.isFinite(rohdaten.maxKmh))     sauber.maxKmh     = rohdaten.maxKmh;
+  /* Die Zahlen bekommen eine Obergrenze. Nicht gegen den eigenen Rekorder -
+     der begrenzt selbst -, sondern gegen alles, was aus der Fremde kommt:
+     Ein Tempo von 1e308 in einer manipulierten Zeile wuerde sonst als
+     Hoechstwert im Rueckblick stehen. */
+  if (imBereich(rohdaten.schnittKmh, 0, TEMPO_HOECHSTENS)) sauber.schnittKmh = rohdaten.schnittKmh;
+  if (imBereich(rohdaten.maxKmh, 0, TEMPO_HOECHSTENS))     sauber.maxKmh     = rohdaten.maxKmh;
   if (rohdaten.neigung && typeof rohdaten.neigung === 'object'
       && !Array.isArray(rohdaten.neigung)
-      && (Number.isFinite(rohdaten.neigung.maxLinksGrad)
-          || Number.isFinite(rohdaten.neigung.maxRechtsGrad))) {
+      && (imBereich(rohdaten.neigung.maxLinksGrad, 0, 90)
+          || imBereich(rohdaten.neigung.maxRechtsGrad, 0, 90))) {
     sauber.neigung = {
       quelle: rohdaten.neigung.quelle === 'sensor' ? 'sensor' : 'gps',
-      maxLinksGrad:  Number.isFinite(rohdaten.neigung.maxLinksGrad)  ? rohdaten.neigung.maxLinksGrad  : 0,
-      maxRechtsGrad: Number.isFinite(rohdaten.neigung.maxRechtsGrad) ? rohdaten.neigung.maxRechtsGrad : 0,
+      maxLinksGrad:  imBereich(rohdaten.neigung.maxLinksGrad, 0, 90)  ? rohdaten.neigung.maxLinksGrad  : 0,
+      maxRechtsGrad: imBereich(rohdaten.neigung.maxRechtsGrad, 0, 90) ? rohdaten.neigung.maxRechtsGrad : 0,
     };
+  }
+
+  /* Die Herkunft einer uebernommenen Tour. Sie MUSS mitwandern, und zwar
+     aus zwei Gruenden: Wer eine fremde Tour uebernimmt, soll in einem
+     halben Jahr noch sehen, von wem sie stammt - und der Rueckblick
+     ("Meine Stats") zaehlt nur Ausfahrten OHNE diese Marke, sonst haette
+     man die Kilometer anderer Leute auf dem eigenen Konto. Ohne diese
+     zwei Zeilen ginge die Marke beim naechsten Abgleich verloren. */
+  if (typeof rohdaten.aufgenommenAm === 'string') {
+    const uebernommen = Date.parse(rohdaten.aufgenommenAm);
+    if (Number.isFinite(uebernommen)) sauber.aufgenommenAm = new Date(uebernommen).toISOString();
+  }
+  if (typeof rohdaten.geteiltVon === 'string' && rohdaten.geteiltVon) {
+    sauber.geteiltVon = rohdaten.geteiltVon.slice(0, 24);
   }
 
   /* Eine Rundtour speichert ihre Zufallspunkte nicht, nur den Start und die

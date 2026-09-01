@@ -287,6 +287,11 @@
         <path d="M3.4 12h17.2"/>
         <path d="M12 3.4c2.3 2.4 3.5 5.3 3.5 8.6s-1.2 6.2-3.5 8.6c-2.3-2.4-3.5-5.3-3.5-8.6S9.7 5.8 12 3.4Z"/>
       </symbol>
+      <!-- Die Stats: drei Balken, aufsteigend - dasselbe Bild wie das
+           Diagramm auf dem Bildschirm dahinter. -->
+      <symbol id="icon-stats" viewBox="0 0 24 24">
+        <path d="M5 20V13.5M12 20V7M19 20v-9.5"/>
+      </symbol>
       <symbol id="icon-profil" viewBox="0 0 24 24">
         <circle cx="12" cy="8" r="3.8"/>
         <path d="M4.5 20c0-3.6 3.4-5.6 7.5-5.6s7.5 2 7.5 5.6"/>
@@ -648,6 +653,20 @@
             <span class="kachel-pfeil" aria-hidden="true">&rarr;</span>
           </button>
 
+          <!-- Als einzige Kachel kein Streckenfoto, sondern das weiche
+               Hintergrundbild der App: Neben Ride mit demselben Bild waere
+               es eine Dopplung, und hinter Zahlen ist ein ruhiger Grund
+               ohnehin der bessere. -->
+          <button class="kachel" id="btnStartStats" style="--kachel-bild: url('img/hintergrund-weich.jpg'); --kachel-lage: center 45%">
+            <span class="kachel-inhalt">
+              <svg class="ic gross kachel-symbol"><use href="#icon-stats"></use></svg>
+              <span class="kachel-text">
+                <span class="kachel-titel">Meine Stats</span>
+              </span>
+            </span>
+            <span class="kachel-pfeil" aria-hidden="true">&rarr;</span>
+          </button>
+
           <!-- Noch ohne Hintergrundbild - das kann spaeter als
                img/kacheln/shop.jpg dazukommen. -->
           <button class="kachel" id="btnStartShop">
@@ -960,7 +979,11 @@
        steht, nicht was. ===== -->
   <div id="statsScreen" class="start-screen listen-screen" hidden>
     <div class="start-screen-inner">
-      <button class="btn ghost back-btn" id="btnStatsZurueck">&larr; Zur&uuml;ck</button>
+      <!-- Ausgeblendet wie auf dem Touren-Bildschirm: Seit "Stats" einen
+           eigenen Eintrag in der Leiste hat, ist sie selbst der Weg
+           zurueck. Der Knopf bleibt im HTML, damit die Verkabelung in
+           rueckblick.js nicht ins Leere greift. -->
+      <button class="btn ghost back-btn" id="btnStatsZurueck" hidden>&larr; Zur&uuml;ck</button>
       <h2>Meine Stats</h2>
 
       <!-- Ohne eine einzige Ausfahrt gibt es nichts auszuwerten - dann
@@ -1113,7 +1136,8 @@
             Wie oft die Seite aufgerufen wird, z&auml;hlen wir selbst &ndash;
             aber nur als Summe, ohne dich wiederzuerkennen (Punkt 8). Eine
             Tour wird nur dann &ouml;ffentlich, wenn du daf&uuml;r einen
-            Schalter umlegst (Punkt 9).
+            Schalter umlegst (Punkt 9). Deine Auswertung unter &bdquo;Meine
+            Stats&ldquo; rechnet allein dein Ger&auml;t aus (Punkt 2).
           </p>
 
           <p class="label">1. Hosting</p>
@@ -1135,6 +1159,19 @@
             damit du beim kurzen Abmelden nichts verlierst. Wer sich ein
             Ger&auml;t mit anderen teilt, l&ouml;scht seine Touren also
             zus&auml;tzlich in der App.
+          </p>
+          <p>
+            Aus diesen Ausfahrten rechnet die App unter &bdquo;Meine
+            Stats&ldquo; deine Bilanz aus: Kilometer, Fahrzeit,
+            H&ouml;henmeter, Rekorde, einen Monats- und Jahresr&uuml;ckblick
+            und &ndash; indem sie Spuren miteinander vergleicht &ndash; deine
+            wiederkehrenden Lieblingsstrecken. Das rechnet
+            <strong>ausschlie&szlig;lich dein Ger&auml;t</strong>. Dabei wird
+            nichts zus&auml;tzlich erhoben und nichts an uns
+            &uuml;bertragen; gez&auml;hlt werden nur Ausfahrten, die du
+            selbst aufgezeichnet hast, nicht die aus der Community
+            &uuml;bernommenen. Die Kartenbilder zu den Lieblingsstrecken
+            kommen wie alle Karten von OpenStreetMap (Punkt 3).
           </p>
 
           <p class="label">3. Karte, Routenberechnung, Ortssuche</p>
@@ -1196,7 +1233,18 @@
             Legst du ein Konto an, speichert unser Auftragsverarbeiter
             Supabase (Region Stockholm, EU) deine E-Mail-Adresse, deinen
             Benutzernamen, auf Wunsch ein Profilbild sowie die Touren und
-            Fotos, die du hochl&auml;dst (Art. 6 Abs. 1 lit. b DSGVO). Fotos
+            Fotos, die du hochl&auml;dst (Art. 6 Abs. 1 lit. b DSGVO). Eine
+            <strong>aufgezeichnete Ausfahrt</strong> enth&auml;lt dabei mehr
+            als eine geplante Route: den vollst&auml;ndigen, ungek&uuml;rzten
+            Streckenverlauf mit H&ouml;hen &ndash; er beginnt dort, wo du
+            wirklich losgefahren bist &ndash;, Datum und Uhrzeit der Fahrt,
+            Dauer, Durchschnitts- und H&ouml;chstgeschwindigkeit, gemessene
+            Schr&auml;glage, deine Notizen und deine Fotos. Das ist deine
+            Sicherungskopie, damit du sie auf einem zweiten Ger&auml;t
+            wiederfindest; sie ist <strong>nicht &ouml;ffentlich</strong>, und
+            f&uuml;rs &ouml;ffentliche Teilen gilt Punkt 9 mit deutlich
+            weniger Angaben. Wer kein Konto benutzt, l&auml;dt nichts davon
+            hoch. Fotos
             liegen in einem nicht &ouml;ffentlichen Speicher und sind nur
             &uuml;ber kurzlebige, signierte Links abrufbar. Profilbilder
             sind &ouml;ffentlich lesbar, damit sie sp&auml;ter neben
@@ -2126,6 +2174,9 @@
     </button>
     <button class="nav-tab" data-ziel="tourenScreen">
       <svg class="ic gross"><use href="#icon-touren"></use></svg><span>Touren</span>
+    </button>
+    <button class="nav-tab" data-ziel="statsScreen">
+      <svg class="ic gross"><use href="#icon-stats"></use></svg><span>Stats</span>
     </button>
     <button class="nav-tab" data-ziel="shopScreen">
       <svg class="ic gross"><use href="#icon-shop"></use></svg><span>Shop</span>

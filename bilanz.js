@@ -21,9 +21,18 @@
    kennen weder Datum noch Schraeglage - dann steht dort null, und die
    Rueckblicke lassen sie einfach aus (im Gesamt zaehlen sie trotzdem). */
 
+/* Gezaehlt wird NUR, was man selbst gefahren ist.
+
+   Eine aus der Community uebernommene Ausfahrt liegt danach in derselben
+   Liste und traegt dieselbe Kennung "aufgezeichnet" - sie ist aber die
+   Fahrt eines anderen. Wer sie mitzaehlte, haette fremde Kilometer auf dem
+   eigenen Konto und einen Rueckblick, der nichts ueber ihn sagt. Die
+   Uebernahme hinterlaesst zwei Marken (aufgenommenAm und geteiltVon);
+   geprueft werden beide, damit eine verlorene die andere nicht mitnimmt. */
 function sammleAusfahrten(rohliste) {
   return (Array.isArray(rohliste) ? rohliste : [])
-    .filter((eintrag) => eintrag && eintrag.aufgezeichnet === true)
+    .filter((eintrag) => eintrag && eintrag.aufgezeichnet === true
+                      && !eintrag.aufgenommenAm && !eintrag.geteiltVon)
     .map(bereiteAusfahrtAuf);
 }
 

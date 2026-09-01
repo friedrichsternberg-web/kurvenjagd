@@ -1524,3 +1524,65 @@ Spalten; die Bundesland-Überschriften und Leerzeilen sind Geschwister der
 Karten im selben `ul` und spannen über beide. Das halbiert das Bild und
 macht aus der Liste ein Regal. Die Umschalter sind auf Handbreite
 begrenzt – zwei Segmente über je 500 Punkte waren Knöpfe wie Fahrbahnen.
+
+## 01.09.2026, abends — Stats als eigener Ort, und ein Zählfehler
+
+### „Meine Stats" bekommt einen Platz in der Leiste
+
+Der Bildschirm hing bisher am Ride-Bildschirm. Jetzt hat er einen eigenen
+Eintrag in der Leiste und eine eigene Kachel in der Garage – dort sind es
+damit vier Kacheln, die im Zweierraster glatt aufgehen. Der
+Zurück-Knopf ist weg: Wo die Leiste sichtbar ist, ist sie der Weg zurück,
+und zwei Wege für dieselbe Sache verwirren (dasselbe gilt auf „Touren").
+
+Die Stats-Kachel trägt als einzige kein Streckenfoto, sondern das weiche
+Hintergrundbild der App. Mit demselben Bild wie „Ride aufzeichnen" wäre es
+eine Dopplung gewesen, und hinter Zahlen ist ein ruhiger Grund der bessere.
+
+Mit fünf Einträgen wird die Kopfleiste im Querformat eng: Unter 1100
+Punkten rücken Schriftzug, Einträge und Abstände zusammen. Ohne das stand
+der Konto-Knopf an der 900er-Ecke 15 Punkte außerhalb des Bildes.
+
+### Die Garage scrollt im Querformat nicht mehr
+
+Die Ursache war das Seitenverhältnis, das die Kacheln seit dem 31.08.2026
+tragen (3:2, damit die Fotos darin gut aussehen). Im Querformat ist die
+Kachel breit, also wurde sie hoch – 215 Punkte statt der gedachten 168 –,
+und die rechte Spalte lief über.
+
+Die Lösung ist eine Umkehrung: Im Hochformat sagen die Kacheln, wie hoch
+sie sein wollen, und die Seite wächst mit. Im Querformat sagt die Spalte,
+wie viel Platz da ist, und das Kachelraster nimmt genau den Rest. Die
+Kacheln geben ihr Seitenverhältnis dafür auf. Das `overflow-y` der Spalte
+bleibt als Sicherung: Ein langes Datenblatt mit ausgeklappter Justierung
+kann den Rest unter die Mindesthöhe drücken, und dann ist Scrollen besser
+als Abschneiden.
+
+### Zwei Breiten statt einer
+
+`--inhalt-max` (1080) war für Textseiten gedacht, und dafür ist es richtig
+– eine 1400 Punkte breite Textzeile liest niemand. Ein Regal aus **Bildern**
+ist etwas anderes: Dort ist Breite kein Hindernis, sondern mehr Bild.
+Touren und Stats laufen deshalb jetzt auf `--feed-max` (1440), Rechtliches
+und Konto behalten die 1080.
+
+### Der Zählfehler: fremde Kilometer auf dem eigenen Konto
+
+Beim Prüfen der neuen Auswertung aufgefallen: Eine aus der Community
+**übernommene** Ausfahrt liegt danach in derselben Liste und trägt dieselbe
+Kennung `aufgezeichnet` – sie ist aber die Fahrt eines anderen. „Meine
+Stats" hätte sie mitgezählt: fremde Kilometer, fremde Rekorde, ein
+Rückblick, der nichts über den eigenen Fahrer sagt.
+
+Die Übernahme hinterlässt zwei Marken (`aufgenommenAm` und `geteiltVon`).
+`sammleAusfahrten()` prüft jetzt beide. Und beide mussten in die
+Positivliste von `pruefeTour()`, sonst hätte der nächste Serverabgleich die
+Marke abgeschnitten und die fremde Fahrt wäre danach doch als eigene
+gezählt. Der Kommentar bei `geteiltVon` versprach ohnehin schon, dass die
+Herkunft „in einem halben Jahr noch" sichtbar ist – das stimmte bis heute
+nicht über einen Abgleich hinweg.
+
+Dazu Plausibilitätsgrenzen für die neu durchgelassenen Zahlen: Tempo über
+400 km/h und Schräglage über 90° fallen weg. Gegen den eigenen Rekorder
+braucht es das nicht, der begrenzt selbst – aber `pruefeTour()` ist die
+Stelle, an der Fremdes hereinkommt, und dort gehört es hin.

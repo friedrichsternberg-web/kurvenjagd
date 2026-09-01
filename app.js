@@ -3496,8 +3496,6 @@ function aktualisiereLeiste(sichtbareId) {
   if (sichtbareId === 'shopProduktScreen') {
     leuchtZiel = typeof produktLeuchtZiel === 'function' ? produktLeuchtZiel() : 'shopScreen';
   }
-  // "Meine Stats" gehoert zum Fahren - der Ride-Eintrag leuchtet weiter.
-  if (sichtbareId === 'statsScreen') leuchtZiel = 'rideScreen';
   leiste.querySelectorAll('.nav-tab').forEach(knopf => {
     knopf.classList.toggle('aktiv', knopf.dataset.ziel === leuchtZiel);
   });
@@ -3859,6 +3857,10 @@ document.querySelectorAll('.nav-tab').forEach(knopf => {
     if (ziel === 'app') zeigePlaner();
     else if (ziel === 'rideScreen') { zeigeRideScreen(); if (!ride.aktiv) rideZurücksetzen(); }
     else if (ziel === 'tourenScreen') zeigeMeineTouren();
+    /* zeigeStats() steht in rueckblick.js - fehlt die Datei, faellt der
+       Eintrag in den Auffangzweig und landet in der Garage, statt einen
+       leeren Bildschirm zu zeigen. */
+    else if (ziel === 'statsScreen' && typeof zeigeStats === 'function') zeigeStats();
     else if (ziel === 'shopScreen') zeigeShop();
     // Auffangzweig: Was hier landet, ist ein Eintrag ohne eigenen Zweig.
     // Die Garage ist der Startbildschirm und damit der richtige Ort dafuer.
@@ -3880,13 +3882,16 @@ document.getElementById('btnStartShop').addEventListener('click', zeigeShop);
    Garagen-Menue. Die uebrigen vier Leisten-Eintraege verteilen den Platz
    von selbst. */
 function wendeShopSchalterAn() {
-  if (SHOP_AKTIV) return;
+  /* Vier Kacheln gehen im Zweierraster glatt auf (Planer, Ride, Touren,
+     Stats). Kommt der Shop als fuenfte dazu, nimmt sie beide Spalten -
+     sonst bliebe daneben ein Loch. */
+  if (SHOP_AKTIV) {
+    document.getElementById('btnStartShop').classList.add('kachel--breit');
+    return;
+  }
   document.querySelectorAll('.nav-tab[data-ziel="shopScreen"]')
     .forEach(knopf => { knopf.hidden = true; });
   document.getElementById('btnStartShop').hidden = true;
-  // Ohne die Shop-Kachel sind es drei Kacheln in einem Zweierraster - die
-  // letzte nimmt beide Spalten, sonst bleibt daneben ein Loch.
-  document.getElementById('btnStartTouren').classList.add('kachel--breit');
 }
 wendeShopSchalterAn();
 

@@ -114,6 +114,18 @@
     margin-left: auto;
   }
 
+  /* Seit "Stats" dazugekommen ist, stehen fuenf Eintraege neben Schriftzug
+     und Konto. Bequem nebeneinander passt das erst ab gut 1100 Punkten -
+     darunter ruecken sie enger zusammen, statt den Konto-Knopf aus dem
+     Bild zu schieben. Gemessen an der 900er-Ecke: vorher 15 Punkte zu
+     breit, danach passt es mit Luft. */
+  @media (max-width: 1100px) {
+    .haupt-nav { padding-inline: var(--s4); gap: var(--s2); }
+    .nav-tab { padding: 0 var(--s3); font-size: 15px; }
+    .nav-marke { margin-right: var(--s4); }
+    .nav-marke .wortmarke-bild { width: 118px; }
+  }
+
   /* Alles, was die Marke ein ZWEITES Mal ins Bild braechte. Der Grundsatz
      ist ueberall derselbe: Im Querformat traegt die Kopfleiste den
      Schriftzug und das Abzeichen, also verschwindet beides ueberall dort,
@@ -189,24 +201,53 @@
     overflow-y: auto;
     min-height: 0;
     margin-top: 0;
-    justify-content: safe center;
+    /* Oben ausgerichtet, nicht zentriert: Das Kachelraster fuellt den
+       uebrigen Platz selbst aus (siehe unten), der Inhalt ist also
+       ohnehin genau so hoch wie die Spalte. */
+    justify-content: flex-start;
     gap: var(--s4);
     padding: var(--s5) var(--s7);
   }
 
-  /* Die Menue-Kacheln wachsen mit ihrer halben Bildschirmseite mit: Die
-     Hochformat-Groessen (116 Punkte Mindesthoehe, 18px-Titeldeckel) sind
-     fuer eine Handybreite gedacht und wirkten hier wie Briefmarken auf
-     einem Poster. */
-  .garage-menue-raster { gap: var(--s4); }
+  /* ALLES AUF EINEN BLICK. Im Hochformat scrollt die Garage, im Querformat
+     soll sie es nicht: Der Raum steht links, und rechts gehoert alles auf
+     eine Seite - Datenblatt, Menue, Fuss.
+
+     Der Trick ist eine Umkehrung. Im Hochformat sagen die Kacheln, wie hoch
+     sie sein wollen (Seitenverhaeltnis 3:2, damit die Fotos darin gut
+     aussehen), und die Seite waechst mit. Hier sagt die SPALTE, wie viel
+     Platz da ist, und das Kachelraster nimmt genau den Rest: Was nach
+     Datenblatt, Ueberschrift und Fuss uebrigbleibt, teilen sich die beiden
+     Kachelreihen. Deshalb geben die Kacheln hier ihr Seitenverhaeltnis auf
+     - sonst forderten sie eine Hoehe, die die Spalte gar nicht hat, und
+     genau das trieb sie ins Scrollen.
+
+     Das overflow-y der Spalte bleibt als Sicherung stehen: Ein langes
+     Datenblatt mit ausgeklappter Justierung kann den Rest unter die
+     Mindesthoehe druecken, und dann ist Scrollen besser als Abschneiden. */
+  .garage-menue {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--s3);
+  }
+  .garage-menue-raster {
+    gap: var(--s4);
+    flex: 1 1 auto;
+    /* Jede Reihe bekommt gleich viel vom uebrigen Platz. auto-rows statt
+       einer festen Reihenzahl: Kommt der Shop als fuenfte Kachel zurueck,
+       sind es drei Reihen, und die Regel stimmt weiter. */
+    grid-auto-rows: minmax(0, 1fr);
+    /* Darunter wird aus einer Kachel ein Streifen - dann lieber scrollen.
+       Der Wert ist an der engsten Ecke gemessen (900x500): Dort bleiben
+       nach Suchknopf, Ueberschrift und Fuss knapp 240 Punkte uebrig, und
+       die Kacheln sollen auch dort noch ganz im Bild stehen. */
+    min-height: 180px;
+  }
   .kachel {
-    /* clamp() heisst: mindestens die 116 Punkte des Hochformats, hoechstens
-       168, dazwischen ein Fuenftel der Fensterhoehe. So fuellen die Kacheln
-       einen grossen Bildschirm, ohne auf einem kleinen Laptop unnoetig
-       Scrollweg zu erzeugen. (An der 900x500-Ecke scrollt die Spalte
-       trotzdem - dort ist schlicht mehr Inhalt als Hoehe da, und genau
-       dafuer hat sie ihr overflow-y.) */
-    min-height: clamp(116px, 21vh, 168px);
+    aspect-ratio: auto;
+    min-height: 0;
     padding: var(--s4);
   }
   /* Die Deckel wachsen mit dem Fenster: Am 900er-Rand ist die halbe
@@ -276,7 +317,13 @@
     grid-column: 1 / -1;
   }
 
-  /* Zwei Segmente ueber je 500 Punkte waeren Knoepfe wie Fahrbahnen - der
+  /* Touren und Stats zeigen Bilder, keine Textzeilen - sie duerfen breiter
+     stehen als die Lesebreite der Textseiten (siehe --feed-max in
+     design.css). Rechtliches und Konto behalten die 1080. */
+  #tourenScreen .start-screen-inner,
+  #statsScreen .start-screen-inner { max-width: var(--feed-max); }
+
+  /* Zwei Segmente ueber je 700 Punkte waeren Knoepfe wie Fahrbahnen - der
      Umschalter bleibt handbreit, die Listen darunter duerfen breit sein. */
   .touren-umschalter, .quellen-umschalter { max-width: 460px; }
 

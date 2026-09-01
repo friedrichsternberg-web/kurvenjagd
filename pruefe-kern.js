@@ -576,6 +576,11 @@ prüfeFall('ohne Punkte gibt es keinen Startpunkt',
 
   const alle = sammleAusfahrten(rohliste);
   prüfeFall('nur Ausfahrten zaehlen, geplante Routen nicht', alle.length === 5);
+  prüfeFall('eine uebernommene fremde Ausfahrt zaehlt NICHT mit',
+    sammleAusfahrten(rohliste.concat([
+      ausfahrt('fremd', { aufgenommenAm: '2026-07-01T10:00:00.000Z' }),
+      ausfahrt('auch fremd', { geteiltVon: 'Jemand' }),
+    ])).length === 5);
   prüfeFall('eine Ausfahrt ohne Datum bekommt null statt Unsinn',
     alle[4].jahr === null && alle[4].monat === null);
   prüfeFall('die Schraeglage ist der groessere der beiden Winkel',
@@ -640,4 +645,22 @@ prüfeFall('ohne Punkte gibt es keinen Startpunkt',
     pruefeTour(Object.assign({}, roh, { gefahrenAm: 'gestern' })).gefahrenAm === undefined);
   prüfeFall('eine Schraeglage ohne Winkel faellt weg',
     pruefeTour(Object.assign({}, roh, { neigung: { quelle: 'sensor' } })).neigung === undefined);
+
+  // Was aus der Fremde kommt, darf keine Fantasiewerte in den Rueckblick
+  // tragen - weder als Tempo noch als Schraeglage.
+  prüfeFall('ein unmoegliches Tempo faellt weg',
+    pruefeTour(Object.assign({}, roh, { maxKmh: 1e308 })).maxKmh === undefined);
+  prüfeFall('ein negatives Tempo faellt weg',
+    pruefeTour(Object.assign({}, roh, { schnittKmh: -5 })).schnittKmh === undefined);
+  prüfeFall('eine Schraeglage ueber 90 Grad faellt weg',
+    pruefeTour(Object.assign({}, roh, {
+      neigung: { quelle: 'gps', maxLinksGrad: 400, maxRechtsGrad: 500 } })).neigung === undefined);
+
+  // Die Herkunftsmarke muss den Abgleich ueberleben, sonst zaehlen fremde
+  // Kilometer nach der naechsten Anmeldung als eigene.
+  const uebernommen = pruefeTour(Object.assign({}, roh, {
+    aufgenommenAm: '2026-07-01T10:00:00.000Z', geteiltVon: 'Jemand' }));
+  prüfeFall('die Marke einer uebernommenen Tour ueberlebt',
+    uebernommen.aufgenommenAm === '2026-07-01T10:00:00.000Z'
+    && uebernommen.geteiltVon === 'Jemand');
 })();

@@ -272,8 +272,9 @@ function oeffneStatsTour(ereignis) {
 /* ===== 6. Verkabelung ====================================================== */
 
 verkabele('btnRideStats', 'click', zeigeStats);
+verkabele('btnStartStats', 'click', zeigeStats);
 verkabele('btnStatsZurAufnahme', 'click', () => zeigeRideScreen());
-verkabele('btnStatsZurueck', 'click', () => zeigeRideScreen());
+verkabele('btnStatsZurueck', 'click', () => zeigeGarage());
 verkabele('btnStatsFrueher', 'click', () => blaettereStatsZeitraum(-1));
 verkabele('btnStatsSpaeter', 'click', () => blaettereStatsZeitraum(1));
 verkabele('statsLieblinge', 'click', oeffneStatsTour);

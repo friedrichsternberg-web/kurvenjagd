@@ -287,6 +287,11 @@
      und weil style.css eine davon ebenfalls benutzt (das Planer-Bedienfeld
      ist im Hochformat ueber 760 Punkten dieselbe Seitenleiste). */
   --inhalt-max: 1080px;    /* Lesebreite fuer Listen und Textseiten */
+  /* Zwei verschiedene Grenzen, und der Unterschied ist der Inhalt: Eine
+     1400 Punkte breite TEXTZEILE liest niemand - deshalb 1080 fuer alles
+     zum Lesen. Ein Regal aus BILDERN darf dagegen breit sein, dort ist
+     Breite kein Hindernis, sondern mehr Bild. */
+  --feed-max: 1440px;      /* Kartenregale: Touren und Stats */
   --spalte-panel: 330px;   /* Bedienfeld des Planers als Seitenleiste */
   --spalte-ride: 380px;    /* Wertefeld beim Aufzeichnen als Seitenspalte */
 

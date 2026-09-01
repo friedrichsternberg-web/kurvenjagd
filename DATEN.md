@@ -91,6 +91,37 @@ Touren wandern in die Tabelle `touren`, Fotos in den Behälter `tourfotos`.
 Der Behälter ist **nicht öffentlich**; zum Anzeigen erzeugt die App einen
 signierten Link, der nach einer Stunde verfällt.
 
+**Was in der Zeile einer Tour steht**, im Klartext – `tourAlsZeile()` in
+`konto.js` nimmt das gespeicherte Objekt mit dem Spread-Operator, es geht
+also alles mit:
+
+| Feld | Inhalt |
+|---|---|
+| `track` | der **vollständige, ungekürzte** Streckenverlauf mit Höhen. Bei einer Aufzeichnung beginnt er dort, wo wirklich losgefahren wurde. Die 300–900-Meter-Kürzung gilt **nur fürs öffentliche Teilen**, nicht für diese Sicherungskopie. |
+| `waypoints` | die Wegpunkte einer geplanten Route |
+| `gefahrenAm` | Datum **und Uhrzeit** des Aufzeichnungsstarts |
+| `distance`, `time`, `ascend`, `curviness` | Länge, Netto-Fahrzeit, Höhenmeter, Kurvigkeit |
+| `schnittKmh`, `maxKmh` | Durchschnitts- und Höchstgeschwindigkeit |
+| `neigung` | größte Schräglage links und rechts, dazu ob sie vom Sensor oder aus dem GPS kam |
+| `notizen` | der eigene Text zur Ausfahrt |
+| `fotos` | nur die Pfade im Behälter, nicht die Bilder selbst |
+| `aufgenommenAm`, `geteiltVon` | gesetzt, wenn die Tour aus der Community übernommen wurde |
+
+Das ist deutlich mehr als das, was beim **öffentlichen** Teilen hinausgeht
+(`oeffentlicheTour()` in `kern.js`) – dort fallen Datum, Tempo, Schräglage,
+Notizen und Fotos weg und die Spur wird an beiden Enden gekürzt. Punkt 7 der
+Datenschutzerklärung zählt die Felder deshalb ausdrücklich auf: Wer eine
+Ausfahrt hochlädt, lädt seinen Bewegungsverlauf samt Zeitstempel hoch, und
+das muss dastehen.
+
+**Was der Rückgabeweg durchlässt** ist enger: `pruefeTour()` in `kern.js` ist
+eine Positivliste. Sie nimmt seit dem 01.09.2026 auch `gefahrenAm`,
+`schnittKmh`, `maxKmh`, `neigung`, `aufgenommenAm` und `geteiltVon` an – die
+ersten vier, damit „Meine Stats" auf einem zweiten Gerät nicht blind ist, die
+letzten beiden, damit übernommene Fremdtouren nicht als eigene Kilometer
+gezählt werden. Zahlen ohne plausiblen Bereich (Tempo über 400 km/h,
+Schräglage über 90°) fallen dabei weg.
+
 #### Profil
 
 Jedes Konto hat eine Zeile in der Tabelle `profile`: **Benutzername** und,
