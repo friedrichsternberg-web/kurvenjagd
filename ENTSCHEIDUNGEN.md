@@ -1706,3 +1706,85 @@ deutlich einem real erhaeltlichen Modell, und seine Herkunft ist ungeklaert
 nur, dass es jetzt auch auf der Stats-Kachel erscheint, wenn kein eigenes
 Foto hinterlegt ist. Die Frage bleibt zu klaeren, unabhaengig davon, dass
 die Fassung draussen ist.
+
+## 01.09.2026 — Reifen von reifen.com: das erste Partnerprogramm
+
+reifen.com hat die Bewerbung am 31.08.2026 angenommen (AWIN-Advertiser
+7605, Publisher 3056191, Provision 3 bis 5 Prozent, Cookie 30 Tage). Damit
+war zum ersten Mal echtes Geld im Spiel, und mehrere Fragen mussten
+entschieden werden.
+
+**Ein eigener Bildschirm statt des vorhandenen Shops.** Der Demo-Shop
+(`shop.js`, `produkte.js`) bleibt abgeschaltet, wie er war. Grund: Er ist
+als Preisvergleich über mehrere Händler gebaut, und der Kauf beginnt dort
+beim Produkt. Reifen kauft man umgekehrt — erst die Größe, dann sieht man,
+was es überhaupt gibt. Beides in ein Regal zu zwingen hätte beide
+schlechter gemacht. Der Demo-Shop wurde NICHT gelöscht: Sobald ein
+Bekleidungsprogramm dazukommt, ist er die richtige Form dafür.
+
+**Die Trennung partner.js / reifen.js.** In `partner.js` steht alles, was
+mit Provision und Einwilligung zu tun hat, in `reifen.js` nur die Reifen.
+Damit ist der Umbau zu mehreren Programmen ein Eintrag in `PARTNER` und
+eine zweite Katalogdatei — nicht eine Suche nach verstreuten Links. Es gibt
+genau EINE Funktion, die nach draußen führt (`öffnePartnerLink()`), und
+davor sitzt die Einwilligung.
+
+**Die Einwilligung kommt vor dem ersten Klick, nicht beim Start.** Der Link
+läuft über awin1.com, dort wird 30 Tage lang eine Kennung gesetzt — das ist
+§ 25 Abs. 1 TDDDG. Ein Banner beim Start wäre die Sorte Einwilligung, die
+man wegklickt, um überhaupt weiterzukommen; die ist rechtlich wertlos und
+praktisch eine Zumutung. Also steht die Frage genau dort, wo sie einen Sinn
+ergibt. „Nein" wird ebenfalls gemerkt, sonst käme sie bei jedem Angebot
+wieder. Widerruf unter „Rechtliches", Punkt 10.
+
+**Keine Produktbilder vom Händler.** Der AWIN-Feed liefert Bildadressen auf
+`productserve.com`. Sie einzubinden hätte die IP-Adresse jedes Besuchers
+dorthin getragen, bevor er irgendetwas angeklickt hat — und damit die
+Einwilligung ausgehebelt, die eine Zeile weiter steht. Stattdessen zeichnet
+die App ein eigenes Reifen-Symbol. Nebenbei fällt damit die ganze
+Bildlizenzfrage weg (AWIN-AGB: Lizenz nur für unveränderte Bilder,
+widerruflich, Rechte werden vom Netzwerk nicht geprüft).
+
+**Eine Datei statt eines Live-Abrufs.** Die App hat keinen Server. Ein
+Live-Abruf des Feeds bräuchte den AWIN-Schlüssel im Browser, und der läge
+damit offen. Also holt `reifen-import.py` den Feed auf Friedrichs Rechner
+und schreibt `reifen-katalog.json`. Der Preis dafür: Die Preise sind so alt
+wie der letzte Lauf. Deshalb trägt der Katalog ein Standdatum, die App
+zeigt es an jedem Ergebnis, und ab 14 Tagen sagt sie dazu, dass sich die
+Preise geändert haben können. Der Schlüssel liegt in `.awin-schluessel`
+und steht in `.gitignore`.
+
+**Kein Preisvergleich, und das steht auch so da.** Es gibt genau einen
+Händler. Die Seite heißt „Reifen", nicht „Preisvergleich", und der Kasten
+„Woher diese Angebote kommen" sagt in einem Satz, dass die Liste das
+Sortiment eines einzigen Shops zeigt und andere günstiger sein können
+(BGH I ZR 55/16 zur Offenlegung). Sortiert wird nach dem Gesamtpreis, nie
+nach der Provision.
+
+**Der große Preis ist der Reifenpreis, nicht die Summe.** Erst stand dort
+Preis plus Versand — darunter aber „zzgl. Versand", was dann etwas meinte,
+das schon drin war. Jetzt: große Zahl gleich Reifenpreis, und wenn Versand
+anfällt, steht die Summe daneben. Bei Motorradreifen ist beides gleich,
+reifen.com liefert sie frachtfrei; der Fall muss trotzdem stimmen.
+
+**Verwendungszweck (Sport, Touring, Enduro) fehlt vorerst.** reifen.com
+filtert danach, der Feed enthält es nicht. Aus dem Modellnamen ableiten
+hieße raten: 1.317 Modellfamilien, die häufigsten 60 decken nur 30 Prozent
+ab. Ein falsch einsortierter Reifen ist schlechter als kein Filter.
+Gefiltert wird deshalb nach dem, was sicher stimmt — Größe, Lage, Marke.
+
+**Vorn und hinten getrennt gemerkt, je Motorrad.** Die Reifengröße steht
+in keinem Datenblatt, das der Finder liefert. Also trägt der Fahrer sie
+einmal ein, und die App merkt sie sich unter Marke + Modell. Eigener
+Speicherschlüssel `kurvenjagd.reifenmass` statt eines Feldes in der Garage:
+Die Garage wandert zum Server und wird dort geprüft, und für eine
+Bequemlichkeit, die auf dem Gerät bleiben darf, ist das der falsche Weg.
+
+**Die Kachel zeigt einen Ausschnitt des Werkstattbildes.** Das Vorderrad
+der Beispielmaschine, 2:1 beschnitten. Es ist dasselbe KI-Bild wie in der
+Garage — die Kennzeichnung unter „Künstlich erzeugte Bilder" nennt die
+Kachelausschnitte jetzt ausdrücklich mit.
+
+**Was NICHT entschieden ist:** ob das live geht. Affiliate-Einnahmen sind
+gewerblich, die Gewerbeanmeldung fehlt. Das steht in `AUFGABEN.md` und ist
+der Punkt, an dem es hängt — nicht am Code.

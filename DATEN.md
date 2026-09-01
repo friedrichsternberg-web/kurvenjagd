@@ -11,7 +11,7 @@ Deshalb die Regel: **Kommt ein Dienst dazu, bekommt er hier eine Zeile.**
 Nachträglich herauszufinden, welcher Aufruf welche Daten mitnimmt, ist ein
 verlorener Nachmittag.
 
-Stand: 28.08.2026
+Stand: 01.09.2026
 
 ---
 
@@ -26,6 +26,8 @@ Gerät nicht, solange niemand angemeldet ist.
 | `kurvenjagd.garage` | Motorräder (Marke, Modell, Baujahr, Hubraum, Leistung, Bild) und Ausrüstung |
 | `kurvenjagd.shop` | Merkliste des Shops: Produkt-Schlüssel, Datum und günstigster Gesamtpreis beim Merken |
 | `kurvenjagd.neigungBasis` | Nullpunkt für die Schräglage: die Einbaulage des Handys als drei Achsen, dazu der Ruhefehler des Gyroskops |
+| `kurvenjagd.reifenmass` | die eingetragene Reifengröße je Motorrad, getrennt für vorn und hinten – drei Zahlen, sonst nichts |
+| `kurvenjagd.partner` | die Einwilligung in Partner-Angebote: `ja` oder `nein` und der Zeitpunkt. **Keine Klicks, keine angesehenen Produkte** |
 
 Aufgezeichnete Fotos liegen **verkleinert im Speicher selbst**, nicht als
 Dateien. Das ist auch der Grund für die 5-MB-Grenze und dafür, dass
@@ -293,7 +295,48 @@ reißt das Löschen eines Kontos die Ausfahrten anderer Leute mit.
 - Kommt Werbung dazu, kommt ein ganzer Abschnitt dazu: welches Netzwerk,
   welche Kennungen, wie der Nutzer widersprechen kann.
 
-## Der Shop (Stand: reine Beispieldaten)
+## Reifen: das Partnerprogramm reifen.com (seit 01.09.2026)
+
+Der Bildschirm **„Reifen"** zeigt echte Angebote von reifen.com. Das ist
+die erste Stelle der App, an der Geld fließt – und die erste, an der eine
+fremde Firma etwas über einen Nutzer erfährt. Deshalb steht hier genau,
+was wann wohin geht.
+
+**Beim Anzeigen der Liste: nichts.** Der Katalog liegt als
+`reifen-katalog.json` neben der App auf GitHub Pages und wird von dort
+geladen wie jede andere Datei der App. Es gibt **keine Produktbilder vom
+Händler**, kein Zählpixel, kein Skript des Partners. Das ist eine bewusste
+Entscheidung: Die Bilder im AWIN-Feed liegen auf `productserve.com`, und
+sie einzubinden hieße, die IP-Adresse jedes Besuchers dorthin zu tragen,
+bevor er irgendetwas angeklickt hat.
+
+**Woher der Katalog kommt:** `reifen-import.py` holt den Produktdatenfeed
+von AWIN – auf Friedrichs Rechner, nicht in der App. Der dafür nötige
+Schlüssel liegt in `.awin-schluessel` und steht in `.gitignore`.
+
+**Beim Klick auf ein Angebot** öffnet sich zuerst eine Frage
+(`partnerBlatt`), einmalig. Erst nach „Einverstanden" öffnet der Link:
+
+    https://www.awin1.com/pclick.php?p=<Produktnummer>&a=3056191&m=7605
+
+| Empfänger | Was ankommt | Grundlage |
+|---|---|---|
+| Awin AG, Berlin (`awin1.com`) | IP-Adresse, User-Agent, unsere Publisher-Nummer 3056191, die Produktnummer; gesetzt wird eine Kennung mit 30 Tagen Laufzeit | Einwilligung, § 25 Abs. 1 TDDDG + Art. 6 Abs. 1 lit. a DSGVO |
+| reifencom GmbH, Hannover | alles, was der Browser beim Aufruf des Shops überträgt; was dort an Cookies gesetzt wird, liegt beim Händler | dasselbe |
+
+**Was zu uns zurückfließt:** nur Summen im AWIN-Konto – Klicks, Verkäufe,
+Provision. Keine Namen, keine Warenkörbe, keine Zuordnung zu einem Gerät.
+Serpa selbst zählt nichts.
+
+**Widerruf:** unter „Impressum & Datenschutz", Punkt 10. Er setzt
+`kurvenjagd.partner` auf `nein`; danach fragt die App beim nächsten
+Angebot wieder.
+
+**Die eine Klickstelle** ist `öffnePartnerLink()` in `partner.js`. Kommt
+ein zweiter Händler dazu, ändert sich dort nichts – nur ein Eintrag in
+`PARTNER` und eine Zeile in der Tabelle oben.
+
+## Der Shop für Ausrüstung (abgeschaltet, reine Beispieldaten)
 
 Der Shop zeigt derzeit **ausschließlich mitgelieferte Beispieldaten** aus
 `produkte.js`. Es gibt keine Partnerverträge und keine echten Angebote –
@@ -308,18 +351,12 @@ nichts; was der Browser beim Aufruf der fremden Seite überträgt und was
 diese Seite an Cookies setzt, liegt beim jeweiligen Händler. Die Links
 tragen derzeit **keine Partner-Kennung**.
 
-Sobald ein Partnernetzwerk (z.B. AWIN) dazukommt, ändert sich das an drei
-Stellen, und alle drei gehören dann hierher und in die
-Datenschutzerklärung:
-
-- Der "Zum Shop"-Link trägt eine Kennung, über die das Netzwerk einen Kauf
-  dieser App zuordnet. Vor dem ersten Klick braucht es dafür eine
-  Einwilligung (§ 25 TDDDG); der Platz dafür ist `öffneAngebot()` in
-  `shop.js`, die einzige Klickstelle.
-- Produktdaten und -bilder kommen aus dem Datenfeed des Netzwerks (neue
-  Zeile unter "Was das Gerät verlässt", sobald sie die App direkt abruft).
-- Der oben angekündigte Werbe-Abschnitt wird fällig: Netzwerk, Kennungen,
-  Widerspruch.
+Dieser Shop ist über `SHOP_AKTIV = false` in `app.js` **abgeschaltet** und
+über die Oberfläche nicht erreichbar. Er wartet auf ein Partnerprogramm
+für Bekleidung; wie es dann aussieht, steht ein Kapitel weiter oben bei
+den Reifen. Der Weg dorthin ist derselbe: `öffneAngebot()` in `shop.js`
+ruft dann `öffnePartnerLink()` aus `partner.js`, und damit gilt die
+Einwilligung dort automatisch mit.
 
 ## Die Besuchszählung (seit 26.08.2026)
 

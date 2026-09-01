@@ -266,7 +266,62 @@ sobald die Hülle steht.
 
 ---
 
-## Der Shop: von der Demo zum echten Preisvergleich
+## Reifen: das erste echte Partnerprogramm (seit 01.09.2026)
+
+**Steht und läuft.** reifen.com hat die Bewerbung am 31.08.2026
+angenommen (AWIN-Programm 7605, Publisher 3056191). Der Bildschirm
+„Reifen" ist über die Garagen-Kachel erreichbar und zeigt 3.829 echte
+Motorradreifen mit echten Preisen und echten Provisionslinks.
+
+Was gebaut wurde: `partner.js` (Partnerliste, Linkbau, Einwilligung, die
+EINE Klickstelle), `reifen.js` (Bildschirm), `reifen-katalog.json`
+(Daten) und `reifen-import.py` (holt den AWIN-Feed). Alles Weitere in
+`DATEN.md` und `ENTSCHEIDUNGEN.md`, Eintrag vom 01.09.2026.
+
+### Was Friedrich noch tun muss, bevor das live geht
+
+1. **Gewerbeanmeldung.** Ab jetzt nicht mehr theoretisch: Sobald der
+   erste Provisionslink öffentlich ist, sind die Einnahmen gewerblich.
+   Vorher mit dem Praxisbetrieb klären, ob eine Nebentätigkeit
+   anzuzeigen ist. **Das ist der Punkt, der die Veröffentlichung
+   blockiert, nicht der Code.**
+2. **Ein Fachanwalt** für IT-/Wettbewerbsrecht über Kennzeichnung,
+   Preisdarstellung und die Offenlegung „kein Marktvergleich".
+3. **Reifenlabel geprüft, Ergebnis: keine Pflicht.** Die
+   EU-Reifenkennzeichnung (VO (EU) 2020/740) gilt für C1-, C2- und
+   C3-Reifen, also Pkw und Lkw. Motorradreifen (Fahrzeugklasse L) fallen
+   nicht darunter, und der Feed liefert die Werte auch gar nicht. Ein
+   Anwalt sollte das trotzdem gegenzeichnen.
+
+### Was danach ansteht
+
+- **Den Katalog frisch halten.** `python3 reifen-import.py`, zur
+  Reifensaison (Oktober/November, April/Mai) einmal die Woche, sonst
+  alle zwei bis drei Wochen. Die App zeigt das Standdatum an jedem Preis
+  und warnt ab 14 Tagen. Später kann das eine GitHub Action erledigen –
+  der Schlüssel wäre dann ein Repository-Secret.
+- **Reifengröße aus dem Motorrad ableiten.** Heute trägt sie der Fahrer
+  ein. Der Finder (`finder.js`) kennt Marke und Modell; eine Tabelle
+  Modell → Serienbereifung würde den Schritt sparen. Es gibt dafür keine
+  freie Datenquelle, das wäre Handarbeit für die häufigsten hundert
+  Modelle.
+- **Verwendungszweck als Filter** (Sport, Touring, Enduro, Custom).
+  reifen.com filtert danach, der AWIN-Feed enthält es **nicht**. Käme
+  entweder aus einer eigenen Zuordnung Modellfamilie → Zweck (1.317
+  Familien, davon decken 60 nur 30 %) oder aus der Händlerseite. Bewusst
+  verschoben, siehe ENTSCHEIDUNGEN.md.
+- **Merkliste und Preisalarm** für Reifen. Die Merkliste des alten Shops
+  (`kurvenjagd.shop`) speichert schon Preis und Datum – dasselbe Muster
+  passt hier, und beim Reifenkauf wartet man tatsächlich auf einen guten
+  Preis.
+- **Weitere Programme beantragen**, jetzt mit einer vorzeigbaren
+  Anzeige-Kennzeichnung und einer echten Einwilligung im Rücken. POLO
+  Motorrad (MID 11475), moto24 (MID 16934), FC-Moto über Webgains
+  (programID 4028) – siehe die Liste weiter unten.
+
+---
+
+## Der Shop für Ausrüstung: von der Demo zum echten Preisvergleich
 
 Die Grundlage steht seit dem 24.08.2026: Übersicht mit Vorschlägen aus der
 Garage, Produktseite mit Preisvergleich, Merkliste. Alles Beispieldaten,
@@ -302,7 +357,9 @@ Rechercheberichte zu Markt und Recht liegen im Brain
    Stand 25.08.2026: Desktop-Fassung steht (`quer.css`), der Demo-Shop ist
    für die Prüfphase per `SHOP_AKTIV` ausgeblendet. Es fehlen: Impressum/
    Datenschutz-Bildschirm (braucht Friedrichs Anschrift) und die Domain.
-2. **AWIN-Registrierung — ERLEDIGT, Account angenommen (25.08.2026)**
+2. **AWIN-Registrierung — ERLEDIGT, Account angenommen (25.08.2026).**
+   **Erstes Programm angenommen: reifen.com am 31.08.2026** (siehe
+   eigener Abschnitt oben).
    → POLO Motorrad beantragen (MID 11475, Programmbetreuung
    PeakLive, polo-motorrad@peaklive.de) und moto24 (MID 16934).
    POLO läuft trotz Sanierungsverfahren weiter, aber: nicht als einzige

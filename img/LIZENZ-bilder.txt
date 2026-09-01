@@ -38,7 +38,14 @@ bike-standard.webp
   Der Ausweg, falls sich die Herkunft nicht klaeren laesst: eine eigene
   Fantasiemaschine erzeugen, so wie sie im Werkstattbild schon steht.
 
-hintergrund-weich.jpg, kacheln/
+kacheln/reifen.jpg
+  Das Vorderrad der Beispielmaschine, 2:1 ausgeschnitten aus
+  garage-werkstatt-standard.webp und auf 1200x600 gerechnet. Damit gilt
+  hier alles, was dort steht: mit einem KI-Bildgenerator erstellt,
+  Herkunft geklaert, Kennzeichnung in der App unter "Kuenstlich erzeugte
+  Bilder". Angelegt am 01.09.2026 fuer die Kachel "Reifen".
+
+hintergrund-weich.jpg, kacheln/ (uebrige)
   Eigene Fotos von Friedrich Sternberg beziehungsweise von ihm gelieferte
   Bilder, teils verkleinert und weichgezeichnet.
 
