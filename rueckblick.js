@@ -218,18 +218,22 @@ function zeichneStatsLieblinge() {
   /* Die meistgefahrene Strecke bekommt die grosse Karte mit dem
      Kartenbild, die uebrigen eine schlichte Zeile. Ein Tipp oeffnet die
      Fahrt im Planer - derselbe Weg wie bei "Meine Touren". */
+  /* Auch die Kennung geht durch escapeHtml. Sie sieht aus wie eine Zahl,
+     ist aber eine Zeichenkette, die vom Server kommen kann - ungeprueft in
+     ein Attribut gesetzt waere sie ein Weg, fremdes HTML einzuschleusen.
+     Dieselbe Vorsicht wie in gespeicherteRouteHtml(). */
   liste.innerHTML = gruppen.map((gruppe, i) => {
     const tour = gruppe.vertreter.tour;
     const meta = `${gruppe.anzahl}&times; gefahren`
       + ` &middot; ${statsZahl(gruppe.vertreter.km)} km`
       + (gruppe.zuletzt ? ` &middot; zuletzt ${statsDatum(gruppe.zuletzt)}` : '');
     if (i === 0) {
-      return `<li class="tour-karte" data-stats-tour="${tour.id}">`
+      return `<li class="tour-karte" data-stats-tour="${escapeHtml(tour.id)}">`
         + (typeof vorschauBildHtml === 'function' ? vorschauBildHtml(tour) : '')
         + `<span class="saved-text"><span class="saved-name">${escapeHtml(tour.name)}</span>`
         + `<span class="saved-meta">${meta}</span></span></li>`;
     }
-    return `<li data-stats-tour="${tour.id}">`
+    return `<li data-stats-tour="${escapeHtml(tour.id)}">`
       + `<span class="saved-text"><span class="saved-name">${escapeHtml(tour.name)}</span>`
       + `<span class="saved-meta">${meta}</span></span></li>`;
   }).join('');
@@ -251,7 +255,7 @@ function zeichneStatsRekorde() {
   liste.innerHTML = zeilen.map(([titel, rekord, alsText]) => {
     const a = rekord.ausfahrt;
     const wann = a.datum ? ` &middot; ${statsDatum(a.datum)}` : '';
-    return `<li class="stats-rekord" data-stats-tour="${a.tour.id}">`
+    return `<li class="stats-rekord" data-stats-tour="${escapeHtml(a.tour.id)}">`
       + `<span class="saved-text"><span class="saved-name">${titel}</span>`
       + `<span class="saved-meta">${escapeHtml(a.tour.name)}${wann}</span></span>`
       + `<span class="stats-rekord-wert">${alsText(rekord.wert)}</span></li>`;
