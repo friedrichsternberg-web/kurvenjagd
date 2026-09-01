@@ -406,6 +406,16 @@
         <path d="M20.5 10.6V5.4a1.9 1.9 0 0 0-1.9-1.9h-5.2L3.9 13a2 2 0 0 0 0 2.8l4.3 4.3a2 2 0 0 0 2.8 0l9.5-9.5Z"/>
         <circle cx="16.2" cy="7.8" r="1.5"/>
       </symbol>
+      <!-- Ein Reifen von der Seite: Lauf, Felge, und dazwischen die
+           Profilrillen. Kein Foto - Reifen sehen alle gleich aus, und ein
+           Symbol in der Schrift der App passt besser als ein
+           freigestelltes Haendlerbild. -->
+      <symbol id="icon-reifen" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9.2"/>
+        <circle cx="12" cy="12" r="4.4"/>
+        <path d="M12 2.8v3.9M12 17.3v3.9M2.8 12h3.9M17.3 12h3.9"/>
+        <path d="m5.5 5.5 2.8 2.8M15.7 15.7l2.8 2.8M18.5 5.5l-2.8 2.8M8.3 15.7l-2.8 2.8"/>
+      </symbol>
       <symbol id="icon-lupe" viewBox="0 0 24 24">
         <circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>
       </symbol>
@@ -663,6 +673,22 @@
               <svg class="ic gross kachel-symbol"><use href="#icon-stats"></use></svg>
               <span class="kachel-text">
                 <span class="kachel-titel">Meine Stats</span>
+              </span>
+            </span>
+            <span class="kachel-pfeil" aria-hidden="true">&rarr;</span>
+          </button>
+
+          <!-- Das erste echte Partnerprogramm: Motorradreifen von
+               reifen.com. Sie nimmt beide Spalten, weil vier Kacheln im
+               Zweierraster aufgehen und eine fuenfte sonst allein
+               danebenstuende. -->
+          <button class="kachel kachel--breit" id="btnStartReifen"
+                  style="--kachel-bild: url('img/kacheln/reifen.jpg'); --kachel-lage: center 60%">
+            <span class="kachel-inhalt">
+              <svg class="ic gross kachel-symbol"><use href="#icon-reifen"></use></svg>
+              <span class="kachel-text">
+                <span class="kachel-titel">Reifen</span>
+                <span class="kachel-zusatz">Passend zu deiner Maschine &middot; Anzeige</span>
               </span>
             </span>
             <span class="kachel-pfeil" aria-hidden="true">&rarr;</span>
@@ -1037,6 +1063,102 @@
     </div>
   </div>
 
+  <!-- ===== Reifen =====
+       Das erste echte Partnerprogramm der App: Motorradreifen von
+       reifen.com, vermittelt ueber das Netzwerk AWIN.
+
+       WARUM AUSGERECHNET REIFEN: Weil Serpa etwas weiss, was eine
+       Reifensuchmaschine nicht weiss - welche Maschine in der Garage
+       steht. Die Groesse wird einmal eingetragen und ist von da an
+       gemerkt, getrennt fuer vorn und hinten.
+
+       WAS HIER NICHT STEHT: kein Preisvergleich (es gibt genau einen
+       Haendler, alles andere waere vorgetaeuscht), keine Sterne (dazu
+       fehlt eine nachpruefbare Quelle) und keine Produktfotos vom
+       Haendler - die kaemen von einem fremden Server und wuerden die
+       IP-Adresse jedes Besuchers dorthin tragen, noch bevor er irgendetwas
+       angeklickt hat.
+
+       Die leeren Behaelter fuellt reifen.js aus reifen-katalog.json.
+       Die Links baut partner.js, und dort steht auch die Einwilligung,
+       die vor dem ersten Klick nach draussen kommt. ===== -->
+  <div id="reifenScreen" class="start-screen listen-screen" hidden>
+    <div class="start-screen-inner">
+      <button class="btn ghost back-btn" id="btnReifenZurueck">&larr; Zur&uuml;ck</button>
+
+      <!-- Kopf und Groessenwahl in einer Huelle: Im Querformat stehen sie
+           nebeneinander (quer.css, Abschnitt 8), im Hochformat
+           untereinander wie jeder andere Block. -->
+      <div class="reifen-oben">
+      <section class="reifen-held" id="reifenHeld"></section>
+
+      <section class="reifen-wahl">
+        <div class="segmented" id="reifenLage">
+          <button type="button" class="seg active" data-lage="v">Vorne</button>
+          <button type="button" class="seg" data-lage="h">Hinten</button>
+        </div>
+
+        <!-- Die Groesse wie auf der Reifenflanke gesetzt: 120/70 R 17.
+             Wer am Rad steht, liest sie dort ab und findet sie hier
+             wieder - ohne erst zu lernen, was "Querschnitt" bedeutet.
+             Die drei Auswahlfelder fuellt reifen.js, und zwar nur mit
+             Werten, hinter denen wirklich Reifen stehen. -->
+        <div class="reifen-mass" id="reifenMass"></div>
+        <p class="hint reifen-mass-hilfe">Steht auf der Flanke deines Reifens,
+          zum Beispiel <b class="reifen-beispielmass">120/70&nbsp;ZR17</b>. Wir merken sie
+          uns f&uuml;r deine Maschine.</p>
+      </section>
+      </div>
+
+      <p class="reifen-laden" id="reifenLaden" hidden>Angebote werden geladen &hellip;</p>
+
+      <div class="reifen-fehler" id="reifenFehler" hidden>
+        <p class="hint">Die Angebote lie&szlig;en sich nicht laden. Das liegt
+          fast immer an der Verbindung.</p>
+        <button class="btn ghost klein" id="btnReifenNochmal">Nochmal versuchen</button>
+      </div>
+
+      <div class="finder-marken reifen-marken" id="reifenMarken"></div>
+      <p class="reifen-treffer" id="reifenListeKopf"></p>
+      <ul class="saved-list reifen-liste" id="reifenListe"></ul>
+      <button class="btn ghost reifen-mehr" id="btnReifenMehr" hidden></button>
+
+      <!-- OFFENLEGUNG. Sie darf nicht wegrationalisiert werden.
+
+           Ein Angebotsplatz, an dem wir mitverdienen, muss als solcher
+           erkennbar sein - das leistet das Abzeichen "Anzeige" an jeder
+           Zeile. Dass die Auswahl NUR aus einem Haendler besteht, muss
+           zusaetzlich dastehen (BGH I ZR 55/16 zur Vergleichs-
+           Offenlegung), und der Zeitpunkt der Preise gehoert an die
+           Preise selbst (er steht ueber der Liste). -->
+      <section class="block reifen-offen">
+        <h2>Woher diese Angebote kommen</h2>
+        <p class="hint">
+          Alle Reifen auf dieser Seite stammen von <b>reifen.com</b>
+          (reifencom GmbH, Hannover). Wir sind Partner dieses Shops: Kaufst
+          du &uuml;ber einen Link von hier, bekommen wir eine Provision von
+          3 bis 5 Prozent. <b>F&uuml;r dich &auml;ndert das am Preis
+          nichts.</b>
+        </p>
+        <p class="hint">
+          Das hei&szlig;t auch: Diese Liste ist <b>kein Marktvergleich</b>.
+          Sie zeigt das Sortiment eines einzigen H&auml;ndlers. Andere
+          Anbieter k&ouml;nnen g&uuml;nstiger sein &ndash; die Reihenfolge
+          hier richtet sich allein nach dem Gesamtpreis, nie nach der
+          H&ouml;he einer Provision.
+        </p>
+        <p class="tiny">
+          Preise inklusive Mehrwertsteuer. Motorradreifen liefert
+          reifen.com frachtfrei innerhalb Deutschlands. Ma&szlig;geblich ist
+          der Preis, den der Shop beim Kauf anzeigt. Alle genannten
+          Marken- und Produktnamen sind Eigentum der jeweiligen
+          Rechteinhaber und dienen hier allein der Beschreibung.
+        </p>
+        <button class="btn ghost klein" id="btnReifenShop">Zu reifen.com (Anzeige)</button>
+      </section>
+    </div>
+  </div>
+
   <!-- ===== Rechtliches: Impressum und Datenschutzerklaerung =====
        Pflicht nach § 5 DDG und Art. 13 DSGVO, sobald die App oeffentlich
        erreichbar ist. Beides muss "leicht erkennbar, unmittelbar
@@ -1142,7 +1264,11 @@
             aber nur als Summe, ohne dich wiederzuerkennen (Punkt 8). Eine
             Tour wird nur dann &ouml;ffentlich, wenn du daf&uuml;r einen
             Schalter umlegst (Punkt 9). Deine Auswertung unter &bdquo;Meine
-            Stats&ldquo; rechnet allein dein Ger&auml;t aus (Punkt 2).
+            Stats&ldquo; rechnet allein dein Ger&auml;t aus (Punkt 2). Im
+            Bereich &bdquo;Reifen&ldquo; zeigen wir Angebote eines
+            Partnershops und verdienen an vermittelten K&auml;ufen mit
+            &ndash; dorthin geht es erst, nachdem du zugestimmt hast
+            (Punkt 10).
           </p>
 
           <p class="label">1. Hosting</p>
@@ -1329,7 +1455,46 @@
             oder Stadt.
           </p>
 
-          <p class="label">10. Deine Rechte</p>
+          <p class="label">10. Partnerprogramme (Reifen)</p>
+          <p>
+            Im Bereich &bdquo;Reifen&ldquo; zeigt die App Angebote von
+            <b>reifen.com</b> (reifencom GmbH, S&uuml;dfeldstra&szlig;e 16,
+            30453 Hannover). Vermittelt werden sie &uuml;ber das
+            Partnernetzwerk <b>AWIN</b> (Awin AG, Eichhornstra&szlig;e 3,
+            10785 Berlin). Kaufst du &uuml;ber einen solchen Link, erhalten
+            wir eine Provision; f&uuml;r dich &auml;ndert sich am Preis
+            nichts. Angebote, an denen wir mitverdienen, sind mit
+            &bdquo;Anzeige&ldquo; gekennzeichnet.
+          </p>
+          <p>
+            <strong>Solange du nichts anklickst, geht nichts an AWIN oder
+            reifen.com.</strong> Die Reifendaten liegen als Datei auf
+            demselben Server wie die App und werden von dort geladen; wir
+            binden keine Produktbilder, keine Z&auml;hlpixel und kein
+            Skript des Partners ein.
+          </p>
+          <p>
+            Tippst du auf ein Angebot, fragt die App <b>einmalig</b>, ob du
+            einverstanden bist. Erst danach &ouml;ffnet der Link. Er
+            f&uuml;hrt &uuml;ber awin1.com; dort werden deine IP-Adresse
+            und eine Kennung verarbeitet, an der ein Kauf innerhalb von
+            <b>30 Tagen</b> uns zugeordnet wird. Wir erfahren dabei nicht,
+            wer etwas gekauft hat oder was &ndash; nur Summen.
+            Rechtsgrundlage ist deine Einwilligung nach &sect; 25 Abs. 1
+            TDDDG und Art. 6 Abs. 1 lit. a DSGVO.
+          </p>
+          <p>
+            Auf deinem Ger&auml;t merkt sich die App nur, <em>ob</em> und
+            <em>wann</em> du entschieden hast &ndash; keine Klicks, keine
+            angesehenen Produkte. Deine Entscheidung kannst du hier
+            jederzeit mit Wirkung f&uuml;r die Zukunft zur&uuml;cknehmen:
+          </p>
+          <p class="partner-stand" id="partnerStandZeile"></p>
+          <p>
+            <button class="btn ghost klein" id="btnPartnerWiderruf" hidden>Einwilligung zur&uuml;cknehmen</button>
+          </p>
+
+          <p class="label">11. Deine Rechte</p>
           <p>
             Du hast das Recht auf Auskunft, Berichtigung, L&ouml;schung,
             Einschr&auml;nkung der Verarbeitung, Daten&uuml;bertragbarkeit
@@ -1339,7 +1504,7 @@
             das Recht auf Akteneinsicht Brandenburg.
           </p>
 
-          <p class="tiny">Stand: 28.08.2026</p>
+          <p class="tiny">Stand: 01.09.2026</p>
         </div>
       </details>
 
@@ -1493,8 +1658,9 @@
             Ein Teil der Bilder dieser App wurde mit einem KI-Bildgenerator
             erstellt: das App-Symbol, der Schriftzug &bdquo;Serpa&ldquo;, der
             Werkstattraum der Garage und die Beispielmaschine, die dort steht,
-            solange du kein eigenes Foto hinterlegt hast. Sie zeigen keine
-            wirklichen Orte, Gegenst&auml;nde oder Personen.
+            solange du kein eigenes Foto hinterlegt hast &ndash; dazu die
+            Kachelbilder, die aus diesem Werkstattbild ausgeschnitten sind.
+            Sie zeigen keine wirklichen Orte, Gegenst&auml;nde oder Personen.
           </p>
           <p>
             Stellst du dein eigenes Foto frei, trennt ein gelerntes Modell
@@ -2170,6 +2336,45 @@
        und der ist versteckt, sobald man woanders ist. Jede Meldung aus
        Garage oder Shop wurde dadurch zwar erzeugt, war aber null Punkte
        gross - man sah sie schlicht nie. -->
+  <!-- ===== Einwilligung fuer Partner-Angebote =====
+       Erscheint EINMAL, unmittelbar vor dem ersten Klick auf einen
+       Provisionslink - nicht als Banner beim Start.
+
+       WARUM ES SIE BRAUCHT: Der Link laeuft ueber awin1.com. Dort wird
+       eine Kennung gesetzt, mit der das Netzwerk einen spaeteren Kauf uns
+       zuordnet, 30 Tage lang. Das dient nicht dem Betrieb der App,
+       sondern unserer Verguetung - genau der Fall, fuer den
+       Paragraf 25 Abs. 1 TDDDG eine Einwilligung verlangt.
+
+       WARUM ERST HIER UND NICHT BEIM START: Eine Einwilligung, die man
+       wegklickt, um die App ueberhaupt benutzen zu koennen, ist keine.
+       Hier steht sie an der Stelle, an der sie einen Sinn ergibt, mit dem
+       Satz, worum es geht - und "Nein" fuehrt einfach dazu, dass nichts
+       passiert. Widerrufen geht unter "Rechtliches". ===== -->
+  <div id="partnerBlatt" class="partner-schleier" hidden>
+    <div class="partner-blatt glas" role="dialog" aria-modal="true"
+         aria-labelledby="partnerBlattTitel">
+      <h3 id="partnerBlattTitel">Zum Shop weitergehen?</h3>
+      <p class="hint">
+        Du verl&auml;sst Serpa und landest bei <b>reifen.com</b>. Der Link
+        l&auml;uft &uuml;ber unser Partnernetzwerk <b>AWIN</b>, das dort
+        eine Kennung setzt: Kaufst du innerhalb von 30 Tagen etwas, wird
+        uns eine Provision gutgeschrieben. <b>Am Preis &auml;ndert das
+        nichts.</b>
+      </p>
+      <p class="hint">
+        Serpa erf&auml;hrt dabei nicht, was du kaufst &ndash; nur, dass
+        insgesamt etwas vermittelt wurde. Wir merken uns deine Antwort,
+        damit die Frage nicht bei jedem Angebot wiederkommt. Zur&uuml;cknehmen
+        kannst du sie jederzeit unter &bdquo;Impressum &amp; Datenschutz&ldquo;.
+      </p>
+      <div class="partner-knoepfe">
+        <button class="btn ghost" id="btnPartnerNein">Nein, hier bleiben</button>
+        <button class="btn" id="btnPartnerJa">Einverstanden &amp; weiter</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast" class="toast" hidden></div>
 
   <nav id="hauptNav" class="haupt-nav">
@@ -2370,6 +2575,18 @@
   <!-- Der Demo-Produktkatalog (nur Daten) und die Shop-Logik. produkte.js
        muss vor shop.js stehen, und beide nach garage.js, weil shop.js
        dessen verkabele() mitbenutzt. -->
+  <!-- Partnerprogramme und Provisionslinks. Nach app.js, weil die
+       Verkabelung des Einwilligungs-Blatts verkabele() und showToast()
+       von dort braucht - und VOR reifen.js, das die Links hier bauen
+       laesst. Faellt partner.js aus, oeffnet reifen.js nichts nach
+       draussen; das ist die richtige Richtung fuer einen Ausfall. -->
+  <script src="partner.js?v=109"></script>
+  <!-- Der Reifen-Bildschirm. Nach garage.js, weil er motorradAktiv()
+       braucht, um die gemerkte Groesse der richtigen Maschine
+       zuzuordnen. Der Katalog (reifen-katalog.json) wird nicht hier
+       geladen, sondern erst beim Oeffnen des Bildschirms. -->
+  <script src="reifen.js?v=109"></script>
+
   <script src="produkte.js?v=109"></script>
   <script src="shop.js?v=109"></script>
   <!-- Die Besuchszaehlung. Zuletzt, weil sie nichts kann, was jemand anders

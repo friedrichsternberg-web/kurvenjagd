@@ -781,9 +781,9 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
    senkrecht zentriert, und ueber die volle Breite. Ein Formular in der
    Mitte wirkt ruhig, eine Liste in der Mitte wirkt verloren. */
 .listen-screen { align-items: stretch; justify-content: flex-start; text-align: left; overflow-y: auto; }
-/* Touren und Stats sind Daten-Bildschirme - das Foto dahinter macht sie
-   nur unruhig. Rechtliches und Konto behalten es. */
-#tourenScreen, #statsScreen { background: var(--bg); }
+/* Touren, Stats und Reifen sind Daten-Bildschirme - das Foto dahinter
+   macht sie nur unruhig. Rechtliches und Konto behalten es. */
+#tourenScreen, #statsScreen, #reifenScreen { background: var(--bg); }
 .listen-screen .start-screen-inner {
   width: 100%;
   padding: var(--s5) var(--s4);
@@ -4409,4 +4409,331 @@ body.nav-modus .karten-knopf { display: none; }
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--accent-hell);
+}
+
+
+/* ========================= REIFEN ==========================================
+
+   Der Bildschirm des ersten Partnerprogramms. Drei Teile, von oben nach
+   unten: die eigene Maschine, die Groessenwahl, die Angebote.
+
+   Die Gestaltung folgt derselben Ordnung wie der Rest der App - Glas auf
+   Schwarz, die Signalfarbe nur dort, wo etwas bedienbar ist. Der einzige
+   eigene Gedanke steckt in der Groessenwahl: Sie ist gesetzt wie die
+   Praegung auf einer Reifenflanke. */
+
+.reifen-held {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--s5) var(--s4);
+  margin: 0 0 var(--s3);
+  border-radius: var(--r-md);
+  border: 1px solid var(--glas-hell);
+  /* Der Schein sitzt links unten statt mittig wie bei den Stats: Der Text
+     ist linksbuendig, und ein Licht unter der Mitte zoege das Auge von der
+     Zeile weg, auf die es ankommt. */
+  background:
+    radial-gradient(ellipse 80% 90% at 12% 115%,
+      color-mix(in srgb, var(--accent) 30%, transparent) 0%,
+      transparent 68%),
+    linear-gradient(to bottom, var(--glas-hauch), var(--glas-hauch));
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  box-shadow:
+    inset 0 1px 0 var(--glas-rand),
+    inset 0 -1px 0 var(--schatten-hauch);
+}
+.reifen-held-titel {
+  margin: 0;
+  font-family: var(--schrift-display);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  text-indent: 0.14em;
+  color: var(--muted);
+}
+.reifen-held-name {
+  margin: 0;
+  font-family: var(--schrift-display);
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--metall-glanz);
+}
+.reifen-held-sub {
+  margin: var(--s2) 0 0;
+  max-width: 42ch;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.reifen-wahl {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+  padding: var(--s4);
+  margin: 0 0 var(--s4);
+  border-radius: var(--r-md);
+  border: 1px solid var(--glas-hell);
+  background: var(--glas-hauch);
+}
+
+/* Die Flankenpraegung. Die Auswahlfelder tragen keine eigene Kante - die
+   Zeile soll als EIN Schriftzug gelesen werden, nicht als drei Formulare.
+   Dass sie bedienbar sind, sagt die Signalfarbe. */
+.reifen-mass {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 2px;
+  padding: var(--s2) 0 var(--s1);
+}
+.reifen-mass-feld {
+  -webkit-appearance: none;
+  appearance: none;
+  padding: 2px 4px;
+  border: 0;
+  border-bottom: 2px solid color-mix(in srgb, var(--accent-hell) 55%, transparent);
+  border-radius: 0;
+  background: transparent;
+  color: var(--accent-hell);
+  font-family: var(--schrift-display);
+  font-size: 40px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  text-align: center;
+  cursor: pointer;
+}
+.reifen-mass-feld:focus-visible {
+  outline: 2px solid var(--accent-hell);
+  outline-offset: 3px;
+}
+/* Die Auswahlliste selbst zeichnet das Betriebssystem. Sie steht dort auf
+   hellem Grund, deshalb bekommt sie die Textfarbe der Seite und nicht die
+   der Praegung - sonst waere Blau auf Weiss zu blass. */
+.reifen-mass-feld option {
+  background: var(--surface);
+  color: var(--text);
+  font-size: 16px;
+}
+.reifen-mass-trenner {
+  font-family: var(--schrift-display);
+  font-size: 34px;
+  font-weight: 600;
+  color: var(--metall-tief);
+}
+.reifen-mass-hilfe { text-align: center; margin-top: 0; }
+.reifen-mass-hilfe b { color: var(--metall); font-weight: 600; }
+
+.reifen-laden { color: var(--muted); font-size: 13px; text-align: center; padding: var(--s5) 0; }
+.reifen-fehler { text-align: center; padding: var(--s4) 0; }
+/* Vierzehn Marken ergeben umgebrochen fuenf Zeilen - auf dem Handy waere
+   der halbe Bildschirm Filter, bevor der erste Reifen auftaucht. Deshalb
+   EINE Zeile, die man zur Seite schiebt; dasselbe Muster wie die
+   Shop-Leiste in der Garage. */
+.reifen-marken {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin: 0 0 var(--s3);
+  padding-bottom: 2px;
+}
+.reifen-marken::-webkit-scrollbar { display: none; }
+.reifen-marken .marken-chip { white-space: nowrap; }
+
+/* Die Zaehlung an den Markenchips. Ein eigenes Element, damit sie nicht wie
+   Teil des Markennamens aussieht. */
+.reifen-marken .marken-chip i {
+  font-style: normal;
+  margin-left: 5px;
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+}
+
+.reifen-treffer {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s2);
+  margin: 0 0 var(--s3);
+}
+.reifen-treffer-zahl {
+  font-family: var(--schrift-display);
+  font-size: 26px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--metall-glanz);
+}
+.reifen-treffer-text {
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: var(--muted);
+}
+.reifen-treffer-text i { font-style: normal; opacity: 0.8; }
+
+.reifen-liste { display: flex; flex-direction: column; gap: var(--s2); }
+
+/* Eine Angebotszeile. Links das Symbol, in der Mitte Marke, Modell und die
+   Bezeichnung des Haendlers, rechts Preis und Weg zum Shop. Der Preis steht
+   ganz rechts, weil danach verglichen wird. */
+.reifen-karte {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s3);
+  cursor: default;
+}
+.reifen-symbol {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: var(--r-sm);
+  background: var(--glas-hauch);
+  border: 1px solid var(--glas-hell);
+  color: var(--metall-tief);
+}
+.reifen-symbol .ic { width: 26px; height: 26px; }
+.reifen-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.reifen-marke {
+  font-family: var(--schrift-display);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--metall);
+}
+.reifen-modell {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+.reifen-bezeichnung {
+  font-size: 11.5px;
+  line-height: 1.35;
+  color: var(--muted);
+  opacity: 0.85;
+}
+.reifen-meta { font-size: 11.5px; color: var(--muted); }
+.reifen-meta i { font-style: normal; opacity: 0.5; margin: 0 3px; }
+
+.reifen-preis-spalte {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+.reifen-preis {
+  font-family: var(--schrift-display);
+  font-size: 22px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--text);
+}
+/* Das Abzeichen an jeder Zeile, an der wir mitverdienen. Es ist mit Absicht
+   ruhig gehalten und trotzdem lesbar: Eine Kennzeichnung, die niemand
+   bemerkt, ist keine - eine, die schreit, macht die Liste unbrauchbar. */
+.reifen-preis-spalte .badge.anzeige {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: transparent;
+  border-color: var(--glas-hell);
+}
+
+.reifen-offen { margin-top: var(--s5); }
+.reifen-offen b { color: var(--text); font-weight: 600; }
+
+/* Der Untertitel auf einer Kachel. Bisher trugen alle Kacheln nur einen
+   Titel; die Reifenkachel braucht die Zeile, weil "Anzeige" schon dort
+   stehen muss und nicht erst dahinter. */
+.kachel-zusatz {
+  font-size: 11.5px;
+  line-height: 1.3;
+  color: var(--muted);
+}
+
+/* ---------- Das Einwilligungs-Blatt ----------
+   Gebaut wie der Garagen-Dialog: unten angeschlagen auf dem Handy, mittig
+   ab 560 Punkten. Es ist kein Banner, sondern eine Frage an genau einer
+   Stelle - deshalb darf es den Bildschirm ruhig fuellen. */
+.partner-schleier {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: var(--schatten-stark);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.partner-blatt {
+  width: 100%;
+  max-width: 520px;
+  max-height: 92dvh;
+  overflow-y: auto;
+  padding: var(--s5) var(--s4) calc(var(--s4) + env(safe-area-inset-bottom));
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+}
+.partner-blatt h3 {
+  margin: 0 0 var(--s3);
+  font-family: var(--schrift-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--metall-glanz);
+}
+.partner-blatt .hint { font-size: 13px; }
+.partner-blatt b { color: var(--text); font-weight: 600; }
+.partner-knoepfe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+  margin-top: var(--s4);
+}
+.partner-knoepfe .btn { flex: 1 1 160px; }
+
+/* Der Stand der Einwilligung in der Datenschutzerklaerung. Ohne diese
+   Zeile waere der Widerrufsknopf ein Knopf ins Nichts. */
+.partner-stand {
+  padding: var(--s2) var(--s3);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--glas-hell);
+  background: var(--glas-hauch);
+  font-size: 13px;
+  color: var(--text);
+}
+
+@media (min-width: 560px) {
+  .partner-schleier { align-items: center; }
+  .partner-blatt { border-radius: var(--r-lg); }
+}
+.reifen-mehr { width: 100%; margin-top: var(--s3); }
+.reifen-beispielmass { white-space: nowrap; }
+
+/* Auf schmalen Geraeten wird aus der Zeile ein Block: erst Marke, Modell
+   und Bezeichnung ueber die volle Breite, darunter eine Leiste mit Preis,
+   Kennzeichnung und Weg zum Shop. Nebeneinander bliebe fuer den Namen
+   sonst eine Spalte von der Breite eines Daumens. */
+@media (max-width: 520px) {
+  .reifen-karte { flex-wrap: wrap; }
+  /* Symbol und Text bleiben nebeneinander - nur die Preisleiste rutscht
+     unter beide. Ein Symbol allein in der ersten Zeile saehe aus, als
+     fehle daneben etwas. */
+  .reifen-text { flex: 1 1 0; min-width: 60%; }
+  .reifen-preis-spalte {
+    flex: 1 1 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--s3);
+    margin-top: var(--s1);
+  }
+  .reifen-preis { margin-right: auto; }
 }

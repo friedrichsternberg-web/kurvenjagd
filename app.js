@@ -3459,7 +3459,7 @@ function symbol(name, zusatz = '') {
    schwarze Flaeche, ohne einen Fehler zu melden. */
 const BILDSCHIRME = [
   'garageScreen', 'tourenScreen', 'app', 'rideScreen', 'statsScreen',
-  'rechtlichesScreen', 'shopScreen', 'shopProduktScreen',
+  'rechtlichesScreen', 'reifenScreen', 'shopScreen', 'shopProduktScreen',
   'kontoScreen', 'profilScreen', 'passwortNeuScreen', 'kontoLoeschenScreen',
 ];
 
@@ -3496,6 +3496,10 @@ function aktualisiereLeiste(sichtbareId) {
   if (sichtbareId === 'shopProduktScreen') {
     leuchtZiel = typeof produktLeuchtZiel === 'function' ? produktLeuchtZiel() : 'shopScreen';
   }
+  // Die Reifen haben ebenfalls keinen eigenen Eintrag - sie sind ueber die
+  // Garage erreichbar und gehoeren zur eigenen Maschine. Also leuchtet die
+  // Garage weiter, statt dass die Leiste ins Leere zeigt.
+  if (sichtbareId === 'reifenScreen') leuchtZiel = 'garageScreen';
   leiste.querySelectorAll('.nav-tab').forEach(knopf => {
     knopf.classList.toggle('aktiv', knopf.dataset.ziel === leuchtZiel);
   });
@@ -3877,14 +3881,24 @@ document.getElementById('btnStartPlaner').addEventListener('click', zeigePlaner)
 document.getElementById('btnStartTouren').addEventListener('click', zeigeMeineTouren);
 document.getElementById('btnStartShop').addEventListener('click', zeigeShop);
 
+/* Die Reifen-Kachel. zeigeReifen() steht in reifen.js, das NACH dieser
+   Datei geladen wird - fehlt sie, fuehrt die Kachel in die Garage zurueck,
+   statt einen leeren Bildschirm zu zeigen. Dasselbe Muster wie bei den
+   Stats. */
+document.getElementById('btnStartReifen').addEventListener('click', () => {
+  if (typeof zeigeReifen === 'function') zeigeReifen();
+  else zeigeGarage();
+});
+
 /* Wendet den Shop-Schalter (ganz oben in dieser Datei) auf die Oberflaeche
    an: Ohne Shop verschwinden der Eintrag in der Leiste und die Kachel im
    Garagen-Menue. Die uebrigen vier Leisten-Eintraege verteilen den Platz
    von selbst. */
 function wendeShopSchalterAn() {
   /* Vier Kacheln gehen im Zweierraster glatt auf (Planer, Ride, Touren,
-     Stats). Kommt der Shop als fuenfte dazu, nimmt sie beide Spalten -
-     sonst bliebe daneben ein Loch. */
+     Stats). Reifen steht als fuenfte darunter und nimmt beide Spalten -
+     sonst bliebe daneben ein Loch. Wird der Shop eingeschaltet, bekommt
+     er dieselbe Behandlung und stellt sich als sechste darunter. */
   if (SHOP_AKTIV) {
     document.getElementById('btnStartShop').classList.add('kachel--breit');
     return;

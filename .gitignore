@@ -74,3 +74,9 @@ dashboard.html
 # zehn Minuten neu geschrieben und enthaelt Absender und Betreffzeilen -
 # gehoert damit in dieselbe Schublade wie dashboard.html selbst.
 post.json
+
+# Der AWIN-Zugangsschluessel fuer den Produktdatenfeed. Wer ihn hat, kann
+# die Produktdaten aller Programme dieses Kontos herunterladen - er gehoert
+# also in dieselbe Schublade wie dashboard.html. reifen-import.py liest ihn
+# aus dieser Datei oder aus der Umgebungsvariablen AWIN_SCHLUESSEL.
+.awin-schluessel

@@ -331,7 +331,23 @@
      zweit, das Gesamtbild und der Rueckblick bleiben untereinander. */
   #statsKacheln, #statsZeitWerte { grid-template-columns: repeat(3, 1fr); }
 
-  /* --- 8. Der Startfilm im Liegen ---------------------------------------------
+  /* --- 8. Reifen: Kopf und Groessenwahl nebeneinander -------------------------
+     Im Hochformat stehen sie untereinander, weil nichts anderes hinpasst.
+     Liegend waeren das zwei breite Baender mit viel Luft darin - also
+     stehen sie nebeneinander, und der Blick geht in einem Zug von der
+     Maschine zur Groesse. Die Liste darunter bleibt einspaltig: Ein Preis
+     laesst sich in einer Spalte vergleichen, in zweien nicht. */
+  .reifen-oben {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--s3);
+    align-items: stretch;
+  }
+  .reifen-held { margin-bottom: 0; }
+  .reifen-wahl { margin-bottom: 0; justify-content: center; }
+  .reifen-held-name { font-size: 38px; }
+
+  /* --- 9. Der Startfilm im Liegen ---------------------------------------------
      Das liegende BILD des Films haengt an der Form des Fensters, nicht an
      dieser Grenze - es steht deshalb in style.css unter
      "min-aspect-ratio: 23/20" und gilt auch dem Handy im Liegen. Hier bleibt
