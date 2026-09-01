@@ -302,23 +302,32 @@ die erste Stelle der App, an der Geld fließt – und die erste, an der eine
 fremde Firma etwas über einen Nutzer erfährt. Deshalb steht hier genau,
 was wann wohin geht.
 
-**Beim Anzeigen der Liste ohne Einwilligung: nichts.** Der Katalog liegt
-als `reifen-katalog.js` neben der App auf GitHub Pages und wird von dort
-geladen wie jede andere Datei der App. Statt der Produktfotos zeichnet die
-App ihr eigenes Reifensymbol; Zählpixel oder Skripte des Partners gibt es
-nicht.
+**Beim Anzeigen der Liste: Namen und Preise vom eigenen Server, Fotos vom
+Bilddienst des Netzwerks.** Der Katalog liegt als `reifen-katalog.js`
+neben der App auf GitHub Pages. Zählpixel oder Skripte des Partners bindet
+Serpa nicht ein.
 
-**Nach der Einwilligung kommen die Produktfotos dazu.** Sie liegen auf dem
-Bilddienst des Netzwerks (`images2.productserve.com`, Awin) und werden von
-dort direkt in die Seite geladen — dabei geht die IP-Adresse des Geräts an
-diesen Dienst, je sichtbarem Foto eine Anfrage. Genau deshalb sind die
-Fotos hinter dieselbe Einwilligung gelegt wie die Provisionslinks: Vor dem
-„Einverstanden" schreibt `reifen.js` keine einzige productserve-Adresse in
-die Seite, und nach einem Widerruf verschwinden sie wieder. Die
-Erlaubnisliste der Seite (CSP in `index.html`) führt die Adresse
-ausdrücklich auf. Die Fotos selbst sind unverändert übernommene Bilder des
-Händlers aus dem Partnerprogramm — die Adressen sind vom Netzwerk signiert
-und stehen so im Produktdatenfeed.
+Die Produktfotos liegen auf `images2.productserve.com` (Awin) und werden
+von dort direkt geladen, sobald jemand den Reifen-Bereich öffnet — je
+sichtbarem Foto eine Anfrage, dabei geht die IP-Adresse dorthin.
+
+**Warum das ohne Einwilligung läuft, der Klick aber nicht:** Gemessen am
+01.09.2026 antwortet der Bilddienst **ohne eine einzige Set-Cookie-Zeile**
+und liest nichts vom Gerät. Damit greift § 25 TDDDG dort nicht; es bleibt
+die IP-Übertragung, und die trägt dieselbe Grundlage wie die Kartenkacheln
+von OpenStreetMap (Punkt 3 der Datenschutzerklärung): Art. 6 Abs. 1 lit. b
+und f DSGVO, Bereitstellung der angeforderten Ansicht. Der Klick auf ein
+Angebot ist etwas anderes — dort setzt awin1.com eine Kennung mit 30 Tagen
+Laufzeit, und dafür fragt die App.
+
+Hier stand bis zum 01.09.2026 abends eine Einwilligung auch für die
+Fotos. Sie war vorsorglich und ohne Rechtsgrund — die Begründung fürs
+Streichen steht in `ENTSCHEIDUNGEN.md`.
+
+Die Erlaubnisliste der Seite (CSP in `index.html`) führt den Bilddienst
+auf. Die Fotos selbst sind unverändert übernommene Bilder des Händlers aus
+dem Partnerprogramm; die Adressen sind vom Netzwerk signiert und stehen so
+im Produktdatenfeed.
 
 **Woher der Katalog kommt:** `reifen-import.py` holt den Produktdatenfeed
 von AWIN – auf Friedrichs Rechner, nicht in der App. Der dafür nötige
@@ -328,14 +337,15 @@ nachlädt — so funktioniert der Reifen-Bereich auch dann, wenn die Seite
 ohne Server direkt aus einer Datei geöffnet wird.
 
 **Beim Klick auf ein Angebot** öffnet sich zuerst eine Frage
-(`partnerBlatt`), einmalig. Erst nach „Einverstanden" öffnet der Link:
+(`partnerBlatt`). Ein Ja wird gemerkt, ein Nein gilt für den Moment. Erst
+nach „Einverstanden" öffnet der Link:
 
     https://www.awin1.com/pclick.php?p=<Produktnummer>&a=3056191&m=7605
 
 | Empfänger | Was ankommt | Grundlage |
 |---|---|---|
 | Awin AG, Berlin (`awin1.com`) | IP-Adresse, User-Agent, unsere Publisher-Nummer 3056191, die Produktnummer; gesetzt wird eine Kennung mit 30 Tagen Laufzeit | Einwilligung, § 25 Abs. 1 TDDDG + Art. 6 Abs. 1 lit. a DSGVO |
-| Awin (`images2.productserve.com`) | IP-Adresse und User-Agent bei jedem geladenen Produktfoto — erst nach der Einwilligung, siehe oben | dasselbe |
+| Awin (`images2.productserve.com`) | IP-Adresse und User-Agent bei jedem geladenen Produktfoto, beim Öffnen des Reifen-Bereichs. **Kein Cookie** (gemessen) | Art. 6 Abs. 1 lit. b und f DSGVO — wie die Kartenkacheln |
 | reifencom GmbH, Hannover | alles, was der Browser beim Aufruf des Shops überträgt; was dort an Cookies gesetzt wird, liegt beim Händler | dasselbe |
 
 **Was zu uns zurückfließt:** nur Summen im AWIN-Konto – Klicks, Verkäufe,

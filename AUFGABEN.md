@@ -276,8 +276,10 @@ Motorradreifen mit echten Preisen und echten Provisionslinks.
 Was gebaut wurde: `partner.js` (Partnerliste, Linkbau, Einwilligung, die
 EINE Klickstelle), `reifen.js` (Bildschirm und die Leiste „Reifen für
 dich" in der Garage), `reifen-katalog.js` (Daten) und `reifen-import.py`
-(holt den AWIN-Feed). Echte Produktfotos kommen nach der Einwilligung
-vom Bilddienst des Netzwerks. Alles Weitere in `DATEN.md` und
+(holt den AWIN-Feed). Echte Produktfotos kommen vom Bilddienst des
+Netzwerks und laden ohne Nachfrage — er setzt kein Cookie, damit gilt
+dieselbe Grundlage wie für die Kartenkacheln. Einwilligungspflichtig ist
+allein der Klick zum Shop. Alles Weitere in `DATEN.md` und
 `ENTSCHEIDUNGEN.md`, Einträge vom 01.09.2026.
 
 ### Was Friedrich noch tun muss, bevor das live geht

@@ -639,7 +639,12 @@
            der Garage bleibt die Platte verborgen. -->
       <div id="garageReifen" class="garage-platte garage-shop" hidden>
         <div class="garage-shop-kopf">
-          <h3>Reifen f&uuml;r dich <span class="garage-shop-anzeige">Anzeige</span></h3>
+          <!-- Die Ueberschrift setzt reifen.js: Sie sagt "Reifen fuer deine
+               Honda ADV150", sobald die Groesse bekannt ist, sonst nur
+               "Motorradreifen". Ein Versprechen, das die Auswahl nicht
+               halten kann, waere hier das Schlimmste. -->
+          <h3><span id="garageReifenKopf">Motorradreifen</span>
+            <span class="garage-shop-anzeige">Anzeige</span></h3>
           <button class="linkbtn" id="btnGarageReifenAlle">Alle ansehen &rarr;</button>
         </div>
         <div class="garage-shop-band" id="garageReifenBand"></div>
@@ -1097,10 +1102,11 @@
 
        WAS HIER NICHT STEHT: kein Preisvergleich (es gibt genau einen
        Haendler, alles andere waere vorgetaeuscht) und keine Sterne (dazu
-       fehlt eine nachpruefbare Quelle). Produktfotos gibt es - aber erst
-       nach der Einwilligung: Sie liegen auf dem Bildserver des
-       Partnernetzwerks, und der Abruf traegt die IP-Adresse dorthin.
-       Vorher zeichnet die App ihr eigenes Reifensymbol.
+       fehlt eine nachpruefbare Quelle). Die Produktfotos kommen vom
+       Bildserver des Partnernetzwerks und laden ohne Nachfrage - er setzt
+       kein Cookie, also gilt dieselbe Grundlage wie fuer die
+       Kartenkacheln. Nur der KLICK auf ein Angebot braucht die
+       Einwilligung.
 
        Die leeren Behaelter fuellt reifen.js aus reifen-katalog.js.
        Die Links baut partner.js, und dort steht auch die Einwilligung,
@@ -1139,16 +1145,6 @@
         <p class="hint">Die Angebote lie&szlig;en sich nicht laden. Das liegt
           fast immer an der Verbindung.</p>
         <button class="btn ghost klein" id="btnReifenNochmal">Nochmal versuchen</button>
-      </div>
-
-      <!-- Solange die Partner-Einwilligung fehlt, zeigt die Liste das
-           gezeichnete Symbol statt der Produktfotos - die Fotos kommen vom
-           Bildserver des Netzwerks, und der Abruf traegt die IP-Adresse
-           dorthin. Diese Zeile bietet die Freischaltung an; sie oeffnet
-           dasselbe Einwilligungs-Blatt wie der erste Klick nach draussen. -->
-      <div class="reifen-bilder-hinweis" id="reifenBilderHinweis" hidden>
-        <span>Produktfotos kommen vom Partnernetzwerk und sind darum noch aus.</span>
-        <button class="btn ghost klein" id="btnReifenBilder">Fotos anzeigen</button>
       </div>
 
       <div class="finder-marken reifen-marken" id="reifenMarken"></div>
@@ -1302,8 +1298,8 @@
             Stats&ldquo; rechnet allein dein Ger&auml;t aus (Punkt 2). Im
             Bereich &bdquo;Reifen&ldquo; zeigen wir Angebote eines
             Partnershops und verdienen an vermittelten K&auml;ufen mit
-            &ndash; dorthin geht es erst, nachdem du zugestimmt hast
-            (Punkt 10).
+            &ndash; zum Shop selbst geht es erst, nachdem du zugestimmt
+            hast (Punkt 10).
           </p>
 
           <p class="label">1. Hosting</p>
@@ -1502,30 +1498,35 @@
             &bdquo;Anzeige&ldquo; gekennzeichnet.
           </p>
           <p>
-            <strong>Ohne deine Zustimmung geht nichts an AWIN oder
-            reifen.com.</strong> Namen, Gr&ouml;&szlig;en und Preise liegen
-            als Datei auf demselben Server wie die App und werden von dort
-            geladen; Z&auml;hlpixel oder Skripte des Partners gibt es
-            nicht. Statt der Produktfotos siehst du zun&auml;chst ein
-            gezeichnetes Symbol.
+            Namen, Gr&ouml;&szlig;en und Preise liegen als Datei auf
+            demselben Server wie die App und werden von dort geladen.
+            Z&auml;hlpixel oder Skripte des Partners bindet Serpa
+            <strong>nicht</strong> ein.
           </p>
+          <p class="label">Produktfotos</p>
           <p>
-            Beim ersten Angebot &ndash; oder wenn du die Produktfotos
-            einschalten willst &ndash; fragt die App, ob du Partner-Angebote
-            zul&auml;sst. Ein Ja merkt sie sich, die Frage kommt dann nicht
-            wieder; ein Nein gilt f&uuml;r den Moment, und beim n&auml;chsten
-            Angebot fragt sie erneut. Erst nach deinem Ja passiert
-            zweierlei:
-            Die <b>Produktfotos</b> werden vom Bilddienst des Netzwerks
-            (images2.productserve.com, Awin) geladen, wobei deine
-            IP-Adresse dorthin &uuml;bertragen wird. Und ein Klick auf ein
-            Angebot f&uuml;hrt &uuml;ber awin1.com; dort werden deine
-            IP-Adresse und eine Kennung verarbeitet, an der ein Kauf
-            innerhalb von <b>30 Tagen</b> uns zugeordnet wird. Wir erfahren
-            dabei nicht, wer etwas angesehen oder gekauft hat &ndash; nur
-            Summen. Rechtsgrundlage ist deine Einwilligung nach
-            &sect; 25 Abs. 1 TDDDG und Art. 6 Abs. 1 lit. a DSGVO; nach
-            einem Widerruf verschwinden die Fotos wieder.
+            Die Fotos der Reifen liegen beim Bilddienst des Netzwerks
+            (images2.productserve.com, Awin) und werden von dort geladen,
+            sobald du den Reifen-Bereich &ouml;ffnest. Dabei wird deine
+            IP-Adresse dorthin &uuml;bertragen &ndash; genau wie beim Laden
+            der Kartenbilder (Punkt 3). Der Dienst setzt dabei
+            <strong>kein Cookie</strong> und liest nichts von deinem
+            Ger&auml;t; &sect; 25 TDDDG greift hier deshalb nicht.
+            Rechtsgrundlage ist Art. 6 Abs. 1 lit. b und f DSGVO
+            (Bereitstellung der von dir ge&ouml;ffneten Ansicht).
+          </p>
+          <p class="label">Der Klick auf ein Angebot</p>
+          <p>
+            Der ist etwas anderes, und daf&uuml;r fragt die App
+            <b>einmalig</b>. Der Link f&uuml;hrt &uuml;ber awin1.com; dort
+            werden deine IP-Adresse und eine <b>Kennung</b> verarbeitet, an
+            der ein Kauf innerhalb von <b>30 Tagen</b> uns zugeordnet wird.
+            Ein Ja merkt sich die App, die Frage kommt dann nicht wieder;
+            ein Nein gilt f&uuml;r den Moment, und beim n&auml;chsten
+            Angebot fragt sie erneut. Wir erfahren dabei nicht, wer etwas
+            angesehen oder gekauft hat &ndash; nur Summen. Rechtsgrundlage
+            ist deine Einwilligung nach &sect; 25 Abs. 1 TDDDG und
+            Art. 6 Abs. 1 lit. a DSGVO.
           </p>
           <p>
             Auf deinem Ger&auml;t merkt sich die App nur, <em>ob</em> und
@@ -2398,15 +2399,13 @@
   <div id="partnerBlatt" class="partner-schleier" hidden>
     <div class="partner-blatt glas" role="dialog" aria-modal="true"
          aria-labelledby="partnerBlattTitel">
-      <h3 id="partnerBlattTitel">Partner-Angebote zulassen?</h3>
+      <h3 id="partnerBlattTitel">Zum Shop weitergehen?</h3>
       <p class="hint">
-        Die Reifen-Angebote kommen von <b>reifen.com</b> &uuml;ber unser
-        Partnernetzwerk <b>AWIN</b>. L&auml;sst du sie zu, passieren zwei
-        Dinge: Die <b>Produktfotos</b> werden vom Bildserver des Netzwerks
-        geladen, und ein Klick auf ein Angebot f&uuml;hrt &uuml;ber einen
-        Link, an dem das Netzwerk eine Kennung setzt &ndash; kaufst du
-        innerhalb von 30 Tagen etwas, wird uns eine Provision
-        gutgeschrieben. <b>Am Preis &auml;ndert das nichts.</b>
+        Du verl&auml;sst Serpa und landest bei <b>reifen.com</b>. Der Link
+        l&auml;uft &uuml;ber unser Partnernetzwerk <b>AWIN</b>, das dabei
+        eine Kennung setzt: Kaufst du innerhalb von <b>30 Tagen</b> etwas,
+        wird uns eine Provision gutgeschrieben. <b>Am Preis &auml;ndert das
+        nichts.</b>
       </p>
       <p class="hint">
         Serpa erf&auml;hrt dabei nicht, was du dir ansiehst oder kaufst

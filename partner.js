@@ -110,6 +110,13 @@ function partnerDeepLink(partner, zielAdresse) {
    Einwilligung verlangt: Es geht nicht mehr nur darum, die App zu
    betreiben.
 
+   NUR DER KLICK, nicht die Anzeige. Die Produktfotos kommen zwar auch vom
+   Netzwerk, setzen dort aber kein Cookie und lesen nichts vom Geraet
+   (nachgemessen, siehe reifen.js) - sie laufen deshalb wie die
+   Kartenkacheln ohne Nachfrage. Hier steht nur, was wirklich eine
+   Einwilligung braucht; eine Frage vor jedem Bild waere eine Huerde ohne
+   Rechtsgrund.
+
    Deshalb fragt die App EINMAL, bevor der erste Partnerlink oeffnet, und
    merkt sich die Antwort. Nicht als Banner beim Start - das waere die
    Sorte Einwilligung, die niemand liest. Sondern genau dann, wenn es
@@ -233,16 +240,8 @@ verkabele('btnPartnerJa', 'click', () => {
      zugesagten Klick zu verschlucken waere die falsche Strafe - der
      Toast aus setzePartnerStand() meldet das Speicherproblem, und beim
      naechsten Angebot kommt die Frage eben wieder. */
-  const gemerkt = setzePartnerStand('ja');
+  setzePartnerStand('ja');
   zeichnePartnerStand();
-  /* Mit der gemerkten Zustimmung duerfen die Produktbilder erscheinen -
-     also alles neu zeichnen, was welche zeigt. reifen.js laedt NACH
-     dieser Datei, deshalb die typeof-Pruefung: Fehlt es, gibt es auch
-     nichts zu zeichnen. */
-  if (gemerkt) {
-    if (typeof zeichneReifenAlles === 'function' && reifenKatalog) zeichneReifenAlles();
-    if (typeof zeichneGarageReifen === 'function') zeichneGarageReifen();
-  }
   if (ziel) geraet.öffneExtern(ziel);
 });
 

@@ -630,11 +630,24 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 /* Eine Kachel ueber beide Spalten - fuer eine ungerade Kachelzahl, damit
    im Raster keine Luecke bleibt. Gesetzt wird die Klasse von
    wendeShopSchalterAn() in app.js. */
-.kachel--breit {
-  grid-column: 1 / -1;
-  /* Ueber beide Spalten waere 3:2 ein Riese - 2:1 ist das breiteste
-     Verhaeltnis, bei dem vom Passfoto noch ein ganzer Kehrenzug bleibt. */
-  aspect-ratio: 2 / 1;
+.kachel--breit { grid-column: 1 / -1; }
+
+/* Das Seitenverhaeltnis der breiten Kachel steht mit ZWEI Klassen da,
+   und das ist kein Zufall: .kachel weiter unten setzt 3:2, und gegen
+   einen gleich starken Selektor gewinnt der spaetere. Eine Kachel ueber
+   beide Spalten war dadurch bis zum 01.09.2026 so hoch wie eine halbe
+   Seite - auf einem 865 Punkte breiten Fenster 555 Punkte. Mit der
+   doppelten Klasse zaehlt hier wieder, was hier steht.
+
+   2:1 auf dem Handy: das breiteste Verhaeltnis, bei dem vom Bild noch
+   etwas zu erkennen ist. Ab 560 Punkten wird es flacher, sonst waechst
+   die Kachel mit dem Fenster ins Unermessliche. */
+.kachel.kachel--breit { aspect-ratio: 2 / 1; }
+@media (min-width: 560px) {
+  .kachel.kachel--breit { aspect-ratio: 5 / 2; }
+}
+@media (min-width: 760px) {
+  .kachel.kachel--breit { aspect-ratio: 16 / 5; }
 }
 .kachel {
   position: relative;
@@ -3931,10 +3944,13 @@ body.nav-modus .leaflet-control-container { display: none; }
 
 /* Die Bildkachel in den Listen: gross genug, dass ein echtes Foto etwas
    zeigt, bis dahin das Kategorie-Symbol auf Glas. */
+/* 74 statt 58 Punkte (ein knappes Viertel mehr): Ein Reifen ist ein
+   dunkler Ring auf hellem Grund - bei 58 Punkten war vom Profil nichts
+   mehr zu erkennen, und genau das Profil unterscheidet die Modelle. */
 .produkt-mini-bild {
   flex: 0 0 auto;
-  width: 58px;
-  height: 58px;
+  width: 74px;
+  height: 74px;
   display: grid;
   place-items: center;
   position: relative;         /* Anker fuer das Foto, siehe unten */
@@ -3942,7 +3958,7 @@ body.nav-modus .leaflet-control-container { display: none; }
   border-radius: var(--r-sm);
   background: var(--glas-hell);
 }
-.produkt-mini-bild .ic { width: 30px; height: 30px; color: var(--accent-hell); }
+.produkt-mini-bild .ic { width: 38px; height: 38px; color: var(--accent-hell); }
 /* Das Foto wird absolut in den Kasten gespannt statt mit height:100%
    in den Fluss gestellt: Ein Prozent-Mass loest sich im Raster am
    Seitenverhaeltnis des Bildes auf, und das Foto ragte dann unten aus
@@ -4049,8 +4065,9 @@ body.nav-modus .leaflet-control-container { display: none; }
   padding: 2px;
 }
 .garage-shop-band::-webkit-scrollbar { display: none; }
+/* Die Karte waechst mit ihrem Bild mit: 135 statt 108 Punkte. */
 .garage-shop-karte {
-  flex: 0 0 108px;
+  flex: 0 0 135px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -4063,7 +4080,7 @@ body.nav-modus .leaflet-control-container { display: none; }
   font-family: var(--schrift-text);
   cursor: pointer;
 }
-.garage-shop-karte .produkt-mini-bild { width: 100%; height: 58px; }
+.garage-shop-karte .produkt-mini-bild { width: 100%; height: 74px; }
 .garage-shop-name {
   font-size: 12px;
   line-height: 1.25;
@@ -4598,14 +4615,14 @@ body.nav-modus .karten-knopf { display: none; }
   flex: 0 0 auto;
   display: grid;
   place-items: center;
-  width: 46px;
-  height: 46px;
+  width: 60px;
+  height: 60px;
   border-radius: var(--r-sm);
   background: var(--glas-hauch);
   border: 1px solid var(--glas-hell);
   color: var(--metall-tief);
 }
-.reifen-symbol .ic { width: 26px; height: 26px; }
+.reifen-symbol .ic { width: 34px; height: 34px; }
 .reifen-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
 .reifen-marke {
   font-family: var(--schrift-display);
@@ -4761,24 +4778,6 @@ body.nav-modus .karten-knopf { display: none; }
   border-radius: var(--r-sm);
 }
 
-/* Die Zeile, die die Produktfotos anbietet, solange die Einwilligung
-   fehlt. Ruhig gehalten: Sie erklaert, warum die Fotos aus sind, und
-   draengt nicht. */
-.reifen-bilder-hinweis {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--s3);
-  padding: var(--s2) var(--s3);
-  margin: 0 0 var(--s3);
-  border-radius: var(--r-sm);
-  border: 1px solid var(--glas-hell);
-  background: var(--glas-hauch);
-  font-size: 12.5px;
-  color: var(--muted);
-}
-.reifen-bilder-hinweis .btn { flex: 0 0 auto; white-space: nowrap; }
-
 /* Das Anzeige-Kennzeichen an der Reifen-Leiste der Garage. Neutral statt
    des warnenden Orange des Demo-Vermerks: Es kennzeichnet Werbung, es
    warnt nicht vor ihr. */
@@ -4792,8 +4791,12 @@ body.nav-modus .karten-knopf { display: none; }
   letter-spacing: 0.04em;
 }
 
-/* Die Einladungs-Karte, solange noch keine Reifengroesse gemerkt ist. Sie
-   ist die einzige Karte der Leiste und darf deshalb breiter sein - eine
-   einzelne 108er-Karte saehe verloren aus. */
-.garage-reifen-einladung { flex: 0 0 auto; max-width: 300px; }
-.garage-reifen-einladung .garage-shop-name { -webkit-line-clamp: 3; }
+/* Die Einladungs-Karte, solange noch keine Reifengroesse gemerkt ist.
+   Sie hat dieselbe Breite wie die Angebote daneben - breiter gemacht
+   verdraengte sie auf dem Handy genau das, wozu sie einlaedt. Ihr
+   Symbolfeld traegt die Signalfarbe, damit sie als Aufforderung zu
+   erkennen ist und nicht als Reifen ohne Bild. */
+.garage-reifen-einladung .produkt-mini-bild {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+  border-color: color-mix(in srgb, var(--accent-hell) 45%, transparent);
+}

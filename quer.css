@@ -209,47 +209,40 @@
     padding: var(--s5) var(--s7);
   }
 
-  /* ALLES AUF EINEN BLICK. Im Hochformat scrollt die Garage, im Querformat
-     soll sie es nicht: Der Raum steht links, und rechts gehoert alles auf
-     eine Seite - Datenblatt, Menue, Fuss.
+  /* DIE KACHELN BEHALTEN IHRE FORM, die Spalte scrollt.
 
-     Der Trick ist eine Umkehrung. Im Hochformat sagen die Kacheln, wie hoch
-     sie sein wollen (Seitenverhaeltnis 3:2, damit die Fotos darin gut
-     aussehen), und die Seite waechst mit. Hier sagt die SPALTE, wie viel
-     Platz da ist, und das Kachelraster nimmt genau den Rest: Was nach
-     Datenblatt, Ueberschrift und Fuss uebrigbleibt, teilen sich die beiden
-     Kachelreihen. Deshalb geben die Kacheln hier ihr Seitenverhaeltnis auf
-     - sonst forderten sie eine Hoehe, die die Spalte gar nicht hat, und
-     genau das trieb sie ins Scrollen.
+     Hier stand bis zum 01.09.2026 die umgekehrte Regel: Die Spalte gab
+     die Hoehe vor, das Kachelraster nahm den Rest, und alles passte ohne
+     Scrollen auf eine Seite. Auf grossen Bildschirmen wurde daraus ein
+     Nachteil - fuenf Kacheln teilten sich den Rest und wurden zu
+     gequetschten Streifen, auf denen von den Fotos nichts mehr zu
+     erkennen war. Die Begruendung fuer den Wechsel steht in
+     ENTSCHEIDUNGEN.md, 01.09.2026.
 
-     Das overflow-y der Spalte bleibt als Sicherung stehen: Ein langes
-     Datenblatt mit ausgeklappter Justierung kann den Rest unter die
-     Mindesthoehe druecken, und dann ist Scrollen besser als Abschneiden. */
+     Jetzt gibt die FENSTERHOEHE das Mass: Jede Kachel ist rund ein
+     Fuenftel davon hoch, nach unten und oben begrenzt, damit sie auf
+     einem 500 Punkte hohen Fenster nicht verschwindet und auf einem
+     grossen nicht die Seite fuellt. Wird die Spalte dadurch laenger als
+     das Fenster, scrollt sie - dafuer war ihr overflow-y immer schon da. */
   .garage-menue {
-    flex: 1 1 auto;
-    min-height: 0;
     display: flex;
     flex-direction: column;
     gap: var(--s3);
   }
-  .garage-menue-raster {
-    gap: var(--s4);
-    flex: 1 1 auto;
-    /* Jede Reihe bekommt gleich viel vom uebrigen Platz. auto-rows statt
-       einer festen Reihenzahl: Kommt der Shop als fuenfte Kachel zurueck,
-       sind es drei Reihen, und die Regel stimmt weiter. */
-    grid-auto-rows: minmax(0, 1fr);
-    /* Darunter wird aus einer Kachel ein Streifen - dann lieber scrollen.
-       Der Wert ist an der engsten Ecke gemessen (900x500): Dort bleiben
-       nach Suchknopf, Ueberschrift und Fuss knapp 240 Punkte uebrig, und
-       die Kacheln sollen auch dort noch ganz im Bild stehen. */
-    min-height: 180px;
-  }
+  .garage-menue-raster { gap: var(--s4); }
   .kachel {
+    /* Statt eines Seitenverhaeltnisses eine gemessene Hoehe: Nebeneinander
+       waeren zwei 3:2-Kacheln auf einem breiten Schirm ueber 300 Punkte
+       hoch, und drei Reihen davon passten in kein Fenster mehr. */
     aspect-ratio: auto;
-    min-height: 0;
+    height: clamp(150px, 21vh, 250px);
     padding: var(--s4);
   }
+  /* Die breite Kachel darf etwas mehr Hoehe haben - sie traegt doppelt so
+     viel Bild, und bei gleicher Hoehe wirkte sie daneben wie ein Balken.
+     Doppelte Klasse aus demselben Grund wie in style.css: gegen das
+     .kachel darueber gewinnt sonst der spaetere Selektor. */
+  .kachel.kachel--breit { height: clamp(170px, 25vh, 290px); }
   /* Die Deckel wachsen mit dem Fenster: Am 900er-Rand ist die halbe
      Bildschirmseite schmaler als ein Handy quer, dort waere 27px zu laut.
      Die Stufe liegt hoeher als im Hochformat, weil die Kachel seit dem
@@ -330,33 +323,6 @@
   /* Die Stats: mehr Platz, mehr Spalten - die Kacheln zu dritt statt zu
      zweit, das Gesamtbild und der Rueckblick bleiben untereinander. */
   #statsKacheln, #statsZeitWerte { grid-template-columns: repeat(3, 1fr); }
-
-  /* Die Reifen-Leiste der Garage braucht rund 150 Punkte Hoehe. In der
-     knappen Querformat-Ecke (900x500) kaeme sie nur unter, wenn die Garage
-     wieder scrollte - und dass sie das nicht tut, war eine ausdrueckliche
-     Anforderung. Also weicht die Leiste, nicht die Regel: Unterhalb von
-     720 Punkten Hoehe bleibt sie weg, die Kachel "Reifen" fuehrt ja
-     ebenfalls hin. Im Hochformat gilt das alles nicht, dort scrollt die
-     Garage ohnehin. */
-  @media (max-height: 719px) {
-    #garageReifen { display: none; }
-    /* Die Reifen-KACHEL rueckt dafuer neben die Stats: Ohne die Leiste
-       ist sie hier der einzige Weg zu den Reifen, aber als dritte Reihe
-       ueber die volle Breite draengte sie Impressum-Link und Kacheln
-       uebereinander. Als fuenfte Kachel in der zweiten Reihe kostet sie
-       keine eigene Reihe - die zweite Reihe teilt sich dann zu dritt. */
-    .garage-menue-raster { grid-template-columns: repeat(4, 1fr); }
-    .kachel { grid-column: auto / span 2; }
-    #btnStartReifen { grid-column: auto / span 1; aspect-ratio: auto; }
-    #btnStartStats { grid-column: auto / span 1; }
-    /* Nur die Erklaerung faellt weg - das Wort "Anzeige" bleibt stehen.
-       Eine Kachel, die in den Partner-Bereich fuehrt, darf in keiner
-       Fenstergroesse unmarkiert sein. */
-    #btnStartReifen .kachel-zusatz-erklaerung { display: none; }
-    /* Die beiden Einzelspalten sind schmal - die grosse Kachelschrift
-       braeche dort mitten im Wort um. */
-    #btnStartStats .kachel-titel, #btnStartReifen .kachel-titel { font-size: 15px; }
-  }
 
   /* --- 8. Reifen: Kopf und Groessenwahl nebeneinander -------------------------
      Im Hochformat stehen sie untereinander, weil nichts anderes hinpasst.

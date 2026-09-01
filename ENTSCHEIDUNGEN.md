@@ -1843,3 +1843,61 @@ ragten in die Beschriftung, jetzt sind sie absolut im Kasten verankert.
 HTML, nicht die ?v=109-Dateien dahinter — die hält der Browser fest.
 Der Testserver im Scratchpad sendet deshalb „Cache-Control: no-store".
 Für die Veröffentlichung ändert sich nichts, dort zählt weiter ?v=.
+
+## 01.09.2026 (spät) — Keine Einwilligung für Produktfotos, und die Kacheln bekommen ihre Form zurück
+
+**Die Einwilligung für die Produktfotos ist weg.** Friedrich fragte, warum
+er erst bestätigen muss, dass er Bilder sehen darf, und ob das nicht in
+den Haken bei der Anmeldung könne. Beides beantwortet dieselbe Messung:
+Der Bilddienst des Netzwerks (images2.productserve.com) antwortet **ohne
+eine einzige Set-Cookie-Zeile** und liest nichts vom Gerät. Damit greift
+§ 25 Abs. 1 TDDDG dort nicht — die Vorschrift setzt Speichern oder
+Auslesen auf dem Endgerät voraus. Was bleibt, ist die Übertragung der
+IP-Adresse, und die trägt dieselbe Grundlage wie die Kartenkacheln von
+OpenStreetMap, die diese App seit jeher ohne Nachfrage lädt: Art. 6 Abs. 1
+lit. b und f DSGVO. Die Einwilligung war also vorsorglich und ohne
+Rechtsgrund — und eine Hürde ohne Rechtsgrund ist keine Vorsicht, sondern
+ein Fehler. Sie ist gestrichen, die Offenlegung in Punkt 10 der
+Datenschutzerklärung bleibt und trennt jetzt sauber zwischen Anzeige
+(keine Einwilligung) und Klick (Einwilligung).
+
+**In den Anmelde-Haken kommt sie NICHT.** Zwei Gründe. Erstens bündelt der
+Haken schon Altersbestätigung und Einbeziehung der Regeln fürs Teilen; eine
+datenschutzrechtliche Einwilligung dazuzupacken verstößt gegen Art. 7
+Abs. 2 DSGVO, der verlangt, dass sie „klar von den anderen Sachverhalten
+unterscheidbar" ist. Zweitens funktioniert Serpa ohne Konto — die meisten
+Nutzer sehen diesen Haken nie. Übrig bleibt die Frage vor dem Klick zum
+Shop, und die steht an der einzigen Stelle, an der sie einen Sinn ergibt.
+
+**Die Garage im Querformat scrollt jetzt.** Am 01.09.2026 vormittags galt
+noch die Vorgabe „alles auf einen Blick, ohne Scrollen"; dafür gab die
+Spalte die Höhe vor und die Kacheln teilten sich den Rest. Mit fünf
+Kacheln wurden daraus auf großen Bildschirmen gequetschte Streifen, auf
+denen von den Fotos nichts mehr zu erkennen war. Friedrich hat die Vorgabe
+darum ausdrücklich zurückgenommen: „bitte im Querformat die
+Größenproportionen anpassen, auch wenn man das scrollen muss." Jetzt gibt
+die Fensterhöhe das Maß (`clamp`), die Kacheln behalten ihre Form, und die
+rechte Spalte scrollt. Die Sonderbehandlung der engen Ecke (unter 720
+Punkten Höhe: Leiste weg, Kacheln umgestellt) ist damit hinfällig und
+entfernt.
+
+**`.kachel--breit` hatte nie gewirkt.** Sie steht in style.css VOR
+`.kachel`, und bei gleicher Spezifität gewinnt der spätere Selektor — die
+breite Kachel war also immer 3:2 statt 2:1. Auf einem 865 Punkte breiten
+Fenster wurde sie dadurch 555 Punkte hoch und füllte den halben
+Bildschirm; genau das zeigte Friedrichs zweiter Screenshot. Behoben mit
+der doppelten Klasse `.kachel.kachel--breit`, dazu drei Stufen: 2:1 auf
+dem Handy, flacher ab 560 und ab 760 Punkten.
+
+**Die Reifen-Leiste zeigt immer Angebote**, auch ohne Motorrad und ohne
+eingetragene Größe. Ohne bekannte Größe trägt jede Karte aber IHR Maß
+statt „Vorne"/„Hinten" — ein Reifen, von dem wir nicht wissen, ob er
+passt, darf nicht so aussehen, als sei er für diese Maschine ausgesucht.
+Aus demselben Grund setzt `reifen.js` jetzt die Überschrift der Leiste und
+die Unterzeile der Kachel: „Passend zu deiner Maschine" darf nicht
+dastehen, wenn keine Maschine in der Garage steht.
+
+**Alle Reifenbilder rund ein Viertel größer** (58 → 74 Punkte in der
+Leiste, 46 → 60 in der Liste, Karten 108 → 135 breit). Ein Reifen ist ein
+dunkler Ring auf hellem Grund; bei 58 Punkten war vom Profil nichts mehr
+zu erkennen, und genau das Profil unterscheidet die Modelle.
