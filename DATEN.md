@@ -26,7 +26,7 @@ Gerät nicht, solange niemand angemeldet ist.
 | `kurvenjagd.garage` | Motorräder (Marke, Modell, Baujahr, Hubraum, Leistung, Bild) und Ausrüstung |
 | `kurvenjagd.shop` | Merkliste des Shops: Produkt-Schlüssel, Datum und günstigster Gesamtpreis beim Merken |
 | `kurvenjagd.neigungBasis` | Nullpunkt für die Schräglage: die Einbaulage des Handys als drei Achsen, dazu der Ruhefehler des Gyroskops |
-| `kurvenjagd.reifenmass` | die eingetragene Reifengröße je Motorrad, getrennt für vorn und hinten – drei Zahlen, sonst nichts |
+| `kurvenjagd.reifenmass` | die eingetragene Reifengröße je Motorrad, getrennt für vorn und hinten – drei Zahlen, sonst nichts. Die **Serienbereifung** der gängigen Modelle steht daneben in `reifen-massen.js`, einer Datei der App – nachgeschlagen wird auf dem Gerät, dafür geht nichts ins Netz |
 | `kurvenjagd.partner` | die Einwilligung in Partner-Angebote: `ja` oder `nein` und der Zeitpunkt. **Keine Klicks, keine angesehenen Produkte** |
 
 Aufgezeichnete Fotos liegen **verkleinert im Speicher selbst**, nicht als

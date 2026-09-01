@@ -304,11 +304,18 @@ allein der Klick zum Shop. Alles Weitere in `DATEN.md` und
   alle zwei bis drei Wochen. Die App zeigt das Standdatum an jedem Preis
   und warnt ab 14 Tagen. Später kann das eine GitHub Action erledigen –
   der Schlüssel wäre dann ein Repository-Secret.
-- **Reifengröße aus dem Motorrad ableiten.** Heute trägt sie der Fahrer
-  ein. Der Finder (`finder.js`) kennt Marke und Modell; eine Tabelle
-  Modell → Serienbereifung würde den Schritt sparen. Es gibt dafür keine
-  freie Datenquelle, das wäre Handarbeit für die häufigsten hundert
-  Modelle.
+- **Reifengröße aus dem Motorrad ableiten — ERLEDIGT (01.09.2026).**
+  `reifen-massen.js` kennt die Serienbereifung der gängigsten Modelle;
+  `serienEintrag()` in `reifen.js` schlägt sie nach, wenn der Fahrer
+  nichts eingetragen hat. Die Einträge stammen aus dem Fachwissen zu den
+  Herstellerangaben und sind **nicht gegengeprüft** – die geplante
+  Prüfung durch zwei unabhängige Stellen wurde als zu aufwändig
+  abgebrochen. Deshalb steht in der App neben jedem Vorschlag der
+  Hinweis auf die Reifenflanke. Die englische Wikipedia-Infobox
+  als Laufzeitquelle wurde verworfen: 16 von 28 Modellen, wechselnde
+  Schreibweisen und Fehltreffer bei der Artikelsuche („CB650R" fand „CB
+  750 Four"). Offen: Modelle nachtragen, die Nutzer vermissen — ein
+  Eintrag ist eine Zeile.
 - **Verwendungszweck als Filter** (Sport, Touring, Enduro, Custom).
   reifen.com filtert danach, der AWIN-Feed enthält es **nicht**. Käme
   entweder aus einer eigenen Zuordnung Modellfamilie → Zweck (1.317

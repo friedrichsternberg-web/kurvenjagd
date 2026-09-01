@@ -1901,3 +1901,60 @@ dastehen, wenn keine Maschine in der Garage steht.
 Leiste, 46 → 60 in der Liste, Karten 108 → 135 breit). Ein Reifen ist ein
 dunkler Ring auf hellem Grund; bei 58 Punkten war vom Profil nichts mehr
 zu erkennen, und genau das Profil unterscheidet die Modelle.
+
+## 01.09.2026 (nachts) — Die Reifengröße kommt jetzt vom Motorrad
+
+Friedrich fragte, ob die App die Reifengröße nicht selbst kennen kann,
+statt sie abzufragen. Sie kann — über eine Tabelle, nicht über einen
+Dienst.
+
+**Was NICHT geht: eine Laufzeitquelle.** Der Finder holt Hubraum und
+Leistung schon aus der Wikipedia-Infobox, es lag also nahe, die Reifen
+gleich mitzunehmen. Gemessen an 28 gängigen Modellen: Die **deutsche**
+Infobox hat gar kein Reifenfeld (0 von 28). Die **englische** hat eines
+bei 16 von 28, aber in wechselnden Schreibweisen („120/70-ZR17M/C (58W)
+front", „{{unbulleted list | Front: 120/70-ZR17", „|rake_trail =" als
+Feldinhalt), und die Artikelsuche trifft daneben: „Honda CB650R" landet
+auf „Honda CB 750 Four", „Kawasaki Versys 650" auf „Versys 1000". Eine
+falsche Größe ist schlimmer als keine — der Fahrer kauft dann Reifen, die
+nicht passen. Verworfen.
+
+**Was geht: `reifen-massen.js`.** 218 Einträge, 19 Marken, die
+Serienbereifung je Generation. `serienEintrag()` in reifen.js schlägt
+nach, `massMitQuelle()` staffelt die Quellen: eigene Eingabe → Tabelle →
+Standard. Der Kopf des Bildschirms sagt jeweils, woher der Wert kommt.
+
+**Die Prüfung wurde abgebrochen.** Erst lief ein Workflow, der jedes
+Modell recherchieren und von zwei unabhängigen Prüfern bestätigen lassen
+sollte — einer nur gegen Herstellerangaben, einer nur gegen die
+Fahrzeugauswahl großer Reifenhändler. Friedrich hat ihn nach der
+Modellliste gestoppt: zu aufwändig. Die Tabelle stammt deshalb aus dem
+Fachwissen zu den Herstellerangaben und ist **nicht gegengeprüft**. Das
+steht so im Kopf der Datei, in AUFGABEN.md und im Brain — eine
+ungeprüfte Quelle als geprüft auszugeben wäre schlimmer als die fehlende
+Prüfung selbst.
+
+Daraus folgt die Vorsicht in der Oberfläche: Der Vorschlag heißt
+ausdrücklich „Serienbereifung laut Hersteller (Baujahre X bis Y)" und
+bittet, an der Reifenflanke zu prüfen. Aufgenommen ist nur, was ohne
+Zweifel feststeht; Varianten mit verschiedener Bereifung unter einem
+Namen (Tiger 900 GT gegen Rally) fehlen absichtlich.
+
+**Drei Regeln beim Nachschlagen**, alle aus demselben Grundsatz „lieber
+kein Vorschlag als ein falscher":
+- Verglichen wird ohne Leerzeichen, Bindestriche und Punkte. „Z 900",
+  „Z-900" und „Z900" sind dasselbe Motorrad; die Fahrzeugdatenbank, der
+  Hersteller und der Fahrer schreiben es verschieden. Klammernamen aus
+  der Datenbank („NSS300 (Forza)") werden zusätzlich in beide Hälften
+  zerlegt — der Fahrer trägt eher „Forza" ein.
+- Bei mehreren Generationen entscheidet das Baujahr. Fehlt es, gilt die
+  laufende Generation nur, wenn es genau eine gibt.
+- Liegt das Baujahr **vor** allen Generationen der Tabelle, gibt es
+  keinen Vorschlag. Eine BMW R 1200 GS von 2015 ist eben nicht die von
+  2010, und raten wäre genau der Fehler, den die Tabelle vermeiden soll.
+
+**Eine Selbstprüfung** über die Datei fand 88 überflüssige Aliasse (die
+der normalisierte Vergleich ohnehin abdeckt) und bestätigte: keine
+doppelten Einträge, keine überlappenden Baujahre, kein Maß außerhalb der
+Grenzen, kein Hinterreifen schmaler als der Vorderreifen, kein Name, der
+gleichzeitig auf zwei verschiedene Größen zeigt.

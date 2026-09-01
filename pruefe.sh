@@ -25,8 +25,8 @@
 # reifen-katalog.js steht mit Absicht in KEINER der beiden Listen: Die
 # Datei wird von reifen-import.py erzeugt (reine Daten in einer Zeile)
 # und von Hand ohnehin nicht angefasst.
-APP="app.js garage.js finder.js freisteller.js konto.js touren.js serpa-touren.js shop.js kern.js vorschau.js start.js bilanz.js rueckblick.js partner.js reifen.js produkte.js besucher.js index.html"
-JS="app.js garage.js finder.js freisteller.js konto.js touren.js serpa-touren.js shop.js kern.js vorschau.js start.js bilanz.js rueckblick.js partner.js reifen.js geraet.js produkte.js besucher.js"
+APP="app.js garage.js finder.js freisteller.js konto.js touren.js serpa-touren.js shop.js kern.js vorschau.js start.js bilanz.js rueckblick.js partner.js reifen.js reifen-massen.js produkte.js besucher.js index.html"
+JS="app.js garage.js finder.js freisteller.js konto.js touren.js serpa-touren.js shop.js kern.js vorschau.js start.js bilanz.js rueckblick.js partner.js reifen.js reifen-massen.js geraet.js produkte.js besucher.js"
 
 echo "== 1. Geraetezugriff gehoert nur in geraet.js =="
 grep -nE '(navigator\.|localStorage\.|sessionStorage\.|indexedDB\.|URL\.(create|revoke)ObjectURL)' $APP \

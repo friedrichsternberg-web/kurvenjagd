@@ -181,16 +181,92 @@ function ladeReifenMasse() {
 let reifenMasse = ladeReifenMasse();
 
 // Prueft, was aus dem Speicher kommt: drei Zahlen in sinnvollen Grenzen.
-// Alles andere faellt auf den Standard zurueck, statt eine kaputte
-// Auswahl in die Oberflaeche zu lassen.
-function gemerktesMass(lage) {
+// Alles andere gilt als "nicht gemerkt", statt eine kaputte Auswahl in
+// die Oberflaeche zu lassen.
+function gemerktesMassRoh(lage) {
   const eintrag = reifenMasse[maschinenSchluessel()]?.[lage];
   const gueltig = Array.isArray(eintrag) && eintrag.length === 3
     && eintrag.every(zahl => Number.isFinite(zahl))
     && eintrag[0] >= 60 && eintrag[0] <= 340
     && eintrag[1] >= 20 && eintrag[1] <= 120
     && eintrag[2] >= 8 && eintrag[2] <= 23;
-  return gueltig ? eintrag : REIFEN_STANDARD[lage];
+  return gueltig ? eintrag : null;
+}
+
+/* --- Die Serienbereifung aus der Tabelle (reifen-massen.js) ----------------
+
+   Der zweite Weg zur Groesse, bevor der Fahrer sie eintippt: Steht seine
+   Maschine in der Tabelle, kennt die App die Werksbereifung und schlaegt
+   sie vor. Vorschlag, nicht Zusage - die Oberflaeche sagt dazu, woher der
+   Wert kommt, und bittet, die Flanke zu lesen.
+
+   Verglichen wird ohne Leerzeichen, Bindestriche und Punkte: Die
+   Fahrzeugdatenbank schreibt "Z900", der Hersteller "Z 900", der Fahrer
+   tippt "Z-900" - dasselbe Motorrad. Ein Modellname wie
+   "NSS300 (Forza)" wird zusaetzlich in beide Haelften zerlegt, weil der
+   Fahrer eher "Forza" eintraegt als die Werksnummer. */
+function normalisiereModell(text) {
+  return String(text || '').toUpperCase().replace(/[\s\-._/]/g, '');
+}
+
+function modellVarianten(modell) {
+  const roh = String(modell || '');
+  const klammer = roh.match(/^(.*?)\s*\((.*?)\)\s*$/);
+  const teile = klammer ? [roh, klammer[1], klammer[2]] : [roh];
+  return teile.map(normalisiereModell).filter(Boolean);
+}
+
+/* Der passende Tabelleneintrag zur Maschine, oder null. Bei mehreren
+   Generationen entscheidet das Baujahr; fehlt es, gilt die laufende
+   Generation nur dann, wenn es genau eine gibt. Liegt das Baujahr vor
+   allen Generationen (aeltere Maschine als die Tabelle kennt), gibt es
+   KEINEN Vorschlag - raten waere hier genau der Fehler, den die Tabelle
+   vermeiden soll. */
+function serienEintrag(motorrad) {
+  if (!motorrad || typeof SERIENBEREIFUNG === 'undefined') return null;
+  const marke = String(motorrad.marke || '').toUpperCase().trim();
+  const namen = modellVarianten(motorrad.modell);
+  if (!marke || !namen.length) return null;
+
+  const kandidaten = SERIENBEREIFUNG.filter(eintrag =>
+    eintrag.marke === marke
+    && [eintrag.modell, ...(eintrag.aliasse || [])]
+        .map(normalisiereModell).some(name => namen.includes(name)));
+  if (!kandidaten.length) return null;
+
+  const jahr = parseInt(motorrad.baujahr, 10);
+  if (Number.isFinite(jahr)) {
+    return kandidaten.find(eintrag => jahr >= eintrag.von
+                                   && (eintrag.bis === null || jahr <= eintrag.bis)) || null;
+  }
+  const laufende = kandidaten.filter(eintrag => eintrag.bis === null);
+  return laufende.length === 1 ? laufende[0] : null;
+}
+
+/* Das Mass fuer eine Lage samt Herkunft, in dieser Reihenfolge:
+   1. was der Fahrer selbst eingetragen hat,
+   2. die Serienbereifung aus der Tabelle,
+   3. der Standard fuer den ersten Besuch.
+   Die Herkunft braucht die Oberflaeche: Ein Vorschlag aus der Tabelle
+   bekommt einen anderen Satz daneben als die eigene Eingabe. */
+function massMitQuelle(lage) {
+  const gemerkt = gemerktesMassRoh(lage);
+  if (gemerkt) return { mass: gemerkt, quelle: 'gemerkt' };
+  const motorrad = (typeof motorradAktiv === 'function') ? motorradAktiv() : null;
+  const serie = serienEintrag(motorrad);
+  if (serie) return { mass: serie[lage], quelle: 'serie', eintrag: serie };
+  return { mass: REIFEN_STANDARD[lage], quelle: 'standard' };
+}
+
+function gemerktesMass(lage) {
+  return massMitQuelle(lage).mass;
+}
+
+// Kennt die App die Groesse dieser Maschine - eingetragen oder aus der
+// Tabelle? Davon haengt ab, ob die Garage-Leiste "Vorne/Hinten" schreibt
+// oder das nackte Mass.
+function groesseBekannt() {
+  return massMitQuelle('v').quelle !== 'standard' || massMitQuelle('h').quelle !== 'standard';
 }
 
 function merkeMass() {
@@ -355,12 +431,31 @@ function zeichneReifenHeld() {
   held.innerHTML = maschine
     ? `<p class="reifen-held-titel">Reifen für deine</p>
        <p class="reifen-held-name">${escapeHtml(maschine)}</p>
-       <p class="reifen-held-sub">Trag die Größe einmal ein &ndash; wir merken sie
-         uns für diese Maschine.</p>`
+       <p class="reifen-held-sub">${reifenHeldSatz()}</p>`
     : `<p class="reifen-held-titel">Motorradreifen</p>
        <p class="reifen-held-name">Welche Größe fährst du?</p>
        <p class="reifen-held-sub">Leg dein Motorrad in der Garage an, dann merken
          wir uns die Größe dazu.</p>`;
+}
+
+/* Der Satz unter dem Maschinennamen haengt davon ab, woher die Groesse
+   kommt. Der Tabellenvorschlag bekommt ausdruecklich den Hinweis auf die
+   Flanke: Umbereift, Sondermodell, Modellpflege - das weiss keine Tabelle,
+   und wer den Vorschlag fuer eine Zusage haelt, kauft womoeglich falsch. */
+function reifenHeldSatz() {
+  const vorn = massMitQuelle('v');
+  const hinten = massMitQuelle('h');
+  const massText = (mass) => `${mass[0]}/${mass[1]}&nbsp;R${mass[2]}`;
+  if (vorn.quelle === 'gemerkt' || hinten.quelle === 'gemerkt') {
+    return 'Deine eingetragene Größe. Änderst du sie unten, merken wir uns das.';
+  }
+  if (vorn.quelle === 'serie') {
+    const bis = vorn.eintrag.bis === null ? 'heute' : vorn.eintrag.bis;
+    return `Serienbereifung laut Hersteller (Baujahre ${vorn.eintrag.von} bis ${bis}):
+      <b>${massText(vorn.mass)}</b> vorn, <b>${massText(hinten.mass)}</b> hinten.
+      Bitte an der Reifenflanke prüfen &ndash; umbereifte Maschinen kennt keine Tabelle.`;
+  }
+  return 'Trag die Größe einmal ein &ndash; wir merken sie uns für diese Maschine.';
 }
 
 /* Die Groessenwahl sieht aus wie die Praegung auf der Reifenflanke:
@@ -578,10 +673,6 @@ verkabele('garageReifenBand', 'click', ereignis => {
 
 const GARAGE_REIFEN_JE_LAGE = 4;
 
-function gemerkteMasseDerMaschine() {
-  return reifenMasse[maschinenSchluessel()] || null;
-}
-
 function garageReifenKarteHtml(reifen, hinweis) {
   const bildAdresse = reifenBildAdresse(reifen, 260);
   const bild = bildAdresse
@@ -645,7 +736,7 @@ function zeichneGarageReifen() {
   const motorrad = (typeof motorradAktiv === 'function') ? motorradAktiv() : null;
   const maschine = motorrad
     ? (`${motorrad.marke || ''} ${motorrad.modell || ''}`.trim() || 'Maschine') : '';
-  const kenntGroesse = !!gemerkteMasseDerMaschine();
+  const kenntGroesse = groesseBekannt();
   beschrifteReifenWege(maschine, kenntGroesse);
 
   /* Der Katalog wird hier zum ersten Mal gebraucht - er kommt erst beim
