@@ -157,65 +157,81 @@ function zeigeBikeAufStatsKachel() {
    Eine zweite Garage ist spaeter nur ein weiterer Eintrag hier. */
 const GARAGEN = [{
   name:      'Werkstatt',
-  /* ZWEI Fassungen desselben Raums, aus derselben Kamera gerendert:
+  /* ZWEI Fassungen desselben Raums:
 
      bild          der leere Drehteller. Er kommt zum Einsatz, sobald der
                    Nutzer ein eigenes Foto hat - dann steht SEINE Maschine
                    darauf.
-     bildStandard  dieselbe Werkstatt mit einer Beispielmaschine auf dem
-                   Teller. Sie steht da, solange kein eigenes Foto da ist.
+     bildStandard  derselbe Raum mit der Beispielmaschine auf dem Teller.
+                   Sie steht da, solange kein eigenes Foto da ist.
 
-     Nachgemessen: Der Tellerrand ist in beiden Bildern zu 98,7 Prozent
-     deckungsgleich - dieselben Standplatzwerte gelten also fuer beide. */
+     Der Raum wurde am 01.09.2026 ausgetauscht (dunkle Werkstatt statt der
+     hellen blau-weissen). Die Beispielmaschine ist diesmal nicht
+     mitgerendert, sondern eingepasst - mit Kontaktschatten unter beiden
+     Reifen und einer blassen Spiegelung. Das Skript dazu und die
+     Begruendung stehen in ENTSCHEIDUNGEN.md, 01.09.2026. */
   bild:      'img/garage-werkstatt.webp',
   bildStandard: 'img/garage-werkstatt-standard.webp',
-  // Das Bild wird in anderthalbfacher Groesse ausgeliefert, damit es auf
-  // einem Handy mit dreifacher Punktdichte nicht aufgeblasen wird. Die
-  // Masse hier beziehen sich auf die AUSGELIEFERTE Datei.
-  bildBreite: 1296,
-  bildHoehe: 2731,
-  // Ausgemessen am Bild: Die Riffelplatte des Drehtellers reicht (in der
-  // Quellaufloesung 864 x 1821) waagerecht von 62 bis 800 und senkrecht von
-  // 1015 bis 1195. Umgerechnet in Anteile - dadurch bleiben die Werte
-  // richtig, egal in welcher Groesse die Datei ausgeliefert wird.
-  mitteX:    0.499,   // Mitte des Drehtellers
-  bodenY:    0.610,   // wo die Raeder aufsetzen: die MITTE der Tellerellipse
-  breite:    0.56,    // wie breit die MASCHINE wird (nicht die Bilddatei)
-  tellerRx:  0.427,   // halbe Breite der Tellerellipse, fuer die Spiegelung
-  tellerRy:  0.049,   // halbe Hoehe der Tellerellipse
-  // Heller Raum mit Tageslicht: Das Foto darf seine Helligkeit behalten.
-  // Dafuer traegt der Schatten mehr, denn auf hellem Beton faellt er
-  // staerker auf - und er ist es, der die Maschine auf den Boden stellt.
-  helligkeit: 0.97,
-  schatten:  0.72,
-  // Kein LED-Ring in diesem Raum, also fast keine Glut. Der Rest ist das
-  // kuehle Licht, das der polierte Boden zurueckwirft.
-  glut:      0.10,
+  /* Das Bild wird in anderthalbfacher Groesse der Quelle ausgeliefert
+     (Quelle 1402 x 1122). Der Grund ist gerechnet, nicht geschaetzt: Ein
+     Handy mit dreifacher Punktdichte zeigt den Raum rund 1545 Punkte
+     hoch. Bei der Quellhoehe muesste der Browser hochrechnen, und die
+     Riffelplatte des Tellers verwaescht als Erstes. Mit 1683 wird das
+     Bild ueberall VERKLEINERT dargestellt und bleibt scharf. */
+  bildBreite: 2103,
+  bildHoehe: 1683,
+  /* Am Bild ausgemessen: Die Riffelplatte reicht waagerecht von 0.163 bis
+     0.828, senkrecht von 0.700 (Hinterkante) bis 0.800 (Vorderkante).
+     Anteile statt Bildpunkte - dadurch bleiben die Werte richtig, egal in
+     welcher Groesse die Datei ausgeliefert wird. */
+  mitteX:    0.4955,  // Mitte des Drehtellers
+  /* Wo die Raeder aufsetzen. Nicht die Mitte der Ellipse, sondern etwas
+     davor - genau dort steht auch die eingepasste Beispielmaschine, und
+     ein eigenes Foto soll auf derselben Linie stehen wie sie. */
+  bodenY:    0.7775,
+  breite:    0.405,   // wie breit die MASCHINE wird (nicht die Bilddatei)
+  /* Der Radstand als Vielfaches der halben Tellerbreite. 0.85 statt der
+     1.06 des alten Raums, und der Wert ist nachgemessen: Damit ist ein
+     eigenes Foto genauso gross wie die eingepasste Beispielmaschine
+     daneben - beim Hinterlegen des ersten Fotos springt die Maschine
+     dadurch nicht in der Groesse. */
+  radstand:  0.85,
+  tellerRx:  0.3325,  // halbe Breite der Tellerellipse, fuer die Spiegelung
+  tellerRy:  0.050,   // halbe Hoehe der Tellerellipse
+  /* Dunkler Raum: Ein eigenes Foto, das bei Tageslicht aufgenommen wurde,
+     leuchtet hier sonst wie ein Aufkleber. Es wird deshalb deutlich
+     abgedunkelt - dieselben Werte, mit denen die Beispielmaschine
+     eingepasst wurde. Der Schatten traegt dafuer mehr: Auf dem hellen
+     Riffelblech des Tellers ist er das Einzige, was die Maschine
+     wirklich aufstellt. */
+  helligkeit: 0.74,
+  schatten:  0.92,
+  // Kaltweisses LED-Licht im ganzen Raum, kein warmer Schein.
+  glut:      0.06,
+  /* Wie stark der Leuchtsaum um die eigene Maschine ist. Im hellen
+     Vorgaengerraum war er Gegenlicht und durfte voll stehen (1); hier
+     wuerde derselbe Saum auf dunklem Grund zum Heiligenschein. Ein
+     Drittel genuegt, um die Maschine von der Wand zu loesen. */
+  saum:      0.34,
   /* Wie stark der Raum oben abgedunkelt wird, damit Ueberschrift und
-     Hakenleiste lesbar bleiben. Dieser Raum hat ein helles Dachfenster
-     genau dort, wo die Schrift steht - er braucht deutlich mehr als eine
-     dunkle Werkstatt. Der Wert ist deshalb je Garage einstellbar. */
-  dunstOben: 0.90,
+     Hakenleiste lesbar bleiben. Der Raum ist oben dunkel, aber der grosse
+     Leuchtring an der Decke ist grell - deshalb reicht weniger als beim
+     hellen Vorgaenger, aber nicht wenig. */
+  dunstOben: 0.74,
   /* Die Lampen des Raums, fuers Flackern. Je Lampe die Lage (x, y) und die
      halbe Groesse ihres Lichtflecks (rx, ry), alles in Anteilen der
-     Bilddatei - ausgemessen wie der Drehteller. "art" waehlt die Animation:
-     eine Leuchtstoffroehre stottert, die Haengelampen haengen weich durch,
-     in zwei verschiedenen Mustern (schirm und schirm2), damit sie wirklich
-     unabhaengig voneinander wirken. "takt" ist die Laenge eines Durchlaufs
-     in Sekunden, "versatz" verschiebt den Start - drei verschiedene Takte
-     sorgen dafuer, dass nie zwei Lampen gleichzeitig zucken und sich das
-     Muster kaum wiederholt.
+     Bilddatei - ausgemessen wie der Drehteller. "art" waehlt die
+     Animation, "takt" die Laenge eines Durchlaufs in Sekunden, "versatz"
+     verschiebt den Start; drei verschiedene Takte sorgen dafuer, dass nie
+     zwei Lampen gleichzeitig zucken.
 
      "anker" sagt, an welchem Anteil der FLECKHOEHE die Lampe sitzt. Bei
-     den Haengelampen ist das die Mitte (0.5). Bei der Roehre liegt der
-     dunkelste Punkt des Verlaufs bei 0.3, denn unter ihr haengt ihr
-     Lichtschein an der Wand und soll mit abdunkeln - der Fleck reicht
-     also weiter nach unten als nach oben. Zentriert saehe der Fleck aus,
-     als haenge er ueber der Lampe (siehe ENTSCHEIDUNGEN.md). */
+     der Roehre ueber der Werkbank liegt er bei 0.3, denn ihr Lichtschein
+     faellt nach unten auf die Arbeitsplatte und soll mit abdunkeln. */
   lampen: [
-    { art: 'roehre',  x: 0.536, y: 0.309, rx: 0.135, ry: 0.058, anker: 0.3, takt: 19, versatz: 4 },
-    { art: 'schirm',  x: 0.235, y: 0.302, rx: 0.100, ry: 0.055, anker: 0.5, takt: 23, versatz: 0 },
-    { art: 'schirm2', x: 0.891, y: 0.297, rx: 0.100, ry: 0.055, anker: 0.5, takt: 31, versatz: 9 },
+    { art: 'schirm',  x: 0.500, y: 0.062, rx: 0.215, ry: 0.055, anker: 0.5, takt: 29, versatz: 0 },
+    { art: 'roehre',  x: 0.500, y: 0.266, rx: 0.085, ry: 0.030, anker: 0.3, takt: 17, versatz: 5 },
+    { art: 'schirm2', x: 0.500, y: 0.425, rx: 0.270, ry: 0.022, anker: 0.5, takt: 23, versatz: 11 },
   ],
 }];
 
@@ -781,7 +797,15 @@ function setzeBuehnenPlatz() {
      Tellerbreite gesetzt, egal aus welchem Winkel fotografiert wurde.
      Eine Seitenansicht und eine Heckansicht bekommen so denselben
      Fussabdruck - unterschiedlich hoch duerfen sie sein, das ist ehrlich. */
-  const RADSTAND_ANTEIL = 1.06;   // Radstand = 1,06 x halbe Tellerbreite
+  /* Radstand = dieser Faktor x halbe Tellerbreite. Er gehoert zur GARAGE,
+     nicht zur App: Wie viel Teller eine Maschine ausfuellen soll, haengt
+     davon ab, wie gross der Teller im Bild ist und aus welchem Winkel die
+     Kamera schaut. Der alte helle Raum hatte einen breiten, steil
+     gesehenen Teller (1.06); der dunkle zeigt ihn flacher und schmaler,
+     und derselbe Faktor machte die Maschine dort ein Viertel zu gross -
+     groesser als die Beispielmaschine im Bild daneben, was beim Wechsel
+     zwischen beiden sofort auffiel. */
+  const RADSTAND_ANTEIL = garageBild.radstand ?? 1.06;
   let zielBreite;
   if (stand && stand.spannweite > 0.05) {
     zielBreite = (tellerRxPx * RADSTAND_ANTEIL) * inhaltAnteil / stand.spannweite;
@@ -873,6 +897,7 @@ function setzeBuehnenPlatz() {
   ansicht.style.setProperty('--buehne-helligkeit', garageBild.helligkeit);
   ansicht.style.setProperty('--schatten-staerke', garageBild.schatten ?? 0.62);
   ansicht.style.setProperty('--glut-staerke', garageBild.glut ?? 0.4);
+  ansicht.style.setProperty('--saum-staerke', garageBild.saum ?? 1);
   raum.style.setProperty('--dunst-oben', garageBild.dunstOben ?? 0.86);
 
   // Der Kontaktschatten sitzt genau unter den Raedern und ist so breit wie

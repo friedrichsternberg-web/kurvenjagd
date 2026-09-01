@@ -1997,3 +1997,57 @@ einem:
 
 Nachgestellt: Platte von Hand sichtbar gemacht, Band gefüllt,
 `zeigeGarage()` gerufen — beides wieder weg.
+
+## 01.09.2026 (nachts) — Neue Werkstatt, Beispielmaschine eingepasst statt gerendert
+
+Friedrich hat einen neuen Raum geliefert („NEUE WERKSTATT V2.png"): eine
+dunkle Werkstatt mit Drehteller, statt der hellen blau-weißen von August.
+Zwei Dinge waren daran anders als beim Vorgänger, und beide hatten Folgen.
+
+**Erstens: Querformat statt Hochformat.** Das alte Bild war 864 × 1821,
+das neue 1402 × 1122. Die Bühnenrechnung verträgt das, weil sie den
+Ausschnitt selbst wählt (cover-Maßstab, Teller bei 50 % Breite und 78 %
+Höhe) — auf dem Handy sieht man deshalb nur die mittleren rund 60 % der
+Bildbreite, die Werkbank links und rechts fällt weg. Der Teller sitzt
+mittig, also trägt der Ausschnitt.
+
+**Zweitens: kein zweites Rendering mit Maschine.** Bisher gab es zwei
+gerenderte Fassungen aus derselben Kamera. Diesmal nur den leeren Teller.
+Die Beispielmaschine ist deshalb **eingepasst**, nicht gerendert:
+`bike-standard.webp` abgedunkelt (0,72) und entsättigt (0,62), je Reifen
+ein Kontaktschatten aus zwei Lagen, dazu eine kurze, blasse Spiegelung.
+
+Der Kontaktschatten je Rad ist der Punkt, an dem es steht oder schwebt.
+Der erste Versuch hatte einen breiten Fleck unter der ganzen Maschine —
+das sah aus wie ein Teppich, und beide Räder hingen sichtbar in der Luft.
+Zwei Flecken an den wirklich gemessenen Aufstandspunkten (Hinterrad bei
+0,140/0,915 des Bildes, Vorderrad bei 0,837/0,996 — verschieden tief,
+weil die Maschine in Dreiviertelansicht steht) binden die Reifen an den
+Teller. Das Skript dafür liegt als `werkzeug-werkstatt.py` bei.
+
+**Zur Auflösung, weil Friedrich ausdrücklich danach gefragt hat.**
+Ausgeliefert wird in anderthalbfacher Größe: 2103 × 1683. Der Faktor ist
+gerechnet: Ein Handy mit dreifacher Punktdichte zeigt den Raum rund 1545
+Punkte hoch; in der Quellauflösung von 1122 müsste der Browser
+hochrechnen, und die Riffelplatte des Tellers verwäscht als Erstes. Mit
+1683 wird das Bild überall verkleinert dargestellt und bleibt scharf.
+**Die Quelle ist damit ausgereizt** — echte zusätzliche Schärfe gäbe nur
+eine größer gerenderte Vorlage, etwa 2800 × 2240.
+
+**Drei Werte, die vorher in der App standen, gehören jetzt zur Garage.**
+Alle drei waren stillschweigend auf den alten Raum kalibriert:
+
+- `saum` — der Leuchtsaum um die eigene Maschine. Im hellen Raum war er
+  Gegenlicht; im dunklen wurde derselbe Saum zum Heiligenschein. Jetzt
+  0,34 statt voll.
+- `radstand` — bisher fest 1,06 mal halbe Tellerbreite. Der neue Teller
+  ist schmaler und flacher gesehen; mit demselben Faktor war ein eigenes
+  Foto ein Viertel größer als die Beispielmaschine daneben, was beim
+  Hinterlegen des ersten Fotos sofort auffiel. Jetzt 0,85 — nachgemessen
+  252 gegen 250 Punkte, also gleich.
+- Dazu neu abgestimmt: `helligkeit` 0,74, `schatten` 0,92, `glut` 0,06,
+  `dunstOben` 0,74 und die drei Lampen (Leuchtring, Röhre über der
+  Werkbank, LED-Leiste darunter).
+
+`kacheln/reifen.jpg` ist aus dem neuen Raum neu geschnitten — sonst zeigte
+die Reifen-Kachel eine Werkstatt, die es nicht mehr gibt.

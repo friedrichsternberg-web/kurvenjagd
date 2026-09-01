@@ -31,6 +31,12 @@ _git_muell/
 # Repository - settings.local.json enthaelt die erteilten Berechtigungen.
 .claude/
 
+# Die Rohvorlage des Werkstattraums (1,9 MB). Die App benutzt die beiden
+# gerechneten WebP-Fassungen in img/; wer den Raum neu bauen will, braucht
+# das Skript aus ENTSCHEIDUNGEN.md und diese Datei - beides gehoert nicht
+# ins oeffentliche Repository.
+NEUE WERKSTATT*.png
+
 # Die PNG-Originale des Garagenbilds (2 MB je Stueck) - die App benutzt die
 # WebP-Fassung in img/, die Originale bleiben nur lokal liegen.
 #

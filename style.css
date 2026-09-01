@@ -2953,11 +2953,14 @@ body.nav-modus .leaflet-control-container { display: none; }
   filter: drop-shadow(0 0 1px color-mix(in srgb, var(--licht-warm) 60%, white))
           drop-shadow(0 0 2px var(--licht-warm))
           drop-shadow(0 0 13px color-mix(in srgb, var(--licht-warm) 40%, transparent));
+  /* Wie stark der Saum ueberhaupt zu sehen ist, sagt die Garage: Im hellen
+     Raum ist er Gegenlicht, im dunklen wuerde derselbe Saum zum
+     Heiligenschein. Der Faktor kommt aus der GARAGEN-Liste. */
   animation: rand-atmen 8s ease-in-out infinite;
 }
 @keyframes rand-atmen {
-  0%, 100% { opacity: 0.6; }
-  50%      { opacity: 0.85; }
+  0%, 100% { opacity: calc(var(--saum-staerke, 1) * 0.6); }
+  50%      { opacity: calc(var(--saum-staerke, 1) * 0.85); }
 }
 
 /* Die weisse Kantenlinie: eine duenne, STAENDIG sichtbare Linie direkt an
@@ -2985,6 +2988,9 @@ body.nav-modus .leaflet-control-container { display: none; }
           drop-shadow(0 0 1px var(--text))
           drop-shadow(0 0 1px var(--text))
           drop-shadow(0 0 7px color-mix(in srgb, var(--text) 55%, transparent));
+  /* Dieselbe Staerke wie beim orangen Saum, aus demselben Grund: Auf
+     dunklem Grund traegt schon eine viel duennere Linie. */
+  opacity: var(--saum-staerke, 1);
 }
 
 /* ---------- Das Lauflicht ----------

@@ -7,16 +7,27 @@ eine geklaerte Herkunft haben.
 
 garage-werkstatt.webp
 garage-werkstatt-standard.webp
-  KI-generierte Bilder (helle Werkstatt mit Drehteller), erstellt von
-  Friedrich Sternberg im August 2026 mit einem KI-Bildgenerator als Vorlage
-  fuer die Garagen-Buehne der App. Zwei Fassungen desselben Raums aus
-  derselben Kamera: einmal mit leerem Teller (fuer Nutzer mit eigenem Foto),
-  einmal mit einer Beispielmaschine darauf (solange kein eigenes Foto da
-  ist). Keine fremden Markenzeichen im Bild, die Beispielmaschine ist kein
-  Abbild eines real erhaeltlichen Modells.
+  KI-generiertes Bild (dunkle Werkstatt mit Drehteller), erstellt von
+  Friedrich Sternberg im September 2026 mit einem KI-Bildgenerator als
+  Vorlage fuer die Garagen-Buehne der App. Es loeste am 01.09.2026 die
+  hellere blau-weisse Werkstatt ab, die seit August 2026 dort stand.
+  Keine fremden Markenzeichen im Bild.
 
-  Beide ausgeliefert in anderthalbfacher Groesse der Quelle (1296 x 2731),
-  damit sie auf Bildschirmen mit dreifacher Punktdichte scharf bleiben.
+  ZWEI Fassungen aus EINER Vorlage, gerechnet statt gerendert:
+    garage-werkstatt.webp           der leere Drehteller, unveraendert.
+    garage-werkstatt-standard.webp  derselbe Raum mit bike-standard.webp
+                                    eingepasst - abgedunkelt, mit einem
+                                    Kontaktschatten unter jedem Reifen und
+                                    einer blassen Spiegelung. Das Skript
+                                    dazu steht in ENTSCHEIDUNGEN.md,
+                                    01.09.2026.
+  Fuer die Beispielmaschine gilt damit alles, was unten unter
+  bike-standard.webp steht - einschliesslich der offenen Herkunftsfrage.
+
+  Beide ausgeliefert in anderthalbfacher Groesse der Quelle: 2103 x 1683
+  aus 1402 x 1122. Der Faktor ist gerechnet, nicht gegriffen - ein Handy
+  mit dreifacher Punktdichte zeigt den Raum rund 1545 Punkte hoch, und in
+  der Quellaufloesung muesste der Browser hochrechnen.
 
 bike-standard.webp
   Freigestelltes Standardmotorrad, aus einem von Friedrich Sternberg
@@ -32,15 +43,19 @@ bike-standard.webp
     1. Woher stammt die Vorlage? Ein Pressefoto oder ein fremdes Bild waere
        ein Urheberrecht, und zwar ein echtes - kein KI-Thema.
     2. Ist die Form nah genug an einem eingetragenen Geschmacksmuster?
-  Bis dahin gilt: Das Bild wird seit dem 01.09.2026 nicht nur auf der Buehne
-  als Rueckfall benutzt, sondern auch als Hintergrund der Kachel "Meine
-  Stats" - es ist also sichtbarer geworden, nicht weniger sichtbar.
+  Bis dahin gilt: Das Bild ist seit dem 01.09.2026 SICHTBARER geworden,
+  nicht weniger. Es steht als Rueckfall auf der Buehne, als Hintergrund
+  der Kachel "Meine Stats" - und seit dem Austausch des Werkstattraums
+  ist es zusaetzlich fest in garage-werkstatt-standard.webp eingerechnet
+  und liefert den Ausschnitt fuer kacheln/reifen.jpg. Damit haengt an
+  dieser einen offenen Frage inzwischen der halbe Startbildschirm.
   Der Ausweg, falls sich die Herkunft nicht klaeren laesst: eine eigene
   Fantasiemaschine erzeugen, so wie sie im Werkstattbild schon steht.
 
 kacheln/reifen.jpg
   Das Vorderrad der Beispielmaschine, 2:1 ausgeschnitten aus
-  garage-werkstatt-standard.webp und auf 1200x600 gerechnet. Damit gilt
+  garage-werkstatt-standard.webp und auf 1200x600 gerechnet. Am
+  01.09.2026 aus dem neuen dunklen Raum neu geschnitten. Damit gilt
   hier alles, was dort steht: mit einem KI-Bildgenerator erstellt,
   Herkunft geklaert, Kennzeichnung in der App unter "Kuenstlich erzeugte
   Bilder". Angelegt am 01.09.2026 fuer die Kachel "Reifen".
