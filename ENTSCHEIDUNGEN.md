@@ -1687,3 +1687,22 @@ Frage ist nicht die Kachel, sondern das Bild. Sie steht als Aufgabe in
 AUFGABEN.md und als Vermerk in `img/LIZENZ-bilder.txt`, damit sie niemand
 mehr übersieht. Es ist ein **echtes** Urheberrecht, kein KI-Thema — und
 damit das größere Risiko von beiden.
+
+## 01.09.2026 — Version 109 veroeffentlicht
+
+Der erste Push seit v=108, auf ausdrueckliche Aufforderung. Drin ist alles
+seit dem 30.08.2026: der Startfilm, die Kartenvorschau auf jeder Tour, das
+Ziehen der Wegpunkte, das Ride-Feld links, die schwarzen Hintergruende,
+„Meine Stats" samt Rueckblick und Lieblingsstrecken, der breitere Feed im
+Vollbild — und die zwei Rechtstext-Korrekturen (Punkt 2 und 7 der
+Datenschutzerklaerung, die KI-Begruendung).
+
+22 Commits, `?v=` genau einmal hochgezaehlt (108 → 109) im letzten Commit
+davor.
+
+**Eine offene Frage geht mit live:** `img/bike-standard.webp` aehnelt sehr
+deutlich einem real erhaeltlichen Modell, und seine Herkunft ist ungeklaert
+(siehe den Eintrag darueber). Das Bild war vorher schon in der App — neu ist
+nur, dass es jetzt auch auf der Stats-Kachel erscheint, wenn kein eigenes
+Foto hinterlegt ist. Die Frage bleibt zu klaeren, unabhaengig davon, dass
+die Fassung draussen ist.
