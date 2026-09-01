@@ -256,7 +256,35 @@
   .garage-kopf { padding-top: var(--s4); }
   .listen-screen .start-screen-inner { padding-top: var(--s5); }
 
-  /* --- 7. Der Startfilm im Liegen ---------------------------------------------
+  /* --- 7. Touren und Stats im Breiten -----------------------------------------
+     Im Hochformat ist der Touren-Feed eine Spalte - im Breiten wuerde jede
+     Karte die vollen 1080 Punkte der Lesebreite nehmen und ihr Kartenbild
+     auf ueber 1000 x 440 wachsen. Zwei Spalten halbieren das Bild und
+     machen aus der Liste ein Regal. Die Gruppenueberschriften (je
+     Bundesland) und die Leer-/Lade-Zeilen sind Geschwister der Karten im
+     selben ul und spannen deshalb einfach ueber beide Spalten. */
+  #tourenList, #serpaListe, #entdeckenListe {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--s3);
+    align-items: start;
+  }
+  /* Das Raster uebernimmt die Abstaende - die Einzelmarge wuerde sie
+     verdoppeln. */
+  #tourenList > li, #serpaListe > li, #entdeckenListe > li { margin-bottom: 0; }
+  #serpaListe .geteilt-gruppe, #tourenList .empty, #serpaListe .geteilt-leer, #entdeckenListe .geteilt-leer {
+    grid-column: 1 / -1;
+  }
+
+  /* Zwei Segmente ueber je 500 Punkte waeren Knoepfe wie Fahrbahnen - der
+     Umschalter bleibt handbreit, die Listen darunter duerfen breit sein. */
+  .touren-umschalter, .quellen-umschalter { max-width: 460px; }
+
+  /* Die Stats: mehr Platz, mehr Spalten - die Kacheln zu dritt statt zu
+     zweit, das Gesamtbild und der Rueckblick bleiben untereinander. */
+  #statsKacheln, #statsZeitWerte { grid-template-columns: repeat(3, 1fr); }
+
+  /* --- 8. Der Startfilm im Liegen ---------------------------------------------
      Das liegende BILD des Films haengt an der Form des Fensters, nicht an
      dieser Grenze - es steht deshalb in style.css unter
      "min-aspect-ratio: 23/20" und gilt auch dem Handy im Liegen. Hier bleibt

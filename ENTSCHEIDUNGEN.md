@@ -1471,3 +1471,56 @@ gekippt ist:
   Haftungshalbsatz „verlass dich unterwegs nicht allein auf die App"
   bleibt), und die vier Akkordeons haben Luft zwischeneinander — nur auf
   diesem Bildschirm, im Planer stapeln sie weiter dicht.
+
+## 01.09.2026 — „Meine Stats" und der Vollbild-Feed
+
+### Zwei neue Dateien statt Anbau
+
+Das Stats-Feature besteht aus `bilanz.js` (reine Rechnerei: Summen,
+Zeiträume, Rekorde, Lieblingsstrecken – läuft im jsc-Selbsttest) und
+`rueckblick.js` (zeichnet den Bildschirm). Nicht in app.js und nicht in
+kern.js: beide sind längst über der Zeilengrenze, und die Trennung
+„Rechnen ohne Oberfläche / Zeichnen ohne Rechnen" ist dieselbe wie bei
+vorschau.js. In app.js kamen genau zwei Zeilen dazu (Bildschirmliste,
+Leuchten des Ride-Eintrags).
+
+### Live oben, Rückblick darunter
+
+Friedrichs Ansage: „zum einen Stats welche Live sind und dann kommen
+Monats- und Jahresrückblicke hinzu". Deshalb trägt der Kopf die große
+Gesamtzahl mit den Kacheln (wächst mit jeder Ausfahrt), und erst darunter
+kommt der blätterbare Rückblick. Das Balkendiagramm ist ein eigenes SVG
+nach dem Rezept des Höhenprofils – zwanzig Zeilen, keine Bibliothek.
+
+### Lieblingsstrecken ohne Karten und ohne Server
+
+Jede Spur wird auf ein Raster von rund 150 Metern gelegt und damit zur
+MENGE von Zellen – egal, in welcher Richtung und wie schnell gefahren
+wurde. Decken sich zwei Mengen zur Hälfte (Schnitt durch Vereinigung),
+ist es dieselbe Strecke; Gruppen ab zwei Fahrten sind Lieblingsstrecken.
+GPS-Rauschen verzeiht das Raster von selbst. Verglichen wird immer gegen
+die ERSTE Fahrt einer Gruppe, nicht gegen alle – sonst wandert eine Kette
+leicht unterschiedlicher Fahrten Stück für Stück von der Strecke weg.
+
+Verworfen: die „Lieblingsgegend" über Rückwärtssuche beim Geodienst.
+Nominatim ist kontingentiert (siehe AUFGABEN.md), und ein Feature, das
+bei jedem Öffnen einen Ortsnamen holt, wäre der falsche Kunde dafür.
+
+### Die Ausfahrt-Werte überleben jetzt den Server-Abgleich
+
+`pruefeTour()` (kern.js) ließ von einer Ausfahrt nur Strecke und
+Grundzahlen durch – Datum, Höchsttempo, Schnitt und Schräglage fielen
+beim Abgleich weg, auf einem zweiten Gerät wäre der Rückblick blind
+gewesen. Die vier Felder stehen jetzt in der Positivliste, das Datum wird
+geparst und neu als ISO geschrieben, damit kein beliebiger String
+durchrutscht. Notizen und Fotos fehlen dort weiterhin (siehe AUFGABEN.md).
+
+### Der Touren-Feed im Vollbild: zwei Spalten
+
+Die Lesebreite (1080 Punkte, quer.css) galt schon – aber eine einspaltige
+Karte darin trug ein Kartenbild von über 1000 × 440 Punkten. Ab der
+Querformat-Grenze stehen die drei Tourenlisten jetzt als Raster mit zwei
+Spalten; die Bundesland-Überschriften und Leerzeilen sind Geschwister der
+Karten im selben `ul` und spannen über beide. Das halbiert das Bild und
+macht aus der Liste ein Regal. Die Umschalter sind auf Handbreite
+begrenzt – zwei Segmente über je 500 Punkte waren Knöpfe wie Fahrbahnen.

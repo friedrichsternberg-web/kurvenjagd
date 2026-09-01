@@ -3458,8 +3458,8 @@ function symbol(name, zusatz = '') {
    zeigeBildschirm() alles und blendet nichts ein. Die App zeigt dann eine
    schwarze Flaeche, ohne einen Fehler zu melden. */
 const BILDSCHIRME = [
-  'garageScreen', 'tourenScreen', 'app', 'rideScreen', 'rechtlichesScreen',
-  'shopScreen', 'shopProduktScreen',
+  'garageScreen', 'tourenScreen', 'app', 'rideScreen', 'statsScreen',
+  'rechtlichesScreen', 'shopScreen', 'shopProduktScreen',
   'kontoScreen', 'profilScreen', 'passwortNeuScreen', 'kontoLoeschenScreen',
 ];
 
@@ -3492,9 +3492,12 @@ function aktualisiereLeiste(sichtbareId) {
   // Die Produktseite ist ein eigener Bildschirm ohne eigenen Eintrag in
   // der Leiste. Welcher Eintrag stattdessen leuchtet, sagt shop.js - es
   // weiss, ob man aus dem Shop oder aus der Garage hineingekommen ist.
-  const leuchtZiel = sichtbareId === 'shopProduktScreen'
-    ? (typeof produktLeuchtZiel === 'function' ? produktLeuchtZiel() : 'shopScreen')
-    : sichtbareId;
+  let leuchtZiel = sichtbareId;
+  if (sichtbareId === 'shopProduktScreen') {
+    leuchtZiel = typeof produktLeuchtZiel === 'function' ? produktLeuchtZiel() : 'shopScreen';
+  }
+  // "Meine Stats" gehoert zum Fahren - der Ride-Eintrag leuchtet weiter.
+  if (sichtbareId === 'statsScreen') leuchtZiel = 'rideScreen';
   leiste.querySelectorAll('.nav-tab').forEach(knopf => {
     knopf.classList.toggle('aktiv', knopf.dataset.ziel === leuchtZiel);
   });

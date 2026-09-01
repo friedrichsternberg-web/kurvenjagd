@@ -757,9 +757,9 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
    senkrecht zentriert, und ueber die volle Breite. Ein Formular in der
    Mitte wirkt ruhig, eine Liste in der Mitte wirkt verloren. */
 .listen-screen { align-items: stretch; justify-content: flex-start; text-align: left; overflow-y: auto; }
-/* Der Touren-Bildschirm ist ein Feed voller Kartenbilder - das Foto
-   dahinter macht ihn nur unruhig. Rechtliches und Konto behalten es. */
-#tourenScreen { background: var(--bg); }
+/* Touren und Stats sind Daten-Bildschirme - das Foto dahinter macht sie
+   nur unruhig. Rechtliches und Konto behalten es. */
+#tourenScreen, #statsScreen { background: var(--bg); }
 .listen-screen .start-screen-inner {
   width: 100%;
   padding: var(--s5) var(--s4);
@@ -4197,3 +4197,172 @@ body.nav-modus .karten-knopf { display: none; }
 .route-knopf { width: 100%; margin-top: var(--s3); }
 .route-knopf:disabled { opacity: 0.45; cursor: not-allowed; }
 #routeKnopfHinweis { margin-top: 6px; text-align: center; }
+
+
+/* ---------- Meine Stats ----------
+   Der Rueckblick ueber die eigenen Ausfahrten (rueckblick.js). Die Bausteine
+   sind bewusst die der uebrigen App: Wertekacheln (.stat), der
+   Segment-Umschalter, die eingelassene Rinne des Hoehenprofils, Metall fuer
+   Ueberschriften und die Signalfarbe fuer genau EINE Zahl - die grosse. */
+
+/* Die grosse Zahl ueber allem. Eine Glaskarte mit einem leisen blauen
+   Schein von unten - derselbe Griff wie die Glut hinter den Bergen im
+   Startfilm, nur viel zurueckhaltender. */
+.stats-held {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s1);
+  padding: var(--s5) var(--s4);
+  margin: 0 0 var(--s3);
+  border-radius: var(--r-md);
+  border: 1px solid var(--glas-hell);
+  background:
+    radial-gradient(ellipse 90% 75% at 50% 115%,
+      color-mix(in srgb, var(--accent) 32%, transparent) 0%,
+      transparent 65%),
+    linear-gradient(to bottom, var(--glas-hauch), var(--glas-hauch));
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  box-shadow:
+    inset 0 1px 0 var(--glas-rand),
+    inset 0 -1px 0 var(--schatten-hauch);
+}
+.stats-held-titel {
+  font-family: var(--schrift-display);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  text-indent: 0.14em;
+  color: var(--muted);
+}
+.stats-held-zahl {
+  font-family: var(--schrift-display);
+  font-size: 56px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-hell);
+}
+.stats-held-zahl i {
+  font-style: normal;
+  font-size: 22px;
+  font-weight: 600;
+  margin-left: 6px;
+  color: var(--muted);
+}
+.stats-held-unter { font-size: 13px; color: var(--muted); }
+
+/* Abschnittstitel in der Handschrift von .ride-titel: Anzeigeschrift,
+   Versalien, Silber. */
+.stats-abschnitt {
+  margin: var(--s6) 0 var(--s3);
+  font-family: var(--schrift-display);
+  font-weight: 700;
+  font-size: 17px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--metall-glanz);
+}
+
+/* Die Wertekacheln erben alles von .stat; hier steht nur der Abstand der
+   Gruppe selbst. */
+.stats-kacheln { margin: 0 0 var(--s3); }
+.stats-kacheln .stat { padding: var(--s3); }
+.stat.stats-still { grid-column: 1 / -1; align-items: center; padding: var(--s4); }
+
+/* Zeitraumwahl: links der Umschalter Jahr/Monat, rechts die Blaetterpfeile
+   mit dem Namen des Zeitraums dazwischen. */
+.stats-zeitwahl {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  margin: 0 0 var(--s3);
+}
+.stats-umschalter { flex: 0 1 220px; margin: 0; }
+.stats-blaettern {
+  display: flex;
+  align-items: center;
+  gap: var(--s1);
+}
+.stats-zeitname {
+  min-width: 108px;
+  text-align: center;
+  font-family: var(--schrift-display);
+  font-size: 15px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.stats-pfeil {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--glas-hell);
+  border-radius: var(--r-sm);
+  background: var(--glas-hauch);
+  color: var(--text);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.14s ease;
+}
+.stats-pfeil:hover { background: var(--glas-hell); }
+.stats-pfeil:disabled { opacity: 0.25; cursor: default; background: var(--glas-hauch); }
+
+/* Das Diagramm sitzt in derselben eingelassenen Rinne wie das Hoehenprofil.
+   position: relative traegt die kleine Massstab-Angabe oben rechts. */
+.stats-diagramm {
+  position: relative;
+  padding: var(--s3) var(--s3) var(--s2);
+  margin: 0 0 var(--s3);
+  border-radius: var(--r-md);
+  background: var(--schatten-hauch);
+  border: 1px solid var(--glas-hell);
+  box-shadow: inset 0 2px 6px var(--schatten-weich);
+}
+.stats-diagramm svg { display: block; width: 100%; height: 110px; }
+.stats-diagramm-max {
+  position: absolute;
+  top: var(--s2);
+  right: var(--s3);
+  font-family: var(--schrift-display);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.stats-balken { fill: var(--accent); }
+.stats-balken.hervor { fill: var(--accent-hell); }
+.stats-balken.leer { fill: var(--glas-hell); }
+.stats-achse {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--s1) 2px 0;
+}
+.stats-achse i {
+  font-style: normal;
+  font-family: var(--schrift-display);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* Rekordzeilen: links Titel und Fahrt, rechts der Wert in der
+   Anzeigeschrift. Die Zeilen sind .saved-list-Eintraege und erben deren
+   Glas; hier steht nur, was der Rekordwert anders macht. */
+.stats-rekord-wert {
+  flex: 0 0 auto;
+  font-family: var(--schrift-display);
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-hell);
+}

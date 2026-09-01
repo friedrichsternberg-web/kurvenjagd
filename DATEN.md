@@ -31,6 +31,15 @@ Aufgezeichnete Fotos liegen **verkleinert im Speicher selbst**, nicht als
 Dateien. Das ist auch der Grund für die 5-MB-Grenze und dafür, dass
 `geraet.schreib()` ein `false` zurückgeben können muss.
 
+**„Meine Stats" (seit 01.09.2026)** rechnet ausschließlich auf diesen lokal
+gespeicherten Ausfahrten: Summen, Monats- und Jahresrückblick, Rekorde und
+die Erkennung von Lieblingsstrecken (`bilanz.js`). Dabei wird **nichts
+Neues erhoben und nichts verschickt** – auch die Lieblingsstrecken-Erkennung
+ist reine Rechnerei auf dem Gerät, ohne Server und ohne Geodienste. Einzige
+Netzanfrage des Bildschirms: die OpenStreetMap-Kacheln für das Vorschaubild
+der Lieblingsstrecke, derselbe Kachelserver wie überall in der App (Punkt 3
+der Datenschutzerklärung).
+
 ---
 
 ## Was das Gerät verlässt

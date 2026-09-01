@@ -946,6 +946,69 @@
     </div>
   </div>
 
+  <!-- ===== Meine Stats =====
+       Die Auswertung der eigenen Ausfahrten: oben die Live-Zahlen ueber
+       alles (sie wachsen mit jeder Ausfahrt mit), darunter der Rueckblick
+       je Monat oder Jahr, die automatisch erkannten Lieblingsstrecken und
+       die Rekorde.
+
+       Der Bildschirm hat keinen eigenen Eintrag in der Leiste - er gehoert
+       zum Fahren und wird vom Ride-Bildschirm aus geoeffnet; dort leuchtet
+       dann auch der Ride-Eintrag weiter. Gerechnet wird alles in bilanz.js
+       (reine Rechnerei), gezeichnet in rueckblick.js. Die leeren Behaelter
+       hier fuellt rueckblick.js beim Oeffnen - im HTML steht nur, WO etwas
+       steht, nicht was. ===== -->
+  <div id="statsScreen" class="start-screen listen-screen" hidden>
+    <div class="start-screen-inner">
+      <button class="btn ghost back-btn" id="btnStatsZurueck">&larr; Zur&uuml;ck</button>
+      <h2>Meine Stats</h2>
+
+      <!-- Ohne eine einzige Ausfahrt gibt es nichts auszuwerten - dann
+           steht hier die Einladung statt einer Wand aus Nullen. -->
+      <div id="statsLeer" hidden>
+        <p class="rechts-alpha">Noch keine Ausfahrt aufgezeichnet. Starte
+        deine erste Aufzeichnung &ndash; hier entsteht dann dein
+        R&uuml;ckblick: Kilometer, Kurven, Schr&auml;glage und deine
+        Lieblingsstrecken.</p>
+        <button class="btn" id="btnStatsZurAufnahme">Zur Aufzeichnung</button>
+      </div>
+
+      <div id="statsInhalt" hidden>
+        <section class="stats-held" id="statsHeld" aria-label="Gesamtbilanz"></section>
+        <div class="stats stats-kacheln" id="statsKacheln"></div>
+
+        <h3 class="stats-abschnitt">R&uuml;ckblick</h3>
+        <!-- Faellt weg, wenn keine Ausfahrt ein Datum traegt (alte
+             Aufzeichnungen) - dann gibt es nichts zurueckzublicken. -->
+        <div id="statsRueckblick">
+          <div class="stats-zeitwahl">
+            <div class="segmented stats-umschalter" id="statsUmschalter">
+              <button class="seg active" data-zeitraum="jahr">Jahr</button>
+              <button class="seg" data-zeitraum="monat">Monat</button>
+            </div>
+            <div class="stats-blaettern">
+              <button class="stats-pfeil" id="btnStatsFrueher"
+                      aria-label="Fr&uuml;herer Zeitraum">&lsaquo;</button>
+              <span class="stats-zeitname" id="statsZeitName"></span>
+              <button class="stats-pfeil" id="btnStatsSpaeter"
+                      aria-label="Sp&auml;terer Zeitraum">&rsaquo;</button>
+            </div>
+          </div>
+          <div class="stats-diagramm" id="statsDiagramm"></div>
+          <div class="stats stats-kacheln" id="statsZeitWerte"></div>
+        </div>
+        <p class="hint" id="statsOhneDatum" hidden>&Auml;ltere Ausfahrten ohne
+        Datum z&auml;hlen nur oben im Gesamt.</p>
+
+        <h3 class="stats-abschnitt" id="statsLieblingeTitel">Lieblingsstrecken</h3>
+        <ul class="saved-list" id="statsLieblinge"></ul>
+
+        <h3 class="stats-abschnitt" id="statsRekordeTitel">Rekorde</h3>
+        <ul class="saved-list" id="statsRekorde"></ul>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== Rechtliches: Impressum und Datenschutzerklaerung =====
        Pflicht nach § 5 DDG und Art. 13 DSGVO, sobald die App oeffentlich
        erreichbar ist. Beides muss "leicht erkennbar, unmittelbar
@@ -1571,6 +1634,9 @@
           <button class="btn" id="btnRideStart">Aufzeichnung starten</button>
         </div>
         <div class="row">
+          <button class="btn ghost" id="btnRideStats">Meine Stats</button>
+        </div>
+        <div class="row">
           <button class="btn ghost" id="btnRideZurueck">Zur&uuml;ck zur Garage</button>
         </div>
       </div>
@@ -2191,6 +2257,9 @@
        daneben statt darin, weil kern.js die Zeilengrenze laengst
        reisst. Vor app.js, das die Bilder in die Listen setzt. -->
   <script src="vorschau.js?v=108"></script>
+  <!-- Auswertung der Ausfahrten - reine Rechnerei wie kern.js und
+       vorschau.js, laeuft im selben Selbsttest (pruefe-kern.js). -->
+  <script src="bilanz.js?v=108"></script>
   <script src="app.js?v=108"></script>
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
@@ -2220,6 +2289,9 @@
        Tourensammlung), dasselbe Muster wie produkte.js vor shop.js. -->
   <script src="serpa-touren.js?v=108"></script>
   <script src="touren.js?v=108"></script>
+  <!-- Der Bildschirm "Meine Stats". Nach app.js (zeigeBildschirm, verkabele,
+       vorschauBildHtml) und nach bilanz.js, dessen Rechnungen er zeichnet. -->
+  <script src="rueckblick.js?v=108"></script>
   <!-- Der Demo-Produktkatalog (nur Daten) und die Shop-Logik. produkte.js
        muss vor shop.js stehen, und beide nach garage.js, weil shop.js
        dessen verkabele() mitbenutzt. -->

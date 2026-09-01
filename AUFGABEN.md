@@ -473,6 +473,11 @@ Datenschutzerklärung, siehe oben.
   Lässt sich im Simulator erzeugen, wenn die Hülle steht.
 - **`fonts 2/` und `Design Inspro/`** liegen unbenutzt im Projektordner und
   können weg.
+- **Notizen und Fotos einer Ausfahrt überleben den Server-Abgleich nicht.**
+  `pruefeTour()` in kern.js lässt seit dem 01.09.2026 Datum, Höchsttempo,
+  Schnitt und Schräglage durch (für „Meine Stats"), Notizen und Fotos aber
+  weiterhin nicht – auf einem zweiten Gerät sind sie weg. Fotos brauchen
+  dafür den Storage-Pfad-Weg aus konto.js, Notizen eine Längenbegrenzung.
 - **Ortsnamen auf der Karte sind auf dem Handy unscharf** (geprüft am
   31.08.2026). Raster-Kacheln mit 256 Punkten auf einem Bildschirm mit
   dreifacher Punktdichte — dreifach hochgerechnet. Die eine schlüssellose

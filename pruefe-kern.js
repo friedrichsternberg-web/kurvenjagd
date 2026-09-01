@@ -18,6 +18,7 @@
 
 if (typeof sucheRundtour === 'undefined') load('kern.js');
 if (typeof kartenBild === 'undefined') load('vorschau.js');
+if (typeof sammleAusfahrten === 'undefined') load('bilanz.js');
 
 // jsc kennt print(), der Browser kennt console.log(). Auf print() darf hier
 // nicht geprüft werden: Im Browser gibt es das auch, dort öffnet es aber
@@ -541,4 +542,102 @@ prüfeFall('ohne Punkte gibt es keinen Startpunkt',
   prüfeFall('die Kachelnamen liegen im gueltigen Bereich',
     bild.kacheln.every(k => k.x >= 0 && k.y >= 0
       && k.x < Math.pow(2, k.zoom) && k.y < Math.pow(2, k.zoom)));
+})();
+
+
+/* --- Bilanz: Summen, Rueckblick, Lieblingsstrecken (bilanz.js) ------------- */
+
+(function () {
+  // Eine kuenstliche Spur: eine Linie aus n Punkten entlang eines Laengengrads,
+  // mit waehlbarem Versatz - so lassen sich "dieselbe Strecke" (kleiner
+  // Versatz, wie GPS-Rauschen) und "eine andere Strecke" (grosser Versatz)
+  // nachstellen, ohne echte Aufzeichnungen zu brauchen.
+  function spur(versatzOst, punkte) {
+    const linie = [];
+    for (let i = 0; i < punkte; i++) linie.push([12 + versatzOst, 48 + i * 0.001, 400]);
+    return linie;
+  }
+  function ausfahrt(name, felder) {
+    return Object.assign({ id: name, name, aufgezeichnet: true, track: spur(0, 80),
+      distance: 100000, time: 7200, ascend: 900, curviness: 180, maxKmh: 120,
+      schnittKmh: 50, neigung: { quelle: 'sensor', maxLinksGrad: 30, maxRechtsGrad: 35 },
+      gefahrenAm: '2026-06-15T09:00:00.000Z' }, felder);
+  }
+
+  const rohliste = [
+    ausfahrt('a', { gefahrenAm: '2026-03-10T09:00:00.000Z', distance: 120000 }),
+    ausfahrt('b', { gefahrenAm: '2026-03-20T09:00:00.000Z', track: spur(0.0004, 80) }),
+    ausfahrt('c', { gefahrenAm: '2026-06-01T09:00:00.000Z', track: spur(0.5, 80),
+                    curviness: 320, maxKmh: 160 }),
+    ausfahrt('d', { gefahrenAm: '2025-08-05T09:00:00.000Z', track: spur(0.0006, 80) }),
+    ausfahrt('alt', { gefahrenAm: undefined, neigung: null }),   // vor dem 24.08.2026
+    { id: 'geplant', name: 'Nur geplant', waypoints: [[48, 12]], distance: 50000 },
+  ];
+
+  const alle = sammleAusfahrten(rohliste);
+  prüfeFall('nur Ausfahrten zaehlen, geplante Routen nicht', alle.length === 5);
+  prüfeFall('eine Ausfahrt ohne Datum bekommt null statt Unsinn',
+    alle[4].jahr === null && alle[4].monat === null);
+  prüfeFall('die Schraeglage ist der groessere der beiden Winkel',
+    alle[0].neigungGrad === 35 && alle[4].neigungGrad === null);
+
+  const gesamt = summiereAusfahrten(alle);
+  prüfeFall('die Kilometer summieren sich', Math.round(gesamt.km) === 520);
+  prüfeFall('die Hoechstwerte sind Maxima, keine Summen',
+    gesamt.maxKmh === 160 && gesamt.gradProKm === 320 && gesamt.laengsteKm === 120);
+  prüfeFall('leere Eingabe ergibt eine leere Bilanz',
+    summiereAusfahrten([]).anzahl === 0 && summiereAusfahrten([]).maxKmh === null);
+
+  prüfeFall('die Jahre kommen absteigend',
+    JSON.stringify(listeJahre(alle)) === '[2026,2025]');
+
+  const maerz = verlaufImZeitraum(alle, 2026, null);
+  prüfeFall('der Jahresverlauf hat zwoelf Felder', maerz.length === 12);
+  prüfeFall('der Maerz traegt zwei Fahrten', Math.round(maerz[2]) === 220);
+  prüfeFall('der Monatsverlauf hat so viele Felder wie der Monat Tage',
+    verlaufImZeitraum(alle, 2026, 2).length === 31
+    && verlaufImZeitraum(alle, 2025, 1).length === 28);
+  prüfeFall('im Monatsverlauf liegt die Fahrt am richtigen Tag',
+    Math.round(verlaufImZeitraum(alle, 2026, 2)[9]) === 120);
+
+  const rekorde = findeRekorde(alle);
+  prüfeFall('die laengste und die kurvigste Fahrt stimmen',
+    rekorde.laengste.ausfahrt.tour.id === 'a' && rekorde.kurvigste.ausfahrt.tour.id === 'c');
+  prüfeFall('ohne Werte gibt es keinen Rekord',
+    findeRekorde(sammleAusfahrten([])).schraegste === null);
+
+  // a, b und d fahren dieselbe Linie (Versatz unter einer Rasterzelle),
+  // c faehrt woanders - erwartet: EINE Gruppe mit drei Fahrten.
+  const lieblinge = findeLieblingsstrecken(alle.filter(a => a.tour.id !== 'alt'));
+  prüfeFall('drei aehnliche Fahrten werden eine Lieblingsstrecke',
+    lieblinge.length === 1 && lieblinge[0].anzahl === 3);
+  prüfeFall('die laengste Fahrt der Gruppe ist der Vertreter',
+    lieblinge[0].vertreter.tour.id === 'a');
+  prüfeFall('zuletzt gefahren stimmt',
+    lieblinge[0].zuletzt.toISOString().slice(0, 10) === '2026-03-20');
+  prüfeFall('eine einzelne Strecke ist keine Lieblingsstrecke',
+    findeLieblingsstrecken(alle.filter(a => ['c'].includes(a.tour.id))).length === 0);
+})();
+
+
+/* --- pruefeTour laesst die Ausfahrt-Werte durch (kern.js) ------------------ */
+
+(function () {
+  const roh = {
+    id: 'sync-test', name: 'Ausfahrt', waypoints: [], track: [[12, 48, 400], [12.1, 48.1, 410]],
+    aufgezeichnet: true, gefahrenAm: '2026-06-15T09:00:00.000Z',
+    schnittKmh: 52.5, maxKmh: 141,
+    neigung: { quelle: 'sensor', maxLinksGrad: 31, maxRechtsGrad: 38, erfunden: 'weg damit' },
+  };
+  const sauber = pruefeTour(roh);
+  prüfeFall('das Datum der Ausfahrt ueberlebt den Abgleich',
+    sauber.gefahrenAm === '2026-06-15T09:00:00.000Z');
+  prüfeFall('die Hoechstwerte ueberleben den Abgleich',
+    sauber.maxKmh === 141 && sauber.schnittKmh === 52.5);
+  prüfeFall('die Schraeglage ueberlebt, aber nur ihre bekannten Felder',
+    sauber.neigung.maxRechtsGrad === 38 && sauber.neigung.erfunden === undefined);
+  prüfeFall('ein kaputtes Datum faellt weg',
+    pruefeTour(Object.assign({}, roh, { gefahrenAm: 'gestern' })).gefahrenAm === undefined);
+  prüfeFall('eine Schraeglage ohne Winkel faellt weg',
+    pruefeTour(Object.assign({}, roh, { neigung: { quelle: 'sensor' } })).neigung === undefined);
 })();

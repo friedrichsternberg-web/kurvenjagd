@@ -1276,6 +1276,27 @@ function pruefeTour(rohdaten) {
   if (Number.isFinite(rohdaten.curveLevel)) sauber.curveLevel = rohdaten.curveLevel;
   if (typeof rohdaten.aufgezeichnet === 'boolean') sauber.aufgezeichnet = rohdaten.aufgezeichnet;
 
+  /* Die Werte einer Ausfahrt wandern mit - ohne sie waere der Rueckblick
+     ("Meine Stats", bilanz.js) auf einem zweiten Geraet blind: kein Datum,
+     keine Hoechstwerte, keine Schraeglage. Das Datum wird geparst und neu
+     als ISO geschrieben, damit kein beliebiger String durchrutscht. */
+  if (typeof rohdaten.gefahrenAm === 'string') {
+    const zeitpunkt = Date.parse(rohdaten.gefahrenAm);
+    if (Number.isFinite(zeitpunkt)) sauber.gefahrenAm = new Date(zeitpunkt).toISOString();
+  }
+  if (Number.isFinite(rohdaten.schnittKmh)) sauber.schnittKmh = rohdaten.schnittKmh;
+  if (Number.isFinite(rohdaten.maxKmh))     sauber.maxKmh     = rohdaten.maxKmh;
+  if (rohdaten.neigung && typeof rohdaten.neigung === 'object'
+      && !Array.isArray(rohdaten.neigung)
+      && (Number.isFinite(rohdaten.neigung.maxLinksGrad)
+          || Number.isFinite(rohdaten.neigung.maxRechtsGrad))) {
+    sauber.neigung = {
+      quelle: rohdaten.neigung.quelle === 'sensor' ? 'sensor' : 'gps',
+      maxLinksGrad:  Number.isFinite(rohdaten.neigung.maxLinksGrad)  ? rohdaten.neigung.maxLinksGrad  : 0,
+      maxRechtsGrad: Number.isFinite(rohdaten.neigung.maxRechtsGrad) ? rohdaten.neigung.maxRechtsGrad : 0,
+    };
+  }
+
   /* Eine Rundtour speichert ihre Zufallspunkte nicht, nur den Start und die
      Wunschlaenge - beim Laden wird neu gewuerfelt. Kommen diese drei Angaben
      nicht mit durch, wird aus einer geteilten Rundtour beim Empfaenger eine
