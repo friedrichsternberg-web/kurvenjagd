@@ -1958,3 +1958,42 @@ der normalisierte Vergleich ohnehin abdeckt) und bestätigte: keine
 doppelten Einträge, keine überlappenden Baujahre, kein Maß außerhalb der
 Grenzen, kein Hinterreifen schmaler als der Vorderreifen, kein Name, der
 gleichzeitig auf zwei verschiedene Größen zeigt.
+
+## 01.09.2026 (nachts) — Zwei Riegel vor dem Demo-Vermerk
+
+Friedrich schickte ein Bildschirmfoto: In der Garage stand
+„SHOP FÜR DICH · DEMO-PREISE", und er fragte, warum das in der
+öffentlichen Fassung zu sehen ist.
+
+**Nachgemessen: Live ist es nicht zu sehen.** Auf serpa-app.de meldet die
+Platte `hidden = true` und `display: none`, `SHOP_AKTIV` steht auf
+`false`, und auch mit einem Motorrad in der Garage bleibt sie weg. Keine
+CSS-Regel setzt dort ein `display`, es gibt keinen Service Worker und
+keinen App-Cache.
+
+**Und es kann nie so ausgeliefert worden sein.** Der Schutz in
+`zeichneGarageShop()` kam am 25.08.2026 mit v=88, die Stats-Kachel im
+Bildschirmfoto erst viel später. Ein Durchlauf über alle Commits, die
+`btnStartStats` in index.html tragen, findet keinen einzigen, dessen
+shop.js den Schutz nicht hatte.
+
+Bleibt als Erklärung ein Mischzustand im Browser: neues HTML, alte
+shop.js aus dem Speicher. Genau das Zeitfenster, das in CLAUDE.md bei der
+Veröffentlichungsregel schon als Kosten eines Pushes steht — hier
+andersherum.
+
+**Gehärtet, weil der Fehler teuer wäre.** Ein Demo-Vermerk in einer
+Fassung, auf die AWIN-Prüfer schauen, ist genau die Sorte Kleinigkeit,
+die ein Partnerprogramm kostet. Deshalb zwei unabhängige Riegel statt
+einem:
+
+1. `zeichneGarageShop()` in shop.js versteckt die Platte jetzt **aktiv**
+   (`platte.hidden = true; band.innerHTML = ''`), statt bei
+   abgeschaltetem Shop nur auszusteigen. Ist sie aus irgendeinem Grund
+   schon sichtbar, räumt der nächste Garagen-Aufruf sie weg.
+2. `wendeShopSchalterAn()` in app.js versteckt sie zusätzlich beim Start.
+   Das wirkt auch dann, wenn shop.js ausfällt oder in einer älteren
+   Fassung geladen wird — app.js definiert den Schalter und läuft vorher.
+
+Nachgestellt: Platte von Hand sichtbar gemacht, Band gefüllt,
+`zeigeGarage()` gerufen — beides wieder weg.

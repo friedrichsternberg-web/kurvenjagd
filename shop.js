@@ -410,8 +410,14 @@ function zeichneGarageShop() {
   const platte = document.getElementById('garageShop');
   const band = document.getElementById('garageShopBand');
   if (!platte || !band) return;
-  // Abgeschalteter Shop: Die Leiste bleibt versteckt, wie sie im HTML steht.
-  if (!SHOP_AKTIV) return;
+  /* Abgeschalteter Shop: Die Leiste wird AKTIV versteckt, nicht nur "nicht
+     eingeblendet". Der Unterschied zaehlt, wenn die Platte aus irgendeinem
+     Grund schon sichtbar ist - etwa weil der Browser eine aeltere Fassung
+     dieser Datei aus seinem Speicher genommen hat, waehrend das HTML neu
+     ist. Nur auszusteigen liesse den Demo-Vermerk dann stehen; so raeumt
+     der naechste Garagen-Aufruf ihn weg. Aufgefallen am 01.09.2026 an
+     einem Bildschirmfoto, siehe ENTSCHEIDUNGEN.md. */
+  if (!SHOP_AKTIV) { platte.hidden = true; band.innerHTML = ''; return; }
 
   const produkte = shopKatalog().produkte;
   const einträge = [];
