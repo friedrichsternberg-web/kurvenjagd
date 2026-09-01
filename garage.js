@@ -107,6 +107,25 @@ function motorradAktiv() {
 function zeichneGarage() {
   zeichneBuehne();
   zeichneDatenblatt();
+  zeigeBikeAufStatsKachel();
+}
+
+/* Die Kachel "Meine Stats" traegt die EIGENE Maschine als Hintergrund -
+   dieselbe, die oben auf dem Drehteller steht, und mit demselben Rueckfall
+   auf die Beispielmaschine, wenn noch kein Foto da ist (bildAdresse in
+   finder.js entscheidet das).
+
+   Warum von hier aus und nicht fest im HTML: Das Bild aendert sich, sobald
+   der Nutzer ein Foto hinterlegt oder das Motorrad wechselt - und
+   zeichneGarage() ist die einzige Stelle, die davon erfaehrt.
+
+   Die Adresse steht in doppelten Anfuehrungszeichen: Ein eigenes Foto kommt
+   als Daten-Adresse herein, und die traegt Zeichen, die ohne Klammerung das
+   url() beenden koennten. */
+function zeigeBikeAufStatsKachel() {
+  const kachel = document.getElementById('btnStartStats');
+  if (!kachel || typeof bildAdresse !== 'function') return;
+  kachel.style.setProperty('--kachel-bild', `url("${bildAdresse(motorradAktiv())}")`);
 }
 
 /* --- Die Buehne: Maschine auf den Drehteller setzen -------------------------

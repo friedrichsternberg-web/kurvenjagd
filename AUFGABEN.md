@@ -124,12 +124,29 @@ where has_function_privilege(r.rolname, p.oid, 'EXECUTE')
   Werkstattraum ein Schriftzug? Trägt die Beispielmaschine eine erkennbare
   Tankform? Auch zufällige Ähnlichkeit ist abmahnfähig, und die Haftung
   liegt beim Verwender, nicht beim Generator. Einmalig, halbe Stunde.
-- **Herkunft von `img/bike-standard.webp` klären.** In
-  `img/LIZENZ-bilder.txt` steht dazu nur „aus einem von Friedrich Sternberg
-  gelieferten Bild". Falls die Vorlage nicht selbst fotografiert oder
-  erzeugt wurde, ist das ein **echtes** Urheberrecht — und damit ein
-  größeres Bildrisiko als alles am KI-Act, wo nach der Prüfung vom
-  01.09.2026 gar keine Pflicht besteht. Die Zeile gehört präzisiert.
+- **Herkunft von `img/bike-standard.webp` klären — der wichtigste offene
+  Punkt der Rechtsprüfung.** Beim Ansehen der Bilder am 01.09.2026 ist
+  aufgefallen: Das ist **keine Fantasiemaschine**. Tankverkleidung,
+  Vierfach-Krümmer, Scheinwerferform und die blaue Lackierung ähneln sehr
+  deutlich einem real erhältlichen Modell (dem Augenschein nach die
+  Kawasaki-Z-Reihe). Fremde Schriftzüge sind keine darauf, aber zwei Fragen
+  bleiben: Woher stammt die Vorlage (ein Pressefoto wäre ein **echtes**
+  Urheberrecht, kein KI-Thema), und ist die Form nah genug an einem
+  eingetragenen Geschmacksmuster? Seit dem 01.09.2026 steht das Bild
+  zusätzlich als Hintergrund auf der Kachel „Meine Stats" — es ist also
+  sichtbarer geworden. Ausweg, falls sich nichts klären lässt: eine eigene
+  Fantasiemaschine erzeugen, wie sie im Werkstattbild schon steht.
+- **Herkunft von `img/kacheln/` und `hintergrund-weich.jpg` klären.**
+  Dieselbe vage Formulierung („beziehungsweise von ihm gelieferte Bilder").
+  `kacheln/touren.jpg` zeigt erkennbar einen wirklichen Ort (dem Augenschein
+  nach das Stilfser Joch) — Orte sind frei fotografierbar, die Frage ist
+  allein, wer das Foto gemacht hat.
+
+**Was die Bildprüfung vom 01.09.2026 NICHT beanstandet hat:** Im
+Werkstattbild ist kein fremdes Markenzeichen zu sehen (Werkzeugwagen und
+Schränke tragen keine lesbaren Schriftzüge), die Beispielmaschine darauf ist
+eine Fantasiemaschine, und das App-Symbol ebenso. Für diese drei stimmt die
+Angabe in `img/LIZENZ-bilder.txt`.
 
 **Bewusst NICHT in der ersten Fassung**, damit es nicht als Lücke gilt:
 Fotos an geteilten Touren (der Behälter `tourfotos` müsste dafür geöffnet

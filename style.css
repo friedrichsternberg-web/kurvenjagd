@@ -671,7 +671,10 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   position: absolute; inset: 0;
   z-index: -2;
   background-image: var(--kachel-bild);
-  background-size: cover;
+  /* Fast immer "cover": Ein Streckenfoto soll die Kachel fuellen. Die
+     Stats-Kachel setzt es auf "contain", weil dort ein FREIGESTELLTES
+     Motorrad liegt - beschnitten waere davon nur ein Stueck Tank zu sehen. */
+  background-size: var(--kachel-fuellung, cover);
   /* Der Ausschnitt ist je Kachel einstellbar. Gebraucht wird das von der
      Garage-Kachel: Sie zeigt das hochformatige Werkstattbild, und davon
      soll der Streifen mit dem Drehteller zu sehen sein, nicht die Mitte. */
@@ -699,6 +702,18 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 /* Beim Antippen gibt die Kachel nach und das Bild darunter zieht leicht
    heran. Diese Verzoegerung ist das, was den Eindruck von Tiefe erzeugt:
    Glas und Bild bewegen sich nicht gleich schnell. */
+/* Die Kachel mit der eigenen Maschine. Das Bild ist freigestellt, hat also
+   keinen eigenen Hintergrund - es steht ganz darin statt beschnitten, und
+   zwar rechts, damit die Beschriftung unten links freie Bahn hat. Der
+   Rueckwaertsgang beim Ueberfahren (scale) wuerde ein freigestelltes Bild
+   ueber den Rand schieben, deshalb bleibt es hier stehen. */
+.kachel-bike {
+  --kachel-fuellung: contain;
+  --kachel-lage: right 78%;
+  background: var(--raum-dunkel);
+}
+.kachel-bike:hover::before { transform: none; }
+
 .kachel:hover { transform: translateY(-2px); box-shadow: inset 0 1px 0 var(--glas-licht), inset 0 -1px 0 var(--schatten-weich), 0 18px 40px var(--schatten-mittel); }
 .kachel:hover::before { transform: scale(1.06); }
 .kachel:active { transform: scale(0.985); }
@@ -4266,6 +4281,26 @@ body.nav-modus .karten-knopf { display: none; }
   letter-spacing: 0.04em;
   color: var(--metall-glanz);
 }
+
+/* Der Satz, der die Nullen erklaert, solange noch nichts aufgezeichnet ist.
+   Eine ruhige Glasplatte, kein Warnkasten: Es ist nichts kaputt, es ist nur
+   noch nichts passiert. Deshalb auch Nebentextfarbe statt Signalfarbe - die
+   traegt allein der Knopf darunter, denn der ist das, was man tun kann. */
+.stats-hinweis {
+  margin: 0 0 var(--s4);
+  padding: var(--s4);
+  border-radius: var(--r-md);
+  background: var(--glas-hauch);
+  border: 1px solid var(--glas-hell);
+  box-shadow: inset 0 1px 0 var(--glas-rand);
+}
+.stats-hinweis p {
+  margin: 0 0 var(--s3);
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+.stats-hinweis .btn { width: auto; }
 
 /* Die Wertekacheln erben alles von .stat; hier steht nur der Abstand der
    Gruppe selbst. */

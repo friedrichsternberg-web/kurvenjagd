@@ -22,9 +22,32 @@ bike-standard.webp
   Freigestelltes Standardmotorrad, aus einem von Friedrich Sternberg
   gelieferten Bild, freigestellt im August 2026.
 
+  OFFEN, geprueft am 01.09.2026: Diese Herkunft ist die einzige unklare in
+  dieser Datei, und sie ist es an der ungeeignetsten Stelle. Anders als bei
+  den KI-Bildern zeigt dieses Bild KEINE Fantasiemaschine - Tankverkleidung,
+  Vierfach-Kruemmer, Scheinwerferform und die blaue Lackierung aehneln sehr
+  deutlich einem real erhaeltlichen Modell (dem Augenschein nach der
+  Kawasaki-Z-Reihe). Fremde Schriftzuege sind keine darauf.
+  Zwei Fragen sind deshalb zu klaeren, bevor die App Werbung traegt:
+    1. Woher stammt die Vorlage? Ein Pressefoto oder ein fremdes Bild waere
+       ein Urheberrecht, und zwar ein echtes - kein KI-Thema.
+    2. Ist die Form nah genug an einem eingetragenen Geschmacksmuster?
+  Bis dahin gilt: Das Bild wird seit dem 01.09.2026 nicht nur auf der Buehne
+  als Rueckfall benutzt, sondern auch als Hintergrund der Kachel "Meine
+  Stats" - es ist also sichtbarer geworden, nicht weniger sichtbar.
+  Der Ausweg, falls sich die Herkunft nicht klaeren laesst: eine eigene
+  Fantasiemaschine erzeugen, so wie sie im Werkstattbild schon steht.
+
 hintergrund-weich.jpg, kacheln/
   Eigene Fotos von Friedrich Sternberg beziehungsweise von ihm gelieferte
   Bilder, teils verkleinert und weichgezeichnet.
+
+  OFFEN, geprueft am 01.09.2026: "beziehungsweise von ihm gelieferte Bilder"
+  laesst dieselbe Frage offen wie bei bike-standard.webp - selbst
+  aufgenommen oder woanders gefunden? kacheln/touren.jpg zeigt erkennbar
+  einen wirklichen Ort (dem Augenschein nach das Stilfser Joch). Das ist
+  fuer sich unproblematisch (Orte sind frei fotografierbar), die Frage ist
+  allein, wer das Foto gemacht hat.
 
   Am 24.08.2026 entfernt, weil die Garage der Startbildschirm wurde und
   die Bilder damit niemand mehr anzeigt: start-hero.jpg,

@@ -1634,3 +1634,56 @@ Zwei Folgeaufgaben stehen in AUFGABEN.md: die Bilder einmal auf fremde
 Marken absuchen, und die Herkunft von `img/bike-standard.webp` klären. Das
 zweite ist das größere Risiko — dort geht es um ein echtes Urheberrecht,
 nicht um eine Pflicht, die es nicht gibt.
+
+## 01.09.2026, Abschluss — die Prüfung zu Ende geführt
+
+### „Meine Stats" trägt die eigene Maschine
+
+Die Kachel in der Garage zeigt jetzt das eigene Motorrad als Hintergrund –
+dasselbe Bild, das oben auf dem Drehteller steht, mit demselben Rückfall auf
+die Beispielmaschine (`bildAdresse()` in finder.js entscheidet das). Gesetzt
+wird es von `zeichneGarage()`, weil nur die Garage erfährt, wenn sich das
+Foto ändert.
+
+Das Bild ist freigestellt, hat also keinen eigenen Hintergrund. Deshalb
+`contain` statt `cover` (beschnitten wäre nur ein Stück Tank zu sehen) und
+kein Heranziehen beim Überfahren – ein freigestelltes Bild würde dabei über
+den Rand rutschen. Die dafür nötige Stellschraube `--kachel-fuellung` hat
+einen Vorgabewert, alle anderen Kacheln bleiben unberührt.
+
+### Der Nullzustand zeigt Nullen, keine leere Seite
+
+Vorher zeigte der Bildschirm ohne eine einzige Ausfahrt nur eine Einladung.
+Das war falsch herum: Eine leere Seite sagt nicht, was einen erwartet. Jetzt
+steht **alles** da – Held, sechs Kacheln, Rückblick mit leerem Diagramm,
+Abschnitte für Lieblingsstrecken und Rekorde – überall mit Nullen, dazu ein
+Satz, der die Nullen erklärt.
+
+Wichtig ist der Unterschied dahinter: **Ohne eine einzige Fahrt ist die Null
+ehrlich. Sobald es Fahrten gibt, ist ein fehlender Wert etwas anderes** –
+alte Aufzeichnungen kennen keine Schräglage, und dort wäre eine Null gelogen.
+Deshalb bleibt die Kachel in dem Fall weg statt auf 0 zu springen.
+
+### Die Bildprüfung — und der eine ernste Fund
+
+Zum Abschluss die Bilder selbst angesehen, nicht nur die Dokumentation.
+
+**Unbeanstandet:** Im Werkstattbild ist kein fremdes Markenzeichen zu sehen,
+die Werkzeugwagen tragen keine lesbaren Schriftzüge, die Beispielmaschine
+darauf ist eine Fantasiemaschine. Das App-Symbol ebenso. Für diese drei
+stimmt, was `img/LIZENZ-bilder.txt` behauptet.
+
+**Der Fund:** `img/bike-standard.webp` ist **keine** Fantasiemaschine.
+Tankverkleidung, Vierfach-Krümmer, Scheinwerferform und die blaue Lackierung
+ähneln sehr deutlich einem real erhältlichen Modell (dem Augenschein nach der
+Kawasaki-Z-Reihe). Fremde Schriftzüge sind keine darauf. Die Lizenzdatei sagt
+dazu nur „aus einem von Friedrich Sternberg gelieferten Bild" – das ist die
+einzige unklare Herkunft im ganzen Ordner, und sie sitzt an der
+ungeeignetsten Stelle: Seit heute ist dieses Bild nicht mehr nur ein Rückfall
+auf der Bühne, sondern steht als Hintergrund auf der Kachel „Meine Stats".
+
+Das ist bewusst so gebaut worden – Friedrich hat es so gewollt, und die
+Frage ist nicht die Kachel, sondern das Bild. Sie steht als Aufgabe in
+AUFGABEN.md und als Vermerk in `img/LIZENZ-bilder.txt`, damit sie niemand
+mehr übersieht. Es ist ein **echtes** Urheberrecht, kein KI-Thema — und
+damit das größere Risiko von beiden.

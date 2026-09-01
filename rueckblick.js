@@ -63,15 +63,14 @@ function zeigeStats() {
     stats.monat = 11;
   }
 
-  const leer = stats.ausfahrten.length === 0;
-  document.getElementById('statsLeer').hidden = !leer;
-  document.getElementById('statsInhalt').hidden = leer;
-  if (!leer) {
-    zeichneStatsGesamt();
-    zeichneStatsRueckblick();
-    zeichneStatsLieblinge();
-    zeichneStatsRekorde();
-  }
+  /* Gezeichnet wird IMMER alles - ohne Ausfahrten eben ueberall mit
+     Nullen. Nur der erklaerende Satz kommt dazu, damit die Nullen nicht
+     wie ein Fehler aussehen. */
+  document.getElementById('statsLeer').hidden = stats.ausfahrten.length > 0;
+  zeichneStatsGesamt();
+  zeichneStatsRueckblick();
+  zeichneStatsLieblinge();
+  zeichneStatsRekorde();
   zeigeBildschirm('statsScreen');
 }
 
@@ -86,19 +85,24 @@ function zeichneStatsGesamt() {
       ${statsDauer(gesamt.fahrzeitSek)} &middot;
       ${statsZahl(gesamt.hoehenmeter)} Hm</span>`;
 
+  /* Ohne eine einzige Ausfahrt gibt es keine Hoechstwerte - dann steht
+     ueberall eine ehrliche Null. Sobald es Fahrten GIBT, ist ein fehlender
+     Wert etwas anderes: Alte Aufzeichnungen kennen keine Schraeglage, und
+     dort waere eine Null gelogen. Deshalb bleibt die Kachel dann weg. */
+  const ohneFahrt = gesamt.anzahl === 0;
+  const wert = (zahl) => (ohneFahrt ? 0 : zahl);
   document.getElementById('statsKacheln').innerHTML =
-    statsKachelHtml('Längste Fahrt', gesamt.laengsteKm, (w) => `${statsZahl(w)} km`)
-    + statsKachelHtml('Kurvigste Fahrt', gesamt.gradProKm, (w) => `${statsZahl(w)} Grad/km`)
-    + statsKachelHtml('Höchsttempo', gesamt.maxKmh, (w) => `${statsZahl(w)} km/h`)
-    + statsKachelHtml('Schräglage', gesamt.neigungGrad, (w) => `${statsZahl(w)}°`)
-    + statsKachelHtml('Ø je Ausfahrt', gesamt.anzahl ? gesamt.km / gesamt.anzahl : null,
+    statsKachelHtml('Längste Fahrt', wert(gesamt.laengsteKm), (w) => `${statsZahl(w)} km`)
+    + statsKachelHtml('Kurvigste Fahrt', wert(gesamt.gradProKm), (w) => `${statsZahl(w)} Grad/km`)
+    + statsKachelHtml('Höchsttempo', wert(gesamt.maxKmh), (w) => `${statsZahl(w)} km/h`)
+    + statsKachelHtml('Schräglage', wert(gesamt.neigungGrad), (w) => `${statsZahl(w)}°`)
+    + statsKachelHtml('Ø je Ausfahrt', ohneFahrt ? 0 : gesamt.km / gesamt.anzahl,
         (w) => `${statsZahl(w)} km`)
-    + statsKachelHtml('Ø Fahrzeit', gesamt.anzahl ? gesamt.fahrzeitSek / gesamt.anzahl : null,
+    + statsKachelHtml('Ø Fahrzeit', ohneFahrt ? 0 : gesamt.fahrzeitSek / gesamt.anzahl,
         (w) => statsDauer(w));
 }
 
-/* Eine Wertekachel - oder nichts, wenn es den Wert nicht gibt (alte
-   Aufzeichnungen kennen zum Beispiel keine Schraeglage). */
+/* Eine Wertekachel - oder nichts, wenn es den Wert nicht gibt. */
 function statsKachelHtml(beschriftung, wert, alsText) {
   if (!Number.isFinite(wert)) return '';
   return `<div class="stat"><span class="k">${beschriftung}</span>`
@@ -110,10 +114,9 @@ function statsKachelHtml(beschriftung, wert, alsText) {
 
 function zeichneStatsRueckblick() {
   const datierte = stats.ausfahrten.filter((a) => a.jahr !== null);
-  document.getElementById('statsRueckblick').hidden = datierte.length === 0;
+  // Der Hinweis gilt nur, wenn es Fahrten GIBT und einigen das Datum fehlt.
   document.getElementById('statsOhneDatum').hidden =
     stats.ausfahrten.length === datierte.length;
-  if (datierte.length === 0) return;
 
   const imMonat = stats.art === 'monat';
   document.getElementById('statsZeitName').textContent = imMonat
@@ -128,14 +131,18 @@ function zeichneStatsRueckblick() {
   document.getElementById('statsDiagramm').innerHTML =
     statsBalkenHtml(werte, hervor) + statsAchseHtml(werte.length);
 
+  /* Die vier Werte stehen immer da, auch als Nullen - eine leere Flaeche
+     laesst offen, ob nichts gefahren wurde oder etwas kaputt ist. Der Satz
+     darunter sagt, was die Nullen bedeuten. */
   const zeitraum = summiereAusfahrten(
     filtereZeitraum(datierte, stats.jahr, imMonat ? stats.monat : null));
-  document.getElementById('statsZeitWerte').innerHTML = zeitraum.anzahl === 0
-    ? '<div class="stat stats-still"><span class="k">Keine Ausfahrt in diesem Zeitraum</span></div>'
-    : statsKachelHtml('Kilometer', zeitraum.km, (w) => `${statsZahl(w)} km`)
-      + statsKachelHtml('Ausfahrten', zeitraum.anzahl, (w) => statsZahl(w))
-      + statsKachelHtml('Fahrzeit', zeitraum.fahrzeitSek, (w) => statsDauer(w))
-      + statsKachelHtml('Höhenmeter', zeitraum.hoehenmeter, (w) => `${statsZahl(w)} Hm`);
+  document.getElementById('statsZeitLeer').hidden =
+    zeitraum.anzahl > 0 || datierte.length === 0;
+  document.getElementById('statsZeitWerte').innerHTML =
+    statsKachelHtml('Kilometer', zeitraum.km, (w) => `${statsZahl(w)} km`)
+    + statsKachelHtml('Ausfahrten', zeitraum.anzahl, (w) => statsZahl(w))
+    + statsKachelHtml('Fahrzeit', zeitraum.fahrzeitSek, (w) => statsDauer(w))
+    + statsKachelHtml('Höhenmeter', zeitraum.hoehenmeter, (w) => `${statsZahl(w)} Hm`);
 
   begrenzeStatsBlaettern(datierte, heute);
 }
@@ -143,6 +150,14 @@ function zeichneStatsRueckblick() {
 /* Die Pfeile enden dort, wo es Daten gibt: vorn bei der aeltesten datierten
    Ausfahrt, hinten im Heute. */
 function begrenzeStatsBlaettern(datierte, heute) {
+  const frueher = document.getElementById('btnStatsFrueher');
+  const spaeter = document.getElementById('btnStatsSpaeter');
+  // Ohne eine einzige datierte Fahrt gibt es nichts zu blaettern.
+  if (datierte.length === 0) {
+    frueher.disabled = true;
+    spaeter.disabled = true;
+    return;
+  }
   const aelteste = datierte.reduce((a, b) => (b.datum < a.datum ? b : a));
   const vorn = stats.art === 'monat'
     ? stats.jahr * 12 + stats.monat
@@ -153,8 +168,8 @@ function begrenzeStatsBlaettern(datierte, heute) {
   const hintenGrenze = stats.art === 'monat'
     ? heute.getFullYear() * 12 + heute.getMonth()
     : heute.getFullYear();
-  document.getElementById('btnStatsFrueher').disabled = vorn <= vornGrenze;
-  document.getElementById('btnStatsSpaeter').disabled = vorn >= hintenGrenze;
+  frueher.disabled = vorn <= vornGrenze;
+  spaeter.disabled = vorn >= hintenGrenze;
 }
 
 function blaettereStatsZeitraum(richtung) {
@@ -210,10 +225,14 @@ function statsAchseHtml(felder) {
 
 function zeichneStatsLieblinge() {
   const gruppen = findeLieblingsstrecken(stats.ausfahrten).slice(0, 3);
-  document.getElementById('statsLieblingeTitel').hidden = gruppen.length === 0;
   const liste = document.getElementById('statsLieblinge');
-  liste.hidden = gruppen.length === 0;
-  if (gruppen.length === 0) { liste.innerHTML = ''; return; }
+  /* Auch ohne Ergebnis bleibt der Abschnitt stehen und erklaert sich - so
+     weiss man, dass es ihn gibt und was ihn fuellt. */
+  if (gruppen.length === 0) {
+    liste.innerHTML = '<li class="empty">Sobald du eine Strecke zum zweiten Mal'
+      + ' f&auml;hrst, erkennt Serpa sie hier von selbst wieder.</li>';
+    return;
+  }
 
   /* Die meistgefahrene Strecke bekommt die grosse Karte mit dem
      Kartenbild, die uebrigen eine schlichte Zeile. Ein Tipp oeffnet die
@@ -249,9 +268,12 @@ function zeichneStatsRekorde() {
     ['Tiefste Schräglage', rekorde.schraegste, (w) => `${statsZahl(w)}°`],
   ].filter(([, rekord]) => rekord !== null);
 
-  document.getElementById('statsRekordeTitel').hidden = zeilen.length === 0;
   const liste = document.getElementById('statsRekorde');
-  liste.hidden = zeilen.length === 0;
+  if (zeilen.length === 0) {
+    liste.innerHTML = '<li class="empty">Deine Bestwerte stehen hier, sobald'
+      + ' die erste Ausfahrt aufgezeichnet ist.</li>';
+    return;
+  }
   liste.innerHTML = zeilen.map(([titel, rekord, alsText]) => {
     const a = rekord.ausfahrt;
     const wann = a.datum ? ` &middot; ${statsDatum(a.datum)}` : '';

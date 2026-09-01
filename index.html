@@ -653,11 +653,12 @@
             <span class="kachel-pfeil" aria-hidden="true">&rarr;</span>
           </button>
 
-          <!-- Als einzige Kachel kein Streckenfoto, sondern das weiche
-               Hintergrundbild der App: Neben Ride mit demselben Bild waere
-               es eine Dopplung, und hinter Zahlen ist ein ruhiger Grund
-               ohnehin der bessere. -->
-          <button class="kachel" id="btnStartStats" style="--kachel-bild: url('img/hintergrund-weich.jpg'); --kachel-lage: center 45%">
+          <!-- Als einzige Kachel traegt sie kein festes Bild: Hier steht
+               die EIGENE Maschine, und die weiss erst garage.js. Sie setzt
+               --kachel-bild bei jedem Zeichnen (zeigeBikeAufStatsKachel).
+               Ohne eigenes Foto ist es die Beispielmaschine, genau wie auf
+               dem Drehteller darueber. -->
+          <button class="kachel kachel-bike" id="btnStartStats">
             <span class="kachel-inhalt">
               <svg class="ic gross kachel-symbol"><use href="#icon-stats"></use></svg>
               <span class="kachel-text">
@@ -986,23 +987,25 @@
       <button class="btn ghost back-btn" id="btnStatsZurueck" hidden>&larr; Zur&uuml;ck</button>
       <h2>Meine Stats</h2>
 
-      <!-- Ohne eine einzige Ausfahrt gibt es nichts auszuwerten - dann
-           steht hier die Einladung statt einer Wand aus Nullen. -->
-      <div id="statsLeer" hidden>
-        <p class="rechts-alpha">Noch keine Ausfahrt aufgezeichnet. Starte
-        deine erste Aufzeichnung &ndash; hier entsteht dann dein
-        R&uuml;ckblick: Kilometer, Kurven, Schr&auml;glage und deine
-        Lieblingsstrecken.</p>
-        <button class="btn" id="btnStatsZurAufnahme">Zur Aufzeichnung</button>
-      </div>
-
-      <div id="statsInhalt" hidden>
+      <!-- Der Bildschirm steht IMMER vollstaendig da, auch ohne eine
+           einzige Ausfahrt - dann eben ueberall mit Nullen. Ein leerer
+           Bildschirm mit einer Einladung darauf zeigt nicht, was einen
+           erwartet; eine Wand aus Nullen mit einem Satz daneben schon. -->
+      <div id="statsInhalt">
         <section class="stats-held" id="statsHeld" aria-label="Gesamtbilanz"></section>
+
+        <div class="stats-hinweis" id="statsLeer" hidden>
+          <p>Noch keine Ausfahrt aufgezeichnet &ndash; deshalb steht hier
+          &uuml;berall eine Null. Sobald du die erste Aufzeichnung beendest,
+          f&uuml;llt sich alles von selbst: Kilometer, Kurven,
+          Schr&auml;glage, dein Monats- und Jahresr&uuml;ckblick und die
+          Strecken, die du immer wieder f&auml;hrst.</p>
+          <button class="btn" id="btnStatsZurAufnahme">Zur Aufzeichnung</button>
+        </div>
+
         <div class="stats stats-kacheln" id="statsKacheln"></div>
 
         <h3 class="stats-abschnitt">R&uuml;ckblick</h3>
-        <!-- Faellt weg, wenn keine Ausfahrt ein Datum traegt (alte
-             Aufzeichnungen) - dann gibt es nichts zurueckzublicken. -->
         <div id="statsRueckblick">
           <div class="stats-zeitwahl">
             <div class="segmented stats-umschalter" id="statsUmschalter">
@@ -1018,6 +1021,8 @@
             </div>
           </div>
           <div class="stats-diagramm" id="statsDiagramm"></div>
+          <p class="hint" id="statsZeitLeer" hidden>In diesem Zeitraum bist du
+          nicht gefahren.</p>
           <div class="stats stats-kacheln" id="statsZeitWerte"></div>
         </div>
         <p class="hint" id="statsOhneDatum" hidden>&Auml;ltere Ausfahrten ohne
