@@ -702,17 +702,26 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 /* Beim Antippen gibt die Kachel nach und das Bild darunter zieht leicht
    heran. Diese Verzoegerung ist das, was den Eindruck von Tiefe erzeugt:
    Glas und Bild bewegen sich nicht gleich schnell. */
-/* Die Kachel mit der eigenen Maschine. Das Bild ist freigestellt, hat also
-   keinen eigenen Hintergrund - es steht ganz darin statt beschnitten, und
-   zwar rechts, damit die Beschriftung unten links freie Bahn hat. Der
-   Rueckwaertsgang beim Ueberfahren (scale) wuerde ein freigestelltes Bild
-   ueber den Rand schieben, deshalb bleibt es hier stehen. */
-.kachel-bike {
-  --kachel-fuellung: contain;
-  --kachel-lage: right 78%;
+/* Die Kachel "Meine Stats". Welches Bild darin liegt, setzt garage.js -
+   dieselbe Maschine wie auf der Buehne darueber. Hier stehen nur die zwei
+   Ausschnitte dazu.
+
+   OHNE eigenes Foto liegt das hochformatige Werkstattbild darin, und davon
+   soll der Streifen mit der Maschine zu sehen sein - nicht die Decke. */
+#btnStartStats {
+  --kachel-lage: center 52%;
   background: var(--raum-dunkel);
 }
-.kachel-bike:hover::before { transform: none; }
+/* MIT eigenem Foto ist es ein FREIGESTELLTES Bild ohne Hintergrund: Es
+   steht ganz in der Kachel statt beschnitten (sonst waere nur ein Stueck
+   Tank zu sehen), und rechts, damit die Beschriftung unten links freie
+   Bahn hat. Das Heranziehen beim Ueberfahren wuerde es ueber den Rand
+   schieben, deshalb bleibt es dabei stehen. */
+#btnStartStats.kachel-bike {
+  --kachel-fuellung: contain;
+  --kachel-lage: right 78%;
+}
+#btnStartStats.kachel-bike:hover::before { transform: none; }
 
 .kachel:hover { transform: translateY(-2px); box-shadow: inset 0 1px 0 var(--glas-licht), inset 0 -1px 0 var(--schatten-weich), 0 18px 40px var(--schatten-mittel); }
 .kachel:hover::before { transform: scale(1.06); }

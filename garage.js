@@ -110,10 +110,18 @@ function zeichneGarage() {
   zeigeBikeAufStatsKachel();
 }
 
-/* Die Kachel "Meine Stats" traegt die EIGENE Maschine als Hintergrund -
-   dieselbe, die oben auf dem Drehteller steht, und mit demselben Rueckfall
-   auf die Beispielmaschine, wenn noch kein Foto da ist (bildAdresse in
-   finder.js entscheidet das).
+/* Die Kachel "Meine Stats" traegt DIESELBE Maschine wie die Buehne darueber -
+   und zwar in beiden Faellen, die es dort gibt:
+
+     MIT eigenem Foto  das freigestellte Bild des Nutzers.
+     OHNE eigenes Foto der Ausschnitt des Werkstattbildes mit der
+                       Beispielmaschine darauf. Nicht bike-standard.webp:
+                       Auf der Buehne steht ohne eigenes Foto der GERENDERTE
+                       Raum samt Maschine, und die Kachel soll denselben
+                       Anblick zeigen, nicht einen zweiten.
+
+   Die Fallunterscheidung laeuft ueber bildAdresse() aus finder.js: Liefert
+   sie das Standardbild zurueck, gibt es kein eigenes Foto.
 
    Warum von hier aus und nicht fest im HTML: Das Bild aendert sich, sobald
    der Nutzer ein Foto hinterlegt oder das Motorrad wechselt - und
@@ -125,7 +133,13 @@ function zeichneGarage() {
 function zeigeBikeAufStatsKachel() {
   const kachel = document.getElementById('btnStartStats');
   if (!kachel || typeof bildAdresse !== 'function') return;
-  kachel.style.setProperty('--kachel-bild', `url("${bildAdresse(motorradAktiv())}")`);
+
+  const adresse = bildAdresse(motorradAktiv());
+  const eigenes = adresse !== STANDARD_BILD;
+  const garageBild = garageAktiv();
+  kachel.classList.toggle('kachel-bike', eigenes);
+  kachel.style.setProperty('--kachel-bild',
+    `url("${eigenes ? adresse : (garageBild.bildStandard || garageBild.bild)}")`);
 }
 
 /* --- Die Buehne: Maschine auf den Drehteller setzen -------------------------
