@@ -2051,3 +2051,112 @@ Alle drei waren stillschweigend auf den alten Raum kalibriert:
 
 `kacheln/reifen.jpg` ist aus dem neuen Raum neu geschnitten — sonst zeigte
 die Reifen-Kachel eine Werkstatt, die es nicht mehr gibt.
+
+---
+
+## 02.09.2026 — motoin, und warum aus dem Preisvergleich ein Angebot wurde
+
+Bei Webgains hat **motoin** die Bewerbung angenommen (Programm 1435,
+Kampagne 1749874, 4 Prozent, Cookie 30 Tage). Zusammen mit reifen.com über
+AWIN gibt es damit zwei Partner, die sich in keinem Artikel überschneiden:
+motoin führt keine Reifen, reifen.com nichts anderes.
+
+**Was verworfen wurde: der Preisvergleich.** `shop.js` war seit dem
+24.08.2026 als Vergleich gebaut, mit mehreren Angeboten je Produkt und der
+Überschrift „Preisvergleich". Mit einem Händler je Warengruppe gibt es je
+Produkt genau ein Angebot, und eine Seite, über der „Preisvergleich" steht
+und auf der ein Preis erscheint, ist irreführend. Der Unterbau bleibt –
+`katalog.js` kann Angebote über die EAN bündeln und sortiert nach
+Gesamtpreis –, geändert hat sich nur die Sprache. Kommt ein zweiter
+Händler für dieselbe Warengruppe, wird von selbst wieder ein Vergleich
+daraus.
+
+**Aus „Shop" wurde „Ausrüstung".** Wir verkaufen nichts, wir empfehlen und
+verlinken. Die Ids im HTML tragen weiter `shopScreen` und `shopSuche`:
+Dreißig Fundstellen mitzuziehen wäre Arbeit ohne Gegenwert, geändert hat
+sich, was der Nutzer liest.
+
+**Die Klickadresse: `track.webgains.com`, nicht die Ausweichdomain.** Der
+Deeplink-Generator im Webgains-Konto bietet `assets.ikhnaie.link` an,
+gedacht gegen Werbeblocker; auch die `link`-Spalte des Feeds zeigt
+dorthin. Beide Adressen führen nachweislich zur selben Weiterleitung samt
+`wgu`-Kennung, nachgemessen am 02.09.2026. Genommen wird trotzdem die
+offizielle: Sie steht in der Sicherheitsrichtlinie der App und kurz in der
+Adresszeile des Nutzers, und dort sieht eine Zufallsdomain aus wie etwas,
+dem man nicht trauen soll. Der Preis dafür sind die Klicks, die
+Werbeblocker schlucken.
+
+**Der Katalog: 6.100 statt 15.328 Produkten.** Der Feed hat 70.682 Zeilen,
+je eine pro Größe. Über `item_group_id` zusammengefasst bleiben 15.328
+Produkte, davon 9.191 in den Warengruppen, die eine Motorradapp braucht.
+Gepackt wären das 450 KB, und das Budget für beide Kataloge zusammen sind
+500 KB, von denen der Reifenkatalog 273 belegt. Beschnitten wird je
+Warengruppe um denselben Anteil, und zwar nach der Zahl der
+Größenvarianten: Eine Jacke, die motoin in acht Größen führt, ist eine
+geführte Baureihe; eine, von der nur XS daliegt, ist ein Rest. Was
+wegfällt, meldet das Importskript am Ende – ein stiller Deckel liest sich
+wie Vollständigkeit.
+
+**Drei Adressen werden gebaut statt gespeichert.** Nachgemessen an allen
+70.682 Zeilen: Die Produktnummer steckt in der `item_group_id`
+(`de-11102688` heißt Produkt 102688), motoin löst ein Produkt allein über
+diese Nummer auf, und der Bilddateiname trägt sie ebenfalls. Das spart
+über die Hälfte der Dateigröße. Ein Sonderfall kostete eine Stunde: 2.084
+der Bilder sind PNG, nicht JPG – die laufende Bildnummer trägt die Endung
+jetzt als Versatz von 100 mit.
+
+**Bilder in der Größe, die der Händler selbst veröffentlicht.** Der Feed
+nennt `original_images` (58 KB je Bild). motoin legt dasselbe Bild
+zusätzlich unter `info_images` (5 KB) und `popup_images` (14 KB) ab; die
+App nimmt die kleinen. Es ist dasselbe Bild vom selben Server in einer
+Größe, die der Händler selbst ausliefert – wir verändern nichts daran, was
+die Bildlizenz auch nicht erlauben würde. Sicherheitshalber sollte motoin
+das schriftlich bestätigen, steht in `AUFGABEN.md`.
+
+**Die Einwilligung weiß jetzt, für wen sie gilt.** Vorher war sie ein
+einziges Ja ohne Empfänger, und ein zweiter Partner hätte sie
+stillschweigend geerbt. Jetzt steht der Umfang mit im Speicher, und ein
+gespeichertes Ja aus der Zeit vor motoin gilt eng ausgelegt nur für
+reifen.com. Das kostet eine zweite Frage und ist der einzige ehrliche Weg:
+Man kann nicht in etwas einwilligen, das es beim Einwilligen nicht gab.
+
+**Ein Fehler, der nie aufgefallen wäre.** `öffneAngebot()` und
+`öffneShopSeite()` in `shop.js` riefen `geraet.öffneExtern()` direkt auf
+und gingen damit an der Einwilligung vorbei. Sichtbar war das nie, weil
+kein Angebot einen Link trug – der erste echte hätte ohne Frage geöffnet.
+Beide laufen jetzt durch `öffnePartnerLink()`.
+
+**Der Fahrstil ist opt-in, und die Schräglage entscheidet nicht mit.** Aus
+Fahrten abzuleiten, welche Ausrüstung jemandem angeboten wird, ist
+Profilbildung zu Werbezwecken (Art. 21 Abs. 2 DSGVO). Also: nur auf dem
+Gerät, einmal gefragt, Voreinstellung aus. Gerechnet wird aus
+Streckenlänge, Fahrzeit, Höhenmetern und Kurvigkeit. Die gemessene
+Schräglage wäre der naheliegende Wert und ist trotzdem draußen: Sie fehlt
+bei Fahrten vor dem 24.08.2026, ist ohne Messquelle leer, ihre Genauigkeit
+schwankt zwischen fünf und zehn Grad, und ein Maximum je Fahrt sagt nur,
+DASS es eine Kurve gab. Sie darf bestätigen, nicht entscheiden.
+
+**Die Kurvigkeitsschwelle ist geerbt, nicht gemessen.** Für „kurvig" gilt
+280 Grad je Kilometer – die Grenze, ab der `kurvigkeitsWort()` von „solide
+kurvig" auf „richtig kurvig" wechselt. Sie ist am Planer geeicht, an
+geglätteten BRouter-Linien; eine aufgezeichnete Fahrt rechnet dieselbe
+Zahl aus rohem GPS, und Rauschen erzeugt Richtungswechsel, die niemand
+gefahren ist. Von den beiden erwogenen Zahlen steht deshalb bewusst die
+höhere da (280 statt der 250 aus dem Konzept): im Zweifel jemanden **nicht**
+zum Kurvenjäger erklären. Nachmessen steht in `AUFGABEN.md`.
+
+**Die billigsten Artikel sind keine Vorschläge.** Die Liste sortiert nach
+Gesamtpreis, und die Vorschläge liefen anfangs dieselbe Reihenfolge
+entlang – heraus kam ein Schnallen-Set von 11,80 Euro als Antwort auf
+„dir fehlen Stiefel". Die Sprossen 3 bis 6 überspringen deshalb das
+günstigste Viertel ihrer Warengruppe; die Sprossen 1 und 2 nicht, denn wenn
+ein Teil ausdrücklich an die eigene Maschine passt, ist sein Preis egal.
+Dazu fielen die Zubehör-Unterordner aus den Hauptgruppen heraus:
+`Bekleidung>Stiefel>Zubehör` sind Schnallen und Einlegesohlen, keine
+Stiefel.
+
+**Und die Übersicht sortiert nicht mehr stur nach Preis.** Ohne gewählte
+Warengruppe standen oben sechzig Spiegeladapter. Jetzt geht sie reihum
+durch die Warengruppen, innerhalb einer Gruppe weiter nach Preis. Wer eine
+Gruppe wählt oder sucht, bekommt wieder die reine Preisreihenfolge – dann
+will jemand genau das sehen.

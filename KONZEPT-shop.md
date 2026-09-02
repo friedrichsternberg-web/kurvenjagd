@@ -1,6 +1,34 @@
 # Konzept: Reifen und Ausrüstung, der Shop mit zwei echten Partnern
 
-Stand 02.09.2026. Entwurf zur Entscheidung, noch nichts davon gebaut.
+Stand 02.09.2026. **Entschieden und gebaut.** Was hier steht, ist der
+Bauplan; was daraus geworden ist, steht darunter.
+
+## Umgesetzt am 02.09.2026
+
+Alle fünf offenen Punkte hat Friedrich so entschieden wie vorgeschlagen:
+Reiter „Ausrüstung", Klickadresse `track.webgains.com`, Fahrstil-Vorschläge
+voreingestellt aus, Feed herunterladen erlaubt, 500 KB für beide Kataloge.
+
+Gebaut ist alles bis auf den Wunschzettel (braucht das Backend). Was beim
+Bauen **anders** kam als geplant, steht in `ENTSCHEIDUNGEN.md` unter dem
+02.09.2026. Die vier wichtigsten Abweichungen:
+
+- **Aus 8.000 bis 12.000 geschätzten Produkten wurden 6.100.** Der Feed
+  ergab nach dem Zusammenfassen 15.328 Produkte, davon 9.191 in den
+  relevanten Warengruppen. Für 224 KB gepackt reichte es für 66 Prozent
+  davon.
+- **Die Produktadresse kostet null Bytes.** Sie ist aus der
+  `item_group_id` baubar, nachgemessen an allen 70.682 Zeilen. Dasselbe
+  gilt für den Bilddateinamen.
+- **Die Schräglage entscheidet beim Fahrstil nicht mit.** Sie fehlt bei
+  alten Fahrten, ist ohne Sensor leer, und ihre Genauigkeit schwankt. Sie
+  darf bestätigen, nicht entscheiden.
+- **Ein Fehler kam beim Umbau ans Licht:** `öffneAngebot()` in `shop.js`
+  ging an der Einwilligung vorbei. Sichtbar war das nie, weil kein
+  Angebot einen Link trug.
+
+**Noch nicht veröffentlicht.** Der Bereich ist eingeschaltet
+(`SHOP_AKTIV = true`), aber vor dem Push fehlt die Gewerbeanmeldung.
 
 ## Was feststeht
 

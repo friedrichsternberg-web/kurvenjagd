@@ -24,10 +24,11 @@ Gerät nicht, solange niemand angemeldet ist.
 |---|---|
 | `kurvenjagd.routen` | gespeicherte Touren: Wegpunkte, Streckenverlauf, Kurvigkeit, Fotos als Daten-URL |
 | `kurvenjagd.garage` | Motorräder (Marke, Modell, Baujahr, Hubraum, Leistung, Bild) und Ausrüstung |
-| `kurvenjagd.shop` | Merkliste des Shops: Produkt-Schlüssel, Datum und günstigster Gesamtpreis beim Merken |
+| `kurvenjagd.shop` | Merkliste: Produkt-Schlüssel (`motoin:88484`), Datum, Marke und Name beim Merken, dazu die eigene Preisbeobachtung – höchstens zwölf Punkte je Eintrag |
 | `kurvenjagd.neigungBasis` | Nullpunkt für die Schräglage: die Einbaulage des Handys als drei Achsen, dazu der Ruhefehler des Gyroskops |
 | `kurvenjagd.reifenmass` | die eingetragene Reifengröße je Motorrad, getrennt für vorn und hinten – drei Zahlen, sonst nichts. Die **Serienbereifung** der gängigen Modelle steht daneben in `reifen-massen.js`, einer Datei der App – nachgeschlagen wird auf dem Gerät, dafür geht nichts ins Netz |
-| `kurvenjagd.partner` | die Einwilligung in Partner-Angebote: `ja` oder `nein` und der Zeitpunkt. **Keine Klicks, keine angesehenen Produkte** |
+| `kurvenjagd.partner` | die Einwilligung in Partner-Angebote: `ja` oder `nein`, der Zeitpunkt und **für welche Händler** sie gilt. **Keine Klicks, keine angesehenen Produkte** |
+| `kurvenjagd.fahrstil` | die Einwilligung, aufgezeichnete Fahrten für Vorschläge auszuwerten: `ja` oder `nein` und der Zeitpunkt. Das Ergebnis selbst wird **nicht** gespeichert, es wird bei Bedarf neu gerechnet |
 
 Aufgezeichnete Fotos liegen **verkleinert im Speicher selbst**, nicht als
 Dateien. Das ist auch der Grund für die 5-MB-Grenze und dafür, dass
@@ -167,7 +168,7 @@ Gelöscht wird in dieser Reihenfolge:
 | 3 | alle Zeilen mit dieser `nutzer_id` | Tabelle `touren` |
 | 4 | das Auth-Konto selbst, samt E-Mail-Adresse | `auth.users` |
 | 5 | die Profilzeile, per `ON DELETE CASCADE` mit Schritt 4 | Tabelle `profile` |
-| 6 | `kurvenjagd.routen`, `kurvenjagd.garage`, `kurvenjagd.shop` und ein noch nicht hochgeladenes Profilbild | localStorage des Geräts |
+| 6 | `kurvenjagd.routen`, `kurvenjagd.garage`, `kurvenjagd.shop`, `kurvenjagd.partner`, `kurvenjagd.fahrstil`, `kurvenjagd.reifenmass` und ein noch nicht hochgeladenes Profilbild | localStorage des Geräts |
 
 Die Reihenfolge ist Absicht. Die Tabellen `touren` und `profile` hängen per
 Fremdschlüssel mit `ON DELETE CASCADE` an `auth.users`, ihre Zeilen würden
@@ -360,27 +361,66 @@ Angebot wieder.
 ein zweiter Händler dazu, ändert sich dort nichts – nur ein Eintrag in
 `PARTNER` und eine Zeile in der Tabelle oben.
 
-## Der Shop für Ausrüstung (abgeschaltet, reine Beispieldaten)
+## Ausrüstung: das Partnerprogramm motoin (seit 02.09.2026)
 
-Der Shop zeigt derzeit **ausschließlich mitgelieferte Beispieldaten** aus
-`produkte.js`. Es gibt keine Partnerverträge und keine echten Angebote –
-der Knopf "Zum Shop" an einem Angebot zeigt nur einen Hinweis.
-**Es verlässt dabei nichts das Gerät**, und die App zählt auch keine
-Klicks.
+Der Bereich **„Ausrüstung"** zeigt echte Angebote von motoin, vermittelt
+über das Netzwerk **Webgains**. Die Beispieldaten sind weg: `produkte.js`
+ist gelöscht, nicht ausgeblendet.
 
-Einzige Ausnahme: Der Abschnitt **"Direkt zu den Shops"** öffnet auf
-Fingertipp die Website des jeweiligen Händlers (Louis, POLO, FC-Moto,
-Motoin, 24MX) in einem neuen Browser-Tab. Die App sendet dabei selbst
-nichts; was der Browser beim Aufruf der fremden Seite überträgt und was
-diese Seite an Cookies setzt, liegt beim jeweiligen Händler. Die Links
-tragen derzeit **keine Partner-Kennung**.
+Der Ablauf ist derselbe wie bei den Reifen, mit zwei Unterschieden.
 
-Dieser Shop ist über `SHOP_AKTIV = false` in `app.js` **abgeschaltet** und
-über die Oberfläche nicht erreichbar. Er wartet auf ein Partnerprogramm
-für Bekleidung; wie es dann aussieht, steht ein Kapitel weiter oben bei
-den Reifen. Der Weg dorthin ist derselbe: `öffneAngebot()` in `shop.js`
-ruft dann `öffnePartnerLink()` aus `partner.js`, und damit gilt die
-Einwilligung dort automatisch mit.
+**Erstens liegen die Produktfotos beim Händler selbst**, nicht bei einem
+Bilddienst des Netzwerks: `www.motoin.de`. Sie werden von dort geladen,
+sobald jemand den Bereich öffnet, je sichtbarem Foto eine Anfrage, dabei
+geht die IP-Adresse dorthin. **Gemessen am 02.09.2026 antwortet der
+Bildserver ohne eine einzige Set-Cookie-Zeile** und liest nichts vom
+Gerät. Damit gilt hier dieselbe Begründung wie bei den Reifenfotos:
+§ 25 TDDDG greift nicht, es bleibt die IP-Übertragung nach
+Art. 6 Abs. 1 lit. b und f DSGVO.
+
+**Zweitens läuft der Klick über `track.webgains.com`.** Auch dort wird
+kein Cookie gesetzt – Webgains hängt die Kennung als Parameter `wgu` an
+die Zieladresse, und das Cookie setzt danach motoin auf der eigenen Seite.
+Die App fragt trotzdem vorher: Es wird eine Kennung vergeben, an der ein
+Kauf innerhalb von 30 Tagen uns zugeordnet wird, und der Nutzer soll das
+wissen, bevor er dorthin geht. Der Weg ist derselbe wie bei den Reifen:
+alles durch `öffnePartnerLink()` in `partner.js`, und nirgendwo sonst.
+
+**Was die Einwilligung neu kann: Sie weiß, für wen sie gilt.** Unter
+`kurvenjagd.partner` steht jetzt auch die Liste der Händler, die im Blatt
+genannt waren. Ein „Ja" für reifen.com deckt motoin nicht mit ab; kommt
+ein Händler dazu, fragt die App noch einmal. Ein gespeichertes „Ja" aus
+der Zeit vor motoin gilt eng ausgelegt nur für reifen.com.
+
+**Was NICHT passiert:** Kein Klicklink wird vorab geladen – kein
+`prefetch`, kein verstecktes Bild, kein Aufwärmen der Verbindung. Beide
+Programme verbieten das ausdrücklich (Cookie-Dropping), und die App baut
+den Link deshalb erst im Moment des Klicks.
+
+### Vorschläge aus den eigenen Fahrten (opt-in, seit 02.09.2026)
+
+Serpa kann aus den aufgezeichneten Ausfahrten einen groben Fahrstil
+ableiten – kurvig, Touren, Alltag – und danach auswählen, welche
+Ausrüstung vorgeschlagen wird. Gerechnet wird **ausschließlich auf dem
+Gerät**: Es geht dabei nichts an Händler, Netzwerk oder an uns, und das
+Ergebnis wird nicht einmal gespeichert.
+
+Das ist trotzdem Profilbildung zu Werbezwecken, und dafür steht ein
+Widerspruchsrecht nach Art. 21 Abs. 2 DSGVO. Deshalb fragt die App einmal,
+statt es einfach zu tun. **Voreinstellung ist aus.** Der Schalter steht
+unter „Impressum & Datenschutz" neben dem Widerruf für die
+Partnerfreigabe; abgelegt wird unter `kurvenjagd.fahrstil` nur, ob und
+wann entschieden wurde.
+
+Vorschläge aus der Garage (Marke, Modell, fehlende Ausrüstung) laufen
+unabhängig davon weiter. Wer sein Motorrad einträgt, erwartet, dass die
+App es benutzt.
+
+Verwendet werden nur Werte, die ohnehin je Fahrt gespeichert sind:
+Streckenlänge, Fahrzeit, Höhenmeter und Kurvigkeit. Die gemessene
+**Schräglage bestätigt allenfalls, sie entscheidet nie** – sie fehlt bei
+Fahrten vor dem 24.08.2026, ist ohne Messquelle leer, und ihre
+Genauigkeit schwankt je nach Quelle zwischen etwa fünf und zehn Grad.
 
 ## Die Besuchszählung (seit 26.08.2026)
 

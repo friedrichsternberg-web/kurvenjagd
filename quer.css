@@ -126,6 +126,21 @@
     .nav-marke .wortmarke-bild { width: 118px; }
   }
 
+  /* Mit "Ausruestung" als sechstem Eintrag reichte das nicht mehr: An der
+     900er-Ecke stand die Leiste 17 Punkte ueber, und der Konto-Knopf lag
+     halb ausserhalb. Nachgemessen, nicht geschaetzt.
+
+     Weg geht die Unterzeile "Deine Motorradapp", nicht ein Eintrag: Der
+     Untertitel ist auf einer 500 Punkte hohen Flaeche ohnehin die
+     unwichtigste Zeile, ein fehlender Reiter dagegen ein fehlender Weg. */
+  @media (max-width: 1000px) {
+    .haupt-nav { padding-inline: var(--s3); }
+    .nav-tab { padding: 0 var(--s2); font-size: 14px; letter-spacing: 0.03em; }
+    .nav-tab .ic { width: 20px; height: 20px; }
+    .nav-marke .wortmarke-sub { display: none; }
+    .nav-marke .wortmarke-bild { width: 104px; }
+  }
+
   /* Alles, was die Marke ein ZWEITES Mal ins Bild braechte. Der Grundsatz
      ist ueberall derselbe: Im Querformat traegt die Kopfleiste den
      Schriftzug und das Abzeichen, also verschwindet beides ueberall dort,

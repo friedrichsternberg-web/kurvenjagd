@@ -332,133 +332,104 @@ allein der Klick zum Shop. Alles Weitere in `DATEN.md` und
 
 ---
 
-## Der Shop für Ausrüstung: von der Demo zum echten Preisvergleich
+## Ausrüstung: das zweite Partnerprogramm (motoin, seit 02.09.2026)
 
-Die Grundlage steht seit dem 24.08.2026: Übersicht mit Vorschlägen aus der
-Garage, Produktseite mit Preisvergleich, Merkliste. Alles Beispieldaten,
-die Angebotsplätze heißen bewusst "Partner-Shop A/B/C" – keine echten
-Händler mit erfundenen Preisen, keine erfundenen Shop-Namen. Die
-Rechercheberichte zu Markt und Recht liegen im Brain
-(`Projekte/Serpa.md`, Abschnitt vom 24.08.2026).
+**Steht und läuft.** motoin hat die Bewerbung über Webgains angenommen
+(Programm 1435, Kampagne 1749874, 4 Prozent, Cookie 30 Tage). Der Bereich
+heißt jetzt **„Ausrüstung"**, zeigt 6.100 echte Artikel und ist über die
+Leiste und die Startkachel erreichbar. `SHOP_AKTIV` steht auf `true`.
 
-### Bevor echte Angebote laufen dürfen (Pflicht, sonst Abmahnrisiko)
+Was gebaut wurde: `katalog.js` (eine Produktform für alle Händler,
+Ladeweg, Abgleich über die EAN), `motoin-import.py` und
+`motoin-katalog.js`, dazu die Teilung des alten `shop.js` in `shop.js`,
+`merkliste.js`, `vorschlaege.js` und `produktseite.js`, und `fahrstil.js`
+für die dritte Sprosse der Vorschlagsleiter. `produkte.js` ist gelöscht.
 
-1. **Gewerbeanmeldung** – Affiliate-Einnahmen sind gewerblich. Vorher mit
-   dem Praxisbetrieb klären, ob eine Nebentätigkeit anzuzeigen ist.
-2. **Impressum** nach § 5 DDG, zusätzlich mit dem Verantwortlichen nach
-   § 18 Abs. 2 MStV (nötig wegen "Unsere Einschätzung"). KEIN Link auf die
-   EU-Streitbeilegungsplattform – die ist seit Juli 2025 abgeschaltet, der
-   Link selbst wäre abmahnbar.
-3. **Datenschutzerklärung** mit eigenem Affiliate-Abschnitt (Netzwerk,
-   Kennungen, Widerruf). Grundlage: `DATEN.md`.
-4. **Einwilligung vor dem ersten Shop-Klick** (§ 25 TDDDG): gehört in
-   `öffneAngebot()` in `shop.js`, die einzige Klickstelle. Kommentar dort
-   markiert die Stelle.
-5. **Beispieldaten restlos raus**, sobald echte Angebote da sind – nicht
-   ausblenden, entfernen. Demo-Preise neben echten wären irreführend.
-6. Am Knopf bleibt die Kennzeichnung: "Anzeige"-Abzeichen an jeder Zeile
-   (steht schon), bei echten Links zusätzlich die Beschriftung
-   `Zum Shop (Anzeige)`.
-7. Vor dem Livegang einmal ein **Fachanwalt für IT-/Wettbewerbsrecht**
-   über Kennzeichnung, Preisdarstellung und die Vergleichs-Offenlegung.
+Die Begründungen zu allem, was dabei anders entschieden wurde als geplant,
+stehen in `ENTSCHEIDUNGEN.md` (02.09.2026), das Konzept in
+`KONZEPT-shop.md`.
 
-### Der Weg zu den Partnern (Reihenfolge, die am schnellsten trägt)
+### Was noch offen ist
 
-1. Web-App vorzeigbar + Rechtstexte + Gewerbe (siehe oben).
-   Stand 25.08.2026: Desktop-Fassung steht (`quer.css`), der Demo-Shop ist
-   für die Prüfphase per `SHOP_AKTIV` ausgeblendet. Es fehlen: Impressum/
-   Datenschutz-Bildschirm (braucht Friedrichs Anschrift) und die Domain.
-2. **AWIN-Registrierung — ERLEDIGT, Account angenommen (25.08.2026).**
-   **Erstes Programm angenommen: reifen.com am 31.08.2026** (siehe
-   eigener Abschnitt oben).
-   → POLO Motorrad beantragen (MID 11475, Programmbetreuung
-   PeakLive, polo-motorrad@peaklive.de) und moto24 (MID 16934).
-   POLO läuft trotz Sanierungsverfahren weiter, aber: nicht als einzige
-   Einnahmequelle einplanen, kurze Auszahlungszyklen wählen.
-3. **Webgains** → FC-Moto (programID 4028), motoin, ChromeBurner.
-4. Parallel **billiger.de (solute GmbH)** anfragen: fertige
-   Preisvergleichsdaten per REST-API, Vergütung je Klick, kostenlos –
-   verlangt aber ein eingetragenes Gewerbe.
-5. **Louis-Status direkt klären**: Die belboon-Kampagnen sind offline
-   (Stand 24.08.2026), das frühere Programm ist nicht mehr auffindbar.
-   Anfrage über die Partnerprogramm-Seite von Louis.
-6. Amazon zuletzt: niedrigste Sätze in Auto & Motorrad (4,5 %),
-   24-h-Cookie, und die alte Produktdaten-API (PA-API 5.0) wird zum
-   15.05.2026 abgeschaltet – wenn, dann direkt die neue Creators API.
-
-### Technisch vorbereitet, wartet auf die Verträge
-
-- **Feed-Import**: `produkte.js` dokumentiert im Kopf die Zuordnung zu den
-  AWIN-Feldern (`ean`, `search_price`, `delivery_cost`, `aw_deep_link`,
-  `aw_image_url`). Getauscht wird nur `shopKatalog()` in `shop.js` gegen
-  einen Serverabruf – der Rest der App merkt nichts. Achtung: `ean` ist
-  bei AWIN kein Pflichtfeld, der Abgleich über mehrere Shops braucht einen
-  Rückfall über Marke + Modellname.
-- **Produktbilder — recherchiert am 24.08.2026, hier das Ergebnis.**
-  Die Galerie und die Bildkacheln sind fertig: Sobald `bilder[].url`
-  gefüllt ist, zeigen sie Fotos statt Symbolen. Es fehlen nur Bilder, die
-  gezeigt werden dürfen.
-
-  **Der einzige Weg, der in Tagen echte Bilder für den ganzen Katalog
-  liefert, ist ein Shop-Programm mit Produktfeed.** Bester Kandidat:
-  **FC-Moto über Webgains** (programID 4028, 366.902 Artikel; FC-Moto
-  führt Schuberth, Shoei, Alpinestars, REV'IT!, Dainese, Held und Givi —
-  das eine Programm deckt fast den ganzen Demo-Katalog ab). Ansprechpartner
-  laut Programmseite: Michael Schneider, mschneider@webgains.de.
-  **Netzwerk-Mitgliedschaft allein reicht nicht** — die Bildlizenz hängt
-  ausdrücklich an der Teilnahme am jeweiligen Advertiser-Programm.
-
-  Drei Bedingungen aus den AWIN-Publisher-AGB, die auch für andere
-  Netzwerke sinngemäß gelten und die man kennen muss:
-  1. Die Lizenz gilt für **unveränderte** Bilder. Freistellen, Zuschneiden
-     oder Überlagern ist damit nicht gedeckt, Skalieren schon.
-  2. Sie ist **widerruflich**. Programmaustritt heißt: Bilder müssen weg,
-     dafür braucht es eine Löschroutine.
-  3. Das Netzwerk prüft die Rechte **nicht** und lässt sich von uns
-     freistellen. Liefert ein Shop ein Bild, an dem er selbst keine Rechte
-     hat, haften wir. Deshalb vom Händler eine schriftliche Zusicherung
-     einholen.
-
-  **Zweiter Weg, langsamer, aber unabhängig: direkt beim Hersteller um
-  Bildfreigabe bitten.** Die deutschen Mittelständler sind die besten
-  Kandidaten: Held (Burgberg, 08321/6646-0), Schuberth (Magdeburg,
-  schuberth.com/presse.html), SW-Motech (Rauschenberg,
-  sw-motech.info/en/media/press-portal.html). Wichtig: nicht die Presse-,
-  sondern die **Marketing- oder Händlerbetreuung** ansprechen — Presse
-  denkt in redaktioneller Nutzung und lehnt kommerzielle Anfragen eher ab.
-  In die Anfrage gehören ausdrücklich: kommerzieller Zweck, Produktliste,
-  Kanäle (App, Web, Store-Screenshots), räumlich weltweit, **zeitlich
-  unbefristet**, Bearbeitungsrecht (Zuschneiden, Freistellen), gewünschter
-  Bildnachweis. Eine formlose Zusage reicht nicht: Geizhals sind
-  eingeräumte Bildrechte wieder entzogen worden, deshalb dort ab 2008 die
-  Nutzerbild-Datenbank bepixelung.org.
-
-  **Nicht gangbar:** Bilder aus Shops oder Herstellerseiten herunterladen
-  und selbst hosten (genau der Fall EuGH Renckhoff, C-161/17, mit reger
-  Abmahnpraxis). Presse-Downloads ohne Rückfrage benutzen — die sind fast
-  immer nur für redaktionelle Nutzung freigegeben, und ein Preisvergleich
-  ist keine. Open Icecat (deckt Motorradzubehör nicht ab). Amazons
-  Produkt-API (setzt drei vermittelte Käufe voraus — Henne und Ei).
-  Einbetten vom fremden Server ist rechtlich umstritten und praktisch
-  unbrauchbar, weil man dann nicht zwischenspeichern darf.
-- **"Direkt zu den Shops"** (`SHOP_VERZEICHNIS` in produkte.js) führt
-  bislang auf die einfachen Website-Adressen. Mit Partnerprogramm wird je
-  Eintrag `affiliateLink` gefüllt UND der Knopf als "Anzeige"
-  gekennzeichnet – der Hinweistext unter den Chips kündigt das schon an
-  und muss dann mitgezogen werden.
-- **Preisalarm**: `preisBeimMerken` und `gemerktAm` liegen schon in der
-  Merkliste. Sobald es Mitteilungen gibt (siehe Punkt 5 oben), ist der
-  Alarm nur noch "vergleichen und melden".
+- **Den Katalog frisch halten.** Der Feed lässt sich anders als bei AWIN
+  **nicht per Skript holen**: Die Adresse
+  `platform-api.webgains.com/auth/publishers/1426402/campaigns/1749874/feeds/products?format=csv`
+  hängt an der angemeldeten Sitzung. Also von Hand herunterladen
+  (Werbemittel → Produktfeeds → Feed herunterladen, CSV) und
+  `python3 motoin-import.py` laufen lassen. **Zu prüfen:** ob Webgains
+  einen API-Schlüssel für den Feed anbietet – dann ginge es wie bei
+  reifen.com automatisch.
+- **Bildgrößen schriftlich bestätigen lassen.** Der Feed nennt
+  `original_images`, die App nimmt die kleineren `info_images` und
+  `popup_images` vom selben Server. Dasselbe Bild, dieselbe Quelle, nur
+  die Auslieferungsgröße des Händlers – trotzdem eine formlose Anfrage an
+  motoin oder Webgains wert, weil die Programmbedingungen „nur aus dem
+  Produktfeed" sagen.
+- **Die Kurvigkeitsschwelle nachmessen.** `KURVIG_AB_GRAD_JE_KM` in
+  `fahrstil.js` steht auf 280, geerbt von `kurvigkeitsWort()` und damit am
+  **Planer** geeicht. Aufgezeichnete Fahrten rechnen dieselbe Zahl aus
+  rohem GPS und fallen tendenziell zu hoch aus. Sobald genug eigene
+  Ausfahrten vorliegen: beide Werte für dieselbe Strecke vergleichen und
+  die Schwelle korrigieren.
+- **Modellgebundene Teile besser erkennen.** Sprosse 1 der Leiter sucht
+  das Modell im Produkttitel („Yakk EXP Yamaha Ténéré 700 T7 25-,
+  Sturzbügel"). Das trifft, wenn der Händler das Modell nennt, und geht
+  leer aus, wenn er es in die Beschreibung schreibt. Die Beschreibung
+  steht aus Platzgründen nicht im Katalog.
+- **Preisalarm**: Der Preisverlauf liegt jetzt je Merklisten-Eintrag
+  (`verlauf`, höchstens zwölf Punkte). Sobald es Mitteilungen gibt, ist
+  der Alarm nur noch „vergleichen und melden".
+- **Katalog je Warengruppe teilen**, falls das Budget pinchen sollte.
+  Heute sind es 224 KB gepackt für motoin und 273 für die Reifen, zusammen
+  497 von 500. Wer mehr Artikel will, teilt `motoin-katalog.js` nach
+  Warengruppen auf und lädt nur die geöffnete – der Ladeweg in
+  `katalog.js` kann das schon, es fehlt nur die Aufteilung im Import.
+- **Warengruppen, die draußen blieben**: Visiere und Helmzubehör (nur
+  sinnvoll, wenn die Garage Helme führt), Brillen, Motocross,
+  Funktionskleidung. Dazu grundsätzlich Reiniger und Pflegemittel, solange
+  es kein Grundpreisfeld gibt (§ 4 PAngV).
 - **Keine Sterne-Bewertungen**, bis eine echte Quelle samt Anzahl,
   Zeitraum und Herkunft angezeigt werden kann – erfundene Sterne sind ein
   Per-se-Verbot ohne Demo-Ausnahme, deshalb hat das Datenmodell bewusst
   kein Bewertungsfeld.
-- **Betriebsstoffe und Pflegemittel** (Öl, Kettenspray) erst mit
-  Grundpreis-Feld (€/l nach § 4 PAngV) in den Katalog.
-- Die **Ausrüstungs-Wand der Garage** (siehe eigener Abschnitt unten)
-  wird mit echten Produktdaten wieder attraktiv: Shop-Kategorien und
-  Ausrüstungs-Arten benutzen dieselben Schlüssel, ein gekauftes Teil kann
-  direkt in die Garage übernommen werden.
+- Die **Ausrüstungs-Wand der Garage** benutzt dieselben Schlüssel wie die
+  Warengruppen des Katalogs; ein gekauftes Teil könnte direkt in die
+  Garage übernommen werden.
+
+### Bevor das live gehen darf (Pflicht, sonst Abmahnrisiko)
+
+Dieselbe Liste wie bei den Reifen, und sie ist weiterhin offen:
+
+1. **Gewerbeanmeldung** – Affiliate-Einnahmen sind gewerblich. Vorher mit
+   dem Praxisbetrieb klären, ob eine Nebentätigkeit anzuzeigen ist.
+   **Das ist der Grund, aus dem der aktuelle Stand nicht veröffentlicht
+   werden darf.**
+2. **Impressum** nach § 5 DDG, zusätzlich mit dem Verantwortlichen nach
+   § 18 Abs. 2 MStV. KEIN Link auf die EU-Streitbeilegungsplattform – die
+   ist seit Juli 2025 abgeschaltet, der Link selbst wäre abmahnbar.
+3. **Datenschutzerklärung**: Punkt 10 ist auf beide Partner erweitert und
+   um den Fahrstil-Abschnitt ergänzt. Grundlage bleibt `DATEN.md`.
+4. Vor dem Livegang einmal ein **Fachanwalt für IT-/Wettbewerbsrecht**
+   über Kennzeichnung, Preisdarstellung und die Offenlegung.
+
+### Wen als Nächstes beantragen
+
+- **Über AWIN**: POLO Motorrad (MID 11475, Programmbetreuung PeakLive,
+  polo-motorrad@peaklive.de – läuft trotz Sanierungsverfahren weiter, aber
+  nicht als einzige Einnahmequelle einplanen), moto24 (MID 16934).
+- **Über Webgains**: FC-Moto (programID 4028), ChromeBurner.
+- **Daisycon** (Publisher 81aserpam) ist noch nicht gesichtet.
+- **billiger.de** (solute GmbH) wäre der schnellste Weg zu
+  flächendeckenden Preisdaten, verlangt aber ein eingetragenes Gewerbe.
+- **Louis**: Status direkt erfragen, die belboon-Kampagnen waren am
+  24.08.2026 offline.
+- Amazon zuletzt: niedrigste Sätze in Auto & Motorrad, kurzes Cookie, und
+  die Creators API verlangt vermittelte Käufe als Eintrittskarte.
+
+Ein dritter Händler ist inzwischen ein Eintrag in `PARTNER` (partner.js),
+ein Katalog und ein Umbau in Abschnitt 4 von `katalog.js`. Fehlt sein
+Netzwerk, kommt ein Eintrag in `NETZWERKE` dazu. An Einwilligung,
+Kennzeichnung und Klickweg ändert sich nichts.
 
 ---
 
