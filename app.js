@@ -29,22 +29,20 @@
    ============================================================================ */
 
 
-/* --- Der Shop-Schalter ------------------------------------------------------
-   true  = der Shop ist ueberall da: Eintrag in der Leiste, Kachel im
-           Garagen-Menue, "Shop fuer dich"-Leiste unter der Garage.
-   false = alles davon ist AUSGEBLENDET, aber nichts ist geloescht - der
-           gesamte Shop-Code samt Demo-Katalog bleibt im Projekt und kommt
-           mit einem einzigen true wieder.
+/* Der grosse Schalter fuer den Ausruestungs-Bereich.
 
-   Warum er gerade aus ist: Die Seite wird bei Affiliate-Netzwerken als
-   Pruef-URL eingereicht, und ein Shop voller Demo-Preise wuerde dort mehr
-   Fragen aufwerfen als beantworten. Sobald die Partnerprogramme freigegeben
-   sind und echte Angebote fliessen koennen, wird er wieder eingeschaltet.
+   Er stand von der Einfuehrung bis zum 02.09.2026 auf false, solange der
+   Bereich nur Beispieldaten zeigte - ein Shop voller erfundener Preise
+   haette bei der AWIN-Pruefung mehr Fragen aufgeworfen als beantwortet.
+   Seit motoin ueber Webgains angenommen ist, sind die Angebote echt, und
+   der Schalter steht auf true.
 
-   Angewendet wird der Schalter an drei Stellen: wendeShopSchalterAn()
-   (Abschnitt 21) versteckt Leisten-Eintrag und Kachel, zeigeShop() weicht
-   zur Garage aus, und zeichneGarageShop() in shop.js steigt sofort aus. */
-const SHOP_AKTIV = false;
+   ER BLEIBT TROTZDEM DER EINE ORT, an dem sich alles abschalten laesst:
+   wendeShopSchalterAn() (Abschnitt 21) versteckt Leisten-Eintrag und
+   Kachel, zeigeShop() weicht zur Garage aus, und zeichneGarageShop() in
+   vorschlaege.js steigt sofort aus. Ein false hier nimmt den ganzen
+   Bereich aus der App, ohne dass eine Zeile geloescht wird. */
+const SHOP_AKTIV = true;
 
 
 /* --- 1. Zustand ------------------------------------------------------------
@@ -3460,6 +3458,7 @@ function symbol(name, zusatz = '') {
 const BILDSCHIRME = [
   'garageScreen', 'tourenScreen', 'app', 'rideScreen', 'statsScreen',
   'rechtlichesScreen', 'reifenScreen', 'shopScreen', 'shopProduktScreen',
+  'merklisteScreen',
   'kontoScreen', 'profilScreen', 'passwortNeuScreen', 'kontoLoeschenScreen',
 ];
 
@@ -3500,6 +3499,9 @@ function aktualisiereLeiste(sichtbareId) {
   // Garage erreichbar und gehoeren zur eigenen Maschine. Also leuchtet die
   // Garage weiter, statt dass die Leiste ins Leere zeigt.
   if (sichtbareId === 'reifenScreen') leuchtZiel = 'garageScreen';
+  // Die Merkliste haengt an der Ausruestung: Sie ist von dort und aus der
+  // Garage erreichbar, hat aber keinen eigenen Platz in der Leiste.
+  if (sichtbareId === 'merklisteScreen') leuchtZiel = 'shopScreen';
   leiste.querySelectorAll('.nav-tab').forEach(knopf => {
     knopf.classList.toggle('aktiv', knopf.dataset.ziel === leuchtZiel);
   });
@@ -3549,14 +3551,16 @@ function zeigeGarage() {
   if (typeof zeichneGarageReifen === 'function') zeichneGarageReifen();
 }
 
-/* Der Shop. zeichneShop() steht in shop.js, das wie garage.js NACH dieser
-   Datei geladen wird - deshalb dieselbe defensive Pruefung wie bei der
-   Garage: Fehlt shop.js, oeffnet sich wenigstens der leere Bildschirm. */
+/* Die Ausruestung. Der Bildschirm heisst im HTML weiter shopScreen, damit
+   nicht dreissig Fundstellen mitwandern muessen - geaendert hat sich, was
+   der Nutzer liest. Warum nicht mehr "Shop": siehe Kopf von shop.js. */
 function zeigeShop() {
-  // Solange der Shop abgeschaltet ist, fuehrt jeder Weg dorthin zur
+  // Solange der Bereich abgeschaltet ist, fuehrt jeder Weg dorthin zur
   // Garage - das faengt Leisten-Eintrag, Kachel und alle Knoepfe auf einmal.
   if (!SHOP_AKTIV) { zeigeGarage(); return; }
-  if (typeof zeichneShop === 'function') zeichneShop();
+  // zeigeAusruestung() steht in shop.js, das NACH dieser Datei geladen
+  // wird - deshalb dieselbe defensive Pruefung wie bei der Garage.
+  if (typeof zeigeAusruestung === 'function') { zeigeAusruestung(); return; }
   zeigeBildschirm('shopScreen');
 }
 

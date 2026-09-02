@@ -752,6 +752,15 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   filter: drop-shadow(0 2px 8px var(--schatten-voll));
 }
 .kachel-text { display: flex; flex-direction: column; gap: 3px; }
+/* Die Unterzeile tragen nur Kacheln, die eine brauchen: Bei der
+   Ausruestung gehoert die Anzeige-Kennzeichnung schon auf den
+   Startbildschirm, nicht erst dahinter. */
+.kachel-unterzeile {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  color: var(--metall);
+  font-size: 12px;
+  text-shadow: 0 1px 6px var(--schatten-voll);
+}
 .kachel-titel {
   font-family: var(--schrift-display);
   /* clamp() heisst: mindestens 16px, hoechstens 24px, dazwischen 5.4% der
@@ -3880,18 +3889,53 @@ body.nav-modus .leaflet-control-container { display: none; }
    dass alle Preise Beispieldaten sind. Warmes Orange statt Markenblau,
    weil es eine Warnung ist und keine Schmuckfarbe - dieselbe Logik wie
    bei der Kurvigkeits-Skala, die auch nicht im Markenton faerbt. */
-.shop-demo-balken {
-  margin: 0 0 var(--s3);
-  padding: 8px 14px;
-  border: 1px solid color-mix(in srgb, var(--licht-warm) 55%, transparent);
-  border-radius: var(--r-sm);
-  background: var(--glas-dunkel);
-  color: var(--licht-warm);
+/* Der Kopf des Ausruestungs-Bildschirms: Ueberschrift links, der kurze
+   Weg zur Merkliste rechts. Sie soll von hier aus einen Tipp entfernt
+   sein, nicht am unteren Ende einer langen Liste. */
+.ausruestung-kopf {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s3);
+}
+.merk-schnellweg { display: inline-flex; align-items: center; gap: 6px; }
+.merk-zahl {
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  color: var(--accent-ink);
   font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  font-weight: 700;
+  line-height: 20px;
   text-align: center;
 }
+
+/* Der Herz-Knopf. Er sitzt an jeder Produktkarte, und die ganze Zeile
+   darunter ist klickbar - deshalb hebt er sich mit eigener Flaeche ab und
+   ist gross genug fuer einen Daumen. */
+.merk-herz {
+  flex: 0 0 auto;
+  width: 40px; height: 40px;
+  display: grid; place-items: center;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--glas-rand);
+  background: var(--glas-hell);
+  color: var(--muted);
+  cursor: pointer;
+  transition: color .14s ease, background .14s ease;
+}
+.merk-herz .ic { width: 20px; height: 20px; }
+.merk-herz.ist-gemerkt { color: var(--danger); background: var(--glas-heller); }
+
+/* Der Titel der Produktseite mit dem Herz daneben. */
+.produkt-kopf { display: flex; align-items: flex-start; gap: var(--s3); }
+.produkt-kopf .produkt-titel { flex: 1 1 auto; }
+
+/* Ein Eintrag der Merkliste, dessen Produkt nicht mehr im Katalog steht:
+   sichtbar blass, aber nicht weg. Der Name bleibt lesbar, denn er wird
+   beim Merken mitgespeichert. */
+.saved-list li.fehlt { opacity: .55; }
 
 /* Die Bildergalerie der Produktseite: ein wischbares Band, jedes Bild
    eine volle Breite, scroll-snap laesst es beim Loslassen einschnappen.
@@ -4100,16 +4144,6 @@ body.nav-modus .leaflet-control-container { display: none; }
 /* Der kleine Demo-Vermerk neben der Ueberschrift der Garage-Leiste. Er
    ist Pflicht, nicht Schmuck: Die Leiste zeigt Preise ausserhalb der
    Shop-Bildschirme, deren grosser DEMO-Balken hier nicht zu sehen ist. */
-.garage-shop-demo {
-  margin-left: 6px;
-  padding: 1px 8px;
-  border-radius: var(--r-pill);
-  border: 1px solid color-mix(in srgb, var(--licht-warm) 55%, transparent);
-  color: var(--licht-warm);
-  font-size: 10px;
-  letter-spacing: 0.04em;
-}
-
 /* ---------- Das Menue unten in der Garage ----------
    Seit die Garage der Startbildschirm ist, stehen hier die Wege in die
    uebrigen Bereiche. Die Ueberschrift traegt denselben leisen Ton wie die

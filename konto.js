@@ -1143,12 +1143,20 @@ async function synchronisiereTouren() {
    abzuschreiben. Eine Kopie würde beim Umbenennen still danebengreifen -
    das Konto wäre gelöscht, die Daten lägen weiter auf dem Gerät, und
    niemand würde es merken. Die try-Blöcke fangen den Fall ab, dass eine
-   der beiden Dateien gar nicht geladen wurde. */
+   der Dateien gar nicht geladen wurde.
+
+   Die beiden EINWILLIGUNGEN stehen bewusst mit in der Liste. Eine
+   Werbe-Einwilligung, die ein gelöschtes Konto überlebt, gehörte
+   niemandem mehr - und beim nächsten Anmelden gälte sie stillschweigend
+   weiter, ohne dass je wieder gefragt worden wäre. */
 function lokaleSchlüssel() {
   const schlüssel = [];
   try { schlüssel.push(STORE); } catch { /* app.js fehlt */ }
   try { schlüssel.push(GARAGE_SPEICHER); } catch { /* garage.js fehlt */ }
-  try { schlüssel.push(SHOP_SPEICHER); } catch { /* shop.js fehlt */ }
+  try { schlüssel.push(SHOP_SPEICHER); } catch { /* merkliste.js fehlt */ }
+  try { schlüssel.push(PARTNER_SPEICHER); } catch { /* partner.js fehlt */ }
+  try { schlüssel.push(FAHRSTIL_SPEICHER); } catch { /* fahrstil.js fehlt */ }
+  try { schlüssel.push(REIFEN_SPEICHER); } catch { /* reifen.js fehlt */ }
   // Ein noch nicht hochgeladenes Profilbild gehört ebenfalls weg - es wäre
   // sonst das einzige, was ein gelöschtes Konto überlebt.
   schlüssel.push(WARTENDES_BILD);

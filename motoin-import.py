@@ -84,6 +84,19 @@ MINDESTENS_JE_GRUPPE = 30
 #   Brillen, Motocross,          erst wieder aufnehmen, wenn das Budget
 #   Funktionskleidung            groesser wird oder je Gruppe geladen wird
 
+# Zubehoer-Unterordner der Bekleidungsgruppen. Sie stehen VOR der Tabelle,
+# weil der erste Treffer gewinnt: "Bekleidung>Stiefel>Zubehoer" enthaelt
+# Schnallen-Sets und Einlegesohlen, und die unter "Stiefel" zu fuehren
+# heisst, jemandem ein Schnallen-Set vorzuschlagen, dem Stiefel fehlen.
+NICHT_AUFNEHMEN = [
+    'Bekleidung>Stiefel>Zubehör',
+    'Bekleidung>Protektoren>Zubehör',
+    'Bekleidung>Brillen>Zubehör',
+    'Bekleidung>Funktionskleidung>Zubehör',
+    'Bekleidung>Zubehör',
+    'Helme>Zubehör',
+]
+
 WARENGRUPPEN = [
     ('Helme>Integral-Helme',        'helm'),
     ('Helme>Klapp-Helme',           'helm'),
@@ -108,6 +121,8 @@ WARENGRUPPEN = [
 
 def warengruppe(pfad):
     """Der App-Schluessel zu einem motoin-Pfad, oder None fuer 'nicht aufnehmen'."""
+    if pfad in NICHT_AUFNEHMEN:
+        return None
     for anfang, schlüssel in WARENGRUPPEN:
         if pfad == anfang or pfad.startswith(anfang):
             return schlüssel
@@ -180,7 +195,7 @@ def fasse_zusammen(feedpfad):
 
 # --- 3. Die drei ausgemessenen Abkuerzungen ----------------------------------
 
-BILDNAME = re.compile(r'^(.*?)-(\d+)_(\d+)\.[A-Za-z]+$')
+BILDNAME = re.compile(r'^(.*?)-(\d+)_(\d+)\.([A-Za-z]+)$')
 
 
 def nummer_aus_gruppe(gruppen_id):
@@ -191,12 +206,22 @@ def nummer_aus_gruppe(gruppen_id):
 
 def bildstamm(bildadresse, nummer):
     """Aus ".../sw-motech-trax-werkzeugbox-102688_0.jpg" wird
-    ("sw-motech-trax-werkzeugbox", 0). Passt der Name nicht ins Muster,
-    kommt der ganze Dateiname zurueck und die laufende Nummer ist -1."""
+    ("sw-motech-trax-werkzeugbox", 0).
+
+    Die laufende Nummer traegt die Endung mit: 0 bis 9 heisst .jpg,
+    100 bis 109 heisst .png. Das ist ein Trick und wird hier deshalb
+    ausgeschrieben - 2.084 der 70.682 Bilder sind PNG, und ohne die
+    Unterscheidung endet jedes davon in einem 404. Eine eigene Spalte
+    fuer die Endung waere ehrlicher und kostete bei 6.000 Produkten
+    rund 4 KB gepackt fuer eine Information mit zwei Werten.
+
+    Passt der Name nicht ins Muster, kommt der ganze Dateiname zurueck
+    und die laufende Nummer ist -1."""
     dateiname = bildadresse.rsplit('/', 1)[-1]
     treffer = BILDNAME.match(dateiname)
     if treffer and treffer.group(2) == str(nummer):
-        return treffer.group(1), int(treffer.group(3))
+        versatz = 100 if treffer.group(4).lower() == 'png' else 0
+        return treffer.group(1), int(treffer.group(3)) + versatz
     return dateiname, -1
 
 

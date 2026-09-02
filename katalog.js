@@ -211,6 +211,10 @@ function alleProdukte() {
       wir veraendern nichts daran, was die Bildlizenz auch nicht erlauben
       wuerde. Siehe ENTSCHEIDUNGEN.md, 02.09.2026.
 
+      Die laufende Nummer traegt die Endung mit: unter 100 heisst .jpg,
+      ab 100 heisst .png. Warum als Trick und nicht als eigenes Feld,
+      steht im Kopf von motoin-import.py.
+
    c) Der Groessensatz. Steht dort eine Zahl, ist es ein Platz im
       Woerterbuch; steht eine Liste, gilt sie unmittelbar. */
 
@@ -242,7 +246,9 @@ function ohneMarke(titel, marke) {
 function baueMotoinProdukt(zeile, daten) {
   const [nummer, gruppe, marke, titel, groessen, preis, versand, gtin, stamm, bildNr] = zeile;
   const markeName = daten.marken[marke];
-  const dateiname = bildNr < 0 ? stamm : `${stamm}-${nummer}_${bildNr}.jpg`;
+  const dateiname = bildNr < 0
+    ? stamm
+    : `${stamm}-${nummer}_${bildNr % 100}.${bildNr >= 100 ? 'png' : 'jpg'}`;
 
   return {
     schluessel: produktSchluessel('motoin', nummer),

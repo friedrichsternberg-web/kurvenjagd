@@ -1,701 +1,270 @@
-/* ============================ KURVENJAGD - SHOP ============================
+/* ========================= SERPA - AUSRUESTUNG ==============================
 
-   Der Preisvergleich fuer Ausruestung. Diese Datei enthaelt die LOGIK,
-   die Daten stehen in produkte.js (siehe den Kommentarkopf dort - alles
-   Beispieldaten, die Angebotsplaetze bleiben bewusst ohne Shop-Namen).
+   Der Bereich "Ausruestung": Katalog durchsehen, filtern, suchen. Die
+   Daten kommen aus katalog.js, die Vorschlaege aus vorschlaege.js, die
+   Merkliste aus merkliste.js, die Produktseite aus produktseite.js.
 
    Abschnitte:
-     1. Katalog-Zugriff
-     2. Die Ablage: die Merkliste
-     3. Geld und Zeit formatieren
-     4. Die Uebersicht (Kategorien, Produktliste, Merkliste)
-     5. "Fuer dich": Vorschlaege aus der Garage
-     6. Die Produktseite
-     7. Verkabelung
+     1. Warengruppen
+     2. Das Bild eines Produkts
+     3. Filter und Liste
+     4. Der Bildschirm
+     5. Verkabelung
 
-   shop.js wird als LETZTES Skript geladen und benutzt Helfer aus den
-   Dateien davor: symbol(), showToast(), escapeHtml() und verkabele() aus
-   app.js, motorradAktiv() und garage aus garage.js.
+   WARUM DER BEREICH NICHT MEHR "SHOP" HEISST: Wir verkaufen nichts, wir
+   empfehlen und verlinken. "Shop" behauptet etwas anderes. Die Ids im
+   HTML tragen weiter shop..., damit nicht dreissig Fundstellen mitwandern
+   muessen - geaendert hat sich, was der Nutzer liest.
+
+   UND WARUM ES KEIN "PREISVERGLEICH" MEHR IST: Mit einem Haendler je
+   Warengruppe gibt es je Produkt genau ein Angebot. Eine Seite, ueber der
+   "Preisvergleich" steht und auf der ein Preis erscheint, ist
+   irrefuehrend. Das Geruest dafuer bleibt (katalog.js kann Angebote
+   buendeln und sortiert nach Gesamtpreis); sobald ein zweiter Haendler
+   dieselbe Warengruppe fuehrt, wird von selbst wieder ein Vergleich
+   daraus. Siehe ENTSCHEIDUNGEN.md, 02.09.2026.
    ========================================================================= */
 
 
-/* --- 1. Katalog-Zugriff -----------------------------------------------------
-   Die EINZIGE Stelle, an der die App an die Produktdaten kommt. Heute
-   liefert sie die Konstante aus produkte.js. Wenn spaeter echte
-   Haendlerdaten kommen, wird aus genau dieser Funktion ein Abruf vom
-   Server - und der Rest der Datei merkt nichts davon. */
+/* --- 1. Warengruppen --------------------------------------------------------
+   Die Schluessel sind dieselben, die die Garage fuer Ausruestung benutzt.
+   "fehlt" traegt die Sprosse 4 der Vorschlagsleiter: Was in der Garage
+   noch nicht haengt, darf vorgeschlagen werden. Warengruppen ohne "fehlt"
+   sind keine Ausruestung und koennen deshalb auch nicht fehlen.
 
-function shopKatalog() {
-  return PRODUKT_KATALOG;
-}
+   "fehlt" ist der ganze Satzteil samt Verb und nicht nur das Hauptwort.
+   Ein Baustein "keine Stiefel" plus ein festes "fehlt" ergaebe "keine
+   Stiefel fehlt" - deutsche Mehrzahl laesst sich nicht anbauen, sie
+   gehoert in den Satz. */
 
-/* Das guenstigste Angebot eines Produkts, gerechnet als GESAMTPREIS
-   (Preis plus Versand). Angebote ohne bekannte Versandkosten fallen
-   komplett raus: Eine Vergleichsliste, in der die Versandkosten fehlen,
-   waere irrefuehrend (BGH "Froogle") - lieber ein Angebot weniger. */
-function angeboteZeigbar(produkt) {
-  return produkt.angebote.filter(angebot => angebot.versand !== null);
-}
-
-function günstigstesGesamt(produkt) {
-  const summen = angeboteZeigbar(produkt).map(a => a.preis + a.versand);
-  return summen.length ? Math.min(...summen) : null;
-}
-
-
-/* --- 2. Die Ablage: die Merkliste ------------------------------------------
-   Gespeichert wie die Garage: ein Schluessel im Geraetespeicher, gelesen
-   und geschrieben NUR ueber geraet.js. Je Eintrag stehen drin: welches
-   Produkt, wann gemerkt, und der guenstigste Gesamtpreis zu diesem
-   Zeitpunkt. Der gespeicherte Preis ist die Vorarbeit fuer den spaeteren
-   Preisalarm - der muss dann nur noch vergleichen und melden. */
-
-const SHOP_SPEICHER = 'kurvenjagd.shop';
-
-function leereShopAblage() {
-  return { merkliste: [] };
-}
-
-function ladeShopAblage() {
-  const gelesen = geraet.lies(SHOP_SPEICHER);
-  if (!gelesen) return leereShopAblage();
-  return { merkliste: Array.isArray(gelesen.merkliste) ? gelesen.merkliste : [] };
-}
-
-// Gibt false zurueck, wenn der Geraetespeicher voll ist - der Aufrufer
-// muss das melden, stillschweigend nichts zu speichern waere das Schlimmste.
-function speichereShopAblage() {
-  return geraet.schreib(SHOP_SPEICHER, shopAblage);
-}
-
-let shopAblage = ladeShopAblage();
-
-function istGemerkt(produktId) {
-  return shopAblage.merkliste.some(eintrag => eintrag.produktId === produktId);
-}
-
-function merkenUmschalten(produktId) {
-  if (istGemerkt(produktId)) {
-    shopAblage.merkliste = shopAblage.merkliste.filter(eintrag => eintrag.produktId !== produktId);
-  } else {
-    const produkt = shopKatalog().produkte.find(p => p.id === produktId);
-    if (!produkt) return;
-    shopAblage.merkliste.push({
-      produktId,
-      gemerktAm: new Date().toISOString(),
-      preisBeimMerken: günstigstesGesamt(produkt),
-    });
-  }
-  if (!speichereShopAblage()) {
-    // Denselben Weg geht die Garage in sichereGarageWeg(): den zuletzt
-    // gespeicherten Stand zurueckholen, damit Anzeige und Speicher nicht
-    // auseinanderlaufen. Sonst zeigte der Knopf "Gemerkt", und nach dem
-    // naechsten Neuladen waere der Eintrag stillschweigend weg.
-    shopAblage = ladeShopAblage();
-    showToast('Der Gerätespeicher ist voll - die Merkliste konnte nicht gespeichert werden.');
-  }
-  zeichneMerkliste();
-  // Steht das Produkt gerade auf der Produktseite, zieht dort NUR die
-  // Knopf-Beschriftung mit. Die ganze Seite neu zu bauen wuerde die
-  // Galerie auf das erste Bild zurueckwerfen und den aufgeklappten
-  // Erklaertext wieder schliessen - fuer eine Textzeile zu viel Verlust.
-  if (angezeigtesProdukt?.id === produktId) aktualisiereMerkenKnopf();
-}
-
-function merkenKnopfText(produktId) {
-  return istGemerkt(produktId)
-    ? 'Gemerkt \u2713 \u2013 wieder entfernen'
-    : 'Merken \u2013 Preis im Blick behalten';
-}
-
-function aktualisiereMerkenKnopf() {
-  const knopf = document.querySelector('#shopProduktInhalt .merken-knopf');
-  if (knopf) knopf.textContent = merkenKnopfText(angezeigtesProdukt.id);
-}
-
-
-/* --- 3. Geld und Zeit formatieren ------------------------------------------ */
-
-// 505.9 wird zu "505,90 €" - immer mit zwei Nachkommastellen, wie es bei
-// Preisen erwartet wird.
-function euro(betrag) {
-  return betrag.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
-}
-
-// "2026-08-24T14:00:00" wird zu "24.08.2026, 14:00 Uhr". Der Stand gehoert
-// an jeden Preis, damit niemand veraltete Zahlen fuer aktuelle haelt.
-function stempel(iso) {
-  const zeitpunkt = new Date(iso);
-  const datum = zeitpunkt.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  const uhrzeit = zeitpunkt.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-  return `${datum}, ${uhrzeit} Uhr`;
-}
-
-
-/* --- 4. Die Uebersicht ------------------------------------------------------
-   Kategorien mit Anzeigenamen. Die Schluessel entsprechen den
-   Ausruestungs-Arten der Garage - so koennen die Vorschlaege pruefen,
-   welche Art in der Garage noch fehlt, und ein gekauftes Teil kann eines
-   Tages direkt als Ausruestung uebernommen werden. Drei alte Arten
-   schreiben sich anders (handschuhe, protektoren, sonstiges); die
-   Uebersetzung steht bei den Vorschlaegen. */
-
-const SHOP_KATEGORIEN = [
-  { schlüssel: 'helm',      name: 'Helme',       fehlt: 'kein Helm' },
-  { schlüssel: 'jacke',     name: 'Jacken',      fehlt: 'keine Jacke' },
-  { schlüssel: 'hose',      name: 'Hosen',       fehlt: 'keine Hose' },
-  { schlüssel: 'handschuh', name: 'Handschuhe',  fehlt: 'keine Handschuhe' },
-  { schlüssel: 'stiefel',   name: 'Stiefel',     fehlt: 'keine Stiefel' },
-  { schlüssel: 'protektor', name: 'Protektoren', fehlt: 'kein Rückenprotektor' },
-  { schlüssel: 'koffer',    name: 'Gepäck',      fehlt: 'kein Gepäck' },
-  { schlüssel: 'anbau',     name: 'Anbauteile' },   // keine Ausruestung, kann nicht "fehlen"
+const WARENGRUPPEN_NAMEN = [
+  { schlüssel: 'helm',      name: 'Helme',        fehlt: 'kein Helm hängt' },
+  { schlüssel: 'jacke',     name: 'Jacken',       fehlt: 'keine Jacke hängt' },
+  { schlüssel: 'hose',      name: 'Hosen',        fehlt: 'keine Hose hängt' },
+  { schlüssel: 'kombi',     name: 'Lederkombis' },
+  { schlüssel: 'handschuh', name: 'Handschuhe',   fehlt: 'keine Handschuhe liegen' },
+  { schlüssel: 'stiefel',   name: 'Stiefel',      fehlt: 'keine Stiefel stehen' },
+  { schlüssel: 'protektor', name: 'Protektoren',  fehlt: 'kein Protektor liegt' },
+  { schlüssel: 'airbag',    name: 'Airbagwesten' },
+  { schlüssel: 'regen',     name: 'Regensachen',  fehlt: 'nichts für Regen liegt' },
+  { schlüssel: 'koffer',    name: 'Gepäck',       fehlt: 'kein Gepäck steht' },
+  { schlüssel: 'anbau',     name: 'Anbauteile' },
+  { schlüssel: 'schloss',   name: 'Schlösser' },
 ];
 
-function kategorieName(schlüssel) {
-  return SHOP_KATEGORIEN.find(k => k.schlüssel === schlüssel)?.name || schlüssel;
+// Nur die Arten, die in der Garage fehlen KOENNEN.
+const AUSRUESTUNGS_ARTEN = WARENGRUPPEN_NAMEN
+  .filter(gruppe => gruppe.fehlt).map(gruppe => gruppe.schlüssel);
+
+function warengruppeName(schlüssel) {
+  return WARENGRUPPEN_NAMEN.find(g => g.schlüssel === schlüssel)?.name || schlüssel;
 }
 
-/* Die Bildkachel eines Produkts, wie sie in allen Listen steht. Gibt es
-   ein echtes Foto (bilder[0].url, spaeter aus dem Haendler-Feed), zeigt
-   sie das - bis dahin das Kategorie-Symbol auf Glas. EINE Funktion fuer
-   alle Listen, damit der Wechsel auf echte Fotos ein Handgriff ist. */
+// Der Satzteil hinter "Weil bei dir noch ...".
+function fehltSatzteil(schlüssel) {
+  return WARENGRUPPEN_NAMEN.find(g => g.schlüssel === schlüssel)?.fehlt || 'etwas fehlt';
+}
+
+
+/* --- 2. Das Bild eines Produkts ---------------------------------------------
+
+   EINE Funktion fuer alle Listen. Sie fragt zuerst den Partner: Die
+   Bildlizenz haengt an der Teilnahme am Programm und ist widerruflich
+   (bilderErlaubt in partner.js). Steht sie auf false, zeichnet die App
+   das Warengruppen-Symbol statt eines Fotos - ohne dass irgendwo sonst
+   etwas geaendert werden muesste. */
+
+function produktBilderErlaubt(produkt) {
+  return partnerNach(produkt.partnerId)?.bilderErlaubt === true;
+}
+
 function produktMiniBild(produkt) {
-  const erstes = produkt.bilder[0];
-  if (erstes?.url) {
-    return `<span class="produkt-mini-bild"><img src="${escapeHtml(erstes.url)}"
+  if (produktBilderErlaubt(produkt)) {
+    return `<span class="produkt-mini-bild"><img loading="lazy"
+      src="${escapeHtml(produkt.bild('klein'))}"
       alt="${escapeHtml(produkt.marke + ' ' + produkt.name)}"></span>`;
   }
-  return `<span class="produkt-mini-bild" title="${escapeHtml(kategorieName(produkt.kategorie))}">${symbol(produkt.symbol)}</span>`;
+  return `<span class="produkt-mini-bild" title="${escapeHtml(warengruppeName(produkt.kategorie))}">${symbol('helm')}</span>`;
 }
 
-/* Was gerade gefiltert wird. kategorie null heisst "Alle". Die Suche
-   ist immer kleingeschrieben abgelegt, damit der Vergleich unten nicht
-   an Gross-/Kleinschreibung haengt. */
-const shopFilter = { kategorie: null, suche: '' };
 
-// Die Kategorie-Chips. Es erscheinen nur Kategorien, in denen wirklich
-// Produkte liegen - ein Chip, hinter dem nichts steckt, waere ein toter Knopf.
+/* --- 3. Filter und Liste ---------------------------------------------------- */
+
+// kategorie null heisst "Alle". Die Suche liegt kleingeschrieben, damit
+// der Vergleich nicht an Gross- und Kleinschreibung haengt.
+const ausruestungFilter = { kategorie: null, suche: '' };
+
+/* Wie viele Zeilen hoechstens auf einmal. Sechstausend Produkte als eine
+   Liste zu zeichnen legt das Handy fuer Sekunden lahm; wer sucht, findet
+   ueber Filter und Suchfeld, nicht ueber Scrollen. */
+const LISTE_HOECHSTENS = 60;
+
+/* Ohne gewaehlte Warengruppe wird REIHUM aus den Warengruppen genommen,
+   je Runde eine je Gruppe. Sortiert wird innerhalb einer Gruppe weiter
+   nach dem Gesamtpreis - aber eine Liste, die stur nach Preis sortiert,
+   besteht oben aus sechzig Spiegeladaptern und Schnallen-Sets. Wer
+   "Alle" waehlt, will zuerst sehen, WAS es gibt. */
+
 function zeichneKategorien() {
   const behälter = document.getElementById('shopKategorien');
-  const vorhandene = new Set(shopKatalog().produkte.map(p => p.kategorie));
-  const chips = SHOP_KATEGORIEN.filter(k => vorhandene.has(k.schlüssel));
+  if (!behälter) return;
+  const vorhandene = new Set(katalogProdukte('motoin').map(p => p.kategorie));
+  const chips = WARENGRUPPEN_NAMEN.filter(g => vorhandene.has(g.schlüssel));
 
   behälter.innerHTML = [
-    `<button type="button" class="marken-chip ${shopFilter.kategorie === null ? 'active' : ''}"
+    `<button type="button" class="marken-chip ${ausruestungFilter.kategorie === null ? 'active' : ''}"
              data-kategorie="">Alle</button>`,
-    ...chips.map(k => `
-      <button type="button" class="marken-chip ${shopFilter.kategorie === k.schlüssel ? 'active' : ''}"
-              data-kategorie="${escapeHtml(k.schlüssel)}">${escapeHtml(k.name)}</button>`),
+    ...chips.map(gruppe => `
+      <button type="button" class="marken-chip ${ausruestungFilter.kategorie === gruppe.schlüssel ? 'active' : ''}"
+              data-kategorie="${escapeHtml(gruppe.schlüssel)}">${escapeHtml(gruppe.name)}</button>`),
   ].join('');
 }
 
-// Kategorie und Suchtext zusammen anwenden. Gesucht wird ueber Marke und
-// Name - mehr braucht es bei einer Handvoll Produkte nicht, und es geht
-// dabei nichts ins Netz.
 function gefilterteProdukte() {
-  return shopKatalog().produkte.filter(produkt => {
-    if (shopFilter.kategorie && produkt.kategorie !== shopFilter.kategorie) return false;
-    if (!shopFilter.suche) return true;
-    return `${produkt.marke} ${produkt.name}`.toLowerCase().includes(shopFilter.suche);
+  return katalogProdukte('motoin').filter(produkt => {
+    if (ausruestungFilter.kategorie && produkt.kategorie !== ausruestungFilter.kategorie) return false;
+    if (!ausruestungFilter.suche) return true;
+    return `${produkt.marke} ${produkt.titel}`.toLowerCase().includes(ausruestungFilter.suche);
   });
 }
 
-// Zeichnet die ganze Uebersicht. Wird bei jedem Oeffnen des Shops gerufen
-// (aus zeigeShop() in app.js).
-function zeichneShop() {
-  zeichneVorschläge();
-  zeichneKategorien();
-  zeichneProduktListe();
-  zeichneMerkliste();
-  zeichneShopVerzeichnis();
-}
+/* Reihum durch die Warengruppen, in der Reihenfolge der Chips: erst je
+   eines aus jeder Gruppe, dann die zweite Runde, und so fort. Ist eine
+   Gruppe gewaehlt oder wird gesucht, bleibt es bei der reinen
+   Preisreihenfolge - dann will jemand genau das sehen. */
+function mischeWarengruppen(sortiert) {
+  if (ausruestungFilter.kategorie || ausruestungFilter.suche) return sortiert;
 
-// Die Knoepfe "Direkt zu den Shops". Nur Wortmarken in der Schrift der
-// App, keine fremden Logos - siehe den Kommentar am SHOP_VERZEICHNIS.
-function zeichneShopVerzeichnis() {
-  const behälter = document.getElementById('shopVerzeichnis');
-  behälter.innerHTML = SHOP_VERZEICHNIS.map((eintrag, stelle) => `
-    <button type="button" class="marken-chip" data-shop="${stelle}">${escapeHtml(eintrag.name)}</button>`).join('');
-}
+  const stapel = new Map();
+  WARENGRUPPEN_NAMEN.forEach(gruppe => stapel.set(gruppe.schlüssel, []));
+  sortiert.forEach(produkt => {
+    if (!stapel.has(produkt.kategorie)) stapel.set(produkt.kategorie, []);
+    stapel.get(produkt.kategorie).push(produkt);
+  });
 
-/* Wie oeffneAngebot(), nur fuer die Shop-Startseiten: EINE Stelle fuer
-   alle Verzeichnis-Klicks. Traegt der Eintrag einen Partner, laeuft der
-   Klick durch oeffnePartnerLink() und damit durch die Einwilligung -
-   auch dann, wenn der hinterlegte Link heute noch die schlichte
-   Website-Adresse ist. So kann ein spaeter eingetragener Provisionslink
-   nicht geraeuschlos an der Frage vorbeigehen. */
-function öffneShopSeite(eintrag) {
-  if (!eintrag) return;
-  const partner = eintrag.partnerId ? partnerNach(eintrag.partnerId) : null;
-  if (partner) {
-    öffnePartnerLink(eintrag.affiliateLink || partnerDeepLink(partner, eintrag.adresse), partner);
-    return;
+  const gemischt = [];
+  let runde = 0;
+  let nachgelegt = true;
+  while (nachgelegt) {
+    nachgelegt = false;
+    stapel.forEach(gruppe => {
+      if (runde < gruppe.length) { gemischt.push(gruppe[runde]); nachgelegt = true; }
+    });
+    runde += 1;
   }
-  geraet.öffneExtern(eintrag.adresse);
+  return gemischt;
 }
 
 function zeichneProduktListe() {
   const liste = document.getElementById('shopProduktListe');
-  const produkte = gefilterteProdukte();
+  const mehr = document.getElementById('shopMehrZeile');
+  if (!liste) return;
 
-  if (!produkte.length) {
-    liste.innerHTML = '<li class="empty">Nichts gefunden &ndash; anderes Stichwort oder eine andere Kategorie versuchen.</li>';
+  const treffer = mischeWarengruppen(gefilterteProdukte().sort(nachGesamtpreis));
+  if (!treffer.length) {
+    liste.innerHTML = '<li class="empty">Nichts gefunden &ndash; anderes Stichwort oder eine andere Warengruppe versuchen.</li>';
+    if (mehr) mehr.hidden = true;
     return;
   }
 
-  liste.innerHTML = produkte.map(produkt => {
-    const ab = günstigstesGesamt(produkt);
-    const abText = ab === null
-      ? 'derzeit kein Angebot'
-      : `ab ${euro(ab)} inkl. Versand`;
-    return `
-      <li data-produkt="${escapeHtml(produkt.id)}">
-        ${produktMiniBild(produkt)}
-        <span class="saved-text">
-          <span class="saved-name">${escapeHtml(produkt.marke)} ${escapeHtml(produkt.name)}</span>
-          <span class="saved-meta">${escapeHtml(kategorieName(produkt.kategorie))} <i>&middot;</i> ${abText}</span>
-        </span>
-      </li>`;
-  }).join('');
-}
-
-
-// Die Merkliste unten auf der Uebersicht. Jeder Eintrag vergleicht den
-// Gesamtpreis von damals mit dem von heute - das ist der sichtbare
-// Vorlaeufer des Preisalarms, solange es noch keine Mitteilungen gibt.
-function zeichneMerkliste() {
-  const liste = document.getElementById('shopMerkliste');
-
-  if (!shopAblage.merkliste.length) {
-    liste.innerHTML = '<li class="empty">Noch nichts gemerkt.</li>';
-    return;
-  }
-
-  liste.innerHTML = shopAblage.merkliste.map(eintrag => {
-    const produkt = shopKatalog().produkte.find(p => p.id === eintrag.produktId);
-    if (!produkt) return '';   // Produkt gibt es im Katalog nicht mehr
-
-    const aktuell = günstigstesGesamt(produkt);
-    let vergleich = '';
-    if (aktuell !== null && eintrag.preisBeimMerken !== null) {
-      const unterschied = eintrag.preisBeimMerken - aktuell;
-      if (unterschied > 0.005)       vergleich = `seitdem ${euro(unterschied)} günstiger`;
-      else if (unterschied < -0.005) vergleich = `seitdem ${euro(-unterschied)} teurer`;
-      else                           vergleich = 'Preis unverändert';
-    }
-    const datum = new Date(eintrag.gemerktAm)
-      .toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' });
-
-    return `
-      <li data-produkt="${escapeHtml(produkt.id)}">
-        ${produktMiniBild(produkt)}
-        <span class="saved-text">
-          <span class="saved-name">${escapeHtml(produkt.marke)} ${escapeHtml(produkt.name)}</span>
-          <span class="saved-meta">Gemerkt am ${datum}${vergleich ? ' <i>&middot;</i> ' + vergleich : ''}</span>
-        </span>
-        <button class="del" data-merk-weg="${escapeHtml(produkt.id)}" title="Von der Merkliste nehmen">&times;</button>
-      </li>`;
-  }).join('');
-}
-
-
-/* --- 5. "Fuer dich": Vorschlaege aus der Garage -----------------------------
-   Das ist der Gedanke hinter dem ganzen Shop: Serpa weiss aus der
-   Garage, welches Motorrad jemand faehrt und welche Ausruestung er schon
-   hat - eine allgemeine Preissuchmaschine weiss das nicht. Drei Regeln,
-   der Reihe nach, bis drei Vorschlaege zusammen sind:
-
-     a) Teile, die genau zum Modell passen (Sturzbuegel, Traeger),
-     b) Teile fuer die Marke,
-     c) je eine Ausruestungs-Art, die in der Garage noch fehlt.
-
-   Jeder Vorschlag traegt seinen Grund als Text - ein Vorschlag ohne
-   Begruendung sieht aus wie Werbung, einer mit Begruendung wie Hilfe. */
-
-// Vergleichbar machen: Gross-/Kleinschreibung und Leerzeichen duerfen
-// keine Rolle spielen, "Z 900" und "Z900" sind dasselbe Motorrad.
-function vergleichbar(text) {
-  return String(text || '').toUpperCase().replace(/\s+/g, '');
-}
-
-function persönlicheVorschläge() {
-  const motorrad = (typeof motorradAktiv === 'function') ? motorradAktiv() : null;
-  if (!motorrad) return null;   // der Aufrufer zeigt dann den Garagen-Hinweis
-
-  const vorschläge = [];
-  const schonDrin = new Set();
-  const nimm = (produkt, grund) => {
-    if (!produkt || schonDrin.has(produkt.id) || vorschläge.length >= 3) return;
-    schonDrin.add(produkt.id);
-    vorschläge.push({ produkt, grund });
-  };
-
-  const produkte = shopKatalog().produkte;
-  const marke = vergleichbar(motorrad.marke);
-  const modell = vergleichbar(motorrad.modell);
-  const maschine = `${motorrad.marke || ''} ${motorrad.modell || ''}`.trim() || 'Maschine';
-
-  // a) genau dieses Modell
-  if (modell) {
-    produkte
-      .filter(p => p.passtZu.modelle.some(m => vergleichbar(m) === modell))
-      .forEach(p => nimm(p, `Passt an deine ${maschine}`));
-  }
-
-  // b) die Marke - aber nur markenweite Teile. Ein Teil, das an ein
-  //    BESTIMMTES Modell gebunden ist (passtZu.modelle gefuellt), darf
-  //    nur ueber Regel a) kommen: Ein Sturzbuegel fuer die CB650R passt
-  //    eben nicht an jede Honda, und "Fuer deine Honda CBR650R" waere
-  //    dann schlicht falsch.
-  if (marke) {
-    produkte
-      .filter(p => !p.passtZu.modelle.length
-                && p.passtZu.marken.some(m => vergleichbar(m) === marke))
-      .forEach(p => nimm(p, `Für deine ${motorrad.marke}`));
-  }
-
-  // c) was in der Garage noch fehlt. garage kommt aus garage.js; die
-  //    Ausruestungsliste existiert dort weiter, auch wenn sie im Bild
-  //    gerade nicht gezeigt wird. Drei alte Arten heissen anders als die
-  //    Shop-Kategorien und werden deshalb uebersetzt - "sonstiges" bleibt
-  //    unuebersetzt, weil es zu keiner Kategorie sauber passt.
-  const ART_ZU_KATEGORIE = { handschuhe: 'handschuh', protektoren: 'protektor' };
-  const vorhandeneArten = new Set(
-    (garage.ausrüstung || []).map(teil => ART_ZU_KATEGORIE[teil.art] || teil.art));
-  SHOP_KATEGORIEN.forEach(kategorie => {
-    if (!kategorie.fehlt || vorhandeneArten.has(kategorie.schlüssel)) return;
-    const kandidat = produkte.find(p =>
-      p.kategorie === kategorie.schlüssel
-      && !p.passtZu.modelle.length && !p.passtZu.marken.length);
-    if (kandidat) nimm(kandidat, `Weil in deiner Garage noch ${kategorie.fehlt} hängt`);
-  });
-
-  return vorschläge;
-}
-
-function zeichneVorschläge() {
-  const behälter = document.getElementById('shopVorschlaege');
-  const vorschläge = persönlicheVorschläge();
-
-  // Ohne Motorrad gibt es nichts Persoenliches - dann ist der ehrliche
-  // Weg ein Hinweis samt Abkuerzung zur Garage, keine erfundene Auswahl.
-  if (vorschläge === null) {
-    behälter.innerHTML = `
-      <div class="vorschlag-leer glas">
-        <p class="hint">Leg dein Motorrad in der Garage an &ndash; dann schlagen
-          wir hier vor, was zu deiner Maschine passt.</p>
-        <button class="btn ghost klein" data-zur-garage>Zur Garage</button>
-      </div>`;
-    return;
-  }
-
-  if (!vorschläge.length) { behälter.innerHTML = ''; return; }
-
-  behälter.innerHTML = `
-    <section class="block vorschlag-block">
-      <h2>F&uuml;r dich</h2>
-      <ul class="saved-list">
-        ${vorschläge.map(({ produkt, grund }) => `
-          <li data-produkt="${escapeHtml(produkt.id)}">
-            ${produktMiniBild(produkt)}
-            <span class="saved-text">
-              <span class="saved-name">${escapeHtml(produkt.marke)} ${escapeHtml(produkt.name)}</span>
-              <span class="saved-meta vorschlag-grund">${escapeHtml(grund)}</span>
-            </span>
-          </li>`).join('')}
-      </ul>
-    </section>`;
-}
-
-
-/* Der kleine Shop unten in der Garage: eine wischbare Querleiste.
-   Zuerst alles von der Merkliste (Hinweis "Gemerkt"), dann fuellen die
-   persoenlichen Vorschlaege auf - dieselbe Logik wie im Shop selbst,
-   nur kompakter dargestellt. Gerufen aus zeigeGarage() in app.js,
-   defensiv wie zeichneShop(). */
-function zeichneGarageShop() {
-  const platte = document.getElementById('garageShop');
-  const band = document.getElementById('garageShopBand');
-  if (!platte || !band) return;
-  /* Abgeschalteter Shop: Die Leiste wird AKTIV versteckt, nicht nur "nicht
-     eingeblendet". Der Unterschied zaehlt, wenn die Platte aus irgendeinem
-     Grund schon sichtbar ist - etwa weil der Browser eine aeltere Fassung
-     dieser Datei aus seinem Speicher genommen hat, waehrend das HTML neu
-     ist. Nur auszusteigen liesse den Demo-Vermerk dann stehen; so raeumt
-     der naechste Garagen-Aufruf ihn weg. Aufgefallen am 01.09.2026 an
-     einem Bildschirmfoto, siehe ENTSCHEIDUNGEN.md. */
-  if (!SHOP_AKTIV) { platte.hidden = true; band.innerHTML = ''; return; }
-
-  const produkte = shopKatalog().produkte;
-  const einträge = [];
-  const schonDrin = new Set();
-  const nimm = (produkt, hinweis) => {
-    if (!produkt || schonDrin.has(produkt.id) || einträge.length >= 8) return;
-    schonDrin.add(produkt.id);
-    einträge.push({ produkt, hinweis });
-  };
-
-  shopAblage.merkliste.forEach(eintrag =>
-    nimm(produkte.find(p => p.id === eintrag.produktId), 'Gemerkt'));
-  (persönlicheVorschläge() || []).forEach(({ produkt }) => nimm(produkt, 'Für dich'));
-  // Ohne Motorrad und ohne Merkliste zeigt die Leiste einfach den Anfang
-  // des Katalogs - leer waere sie nur ein grauer Balken ohne Zweck.
-  produkte.forEach(produkt => nimm(produkt, 'Aus dem Shop'));
-
-  band.innerHTML = einträge.map(({ produkt, hinweis }) => {
-    const ab = günstigstesGesamt(produkt);
-    return `
-      <button type="button" class="garage-shop-karte" data-produkt="${escapeHtml(produkt.id)}">
-        ${produktMiniBild(produkt)}
-        <span class="garage-shop-name">${escapeHtml(produkt.marke)} ${escapeHtml(produkt.name)}</span>
-        <span class="garage-shop-meta">${escapeHtml(hinweis)}${ab !== null ? ' &middot; ab ' + euro(ab) : ''}</span>
-      </button>`;
-  }).join('');
-
-  platte.hidden = false;
-}
-
-
-/* --- 6. Die Produktseite ----------------------------------------------------
-   Ein Produkt, alle Angebote. Die Seite wird bei jedem Aufruf komplett
-   neu zusammengebaut - bei einer Handvoll Angebote ist das billiger und
-   einfacher als jedes Detail einzeln nachzufuehren.
-
-   Drei Dinge stehen hier aus RECHTLICHEN Gruenden und duerfen nicht
-   wegrationalisiert werden, sobald echte Angebote kommen:
-   - Versandkosten und GESAMTPREIS direkt in der Liste (BGH "Froogle"),
-     sortiert wird nach dem Gesamtpreis.
-   - Ein Zeitstempel AN JEDEM Angebot, nicht einer fuer die ganze Seite.
-   - Der Aufklapper "So entsteht dieser Vergleich": Ein Vergleich, der nur
-     Partner-Shops zeigt, muss genau das offenlegen (BGH I ZR 55/16). */
-
-// Welches Produkt gerade auf der Produktseite steht - und woher man kam.
-// Die Herkunft entscheidet, wohin der Zurueck-Knopf fuehrt und welcher
-// Leisten-Eintrag leuchtet: Wer aus der Garage kommt, ist gedanklich noch
-// in der Garage, nicht im Shop.
-let angezeigtesProdukt = null;
-let produktHerkunft = 'shop';
-
-function zeigeProdukt(produktId, herkunft = 'shop') {
-  angezeigtesProdukt = shopKatalog().produkte.find(p => p.id === produktId) || null;
-  if (!angezeigtesProdukt) return;
-  produktHerkunft = herkunft;
-  zeichneProduktSeite();
-  zeigeBildschirm('shopProduktScreen');
-  // Wer aus einer gescrollten Liste kommt, soll oben auf der Seite landen.
-  document.getElementById('shopProduktScreen').scrollTop = 0;
-}
-
-// Fuer aktualisiereLeiste() in app.js: welcher Eintrag soll leuchten,
-// solange die Produktseite offen ist.
-function produktLeuchtZiel() {
-  return produktHerkunft === 'garage' ? 'garageScreen' : 'shopScreen';
-}
-
-function zurückVomProdukt() {
-  if (produktHerkunft === 'garage') { zeigeGarage(); return; }
-  zeigeShop();
-}
-
-function zeichneProduktSeite() {
-  const produkt = angezeigtesProdukt;
-  const inhalt = document.getElementById('shopProduktInhalt');
-
-  // Die Angebote, dem Gesamtpreis nach sortiert. Der Verweis auf die
-  // Stelle im Original-Array bleibt erhalten, damit der Knopf "Zum Shop"
-  // spaeter das richtige Angebot oeffnet.
-  const angebote = angeboteZeigbar(produkt)
-    .map(angebot => ({ ...angebot, gesamt: angebot.preis + angebot.versand }))
-    .sort((a, b) => a.gesamt - b.gesamt);
-
-  // Die freien Plaetze heissen schlicht A, B, C ... - siehe produkte.js:
-  // keine echten Haendler mit erfundenen Preisen, keine erfundenen Namen.
-  const platzName = stelle => `Partner-Shop ${String.fromCharCode(65 + stelle)}`;
-
-  const angebotZeilen = angebote.map((angebot, stelle) => `
-    <li>
+  liste.innerHTML = treffer.slice(0, LISTE_HOECHSTENS).map(produkt => `
+    <li data-produkt="${escapeHtml(produkt.schluessel)}">
+      ${produktMiniBild(produkt)}
       <span class="saved-text">
-        <span class="angebot-kopf">
-          <span class="badge anzeige">Anzeige</span>
-          <span class="saved-name">${platzName(stelle)}</span>
-        </span>
-        <span class="saved-meta">${euro(angebot.preis)} inkl. MwSt. <i>&middot;</i> ${angebot.versand === 0 ? 'versandkostenfrei' : 'zzgl. ' + euro(angebot.versand) + ' Versand'}</span>
-        <span class="angebot-gesamt">Gesamt ${euro(angebot.gesamt)}</span>
-        <span class="tiny">Stand: ${stempel(angebot.stand)}</span>
+        <span class="saved-name">${escapeHtml(produkt.marke)} ${escapeHtml(produkt.name)}</span>
+        <span class="saved-meta">${escapeHtml(warengruppeName(produkt.kategorie))}
+          <i>&middot;</i> ${escapeHtml(euroAusCent(produkt.gesamt))} inkl. Versand</span>
       </span>
-      <button class="btn klein" data-angebot="${stelle}">Zum Shop</button>
+      ${merkHerz(produkt.schluessel)}
     </li>`).join('');
 
-  // Die Bilder als wischbares Band: jedes Bild schnappt beim Loslassen
-  //  ein (CSS scroll-snap, kein eigener Wisch-Code noetig). Die Punkte
-  //  darunter zeigen, wo man ist.
-  const galerieBilder = produkt.bilder.map(bild => `
-    <figure class="galerie-bild">
-      ${bild.url
-        ? `<img src="${escapeHtml(bild.url)}" alt="${escapeHtml(produkt.marke + ' ' + produkt.name)}">`
-        : `${symbol(produkt.symbol, 'gross')}
-           <figcaption>${escapeHtml(bild.beschriftung)}</figcaption>`}
-    </figure>`).join('');
-
-  const galeriePunkte = produkt.bilder.map((_, stelle) =>
-    `<span class="${stelle === 0 ? 'aktiv' : ''}"></span>`).join('');
-
-  inhalt.innerHTML = `
-    <div class="galerie">
-      <div class="galerie-band" id="galerieBand">${galerieBilder}</div>
-      ${produkt.bilder.length > 1 ? `<div class="galerie-punkte" id="galeriePunkte">${galeriePunkte}</div>` : ''}
-    </div>
-
-    <h2 class="produkt-titel">${escapeHtml(produkt.marke)} ${escapeHtml(produkt.name)}</h2>
-    <p class="hint produkt-kategorie">${escapeHtml(kategorieName(produkt.kategorie))}</p>
-
-    ${produkt.groessen.length ? `
-      <div class="groessen-reihe">
-        ${produkt.groessen.map(g => `<span class="shop-groesse">${escapeHtml(g)}</span>`).join('')}
-      </div>` : ''}
-
-    <div class="stats produkt-daten">
-      ${produkt.eigenschaften.map(eigenschaft => `
-        <div class="stat"><span class="k">${escapeHtml(eigenschaft.name)}</span><span class="v">${escapeHtml(eigenschaft.wert)}</span></div>`).join('')}
-    </div>
-
-    <section class="block">
-      <h2>${escapeHtml(produkt.meinung.titel)}</h2>
-      <p class="meinung-text">${escapeHtml(produkt.meinung.text)}</p>
-      <p class="hint">Diese Einsch&auml;tzung stammt von uns und beruht auf
-        Herstellerangaben, nicht auf einem eigenen Produkttest.</p>
-    </section>
-
-    <section class="block">
-      <h2>Preisvergleich</h2>
-      <ul class="saved-list angebots-liste">
-        ${angebotZeilen || '<li class="empty">Derzeit kein Angebot mit vollst&auml;ndigen Versandkosten.</li>'}
-      </ul>
-      <p class="hint">Die Pl&auml;tze sind bewusst frei gehalten &ndash; hier
-        erscheinen die Shops unserer k&uuml;nftigen Partnerprogramme.</p>
-      <p class="tiny">Preise und Verf&uuml;gbarkeit entsprechen dem jeweils
-        angegebenen Stand und k&ouml;nnen sich seitdem ge&auml;ndert haben.
-        Ma&szlig;geblich ist der Preis, den der Shop beim Kauf anzeigt.
-        Versandkosten gelten f&uuml;r Standardversand innerhalb Deutschlands.</p>
-      <details class="block accordion vergleich-erklaert">
-        <summary>So entsteht dieser Vergleich</summary>
-        <div class="accordion-body">
-          <p class="hint">Sortiert wird nach dem Gesamtpreis aus Produktpreis
-            und Versandkosten, das g&uuml;nstigste Angebot steht oben. Die
-            H&ouml;he einer Provision hat auf die Reihenfolge keinen Einfluss.</p>
-          <p class="hint">K&uuml;nftig zeigen wir hier ausschlie&szlig;lich
-            Angebote von Shops, mit denen wir ein Partnerprogramm haben, und
-            erhalten f&uuml;r vermittelte K&auml;ufe eine Provision. Der
-            Vergleich bildet daher nicht den gesamten Markt ab. F&uuml;r dich
-            &auml;ndert sich am Preis nichts.</p>
-        </div>
-      </details>
-    </section>
-
-    <button class="btn ghost merken-knopf" data-merken="${escapeHtml(produkt.id)}">
-      ${merkenKnopfText(produkt.id)}
-    </button>`;
-
-  const band = document.getElementById('galerieBand');
-  const punkte = document.getElementById('galeriePunkte');
-  if (band && punkte) {
-    band.addEventListener('scroll', () => {
-      const stelle = Math.round(band.scrollLeft / band.clientWidth);
-      [...punkte.children].forEach((punkt, i) => punkt.classList.toggle('aktiv', i === stelle));
-    }, { passive: true });
+  // Kein stiller Deckel: Wer nicht alles sieht, soll wenigstens wissen,
+  // dass da mehr ist.
+  if (mehr) {
+    const rest = treffer.length - LISTE_HOECHSTENS;
+    mehr.hidden = rest <= 0;
+    mehr.textContent = ausruestungFilter.kategorie || ausruestungFilter.suche
+      ? `${treffer.length} Treffer, die ${LISTE_HOECHSTENS} günstigsten stehen oben. `
+        + 'Suchfeld oder Warengruppe eingrenzen zeigt den Rest.'
+      : `${treffer.length} Artikel im Katalog. Oben steht reihum das Günstigste `
+        + 'aus jeder Warengruppe – tipp auf eine Gruppe, um sie ganz zu sehen.';
   }
 }
 
-
-/* Jeder Klick auf "Zum Shop" laeuft durch DIESE eine Funktion. Das ist
-   Absicht und soll so bleiben: Wenn spaeter echte Partner-Links kommen,
-   gehoert VOR das Oeffnen genau hier die Einwilligungsfrage (der Link
-   traegt dann eine Kennung, ueber die das Netzwerk den Kauf zuordnet -
-   und dafuer braucht es nach Paragraf 25 TDDDG eine Zustimmung). Eine
-   einzige Stelle laesst sich absichern, verstreute Klickstellen nicht. */
-function öffneAngebot(angebot) {
-  if (!angebot) return;
-  if (!angebot.deeplink) {
-    // Demo-Stand: Es gibt noch keinen Partner-Link.
-    showToast('Demo: Hier öffnet später die Produktseite des Shops.');
-    return;
-  }
-  /* Durch oeffnePartnerLink(), NICHT direkt: Dort steht die Einwilligung
-     davor. Frueher stand hier geraet.oeffneExtern() mit dem Vermerk, die
-     Frage komme spaeter - und genau so haette der erste echte Link ohne
-     Einwilligung geoeffnet. */
-  öffnePartnerLink(angebot.deeplink, partnerNach(angebot.partnerId));
+/* Der Stand des Katalogs, an jeder Uebersicht. Ein Preis ohne Zeitpunkt
+   ist eine falsche Preisangabe - deshalb steht er hier und nicht nur auf
+   der Produktseite. */
+function zeichneAusruestungStand() {
+  const zeile = document.getElementById('ausruestungStand');
+  if (!zeile) return;
+  const stand = katalogStand('motoin');
+  if (!stand) { zeile.textContent = ''; return; }
+  const datum = new Date(stand).toLocaleDateString('de-DE',
+    { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const alter = Math.floor((Date.now() - Date.parse(stand)) / 86400000);
+  zeile.textContent = alter > 14
+    ? `Preise vom ${datum} – das ist über zwei Wochen her, sie können sich geändert haben.`
+    : `Preise und Verfügbarkeit vom ${datum}. Maßgeblich ist der Preis, den der Shop beim Kauf anzeigt.`;
 }
 
 
-/* --- 7. Verkabelung ---------------------------------------------------------
+/* --- 4. Der Bildschirm ------------------------------------------------------ */
+
+function zeigeAusruestung() {
+  zeigeBildschirm('shopScreen');
+  const laden = document.getElementById('ausruestungLaden');
+  const fehler = document.getElementById('ausruestungFehler');
+  if (fehler) fehler.hidden = true;
+
+  if (katalogGeladen('motoin')) { zeichneAusruestung(); return; }
+
+  if (laden) laden.hidden = false;
+  ladeKatalog('motoin').then(() => {
+    if (laden) laden.hidden = true;
+    zeichneAusruestung();
+  }).catch(() => {
+    // Auch der spaete Erfolg muss den Fehlerkasten wieder wegraeumen -
+    // sonst bleibt er nach einem Funkloch fuer immer stehen.
+    if (laden) laden.hidden = true;
+    if (fehler) fehler.hidden = false;
+  });
+}
+
+function zeichneAusruestung() {
+  zeichneVorschläge();
+  zeichneKategorien();
+  zeichneProduktListe();
+  zeichneAusruestungStand();
+}
+
+
+/* --- 5. Verkabelung ---------------------------------------------------------
    Die Chips werden bei jedem Zeichnen neu erzeugt, deshalb haengt ihr
-   Horcher am BEHAELTER und nicht am einzelnen Knopf - dasselbe Muster wie
-   beim Garage-Dialog. Suchfeld und Liste stehen dagegen fest im HTML. */
+   Horcher am BEHAELTER und nicht am einzelnen Knopf. */
 
 verkabele('shopKategorien', 'click', ereignis => {
   const chip = ereignis.target.closest('.marken-chip');
   if (!chip) return;
-  shopFilter.kategorie = chip.dataset.kategorie || null;
-  zeichneKategorien();       // der aktive Chip wandert mit
+  ausruestungFilter.kategorie = chip.dataset.kategorie || null;
+  zeichneKategorien();
   zeichneProduktListe();
 });
 
 verkabele('shopSuche', 'input', ereignis => {
-  shopFilter.suche = ereignis.target.value.trim().toLowerCase();
+  ausruestungFilter.suche = ereignis.target.value.trim().toLowerCase();
   zeichneProduktListe();
 });
 
-verkabele('shopVerzeichnis', 'click', ereignis => {
-  const knopf = ereignis.target.closest('button[data-shop]');
-  if (knopf) öffneShopSeite(SHOP_VERZEICHNIS[Number(knopf.dataset.shop)]);
-});
-
-verkabele('garageShopBand', 'click', ereignis => {
-  const karte = ereignis.target.closest('[data-produkt]');
-  if (karte) zeigeProdukt(karte.dataset.produkt, 'garage');
-});
-
-// Der Zurueck-Knopf der Produktseite gehoert dem Shop und folgt der
-// Herkunft - deshalb ist er HIER verkabelt und nicht in app.js.
-verkabele('btnShopZurueck', 'click', zurückVomProdukt);
-
-verkabele('btnGarageShopAlle', 'click', zeigeShop);
-
 verkabele('shopProduktListe', 'click', ereignis => {
+  // Herz VOR Zeile, sonst oeffnet das Herz die Produktseite.
+  const herz = ereignis.target.closest('[data-merken]');
+  if (herz) { merkenUmschalten(herz.dataset.merken); return; }
   const zeile = ereignis.target.closest('li[data-produkt]');
-  if (zeile) zeigeProdukt(zeile.dataset.produkt);
+  if (zeile) zeigeProdukt(zeile.dataset.produkt, 'ausruestung');
 });
 
-verkabele('shopVorschlaege', 'click', ereignis => {
-  if (ereignis.target.closest('[data-zur-garage]')) { zeigeGarage(); return; }
-  const zeile = ereignis.target.closest('li[data-produkt]');
-  if (zeile) zeigeProdukt(zeile.dataset.produkt);
+verkabele('btnAusruestungMerkliste', 'click', () => {
+  ladeMerklistenKataloge().then(zeigeMerkliste);
 });
 
-verkabele('shopMerkliste', 'click', ereignis => {
-  const wegKnopf = ereignis.target.closest('[data-merk-weg]');
-  if (wegKnopf) { merkenUmschalten(wegKnopf.dataset.merkWeg); return; }
-  const zeile = ereignis.target.closest('li[data-produkt]');
-  if (zeile) zeigeProdukt(zeile.dataset.produkt);
-});
-
-verkabele('shopProduktInhalt', 'click', ereignis => {
-  const merkKnopf = ereignis.target.closest('[data-merken]');
-  if (merkKnopf) { merkenUmschalten(merkKnopf.dataset.merken); return; }
-  const knopf = ereignis.target.closest('button[data-angebot]');
-  if (!knopf) return;
-  const angebote = angeboteZeigbar(angezeigtesProdukt)
-    .map(angebot => ({ ...angebot, gesamt: angebot.preis + angebot.versand }))
-    .sort((a, b) => a.gesamt - b.gesamt);
-  öffneAngebot(angebote[Number(knopf.dataset.angebot)]);
-});
-
-
-/* Einmal beim Start zeichnen. Der Grund steht in der Ladereihenfolge:
-   zeichneGarageShop() wird sonst nur aus zeigeGarage() gerufen - und seit
-   die Garage der erste sichtbare Bildschirm ist, findet dieser Aufruf beim
-   allerersten Oeffnen nicht statt. Am Ende von app.js waere es wirkungslos,
-   denn shop.js wird erst danach geladen. Deshalb hier, in der zuletzt
-   geladenen Datei. */
-zeichneGarageShop();
+verkabele('btnGarageShopAlle', 'click', zeigeAusruestung);

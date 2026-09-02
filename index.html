@@ -408,7 +408,15 @@
         <path d="M17.8 3.7a2.4 2.4 0 0 1 2.5 4l-8.4 5.6-1.7-2.6 7.6-7Z"/>
         <path d="M9.5 12.2c1.6-.6 3 .6 3 2.3 0 2.2-1.6 4-4.5 4-1.4 0-2.3-.4-3.5-1.2 1.4-.3 1.9-1.2 2.2-2.4.3-1.4 1.2-2.3 2.8-2.7Z"/>
       </symbol>
-      <symbol id="icon-shop" viewBox="0 0 24 24">
+      <!-- Das Herz der Merkliste. Gefuellt gezeichnet und ueber CSS
+         eingefaerbt: gemerkt oder nicht ist ein Farbwechsel, kein zweites
+         Symbol - so kann kein Zustand mit dem falschen Bild dastehen. -->
+    <symbol id="icon-herz" viewBox="0 0 24 24">
+      <path d="M12 20.5 3.8 12.6a5 5 0 0 1 7.1-7.05L12 6.6l1.1-1.05a5 5 0 0 1 7.1 7.05Z"
+            fill="currentColor" stroke="currentColor" stroke-width="1.6"
+            stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="icon-shop" viewBox="0 0 24 24">
         <path d="M20.5 10.6V5.4a1.9 1.9 0 0 0-1.9-1.9h-5.2L3.9 13a2 2 0 0 0 0 2.8l4.3 4.3a2 2 0 0 0 2.8 0l9.5-9.5Z"/>
         <circle cx="16.2" cy="7.8" r="1.5"/>
       </symbol>
@@ -623,10 +631,10 @@
            die Platte einfach verborgen. -->
       <div id="garageShop" class="garage-platte garage-shop" hidden>
         <div class="garage-shop-kopf">
-          <!-- Der Demo-Vermerk steht hier NOCH EINMAL, weil diese Leiste
-               Preise ausserhalb der Shop-Bildschirme zeigt - deren
-               DEMO-Balken ist von hier aus nicht zu sehen. -->
-          <h3>Shop f&uuml;r dich <span class="garage-shop-demo">Demo-Preise</span></h3>
+          <!-- Die Anzeige-Kennzeichnung steht hier NOCH EINMAL, weil diese
+               Leiste Preise ausserhalb des Ausruestungs-Bildschirms zeigt -
+               dessen Offenlegung ist von hier aus nicht zu sehen. -->
+          <h3>Ausr&uuml;stung f&uuml;r dich <span class="badge anzeige">Anzeige</span></h3>
           <button class="linkbtn" id="btnGarageShopAlle">Alle ansehen &rarr;</button>
         </div>
         <div class="garage-shop-band" id="garageShopBand"></div>
@@ -725,12 +733,14 @@
           </button>
 
           <!-- Noch ohne Hintergrundbild - das kann spaeter als
-               img/kacheln/shop.jpg dazukommen. -->
+               img/kacheln/ausruestung.jpg dazukommen. -->
           <button class="kachel" id="btnStartShop">
             <span class="kachel-inhalt">
               <svg class="ic gross kachel-symbol"><use href="#icon-shop"></use></svg>
               <span class="kachel-text">
-                <span class="kachel-titel">Shop</span>
+                <span class="kachel-titel">Ausr&uuml;stung</span>
+                <span class="kachel-unterzeile">Helme, Kleidung, Gep&auml;ck
+                  <span class="badge anzeige">Anzeige</span></span>
               </span>
             </span>
             <span class="kachel-pfeil" aria-hidden="true">&rarr;</span>
@@ -1548,6 +1558,31 @@
             <button class="btn ghost klein" id="btnPartnerWiderruf" hidden>Einwilligung zur&uuml;cknehmen</button>
           </p>
 
+          <p class="label">Vorschl&auml;ge aus deinen Fahrten</p>
+          <p>
+            Serpa kann aus deinen <b>aufgezeichneten Ausfahrten</b> ableiten,
+            wie du unterwegs bist &ndash; kurvig, auf langen Touren oder auf
+            kurzen Strecken &ndash; und danach ausw&auml;hlen, welche
+            Ausr&uuml;stung wir dir vorschlagen. Gerechnet wird
+            <strong>ausschlie&szlig;lich auf deinem Ger&auml;t</strong>: Es
+            geht dabei nichts an H&auml;ndler, Partnernetzwerke oder an uns.
+          </p>
+          <p>
+            Das ist trotzdem Profilbildung f&uuml;r Werbezwecke, und deshalb
+            fragen wir, statt es einfach zu tun. Voreinstellung ist
+            <b>aus</b>. Vorschl&auml;ge aus deiner Garage (Marke, Modell,
+            fehlende Ausr&uuml;stung) laufen unabh&auml;ngig davon weiter
+            &ndash; wer sein Motorrad eintr&auml;gt, erwartet, dass die App
+            es benutzt. Rechtsgrundlage ist deine Einwilligung nach
+            Art. 6 Abs. 1 lit. a DSGVO; Art. 21 Abs. 2 DSGVO gibt dir
+            ohnehin jederzeit das Recht, zu widersprechen.
+          </p>
+          <p class="partner-stand" id="fahrstilStandZeile"></p>
+          <p>
+            <button class="btn ghost klein" id="btnFahrstilAn" hidden>Fahrten einbeziehen</button>
+            <button class="btn ghost klein" id="btnFahrstilAus" hidden>Nicht mehr einbeziehen</button>
+          </p>
+
           <p class="label">11. Deine Rechte</p>
           <p>
             Du hast das Recht auf Auskunft, Berichtigung, L&ouml;schung,
@@ -1821,18 +1856,26 @@
        Skriptfehler verschwinden koennen. ===== -->
   <div id="shopScreen" class="start-screen listen-screen" hidden>
     <div class="start-screen-inner">
-      <p class="shop-demo-balken">DEMO &middot; Alle Preise und Angebote sind Beispieldaten, keine echten Angebote.</p>
-      <h2>Shop</h2>
+      <div class="ausruestung-kopf">
+        <h2>Ausr&uuml;stung</h2>
+        <button class="linkbtn merk-schnellweg" id="btnAusruestungMerkliste">
+          Merkliste <span class="merk-zahl" data-merk-zahl hidden></span>
+        </button>
+      </div>
 
-      <!-- "Fuer dich": Vorschlaege, die zur eigenen Garage passen. Fuellt shop.js. -->
-      <div id="shopVorschlaege"></div>
+      <p class="hint" id="ausruestungLaden" hidden>Angebote werden geladen &hellip;</p>
+      <p class="hint" id="ausruestungFehler" hidden>Die Angebote lassen sich
+        gerade nicht laden. Einmal neu laden hilft meistens.</p>
 
-      <!-- Kategorien als Chips, dasselbe Muster wie die Markenwahl im
+      <!-- "Fuer dich": die Leiter der Gruende. Fuellt vorschlaege.js. -->
+      <div id="ausruestungVorschlaege"></div>
+
+      <!-- Warengruppen als Chips, dasselbe Muster wie die Markenwahl im
            Motorrad-Finder. Fuellt shop.js. -->
       <div class="finder-marken" id="shopKategorien"></div>
 
-      <!-- Die Suche filtert nur die mitgelieferte Produktliste - hier
-           geht nichts ins Netz. -->
+      <!-- Die Suche filtert nur den bereits geladenen Katalog - hier geht
+           nichts ins Netz. -->
       <div class="such-feld search-wrap">
         <input type="search" id="shopSuche" class="search-input"
                placeholder="Produkt oder Marke suchen &hellip;" autocomplete="off">
@@ -1840,44 +1883,39 @@
 
       <ul id="shopProduktListe" class="saved-list">
         <!-- Dieser Text ist nur zu sehen, wenn shop.js gar nicht laeuft -
-             im Normalfall ersetzt zeichneShop() ihn vor dem Einblenden. -->
-        <li class="empty">Der Shop konnte nicht geladen werden. Einmal neu laden hilft meistens.</li>
+             im Normalfall ersetzt zeichneAusruestung() ihn vor dem Einblenden. -->
+        <li class="empty">Die Ausr&uuml;stung konnte nicht geladen werden. Einmal neu laden hilft meistens.</li>
       </ul>
+      <p class="tiny" id="shopMehrZeile" hidden></p>
 
-      <section class="block">
-        <h2>Merkliste</h2>
-        <ul id="shopMerkliste" class="saved-list">
-          <li class="empty">Noch nichts gemerkt.</li>
-        </ul>
-        <!-- Kein Versprechen, das die App nicht halten kann: Mitteilungen
-             gibt es noch nicht, also steht hier, was STATTDESSEN gilt. -->
-        <p class="hint">Sp&auml;ter sagt dir die App Bescheid, sobald der Preis
-          eines gemerkten Produkts f&auml;llt. Mitteilungen gibt es noch nicht
-          &ndash; bis dahin siehst du den Vergleich hier.</p>
-      </section>
+      <p class="tiny" id="ausruestungStand"></p>
+      <p class="tiny">Alle genannten Marken-, Produkt- und Firmennamen sind
+        Eigentum der jeweiligen Rechteinhaber und dienen hier allein der
+        Beschreibung und Zuordnung.</p>
+    </div>
+  </div>
 
-      <!-- Der kurze Weg zu den Haendlern selbst. Die Eintraege kommen aus
-           SHOP_VERZEICHNIS in produkte.js und fuehren derzeit schlicht auf
-           die Websites - der Hinweis darunter sagt ehrlich, dass daran
-           noch nichts verdient wird. Mit Partnerprogramm werden daraus
-           gekennzeichnete Anzeige-Links. -->
-      <section class="block">
-        <h2>Direkt zu den Shops</h2>
-        <div class="shop-links" id="shopVerzeichnis"></div>
-        <p class="hint">Diese Links f&uuml;hren direkt auf die Websites der
-          Shops. Es bestehen derzeit keine Partnerprogramme &ndash; wir
-          verdienen an diesen Links nichts. Sobald sich das &auml;ndert,
-          kennzeichnen wir sie als Anzeige.</p>
-        <p class="tiny">Alle genannten Marken-, Produkt- und Firmennamen sind
-          Eigentum der jeweiligen Rechteinhaber und dienen hier allein der
-          Beschreibung und Zuordnung.</p>
-      </section>
+  <!-- Die Merkliste als eigener Ort, nicht als Abschnitt unten im Katalog.
+       Bei Reifen und einer Lederkombi wartet man wirklich Wochen auf einen
+       Preis - das ist der eine Fall, in dem Wiederkommen kein Kunstgriff
+       ist, sondern der Nutzen. Fuellt merkliste.js. -->
+  <div id="merklisteScreen" class="start-screen listen-screen" hidden>
+    <div class="start-screen-inner">
+      <button class="btn ghost back-btn" id="btnMerklisteZurueck">&larr; Zur&uuml;ck</button>
+      <h2>Merkliste</h2>
+      <ul id="merkListe" class="saved-list">
+        <li class="empty">Noch nichts gemerkt.</li>
+      </ul>
+      <p class="hint" id="merkSumme" hidden></p>
+      <p class="hint">Der Vergleich unter jedem Eintrag ist <b>unsere eigene
+        Beobachtung</b> seit dem Merken, kein Streichpreis des H&auml;ndlers.
+        Sp&auml;ter sagt die App Bescheid, sobald ein Preis f&auml;llt;
+        Mitteilungen gibt es noch nicht.</p>
     </div>
   </div>
 
   <div id="shopProduktScreen" class="start-screen listen-screen" hidden>
     <div class="start-screen-inner">
-      <p class="shop-demo-balken">DEMO &middot; Alle Preise und Angebote sind Beispieldaten, keine echten Angebote.</p>
       <button class="btn ghost back-btn" id="btnShopZurueck">&larr; Zur&uuml;ck</button>
       <div id="shopProduktInhalt"></div>
     </div>
@@ -2465,7 +2503,7 @@
       <svg class="ic gross"><use href="#icon-stats"></use></svg><span>Stats</span>
     </button>
     <button class="nav-tab" data-ziel="shopScreen">
-      <svg class="ic gross"><use href="#icon-shop"></use></svg><span>Shop</span>
+      <svg class="ic gross"><use href="#icon-shop"></use></svg><span>Ausr&uuml;stung</span>
     </button>
     <span class="nav-rechts nur-quer">
       <!-- Derselbe Weg wie der runde Konto-Knopf im Garagenkopf; beide
@@ -2623,15 +2661,12 @@
        Liste. Der Reiter "Entdecken" waere dann still.
 
        serpa-touren.js davor: reine Daten (die redaktionelle
-       Tourensammlung), dasselbe Muster wie produkte.js vor shop.js. -->
+       Tourensammlung), dasselbe Muster wie ein Katalog vor seiner Logik. -->
   <script src="serpa-touren.js?v=109"></script>
   <script src="touren.js?v=109"></script>
   <!-- Der Bildschirm "Meine Stats". Nach app.js (zeigeBildschirm, verkabele,
        vorschauBildHtml) und nach bilanz.js, dessen Rechnungen er zeichnet. -->
   <script src="rueckblick.js?v=109"></script>
-  <!-- Der Demo-Produktkatalog (nur Daten) und die Shop-Logik. produkte.js
-       muss vor shop.js stehen, und beide nach garage.js, weil shop.js
-       dessen verkabele() mitbenutzt. -->
   <!-- Partnerprogramme und Provisionslinks. Nach app.js, weil die
        Verkabelung des Einwilligungs-Blatts verkabele() und showToast()
        von dort braucht - und VOR reifen.js, das die Links hier bauen
@@ -2654,8 +2689,15 @@
        geladen, sondern erst beim Oeffnen des Bildschirms. -->
   <script src="reifen.js?v=109"></script>
 
-  <script src="produkte.js?v=109"></script>
+  <!-- Der Ausruestungs-Bereich, in vier Dateien statt einer: shop.js allein
+       waere mit Merkliste, Vorschlagsleiter und Produktseite ueber tausend
+       Zeilen lang geworden. Die Reihenfolge ist Pflicht - jede benutzt
+       Funktionen der vorherigen. -->
+  <script src="fahrstil.js?v=109"></script>
+  <script src="merkliste.js?v=109"></script>
   <script src="shop.js?v=109"></script>
+  <script src="vorschlaege.js?v=109"></script>
+  <script src="produktseite.js?v=109"></script>
   <!-- Die Besuchszaehlung. Zuletzt, weil sie nichts kann, was jemand anders
        braucht - und nach konto.js, weil sie die dort stehende Serveradresse
        und den oeffentlichen Schluessel mitbenutzt, statt beides ein zweites
