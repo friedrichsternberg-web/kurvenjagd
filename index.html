@@ -47,10 +47,12 @@
          data: fuer die verkleinerten Fotos, blob: fuer Bilder aus der
          Dateiauswahl, dazu die Kartenkacheln und der Bilderspeicher des
          Kontos. images2.productserve.com ist der Bildserver des
-         Partnernetzwerks AWIN: die Produktfotos im Reifen-Bereich. Die
-         CSP kann nicht nach Einwilligung unterscheiden - das tut
-         reifen.js, das die Adressen erst nach der Zustimmung in die
-         Seite schreibt. Diese Zeile erlaubt sie nur, sie laedt nichts.
+         Partnernetzwerks AWIN (Produktfotos im Reifen-Bereich),
+         www.motoin.de der des Haendlers motoin (Ausruestung). Beide
+         setzen nachweislich kein Cookie, deshalb laufen die Fotos ohne
+         Einwilligung; die braucht nur der Klick auf ein Angebot, und
+         darum kuemmert sich partner.js. Diese Zeile erlaubt die
+         Adressen nur, sie laedt nichts.
 
        connect-src
          Jede Adresse, die die App im Hintergrund fragt: BRouter fuer
@@ -94,7 +96,7 @@
     worker-src 'self' blob:;
     style-src 'self' 'unsafe-inline';
     font-src 'self';
-    img-src 'self' data: blob: https://tile.openstreetmap.org https://copydwpdqpnwjvknsakz.supabase.co https://images2.productserve.com;
+    img-src 'self' data: blob: https://tile.openstreetmap.org https://copydwpdqpnwjvknsakz.supabase.co https://images2.productserve.com https://www.motoin.de;
     connect-src 'self' https://brouter.de https://nominatim.openstreetmap.org
                 https://vpic.nhtsa.dot.gov https://de.wikipedia.org https://en.wikipedia.org
                 https://copydwpdqpnwjvknsakz.supabase.co https://cdn.jsdelivr.net;
@@ -1486,16 +1488,19 @@
             oder Stadt.
           </p>
 
-          <p class="label">10. Partnerprogramme (Reifen)</p>
+          <p class="label">10. Partnerprogramme (Reifen und Ausr&uuml;stung)</p>
           <p>
             Im Bereich &bdquo;Reifen&ldquo; zeigt die App Angebote von
             <b>reifen.com</b> (reifencom GmbH, S&uuml;dfeldstra&szlig;e 16,
-            30453 Hannover). Vermittelt werden sie &uuml;ber das
-            Partnernetzwerk <b>AWIN</b> (Awin AG, Eichhornstra&szlig;e 3,
-            10785 Berlin). Kaufst du &uuml;ber einen solchen Link, erhalten
-            wir eine Provision; f&uuml;r dich &auml;ndert sich am Preis
-            nichts. Angebote, an denen wir mitverdienen, sind mit
-            &bdquo;Anzeige&ldquo; gekennzeichnet.
+            30453 Hannover), vermittelt &uuml;ber das Partnernetzwerk
+            <b>AWIN</b> (Awin AG, Eichhornstra&szlig;e 3, 10785 Berlin).
+            Im Bereich &bdquo;Ausr&uuml;stung&ldquo; zeigt sie Angebote von
+            <b>motoin</b> (motoin GmbH, Hamburg), vermittelt &uuml;ber
+            <b>Webgains</b> (Webgains GmbH, Deutschland). Kaufst du
+            &uuml;ber einen solchen Link, erhalten wir eine Provision;
+            f&uuml;r dich &auml;ndert sich am Preis nichts. Angebote, an
+            denen wir mitverdienen, sind mit &bdquo;Anzeige&ldquo;
+            gekennzeichnet.
           </p>
           <p>
             Namen, Gr&ouml;&szlig;en und Preise liegen als Datei auf
@@ -1506,24 +1511,28 @@
           <p class="label">Produktfotos</p>
           <p>
             Die Fotos der Reifen liegen beim Bilddienst des Netzwerks
-            (images2.productserve.com, Awin) und werden von dort geladen,
-            sobald du den Reifen-Bereich &ouml;ffnest. Dabei wird deine
-            IP-Adresse dorthin &uuml;bertragen &ndash; genau wie beim Laden
-            der Kartenbilder (Punkt 3). Der Dienst setzt dabei
-            <strong>kein Cookie</strong> und liest nichts von deinem
-            Ger&auml;t; &sect; 25 TDDDG greift hier deshalb nicht.
-            Rechtsgrundlage ist Art. 6 Abs. 1 lit. b und f DSGVO
-            (Bereitstellung der von dir ge&ouml;ffneten Ansicht).
+            (images2.productserve.com, Awin), die Fotos der Ausr&uuml;stung
+            beim H&auml;ndler selbst (www.motoin.de). Beide werden von dort
+            geladen, sobald du den jeweiligen Bereich &ouml;ffnest. Dabei
+            wird deine IP-Adresse dorthin &uuml;bertragen &ndash; genau wie
+            beim Laden der Kartenbilder (Punkt 3). Beide setzen dabei
+            <strong>kein Cookie</strong> und lesen nichts von deinem
+            Ger&auml;t (nachgemessen am 01.09. und 02.09.2026);
+            &sect; 25 TDDDG greift hier deshalb nicht. Rechtsgrundlage ist
+            Art. 6 Abs. 1 lit. b und f DSGVO (Bereitstellung der von dir
+            ge&ouml;ffneten Ansicht).
           </p>
           <p class="label">Der Klick auf ein Angebot</p>
           <p>
             Der ist etwas anderes, und daf&uuml;r fragt die App
-            <b>einmalig</b>. Der Link f&uuml;hrt &uuml;ber awin1.com; dort
-            werden deine IP-Adresse und eine <b>Kennung</b> verarbeitet, an
-            der ein Kauf innerhalb von <b>30 Tagen</b> uns zugeordnet wird.
-            Ein Ja merkt sich die App, die Frage kommt dann nicht wieder;
-            ein Nein gilt f&uuml;r den Moment, und beim n&auml;chsten
-            Angebot fragt sie erneut. Wir erfahren dabei nicht, wer etwas
+            <b>einmalig</b>. Der Link f&uuml;hrt &uuml;ber awin1.com
+            beziehungsweise track.webgains.com; dort werden deine
+            IP-Adresse und eine <b>Kennung</b> verarbeitet, an der ein Kauf
+            innerhalb von <b>30 Tagen</b> uns zugeordnet wird. Ein Ja merkt
+            sich die App und gilt f&uuml;r die H&auml;ndler, die im
+            Einwilligungsfenster genannt waren; kommt sp&auml;ter ein
+            weiterer dazu, fragen wir noch einmal. Ein Nein gilt f&uuml;r
+            den Moment, und beim n&auml;chsten Angebot fragt sie erneut. Wir erfahren dabei nicht, wer etwas
             angesehen oder gekauft hat &ndash; nur Summen. Rechtsgrundlage
             ist deine Einwilligung nach &sect; 25 Abs. 1 TDDDG und
             Art. 6 Abs. 1 lit. a DSGVO.
@@ -2400,13 +2409,13 @@
     <div class="partner-blatt glas" role="dialog" aria-modal="true"
          aria-labelledby="partnerBlattTitel">
       <h3 id="partnerBlattTitel">Zum Shop weitergehen?</h3>
-      <p class="hint">
-        Du verl&auml;sst Serpa und landest bei <b>reifen.com</b>. Der Link
-        l&auml;uft &uuml;ber unser Partnernetzwerk <b>AWIN</b>, das dabei
-        eine Kennung setzt: Kaufst du innerhalb von <b>30 Tagen</b> etwas,
-        wird uns eine Provision gutgeschrieben. <b>Am Preis &auml;ndert das
-        nichts.</b>
-      </p>
+      <!-- Die beiden Abs&auml;tze mit Id werden von schreibePartnerBlatt()
+           in partner.js gef&uuml;llt: Sie nennen den H&auml;ndler, zu dem
+           es gerade geht, und alle, f&uuml;r die die Zustimmung gilt.
+           Nicht fest eingetragen, weil eine Einwilligung sonst irgendwann
+           f&uuml;r den falschen Empf&auml;nger eingeholt w&uuml;rde. -->
+      <p class="hint" id="partnerBlattWohin"></p>
+      <p class="hint" id="partnerBlattUmfang"></p>
       <p class="hint">
         Serpa erf&auml;hrt dabei nicht, was du dir ansiehst oder kaufst
         &ndash; nur, dass insgesamt etwas vermittelt wurde. Sagst du Ja,
@@ -2629,6 +2638,12 @@
        laesst. Faellt partner.js aus, oeffnet reifen.js nichts nach
        draussen; das ist die richtige Richtung fuer einen Ausfall. -->
   <script src="partner.js?v=109"></script>
+
+  <!-- katalog.js: eine Produktform fuer alle Haendler. Muss NACH partner.js
+       stehen (es baut Zieladressen zu Partnern) und VOR reifen.js und
+       shop.js, die daraus lesen. Die Katalogdateien selbst stehen hier
+       NICHT - die holt katalog.js erst, wenn ihr Bildschirm sich oeffnet. -->
+  <script src="katalog.js?v=109"></script>
   <!-- Die Serienbereifung der gaengigen Modelle: reine Daten, klein
        genug fuer den Start (im Gegensatz zum Katalog). VOR reifen.js,
        das darin nachschlaegt, sobald die Garage gezeichnet wird. -->

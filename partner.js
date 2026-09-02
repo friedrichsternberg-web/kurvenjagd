@@ -33,34 +33,58 @@
      id         Kurzname, taucht in den Katalogdateien wieder auf
      name       so heisst der Haendler in der Oberflaeche
      betreiber  wer dahintersteht - gehoert in die Offenlegung
-     netz       das Partnernetzwerk, ueber das abgerechnet wird
-     mid        die Advertiser-Nummer dieses Haendlers im Netzwerk
+     netz       Schluessel in NETZWERKE weiter unten, entscheidet den Linkbau
+     kennung    was DIESES Netzwerk braucht, um den Klick uns zuzuordnen
      start      die Startseite, fuer den Weg "einfach mal umsehen"
      cookieTage wie lange der Klick dem Haendler zugerechnet wird
      provision  was wir bekommen - steht so in der Offenlegung
-     versandfrei  gilt fuer die Warengruppe, die wir zeigen
+     versandfrei  gilt fuer die Warengruppe, die wir zeigen, sonst null
+     bilderErlaubt  ob die Produktfotos dieses Haendlers gezeigt werden
+                    duerfen. Die Bildlizenz haengt an der Teilnahme am
+                    Programm und ist WIDERRUFLICH - tritt man aus, wird
+                    hier false gesetzt und die App zeigt wieder Symbole.
+                    Ein Wert statt eines Umbaus.
 
-   Die Provisionsangabe ist bewusst eine Spanne und kein Versprechen: Bei
-   AWIN haengt der Satz an der Provisionsgruppe, und die kann der Haendler
-   aendern. */
+   Die Provisionsangabe ist bewusst eine Spanne, wo das Netzwerk eine
+   Spanne fuehrt, und kein Versprechen: Bei AWIN haengt der Satz an der
+   Provisionsgruppe, und die kann der Haendler aendern.
 
-// Die Publisher-Nummer von Serpa bei AWIN. Sie ist keine Geheimzahl - sie
-// steht in jedem Link, den die App oeffnet, und identifiziert nur uns als
-// Vermittler. Der SCHLUESSEL fuer den Produktdatenfeed ist etwas ganz
-// anderes und liegt NICHT im Repository (siehe reifen-import.py).
+   EIN DRITTER HAENDLER IST EIN EINTRAG HIER, ein Katalog dazu und - falls
+   sein Netzwerk noch fehlt - ein Eintrag in NETZWERKE. An der
+   Einwilligung, an der Kennzeichnung und am Klickweg aendert sich nichts. */
+
+// Die Publisher-Nummer von Serpa bei AWIN und die Kampagnennummer bei
+// Webgains. Beide sind KEINE Geheimzahlen - sie stehen in jedem Link, den
+// die App oeffnet, und weisen nur uns als Vermittler aus. Die SCHLUESSEL
+// fuer die Produktdatenfeeds sind etwas ganz anderes und liegen NICHT im
+// Repository (siehe reifen-import.py und motoin-import.py).
 const AWIN_PUBLISHER = '3056191';
+const WEBGAINS_KAMPAGNE = '1749874';
 
 const PARTNER = [
   {
     id: 'reifencom',
     name: 'reifen.com',
     betreiber: 'reifencom GmbH, Hannover',
-    netz: 'AWIN',
-    mid: '7605',
+    netz: 'awin',
+    kennung: { publisher: AWIN_PUBLISHER, mid: '7605' },
     start: 'https://www.reifen.com/de-de/motorradreifen',
     cookieTage: 30,
     provision: '3 bis 5 Prozent vom Warenwert',
     versandfrei: 'Motorradreifen liefert reifen.com frachtfrei.',
+    bilderErlaubt: true,
+  },
+  {
+    id: 'motoin',
+    name: 'motoin',
+    betreiber: 'motoin GmbH, Hamburg',
+    netz: 'webgains',
+    kennung: { kampagne: WEBGAINS_KAMPAGNE, programm: '1435' },
+    start: 'https://www.motoin.de/',
+    cookieTage: 30,
+    provision: '4 Prozent vom Warenwert',
+    versandfrei: null,
+    bilderErlaubt: true,
   },
 ];
 
@@ -71,78 +95,156 @@ function partnerNach(id) {
 
 /* --- 2. Provisionslinks bauen -----------------------------------------------
 
-   Zwei Formen, beide von AWIN vorgegeben:
+   Jedes Netzwerk hat seine eigene Adressform. Statt einer if-Kette, die
+   mit jedem Haendler laenger wird, steht hier EINE TABELLE: je Netzwerk
+   ein Eintrag mit seiner Bauanweisung. Ein neues Netzwerk ist damit eine
+   Funktion und kein Eingriff.
 
-   a) Der PRODUKTLINK (pclick) fuehrt auf genau einen Artikel. Die Nummer
-      dahinter steht im Produktdatenfeed und ist nur dort zu bekommen -
-      deshalb steht sie in reifen-katalog.js bei jedem Reifen.
+   AWIN kennt zwei Formen:
 
-   b) Der DEEPLINK (cread) fuehrt auf eine beliebige Seite des Haendlers.
-      Den brauchen wir fuer alles, was kein einzelner Artikel ist: die
-      Startseite, eine gefilterte Liste, spaeter Aktionsseiten.
+     produktLink (pclick) fuehrt auf genau einen Artikel. Die Nummer
+       dahinter steht im Produktdatenfeed und ist nur dort zu bekommen -
+       deshalb steht sie in reifen-katalog.js bei jedem Reifen.
+     zielLink (cread) fuehrt auf eine beliebige Seite des Haendlers. Den
+       brauchen wir fuer alles, was kein einzelner Artikel ist: die
+       Startseite, eine gefilterte Liste, spaeter Aktionsseiten.
 
-   In beiden steckt AWIN_PUBLISHER. Ohne ihn ist es ein gewoehnlicher
-   Link - der Kauf wird dann niemandem zugerechnet. */
+   Webgains kennt nur EINE Form, click.html mit dem Ziel im Anhang. Eine
+   Produktnummer allein reicht dort nicht, deshalb hat der Eintrag kein
+   produktLink - katalog.js baut fuer motoin die Zieladresse aus der
+   Produktnummer und ruft zielLink.
+
+   Ueber die Klickadresse von Webgains ist am 02.09.2026 bewusst
+   entschieden worden: Der Generator im Konto bietet die Ausweichdomain
+   assets.ikhnaie.link an, gedacht gegen Werbeblocker. Wir nehmen
+   track.webgains.com. Beide fuehren nachweislich zur selben Weiterleitung
+   samt wgu-Kennung (nachgemessen), aber die Adresse steht kurz in der
+   Adresszeile des Nutzers - und dort sieht eine Zufallsdomain aus wie
+   etwas, dem man nicht trauen soll. Naeheres in ENTSCHEIDUNGEN.md.
+
+   Ohne die eigene Kennung ist es jeweils ein gewoehnlicher Link - der
+   Kauf wird dann niemandem zugerechnet. */
+
+const NETZWERKE = {
+  awin: {
+    name: 'AWIN',
+    produktLink(kennung, produktNummer) {
+      return 'https://www.awin1.com/pclick.php'
+        + `?p=${encodeURIComponent(produktNummer)}`
+        + `&a=${encodeURIComponent(kennung.publisher)}`
+        + `&m=${encodeURIComponent(kennung.mid)}`;
+    },
+    zielLink(kennung, zielAdresse) {
+      return 'https://www.awin1.com/cread.php'
+        + `?awinmid=${encodeURIComponent(kennung.mid)}`
+        + `&awinaffid=${encodeURIComponent(kennung.publisher)}`
+        + `&ued=${encodeURIComponent(zielAdresse)}`;
+    },
+  },
+
+  webgains: {
+    name: 'Webgains',
+    zielLink(kennung, zielAdresse) {
+      return 'https://track.webgains.com/click.html'
+        + `?wgcampaignid=${encodeURIComponent(kennung.kampagne)}`
+        + `&wgprogramid=${encodeURIComponent(kennung.programm)}`
+        + `&wgtarget=${encodeURIComponent(zielAdresse)}`;
+    },
+  },
+};
+
+function netzwerkVon(partner) {
+  return partner ? NETZWERKE[partner.netz] || null : null;
+}
+
+// Der Name des Netzwerks, wie er in der Einwilligung und in der
+// Offenlegung steht ("laeuft ueber unser Partnernetzwerk AWIN").
+function netzName(partner) {
+  return netzwerkVon(partner)?.name || '';
+}
 
 function partnerProduktLink(partner, produktNummer) {
-  if (!partner || !produktNummer) return null;
-  return 'https://www.awin1.com/pclick.php'
-    + `?p=${encodeURIComponent(produktNummer)}`
-    + `&a=${AWIN_PUBLISHER}`
-    + `&m=${encodeURIComponent(partner.mid)}`;
+  const netz = netzwerkVon(partner);
+  if (!netz || !netz.produktLink || !produktNummer) return null;
+  return netz.produktLink(partner.kennung, produktNummer);
 }
 
 function partnerDeepLink(partner, zielAdresse) {
-  if (!partner) return null;
-  const ziel = zielAdresse || partner.start;
-  return 'https://www.awin1.com/cread.php'
-    + `?awinmid=${encodeURIComponent(partner.mid)}`
-    + `&awinaffid=${AWIN_PUBLISHER}`
-    + `&ued=${encodeURIComponent(ziel)}`;
+  const netz = netzwerkVon(partner);
+  if (!netz) return null;
+  return netz.zielLink(partner.kennung, zielAdresse || partner.start);
 }
 
 
 /* --- 3. Die Einwilligung ----------------------------------------------------
 
-   Ein Provisionslink laeuft ueber awin1.com. Dort wird eine Kennung
-   gesetzt, an der das Netzwerk einen spaeteren Kauf uns zuordnet - 30 Tage
-   lang. Das ist genau der Fall, fuer den Paragraf 25 TDDDG eine
-   Einwilligung verlangt: Es geht nicht mehr nur darum, die App zu
-   betreiben.
+   Ein Provisionslink laeuft ueber das Netzwerk. Dort wird eine Kennung
+   vergeben, an der ein spaeterer Kauf uns zugeordnet wird - 30 Tage lang.
+   Das ist der Fall, fuer den Paragraf 25 TDDDG eine Einwilligung
+   verlangt: Es geht nicht mehr nur darum, die App zu betreiben.
 
-   NUR DER KLICK, nicht die Anzeige. Die Produktfotos kommen zwar auch vom
-   Netzwerk, setzen dort aber kein Cookie und lesen nichts vom Geraet
-   (nachgemessen, siehe reifen.js) - sie laufen deshalb wie die
-   Kartenkacheln ohne Nachfrage. Hier steht nur, was wirklich eine
-   Einwilligung braucht; eine Frage vor jedem Bild waere eine Huerde ohne
-   Rechtsgrund.
+   NUR DER KLICK, nicht die Anzeige. Die Produktfotos kommen von den
+   Servern der Haendler beziehungsweise ihres Netzwerks, setzen dort aber
+   kein Cookie und lesen nichts vom Geraet. Beides ist nachgemessen: der
+   Bilddienst von AWIN am 01.09.2026, der Bildserver von motoin am
+   02.09.2026, beide Antworten ohne Set-Cookie. Die Fotos laufen deshalb
+   wie die Kartenkacheln ohne Nachfrage. Eine Frage vor jedem Bild waere
+   eine Huerde ohne Rechtsgrund.
 
-   Deshalb fragt die App EINMAL, bevor der erste Partnerlink oeffnet, und
-   merkt sich die Antwort. Nicht als Banner beim Start - das waere die
-   Sorte Einwilligung, die niemand liest. Sondern genau dann, wenn es
-   soweit ist, mit dem Satz, worum es geht.
+   WAS DIE EINWILLIGUNG UMFASST, WIRD MITGESPEICHERT. Eine Zustimmung
+   gilt fuer die Haendler, die im Blatt genannt waren, und fuer keine
+   anderen - sonst dehnte man eine alte Zusage auf einen Empfaenger aus,
+   von dem beim Zustimmen niemand wusste. Kommt ein Haendler dazu, fragt
+   die App deshalb noch einmal, und das Blatt zaehlt dann alle auf.
 
-   Abgelegt wird nur, WAS entschieden wurde und WANN. Kein Zaehler, keine
-   Klicks, nichts, was einzelne Aufrufe verraet. */
+   Wer noch aus der Zeit vor motoin ein "Ja" gespeichert hat, hat kein
+   Feld "umfang" in seinem Eintrag. Fuer den gilt das Ja fuer reifen.com,
+   denn genau der stand damals im Blatt.
+
+   Abgelegt wird nur, WAS entschieden wurde, WANN und FUER WEN. Kein
+   Zaehler, keine Klicks, nichts, was einzelne Aufrufe verraet. */
 
 const PARTNER_SPEICHER = 'kurvenjagd.partner';
 
+// Der Umfang, den ein "Ja" aus der Zeit vor dem zweiten Haendler hatte.
+const UMFANG_VOR_MOTOIN = ['reifencom'];
+
 function ladePartnerStand() {
+  const leer = { entschieden: null, am: null, umfang: [] };
   const gelesen = geraet.lies(PARTNER_SPEICHER);
-  if (!gelesen || typeof gelesen !== 'object') return { entschieden: null, am: null };
+  if (!gelesen || typeof gelesen !== 'object') return leer;
+
   const entschieden = gelesen.entschieden === 'ja' || gelesen.entschieden === 'nein'
     ? gelesen.entschieden : null;
-  return { entschieden, am: typeof gelesen.am === 'string' ? gelesen.am : null };
+  const umfang = Array.isArray(gelesen.umfang)
+    ? gelesen.umfang.filter(id => typeof id === 'string')
+    : (entschieden === 'ja' ? UMFANG_VOR_MOTOIN : []);
+
+  return { entschieden, am: typeof gelesen.am === 'string' ? gelesen.am : null, umfang };
 }
 
 let partnerStand = ladePartnerStand();
 
-function partnerFreigegeben() {
-  return partnerStand.entschieden === 'ja';
+// Alle Partner, die es HEUTE gibt - der Umfang, den ein neues Ja bekommt.
+function alleParterKennungen() {
+  return PARTNER.map(eintrag => eintrag.id).sort();
+}
+
+/* Darf fuer DIESEN Haendler geoeffnet werden? Ohne Angabe wird gefragt,
+   ob die Zustimmung alle heutigen Partner deckt - das braucht die
+   Statuszeile unter "Rechtliches". */
+function partnerFreigegeben(partner) {
+  if (partnerStand.entschieden !== 'ja') return false;
+  if (!partner) return alleParterKennungen().every(id => partnerStand.umfang.includes(id));
+  return partnerStand.umfang.includes(partner.id);
 }
 
 function setzePartnerStand(entschieden) {
-  partnerStand = { entschieden, am: new Date().toISOString() };
+  partnerStand = {
+    entschieden,
+    am: new Date().toISOString(),
+    umfang: entschieden === 'ja' ? alleParterKennungen() : [],
+  };
   if (!geraet.schreib(PARTNER_SPEICHER, partnerStand)) {
     // Genau wie Garage und Merkliste: Wenn der Speicher voll ist, darf die
     // Anzeige nicht behaupten, es sei gespeichert.
@@ -161,6 +263,13 @@ function widerrufePartnerFreigabe() {
   showToast('Zurückgenommen. Beim nächsten Partner-Angebot fragen wir wieder.');
 }
 
+// Die Haendlernamen als Aufzaehlung: "reifen.com und motoin".
+function partnerAufzaehlung(liste) {
+  const namen = (liste || PARTNER).map(eintrag => eintrag.name);
+  if (namen.length < 2) return namen[0] || '';
+  return namen.slice(0, -1).join(', ') + ' und ' + namen[namen.length - 1];
+}
+
 /* Der Satz im Bildschirm "Rechtliches", der den aktuellen Stand zeigt.
    Ohne ihn waere der Widerruf ein Knopf ins Nichts - man saehe nicht, ob
    er gewirkt hat. */
@@ -174,9 +283,16 @@ function zeichnePartnerStand() {
       ? new Date(partnerStand.am).toLocaleDateString('de-DE',
           { day: '2-digit', month: '2-digit', year: 'numeric' })
       : null;
+    const gedeckt = PARTNER.filter(eintrag => partnerStand.umfang.includes(eintrag.id));
+    const wen = gedeckt.length === PARTNER.length
+      ? 'Partner-Angebote'
+      : `Angebote von ${partnerAufzaehlung(gedeckt)}`;
     zeile.textContent = datum
-      ? `Du hast Partner-Angebote am ${datum} zugelassen.`
-      : 'Du hast Partner-Angebote zugelassen.';
+      ? `Du hast ${wen} am ${datum} zugelassen.`
+      : `Du hast ${wen} zugelassen.`;
+    if (gedeckt.length < PARTNER.length) {
+      zeile.textContent += ' Bei neu dazugekommenen Händlern fragen wir noch einmal.';
+    }
     if (knopf) knopf.hidden = false;
     return;
   }
@@ -192,23 +308,56 @@ function zeichnePartnerStand() {
    der Grund, warum es diese Datei gibt: Eine Stelle laesst sich absichern,
    fuenfzehn verstreute nicht.
 
-   Ohne Einwilligung oeffnet sich nichts, sondern das Blatt mit der Frage.
-   Das Ziel wird solange gemerkt - wer zustimmt, landet dort, wo er
-   hinwollte, und muss nicht noch einmal tippen. */
+   Ohne Einwilligung fuer DIESEN Haendler oeffnet sich nichts, sondern das
+   Blatt mit der Frage. Das Ziel wird solange gemerkt - wer zustimmt,
+   landet dort, wo er hinwollte, und muss nicht noch einmal tippen.
+
+   Was hier NICHT passieren darf, und zwar nie: den Link vorab laden. Kein
+   prefetch, kein preconnect, kein verstecktes Bild, kein "schon mal
+   aufwaermen". Ein Klick, den der Nutzer nicht getan hat, ist
+   Cookie-Dropping, und das verbieten beide Programme ausdruecklich. */
 
 let gemerktesPartnerZiel = null;
+let gemerkterPartner = null;
 
-function öffnePartnerLink(adresse) {
+function öffnePartnerLink(adresse, partner) {
   if (!adresse) return;
-  if (!partnerFreigegeben()) {
+  if (!partnerFreigegeben(partner)) {
     gemerktesPartnerZiel = adresse;
-    öffnePartnerBlatt();
+    gemerkterPartner = partner || null;
+    öffnePartnerBlatt(partner);
     return;
   }
   geraet.öffneExtern(adresse);
 }
 
-function öffnePartnerBlatt() {
+/* Der Text im Blatt wird bei jedem Oeffnen gebaut, nicht im HTML
+   festgeschrieben. Sonst stuende dort auf ewig ein Haendlername, der
+   irgendwann nicht mehr stimmt - und die Einwilligung waere fuer den
+   falschen Empfaenger eingeholt. */
+function schreibePartnerBlatt(partner) {
+  const wohin = document.getElementById('partnerBlattWohin');
+  const wen = document.getElementById('partnerBlattUmfang');
+  if (wohin) {
+    wohin.innerHTML = partner
+      ? `Du verl&auml;sst Serpa und landest bei <b>${escapeHtml(partner.name)}</b>. `
+        + `Der Link l&auml;uft &uuml;ber unser Partnernetzwerk `
+        + `<b>${escapeHtml(netzName(partner))}</b>, das dabei eine Kennung vergibt: `
+        + `Kaufst du innerhalb von <b>${partner.cookieTage} Tagen</b> etwas, wird uns `
+        + 'eine Provision gutgeschrieben. <b>Am Preis &auml;ndert das nichts.</b>'
+      : 'Du verl&auml;sst Serpa und landest bei einem unserer Partner-Shops. '
+        + 'Der Link l&auml;uft &uuml;ber ein Partnernetzwerk, das dabei eine Kennung '
+        + 'vergibt: Kaufst du dort etwas, wird uns eine Provision gutgeschrieben. '
+        + '<b>Am Preis &auml;ndert das nichts.</b>';
+  }
+  if (wen) {
+    wen.innerHTML = 'Deine Zustimmung gilt f&uuml;r unsere Partner-Shops '
+      + `<b>${escapeHtml(partnerAufzaehlung())}</b>. Kommt sp&auml;ter ein `
+      + 'weiterer dazu, fragen wir noch einmal.';
+  }
+}
+
+function öffnePartnerBlatt(partner) {
   const blatt = document.getElementById('partnerBlatt');
   if (!blatt) {
     // Sicherheitsnetz: Fehlt das Blatt im HTML, wird NICHT ersatzweise
@@ -216,6 +365,7 @@ function öffnePartnerBlatt() {
     showToast('Die Einwilligung lässt sich gerade nicht anzeigen.');
     return;
   }
+  schreibePartnerBlatt(partner);
   blatt.hidden = false;
 }
 
@@ -223,6 +373,7 @@ function schliessePartnerBlatt() {
   const blatt = document.getElementById('partnerBlatt');
   if (blatt) blatt.hidden = true;
   gemerktesPartnerZiel = null;
+  gemerkterPartner = null;
 }
 
 
@@ -233,6 +384,7 @@ verkabele('btnPartnerJa', 'click', () => {
   const blatt = document.getElementById('partnerBlatt');
   if (blatt) blatt.hidden = true;
   gemerktesPartnerZiel = null;
+  gemerkterPartner = null;
 
   /* Der Link oeffnet auch dann, wenn das MERKEN scheitert (voller
      Geraetespeicher): Eingewilligt hat der Nutzer in diesem Moment

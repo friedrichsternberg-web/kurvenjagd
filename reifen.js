@@ -573,12 +573,12 @@ function öffneReifenAngebot(produktNummer) {
   const partner = partnerNach('reifencom');
   const adresse = partnerProduktLink(partner, produktNummer);
   if (!adresse) { showToast('Dieses Angebot lässt sich gerade nicht öffnen.'); return; }
-  öffnePartnerLink(adresse);
+  öffnePartnerLink(adresse, partner);
 }
 
 function öffneReifenStartseite() {
   const partner = partnerNach('reifencom');
-  öffnePartnerLink(partnerDeepLink(partner));
+  öffnePartnerLink(partnerDeepLink(partner), partner);
 }
 
 

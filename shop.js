@@ -219,12 +219,19 @@ function zeichneShopVerzeichnis() {
 }
 
 /* Wie oeffneAngebot(), nur fuer die Shop-Startseiten: EINE Stelle fuer
-   alle Verzeichnis-Klicks. Solange kein Partnerprogramm besteht, ist es
-   die einfache Website-Adresse; spaeter haengt hier derselbe
-   Einwilligungs-Schritt davor wie bei den Angeboten. */
+   alle Verzeichnis-Klicks. Traegt der Eintrag einen Partner, laeuft der
+   Klick durch oeffnePartnerLink() und damit durch die Einwilligung -
+   auch dann, wenn der hinterlegte Link heute noch die schlichte
+   Website-Adresse ist. So kann ein spaeter eingetragener Provisionslink
+   nicht geraeuschlos an der Frage vorbeigehen. */
 function öffneShopSeite(eintrag) {
   if (!eintrag) return;
-  geraet.öffneExtern(eintrag.affiliateLink || eintrag.adresse);
+  const partner = eintrag.partnerId ? partnerNach(eintrag.partnerId) : null;
+  if (partner) {
+    öffnePartnerLink(eintrag.affiliateLink || partnerDeepLink(partner, eintrag.adresse), partner);
+    return;
+  }
+  geraet.öffneExtern(eintrag.adresse);
 }
 
 function zeichneProduktListe() {
@@ -613,7 +620,11 @@ function öffneAngebot(angebot) {
     showToast('Demo: Hier öffnet später die Produktseite des Shops.');
     return;
   }
-  geraet.öffneExtern(angebot.deeplink);
+  /* Durch oeffnePartnerLink(), NICHT direkt: Dort steht die Einwilligung
+     davor. Frueher stand hier geraet.oeffneExtern() mit dem Vermerk, die
+     Frage komme spaeter - und genau so haette der erste echte Link ohne
+     Einwilligung geoeffnet. */
+  öffnePartnerLink(angebot.deeplink, partnerNach(angebot.partnerId));
 }
 
 
