@@ -415,8 +415,8 @@ Dieselbe Liste wie bei den Reifen, und sie ist weiterhin offen:
 ### Helmexpress und der Preisvergleich (seit 03.09.2026)
 
 **Steht.** Helm Express DE über AWIN (Advertiser 121690, Feed 111977,
-5 Prozent, Cookie 30 Tage), 1.553 Motorradhelme, 219 davon mit
-Gegenstück bei motoin – die Produktseite zeigt dann beide Preise. Der
+5 Prozent, Cookie 30 Tage), 1.046 Motorradhelme, 218 davon mit
+Gegenstück bei motoin (132 im beschnittenen motoin-Katalog) – die Produktseite zeigt dann beide Preise. Der
 Abgleich läuft in `helmexpress-import.py` über alle Varianten-EANs und
 braucht deshalb den motoin-Feed unter `~/Downloads/products.csv`.
 
@@ -424,10 +424,10 @@ braucht deshalb den motoin-Feed unter `~/Downloads/products.csv`.
   „Risikostufe 2" (Kreditlinie überzogen, keine Lastschrift) und 103
   Tagen durchschnittlicher Zahlungsdauer. Nicht als verlässliche
   Einnahme einplanen; Provisionen dort können lange offen bleiben.
-- **Katalogbudget neu vereinbaren.** 612 KB gepackt für drei Kataloge
+- **Katalogbudget neu vereinbaren.** 573 KB gepackt für drei Kataloge
   statt 500 für zwei. Wer das drücken will: Helmexpress auf die Helme
-  mit Gegenstück plus eine Auswahl beschneiden (etwa 60 KB), oder die
-  Kataloge je Warengruppe teilen.
+  mit Gegenstück plus eine Auswahl beschneiden, oder die Kataloge je
+  Warengruppe teilen.
 - **Katalog frisch halten:** `python3 helmexpress-import.py` holt den
   Feed selbst (AWIN-Schlüssel wie bei den Reifen). Vorher den
   motoin-Feed herunterladen, sonst fehlen die Verknüpfungen.

@@ -2303,9 +2303,11 @@ Helmexpress-Klick noch einmal, weil sie ihren Umfang kennt; genau dafür
 war sie so gebaut.
 
 **Nur Helme.** Helmexpress führt 23.916 Artikel, darunter Bekleidung,
-Fahrrad- und Reithelme, und der Feed hat keine Warengruppe. Aufgenommen
-wird, was im Namen „Helm", „Integral", „Jet" oder „Klapp" trägt: 1.553
-lieferbare Motorradhelme. Das ist die Warengruppe, in der es den
+Fahrrad- und Reithelme, und der Feed hat keine Warengruppe. Aufgenommen wird, was auf „helm" endet und weder Zubehör noch Fahrrad- oder
+Skiware ist: 1.046 lieferbare Motorradhelme. Der erste Filter („enthält
+Helm, Integral, Jet oder Klapp") ließ Hufkratzer, Stockclips und
+Reinigungstücher durch, weil „Klapp", „Helmschild" und die Marke
+HELMEXPRESS das Wort auch tragen. Das ist die Warengruppe, in der es den
 Vergleich gibt, weil motoin dieselben Helme führt.
 
 **Der Abgleich läuft im Importskript, nicht in der App.** Der
@@ -2314,8 +2316,8 @@ daran, dass je Produkt nur eine GTIN gespeichert ist, die der ersten
 Variante. Ein Helm in sechs Größen hat sechs, und zwei Kataloge träfen
 sich nur zufällig. Das Skript sieht alle Varianten-EANs beider Feeds und
 ordnet ein Helmexpress-Produkt dem motoin-Produkt zu, mit dem es die
-meisten teilt. Ergebnis: 219 von 1.553 Helmen haben ein Gegenstück, 133
-davon liegen im beschnittenen motoin-Katalog. Die Zuordnung steht als
+meisten teilt. Ergebnis: 218 von 1.046 Helmen haben ein Gegenstück, 132 davon liegen
+im beschnittenen motoin-Katalog. Die Zuordnung steht als
 motoin-Nummer im Katalog; die App merkt sie sich beim Laden in beide
 Richtungen.
 
@@ -2337,8 +2339,8 @@ helmexpress.com/lieferung, gelesen am 03.09.2026: 6,90 Euro bis 499,00
 Euro Warenwert, darüber frei. Steht als Konstante im Importskript, mit
 Datum – wenn sich das ändert, ändert es sich dort.
 
-**Das Budget ist gerissen.** 273 (Reifen) + 224 (motoin) + 115
-(Helmexpress) = 612 KB gepackt, vereinbart waren 500 für zwei Kataloge.
+**Das Budget ist gerissen.** 273 (Reifen) + 224 (motoin) + 76
+(Helmexpress) = 573 KB gepackt, vereinbart waren 500 für zwei Kataloge.
 Der dritte war nicht Teil der Vereinbarung. Geladen wird trotzdem nichts
 davon beim Start: Die Ausrüstung holt beide Kataloge erst beim Öffnen,
 die Garage nur motoin und was die Merkliste braucht.
