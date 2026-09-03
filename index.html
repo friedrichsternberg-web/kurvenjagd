@@ -635,18 +635,22 @@
                Leiste Preise ausserhalb des Ausruestungs-Bildschirms zeigt -
                dessen Offenlegung ist von hier aus nicht zu sehen. -->
           <h3>Ausr&uuml;stung <span class="badge anzeige">Anzeige</span></h3>
-          <button class="linkbtn" id="btnGarageShopAlle">Alle ansehen &rarr;</button>
+          <span class="garage-shop-wege">
+            <button class="linkbtn" id="btnGarageMerkliste">Merkliste
+              <span class="merk-zahl" data-merk-zahl hidden></span></button>
+            <button class="linkbtn" id="btnGarageShopAlle">Alle ansehen &rarr;</button>
+          </span>
         </div>
         <div class="garage-shop-band" id="garageShopBand"></div>
       </div>
 
-      <!-- Die Reifen-Leiste: dieselbe Form wie die Shop-Leiste darueber,
-           nur mit echten Angeboten aus dem Partnerprogramm von reifen.com.
-           Statt des Demo-Vermerks traegt sie deshalb die
-           Anzeige-Kennzeichnung - sie zeigt Preise ausserhalb des
-           Reifen-Bildschirms, dessen Offenlegung hier nicht zu sehen ist.
-           Gefuellt von reifen.js (zeichneGarageReifen); ohne Motorrad in
-           der Garage bleibt die Platte verborgen. -->
+      <!-- Die Reifen-Leiste: dieselbe Form wie die Ausruestungs-Leiste
+           darueber, mit Angeboten aus dem Partnerprogramm von reifen.com.
+           Die Anzeige-Kennzeichnung steht hier aus demselben Grund wie
+           dort. Gefuellt von reifen.js (zeichneGarageReifen). Seit dem
+           03.09.2026 ist "Alle ansehen" der EINZIGE Weg zum
+           Reifen-Bildschirm - die Kachel darunter gibt es nicht mehr, die
+           uebrigen Bereiche erreicht man ueber die Leiste. -->
       <div id="garageReifen" class="garage-platte garage-shop" hidden>
         <div class="garage-shop-kopf">
           <!-- Die Ueberschrift setzt reifen.js: Sie sagt "Reifen fuer deine
@@ -654,98 +658,10 @@
                "Motorradreifen". Ein Versprechen, das die Auswahl nicht
                halten kann, waere hier das Schlimmste. -->
           <h3><span id="garageReifenKopf">Motorradreifen</span>
-            <span class="garage-shop-anzeige">Anzeige</span></h3>
+            <span class="badge anzeige">Anzeige</span></h3>
           <button class="linkbtn" id="btnGarageReifenAlle">Alle ansehen &rarr;</button>
         </div>
         <div class="garage-shop-band" id="garageReifenBand"></div>
-      </div>
-
-      <!-- Das Menue. Seit die Garage der Startbildschirm ist, wohnen die
-           Wege in die uebrigen Bereiche hier unten: erst die eigene
-           Maschine, dann der Shop, dann das, was man sonst vorhat. Eine
-           Garage-Kachel gibt es nicht mehr - man ist ja schon da. -->
-      <div id="garageMenue" class="garage-menue">
-        <h3 class="garage-menue-kopf">Was willst du fahren?</h3>
-        <div class="garage-menue-raster">
-          <button class="kachel" id="btnStartPlaner" style="--kachel-bild: url('img/kacheln/routenplaner.jpg'); --kachel-lage: center 40%">
-            <span class="kachel-inhalt">
-              <svg class="ic gross kachel-symbol"><use href="#icon-route"></use></svg>
-              <span class="kachel-text">
-                <span class="kachel-titel">Routenplaner</span>
-              </span>
-            </span>
-            <span class="kachel-pfeil" aria-hidden="true">&rarr;</span>
-          </button>
-
-          <button class="kachel" id="btnStartRide" style="--kachel-bild: url('img/kacheln/aufzeichnen.jpg'); --kachel-lage: center 35%">
-            <span class="kachel-inhalt">
-              <svg class="ic gross kachel-symbol"><use href="#icon-aufnahme"></use></svg>
-              <span class="kachel-text">
-                <span class="kachel-titel">Ride aufzeichnen</span>
-              </span>
-            </span>
-            <span class="kachel-pfeil" aria-hidden="true">&rarr;</span>
-          </button>
-
-          <button class="kachel" id="btnStartTouren" style="--kachel-bild: url('img/kacheln/touren.jpg'); --kachel-lage: center 30%">
-            <span class="kachel-inhalt">
-              <svg class="ic gross kachel-symbol"><use href="#icon-touren"></use></svg>
-              <span class="kachel-text">
-                <span class="kachel-titel">Touren</span>
-              </span>
-            </span>
-            <span class="kachel-pfeil" aria-hidden="true">&rarr;</span>
-          </button>
-
-          <!-- Als einzige Kachel traegt sie kein festes Bild: Hier steht
-               die EIGENE Maschine, und die weiss erst garage.js. Sie setzt
-               --kachel-bild bei jedem Zeichnen (zeigeBikeAufStatsKachel).
-               Ohne eigenes Foto ist es die Beispielmaschine, genau wie auf
-               dem Drehteller darueber. -->
-          <button class="kachel" id="btnStartStats">
-            <span class="kachel-inhalt">
-              <svg class="ic gross kachel-symbol"><use href="#icon-stats"></use></svg>
-              <span class="kachel-text">
-                <span class="kachel-titel">Meine Stats</span>
-              </span>
-            </span>
-            <span class="kachel-pfeil" aria-hidden="true">&rarr;</span>
-          </button>
-
-          <!-- Das erste echte Partnerprogramm: Motorradreifen von
-               reifen.com. Sie nimmt beide Spalten, weil vier Kacheln im
-               Zweierraster aufgehen und eine fuenfte sonst allein
-               danebenstuende. -->
-          <button class="kachel kachel--breit" id="btnStartReifen"
-                  style="--kachel-bild: url('img/kacheln/reifen.jpg'); --kachel-lage: center 60%">
-            <span class="kachel-inhalt">
-              <svg class="ic gross kachel-symbol"><use href="#icon-reifen"></use></svg>
-              <span class="kachel-text">
-                <span class="kachel-titel">Reifen</span>
-                <!-- Die Erklaerung steckt in einem eigenen span, damit die
-                     enge Querformat-Ecke (quer.css) nur SIE ausblenden
-                     kann - das Wort "Anzeige" muss auf der Kachel stehen
-                     bleiben, in jeder Groesse. -->
-                <span class="kachel-zusatz"><span class="kachel-zusatz-erklaerung">Passend zu deiner Maschine &middot; </span>Anzeige</span>
-              </span>
-            </span>
-            <span class="kachel-pfeil" aria-hidden="true">&rarr;</span>
-          </button>
-
-          <!-- Noch ohne Hintergrundbild - das kann spaeter als
-               img/kacheln/ausruestung.jpg dazukommen. -->
-          <button class="kachel" id="btnStartShop">
-            <span class="kachel-inhalt">
-              <svg class="ic gross kachel-symbol"><use href="#icon-shop"></use></svg>
-              <span class="kachel-text">
-                <span class="kachel-titel">Ausr&uuml;stung</span>
-                <span class="kachel-unterzeile">Helme, Kleidung, Gep&auml;ck
-                  <span class="badge anzeige">Anzeige</span></span>
-              </span>
-            </span>
-            <span class="kachel-pfeil" aria-hidden="true">&rarr;</span>
-          </button>
-        </div>
       </div>
 
       <!-- Die Pflichtangaben. Dezent im Fuss, wie auf jeder Webseite, aber
@@ -1046,11 +962,10 @@
        steht, nicht was. ===== -->
   <div id="statsScreen" class="start-screen listen-screen" hidden>
     <div class="start-screen-inner">
-      <!-- Ausgeblendet wie auf dem Touren-Bildschirm: Seit "Stats" einen
-           eigenen Eintrag in der Leiste hat, ist sie selbst der Weg
-           zurueck. Der Knopf bleibt im HTML, damit die Verkabelung in
-           rueckblick.js nicht ins Leere greift. -->
-      <button class="btn ghost back-btn" id="btnStatsZurueck" hidden>&larr; Zur&uuml;ck</button>
+      <!-- Zurueck fuehrt zu "Ride": Seit dem 03.09.2026 haben die Stats
+           keinen eigenen Eintrag in der Leiste mehr, sondern haengen an
+           der Aufzeichnung. In der Leiste leuchtet derweil "Ride". -->
+      <button class="btn ghost back-btn" id="btnStatsZurueck">&larr; Zur&uuml;ck</button>
       <h2>Meine Stats</h2>
 
       <!-- Der Bildschirm steht IMMER vollstaendig da, auch ohne eine
@@ -1858,7 +1773,8 @@
     <div class="start-screen-inner">
       <div class="ausruestung-kopf">
         <h2>Ausr&uuml;stung</h2>
-        <button class="linkbtn merk-schnellweg" id="btnAusruestungMerkliste">
+        <button class="btn ghost klein merk-schnellweg" id="btnAusruestungMerkliste">
+          <svg class="ic"><use href="#icon-herz"></use></svg>
           Merkliste <span class="merk-zahl" data-merk-zahl hidden></span>
         </button>
       </div>
@@ -1874,9 +1790,10 @@
       <!-- "Fuer dich": die Leiter der Gruende. Fuellt vorschlaege.js. -->
       <div id="ausruestungVorschlaege"></div>
 
-      <!-- Warengruppen als Chips, dasselbe Muster wie die Markenwahl im
-           Motorrad-Finder. Fuellt shop.js. -->
-      <div class="finder-marken" id="shopKategorien"></div>
+      <!-- Warengruppen als Chips in EINER wischbaren Zeile. Zwoelf Chips
+           umgebrochen waren vier Zeilen Knoepfe ueber dem Suchfeld - mehr
+           Bedienung als Inhalt. Fuellt shop.js. -->
+      <div class="warengruppen-band" id="shopKategorien"></div>
 
       <!-- Die Suche filtert nur den bereits geladenen Katalog - hier geht
            nichts ins Netz. -->
@@ -1885,7 +1802,7 @@
                placeholder="Produkt oder Marke suchen &hellip;" autocomplete="off">
       </div>
 
-      <ul id="shopProduktListe" class="saved-list">
+      <ul id="shopProduktListe" class="saved-list produkt-liste">
         <!-- Dieser Text ist nur zu sehen, wenn shop.js gar nicht laeuft -
              im Normalfall ersetzt zeichneAusruestung() ihn vor dem Einblenden. -->
         <li class="empty">Die Ausr&uuml;stung konnte nicht geladen werden. Einmal neu laden hilft meistens.</li>
@@ -1907,7 +1824,7 @@
     <div class="start-screen-inner">
       <button class="btn ghost back-btn" id="btnMerklisteZurueck">&larr; Zur&uuml;ck</button>
       <h2>Merkliste</h2>
-      <ul id="merkListe" class="saved-list">
+      <ul id="merkListe" class="saved-list produkt-liste">
         <li class="empty">Noch nichts gemerkt.</li>
       </ul>
       <p class="hint" id="merkSumme" hidden></p>
@@ -1967,12 +1884,19 @@
         <div class="row">
           <button class="btn" id="btnRideStart">Aufzeichnung starten</button>
         </div>
-        <div class="row">
-          <button class="btn ghost" id="btnRideStats">Meine Stats</button>
-        </div>
-        <div class="row">
-          <button class="btn ghost" id="btnRideZurueck">Zur&uuml;ck zur Garage</button>
-        </div>
+
+        <!-- Die Stats wohnen seit dem 03.09.2026 hier, nicht mehr in der
+             Leiste: Sie sind die Bilanz der Aufzeichnungen, also gehoeren
+             sie neben den Startknopf. Die Karte fuellt rueckblick.js
+             (zeichneRideStatsKarte) mit den Gesamtzahlen; ein Tipp
+             darauf oeffnet den Bildschirm. -->
+        <button class="ride-stats-karte" id="btnRideStats" type="button">
+          <span class="ride-stats-text">
+            <span class="ride-stats-titel">Meine Stats</span>
+            <span class="ride-stats-unter">Bilanz deiner Ausfahrten</span>
+          </span>
+          <span class="ride-stats-pfeil" aria-hidden="true">&rarr;</span>
+        </button>
       </div>
 
       <!-- Während der Fahrt: großes Tempo, laufende Werte, Pause/Beenden -->
@@ -2502,9 +2426,6 @@
     </button>
     <button class="nav-tab" data-ziel="tourenScreen">
       <svg class="ic gross"><use href="#icon-touren"></use></svg><span>Touren</span>
-    </button>
-    <button class="nav-tab" data-ziel="statsScreen">
-      <svg class="ic gross"><use href="#icon-stats"></use></svg><span>Stats</span>
     </button>
     <button class="nav-tab" data-ziel="shopScreen">
       <svg class="ic gross"><use href="#icon-shop"></use></svg><span>Ausr&uuml;stung</span>

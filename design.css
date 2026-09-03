@@ -273,7 +273,7 @@
      versteckt ist (siehe body.mit-nav in style.css). Wo die Leiste sitzt,
      entscheidet die Anordnung: im Hochformat unten (style.css), im
      Querformat oben (quer.css) - der Platzhalter ist derselbe. */
-  --nav-h: 58px;
+  --nav-h: 66px;
   /* Im Querformat ist dieselbe Leiste die Kopfzeile einer Webseite und
      darf mehr Gewicht haben als eine Daumenleiste - quer.css legt --nav-h
      innerhalb seines Media-Blocks auf diesen Wert um. Alles Weitere folgt

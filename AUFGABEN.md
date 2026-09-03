@@ -132,15 +132,15 @@ where has_function_privilege(r.rolname, p.oid, 'EXECUTE')
   Kawasaki-Z-Reihe). Fremde Schriftzüge sind keine darauf, aber zwei Fragen
   bleiben: Woher stammt die Vorlage (ein Pressefoto wäre ein **echtes**
   Urheberrecht, kein KI-Thema), und ist die Form nah genug an einem
-  eingetragenen Geschmacksmuster? Seit dem 01.09.2026 steht das Bild
-  zusätzlich als Hintergrund auf der Kachel „Meine Stats" — es ist also
-  sichtbarer geworden. Ausweg, falls sich nichts klären lässt: eine eigene
-  Fantasiemaschine erzeugen, wie sie im Werkstattbild schon steht.
-- **Herkunft von `img/kacheln/` und `hintergrund-weich.jpg` klären.**
-  Dieselbe vage Formulierung („beziehungsweise von ihm gelieferte Bilder").
-  `kacheln/touren.jpg` zeigt erkennbar einen wirklichen Ort (dem Augenschein
-  nach das Stilfser Joch) — Orte sind frei fotografierbar, die Frage ist
-  allein, wer das Foto gemacht hat.
+  eingetragenen Geschmacksmuster? Seit dem 01.09.2026 ist das Bild fest in
+  das Werkstattbild eingerechnet — es ist also sichtbarer geworden. Ausweg,
+  falls sich nichts klären lässt: eine eigene Fantasiemaschine erzeugen,
+  wie sie im Werkstattbild schon steht.
+- **Herkunft von `hintergrund-weich.jpg` klären.** Dieselbe vage
+  Formulierung („beziehungsweise von ihm geliefertes Bild"). Die
+  Kachelbilder unter `img/kacheln/`, zu denen dieselbe Frage stand, sind
+  seit dem 03.09.2026 aus dem Repository — die Kacheln in der Garage gibt
+  es nicht mehr.
 
 **Was die Bildprüfung vom 01.09.2026 NICHT beanstandet hat:** Im
 Werkstattbild ist kein fremdes Markenzeichen zu sehen (Werkzeugwagen und

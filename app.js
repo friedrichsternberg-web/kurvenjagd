@@ -3499,6 +3499,9 @@ function aktualisiereLeiste(sichtbareId) {
   // Garage erreichbar und gehoeren zur eigenen Maschine. Also leuchtet die
   // Garage weiter, statt dass die Leiste ins Leere zeigt.
   if (sichtbareId === 'reifenScreen') leuchtZiel = 'garageScreen';
+  // Die Stats haengen an der Aufzeichnung und haben keinen eigenen
+  // Eintrag - also leuchtet "Ride", solange sie offen sind.
+  if (sichtbareId === 'statsScreen') leuchtZiel = 'rideScreen';
   // Die Merkliste haengt an der Ausruestung: Sie ist von dort und aus der
   // Garage erreichbar, hat aber keinen eigenen Platz in der Leiste.
   if (sichtbareId === 'merklisteScreen') leuchtZiel = 'shopScreen';
@@ -3586,6 +3589,9 @@ function zurückVomRechtlichen() {
 function zeigeRideScreen() {
   zeigeBildschirm('rideScreen');
   neigungStatusAnzeigen();
+  // Die Stats-Karte im Bedienfeld. Steht in rueckblick.js, das NACH dieser
+  // Datei geladen wird - fehlt es, bleibt die Karte bei ihrer Beschriftung.
+  if (typeof zeichneRideStatsKarte === 'function') zeichneRideStatsKarte();
   rideKarte().invalidateSize(); // gleiche Begründung wie beim Planer oben
 }
 
@@ -3860,9 +3866,10 @@ document.getElementById('btnNavZentrieren').addEventListener('click', navZentrie
 verkabele('btnMeinStandort', 'click', zeigeEigenenStandort);
 verkabeleNaviWisch();
 
-// Untere Leiste: jeder Eintrag fuehrt auf seinen Bildschirm. Der Weg
-// laeuft ueber dieselben Funktionen wie die Kacheln, damit es nur eine
-// Stelle gibt, an der etwas passiert (z.B. das Neuzeichnen der Liste).
+// Untere Leiste: jeder Eintrag fuehrt auf seinen Bildschirm. Es gibt nur
+// diese eine Stelle, an der der Wechsel passiert (z.B. das Neuzeichnen
+// der Liste) - die Kacheln, die frueher dasselbe taten, sind seit dem
+// 03.09.2026 weg.
 document.querySelectorAll('.nav-tab').forEach(knopf => {
   knopf.addEventListener('click', () => {
     const ziel = knopf.dataset.ziel;
@@ -3885,35 +3892,18 @@ document.querySelectorAll('.nav-tab').forEach(knopf => {
    konto.js. Der Textlink am Fuss der Startseite, auf den hier frueher
    weitergereicht wurde, ist mit dem Umzug des Kontos ins Profil entfallen. */
 
-document.getElementById('btnStartPlaner').addEventListener('click', zeigePlaner);
-document.getElementById('btnStartTouren').addEventListener('click', zeigeMeineTouren);
-document.getElementById('btnStartShop').addEventListener('click', zeigeShop);
+/* Seit dem 03.09.2026 fuehren aus der Garage keine Kacheln mehr in die
+   uebrigen Bereiche - die Leiste unten ist der eine Weg dorthin, und die
+   Garage zeigt nur noch, was zur eigenen Maschine gehoert. Die
+   Abwaegung steht in ENTSCHEIDUNGEN.md. */
 
-/* Die Reifen-Kachel. zeigeReifen() steht in reifen.js, das NACH dieser
-   Datei geladen wird - fehlt sie, fuehrt die Kachel in die Garage zurueck,
-   statt einen leeren Bildschirm zu zeigen. Dasselbe Muster wie bei den
-   Stats. */
-document.getElementById('btnStartReifen').addEventListener('click', () => {
-  if (typeof zeigeReifen === 'function') zeigeReifen();
-  else zeigeGarage();
-});
-
-/* Wendet den Shop-Schalter (ganz oben in dieser Datei) auf die Oberflaeche
-   an: Ohne Shop verschwinden der Eintrag in der Leiste und die Kachel im
-   Garagen-Menue. Die uebrigen vier Leisten-Eintraege verteilen den Platz
-   von selbst. */
+/* Wendet den Schalter fuer den Ausruestungs-Bereich (ganz oben in dieser
+   Datei) auf die Oberflaeche an: Ohne ihn verschwindet der Eintrag in der
+   Leiste, die uebrigen Eintraege verteilen den Platz von selbst. */
 function wendeShopSchalterAn() {
-  /* Vier Kacheln gehen im Zweierraster glatt auf (Planer, Ride, Touren,
-     Stats). Reifen steht als fuenfte darunter und nimmt beide Spalten -
-     sonst bliebe daneben ein Loch. Wird der Shop eingeschaltet, bekommt
-     er dieselbe Behandlung und stellt sich als sechste darunter. */
-  if (SHOP_AKTIV) {
-    document.getElementById('btnStartShop').classList.add('kachel--breit');
-    return;
-  }
+  if (SHOP_AKTIV) return;
   document.querySelectorAll('.nav-tab[data-ziel="shopScreen"]')
     .forEach(knopf => { knopf.hidden = true; });
-  document.getElementById('btnStartShop').hidden = true;
   /* Die Ausruestungs-Leiste in der Garage ebenfalls, und zwar VON HIER
      aus: Diese Datei definiert den Schalter, vorschlaege.js wird erst
      danach geladen. Faellt sie aus oder kommt eine aeltere Fassung aus
@@ -3954,16 +3944,10 @@ document.getElementById('btnZumStartmenü').addEventListener('click', () => {
   zeigeGarage();
 });
 
-// "Meinen Ride aufzeichnen": zeigt zunächst nur den Bildschirm. Die
-// Aufzeichnung startet erst auf ausdrücklichen Knopfdruck - sonst liefe das
-// GPS schon, während man noch am Parkplatz steht.
-document.getElementById('btnStartRide').addEventListener('click', () => {
-  zeigeRideScreen();
-  rideZurücksetzen();
-});
+// Die Aufzeichnung startet erst auf ausdrücklichen Knopfdruck - sonst
+// liefe das GPS schon, während man noch am Parkplatz steht.
 document.getElementById('btnRideStart').addEventListener('click', starteRide);
 document.getElementById('btnNeigungNullpunkt').addEventListener('click', neigungNullpunktSetzen);
-document.getElementById('btnRideZurueck').addEventListener('click', zeigeGarage);
 document.getElementById('btnRidePause').addEventListener('click', pausiereRideUmschalten);
 document.getElementById('btnRideStop').addEventListener('click', beendeRide);
 document.getElementById('btnRideSpeichern').addEventListener('click', speichereRide);

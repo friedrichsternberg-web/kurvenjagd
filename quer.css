@@ -216,53 +216,12 @@
     overflow-y: auto;
     min-height: 0;
     margin-top: 0;
-    /* Oben ausgerichtet, nicht zentriert: Das Kachelraster fuellt den
-       uebrigen Platz selbst aus (siehe unten), der Inhalt ist also
-       ohnehin genau so hoch wie die Spalte. */
+    /* Oben ausgerichtet, nicht zentriert: Die Leisten haengen unter dem
+       Datenblatt, und darunter darf die Spalte einfach enden. */
     justify-content: flex-start;
     gap: var(--s4);
     padding: var(--s5) var(--s7);
   }
-
-  /* DIE KACHELN BEHALTEN IHRE FORM, die Spalte scrollt.
-
-     Hier stand bis zum 01.09.2026 die umgekehrte Regel: Die Spalte gab
-     die Hoehe vor, das Kachelraster nahm den Rest, und alles passte ohne
-     Scrollen auf eine Seite. Auf grossen Bildschirmen wurde daraus ein
-     Nachteil - fuenf Kacheln teilten sich den Rest und wurden zu
-     gequetschten Streifen, auf denen von den Fotos nichts mehr zu
-     erkennen war. Die Begruendung fuer den Wechsel steht in
-     ENTSCHEIDUNGEN.md, 01.09.2026.
-
-     Jetzt gibt die FENSTERHOEHE das Mass: Jede Kachel ist rund ein
-     Fuenftel davon hoch, nach unten und oben begrenzt, damit sie auf
-     einem 500 Punkte hohen Fenster nicht verschwindet und auf einem
-     grossen nicht die Seite fuellt. Wird die Spalte dadurch laenger als
-     das Fenster, scrollt sie - dafuer war ihr overflow-y immer schon da. */
-  .garage-menue {
-    display: flex;
-    flex-direction: column;
-    gap: var(--s3);
-  }
-  .garage-menue-raster { gap: var(--s4); }
-  .kachel {
-    /* Statt eines Seitenverhaeltnisses eine gemessene Hoehe: Nebeneinander
-       waeren zwei 3:2-Kacheln auf einem breiten Schirm ueber 300 Punkte
-       hoch, und drei Reihen davon passten in kein Fenster mehr. */
-    aspect-ratio: auto;
-    height: clamp(150px, 21vh, 250px);
-    padding: var(--s4);
-  }
-  /* Die breite Kachel darf etwas mehr Hoehe haben - sie traegt doppelt so
-     viel Bild, und bei gleicher Hoehe wirkte sie daneben wie ein Balken.
-     Doppelte Klasse aus demselben Grund wie in style.css: gegen das
-     .kachel darueber gewinnt sonst der spaetere Selektor. */
-  .kachel.kachel--breit { height: clamp(170px, 25vh, 290px); }
-  /* Die Deckel wachsen mit dem Fenster: Am 900er-Rand ist die halbe
-     Bildschirmseite schmaler als ein Handy quer, dort waere 27px zu laut.
-     Die Stufe liegt hoeher als im Hochformat, weil die Kachel seit dem
-     27.08.2026 nur noch den Namen traegt und der Platz sonst leer bliebe. */
-  .kachel-titel { font-size: clamp(18px, 2.1vw, 27px); }
 
   /* Dieselbe Stufe fuer das Datenblatt, wenn ein eigenes Motorrad da ist:
      Name und Werte duerfen auf der halben Seite groesser sprechen als auf

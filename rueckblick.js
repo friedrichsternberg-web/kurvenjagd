@@ -297,10 +297,37 @@ function oeffneStatsTour(ereignis) {
 
 /* ===== 6. Verkabelung ====================================================== */
 
+/* Die Karte im Bedienfeld der Aufzeichnung: Gesamtkilometer und die Zahl
+   der Ausfahrten, damit die Stats schon dort etwas sagen, bevor man sie
+   oeffnet. Ohne eine einzige Fahrt bleibt der Untertitel eine Einladung
+   statt einer Null. */
+function zeichneRideStatsKarte() {
+  const karte = document.getElementById('btnRideStats');
+  if (!karte) return;
+  const gesamt = summiereAusfahrten(sammleAusfahrten(loadSaved()));
+  const einzahl = gesamt.anzahl === 1;
+  karte.innerHTML = `
+    ${gesamt.anzahl
+      ? `<span class="ride-stats-zahl">${statsZahl(gesamt.km)}<i>km</i></span>`
+      : `<span class="ride-stats-symbol">${symbol('stats')}</span>`}
+    <span class="ride-stats-text">
+      <span class="ride-stats-titel">Meine Stats</span>
+      <span class="ride-stats-unter">${gesamt.anzahl
+        ? `${statsZahl(gesamt.anzahl)} ${einzahl ? 'Ausfahrt' : 'Ausfahrten'} &middot; ${statsDauer(gesamt.fahrzeitSek)}`
+        : 'Noch keine Ausfahrt aufgezeichnet'}</span>
+    </span>
+    <span class="ride-stats-pfeil" aria-hidden="true">&rarr;</span>`;
+}
+
 verkabele('btnRideStats', 'click', zeigeStats);
 verkabele('btnStartStats', 'click', zeigeStats);
 verkabele('btnStatsZurAufnahme', 'click', () => zeigeRideScreen());
-verkabele('btnStatsZurueck', 'click', () => zeigeGarage());
+// Zurueck zur Aufzeichnung, denn von dort kommt man her - und dort
+// leuchtet auch der Leisten-Eintrag, solange die Stats offen sind.
+verkabele('btnStatsZurueck', 'click', () => {
+  if (typeof zeigeRideScreen === 'function') zeigeRideScreen();
+  else zeigeGarage();
+});
 verkabele('btnStatsFrueher', 'click', () => blaettereStatsZeitraum(-1));
 verkabele('btnStatsSpaeter', 'click', () => blaettereStatsZeitraum(1));
 verkabele('statsLieblinge', 'click', oeffneStatsTour);

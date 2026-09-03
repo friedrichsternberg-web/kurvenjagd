@@ -712,19 +712,13 @@ function garageReifenKarten(kenntGroesse) {
 }
 
 /* Der Kopf der Platte sagt, worauf sich die Auswahl bezieht: auf die
-   eigene Maschine oder auf gaengige Masse. Dieselbe Unterscheidung traegt
-   die Kachel darunter - sie darf nicht "Passend zu deiner Maschine"
-   versprechen, wenn keine Maschine in der Garage steht. */
+   eigene Maschine oder auf gaengige Masse. Er darf nicht "Reifen fuer
+   deine Maschine" versprechen, wenn keine Groesse bekannt ist. */
 function beschrifteReifenWege(maschine, kenntGroesse) {
   const kopf = document.getElementById('garageReifenKopf');
-  const kachel = document.querySelector('#btnStartReifen .kachel-zusatz-erklaerung');
   if (kopf) {
     kopf.textContent = kenntGroesse && maschine
       ? `Reifen für deine ${maschine}` : 'Motorradreifen';
-  }
-  if (kachel) {
-    kachel.textContent = maschine
-      ? 'Passend zu deiner Maschine \u00b7 ' : 'Größe eintragen, Preise vergleichen \u00b7 ';
   }
 }
 

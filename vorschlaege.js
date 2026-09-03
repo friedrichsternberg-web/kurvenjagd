@@ -221,7 +221,7 @@ function zeichneVorschläge() {
     <section class="block vorschlag-block">
       <h2>F&uuml;r dich</h2>
       <p class="hint">${escapeHtml(vorschlagsQuelle(motorrad, stil))}</p>
-      <ul class="saved-list">
+      <ul class="saved-list produkt-liste">
         ${vorschläge.map(zeichneVorschlagsZeile).join('')}
       </ul>
       ${motorrad ? '' : '<button class="btn ghost klein" data-zur-garage>Motorrad eintragen</button>'}
@@ -301,6 +301,11 @@ verkabele('ausruestungVorschlaege', 'click', ereignis => {
 verkabele('garageShopBand', 'click', ereignis => {
   const karte = ereignis.target.closest('[data-produkt]');
   if (karte) zeigeProdukt(karte.dataset.produkt, 'garage');
+});
+
+// Der direkte Weg aus der Garage in die Merkliste - ein Tipp, nicht zwei.
+verkabele('btnGarageMerkliste', 'click', () => {
+  ladeMerklistenKataloge().then(zeigeMerkliste);
 });
 
 

@@ -2195,3 +2195,49 @@ auseinanderlaufen, weil es nur noch einen gibt.
 Die allgemeine Lehre steht schon in mehreren Einträgen davor und gilt
 hier noch einmal: Wer eine Anzeige verbirgt, darf sie nicht selbst
 zurückholen. Zurückholen darf nur, wer die Bedingung kennt.
+
+---
+
+## 03.09.2026 — Die Garage verliert ihre Kacheln, die Stats ziehen zu Ride
+
+**Was war:** Unter den beiden Leisten in der Garage stand ein Raster aus
+sechs Kacheln, „Was willst du fahren?" – Routenplaner, Ride aufzeichnen,
+Touren, Meine Stats, Reifen, Ausrüstung. Jede führte auf einen Bereich,
+den auch die Leiste unten erreicht. Zwei Wege zu allem, und die Garage
+war eine Seite lang Menü.
+
+**Was jetzt gilt:** Die Kacheln sind weg. Die Leiste unten ist der eine
+Weg in die Bereiche, und die Garage zeigt nur noch, was zur eigenen
+Maschine gehört: die Bühne, das Datenblatt, die Ausrüstung und die
+Reifen. Zum Reifen-Bildschirm führt „Alle ansehen" in der Reifenleiste,
+zur Merkliste ein eigener Link in der Ausrüstungsleiste – ein Tipp statt
+zwei. Die vier Kachelbilder sind aus dem Repository entfernt, damit
+erledigt sich auch die offene Herkunftsfrage zu `kacheln/touren.jpg`.
+
+**Die Stats haben keinen eigenen Eintrag mehr.** Sie sind die Bilanz der
+Aufzeichnungen und stehen jetzt als Karte im Bedienfeld von „Ride",
+direkt unter dem Startknopf, mit Gesamtkilometern und Zahl der
+Ausfahrten. Solange die Stats offen sind, leuchtet in der Leiste „Ride",
+und der Zurück-Knopf führt dorthin. Die Leiste hat damit fünf Einträge
+statt sechs, ist von 58 auf 66 Punkte gewachsen, und der aktive Eintrag
+trägt eine Glaspille um sein Symbol statt nur einer anderen Schriftfarbe.
+
+**Ein Abzeichen für alle.** „Anzeige" gab es in drei Fassungen, und in
+der Garage sahen die Ausrüstungs- und die Reifenleiste verschieden aus.
+Jetzt gibt es eine Regel `.badge.anzeige`, und die beiden Sonderregeln
+sind weg.
+
+**Die Ausrüstung als Glaskarten.** Die zwölf Warengruppen-Chips waren
+umgebrochen vier Zeilen Knöpfe über dem Suchfeld, und im Querformat lief
+das Suchfeld in die zweite Zeile hinein. Jetzt sind sie eine wischbare
+Zeile. Die Produktzeilen sind Glaskarten mit größerem Foto, „Für dich"
+ein eigener Abschnitt in der Handschrift der Stats.
+
+**Die Stats bekommen das Foto zurück.** Sie standen auf blankem Schwarz,
+und Glas über Schwarz bleibt tot (Grundsatz 4 in `design.css`). Die
+Gesamtzahl ist größer und trägt einen leisen Schein in ihrer eigenen
+Farbe – kein Neon, die Lampe über der Zahl.
+
+`style.css` ist dabei trotz der neuen Karten von 4842 auf 4776 Zeilen
+geschrumpft: Das Kachel-CSS war 190 Zeilen, und mit ihm gingen die
+Sonderfälle in `quer.css`.

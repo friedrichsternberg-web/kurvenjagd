@@ -44,38 +44,30 @@ bike-standard.webp
        ein Urheberrecht, und zwar ein echtes - kein KI-Thema.
     2. Ist die Form nah genug an einem eingetragenen Geschmacksmuster?
   Bis dahin gilt: Das Bild ist seit dem 01.09.2026 SICHTBARER geworden,
-  nicht weniger. Es steht als Rueckfall auf der Buehne, als Hintergrund
-  der Kachel "Meine Stats" - und seit dem Austausch des Werkstattraums
-  ist es zusaetzlich fest in garage-werkstatt-standard.webp eingerechnet
-  und liefert den Ausschnitt fuer kacheln/reifen.jpg. Damit haengt an
-  dieser einen offenen Frage inzwischen der halbe Startbildschirm.
+  nicht weniger. Es steht als Rueckfall auf der Buehne, und seit dem
+  Austausch des Werkstattraums ist es zusaetzlich fest in
+  garage-werkstatt-standard.webp eingerechnet. Damit haengt an dieser
+  einen offenen Frage der Startbildschirm.
   Der Ausweg, falls sich die Herkunft nicht klaeren laesst: eine eigene
   Fantasiemaschine erzeugen, so wie sie im Werkstattbild schon steht.
 
-kacheln/reifen.jpg
-  Das Vorderrad der Beispielmaschine, 2:1 ausgeschnitten aus
-  garage-werkstatt-standard.webp und auf 1200x600 gerechnet. Am
-  01.09.2026 aus dem neuen dunklen Raum neu geschnitten. Damit gilt
-  hier alles, was dort steht: mit einem KI-Bildgenerator erstellt,
-  Herkunft geklaert, Kennzeichnung in der App unter "Kuenstlich erzeugte
-  Bilder". Angelegt am 01.09.2026 fuer die Kachel "Reifen".
+hintergrund-weich.jpg
+  Eigenes Foto von Friedrich Sternberg beziehungsweise von ihm geliefertes
+  Bild, verkleinert und weichgezeichnet.
 
-hintergrund-weich.jpg, kacheln/ (uebrige)
-  Eigene Fotos von Friedrich Sternberg beziehungsweise von ihm gelieferte
-  Bilder, teils verkleinert und weichgezeichnet.
-
-  OFFEN, geprueft am 01.09.2026: "beziehungsweise von ihm gelieferte Bilder"
+  OFFEN, geprueft am 01.09.2026: "beziehungsweise von ihm geliefertes Bild"
   laesst dieselbe Frage offen wie bei bike-standard.webp - selbst
-  aufgenommen oder woanders gefunden? kacheln/touren.jpg zeigt erkennbar
-  einen wirklichen Ort (dem Augenschein nach das Stilfser Joch). Das ist
-  fuer sich unproblematisch (Orte sind frei fotografierbar), die Frage ist
-  allein, wer das Foto gemacht hat.
+  aufgenommen oder woanders gefunden?
 
   Am 24.08.2026 entfernt, weil die Garage der Startbildschirm wurde und
   die Bilder damit niemand mehr anzeigt: start-hero.jpg,
   start-hintergrund.jpg (das Heldenfoto des alten Startbildschirms) und
-  kacheln/garage.jpg (die weggefallene Garage-Kachel). Sie liegen weiter
-  in der Git-Historie.
+  kacheln/garage.jpg. Am 03.09.2026 der ganze Ordner kacheln/
+  (routenplaner, aufzeichnen, touren, reifen), weil die Kacheln in der
+  Garage weggefallen sind - die Bereiche erreicht man ueber die Leiste.
+  Damit ist auch die offene Herkunftsfrage zu kacheln/touren.jpg
+  (erkennbar das Stilfser Joch) erledigt. Alles liegt weiter in der
+  Git-Historie.
 
 icon-*.png, apple-touch-icon.png, favicon-32.png, app-icon-quelle.png
   Das App-Symbol: eine gebuerstete Metallplatte mit Hoehenlinien, darin ein

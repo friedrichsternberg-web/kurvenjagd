@@ -107,39 +107,6 @@ function motorradAktiv() {
 function zeichneGarage() {
   zeichneBuehne();
   zeichneDatenblatt();
-  zeigeBikeAufStatsKachel();
-}
-
-/* Die Kachel "Meine Stats" traegt DIESELBE Maschine wie die Buehne darueber -
-   und zwar in beiden Faellen, die es dort gibt:
-
-     MIT eigenem Foto  das freigestellte Bild des Nutzers.
-     OHNE eigenes Foto der Ausschnitt des Werkstattbildes mit der
-                       Beispielmaschine darauf. Nicht bike-standard.webp:
-                       Auf der Buehne steht ohne eigenes Foto der GERENDERTE
-                       Raum samt Maschine, und die Kachel soll denselben
-                       Anblick zeigen, nicht einen zweiten.
-
-   Die Fallunterscheidung laeuft ueber bildAdresse() aus finder.js: Liefert
-   sie das Standardbild zurueck, gibt es kein eigenes Foto.
-
-   Warum von hier aus und nicht fest im HTML: Das Bild aendert sich, sobald
-   der Nutzer ein Foto hinterlegt oder das Motorrad wechselt - und
-   zeichneGarage() ist die einzige Stelle, die davon erfaehrt.
-
-   Die Adresse steht in doppelten Anfuehrungszeichen: Ein eigenes Foto kommt
-   als Daten-Adresse herein, und die traegt Zeichen, die ohne Klammerung das
-   url() beenden koennten. */
-function zeigeBikeAufStatsKachel() {
-  const kachel = document.getElementById('btnStartStats');
-  if (!kachel || typeof bildAdresse !== 'function') return;
-
-  const adresse = bildAdresse(motorradAktiv());
-  const eigenes = adresse !== STANDARD_BILD;
-  const garageBild = garageAktiv();
-  kachel.classList.toggle('kachel-bike', eigenes);
-  kachel.style.setProperty('--kachel-bild',
-    `url("${eigenes ? adresse : (garageBild.bildStandard || garageBild.bild)}")`);
 }
 
 /* --- Die Buehne: Maschine auf den Drehteller setzen -------------------------
@@ -1366,15 +1333,13 @@ function positionAnpassen() {
   document.getElementById('garageDialog').hidden = true;
   document.getElementById('garageDatenblatt').hidden = true;
   document.getElementById('garageOhneMotorrad').hidden = true;
-  /* Ausruestungs-Leiste und Menue gehen ebenfalls beiseite. Platz nehmen
-     sie der Buehne seit der festen Raumhoehe zwar nicht mehr weg - aber
-     ihre Karten und Kacheln fuehren mitten aus der Justierung heraus auf
-     einen anderen Bildschirm, und der halb ausgefuellte Dialog bliebe
-     dann unsichtbar im Hintergrund haengen. */
+  /* Die Ausruestungs-Leiste geht ebenfalls beiseite. Platz nimmt sie der
+     Buehne seit der festen Raumhoehe zwar nicht mehr weg - aber ihre
+     Karten fuehren mitten aus der Justierung heraus auf einen anderen
+     Bildschirm, und der halb ausgefuellte Dialog bliebe dann unsichtbar
+     im Hintergrund haengen. */
   const shopLeiste = document.getElementById('garageShop');
   if (shopLeiste) shopLeiste.hidden = true;
-  const menue = document.getElementById('garageMenue');
-  if (menue) menue.hidden = true;
   document.getElementById('buehneJustierung').hidden = false;
   zeichneBuehne();
 }
@@ -1433,8 +1398,6 @@ verkabele('btnJustFertig', 'click', () => {
     const shopLeisteZurück = document.getElementById('garageShop');
     if (shopLeisteZurück) shopLeisteZurück.hidden = true;
   }
-  const menueZurück = document.getElementById('garageMenue');
-  if (menueZurück) menueZurück.hidden = false;
   // Zurueck in den wartenden Dialog; die Buehne zeigt wieder die
   // gespeicherte Maschine (oder das Standardbild).
   document.getElementById('garageDialog').hidden = false;

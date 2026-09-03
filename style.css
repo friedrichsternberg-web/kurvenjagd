@@ -516,23 +516,42 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 4px;
   border: 0;
   background: transparent;
   color: var(--muted);
   cursor: pointer;
   padding: 0;
   font-family: var(--schrift-display);
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   transition: color 0.15s ease, transform 0.15s cubic-bezier(0.2,0.8,0.2,1);
 }
 .nav-tab:active { transform: scale(0.92); }
-.nav-tab .ic { width: 22px; height: 22px; }
+/* Das Symbol sitzt in einer eigenen Pille. Unangetippt ist sie
+   unsichtbar; beim aktiven Eintrag wird sie zur Glasflaeche mit der
+   Signalfarbe darin - so zeigt die Leiste, WO man ist, nicht nur mit
+   einer anderen Schriftfarbe. Seit dem 03.09.2026 gibt es fuenf
+   Eintraege statt sechs, deshalb darf jeder mehr Raum haben. */
+.nav-tab .ic {
+  width: 26px;
+  height: 26px;
+  padding: 5px 14px;
+  box-sizing: content-box;
+  border-radius: var(--r-pill);
+  border: 1px solid transparent;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
 .nav-tab.aktiv { color: var(--accent-hell); }
+.nav-tab.aktiv .ic {
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+  border-color: color-mix(in srgb, var(--accent-hell) 35%, transparent);
+  box-shadow: inset 0 1px 0 var(--glas-rand);
+}
 .nav-tab:hover:not(.aktiv) { color: var(--text); }
+.nav-tab:hover:not(.aktiv) .ic { background: var(--glas-hauch); }
 
 /* Solange die Leiste sichtbar ist, halten alle Bildschirme unten Platz frei. */
 body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
@@ -612,200 +631,15 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   gap: var(--s2);
 }
 
-/* ---------- Kacheln ----------
-   Jede Kachel traegt ihr eigenes Bild (ueber die Marke --kachel-bild aus
-   dem HTML) und liegt als Glasplatte darauf. Der Aufbau von hinten nach
-   vorn: Bild, dunkler Schleier fuer die Lesbarkeit, Glanzstreifen, Inhalt.
-
-   Bild und Schleier stecken in ::before und ::after, damit das HTML nicht
-   mit reinen Gestaltungselementen zugestellt wird. */
-/* Das Raster des Menues unten in der Garage. Bewusst OHNE Zeilenangabe:
-   Die Garage scrollt, es gibt also keinen "Rest", den die Kacheln fuellen
-   koennten. Die Hoehe kommt aus dem Inhalt, die Untergrenze aus .kachel. */
-.garage-menue-raster {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--s3);
-}
-/* Eine Kachel ueber beide Spalten - fuer eine ungerade Kachelzahl, damit
-   im Raster keine Luecke bleibt. Gesetzt wird die Klasse von
-   wendeShopSchalterAn() in app.js. */
-.kachel--breit { grid-column: 1 / -1; }
-
-/* Das Seitenverhaeltnis der breiten Kachel steht mit ZWEI Klassen da,
-   und das ist kein Zufall: .kachel weiter unten setzt 3:2, und gegen
-   einen gleich starken Selektor gewinnt der spaetere. Eine Kachel ueber
-   beide Spalten war dadurch bis zum 01.09.2026 so hoch wie eine halbe
-   Seite - auf einem 865 Punkte breiten Fenster 555 Punkte. Mit der
-   doppelten Klasse zaehlt hier wieder, was hier steht.
-
-   2:1 auf dem Handy: das breiteste Verhaeltnis, bei dem vom Bild noch
-   etwas zu erkennen ist. Ab 560 Punkten wird es flacher, sonst waechst
-   die Kachel mit dem Fenster ins Unermessliche. */
-.kachel.kachel--breit { aspect-ratio: 2 / 1; }
-@media (min-width: 560px) {
-  .kachel.kachel--breit { aspect-ratio: 5 / 2; }
-}
-@media (min-width: 760px) {
-  .kachel.kachel--breit { aspect-ratio: 16 / 5; }
-}
-.kachel {
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  min-height: 116px;
-  /* Festes Seitenverhaeltnis statt einer reinen Mindesthoehe: Die Fotos sind
-     4:3, und eine Kachel, deren Form von der Fensterbreite abhaengt, schnitt
-     daraus mal ein Band, mal einen Turm. Bei 3:2 zeigt das Bild fast seine
-     ganze Hoehe - der Ausschnitt bleibt auf jedem Geraet derselbe. */
-  aspect-ratio: 3 / 2;
-  padding: var(--s3);
-  border-radius: var(--r-lg);
-  border: 1px solid var(--glas-rand);
-  background: var(--surface-2);
-  color: var(--text);
-  text-align: left;
-  cursor: pointer;
-  box-shadow:
-    inset 0 1px 0 var(--glas-licht),
-    inset 0 -1px 0 var(--schatten-weich),
-    0 12px 32px var(--schatten-mittel);
-  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1),
-              box-shadow 0.18s ease;
-}
-
-/* Schicht 1 und 2: das Bild, darueber der Schleier. Der Schleier ist unten
-   links am dichtesten - genau dort steht der Text. */
-.kachel::before {
-  content: "";
-  position: absolute; inset: 0;
-  z-index: -2;
-  background-image: var(--kachel-bild);
-  /* Fast immer "cover": Ein Streckenfoto soll die Kachel fuellen. Die
-     Stats-Kachel setzt es auf "contain", weil dort ein FREIGESTELLTES
-     Motorrad liegt - beschnitten waere davon nur ein Stueck Tank zu sehen. */
-  background-size: var(--kachel-fuellung, cover);
-  /* Der Ausschnitt ist je Kachel einstellbar. Gebraucht wird das von der
-     Garage-Kachel: Sie zeigt das hochformatige Werkstattbild, und davon
-     soll der Streifen mit dem Drehteller zu sehen sein, nicht die Mitte. */
-  background-position: var(--kachel-lage, center);
-  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-.kachel::after {
-  content: "";
-  position: absolute; inset: 0;
-  z-index: -1;
-  background:
-    /* Kraeftiger Schleier von unten. Er reicht hoeher und ist unten
-       dichter als vorher - in der Vorlage steht der Text auf einer klar
-       abgedunkelten Flaeche, nicht auf dem blanken Foto. */
-    linear-gradient(to top,
-      color-mix(in srgb, black 97%, transparent) 0%,
-      color-mix(in srgb, black 92%, transparent) 22%,
-      color-mix(in srgb, black 72%, transparent) 45%,
-      color-mix(in srgb, black 38%, transparent) 68%,
-      color-mix(in srgb, black 10%, transparent) 100%),
-    /* Der Glanzstreifen quer darueber bleibt, er macht das Glas aus. */
-    linear-gradient(115deg, var(--glas-heller) 0%, var(--glas-hauch) 26%, transparent 52%);
-}
-
-/* Beim Antippen gibt die Kachel nach und das Bild darunter zieht leicht
-   heran. Diese Verzoegerung ist das, was den Eindruck von Tiefe erzeugt:
-   Glas und Bild bewegen sich nicht gleich schnell. */
-/* Die Kachel "Meine Stats". Welches Bild darin liegt, setzt garage.js -
-   dieselbe Maschine wie auf der Buehne darueber. Hier stehen nur die zwei
-   Ausschnitte dazu.
-
-   OHNE eigenes Foto liegt das hochformatige Werkstattbild darin, und davon
-   soll der Streifen mit der Maschine zu sehen sein - nicht die Decke. */
-#btnStartStats {
-  --kachel-lage: center 52%;
-  background: var(--raum-dunkel);
-}
-/* MIT eigenem Foto ist es ein FREIGESTELLTES Bild ohne Hintergrund: Es
-   steht ganz in der Kachel statt beschnitten (sonst waere nur ein Stueck
-   Tank zu sehen), und rechts, damit die Beschriftung unten links freie
-   Bahn hat. Das Heranziehen beim Ueberfahren wuerde es ueber den Rand
-   schieben, deshalb bleibt es dabei stehen. */
-#btnStartStats.kachel-bike {
-  --kachel-fuellung: contain;
-  --kachel-lage: right 78%;
-}
-#btnStartStats.kachel-bike:hover::before { transform: none; }
-
-.kachel:hover { transform: translateY(-2px); box-shadow: inset 0 1px 0 var(--glas-licht), inset 0 -1px 0 var(--schatten-weich), 0 18px 40px var(--schatten-mittel); }
-.kachel:hover::before { transform: scale(1.06); }
-.kachel:active { transform: scale(0.985); }
-
-.kachel-inhalt {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s2);
-  min-width: 0;              /* ohne das bricht langer Text nicht um, sondern
-                                schiebt die Kachel breiter */
-}
-.kachel-symbol {
-  color: var(--accent-hell);
-  filter: drop-shadow(0 2px 8px var(--schatten-voll));
-}
-.kachel-text { display: flex; flex-direction: column; gap: 3px; }
-/* Die Unterzeile tragen nur Kacheln, die eine brauchen: Bei der
-   Ausruestung gehoert die Anzeige-Kennzeichnung schon auf den
-   Startbildschirm, nicht erst dahinter. */
-.kachel-unterzeile {
-  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
-  color: var(--metall);
-  font-size: 12px;
-  text-shadow: 0 1px 6px var(--schatten-voll);
-}
-.kachel-titel {
-  font-family: var(--schrift-display);
-  /* clamp() heisst: mindestens 16px, hoechstens 24px, dazwischen 5.4% der
-     Bildschirmbreite. Damit passt "RIDE AUFZEICHNEN" - der laengste der vier
-     Namen - auf einem iPhone SE noch in zwei Zeilen, ohne dass ein Wort
-     zerrissen wird.
-
-     Die Kachel traegt seit dem 27.08.2026 nur noch diesen Namen, keine
-     Unterzeile mehr. Der frei gewordene Platz geht in die Schriftgroesse:
-     Auf einem Startbildschirm, der aus vier Wegen besteht, muessen die vier
-     Namen von weitem lesbar sein - erklaeren tut sie ohnehin erst der
-     Bildschirm dahinter. */
-  font-size: clamp(16px, 4.8vw, 24px);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0;
-  line-height: 1.08;
-  text-shadow: 0 1px 8px var(--schatten-voll), 0 1px 2px var(--schatten-tief);
-  /* break-word statt anywhere: bricht nur, wenn ein einzelnes Wort wirklich
-     nicht passt. "anywhere" hatte mitten im Wort getrennt (ROUTENPL/ANER). */
-  overflow-wrap: break-word;
-}
-
-/* Der Pfeil sitzt OBEN rechts, nicht unten. Der Kachelinhalt steht am
-   unteren Rand (justify-content: flex-end an .kachel), ein Pfeil unten rechts
-   nahm dem Namen also genau dort Breite weg, wo er sie braucht - so knapp,
-   dass "ROUTENPLANER" mitten im Wort zerriss. Oben ist die Ecke ohnehin
-   leer. */
-.kachel-pfeil {
-  position: absolute;
-  right: var(--s3); top: var(--s3);
-  color: var(--accent-hell);
-  font-size: 20px;
-  line-height: 1;
-  transition: transform 0.18s ease;
-}
-.kachel:hover .kachel-pfeil { transform: translateX(4px); }
-
 /* Bildschirme mit einer Liste statt eines Formulars: Inhalt oben statt
    senkrecht zentriert, und ueber die volle Breite. Ein Formular in der
    Mitte wirkt ruhig, eine Liste in der Mitte wirkt verloren. */
 .listen-screen { align-items: stretch; justify-content: flex-start; text-align: left; overflow-y: auto; }
-/* Touren, Stats und Reifen sind Daten-Bildschirme - das Foto dahinter
-   macht sie nur unruhig. Rechtliches und Konto behalten es. */
-#tourenScreen, #statsScreen, #reifenScreen { background: var(--bg); }
+/* Touren und Reifen sind Daten-Bildschirme - das Foto dahinter macht sie
+   nur unruhig. Rechtliches, Konto und seit dem 03.09.2026 auch die Stats
+   behalten es: Die Stats bestehen aus Glasplatten, und Glas ueber
+   blankem Schwarz bleibt tot (Grundsatz 4 in design.css). */
+#tourenScreen, #reifenScreen { background: var(--bg); }
 .listen-screen .start-screen-inner {
   width: 100%;
   padding: var(--s5) var(--s4);
@@ -1497,6 +1331,23 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   font-size: 11px;
   text-align: center;
 }
+/* Das Abzeichen an jeder Zeile, an der wir mitverdienen - ueberall
+   dasselbe: in der Garage, in den Listen, auf der Produktseite. Es ist
+   mit Absicht ruhig gehalten und trotzdem lesbar: Eine Kennzeichnung,
+   die niemand bemerkt, ist keine; eine, die schreit, macht die Liste
+   unbrauchbar. Bis zum 03.09.2026 gab es drei Fassungen davon, und in
+   der Garage sahen die beiden Leisten verschieden aus. */
+.badge.anzeige {
+  font-family: var(--schrift-display);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: transparent;
+  border-color: var(--glas-rand);
+  vertical-align: middle;
+}
 
 .wp-list, .saved-list { list-style: none; margin: 0; padding: 0; }
 
@@ -2110,6 +1961,57 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 /* Vor dem Start darf das Feld ruhig etwas mehr Platz nehmen - da steht
    erklaerender Text, und die Karte ist noch nicht wichtig. */
 .ride-panel.bereit { max-height: 70dvh; }
+
+/* Die Stats-Karte im Bedienfeld vor dem Start: links die Gesamtzahl
+   gross, rechts der Pfeil. Dieselbe Glasplatte wie der Kopf des
+   Stats-Bildschirms, damit man beim Antippen ankommt, wo man hinwollte. */
+.ride-stats-karte {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  margin: var(--s3) 0;
+  padding: var(--s3) var(--s4);
+  border-radius: var(--r-md);
+  border: 1px solid var(--glas-hell);
+  background:
+    radial-gradient(ellipse 70% 90% at 0% 50%,
+      color-mix(in srgb, var(--accent) 30%, transparent) 0%,
+      transparent 70%),
+    linear-gradient(to bottom, var(--glas-hauch), var(--glas-hauch));
+  box-shadow: inset 0 1px 0 var(--glas-rand);
+  color: var(--text);
+  text-align: left;
+  font-family: var(--schrift-text);
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.ride-stats-karte:hover { background: var(--glas-hell); }
+.ride-stats-karte:active { transform: scale(0.985); }
+.ride-stats-zahl {
+  flex: 0 0 auto;
+  font-family: var(--schrift-display);
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-hell);
+}
+.ride-stats-zahl i { font-style: normal; font-size: 14px; font-weight: 600; margin-left: 3px; color: var(--muted); }
+.ride-stats-symbol { flex: 0 0 auto; display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--accent) 28%, transparent); color: var(--accent-hell); }
+.ride-stats-symbol .ic { width: 22px; height: 22px; }
+.ride-stats-text { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.ride-stats-titel {
+  font-family: var(--schrift-display);
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--metall-glanz);
+}
+.ride-stats-unter { font-size: 12.5px; color: var(--muted); }
+.ride-stats-pfeil { flex: 0 0 auto; font-size: 22px; line-height: 1; color: var(--accent-hell); }
 
 .ride-abschnitt { margin-top: 16px; margin-bottom: 6px; }
 .ride-notizen { resize: vertical; min-height: 70px; font-family: inherit; line-height: 1.45; }
@@ -3894,11 +3796,51 @@ body.nav-modus .leaflet-control-container { display: none; }
    sein, nicht am unteren Ende einer langen Liste. */
 .ausruestung-kopf {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: var(--s3);
 }
-.merk-schnellweg { display: inline-flex; align-items: center; gap: 6px; }
+.ausruestung-kopf h2 { margin: 0; }
+.merk-schnellweg { display: inline-flex; align-items: center; gap: 6px; width: auto; }
+.merk-schnellweg .ic { width: 16px; height: 16px; }
+
+/* Die Warengruppen als EINE wischbare Zeile, wie die Leisten in der
+   Garage: Der Anschnitt am rechten Rand sagt, dass es weitergeht. Der
+   negative Rand laesst die Zeile bis an die Bildschirmkante laufen,
+   das Innenpolster bringt den ersten Chip wieder auf die Textkante. */
+.warengruppen-band {
+  display: flex;
+  gap: var(--s2);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  margin: 0 calc(-1 * var(--s4)) var(--s3);
+  padding: 2px var(--s4) var(--s2);
+  scroll-snap-type: x proximity;
+}
+.warengruppen-band::-webkit-scrollbar { display: none; }
+.warengruppen-band .marken-chip {
+  scroll-snap-align: start;
+  padding: 8px 14px;
+  border-radius: var(--r-pill);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+/* Die Produktzeilen als Glaskarten: groesseres Foto, der Preis in der
+   Anzeigeschrift, die Warengruppe als leise Zeile darueber. */
+.produkt-liste { display: flex; flex-direction: column; gap: var(--s2); }
+.produkt-liste li {
+  padding: var(--s2);
+  border-radius: var(--r-md);
+  border: 1px solid var(--glas-hell);
+  background: var(--glas-hauch);
+  box-shadow: inset 0 1px 0 var(--glas-rand);
+}
+.produkt-liste .produkt-mini-bild { width: 88px; height: 88px; }
+.produkt-liste .saved-name { white-space: normal; line-height: 1.3; }
+.produkt-liste .saved-meta { font-size: 13px; }
+.produkt-liste .saved-meta .badge.anzeige { margin-left: 2px; }
 .merk-zahl {
   min-width: 20px;
   padding: 0 6px;
@@ -4063,7 +4005,16 @@ body.nav-modus .leaflet-control-container { display: none; }
 /* "Fuer dich": der Grund eines Vorschlags in der Akzentfarbe - er ist
    das Besondere an dieser Liste. Der leere Zustand (noch kein Motorrad
    in der Garage) ist eine Glaskarte mit Abkuerzung dorthin. */
-.vorschlag-block { margin-bottom: var(--s3); }
+.vorschlag-block { margin: var(--s4) 0; padding: 0; background: none; border: 0; box-shadow: none; }
+.vorschlag-block h2 {
+  margin: 0 0 var(--s1);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--metall-glanz);
+}
+.vorschlag-block > .hint { margin: 0 0 var(--s3); }
+.vorschlag-block .btn { margin-top: var(--s3); width: auto; }
 .vorschlag-grund { color: var(--accent-hell); }
 .vorschlag-leer {
   display: flex;
@@ -4094,67 +4045,76 @@ body.nav-modus .leaflet-control-container { display: none; }
 .garage-shop { padding: var(--s4); }
 .garage-shop-kopf {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--s2);
+  gap: var(--s3);
+  margin-bottom: var(--s3);
 }
 .garage-shop-kopf h3 {
   margin: 0;
-  font-size: 13px;
-  letter-spacing: 0.06em;
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  font-family: var(--schrift-display);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--metall-glanz);
 }
+/* Die Wege rechts im Kopf: Merkliste und "Alle ansehen". Eine Merkliste
+   mit Zahl darf hier stehen, weil sie aus der Garage heraus mit EINEM
+   Tipp erreichbar sein soll - nicht erst ueber die Ausruestung. */
+.garage-shop-wege { display: inline-flex; align-items: center; gap: var(--s3); white-space: nowrap; }
+.garage-shop-wege .linkbtn { display: inline-flex; align-items: center; gap: 5px; text-decoration: none; font-size: 13.5px; }
 .garage-shop-band {
   display: flex;
   gap: var(--s2);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  /* Etwas Luft, damit der Fokusrand der Karten nicht abgeschnitten wird. */
-  padding: 2px;
+  /* Etwas Luft, damit Schatten und Fokusrand nicht abgeschnitten werden. */
+  padding: 3px 3px var(--s2);
+  margin: 0 calc(-1 * var(--s1));
 }
 .garage-shop-band::-webkit-scrollbar { display: none; }
-/* Die Karte waechst mit ihrem Bild mit: 135 statt 108 Punkte. */
+/* Jede Karte ist eine kleine Glasplatte auf der grossen - das Bild oben
+   auf hellem Grund, darunter Name und Preis. 148 Punkte breit: drei
+   Karten sind auf einem Handy angeschnitten zu sehen, und der Anschnitt
+   sagt, dass man wischen kann. */
 .garage-shop-karte {
-  flex: 0 0 135px;
+  flex: 0 0 148px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 4px;
-  padding: 0;
-  border: none;
-  background: none;
+  gap: 5px;
+  padding: var(--s2);
+  border-radius: var(--r-md);
+  border: 1px solid var(--glas-hell);
+  background: var(--glas-hauch);
+  box-shadow: inset 0 1px 0 var(--glas-rand);
   color: var(--text);
   text-align: left;
   font-family: var(--schrift-text);
   cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
 }
-.garage-shop-karte .produkt-mini-bild { width: 100%; height: 74px; }
+.garage-shop-karte:hover { background: var(--glas-hell); transform: translateY(-2px); }
+.garage-shop-karte:active { transform: scale(0.97); }
+.garage-shop-karte .produkt-mini-bild { width: 100%; height: 96px; }
 .garage-shop-name {
-  font-size: 12px;
+  font-size: 12.5px;
   line-height: 1.25;
   display: -webkit-box;
   -webkit-line-clamp: 2;      /* lange Namen enden nach zwei Zeilen */
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.garage-shop-meta { font-size: 11px; color: var(--accent-hell); }
-
-/* Der kleine Demo-Vermerk neben der Ueberschrift der Garage-Leiste. Er
-   ist Pflicht, nicht Schmuck: Die Leiste zeigt Preise ausserhalb der
-   Shop-Bildschirme, deren grosser DEMO-Balken hier nicht zu sehen ist. */
-/* ---------- Das Menue unten in der Garage ----------
-   Seit die Garage der Startbildschirm ist, stehen hier die Wege in die
-   uebrigen Bereiche. Die Ueberschrift traegt denselben leisen Ton wie die
-   der Shop-Leiste darueber - beides sind Abschnitte, nicht Titel. */
-.garage-menue { margin-top: var(--s2); }
-.garage-menue-kopf {
-  margin: 0 0 var(--s2);
-  font-size: 13px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
+.garage-shop-meta {
+  font-family: var(--schrift-display);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--accent-hell);
 }
 
 /* Waehrend "Punkt auf der Karte setzen" an ist, wird der Zeiger zum
@@ -4302,10 +4262,10 @@ body.nav-modus .karten-knopf { display: none; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--s1);
-  padding: var(--s5) var(--s4);
+  gap: var(--s2);
+  padding: var(--s6) var(--s4);
   margin: 0 0 var(--s3);
-  border-radius: var(--r-md);
+  border-radius: var(--r-lg);
   border: 1px solid var(--glas-hell);
   background:
     radial-gradient(ellipse 90% 75% at 50% 115%,
@@ -4329,12 +4289,15 @@ body.nav-modus .karten-knopf { display: none; }
 }
 .stats-held-zahl {
   font-family: var(--schrift-display);
-  font-size: 56px;
+  font-size: 72px;
   font-weight: 700;
   line-height: 1;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
   color: var(--accent-hell);
+  /* Ein leiser Schein in der eigenen Farbe - kein Neon, nur die Lampe
+     ueber der Zahl. */
+  text-shadow: 0 0 28px color-mix(in srgb, var(--accent-hell) 35%, transparent);
 }
 .stats-held-zahl i {
   font-style: normal;
@@ -4379,8 +4342,9 @@ body.nav-modus .karten-knopf { display: none; }
 
 /* Die Wertekacheln erben alles von .stat; hier steht nur der Abstand der
    Gruppe selbst. */
-.stats-kacheln { margin: 0 0 var(--s3); }
-.stats-kacheln .stat { padding: var(--s3); }
+.stats-kacheln { margin: 0 0 var(--s3); gap: var(--s2); }
+.stats-kacheln .stat { padding: var(--s3) var(--s4); border-radius: var(--r-md); }
+.stats-kacheln .stat .v { font-size: 26px; }
 .stat.stats-still { grid-column: 1 / -1; align-items: center; padding: var(--s4); }
 
 /* Zeitraumwahl: links der Umschalter Jahr/Monat, rechts die Blaetterpfeile
@@ -4701,29 +4665,9 @@ body.nav-modus .karten-knopf { display: none; }
   line-height: 1;
   color: var(--text);
 }
-/* Das Abzeichen an jeder Zeile, an der wir mitverdienen. Es ist mit Absicht
-   ruhig gehalten und trotzdem lesbar: Eine Kennzeichnung, die niemand
-   bemerkt, ist keine - eine, die schreit, macht die Liste unbrauchbar. */
-.reifen-preis-spalte .badge.anzeige {
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-  background: transparent;
-  border-color: var(--glas-hell);
-}
 
 .reifen-offen { margin-top: var(--s5); }
 .reifen-offen b { color: var(--text); font-weight: 600; }
-
-/* Der Untertitel auf einer Kachel. Bisher trugen alle Kacheln nur einen
-   Titel; die Reifenkachel braucht die Zeile, weil "Anzeige" schon dort
-   stehen muss und nicht erst dahinter. */
-.kachel-zusatz {
-  font-size: 11.5px;
-  line-height: 1.3;
-  color: var(--muted);
-}
 
 /* ---------- Das Einwilligungs-Blatt ----------
    Gebaut wie der Garagen-Dialog: unten angeschlagen auf dem Handy, mittig
@@ -4821,16 +4765,6 @@ body.nav-modus .karten-knopf { display: none; }
 /* Das Anzeige-Kennzeichen an der Reifen-Leiste der Garage. Neutral statt
    des warnenden Orange des Demo-Vermerks: Es kennzeichnet Werbung, es
    warnt nicht vor ihr. */
-.garage-shop-anzeige {
-  margin-left: 6px;
-  padding: 1px 8px;
-  border-radius: var(--r-pill);
-  border: 1px solid var(--glas-hell);
-  color: var(--muted);
-  font-size: 10px;
-  letter-spacing: 0.04em;
-}
-
 /* Die Einladungs-Karte, solange noch keine Reifengroesse gemerkt ist.
    Sie hat dieselbe Breite wie die Angebote daneben - breiter gemacht
    verdraengte sie auf dem Handy genau das, wozu sie einlaedt. Ihr
