@@ -412,6 +412,30 @@ Dieselbe Liste wie bei den Reifen, und sie ist weiterhin offen:
 4. Vor dem Livegang einmal ein **Fachanwalt für IT-/Wettbewerbsrecht**
    über Kennzeichnung, Preisdarstellung und die Offenlegung.
 
+### Helmexpress und der Preisvergleich (seit 03.09.2026)
+
+**Steht.** Helm Express DE über AWIN (Advertiser 121690, Feed 111977,
+5 Prozent, Cookie 30 Tage), 1.553 Motorradhelme, 219 davon mit
+Gegenstück bei motoin – die Produktseite zeigt dann beide Preise. Der
+Abgleich läuft in `helmexpress-import.py` über alle Varianten-EANs und
+braucht deshalb den motoin-Feed unter `~/Downloads/products.csv`.
+
+- **Zahlungsstufe beachten.** AWIN führt Helmexpress mit
+  „Risikostufe 2" (Kreditlinie überzogen, keine Lastschrift) und 103
+  Tagen durchschnittlicher Zahlungsdauer. Nicht als verlässliche
+  Einnahme einplanen; Provisionen dort können lange offen bleiben.
+- **Katalogbudget neu vereinbaren.** 612 KB gepackt für drei Kataloge
+  statt 500 für zwei. Wer das drücken will: Helmexpress auf die Helme
+  mit Gegenstück plus eine Auswahl beschneiden (etwa 60 KB), oder die
+  Kataloge je Warengruppe teilen.
+- **Katalog frisch halten:** `python3 helmexpress-import.py` holt den
+  Feed selbst (AWIN-Schlüssel wie bei den Reifen). Vorher den
+  motoin-Feed herunterladen, sonst fehlen die Verknüpfungen.
+- **Reifentiefpreis DE ist ebenfalls angenommen** (AWIN 14701, Feed
+  37241, 57.915 Artikel). Das wäre der zweite Reifenhändler und damit der
+  Preisvergleich bei den Reifen – dasselbe Muster wie bei den Helmen,
+  nur ist dort die Dimension der Schlüssel, nicht die EAN.
+
 ### Wen als Nächstes beantragen
 
 - **Über AWIN**: POLO Motorrad (MID 11475, Programmbetreuung PeakLive,

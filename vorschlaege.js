@@ -211,7 +211,7 @@ function zeichneVorschläge() {
   const behälter = document.getElementById('ausruestungVorschlaege');
   if (!behälter) return;
 
-  const produkte = katalogProdukte('motoin');
+  const produkte = sortiment();
   if (!produkte.length) { behälter.innerHTML = ''; return; }
 
   const { vorschläge, motorrad, stil } = persönlicheVorschläge(produkte);
@@ -265,7 +265,7 @@ function zeichneGarageShop() {
 }
 
 function zeichneGarageBand(band, platte) {
-  const produkte = katalogProdukte('motoin');
+  const produkte = sortiment();
   const einträge = [];
   const schonDrin = new Set(shopAblage.merkliste.map(eintrag => eintrag.schluessel));
   persönlicheVorschläge(produkte).vorschläge.forEach(({ produkt, grund }) => {

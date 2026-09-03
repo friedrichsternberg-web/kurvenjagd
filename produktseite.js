@@ -23,6 +23,10 @@
        zeigt und daran verdient, muss genau das offenlegen
        (BGH I ZR 55/16).
 
+   Seit dem 03.09.2026 gibt es den ersten echten Preisvergleich: Helme,
+   die motoin UND Helmexpress fuehren, zeigen hier beide Angebote. Die
+   Zuordnung kommt aus dem Importskript (siehe katalog.js, Abschnitt 5).
+
    produktseite.js wird NACH katalog.js, merkliste.js und shop.js geladen.
    ========================================================================= */
 
@@ -42,6 +46,13 @@ function zeigeProdukt(schlüssel, herkunft = 'ausruestung') {
   zeichneProduktSeite();
   zeigeBildschirm('shopProduktScreen');
   document.getElementById('shopProduktScreen').scrollTop = 0;
+  /* Die Kataloge der anderen Haendler dieser Warengruppe nachladen und
+     dann noch einmal zeichnen - so erscheint das zweite Angebot, sobald
+     es da ist, und die Seite steht nicht leer, solange es laedt. */
+  const gezeigt = angezeigtesProdukt;
+  ladeKatalogeFuer(gezeigt.kategorie).then(() => {
+    if (angezeigtesProdukt === gezeigt) zeichneProduktSeite();
+  });
 }
 
 // Fuer aktualisiereLeiste() in app.js: welcher Eintrag leuchten soll,
@@ -93,60 +104,77 @@ function zeichneGroessen(produkt) {
   <p class="tiny">Welche Gr&ouml;&szlig;en gerade lieferbar sind, steht beim H&auml;ndler.</p>`;
 }
 
-/* Der Angebotsblock. EIN Angebot, weil es je Warengruppe einen Haendler
-   gibt - deshalb "Angebot" und nicht "Preisvergleich". Kommt ein zweiter
-   Haendler, wird aus dieser einen Zeile eine sortierte Liste, und die
-   Ueberschrift heisst wieder Vergleich. */
+/* Der Angebotsblock. Ein Angebot je Haendler, der diese Ware fuehrt,
+   nach Gesamtpreis sortiert. Mit einem Haendler heisst der Block
+   "Angebot", mit zweien "Preisvergleich" - das Wort steht erst da, wenn
+   es stimmt. */
 function zeichneAngebot(produkt) {
-  const partner = partnerNach(produkt.partnerId);
-  const stand = katalogStand(produkt.partnerId);
-  const standText = stand
-    ? new Date(stand).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
-    : 'unbekannt';
-
+  const angebote = angeboteFuer(produkt);
+  const vergleich = angebote.length > 1;
   return `
     <section class="block">
-      <h2>Angebot</h2>
+      <h2>${vergleich ? 'Preisvergleich' : 'Angebot'}</h2>
       <ul class="saved-list angebots-liste">
-        <li>
-          <span class="saved-text">
-            <span class="angebot-kopf">
-              <span class="badge anzeige">Anzeige</span>
-              <span class="saved-name">${escapeHtml(partner ? partner.name : 'Partner-Shop')}</span>
-            </span>
-            <span class="saved-meta">${escapeHtml(euroAusCent(produkt.preis))} inkl. MwSt.
-              <i>&middot;</i> ${produkt.versand === 0
-                ? 'versandkostenfrei'
-                : 'zzgl. ' + escapeHtml(euroAusCent(produkt.versand)) + ' Versand'}</span>
-            <span class="angebot-gesamt">Gesamt ${escapeHtml(euroAusCent(produkt.gesamt))}</span>
-            <span class="tiny">Stand: ${escapeHtml(standText)}</span>
-          </span>
-          <button class="btn klein" data-angebot>Zum Shop (Anzeige)</button>
-        </li>
+        ${angebote.map((angebot, stelle) => zeichneAngebotsZeile(angebot, vergleich && stelle === 0)).join('')}
       </ul>
-      <p class="tiny">Preis und Verf&uuml;gbarkeit entsprechen dem angegebenen
+      <p class="tiny">Preise und Verf&uuml;gbarkeit entsprechen dem angegebenen
         Stand und k&ouml;nnen sich seitdem ge&auml;ndert haben. Ma&szlig;geblich
         ist der Preis, den der Shop beim Kauf anzeigt. Versandkosten gelten
         f&uuml;r Standardversand innerhalb Deutschlands.</p>
-      ${zeichneOffenlegung(partner)}
+      ${zeichneOffenlegung(angebote)}
     </section>`;
 }
 
-function zeichneOffenlegung(partner) {
-  const name = partner ? partner.name : 'unserem Partner';
-  const provision = partner ? partner.provision : 'einen Anteil vom Warenwert';
+function zeichneAngebotsZeile(angebot, guenstigstes) {
+  const partner = partnerNach(angebot.partnerId);
+  const stand = katalogStand(angebot.partnerId);
+  const standText = stand
+    ? new Date(stand).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    : 'unbekannt';
+  return `
+    <li${guenstigstes ? ' class="guenstigstes"' : ''}>
+      <span class="saved-text">
+        <span class="angebot-kopf">
+          <span class="badge anzeige">Anzeige</span>
+          <span class="saved-name">${escapeHtml(partner ? partner.name : 'Partner-Shop')}</span>
+          ${guenstigstes ? '<span class="badge guenstig">g&uuml;nstigstes</span>' : ''}
+        </span>
+        <span class="saved-meta">${escapeHtml(euroAusCent(angebot.preis))} inkl. MwSt.
+          <i>&middot;</i> ${angebot.versand === 0
+            ? 'versandkostenfrei'
+            : 'zzgl. ' + escapeHtml(euroAusCent(angebot.versand)) + ' Versand'}</span>
+        <span class="angebot-gesamt">Gesamt ${escapeHtml(euroAusCent(angebot.gesamt))}</span>
+        <span class="tiny">Stand: ${escapeHtml(standText)}</span>
+      </span>
+      <button class="btn klein" data-angebot="${escapeHtml(angebot.schluessel)}">Zum Shop (Anzeige)</button>
+    </li>`;
+}
+
+/* Die Offenlegung. Bei EINEM Angebot: dass es nur diesen Haendler gibt.
+   Bei zweien: wie sortiert wird und dass die Provision darauf keinen
+   Einfluss hat (BGH I ZR 55/16). Beides in einem Aufklapper, weil der
+   Satz an jeder Produktseite steht und trotzdem gelesen werden koennen
+   muss. */
+function zeichneOffenlegung(angebote) {
+  const namen = angebote.map(a => partnerNach(a.partnerId)?.name).filter(Boolean);
+  const vergleich = angebote.length > 1;
+  const wer = namen.length > 1
+    ? namen.slice(0, -1).join(', ') + ' und ' + namen[namen.length - 1]
+    : (namen[0] || 'unserem Partner');
   return `
     <details class="block accordion vergleich-erklaert">
-      <summary>Woher dieses Angebot kommt</summary>
+      <summary>${vergleich ? 'So entsteht dieser Vergleich' : 'Woher dieses Angebot kommt'}</summary>
       <div class="accordion-body">
-        <p class="hint">Serpa zeigt in dieser Warengruppe nur Angebote von
-          ${escapeHtml(name)}. Der Katalog bildet also <b>nicht den ganzen
-          Markt</b> ab, und es kann anderswo g&uuml;nstiger sein.</p>
-        <p class="hint">Kaufst du &uuml;ber den Knopf, bekommen wir
-          ${escapeHtml(provision)}. <b>F&uuml;r dich &auml;ndert sich am Preis
-          nichts.</b> Sortiert wird nach dem Gesamtpreis aus Ware und Versand
-          &ndash; die H&ouml;he einer Provision hat auf die Reihenfolge
-          <b>keinen Einfluss</b>.</p>
+        <p class="hint">Serpa zeigt hier ausschlie&szlig;lich Angebote von
+          ${escapeHtml(wer)} &ndash; Shops, mit denen wir ein Partnerprogramm
+          haben. Der ${vergleich ? 'Vergleich' : 'Katalog'} bildet also
+          <b>nicht den ganzen Markt</b> ab, und es kann anderswo
+          g&uuml;nstiger sein.</p>
+        <p class="hint">Kaufst du &uuml;ber einen der Kn&ouml;pfe, bekommen wir
+          eine Provision. <b>F&uuml;r dich &auml;ndert sich am Preis
+          nichts.</b> Sortiert wird nach dem Gesamtpreis aus Ware und Versand,
+          das g&uuml;nstigste Angebot steht oben &ndash; die H&ouml;he einer
+          Provision hat auf die Reihenfolge <b>keinen Einfluss</b>.</p>
       </div>
     </details>`;
 }
@@ -182,11 +210,13 @@ function zeichneProduktSeite() {
    Klicks - ein fertiger Klicklink, der in einer Liste herumliegt, ist
    einer, den irgendwann jemand versehentlich vorlaedt. */
 
-function öffneProduktAngebot() {
-  const produkt = angezeigtesProdukt;
-  if (!produkt) return;
-  const partner = partnerNach(produkt.partnerId);
-  const adresse = partnerDeepLink(partner, produkt.ziel());
+function öffneProduktAngebot(schlüssel) {
+  const angebot = produktNach(schlüssel);
+  if (!angebot) return;
+  const partner = partnerNach(angebot.partnerId);
+  // Produktlink, wo das Netzwerk einen kennt (AWIN), sonst das Ziel.
+  const adresse = partnerProduktLink(partner, angebot.produktNummer)
+    || partnerDeepLink(partner, angebot.ziel());
   if (!adresse) { showToast('Dieses Angebot lässt sich gerade nicht öffnen.'); return; }
   öffnePartnerLink(adresse, partner);
 }
@@ -199,5 +229,6 @@ verkabele('btnShopZurueck', 'click', zurückVomProdukt);
 verkabele('shopProduktInhalt', 'click', ereignis => {
   const herz = ereignis.target.closest('[data-merken]');
   if (herz) { merkenUmschalten(herz.dataset.merken); return; }
-  if (ereignis.target.closest('[data-angebot]')) öffneProduktAngebot();
+  const knopf = ereignis.target.closest('[data-angebot]');
+  if (knopf) öffneProduktAngebot(knopf.dataset.angebot);
 });

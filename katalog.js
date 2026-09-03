@@ -9,7 +9,7 @@
      2. Laden auf Zuruf
      3. Die gemeinsame Produktform
      4. Der Umbau je Haendler
-     5. Schluessel und Abgleich
+     5. Verknuepfung: dasselbe Produkt bei zwei Haendlern
      6. Preis und Reihenfolge
 
    DER DRITTE HAENDLER: Er braucht einen Eintrag in PARTNER (partner.js),
@@ -30,6 +30,9 @@
      datei        die Datei mit den Daten, ohne Versionsanhang
      holen        kommt an die Konstante in dieser Datei heran
      baueProdukt  macht aus einer Zeile der Datei ein Produkt
+     warengruppen welche Arten dieser Katalog fuehrt - null heisst alle.
+                  Danach entscheidet ladeKatalogeFuer(), welche Kataloge
+                  fuer einen Preisvergleich in einer Warengruppe noetig sind
 
    Geladen wird NICHT beim Start. Fuenf Kataloge zu je 300 KB beim
    Aufschlagen der App waeren das Ende auf dem Handy - jeder kommt erst,
@@ -132,12 +135,33 @@ function katalogProdukte(id) {
   if (!daten || !eintrag) return [];
   if (!daten.aufbereitet) {
     daten.aufbereitet = daten.produkte.map(zeile => eintrag.baueProdukt(zeile, daten));
+    daten.aufbereitet.forEach(merkeVerknuepfung);
   }
   return daten.aufbereitet;
 }
 
 function katalogStand(id) {
   return KATALOG_DATEN[id]?.stand || null;
+}
+
+// Der aelteste Stand aller geladenen Kataloge - fuer die Zeile unter der
+// Uebersicht. Der aelteste, nicht der juengste: Eine Seite ist so aktuell
+// wie ihr aeltester Preis.
+function aeltesterKatalogStand() {
+  const staende = KATALOGE.map(e => katalogStand(e.id)).filter(Boolean).sort();
+  return staende[0] || null;
+}
+
+// Alle Kataloge, die eine Warengruppe fuehren - fuer den Preisvergleich
+// auf der Produktseite. Ein Fehler in einem Katalog nimmt die anderen
+// nicht mit.
+function ladeKatalogeFuer(kategorie) {
+  const passende = KATALOGE.filter(e => !e.warengruppen || e.warengruppen.includes(kategorie));
+  return Promise.all(passende.map(e => ladeKatalog(e.id).catch(() => null)));
+}
+
+function ladeAlleKataloge() {
+  return Promise.all(KATALOGE.map(e => ladeKatalog(e.id).catch(() => null)));
 }
 
 function katalogGeladen(id) {
@@ -159,8 +183,15 @@ function katalogGeladen(id) {
      preis       in Cent
      versand     in Cent
      gesamt      Preis plus Versand, in Cent
-     gtin        Zahl oder 0 - fuer den Abgleich, wenn ein zweiter
-                 Haendler dasselbe Produkt fuehrt
+     gtin        Zahl oder 0
+     produktNummer  die Nummer, mit der das Netzwerk einen Produktlink
+                 baut (AWIN pclick) - oder null, dann gilt ziel()
+     gleichWie   Schluessel desselben Produkts bei einem ANDEREN Haendler,
+                 oder null. Wer ihn traegt, ist das Zweitangebot; der
+                 Erstanbieter steht in den Listen, das Zweitangebot nur
+                 auf seiner Produktseite. Zugeordnet wird im Importskript
+                 ueber alle Varianten-EANs, nicht hier - siehe
+                 helmexpress-import.py
      bild(art)   Bildadresse, art ist 'klein' oder 'gross'
      ziel()      die Produktseite beim Haendler, OHNE Provisionsanhang
 
@@ -262,6 +293,8 @@ function baueMotoinProdukt(zeile, daten) {
     versand,
     gesamt: preis + versand,
     gtin: gtin || 0,
+    produktNummer: null,
+    gleichWie: null,
     bild(art) {
       const ordner = MOTOIN_BILDGROESSEN[art] || MOTOIN_BILDGROESSEN.klein;
       return `https://${daten.bildBasis}${ordner}/${dateiname}`;
@@ -277,36 +310,124 @@ meldeKatalog({
   datei: 'motoin-katalog.js',
   holen: () => (typeof MOTOIN_KATALOG !== 'undefined' ? MOTOIN_KATALOG : null),
   baueProdukt: baueMotoinProdukt,
+  warengruppen: null,
 });
 
 
-/* --- 5. Schluessel und Abgleich ---------------------------------------------
+/* Helmexpress. Die Zeilenform steht im Kopf von helmexpress-import.py.
+   Zwei Unterschiede zu motoin:
 
-   Wenn eines Tages ein zweiter Haendler dieselbe Jacke fuehrt, muss die
-   App erkennen, dass es dieselbe ist. Zuerst ueber die GTIN, die
-   Strichcode-Nummer: Die ist weltweit eindeutig. Fehlt sie - bei motoin
-   bei etwa jedem zwanzigsten Artikel, bei AWIN ist sie nicht einmal
-   Pflichtfeld -, bleibt der Rueckfall ueber Marke und Namen.
+   a) Der Klick laeuft ueber AWIN mit einer Produktnummer (pclick), wie
+      bei reifen.com. Deshalb traegt das Produkt eine produktNummer.
 
-   Der Rueckfall ist absichtlich streng normalisiert: Kleinschreibung,
-   keine Leerzeichen, keine Bindestriche. "REV'IT! Sand 4" und
-   "Revit Sand 4" sollen zusammenfinden, ohne dass daraus "Sand 3" wird. */
+   b) Das Bild kommt vom Bilddienst des Netzwerks, wie bei reifen.com:
+      Quelle und Signatur stehen im Katalog, die Groesse waehlt die App.
+      Nachgemessen: Die Signatur bindet an die Quelle, nicht an die
+      Groesse, und der Dienst setzt kein Cookie.
 
-function abgleichSchluessel(produkt) {
-  if (produkt.gtin) return `e${produkt.gtin}`;
-  const roh = `${produkt.marke} ${produkt.name}`;
-  return `n${roh.toLowerCase().replace(/[^a-z0-9äöüß]/g, '')}`;
+   Die letzte Zahl der Zeile ist die motoin-Nummer desselben Helms, oder
+   0. Traegt ein Produkt sie, ist es das Zweitangebot: Es erscheint nicht
+   in den Listen, sondern auf der Produktseite des motoin-Helms als
+   zweiter Preis. */
+
+const HELMEXPRESS_BILDGROESSEN = { klein: 200, gross: 480 };
+
+function baueHelmexpressProdukt(zeile, daten) {
+  const [awNummer, marke, titel, groessen, preis, versand, gtin, pfad, quelle, signatur, motoinNummer] = zeile;
+  const markeName = daten.marken[marke];
+  return {
+    schluessel: produktSchluessel('helmexpress', awNummer),
+    partnerId: 'helmexpress',
+    kategorie: 'helm',
+    marke: markeName,
+    name: ohneMarke(titel, markeName),
+    titel,
+    groessen: typeof groessen === 'number' ? daten.groessensaetze[groessen] : (groessen || []),
+    preis,
+    versand,
+    gesamt: preis + versand,
+    gtin: gtin || 0,
+    produktNummer: String(awNummer),
+    gleichWie: motoinNummer ? produktSchluessel('motoin', motoinNummer) : null,
+    bild(art) {
+      const mass = HELMEXPRESS_BILDGROESSEN[art] || HELMEXPRESS_BILDGROESSEN.klein;
+      return `${daten.bildDienst}?w=${mass}&h=${mass}&bg=white&trim=5&t=letterbox`
+        + `&url=${encodeURIComponent(daten.bildQuelle + quelle)}`
+        + `&feedId=${encodeURIComponent(daten.feed)}&k=${encodeURIComponent(signatur)}`;
+    },
+    ziel() {
+      return daten.zielBasis + pfad;
+    },
+  };
 }
 
-// Produkte aus mehreren Katalogen zu Angeboten desselben Artikels buendeln.
-function buendeleAngebote(produkte) {
-  const nach = new Map();
-  produkte.forEach(produkt => {
-    const schluessel = abgleichSchluessel(produkt);
-    if (!nach.has(schluessel)) nach.set(schluessel, []);
-    nach.get(schluessel).push(produkt);
-  });
-  return [...nach.values()];
+meldeKatalog({
+  id: 'helmexpress',
+  datei: 'helmexpress-katalog.js',
+  holen: () => (typeof HELMEXPRESS_KATALOG !== 'undefined' ? HELMEXPRESS_KATALOG : null),
+  baueProdukt: baueHelmexpressProdukt,
+  warengruppen: ['helm'],
+});
+
+
+/* --- 5. Verknuepfung: dasselbe Produkt bei zwei Haendlern -------------------
+
+   Der Abgleich passiert NICHT hier, sondern im Importskript, ueber alle
+   Varianten-EANs beider Feeds (siehe helmexpress-import.py). Hier wird
+   nur gemerkt, was der Import festgestellt hat: Wer "gleichWie" traegt,
+   ist das Zweitangebot eines anderen Produkts.
+
+   Warum nicht zur Laufzeit ueber die GTIN: Je Produkt liegt in der App
+   nur EINE GTIN, die der ersten Variante - ein Helm in sechs Groessen
+   hat sechs. Zwei Kataloge traefen sich damit nur zufaellig. Das Skript
+   sieht alle sechs. */
+
+const VERKNUEPFUNGEN = new Map();   // Schluessel -> Set der Schluessel derselben Ware
+
+function merkeVerknuepfung(produkt) {
+  if (!produkt.gleichWie) return;
+  [[produkt.schluessel, produkt.gleichWie], [produkt.gleichWie, produkt.schluessel]]
+    .forEach(([von, nach]) => {
+      if (!VERKNUEPFUNGEN.has(von)) VERKNUEPFUNGEN.set(von, new Set());
+      VERKNUEPFUNGEN.get(von).add(nach);
+    });
+}
+
+/* Alle Angebote fuer dieselbe Ware, das Produkt selbst zuerst. Nur, was
+   geladen ist: Ein Angebot aus einem Katalog, der nicht da ist, wird
+   nicht erfunden, sondern fehlt - die Produktseite laedt vorher, was
+   fuer die Warengruppe noetig ist (ladeKatalogeFuer). */
+function angeboteFuer(produkt) {
+  const weitere = [...(VERKNUEPFUNGEN.get(produkt.schluessel) || [])]
+    .map(produktNach).filter(Boolean);
+  return [produkt, ...weitere].sort(nachGesamtpreis);
+}
+
+// Ist das Produkt das Zweitangebot eines geladenen Erstanbieters? Dann
+// steht es nicht in den Listen - dort steht die Ware einmal.
+function istZweitangebot(produkt) {
+  return Boolean(produkt.gleichWie) && Boolean(produktNach(produkt.gleichWie));
+}
+
+// Das Sortiment fuer Listen und Regale: alle geladenen Produkte, jede
+// Ware einmal.
+function sortiment() {
+  return alleProdukte().filter(produkt => !istZweitangebot(produkt));
+}
+
+// Der guenstigste Gesamtpreis ueber alle Angebote.
+function preisAb(produkt) {
+  return angeboteFuer(produkt)[0].gesamt;
+}
+
+// "ab 189,90 €" bei zwei Angeboten, sonst der Preis. Heisst NICHT
+// preisText: So heisst schon die Funktion in reifen.js, die eine Zahl
+// nimmt - und die spaeter geladene Datei gewinnt.
+function preisAbText(produkt) {
+  const angebote = angeboteFuer(produkt);
+  return angebote.length > 1
+    ? `ab ${euroAusCent(angebote[0].gesamt)}`
+    : euroAusCent(produkt.gesamt);
 }
 
 

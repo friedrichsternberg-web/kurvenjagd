@@ -640,6 +640,15 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
    behalten es: Die Stats bestehen aus Glasplatten, und Glas ueber
    blankem Schwarz bleibt tot (Grundsatz 4 in design.css). */
 #tourenScreen, #reifenScreen { background: var(--bg); }
+/* Die Ausruestung und die Merkliste: Produktfotos auf weissen Karten
+   ueber dem verwischten Werkstattfoto wurden unruhig. Also Schwarz mit
+   einem leisen Lichtkegel von oben - das gibt den Glaskanten etwas zu
+   fangen, ohne mit den Fotos zu streiten. */
+#shopScreen, #merklisteScreen {
+  background:
+    radial-gradient(120% 55% at 50% -12%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 62%),
+    var(--bg);
+}
 .listen-screen .start-screen-inner {
   width: 100%;
   padding: var(--s5) var(--s4);
@@ -4007,7 +4016,11 @@ body.nav-modus .leaflet-control-container { display: none; }
    steht in derselben Groesse wie der Platzname - eine Kennzeichnung, die
    kleiner gedruckt ist als das, was sie kennzeichnet, kennzeichnet nichts. */
 .angebots-liste .saved-text { gap: 2px; }
-.angebot-kopf { display: flex; align-items: center; gap: 8px; }
+/* Darf umbrechen: Mit Abzeichen, Haendlername und "guenstigstes" ist die
+   Zeile auf dem Handy zu voll fuer eine Reihe, und ein abgeschnittener
+   Haendlername waere im Vergleich das Schlimmste. */
+.angebot-kopf { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.angebot-kopf .saved-name { white-space: normal; }
 .angebot-kopf .badge.anzeige { font-size: 13px; color: var(--muted); }
 
 /* Der Gesamtpreis ist DIE Zahl des Vergleichs und steht deshalb im
@@ -4159,6 +4172,36 @@ body.nav-modus .leaflet-control-container { display: none; }
   color: var(--text);
 }
 .produkt-karte-meta i { font-style: normal; opacity: 0.45; margin: 0 2px; }
+/* "2 Shops" hinter einem ab-Preis: Es gibt die Ware bei zwei Haendlern,
+   und die Produktseite vergleicht. Klein und leise, aber sichtbar. */
+.zwei-shops {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 0 6px;
+  border-radius: var(--r-pill);
+  border: 1px solid color-mix(in srgb, var(--accent-hell) 45%, transparent);
+  color: var(--accent-hell);
+  font-family: var(--schrift-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+/* Das guenstigste Angebot im Vergleich bekommt eine Kante in der
+   Signalfarbe und ein Abzeichen - der eine Ort, an dem Blau auf der
+   Produktseite etwas bedeutet. */
+.angebots-liste li.guenstigstes { border-color: color-mix(in srgb, var(--accent-hell) 45%, transparent); }
+.badge.guenstig {
+  font-family: var(--schrift-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+  background: var(--accent);
+  border-color: var(--accent);
+}
 
 /* Ein Regal der Ausruestung: Titel und Grund links, "Alle" rechts, der
    Inhalt darunter in einer von drei Formen (Band, Raster, Zeilen). */
@@ -4197,6 +4240,9 @@ body.nav-modus .leaflet-control-container { display: none; }
     linear-gradient(to bottom, var(--glas-hauch), var(--glas-hauch));
 }
 .garage-merkliste .produkt-karte { flex-basis: 172px; }
+.garage-merkliste-leer { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s3); }
+.garage-merkliste-leer .hint { margin: 0; }
+.garage-merkliste-leer .btn { width: auto; }
 .garage-merkliste .produkt-mini-bild { height: 116px; }
 
 /* Waehrend "Punkt auf der Karte setzen" an ist, wird der Zeiger zum

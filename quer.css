@@ -288,7 +288,18 @@
      stehen als die Lesebreite der Textseiten (siehe --feed-max in
      design.css). Rechtliches und Konto behalten die 1080. */
   #tourenScreen .start-screen-inner,
-  #statsScreen .start-screen-inner { max-width: var(--feed-max); }
+  #statsScreen .start-screen-inner,
+  #shopScreen .start-screen-inner,
+  #merklisteScreen .start-screen-inner { max-width: var(--feed-max); }
+
+  /* Die Regale der Ausruestung nutzen die Breite: vier Karten im Raster
+     statt zwei, die Trefferliste in zwei Spalten. */
+  #shopScreen .produkt-raster { grid-template-columns: repeat(4, 1fr); }
+  #shopScreen .produkt-liste { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); }
+  #shopScreen .produkt-liste li { margin: 0; }
+  #shopScreen .produkt-karte { flex-basis: 176px; }
+  #shopScreen .produkt-band .produkt-mini-bild { height: 120px; }
+  #shopScreen .produkt-raster .produkt-mini-bild { height: 160px; }
 
   /* Zwei Segmente ueber je 700 Punkte waeren Knoepfe wie Fahrbahnen - der
      Umschalter bleibt handbreit, die Listen darunter duerfen breit sein. */

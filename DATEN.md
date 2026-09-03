@@ -397,6 +397,20 @@ der Zeit vor motoin gilt eng ausgelegt nur für reifen.com.
 Programme verbieten das ausdrücklich (Cookie-Dropping), und die App baut
 den Link deshalb erst im Moment des Klicks.
 
+### Helmexpress und der erste Preisvergleich (seit 03.09.2026)
+
+Bei Helmen zeigt die App zusätzlich Angebote von **Helmexpress** (Loitz
+GmbH & Co KG, Lauterach, Österreich), vermittelt über AWIN wie reifen.com:
+Klick über awin1.com mit Produktnummer, Fotos über den Bilddienst des
+Netzwerks (images2.productserve.com, ohne Cookie, siehe Reifen). Für die
+Datenverarbeitung gilt alles, was bei den Reifen steht.
+
+Führen motoin und Helmexpress denselben Helm, zeigt die Produktseite beide
+Angebote, sortiert nach Gesamtpreis. **Welcher Helm derselbe ist,
+entscheidet das Importskript** über die Strichcode-Nummern aller
+Varianten – nicht die App, und nicht der Nutzer. Es geht dabei nichts
+vom Gerät weg.
+
 ### Vorschläge aus den eigenen Fahrten (opt-in, seit 02.09.2026)
 
 Serpa kann aus den aufgezeichneten Ausfahrten einen groben Fahrstil

@@ -86,6 +86,18 @@ const PARTNER = [
     versandfrei: null,
     bilderErlaubt: true,
   },
+  {
+    id: 'helmexpress',
+    name: 'Helmexpress',
+    betreiber: 'Loitz GmbH & Co KG, Lauterach (Österreich)',
+    netz: 'awin',
+    kennung: { publisher: AWIN_PUBLISHER, mid: '121690' },
+    start: 'https://www.helmexpress.com/',
+    cookieTage: 30,
+    provision: '5 Prozent vom Warenwert',
+    versandfrei: 'Ab 499 Euro Warenwert liefert Helmexpress frachtfrei, darunter 6,90 Euro.',
+    bilderErlaubt: true,
+  },
 ];
 
 function partnerNach(id) {

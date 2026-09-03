@@ -2289,3 +2289,69 @@ Nachdruck. Der Link „Merkliste" im Kopf der Ausrüstungsleiste ist damit
 **Das Anzeige-Abzeichen sitzt bei Band und Raster im Regalkopf**, nicht
 auf jeder Karte, so wie bei den Leisten in der Garage. Nur die Zeilenform
 trägt es je Zeile, weil dort kein Kopf direkt über dem Preis steht.
+
+---
+
+## 03.09.2026 — Helmexpress, und der erste echte Preisvergleich
+
+**Was neu ist:** AWIN hat Serpa für **Helm Express DE** zugelassen
+(Advertiser 121690, Feed 111977, 5 Prozent, Cookie 30 Tage). Der dritte
+Partner war, wie am 02.09.2026 versprochen, ein Eintrag in `PARTNER`, ein
+Katalog und ein Umbau in `katalog.js` – an Einwilligung, Kennzeichnung und
+Klickweg hat sich nichts geändert. Die Einwilligung fragt beim ersten
+Helmexpress-Klick noch einmal, weil sie ihren Umfang kennt; genau dafür
+war sie so gebaut.
+
+**Nur Helme.** Helmexpress führt 23.916 Artikel, darunter Bekleidung,
+Fahrrad- und Reithelme, und der Feed hat keine Warengruppe. Aufgenommen
+wird, was im Namen „Helm", „Integral", „Jet" oder „Klapp" trägt: 1.553
+lieferbare Motorradhelme. Das ist die Warengruppe, in der es den
+Vergleich gibt, weil motoin dieselben Helme führt.
+
+**Der Abgleich läuft im Importskript, nicht in der App.** Der
+naheliegende Weg – in der App über die GTIN vergleichen – scheitert
+daran, dass je Produkt nur eine GTIN gespeichert ist, die der ersten
+Variante. Ein Helm in sechs Größen hat sechs, und zwei Kataloge träfen
+sich nur zufällig. Das Skript sieht alle Varianten-EANs beider Feeds und
+ordnet ein Helmexpress-Produkt dem motoin-Produkt zu, mit dem es die
+meisten teilt. Ergebnis: 219 von 1.553 Helmen haben ein Gegenstück, 133
+davon liegen im beschnittenen motoin-Katalog. Die Zuordnung steht als
+motoin-Nummer im Katalog; die App merkt sie sich beim Laden in beide
+Richtungen.
+
+**Erstanbieter und Zweitangebot.** In Listen und Regalen steht jede Ware
+einmal – als motoin-Produkt, mit „ab"-Preis und dem Vermerk „2 Shops".
+Das Helmexpress-Gegenstück erscheint nur auf der Produktseite, als zweite
+Zeile. Wer beide in die Liste stellte, zeigte denselben Helm zweimal
+untereinander. Helme, die nur Helmexpress führt, stehen normal in der
+Liste.
+
+**„Preisvergleich" steht erst da, wenn es einer ist.** Mit einem Angebot
+heißt der Block „Angebot" und der Aufklapper „Woher dieses Angebot
+kommt"; mit zweien „Preisvergleich" und „So entsteht dieser Vergleich",
+sortiert nach Gesamtpreis, das günstigste markiert. Genau der Unterbau
+vom 02.09.2026, der damals nur die Sprache verlor.
+
+**Versandkosten stehen nicht im Feed.** Die Spalte ist leer. Von
+helmexpress.com/lieferung, gelesen am 03.09.2026: 6,90 Euro bis 499,00
+Euro Warenwert, darüber frei. Steht als Konstante im Importskript, mit
+Datum – wenn sich das ändert, ändert es sich dort.
+
+**Das Budget ist gerissen.** 273 (Reifen) + 224 (motoin) + 115
+(Helmexpress) = 612 KB gepackt, vereinbart waren 500 für zwei Kataloge.
+Der dritte war nicht Teil der Vereinbarung. Geladen wird trotzdem nichts
+davon beim Start: Die Ausrüstung holt beide Kataloge erst beim Öffnen,
+die Garage nur motoin und was die Merkliste braucht.
+
+**Ein Fehler beim Bauen:** `preisText()` gab es schon in `reifen.js`, für
+eine Zahl. Die zweite gleichnamige Funktion in `katalog.js` verlor, weil
+`reifen.js` später lädt, und jede Karte zeigte „[object Object]". Jetzt
+heißt sie `preisAbText()`. Die Lehre steht schon in Regel 6: Namen
+deutsch und sprechend – und vorher `grep`.
+
+**Nebenbei:** Die Ausrüstung nutzt im Querformat die volle Breite (vier
+Karten im Raster, zwei Spalten Treffer) und steht auf Schwarz mit einem
+leisen Lichtkegel statt auf dem verwischten Foto – Produktfotos auf
+weißen Karten über dem Foto wurden unruhig. Und die Merkliste in der
+Garage ist jetzt immer da, leer als Einladung: Eine Platte, die erst
+erscheint, wenn man sie schon benutzt hat, erklärt sich niemandem.

@@ -304,22 +304,31 @@ function zeichneMerkZeile({ eintrag, produkt }) {
 function zeichneGarageMerkliste() {
   const platte = document.getElementById('garageMerkliste');
   const band = document.getElementById('garageMerklisteBand');
+  const leer = document.getElementById('garageMerklisteLeer');
   if (!platte || !band) return;
-  if (!SHOP_AKTIV || !shopAblage.merkliste.length) {
-    platte.hidden = true;
+  if (!SHOP_AKTIV) { platte.hidden = true; band.innerHTML = ''; return; }
+
+  /* Leer ist sie trotzdem da - als Einladung. Wer die Merkliste nie
+     gesehen hat, kann sie nicht benutzen, und eine Platte, die erst
+     erscheint, wenn man sie schon benutzt hat, erklaert sich niemandem. */
+  if (!shopAblage.merkliste.length) {
     band.innerHTML = '';
+    band.hidden = true;
+    if (leer) leer.hidden = false;
+    platte.hidden = false;
     return;
   }
   ladeMerklistenKataloge().then(() => {
     const zeilen = shopAblage.merkliste
       .map(eintrag => ({ eintrag, produkt: produktNach(eintrag.schluessel) }))
       .filter(zeile => zeile.produkt);
-    if (!zeilen.length) { platte.hidden = true; return; }
     band.innerHTML = zeilen.map(({ eintrag, produkt }) => {
       const datum = new Date(eintrag.gemerktAm)
         .toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
       return produktKarte(produkt, { grund: verlaufSatz(eintrag, produkt) || `Gemerkt am ${datum}` });
     }).join('');
+    band.hidden = zeilen.length === 0;
+    if (leer) leer.hidden = zeilen.length > 0;
     platte.hidden = false;
   });
 }
@@ -337,6 +346,9 @@ verkabele('garageMerklisteBand', 'click', ereignis => {
 verkabele('btnGarageMerklisteAlle', 'click', () => {
   ladeMerklistenKataloge().then(zeigeMerkliste);
 });
+
+// Aus der leeren Merkliste in die Ausruestung - dort haengen die Herzen.
+verkabele('btnGarageMerklisteStoebern', 'click', () => zeigeAusruestung());
 
 verkabele('merkListe', 'click', ereignis => {
   // Herz VOR Zeile - sonst oeffnet das Herz die Produktseite.

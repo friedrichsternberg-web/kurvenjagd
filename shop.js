@@ -103,7 +103,7 @@ function produktKarte(produkt, { grund = '', hinweis = '' } = {}) {
       ${merkHerz(produkt.schluessel, 'karte-herz')}
       <span class="produkt-karte-name">${escapeHtml(produkt.marke)} ${escapeHtml(produkt.name)}</span>
       ${grund ? `<span class="produkt-karte-grund">${escapeHtml(grund)}</span>` : ''}
-      <span class="produkt-karte-meta">${hinweis ? escapeHtml(hinweis) + ' <i>&middot;</i> ' : ''}${escapeHtml(euroAusCent(produkt.gesamt))}</span>
+      <span class="produkt-karte-meta">${hinweis ? escapeHtml(hinweis) + ' <i>&middot;</i> ' : ''}${escapeHtml(preisAbText(produkt))}${angeboteFuer(produkt).length > 1 ? ' <span class="zwei-shops">2 Shops</span>' : ''}</span>
     </div>`;
 }
 
@@ -116,7 +116,8 @@ function produktZeile(produkt) {
       <span class="saved-text">
         <span class="saved-name">${escapeHtml(produkt.marke)} ${escapeHtml(produkt.name)}</span>
         <span class="saved-meta">${escapeHtml(warengruppeName(produkt.kategorie))}
-          <i>&middot;</i> ${escapeHtml(euroAusCent(produkt.gesamt))} inkl. Versand
+          <i>&middot;</i> ${escapeHtml(preisAbText(produkt))} inkl. Versand
+          ${angeboteFuer(produkt).length > 1 ? '<span class="zwei-shops">2 Shops</span>' : ''}
           ${anzeigeAbzeichen()}</span>
       </span>
       ${merkHerz(produkt.schluessel)}
@@ -138,7 +139,7 @@ const LISTE_HOECHSTENS = 60;
 function zeichneKategorien() {
   const behälter = document.getElementById('shopKategorien');
   if (!behälter) return;
-  const vorhandene = new Set(katalogProdukte('motoin').map(p => p.kategorie));
+  const vorhandene = new Set(sortiment().map(p => p.kategorie));
   const chips = WARENGRUPPEN_NAMEN.filter(g => vorhandene.has(g.schlüssel));
 
   behälter.innerHTML = [
@@ -151,7 +152,7 @@ function zeichneKategorien() {
 }
 
 function gefilterteProdukte() {
-  return katalogProdukte('motoin').filter(produkt => {
+  return sortiment().filter(produkt => {
     if (ausruestungFilter.kategorie && produkt.kategorie !== ausruestungFilter.kategorie) return false;
     if (!ausruestungFilter.suche) return true;
     return `${produkt.marke} ${produkt.titel}`.toLowerCase().includes(ausruestungFilter.suche);
@@ -166,7 +167,7 @@ function zeichneProduktListe() {
   const mehr = document.getElementById('shopMehrZeile');
   if (!liste) return;
 
-  const treffer = gefilterteProdukte().sort(nachGesamtpreis);
+  const treffer = gefilterteProdukte().sort((a, b) => preisAb(a) - preisAb(b));
   if (!treffer.length) {
     liste.innerHTML = '<li class="empty">Nichts gefunden &ndash; anderes Stichwort oder eine andere Warengruppe versuchen.</li>';
     if (mehr) mehr.hidden = true;
@@ -272,7 +273,7 @@ function regalHtml(gruppe, grund, form, auswahl) {
 function zeichneRegale() {
   const behälter = document.getElementById('ausruestungRegale');
   if (!behälter) return;
-  const produkte = katalogProdukte('motoin');
+  const produkte = sortiment();
   behälter.innerHTML = regalReihenfolge(produkte).map(([gruppe, grund], stelle) => {
     const form = REGAL_FORMEN[stelle % REGAL_FORMEN.length];
     return regalHtml(gruppe, grund, form, regalAuswahl(produkte, gruppe, JE_REGAL[form]));
@@ -285,7 +286,7 @@ function zeichneRegale() {
 function zeichneAusruestungStand() {
   const zeile = document.getElementById('ausruestungStand');
   if (!zeile) return;
-  const stand = katalogStand('motoin');
+  const stand = aeltesterKatalogStand();
   if (!stand) { zeile.textContent = ''; return; }
   const datum = new Date(stand).toLocaleDateString('de-DE',
     { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -304,11 +305,12 @@ function zeigeAusruestung() {
   const fehler = document.getElementById('ausruestungFehler');
   if (fehler) fehler.hidden = true;
 
-  if (katalogGeladen('motoin')) { zeichneAusruestung(); return; }
-
+  // Alle Kataloge, nicht nur einer: Erst mit beiden Helm-Haendlern kann
+  // die Liste "ab"-Preise zeigen und das Regal beide Sortimente.
   if (laden) laden.hidden = false;
-  ladeKatalog('motoin').then(() => {
+  ladeAlleKataloge().then(() => {
     if (laden) laden.hidden = true;
+    if (!katalogGeladen('motoin')) throw new Error('Hauptkatalog fehlt');
     zeichneAusruestung();
   }).catch(() => {
     // Auch der spaete Erfolg muss den Fehlerkasten wieder wegraeumen -
