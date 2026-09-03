@@ -245,7 +245,8 @@ function zeichneVorschlagsZeile({ produkt, grund }) {
       <span class="saved-text">
         <span class="saved-name">${escapeHtml(produkt.marke)} ${escapeHtml(produkt.name)}</span>
         <span class="saved-meta vorschlag-grund">${escapeHtml(grund)}</span>
-        <span class="saved-meta">${escapeHtml(euroAusCent(produkt.gesamt))} inkl. Versand</span>
+        <span class="saved-meta">${escapeHtml(euroAusCent(produkt.gesamt))} inkl. Versand
+          ${anzeigeAbzeichen()}</span>
       </span>
       ${merkHerz(produkt.schluessel)}
     </li>`;

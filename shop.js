@@ -173,7 +173,8 @@ function zeichneProduktListe() {
       <span class="saved-text">
         <span class="saved-name">${escapeHtml(produkt.marke)} ${escapeHtml(produkt.name)}</span>
         <span class="saved-meta">${escapeHtml(warengruppeName(produkt.kategorie))}
-          <i>&middot;</i> ${escapeHtml(euroAusCent(produkt.gesamt))} inkl. Versand</span>
+          <i>&middot;</i> ${escapeHtml(euroAusCent(produkt.gesamt))} inkl. Versand
+          ${anzeigeAbzeichen()}</span>
       </span>
       ${merkHerz(produkt.schluessel)}
     </li>`).join('');

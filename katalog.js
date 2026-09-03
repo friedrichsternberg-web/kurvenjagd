@@ -324,6 +324,19 @@ function nachGesamtpreis(a, b) {
   return a.gesamt - b.gesamt;
 }
 
+/* Die Kennzeichnung, die an JEDER Zeile mit einem Preis steht.
+
+   Nicht einmal oben am Bildschirm, sondern an jedem einzelnen Angebot:
+   Wer eine Liste scrollt, sieht die Ueberschrift laengst nicht mehr, und
+   die Kennzeichnung gehoert dorthin, wo das Angebot ist (Paragraf 5a
+   Abs. 4 UWG). Die Reifenliste macht es seit dem 01.09.2026 genauso.
+
+   Steht hier und nicht in shop.js, weil die Merkliste sie ebenso braucht
+   und frueher geladen wird. */
+function anzeigeAbzeichen() {
+  return '<span class="badge anzeige">Anzeige</span>';
+}
+
 // 2595 Cent werden zu "25,95 €".
 function euroAusCent(cent) {
   return (cent / 100).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });

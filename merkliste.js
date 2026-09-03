@@ -248,11 +248,18 @@ function zeichneMerkliste() {
     eintrag, produkt: produktNach(eintrag.schluessel),
   }));
 
-  // Preise nachtragen, und nur dann speichern, wenn sich wirklich etwas
-  // geaendert hat - sonst schriebe jedes Oeffnen in den Geraetespeicher.
-  if (zeilen.filter(({ eintrag, produkt }) => ergaenzeVerlauf(eintrag, produkt)).length) {
-    speichereShopAblage();
-  }
+  /* Preise nachtragen, und nur dann speichern, wenn sich wirklich etwas
+     geaendert hat - sonst schriebe jedes Oeffnen in den Geraetespeicher.
+
+     Scheitert das Speichern (voller Speicher), bleibt es still: Der
+     Preisverlauf ist eine Zugabe, kein Auftrag des Nutzers. Beim Merken
+     und Vergessen ist das anders, dort meldet merkenUmschalten() den
+     Fehler und holt den gespeicherten Stand zurueck. */
+  let etwasNeu = false;
+  zeilen.forEach(({ eintrag, produkt }) => {
+    if (ergaenzeVerlauf(eintrag, produkt)) etwasNeu = true;
+  });
+  if (etwasNeu) speichereShopAblage();
 
   liste.innerHTML = zeilen.map(zeichneMerkZeile).join('');
 
@@ -272,7 +279,8 @@ function zeichneMerkZeile({ eintrag, produkt }) {
     .toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' });
 
   const zweite = produkt
-    ? `${euroAusCent(produkt.gesamt)} inkl. Versand${verlaufSatz(eintrag, produkt) ? ' <i>&middot;</i> ' + escapeHtml(verlaufSatz(eintrag, produkt)) : ''}`
+    ? `${escapeHtml(euroAusCent(produkt.gesamt))} inkl. Versand ${anzeigeAbzeichen()}`
+      + (verlaufSatz(eintrag, produkt) ? ' <i>&middot;</i> ' + escapeHtml(verlaufSatz(eintrag, produkt)) : '')
     : 'Zurzeit nicht im Katalog';
 
   return `

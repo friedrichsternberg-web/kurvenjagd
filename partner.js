@@ -226,7 +226,7 @@ function ladePartnerStand() {
 let partnerStand = ladePartnerStand();
 
 // Alle Partner, die es HEUTE gibt - der Umfang, den ein neues Ja bekommt.
-function alleParterKennungen() {
+function allePartnerKennungen() {
   return PARTNER.map(eintrag => eintrag.id).sort();
 }
 
@@ -235,7 +235,7 @@ function alleParterKennungen() {
    Statuszeile unter "Rechtliches". */
 function partnerFreigegeben(partner) {
   if (partnerStand.entschieden !== 'ja') return false;
-  if (!partner) return alleParterKennungen().every(id => partnerStand.umfang.includes(id));
+  if (!partner) return allePartnerKennungen().every(id => partnerStand.umfang.includes(id));
   return partnerStand.umfang.includes(partner.id);
 }
 
@@ -243,7 +243,7 @@ function setzePartnerStand(entschieden) {
   partnerStand = {
     entschieden,
     am: new Date().toISOString(),
-    umfang: entschieden === 'ja' ? alleParterKennungen() : [],
+    umfang: entschieden === 'ja' ? allePartnerKennungen() : [],
   };
   if (!geraet.schreib(PARTNER_SPEICHER, partnerStand)) {
     // Genau wie Garage und Merkliste: Wenn der Speicher voll ist, darf die
