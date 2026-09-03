@@ -625,23 +625,30 @@
         </div>
       </div>
 
-      <!-- Der kleine Shop in der Garage: zuerst die gemerkten Produkte,
-           dann Empfehlungen zur eigenen Maschine, als schmale Querleiste
-           zum Wischen. Gefuellt von shop.js; faellt shop.js aus, bleibt
-           die Platte einfach verborgen. -->
+      <!-- Die Merkliste, ganz vorn: das Regal mit den eigenen Sachen. Nur
+           sichtbar, wenn etwas drinliegt; jede Karte sagt, was der Preis
+           seit dem Merken gemacht hat. Gefuellt von merkliste.js. -->
+      <div id="garageMerkliste" class="garage-platte garage-shop garage-merkliste" hidden>
+        <div class="garage-shop-kopf">
+          <h3><svg class="ic" aria-hidden="true"><use href="#icon-herz"></use></svg>
+            Merkliste <span class="badge anzeige">Anzeige</span></h3>
+          <button class="linkbtn" id="btnGarageMerklisteAlle">Alle ansehen &rarr;</button>
+        </div>
+        <div class="produkt-band" id="garageMerklisteBand"></div>
+      </div>
+
+      <!-- Die Ausruestung in der Garage: Vorschlaege zur eigenen Maschine
+           als schmale Querleiste zum Wischen. Gefuellt von vorschlaege.js;
+           faellt es aus, bleibt die Platte einfach verborgen. -->
       <div id="garageShop" class="garage-platte garage-shop" hidden>
         <div class="garage-shop-kopf">
           <!-- Die Anzeige-Kennzeichnung steht hier NOCH EINMAL, weil diese
                Leiste Preise ausserhalb des Ausruestungs-Bildschirms zeigt -
                dessen Offenlegung ist von hier aus nicht zu sehen. -->
-          <h3>Ausr&uuml;stung <span class="badge anzeige">Anzeige</span></h3>
-          <span class="garage-shop-wege">
-            <button class="linkbtn" id="btnGarageMerkliste">Merkliste
-              <span class="merk-zahl" data-merk-zahl hidden></span></button>
-            <button class="linkbtn" id="btnGarageShopAlle">Alle ansehen &rarr;</button>
-          </span>
+          <h3>F&uuml;r dich <span class="badge anzeige">Anzeige</span></h3>
+          <button class="linkbtn" id="btnGarageShopAlle">Alle ansehen &rarr;</button>
         </div>
-        <div class="garage-shop-band" id="garageShopBand"></div>
+        <div class="produkt-band" id="garageShopBand"></div>
       </div>
 
       <!-- Die Reifen-Leiste: dieselbe Form wie die Ausruestungs-Leiste
@@ -661,7 +668,7 @@
             <span class="badge anzeige">Anzeige</span></h3>
           <button class="linkbtn" id="btnGarageReifenAlle">Alle ansehen &rarr;</button>
         </div>
-        <div class="garage-shop-band" id="garageReifenBand"></div>
+        <div class="produkt-band" id="garageReifenBand"></div>
       </div>
 
       <!-- Die Pflichtangaben. Dezent im Fuss, wie auf jeder Webseite, aber
@@ -1779,36 +1786,45 @@
         </button>
       </div>
 
-      <p class="hint">Angebote unserer Partner-Shops. Kaufst du dar&uuml;ber,
-        bekommen wir eine Provision &ndash; f&uuml;r dich &auml;ndert sich am
-        Preis nichts. Deshalb ist jede Zeile als <b>Anzeige</b>
-        gekennzeichnet.</p>
+      <!-- Die Suche steht ganz oben und ist gross: Wer weiss, was er
+           will, soll nicht erst an Regalen vorbei. Sie filtert nur den
+           bereits geladenen Katalog - hier geht nichts ins Netz. -->
+      <div class="such-feld search-wrap ausruestung-suche">
+        <svg class="ic suche-symbol" aria-hidden="true"><use href="#icon-lupe"></use></svg>
+        <input type="search" id="shopSuche" class="search-input"
+               placeholder="Helm, Handschuhe, Marke &hellip;" autocomplete="off">
+      </div>
+
+      <!-- Warengruppen als Chips in EINER wischbaren Zeile. Fuellt shop.js. -->
+      <div class="warengruppen-band" id="shopKategorien"></div>
+
       <p class="hint" id="ausruestungLaden" hidden>Angebote werden geladen &hellip;</p>
       <p class="hint" id="ausruestungFehler" hidden>Die Angebote lassen sich
         gerade nicht laden. Einmal neu laden hilft meistens.</p>
 
-      <!-- "Fuer dich": die Leiter der Gruende. Fuellt vorschlaege.js. -->
-      <div id="ausruestungVorschlaege"></div>
-
-      <!-- Warengruppen als Chips in EINER wischbaren Zeile. Zwoelf Chips
-           umgebrochen waren vier Zeilen Knoepfe ueber dem Suchfeld - mehr
-           Bedienung als Inhalt. Fuellt shop.js. -->
-      <div class="warengruppen-band" id="shopKategorien"></div>
-
-      <!-- Die Suche filtert nur den bereits geladenen Katalog - hier geht
-           nichts ins Netz. -->
-      <div class="such-feld search-wrap">
-        <input type="search" id="shopSuche" class="search-input"
-               placeholder="Produkt oder Marke suchen &hellip;" autocomplete="off">
+      <!-- Das Schaufenster: "Fuer dich" und die Regale. Sichtbar, solange
+           weder gefiltert noch gesucht wird. Fuellen vorschlaege.js und
+           shop.js. -->
+      <div id="ausruestungSchaufenster">
+        <div id="ausruestungVorschlaege"></div>
+        <div id="ausruestungRegale"></div>
       </div>
 
-      <ul id="shopProduktListe" class="saved-list produkt-liste">
-        <!-- Dieser Text ist nur zu sehen, wenn shop.js gar nicht laeuft -
-             im Normalfall ersetzt zeichneAusruestung() ihn vor dem Einblenden. -->
-        <li class="empty">Die Ausr&uuml;stung konnte nicht geladen werden. Einmal neu laden hilft meistens.</li>
-      </ul>
-      <p class="tiny" id="shopMehrZeile" hidden></p>
+      <!-- Die Trefferliste: sobald eine Warengruppe gewaehlt ist oder ein
+           Suchwort drinsteht. Fuellt shop.js. -->
+      <div id="ausruestungTreffer" hidden>
+        <ul id="shopProduktListe" class="saved-list produkt-liste">
+          <!-- Dieser Text ist nur zu sehen, wenn shop.js gar nicht laeuft -
+               im Normalfall ersetzt zeichneAusruestung() ihn vor dem Einblenden. -->
+          <li class="empty">Die Ausr&uuml;stung konnte nicht geladen werden. Einmal neu laden hilft meistens.</li>
+        </ul>
+        <p class="tiny" id="shopMehrZeile" hidden></p>
+      </div>
 
+      <p class="tiny">Angebote unserer Partner-Shops. Kaufst du dar&uuml;ber,
+        bekommen wir eine Provision &ndash; f&uuml;r dich &auml;ndert sich am
+        Preis nichts. Deshalb ist jedes Angebot als <b>Anzeige</b>
+        gekennzeichnet.</p>
       <p class="tiny" id="ausruestungStand"></p>
       <p class="tiny">Alle genannten Marken-, Produkt- und Firmennamen sind
         Eigentum der jeweiligen Rechteinhaber und dienen hier allein der

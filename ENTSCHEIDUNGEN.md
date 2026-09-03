@@ -2241,3 +2241,51 @@ Farbe – kein Neon, die Lampe über der Zahl.
 `style.css` ist dabei trotz der neuen Karten von 4842 auf 4776 Zeilen
 geschrumpft: Das Kachel-CSS war 190 Zeilen, und mit ihm gingen die
 Sonderfälle in `quer.css`.
+
+---
+
+## 03.09.2026 — Die Ausrüstung wird ein Schaufenster, die Merkliste eine eigene Platte
+
+**Was war:** Die Ausrüstungsseite war eine Liste: sechzig Zeilen, reihum
+aus den Warengruppen, darüber „Für dich" als weitere Liste. Alles sah
+gleich aus, und das Suchfeld stand irgendwo dazwischen.
+
+**Was jetzt gilt:** Ohne Filter und Suchwort ist die Seite ein
+Schaufenster. Je Warengruppe ein Regal mit einer Handvoll Produkten, und
+die Regale wechseln die Form – ein wischbares Band, dann ein Raster zu
+zweit, dann drei Zeilen untereinander, wieder von vorn. Eine Seite, auf
+der jedes Regal gleich aussieht, liest sich wie eine Tabelle. Sobald eine
+Warengruppe gewählt oder gesucht wird, steht wieder die Trefferliste,
+nach Gesamtpreis sortiert. Das Suchfeld steht ganz oben, groß, mit der
+Lupe darin.
+
+**Welche Regale zuerst kommen, sagen die Signale, die die App hat:**
+Warengruppen, aus denen etwas auf der Merkliste liegt (wer sich einen
+Helm gemerkt hat, will Helme sehen), dann die Arten zum Fahrstil, dann was
+in der Garage fehlt, dann der Rest. Jedes Regal nennt seinen Grund –
+dieselbe Regel wie bei den Vorschlägen: ohne Grund ist es Werbung, mit
+Grund Hilfe.
+
+**Ins Regal kommen nicht die billigsten Artikel** – das sind
+Schnallen-Sets – und nicht die teuersten, sondern eine Auswahl quer
+durch das mittlere Preisfeld, gleichmäßig verteilt. So zeigt ein Helmregal
+einen 60-Euro-Jethelm neben einem 400-Euro-Klapphelm statt acht Varianten
+desselben Modells.
+
+**EINE Produktkarte für alles.** Die Leisten in der Garage, die Regale
+und die Vorschläge benutzen dieselbe Karte aus `produktKarte()` in
+`shop.js`: Foto oben, Herz darauf, Name und Preis darunter, ein Grund
+dazwischen, wenn es einen gibt. Vorher hatte die Garage ihre eigenen
+Kartenklassen; die sind in `.produkt-karte` aufgegangen.
+
+**Die Merkliste steht in der Garage ganz vorn**, auf einer eigenen Platte
+mit der Signalfarbe im Rand: das Regal mit den eigenen Sachen, nur
+sichtbar, wenn etwas drinliegt, und unter jeder Karte, was der Preis seit
+dem Merken gemacht hat. Die Ausrüstungsleiste darunter lässt gemerkte
+Produkte aus – zweimal dieselbe Karte untereinander wäre ein Fehler, kein
+Nachdruck. Der Link „Merkliste" im Kopf der Ausrüstungsleiste ist damit
+überflüssig geworden und weg.
+
+**Das Anzeige-Abzeichen sitzt bei Band und Raster im Regalkopf**, nicht
+auf jeder Karte, so wie bei den Leisten in der Garage. Nur die Zeilenform
+trägt es je Zeile, weil dort kein Kopf direkt über dem Preis steht.

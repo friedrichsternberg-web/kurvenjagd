@@ -3804,6 +3804,24 @@ body.nav-modus .leaflet-control-container { display: none; }
 .merk-schnellweg { display: inline-flex; align-items: center; gap: 6px; width: auto; }
 .merk-schnellweg .ic { width: 16px; height: 16px; }
 
+/* Die Suche der Ausruestung: gross, ganz oben, mit der Lupe im Feld.
+   Wer weiss, was er will, soll nicht erst an Regalen vorbei. */
+.ausruestung-suche { margin: var(--s4) 0 var(--s3); }
+.ausruestung-suche .search-input {
+  padding: 15px 18px 15px 50px;
+  font-size: 17px;
+}
+.suche-symbol {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
 /* Die Warengruppen als EINE wischbare Zeile, wie die Leisten in der
    Garage: Der Anschnitt am rechten Rand sagt, dass es weitergeht. Der
    negative Rand laesst die Zeile bis an die Bildschirmkante laufen,
@@ -4005,17 +4023,7 @@ body.nav-modus .leaflet-control-container { display: none; }
 /* "Fuer dich": der Grund eines Vorschlags in der Akzentfarbe - er ist
    das Besondere an dieser Liste. Der leere Zustand (noch kein Motorrad
    in der Garage) ist eine Glaskarte mit Abkuerzung dorthin. */
-.vorschlag-block { margin: var(--s4) 0; padding: 0; background: none; border: 0; box-shadow: none; }
-.vorschlag-block h2 {
-  margin: 0 0 var(--s1);
-  font-size: 17px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: var(--metall-glanz);
-}
-.vorschlag-block > .hint { margin: 0 0 var(--s3); }
-.vorschlag-block .btn { margin-top: var(--s3); width: auto; }
-.vorschlag-grund { color: var(--accent-hell); }
+.vorschlag-block { margin-top: var(--s3); padding: 0; background: none; border: 0; box-shadow: none; }
 .vorschlag-leer {
   display: flex;
   align-items: center;
@@ -4062,12 +4070,15 @@ body.nav-modus .leaflet-control-container { display: none; }
   text-transform: uppercase;
   color: var(--metall-glanz);
 }
-/* Die Wege rechts im Kopf: Merkliste und "Alle ansehen". Eine Merkliste
-   mit Zahl darf hier stehen, weil sie aus der Garage heraus mit EINEM
-   Tipp erreichbar sein soll - nicht erst ueber die Ausruestung. */
-.garage-shop-wege { display: inline-flex; align-items: center; gap: var(--s3); white-space: nowrap; }
-.garage-shop-wege .linkbtn { display: inline-flex; align-items: center; gap: 5px; text-decoration: none; font-size: 13.5px; }
-.garage-shop-band {
+.garage-shop-kopf h3 .ic { width: 18px; height: 18px; color: var(--danger); }
+/* "Alle ansehen" bleibt eine Zeile, auch wenn der Titel daneben lang ist. */
+.garage-shop-kopf .linkbtn { flex: 0 0 auto; white-space: nowrap; text-decoration: none; font-size: 13.5px; }
+
+/* ---------- Produktkarten, Baender, Raster, Regale ----------
+   EINE Karte fuer alles, was Produkte nebeneinander zeigt: die Leisten in
+   der Garage, die Regale der Ausruestung, die Vorschlaege. Das HTML dazu
+   baut produktKarte() in shop.js. */
+.produkt-band {
   display: flex;
   gap: var(--s2);
   overflow-x: auto;
@@ -4077,13 +4088,22 @@ body.nav-modus .leaflet-control-container { display: none; }
   padding: 3px 3px var(--s2);
   margin: 0 calc(-1 * var(--s1));
 }
-.garage-shop-band::-webkit-scrollbar { display: none; }
-/* Jede Karte ist eine kleine Glasplatte auf der grossen - das Bild oben
-   auf hellem Grund, darunter Name und Preis. 148 Punkte breit: drei
-   Karten sind auf einem Handy angeschnitten zu sehen, und der Anschnitt
-   sagt, dass man wischen kann. */
-.garage-shop-karte {
+.produkt-band::-webkit-scrollbar { display: none; }
+/* Zwei nebeneinander, die Karte so breit wie die Spalte. */
+.produkt-raster {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s2);
+}
+/* Jede Karte ist eine kleine Glasplatte: das Bild oben auf hellem Grund,
+   das Herz darauf, darunter Name und Preis. Im Band 148 Punkte breit -
+   drei Karten sind auf einem Handy angeschnitten zu sehen, und der
+   Anschnitt sagt, dass man wischen kann. Im Raster so breit wie die
+   Spalte. */
+.produkt-karte {
+  position: relative;
   flex: 0 0 148px;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -4099,10 +4119,25 @@ body.nav-modus .leaflet-control-container { display: none; }
   cursor: pointer;
   transition: transform 0.15s ease, background 0.15s ease;
 }
-.garage-shop-karte:hover { background: var(--glas-hell); transform: translateY(-2px); }
-.garage-shop-karte:active { transform: scale(0.97); }
-.garage-shop-karte .produkt-mini-bild { width: 100%; height: 96px; }
-.garage-shop-name {
+.produkt-karte:hover { background: var(--glas-hell); transform: translateY(-2px); }
+.produkt-karte:active { transform: scale(0.97); }
+.produkt-karte .produkt-mini-bild { width: 100%; height: 96px; }
+.produkt-raster .produkt-karte { flex: 1 1 auto; }
+.produkt-raster .produkt-mini-bild { height: 124px; }
+/* Das Herz liegt auf dem Foto, oben rechts, mit dunklem Grund, damit es
+   auf dem weissen Produktbild nicht verschwindet. */
+.karte-herz {
+  position: absolute;
+  top: calc(var(--s2) + 6px);
+  right: calc(var(--s2) + 6px);
+  width: 32px;
+  height: 32px;
+  background: var(--schatten-mittel);
+  border-color: var(--glas-rand);
+  color: var(--text);
+}
+.karte-herz .ic { width: 16px; height: 16px; }
+.produkt-karte-name {
   font-size: 12.5px;
   line-height: 1.25;
   display: -webkit-box;
@@ -4110,12 +4145,59 @@ body.nav-modus .leaflet-control-container { display: none; }
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.garage-shop-meta {
+.produkt-karte-grund {
   font-family: var(--schrift-display);
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 600;
+  line-height: 1.25;
   color: var(--accent-hell);
 }
+.produkt-karte-meta {
+  font-family: var(--schrift-display);
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text);
+}
+.produkt-karte-meta i { font-style: normal; opacity: 0.45; margin: 0 2px; }
+
+/* Ein Regal der Ausruestung: Titel und Grund links, "Alle" rechts, der
+   Inhalt darunter in einer von drei Formen (Band, Raster, Zeilen). */
+.regal { margin: var(--s5) 0 0; }
+.regal-kopf {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--s3);
+  margin: 0 0 var(--s3);
+}
+.regal-kopf .linkbtn { flex: 0 0 auto; text-decoration: none; font-size: 13.5px; white-space: nowrap; }
+.regal-titel {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  font-family: var(--schrift-display);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--metall-glanz);
+}
+.regal-grund { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); }
+
+/* Die Merkliste in der Garage: dieselbe Platte wie die anderen, nur mit
+   der Signalfarbe im Rand und in der Ecke. Die eigenen Sachen duerfen
+   das eine Regal sein, das leuchtet. */
+.garage-merkliste {
+  border-color: color-mix(in srgb, var(--accent-hell) 38%, transparent);
+  background:
+    radial-gradient(ellipse 70% 60% at 0% 0%,
+      color-mix(in srgb, var(--accent) 24%, transparent) 0%,
+      transparent 70%),
+    linear-gradient(to bottom, var(--glas-hauch), var(--glas-hauch));
+}
+.garage-merkliste .produkt-karte { flex-basis: 172px; }
+.garage-merkliste .produkt-mini-bild { height: 116px; }
 
 /* Waehrend "Punkt auf der Karte setzen" an ist, wird der Zeiger zum
    Fadenkreuz. Auf dem Handy sieht man das zwar nicht, aber die Meldung

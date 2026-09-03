@@ -7,9 +7,11 @@
    Abschnitte:
      1. Warengruppen
      2. Das Bild eines Produkts
-     3. Filter und Liste
-     4. Der Bildschirm
-     5. Verkabelung
+     3. Die Produktkarte
+     4. Filter und Trefferliste
+     5. Das Schaufenster: Regale in wechselnder Form
+     6. Der Bildschirm
+     7. Verkabelung
 
    WARUM DER BEREICH NICHT MEHR "SHOP" HEISST: Wir verkaufen nichts, wir
    empfehlen und verlinken. "Shop" behauptet etwas anderes. Die Ids im
@@ -88,7 +90,41 @@ function produktMiniBild(produkt) {
 }
 
 
-/* --- 3. Filter und Liste ---------------------------------------------------- */
+/* --- 3. Die Produktkarte ----------------------------------------------------
+   EINE Karte fuer alle Baender und Raster: in der Garage, in den Regalen,
+   bei den Vorschlaegen. Foto oben, Herz darauf, Name und Preis darunter.
+   Wer sie aendert, aendert sie ueberall - genau deshalb gibt es sie nur
+   einmal. */
+
+function produktKarte(produkt, { grund = '', hinweis = '' } = {}) {
+  return `
+    <div class="produkt-karte" data-produkt="${escapeHtml(produkt.schluessel)}">
+      ${produktMiniBild(produkt)}
+      ${merkHerz(produkt.schluessel, 'karte-herz')}
+      <span class="produkt-karte-name">${escapeHtml(produkt.marke)} ${escapeHtml(produkt.name)}</span>
+      ${grund ? `<span class="produkt-karte-grund">${escapeHtml(grund)}</span>` : ''}
+      <span class="produkt-karte-meta">${hinweis ? escapeHtml(hinweis) + ' <i>&middot;</i> ' : ''}${escapeHtml(euroAusCent(produkt.gesamt))}</span>
+    </div>`;
+}
+
+// Die Zeile in einer Liste: Foto links, Text, Herz rechts. Traegt das
+// Anzeige-Abzeichen selbst, weil in einer Liste kein Kopf darueber steht.
+function produktZeile(produkt) {
+  return `
+    <li data-produkt="${escapeHtml(produkt.schluessel)}">
+      ${produktMiniBild(produkt)}
+      <span class="saved-text">
+        <span class="saved-name">${escapeHtml(produkt.marke)} ${escapeHtml(produkt.name)}</span>
+        <span class="saved-meta">${escapeHtml(warengruppeName(produkt.kategorie))}
+          <i>&middot;</i> ${escapeHtml(euroAusCent(produkt.gesamt))} inkl. Versand
+          ${anzeigeAbzeichen()}</span>
+      </span>
+      ${merkHerz(produkt.schluessel)}
+    </li>`;
+}
+
+
+/* --- 4. Filter und Trefferliste --------------------------------------------- */
 
 // kategorie null heisst "Alle". Die Suche liegt kleingeschrieben, damit
 // der Vergleich nicht an Gross- und Kleinschreibung haengt.
@@ -98,12 +134,6 @@ const ausruestungFilter = { kategorie: null, suche: '' };
    Liste zu zeichnen legt das Handy fuer Sekunden lahm; wer sucht, findet
    ueber Filter und Suchfeld, nicht ueber Scrollen. */
 const LISTE_HOECHSTENS = 60;
-
-/* Ohne gewaehlte Warengruppe wird REIHUM aus den Warengruppen genommen,
-   je Runde eine je Gruppe. Sortiert wird innerhalb einer Gruppe weiter
-   nach dem Gesamtpreis - aber eine Liste, die stur nach Preis sortiert,
-   besteht oben aus sechzig Spiegeladaptern und Schnallen-Sets. Wer
-   "Alle" waehlt, will zuerst sehen, WAS es gibt. */
 
 function zeichneKategorien() {
   const behälter = document.getElementById('shopKategorien');
@@ -128,68 +158,125 @@ function gefilterteProdukte() {
   });
 }
 
-/* Reihum durch die Warengruppen, in der Reihenfolge der Chips: erst je
-   eines aus jeder Gruppe, dann die zweite Runde, und so fort. Ist eine
-   Gruppe gewaehlt oder wird gesucht, bleibt es bei der reinen
-   Preisreihenfolge - dann will jemand genau das sehen. */
-function mischeWarengruppen(sortiert) {
-  if (ausruestungFilter.kategorie || ausruestungFilter.suche) return sortiert;
-
-  const stapel = new Map();
-  WARENGRUPPEN_NAMEN.forEach(gruppe => stapel.set(gruppe.schlüssel, []));
-  sortiert.forEach(produkt => {
-    if (!stapel.has(produkt.kategorie)) stapel.set(produkt.kategorie, []);
-    stapel.get(produkt.kategorie).push(produkt);
-  });
-
-  const gemischt = [];
-  let runde = 0;
-  let nachgelegt = true;
-  while (nachgelegt) {
-    nachgelegt = false;
-    stapel.forEach(gruppe => {
-      if (runde < gruppe.length) { gemischt.push(gruppe[runde]); nachgelegt = true; }
-    });
-    runde += 1;
-  }
-  return gemischt;
-}
-
+/* Die Trefferliste: Was zur Warengruppe oder zum Suchwort passt, nach
+   Gesamtpreis sortiert. Sie erscheint NUR, wenn gefiltert oder gesucht
+   wird - ohne beides steht das Schaufenster (Abschnitt 5). */
 function zeichneProduktListe() {
   const liste = document.getElementById('shopProduktListe');
   const mehr = document.getElementById('shopMehrZeile');
   if (!liste) return;
 
-  const treffer = mischeWarengruppen(gefilterteProdukte().sort(nachGesamtpreis));
+  const treffer = gefilterteProdukte().sort(nachGesamtpreis);
   if (!treffer.length) {
     liste.innerHTML = '<li class="empty">Nichts gefunden &ndash; anderes Stichwort oder eine andere Warengruppe versuchen.</li>';
     if (mehr) mehr.hidden = true;
     return;
   }
 
-  liste.innerHTML = treffer.slice(0, LISTE_HOECHSTENS).map(produkt => `
-    <li data-produkt="${escapeHtml(produkt.schluessel)}">
-      ${produktMiniBild(produkt)}
-      <span class="saved-text">
-        <span class="saved-name">${escapeHtml(produkt.marke)} ${escapeHtml(produkt.name)}</span>
-        <span class="saved-meta">${escapeHtml(warengruppeName(produkt.kategorie))}
-          <i>&middot;</i> ${escapeHtml(euroAusCent(produkt.gesamt))} inkl. Versand
-          ${anzeigeAbzeichen()}</span>
-      </span>
-      ${merkHerz(produkt.schluessel)}
-    </li>`).join('');
+  liste.innerHTML = treffer.slice(0, LISTE_HOECHSTENS).map(produktZeile).join('');
 
   // Kein stiller Deckel: Wer nicht alles sieht, soll wenigstens wissen,
   // dass da mehr ist.
   if (mehr) {
     const rest = treffer.length - LISTE_HOECHSTENS;
     mehr.hidden = rest <= 0;
-    mehr.textContent = ausruestungFilter.kategorie || ausruestungFilter.suche
-      ? `${treffer.length} Treffer, die ${LISTE_HOECHSTENS} günstigsten stehen oben. `
-        + 'Suchfeld oder Warengruppe eingrenzen zeigt den Rest.'
-      : `${treffer.length} Artikel im Katalog. Oben steht reihum das Günstigste `
-        + 'aus jeder Warengruppe – tipp auf eine Gruppe, um sie ganz zu sehen.';
+    mehr.textContent = `${treffer.length} Treffer, die ${LISTE_HOECHSTENS} günstigsten stehen oben. `
+      + 'Suchwort oder Warengruppe eingrenzen zeigt den Rest.';
   }
+}
+
+
+/* --- 5. Das Schaufenster: Regale in wechselnder Form -----------------------
+
+   Ohne Filter und Suchwort ist die Seite kein Katalog, sondern ein
+   Schaufenster: je Warengruppe ein Regal mit einer Handvoll Produkten,
+   und die Regale wechseln ihre Form - erst ein wischbares Band, dann ein
+   Raster zu zweit, dann drei Zeilen untereinander, und wieder von vorn.
+   Eine Seite, auf der jedes Regal gleich aussieht, liest sich wie eine
+   Tabelle.
+
+   WELCHE Regale zuerst kommen, entscheiden die Signale, die die App hat,
+   in dieser Reihenfolge: Warengruppen, aus denen etwas auf der Merkliste
+   liegt (wer sich einen Helm gemerkt hat, will Helme sehen), dann die
+   Arten zum Fahrstil (nur nach Zustimmung), dann was in der Garage noch
+   fehlt, dann der Rest in fester Reihenfolge. Jedes Regal sagt seinen
+   Grund. */
+
+const REGAL_FORMEN = ['band', 'raster', 'zeile'];
+const REGALE_HOECHSTENS = 6;
+const JE_REGAL = { band: 8, raster: 4, zeile: 3 };
+
+function regalReihenfolge(produkte) {
+  const gruende = new Map();
+  const nimm = (gruppe, grund) => {
+    if (gruppe && !gruende.has(gruppe)) gruende.set(gruppe, grund);
+  };
+
+  shopAblage.merkliste
+    .map(eintrag => produktNach(eintrag.schluessel)).filter(Boolean)
+    .forEach(p => nimm(p.kategorie, 'Weil du dir davon etwas gemerkt hast'));
+
+  const stil = (typeof bestimmeFahrstil === 'function') ? bestimmeFahrstil() : null;
+  if (stil) stil.arten.forEach(art => nimm(art, fahrstilSatz(stil)));
+
+  if (typeof fehlendeAusruestung === 'function') {
+    fehlendeAusruestung().forEach(art => nimm(art, `Weil bei dir noch ${fehltSatzteil(art)}`));
+  }
+
+  WARENGRUPPEN_NAMEN.forEach(gruppe => nimm(gruppe.schlüssel, ''));
+
+  const vorhanden = new Set(produkte.map(p => p.kategorie));
+  return [...gruende].filter(([gruppe]) => vorhanden.has(gruppe)).slice(0, REGALE_HOECHSTENS);
+}
+
+/* Welche Produkte ins Regal kommen. Nicht die billigsten - das sind
+   Schnallen-Sets und Klebefolien - und nicht die teuersten, sondern eine
+   Auswahl quer durch das mittlere Preisfeld, gleichmaessig verteilt. So
+   zeigt ein Helmregal einen 60-Euro-Jethelm neben einem 400-Euro-Klapphelm
+   statt acht Varianten desselben Modells. */
+function regalAuswahl(produkte, gruppe, anzahl) {
+  const sortiert = produkte.filter(p => p.kategorie === gruppe).sort(nachGesamtpreis);
+  if (sortiert.length <= anzahl) return sortiert;
+  const von = Math.floor(sortiert.length * 0.25);
+  const bis = Math.floor(sortiert.length * 0.8);
+  const spanne = Math.max(1, bis - von);
+  const auswahl = [];
+  const schonDrin = new Set();
+  for (let i = 0; i < anzahl; i += 1) {
+    const produkt = sortiert[Math.min(sortiert.length - 1, von + Math.floor((i * spanne) / anzahl))];
+    if (schonDrin.has(produkt.schluessel)) continue;
+    schonDrin.add(produkt.schluessel);
+    auswahl.push(produkt);
+  }
+  return auswahl;
+}
+
+function regalHtml(gruppe, grund, form, auswahl) {
+  const kopf = `
+    <div class="regal-kopf">
+      <div>
+        <h2 class="regal-titel">${escapeHtml(warengruppeName(gruppe))}
+          ${form === 'zeile' ? '' : anzeigeAbzeichen()}</h2>
+        ${grund ? `<p class="regal-grund">${escapeHtml(grund)}</p>` : ''}
+      </div>
+      <button type="button" class="linkbtn" data-alle="${escapeHtml(gruppe)}">Alle &rarr;</button>
+    </div>`;
+  const inhalt = form === 'zeile'
+    ? `<ul class="saved-list produkt-liste">${auswahl.map(produktZeile).join('')}</ul>`
+    : `<div class="${form === 'band' ? 'produkt-band' : 'produkt-raster'}">
+         ${auswahl.map(produkt => produktKarte(produkt)).join('')}
+       </div>`;
+  return `<section class="regal regal-${form}">${kopf}${inhalt}</section>`;
+}
+
+function zeichneRegale() {
+  const behälter = document.getElementById('ausruestungRegale');
+  if (!behälter) return;
+  const produkte = katalogProdukte('motoin');
+  behälter.innerHTML = regalReihenfolge(produkte).map(([gruppe, grund], stelle) => {
+    const form = REGAL_FORMEN[stelle % REGAL_FORMEN.length];
+    return regalHtml(gruppe, grund, form, regalAuswahl(produkte, gruppe, JE_REGAL[form]));
+  }).join('');
 }
 
 /* Der Stand des Katalogs, an jeder Uebersicht. Ein Preis ohne Zeitpunkt
@@ -209,7 +296,7 @@ function zeichneAusruestungStand() {
 }
 
 
-/* --- 4. Der Bildschirm ------------------------------------------------------ */
+/* --- 6. Der Bildschirm ------------------------------------------------------ */
 
 function zeigeAusruestung() {
   zeigeBildschirm('shopScreen');
@@ -231,37 +318,61 @@ function zeigeAusruestung() {
   });
 }
 
+// Schaufenster oder Trefferliste - je nachdem, ob gefiltert wird.
 function zeichneAusruestung() {
-  zeichneVorschläge();
+  const schaufenster = !ausruestungFilter.kategorie && !ausruestungFilter.suche;
   zeichneKategorien();
-  zeichneProduktListe();
+  const fenster = document.getElementById('ausruestungSchaufenster');
+  const treffer = document.getElementById('ausruestungTreffer');
+  if (fenster) fenster.hidden = !schaufenster;
+  if (treffer) treffer.hidden = schaufenster;
+  if (schaufenster) {
+    zeichneVorschläge();
+    zeichneRegale();
+  } else {
+    zeichneProduktListe();
+  }
   zeichneAusruestungStand();
 }
 
+// "Alle ->" an einem Regal: dieselbe Warengruppe als Filter, oben beginnen.
+function zeigeWarengruppe(gruppe) {
+  ausruestungFilter.kategorie = gruppe || null;
+  zeichneAusruestung();
+  document.getElementById('shopScreen').scrollTop = 0;
+}
 
-/* --- 5. Verkabelung ---------------------------------------------------------
-   Die Chips werden bei jedem Zeichnen neu erzeugt, deshalb haengt ihr
-   Horcher am BEHAELTER und nicht am einzelnen Knopf. */
+
+/* --- 7. Verkabelung ---------------------------------------------------------
+   Die Chips und die Regale werden bei jedem Zeichnen neu erzeugt, deshalb
+   haengen ihre Horcher am BEHAELTER und nicht am einzelnen Knopf. Ueberall
+   gilt: Herz VOR Karte, sonst oeffnet das Herz die Produktseite. */
 
 verkabele('shopKategorien', 'click', ereignis => {
   const chip = ereignis.target.closest('.marken-chip');
   if (!chip) return;
-  ausruestungFilter.kategorie = chip.dataset.kategorie || null;
-  zeichneKategorien();
-  zeichneProduktListe();
+  zeigeWarengruppe(chip.dataset.kategorie);
 });
 
 verkabele('shopSuche', 'input', ereignis => {
   ausruestungFilter.suche = ereignis.target.value.trim().toLowerCase();
-  zeichneProduktListe();
+  zeichneAusruestung();
 });
 
 verkabele('shopProduktListe', 'click', ereignis => {
-  // Herz VOR Zeile, sonst oeffnet das Herz die Produktseite.
   const herz = ereignis.target.closest('[data-merken]');
   if (herz) { merkenUmschalten(herz.dataset.merken); return; }
-  const zeile = ereignis.target.closest('li[data-produkt]');
+  const zeile = ereignis.target.closest('[data-produkt]');
   if (zeile) zeigeProdukt(zeile.dataset.produkt, 'ausruestung');
+});
+
+verkabele('ausruestungRegale', 'click', ereignis => {
+  const herz = ereignis.target.closest('[data-merken]');
+  if (herz) { merkenUmschalten(herz.dataset.merken); return; }
+  const alle = ereignis.target.closest('[data-alle]');
+  if (alle) { zeigeWarengruppe(alle.dataset.alle); return; }
+  const karte = ereignis.target.closest('[data-produkt]');
+  if (karte) zeigeProdukt(karte.dataset.produkt, 'ausruestung');
 });
 
 verkabele('btnAusruestungMerkliste', 'click', () => {

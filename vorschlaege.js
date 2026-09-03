@@ -217,14 +217,20 @@ function zeichneVorschläge() {
   const { vorschläge, motorrad, stil } = persönlicheVorschläge(produkte);
   if (!vorschläge.length) { behälter.innerHTML = ''; return; }
 
+  // Als Raster zu zweit: Der Grund braucht Platz, den eine Bandkarte
+  // nicht hat, und eine Liste saehe aus wie die Treffer darunter.
   behälter.innerHTML = `
-    <section class="block vorschlag-block">
-      <h2>F&uuml;r dich</h2>
-      <p class="hint">${escapeHtml(vorschlagsQuelle(motorrad, stil))}</p>
-      <ul class="saved-list produkt-liste">
-        ${vorschläge.map(zeichneVorschlagsZeile).join('')}
-      </ul>
-      ${motorrad ? '' : '<button class="btn ghost klein" data-zur-garage>Motorrad eintragen</button>'}
+    <section class="regal regal-raster vorschlag-block">
+      <div class="regal-kopf">
+        <div>
+          <h2 class="regal-titel">F&uuml;r dich ${anzeigeAbzeichen()}</h2>
+          <p class="regal-grund">${escapeHtml(vorschlagsQuelle(motorrad, stil))}</p>
+        </div>
+        ${motorrad ? '' : '<button type="button" class="linkbtn" data-zur-garage>Motorrad eintragen &rarr;</button>'}
+      </div>
+      <div class="produkt-raster">
+        ${vorschläge.map(({ produkt, grund }) => produktKarte(produkt, { grund })).join('')}
+      </div>
     </section>`;
 }
 
@@ -238,30 +244,22 @@ function vorschlagsQuelle(motorrad, stil) {
   return `Aus ${teile.join(' und ')}.`;
 }
 
-function zeichneVorschlagsZeile({ produkt, grund }) {
-  return `
-    <li data-produkt="${escapeHtml(produkt.schluessel)}">
-      ${produktMiniBild(produkt)}
-      <span class="saved-text">
-        <span class="saved-name">${escapeHtml(produkt.marke)} ${escapeHtml(produkt.name)}</span>
-        <span class="saved-meta vorschlag-grund">${escapeHtml(grund)}</span>
-        <span class="saved-meta">${escapeHtml(euroAusCent(produkt.gesamt))} inkl. Versand
-          ${anzeigeAbzeichen()}</span>
-      </span>
-      ${merkHerz(produkt.schluessel)}
-    </li>`;
-}
 
-
-/* Die Querleiste unten in der Garage: erst die Merkliste, dann die
-   persoenlichen Vorschlaege. Gerufen aus zeigeGarage() in app.js. */
+/* Die Querleiste unten in der Garage: die persoenlichen Vorschlaege.
+   Die Merkliste steht seit dem 03.09.2026 auf einer eigenen Platte
+   davor (zeichneGarageMerkliste in merkliste.js) und wird hier deshalb
+   ausgelassen - zweimal dieselbe Karte untereinander waere ein Fehler,
+   kein Nachdruck. Gerufen aus zeigeGarage() in app.js. */
 function zeichneGarageShop() {
   const platte = document.getElementById('garageShop');
   const band = document.getElementById('garageShopBand');
   if (!platte || !band) return;
-  if (!SHOP_AKTIV) { platte.hidden = true; band.innerHTML = ''; return; }
+  if (!SHOP_AKTIV) { platte.hidden = true; band.innerHTML = ''; zeichneGarageMerkliste(); return; }
 
-  ladeKatalog('motoin').then(() => zeichneGarageBand(band, platte)).catch(() => {
+  ladeKatalog('motoin').then(() => {
+    zeichneGarageBand(band, platte);
+    zeichneGarageMerkliste();
+  }).catch(() => {
     platte.hidden = true;
   });
 }
@@ -269,23 +267,14 @@ function zeichneGarageShop() {
 function zeichneGarageBand(band, platte) {
   const produkte = katalogProdukte('motoin');
   const einträge = [];
-  const schonDrin = new Set();
-  const nimm = (produkt, hinweis) => {
-    if (!produkt || schonDrin.has(produkt.schluessel) || einträge.length >= 8) return;
+  const schonDrin = new Set(shopAblage.merkliste.map(eintrag => eintrag.schluessel));
+  persönlicheVorschläge(produkte).vorschläge.forEach(({ produkt, grund }) => {
+    if (schonDrin.has(produkt.schluessel) || einträge.length >= 8) return;
     schonDrin.add(produkt.schluessel);
-    einträge.push({ produkt, hinweis });
-  };
+    einträge.push({ produkt, grund });
+  });
 
-  shopAblage.merkliste.forEach(eintrag => nimm(produktNach(eintrag.schluessel), 'Gemerkt'));
-  persönlicheVorschläge(produkte).vorschläge.forEach(({ produkt, grund }) => nimm(produkt, grund));
-
-  band.innerHTML = einträge.map(({ produkt, hinweis }) => `
-    <button type="button" class="garage-shop-karte" data-produkt="${escapeHtml(produkt.schluessel)}">
-      ${produktMiniBild(produkt)}
-      <span class="garage-shop-name">${escapeHtml(produkt.marke)} ${escapeHtml(produkt.name)}</span>
-      <span class="garage-shop-meta">${escapeHtml(hinweis)} <i>&middot;</i> ${escapeHtml(euroAusCent(produkt.gesamt))}</span>
-    </button>`).join('');
-
+  band.innerHTML = einträge.map(({ produkt, grund }) => produktKarte(produkt, { grund })).join('');
   platte.hidden = einträge.length === 0;
 }
 
@@ -294,18 +283,15 @@ verkabele('ausruestungVorschlaege', 'click', ereignis => {
   const herz = ereignis.target.closest('[data-merken]');
   if (herz) { merkenUmschalten(herz.dataset.merken); return; }
   if (ereignis.target.closest('[data-zur-garage]')) { zeigeGarage(); return; }
-  const zeile = ereignis.target.closest('li[data-produkt]');
-  if (zeile) zeigeProdukt(zeile.dataset.produkt, 'ausruestung');
+  const karte = ereignis.target.closest('[data-produkt]');
+  if (karte) zeigeProdukt(karte.dataset.produkt, 'ausruestung');
 });
 
 verkabele('garageShopBand', 'click', ereignis => {
+  const herz = ereignis.target.closest('[data-merken]');
+  if (herz) { merkenUmschalten(herz.dataset.merken); return; }
   const karte = ereignis.target.closest('[data-produkt]');
   if (karte) zeigeProdukt(karte.dataset.produkt, 'garage');
-});
-
-// Der direkte Weg aus der Garage in die Merkliste - ein Tipp, nicht zwei.
-verkabele('btnGarageMerkliste', 'click', () => {
-  ladeMerklistenKataloge().then(zeigeMerkliste);
 });
 
 

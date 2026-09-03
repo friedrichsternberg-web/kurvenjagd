@@ -679,10 +679,10 @@ function garageReifenKarteHtml(reifen, hinweis) {
     ? `<span class="produkt-mini-bild"><img src="${escapeHtml(bildAdresse)}" alt="" loading="lazy"></span>`
     : `<span class="produkt-mini-bild">${symbol('reifen')}</span>`;
   return `
-    <button type="button" class="garage-shop-karte" data-reifen-band>
+    <button type="button" class="produkt-karte" data-reifen-band>
       ${bild}
-      <span class="garage-shop-name">${escapeHtml(reifenMarke(reifen))} ${escapeHtml(reifen.n)}</span>
-      <span class="garage-shop-meta">${escapeHtml(hinweis)} &middot; ${preisText(reifen.p + reifen.k)}</span>
+      <span class="produkt-karte-name">${escapeHtml(reifenMarke(reifen))} ${escapeHtml(reifen.n)}</span>
+      <span class="produkt-karte-meta">${escapeHtml(hinweis)} &middot; ${preisText(reifen.p + reifen.k)}</span>
     </button>`;
 }
 
@@ -749,10 +749,10 @@ function zeichneGarageReifen() {
      dem Bild. Welche Maschine gemeint ist, steht ohnehin im Datenblatt
      direkt darueber. */
   const einladung = (motorrad && !kenntGroesse) ? `
-    <button type="button" class="garage-shop-karte garage-reifen-einladung" data-reifen-band>
+    <button type="button" class="produkt-karte garage-reifen-einladung" data-reifen-band>
       <span class="produkt-mini-bild">${symbol('reifen')}</span>
-      <span class="garage-shop-name">Deine Gr&ouml;&szlig;e fehlt noch</span>
-      <span class="garage-shop-meta">Jetzt eintragen &rarr;</span>
+      <span class="produkt-karte-name">Deine Gr&ouml;&szlig;e fehlt noch</span>
+      <span class="produkt-karte-meta">Jetzt eintragen &rarr;</span>
     </button>` : '';
 
   const karten = garageReifenKarten(kenntGroesse);

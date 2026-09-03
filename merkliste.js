@@ -133,6 +133,7 @@ function merkenUmschalten(schluessel) {
   }
   zeichneMerkHerzen();
   zeichneMerkliste();
+  zeichneGarageMerkliste();
   aktualisiereMerkZaehler();
 }
 
@@ -184,9 +185,9 @@ function verlaufSatz(eintrag, produkt) {
    klickbar, und die Horcher haengen am Behaelter. Wer nicht ZUERST auf
    [data-merken] prueft, oeffnet mit dem Herz die Produktseite. */
 
-function merkHerz(schluessel) {
+function merkHerz(schluessel, zusatzKlasse = '') {
   const gemerkt = istGemerkt(schluessel);
-  return `<button type="button" class="merk-herz${gemerkt ? ' ist-gemerkt' : ''}"
+  return `<button type="button" class="merk-herz${gemerkt ? ' ist-gemerkt' : ''}${zusatzKlasse ? ' ' + zusatzKlasse : ''}"
     data-merken="${escapeHtml(schluessel)}" aria-pressed="${gemerkt}"
     title="${gemerkt ? 'Von der Merkliste nehmen' : 'Merken'}"
     aria-label="${gemerkt ? 'Von der Merkliste nehmen' : 'Merken'}">${symbol('herz')}</button>`;
@@ -295,7 +296,47 @@ function zeichneMerkZeile({ eintrag, produkt }) {
 }
 
 
+/* Die Merkliste in der Garage: eine eigene Platte VOR der Ausruestung,
+   nur sichtbar, wenn etwas drinliegt. Sie ist das Regal mit den eigenen
+   Sachen - deshalb steht sie ganz vorn und traegt unter jeder Karte, was
+   der Preis seit dem Merken gemacht hat. Gerufen aus zeichneGarageShop()
+   in vorschlaege.js und nach jedem Merken. */
+function zeichneGarageMerkliste() {
+  const platte = document.getElementById('garageMerkliste');
+  const band = document.getElementById('garageMerklisteBand');
+  if (!platte || !band) return;
+  if (!SHOP_AKTIV || !shopAblage.merkliste.length) {
+    platte.hidden = true;
+    band.innerHTML = '';
+    return;
+  }
+  ladeMerklistenKataloge().then(() => {
+    const zeilen = shopAblage.merkliste
+      .map(eintrag => ({ eintrag, produkt: produktNach(eintrag.schluessel) }))
+      .filter(zeile => zeile.produkt);
+    if (!zeilen.length) { platte.hidden = true; return; }
+    band.innerHTML = zeilen.map(({ eintrag, produkt }) => {
+      const datum = new Date(eintrag.gemerktAm)
+        .toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
+      return produktKarte(produkt, { grund: verlaufSatz(eintrag, produkt) || `Gemerkt am ${datum}` });
+    }).join('');
+    platte.hidden = false;
+  });
+}
+
+
 /* --- 7. Verkabelung --------------------------------------------------------- */
+
+verkabele('garageMerklisteBand', 'click', ereignis => {
+  const herz = ereignis.target.closest('[data-merken]');
+  if (herz) { merkenUmschalten(herz.dataset.merken); return; }
+  const karte = ereignis.target.closest('[data-produkt]');
+  if (karte) zeigeProdukt(karte.dataset.produkt, 'garage');
+});
+
+verkabele('btnGarageMerklisteAlle', 'click', () => {
+  ladeMerklistenKataloge().then(zeigeMerkliste);
+});
 
 verkabele('merkListe', 'click', ereignis => {
   // Herz VOR Zeile - sonst oeffnet das Herz die Produktseite.
