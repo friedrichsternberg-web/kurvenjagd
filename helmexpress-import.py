@@ -8,11 +8,16 @@ Braucht: den AWIN-Schluessel (Umgebungsvariable AWIN_SCHLUESSEL oder die
          ~/Downloads/products.csv (siehe motoin-import.py). Fehlt der,
          laeuft der Import trotzdem - nur ohne Verknuepfungen.
 
-NUR HELME. Helmexpress fuehrt 23.916 Artikel, darunter Bekleidung und
-Fahrradhelme. Aufgenommen wird, was im Namen "Helm", "Integral", "Jet"
-oder "Klapp" traegt - der Feed hat KEINE Warengruppe, nur Namen. Das ist
-die Warengruppe, in der es den ersten Preisvergleich gibt: motoin fuehrt
-dieselben Helme, und ueber die EAN lassen sie sich zusammenfuehren.
+NUR HELME. Helmexpress fuehrt 23.916 Artikel, darunter Bekleidung,
+Fahrrad-, Reit- und Skihelme - und der Feed hat KEINE Warengruppe, nur
+Namen. Ein Helm ist, was auf "helm" ENDET (Integralhelm, Jethelm,
+Klapphelm, Motorradhelm, Helm), nicht was es enthaelt: "Helmschild-
+schrauben" und die Marke HELMEXPRESS selbst tragen das Wort auch. Dazu
+zwei Ausschlusslisten - Zubehoer (Visier, Reinigung, Tasche ...) und
+andere Sportarten (Reit, Ski, Fahrrad ...) - und ein Mindestpreis von
+30 Euro: Einen Motorradhelm darunter gibt es nicht, einen Hufkratzer
+schon. Vor diesen Regeln standen in der Helmliste Hufkratzer, Stockclips
+und Reinigungstuecher ganz oben, gesehen am 03.09.2026.
 
 DER ABGLEICH LAEUFT HIER, NICHT IN DER APP. Der Feed fuehrt eine Zeile je
 Groesse und Farbe, jede mit eigener EAN. In der App liegt je Produkt nur
@@ -65,7 +70,21 @@ FEED_ADRESSE = (
 VERSAND_CENT = 690
 VERSANDFREI_AB_CENT = 49901
 
-HELM = re.compile(r'helm|integral|jet-?helm|klapp', re.I)
+HELM = re.compile(r'helm\b', re.I)
+KEIN_HELM = re.compile(
+    r'visier|pinlock|reinig|tasche|schraub|clip|ersatz|innenfutter|polster|'
+    r'kinnriemen|aufkleber|sticker|halterung|kamera|belueft|belüft|sonnenblende|'
+    r'spoiler|abdeckung|schutzh[uü]lle|beutel|schloss|haken|adapter|'
+    r'reit|ski|fahrrad|bike|snowboard|kletter|skate|bmx|mtb|downhill',
+    re.I)
+HELM_MINDESTPREIS_CENT = 3000
+# Marken, die keine Motorradhelme bauen. Ein "Kinderhelm" von Puky ist ein
+# Fahrradhelm, und das Wort verraet es nicht.
+KEINE_MOTORRADMARKE = {
+    'ALPINA', 'PUKY', 'UVEX', 'CASCO', 'ABUS', 'GIRO', 'OAKLEY', 'POC', 'SMITH',
+    'KASK', 'LAZER', 'MET', 'CRATONI', 'KED', 'NUTCASE', 'THOUSAND', 'BOLLE',
+    'BOLLÉ', 'SALOMON', 'ATOMIC', 'HEAD', 'ROSSIGNOL', 'SCOTT', 'LEKI',
+}
 ADRESS_BASIS = 'https://www.helmexpress.com/'
 BILD_QUELLE = 'ssl:cdn1.helmexpress.com/media/catalog/product/'
 
@@ -126,7 +145,14 @@ def fasse_zusammen(text):
     zeilen = 0
     for zeile in csv.DictReader(io.StringIO(text)):
         zeilen += 1
-        if not HELM.search(zeile['product_name']) or zeile['in_stock'] != '1':
+        # Der Name ohne die Marke davor - sonst zaehlt "HELMEXPRESS" als Helm.
+        name = zeile['product_name'].strip()
+        marke = zeile['brand_name'].strip()
+        if marke and name.upper().startswith(marke.upper()):
+            name = name[len(marke):].strip()
+        if not HELM.search(name) or KEIN_HELM.search(name) or zeile['in_stock'] != '1':
+            continue
+        if marke.upper() in KEINE_MOTORRADMARKE:
             continue
         adresse = zeile['merchant_deep_link'].split('#')[0]
         if not adresse.startswith(ADRESS_BASIS):
@@ -134,6 +160,8 @@ def fasse_zusammen(text):
         try:
             preis = round(float(zeile['search_price']) * 100)
         except ValueError:
+            continue
+        if preis < HELM_MINDESTPREIS_CENT:
             continue
 
         p = produkte.setdefault(adresse, {
