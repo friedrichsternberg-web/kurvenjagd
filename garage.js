@@ -1366,11 +1366,11 @@ function positionAnpassen() {
   document.getElementById('garageDialog').hidden = true;
   document.getElementById('garageDatenblatt').hidden = true;
   document.getElementById('garageOhneMotorrad').hidden = true;
-  /* Shop-Leiste und Menue gehen ebenfalls beiseite. Platz nehmen sie der
-     Buehne seit der festen Raumhoehe zwar nicht mehr weg - aber ihre
-     Karten und Kacheln fuehren mitten aus der Justierung heraus auf einen
-     anderen Bildschirm, und der halb ausgefuellte Dialog bliebe dann
-     unsichtbar im Hintergrund haengen. */
+  /* Ausruestungs-Leiste und Menue gehen ebenfalls beiseite. Platz nehmen
+     sie der Buehne seit der festen Raumhoehe zwar nicht mehr weg - aber
+     ihre Karten und Kacheln fuehren mitten aus der Justierung heraus auf
+     einen anderen Bildschirm, und der halb ausgefuellte Dialog bliebe
+     dann unsichtbar im Hintergrund haengen. */
   const shopLeiste = document.getElementById('garageShop');
   if (shopLeiste) shopLeiste.hidden = true;
   const menue = document.getElementById('garageMenue');
@@ -1420,10 +1420,19 @@ verkabele('btnJustFertig', 'click', () => {
   währendJustierung = null;
   buehneVorschau = null;
   document.getElementById('buehneJustierung').hidden = true;
-  // Die Shop-Leiste wieder her, die positionAnpassen() beiseite genommen
-  // hat - shop.js fuellt sie beim naechsten zeigeGarage() ohnehin frisch.
-  const shopLeisteZurück = document.getElementById('garageShop');
-  if (shopLeisteZurück) shopLeisteZurück.hidden = false;
+  /* Die Leiste holt sich NICHT die Justierung zurueck, sondern
+     zeichneGarageShop(): Nur die weiss, ob die Leiste ueberhaupt
+     erscheinen darf - der Bereich kann abgeschaltet und die Leiste leer
+     sein. Verlassen darf man sich dabei auf nichts Spaeteres: Von hier
+     geht es in den wartenden Dialog zurueck, und der ruft
+     zeichneGarage(), nicht zeigeGarage(). Naeheres in
+     ENTSCHEIDUNGEN.md, 03.09.2026. */
+  if (typeof zeichneGarageShop === 'function') {
+    zeichneGarageShop();
+  } else {
+    const shopLeisteZurück = document.getElementById('garageShop');
+    if (shopLeisteZurück) shopLeisteZurück.hidden = true;
+  }
   const menueZurück = document.getElementById('garageMenue');
   if (menueZurück) menueZurück.hidden = false;
   // Zurueck in den wartenden Dialog; die Buehne zeigt wieder die

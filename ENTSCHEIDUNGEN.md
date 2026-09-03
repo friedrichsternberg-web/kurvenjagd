@@ -2160,3 +2160,38 @@ Warengruppe standen oben sechzig Spiegeladapter. Jetzt geht sie reihum
 durch die Warengruppen, innerhalb einer Gruppe weiter nach Preis. Wer eine
 Gruppe wählt oder sucht, bekommt wieder die reine Preisreihenfolge – dann
 will jemand genau das sehen.
+
+---
+
+## 03.09.2026 — Der Demo-Vermerk, der nach dem Anlegen eines Motorrads erschien
+
+**Gemeldet aus der veröffentlichten Fassung:** Wer ein Motorrad mit Foto
+anlegt, sieht danach die Leiste „Shop für dich · Demo-Preise" in der
+Garage – obwohl der Bereich über `SHOP_AKTIV = false` abgeschaltet ist.
+Ein Neuladen der Seite ließ sie wieder verschwinden.
+
+**Die Ursache liegt in der Bühnen-Justierung.** `positionAnpassen()` nimmt
+Leiste und Menü beiseite, damit ihre Karten nicht mitten aus der
+Justierung heraus auf einen anderen Bildschirm führen. Der Fertig-Knopf
+holte beides mit einem festen `hidden = false` zurück, mit dem Vermerk,
+der nächste Garagenaufruf räume das schon auf.
+
+Er räumt es nicht auf. Von der Justierung geht es in den wartenden Dialog
+zurück, und der ruft `zeichneGarage()`, nicht `zeigeGarage()` – nur
+Letzteres ruft `zeichneGarageShop()`, und nur die Funktion kennt den
+Schalter. Deshalb blieb die Leiste bis zum nächsten Neuladen stehen.
+
+**Verworfen: sich merken, ob die Leiste vorher sichtbar war.** Das lag
+nahe und ist trotzdem falsch. `positionAnpassen()` steigt bei fehlendem
+Foto in der ersten Zeile aus, ohne etwas zu verbergen; der Merker bliebe
+dann auf seinem alten Stand, und der Fertig-Knopf verstecke eine Leiste,
+die niemand versteckt hatte. Beim Nachbauen ist genau das passiert.
+
+**Jetzt fragt der Fertig-Knopf `zeichneGarageShop()`.** Das ist die eine
+Stelle, die weiß, ob die Leiste erscheinen darf – abgeschalteter Bereich,
+leere Leiste, alles dort entschieden. Zwei Zustände können so nicht mehr
+auseinanderlaufen, weil es nur noch einen gibt.
+
+Die allgemeine Lehre steht schon in mehreren Einträgen davor und gilt
+hier noch einmal: Wer eine Anzeige verbirgt, darf sie nicht selbst
+zurückholen. Zurückholen darf nur, wer die Bedingung kennt.

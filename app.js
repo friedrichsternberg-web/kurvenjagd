@@ -3914,11 +3914,12 @@ function wendeShopSchalterAn() {
   document.querySelectorAll('.nav-tab[data-ziel="shopScreen"]')
     .forEach(knopf => { knopf.hidden = true; });
   document.getElementById('btnStartShop').hidden = true;
-  /* Die Shop-Leiste in der Garage ebenfalls, und zwar VON HIER aus: Diese
-     Datei definiert den Schalter, shop.js wird erst danach geladen. Faellt
-     shop.js aus oder kommt eine aeltere Fassung davon aus dem
-     Browserspeicher, haengt die Kennzeichnung "Demo-Preise" trotzdem nicht
-     in einer oeffentlichen Fassung. Zwei Riegel statt einem. */
+  /* Die Ausruestungs-Leiste in der Garage ebenfalls, und zwar VON HIER
+     aus: Diese Datei definiert den Schalter, vorschlaege.js wird erst
+     danach geladen. Faellt sie aus oder kommt eine aeltere Fassung aus
+     dem Browserspeicher, haengen die Angebote trotzdem nicht in einer
+     Fassung, in der sie nicht erscheinen sollen. Zwei Riegel statt
+     einem. */
   const shopLeiste = document.getElementById('garageShop');
   if (shopLeiste) shopLeiste.hidden = true;
 }
