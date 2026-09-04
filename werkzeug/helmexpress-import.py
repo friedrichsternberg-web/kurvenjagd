@@ -53,9 +53,21 @@ import sys
 import urllib.parse
 import urllib.request
 
+# Liegt daneben in werkzeug/ - Python findet Geschwistermodule von
+# selbst, weil der Ordner des Skripts im Suchpfad steht.
+import katalogstempel
+
 # Das Skript liegt in werkzeug/, der Projektordner ist eine Ebene hoeher.
 PROJEKT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ZIEL = os.path.join(PROJEKT, 'daten', 'helmexpress-katalog.js')
+
+# Die gefundenen Paare Helm <-> motoin werden hier abgelegt und beim
+# naechsten Lauf wieder eingelesen, falls der motoin-Feed fehlt. Grund:
+# Der Feed haengt bei Webgains an der angemeldeten Sitzung, ein Auftrag in
+# der Cloud kommt nicht an ihn heran. Ohne diese Datei verloere jeder
+# automatische Lauf saemtliche Preisvergleiche bei den Helmen - und zwar
+# stillschweigend, was schlimmer waere als ein Abbruch.
+PAARE = os.path.join(PROJEKT, 'daten', 'helm-motoin-paare.json')
 MOTOIN_FEED = os.path.expanduser('~/Downloads/products.csv')
 
 MID = '121690'
@@ -202,6 +214,19 @@ def fasse_zusammen(text):
     return produkte, zeilen
 
 
+def paare_lesen():
+    """Die Zuordnung aus dem letzten Lauf mit Feed - der Ausweg fuer die Cloud."""
+    if not os.path.exists(PAARE):
+        return {}
+    with io.open(PAARE, encoding='utf-8') as datei:
+        return json.load(datei)
+
+
+def paare_schreiben(treffer):
+    with io.open(PAARE, 'w', encoding='utf-8') as datei:
+        json.dump(treffer, datei, ensure_ascii=False, indent=1, sort_keys=True)
+
+
 def zuordnung_zu_motoin(produkte, motoin_eans):
     """Je Produkt die motoin-Nummer mit den meisten gemeinsamen EANs."""
     treffer = {}
@@ -225,8 +250,21 @@ def main():
     print(f'{zeilen} Feedzeilen, {len(produkte)} lieferbare Helme')
 
     motoin_eans = motoin_eans_lesen()
-    treffer, mehrdeutig = zuordnung_zu_motoin(produkte, motoin_eans)
-    print(f'{len(treffer)} Helme mit Gegenstueck bei motoin, {mehrdeutig} mehrdeutig weggelassen')
+    if motoin_eans:
+        treffer, mehrdeutig = zuordnung_zu_motoin(produkte, motoin_eans)
+        print(f'{len(treffer)} Helme mit Gegenstueck bei motoin, '
+              f'{mehrdeutig} mehrdeutig weggelassen')
+        paare_schreiben(treffer)
+    else:
+        # Ohne Feed wird NICHT neu zugeordnet, sondern die letzte Zuordnung
+        # weiterverwendet. Die Adresse eines Helms bei Helmexpress ist
+        # stabil, deshalb passt sie auch auf den frischen Feed. Was seitdem
+        # neu dazukam, hat vorerst keinen Vergleich - besser als alle zu
+        # verlieren.
+        alt = paare_lesen()
+        treffer = {a: n for a, n in alt.items() if a in produkte}
+        print(f'Ohne motoin-Feed: {len(treffer)} Paare aus {os.path.basename(PAARE)} '
+              f'uebernommen, {len(alt) - len(treffer)} davon nicht mehr lieferbar')
 
     unterarten = sorted({p['unterart'] for p in produkte.values()})
     unterarten_platz = {u: i for i, u in enumerate(unterarten)}
@@ -292,6 +330,10 @@ def main():
     print(f'{len(marken)} Marken, {len(sätze)} Groessensaetze')
     print(f'{ZIEL}: {len(text.encode()) // 1024} KB roh, '
           f'{len(gzip.compress(text.encode(), 9)) // 1024} KB gepackt')
+
+    # Neue Preise brauchen einen neuen Stempel, sonst zeigt der Browser
+    # weiter seine alte Fassung des Katalogs.
+    katalogstempel.stempel_setzen()
     return 0
 
 

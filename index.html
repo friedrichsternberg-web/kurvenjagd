@@ -219,6 +219,15 @@
                    die spaetere Webseite genauso benutzen.
        style.css   die Anordnung DIESER App, ausgelegt auf Hochformat. Die
                    Webseite bekommt dafuer eine eigene Datei. -->
+  <!-- Der Stand der Produktkataloge, gesetzt von den Import-Skripten in
+       werkzeug/. Er haengt BEWUSST nicht an ?v=: Die Preise werden
+       woechentlich neu geholt, die App wird viel seltener veroeffentlicht.
+       Haetten beide dieselbe Nummer, muesste man fuer jeden Preisstand eine
+       Version verbrauchen - oder die frischen Preise erreichten niemanden,
+       der die Seite schon einmal besucht hat. Siehe katalogStempel() in
+       js/shop/katalog.js. -->
+  <meta name="katalog-stand" content="2026-09-03">
+
   <link rel="stylesheet" href="stil/design.css?v=109">
   <link rel="stylesheet" href="stil/style.css?v=109">
   <!-- Die Anordnung fuer breite Bildschirme. Laedt NACH style.css und

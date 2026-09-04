@@ -97,9 +97,11 @@ function holeKatalogDatei(eintrag) {
     if (schonDa) { gelungen(schonDa); return; }
 
     const element = document.createElement('script');
-    // Dieselbe Versionsnummer wie die uebrigen Dateien: Sonst zeigt der
-    // Browser nach einer Veroeffentlichung wochenlang alte Preise.
-    element.src = `${eintrag.datei}?v=${appVersion()}`;
+    // Der Katalogstand, nicht die App-Version: Sonst zeigt der Browser
+    // nach einem Preislauf wochenlang alte Preise weiter. Warum das zwei
+    // verschiedene Zahlen sind, steht im Kommentar am meta-Element in
+    // index.html.
+    element.src = `${eintrag.datei}?stand=${katalogStempel()}`;
     element.onload = () => {
       element.remove();
       /* Geladen heisst nicht angekommen. Traegt eine zweite Katalogdatei
@@ -117,6 +119,23 @@ function holeKatalogDatei(eintrag) {
     };
     document.head.appendChild(element);
   });
+}
+
+/* Der Stempel fuer die Adresse, aus dem meta-Element in index.html
+   abgelesen. Nicht zu verwechseln mit katalogStand(id) weiter unten: Das
+   ist der Stand EINES geladenen Katalogs, dieser hier gilt fuer alle und
+   steht schon fest, bevor irgendetwas geladen ist.
+   Die Import-Skripte tragen ihn dort ein, wenn sie neue Preise holen -
+   deshalb steht er an EINER Stelle und nicht zusaetzlich hier.
+
+   Er ist absichtlich von der App-Version ?v= getrennt: Preise laufen
+   woechentlich, die App wird viel seltener veroeffentlicht. Faellt der
+   Stempel weg, bleibt die App-Version als Rueckfall - dann ist der Katalog
+   hoechstens so alt wie die letzte Veroeffentlichung. */
+function katalogStempel() {
+  const stempel = document.querySelector('meta[name="katalog-stand"]');
+  const wert = stempel && stempel.getAttribute('content');
+  return wert || appVersion();
 }
 
 /* Die Versionsnummer von irgendeinem Skript der Seite abgelesen. So steht

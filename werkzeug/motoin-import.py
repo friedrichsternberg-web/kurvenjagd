@@ -51,6 +51,10 @@ import os
 import re
 import sys
 
+# Liegt daneben in werkzeug/ - Python findet Geschwistermodule von
+# selbst, weil der Ordner des Skripts im Suchpfad steht.
+import katalogstempel
+
 # Das Skript liegt in werkzeug/, der Projektordner ist eine Ebene hoeher.
 PROJEKT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FEED_VORGABE = os.path.expanduser('~/Downloads/products.csv')
@@ -438,6 +442,10 @@ def main():
     print('\nNicht aufgenommene Warengruppen von motoin (die groessten):')
     for pfad, anzahl in übersprungen.most_common(8):
         print(f'  {anzahl:6d}  {pfad}')
+
+    # Neue Preise brauchen einen neuen Stempel, sonst zeigt der Browser
+    # weiter seine alte Fassung des Katalogs.
+    katalogstempel.stempel_setzen()
     return 0
 
 

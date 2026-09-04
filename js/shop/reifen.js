@@ -69,14 +69,12 @@ const REIFEN_STAND_ALT_AB_TAGEN = 14;
 let reifenKatalog = null;
 let reifenAbruf = null;
 
-/* Die Versionsnummer aus dem eigenen script-Verweis uebernehmen, damit der
-   Katalog beim Veroeffentlichen genauso frisch geholt wird wie der Rest.
-   Sie hier noch einmal hinzuschreiben hiesse, sie bei jeder Version an
-   einer weiteren Stelle nachzuziehen - und genau das wuerde vergessen. */
+/* Denselben Stempel wie die uebrigen Kataloge, siehe katalogStempel() in
+   katalog.js. Frueher hing diese Adresse an der App-Version; das hiess,
+   dass frische Reifenpreise erst mit der naechsten Veroeffentlichung
+   ankamen. Die Begruendung steht am meta-Element in index.html. */
 function reifenKatalogAdresse() {
-  const eigenerVerweis = document.querySelector('script[src*="reifen.js"]');
-  const frage = eigenerVerweis ? eigenerVerweis.getAttribute('src').split('?')[1] : '';
-  return frage ? `${REIFEN_KATALOG_DATEI}?${frage}` : REIFEN_KATALOG_DATEI;
+  return `${REIFEN_KATALOG_DATEI}?stand=${katalogStempel()}`;
 }
 
 /* Der Katalog kommt als <script>-Element, nicht per fetch(). Der Grund

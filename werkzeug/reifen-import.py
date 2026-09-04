@@ -40,6 +40,10 @@ import re
 import sys
 import urllib.parse
 import urllib.request
+
+# Liegt daneben in werkzeug/ - Python findet Geschwistermodule von
+# selbst, weil der Ordner des Skripts im Suchpfad steht.
+import katalogstempel
 from datetime import date
 
 # Der Publisher-Account von Serpa bei AWIN. Steht auch in partner.js -
@@ -345,7 +349,11 @@ def main():
         json.dump(katalog, datei, ensure_ascii=False, separators=(',', ':'))
         datei.write(';\n')
     print(f'{ZIEL} geschrieben ({os.path.getsize(ZIEL) // 1024} KB).')
-    print('Nicht vergessen: in ENTSCHEIDUNGEN.md steht, wann zuletzt '
+
+    # Neue Preise brauchen einen neuen Stempel, sonst zeigt der Browser
+    # weiter seine alte Fassung des Katalogs.
+    katalogstempel.stempel_setzen()
+    print('Nicht vergessen: in doku/ENTSCHEIDUNGEN.md steht, wann zuletzt '
           'importiert wurde.')
 
 

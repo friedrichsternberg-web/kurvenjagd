@@ -1,0 +1,129 @@
+# Holt woechentlich die Produktpreise der AWIN-Partner und legt das
+# Ergebnis als Vorschlag ab. Er veroeffentlicht NICHTS.
+#
+# WARUM ES DIESEN AUFTRAG GIBT: Zeigt die App einen Preis, den der Shop
+# nicht mehr verlangt, ist das irrefuehrende Werbung - unabhaengig davon,
+# ob es Absicht war. Ein Katalog, an dem Geld haengt, muss deshalb
+# regelmaessig nachgezogen werden, und "wenn ich gerade daran denke" ist
+# dafuer keine Grundlage.
+#
+# WARUM ER NICHT PUSHT: In diesem Projekt gilt, dass nichts ohne
+# ausdrueckliches Wort live geht. Der Auftrag legt seine Arbeit deshalb auf
+# einem eigenen Zweig ab und oeffnet einen Pull Request. GitHub Pages baut
+# aus main - solange der Vorschlag nicht uebernommen ist, aendert sich
+# draussen nichts. Uebernehmen ist ein Klick, Verwerfen auch.
+#
+# WAS ER NICHT KANN: motoin. Deren Feed liegt bei Webgains hinter der
+# angemeldeten Sitzung, es gibt keinen Schluessel fuer ein Skript. Der
+# bleibt Handarbeit, siehe Kopf von werkzeug/motoin-import.py. Damit die
+# Helm-Preisvergleiche dabei nicht verlorengehen, greift
+# helmexpress-import.py auf daten/helm-motoin-paare.json zurueck.
+#
+# EINMALIG EINZURICHTEN, sonst laeuft er ins Leere:
+#   1. Settings -> Secrets and variables -> Actions -> New secret
+#      Name: AWIN_SCHLUESSEL, Wert: der Schluessel aus .awin-schluessel
+#   2. Settings -> Actions -> General -> Workflow permissions:
+#      "Allow GitHub Actions to create and approve pull requests" anhaken
+
+name: Preise nachziehen
+
+on:
+  schedule:
+    # Montags um 5 Uhr UTC, also 6 oder 7 Uhr deutscher Zeit. Frueh genug,
+    # dass der Vorschlag am Montagmorgen dasteht.
+    - cron: '0 5 * * 1'
+  # Damit man ihn auch von Hand anstossen kann, ohne bis Montag zu warten.
+  workflow_dispatch:
+
+# Nur so viele Rechte wie noetig: Zweig schreiben, Vorschlag oeffnen.
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  kataloge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Projekt holen
+        uses: actions/checkout@v4
+
+      - name: Python bereitstellen
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+        # Die Importskripte kommen mit der Standardbibliothek aus.
+        # Absicht: kein pip install, keine fremde Abhaengigkeit im Lauf.
+
+      - name: Schluessel pruefen
+        env:
+          AWIN_SCHLUESSEL: ${{ secrets.AWIN_SCHLUESSEL }}
+        run: |
+          if [ -z "$AWIN_SCHLUESSEL" ]; then
+            echo "Das Secret AWIN_SCHLUESSEL fehlt. Ohne den Schluessel gibt"
+            echo "AWIN keine Produktdaten heraus - siehe Kopf dieser Datei."
+            exit 1
+          fi
+
+      - name: Reifen holen (reifen.com und Reifentiefpreis)
+        env:
+          AWIN_SCHLUESSEL: ${{ secrets.AWIN_SCHLUESSEL }}
+        run: python3 werkzeug/reifen-import.py
+
+      - name: Helme holen (Helmexpress)
+        env:
+          AWIN_SCHLUESSEL: ${{ secrets.AWIN_SCHLUESSEL }}
+        run: python3 werkzeug/helmexpress-import.py
+
+      - name: Grenzen nachpruefen
+        # Dasselbe Skript, das vor jedem Commit von Hand laeuft. Es soll
+        # nicht abbrechen, aber im Protokoll stehen - wenn ein Importlauf
+        # eine Regel reisst, sieht man es hier.
+        run: sh werkzeug/pruefe.sh
+
+      - name: Vorschlag ablegen
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # NUR die Dateien, die ein Preislauf anfassen darf. Kein
+          # "git add -A" - dieselbe Regel wie von Hand.
+          git add daten/reifen-katalog.js \
+                  daten/helmexpress-katalog.js \
+                  daten/helm-motoin-paare.json \
+                  index.html
+
+          if git diff --cached --quiet; then
+            echo "Keine Preisaenderung - kein Vorschlag noetig."
+            exit 0
+          fi
+
+          git config user.name  "Preis-Bote"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          ZWEIG="preise/$(date +%Y-%m-%d)"
+          git checkout -b "$ZWEIG"
+          git commit -q -m "Preise vom $(date +%d.%m.%Y)" -m \
+            "Automatisch geholt von .github/workflows/preise.yml. Enthaelt die
+          beiden Reifenhaendler und Helmexpress; motoin bleibt Handarbeit,
+          weil Webgains keinen Schluessel fuer Skripte herausgibt.
+
+          Vor dem Uebernehmen ein Blick auf die Zahl der Produkte: Faellt
+          sie stark, war der Feed kaputt und der Vorschlag gehoert
+          verworfen."
+          git push -u origin "$ZWEIG"
+
+          gh pr create \
+            --title "Preise vom $(date +%d.%m.%Y)" \
+            --body "Woechentlicher Preislauf.
+
+          **Enthalten:** reifen.com, Reifentiefpreis, Helmexpress.
+          **Nicht enthalten:** motoin. Deren Feed haengt bei Webgains an der
+          angemeldeten Sitzung und muss von Hand geholt werden.
+
+          Der Katalogstempel in \`index.html\` ist mitgesetzt, die App holt
+          die neuen Preise also auch bei Besuchern, die schon einmal da
+          waren. Die Versionsnummer \`?v=\` bleibt unberuehrt.
+
+          **Vor dem Uebernehmen:** Im Protokoll des Laufs steht, wie viele
+          Produkte geschrieben wurden. Ist die Zahl deutlich kleiner als
+          beim letzten Mal, war der Feed unvollstaendig." \
+            --base main --head "$ZWEIG"
