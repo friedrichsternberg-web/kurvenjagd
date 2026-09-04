@@ -2704,3 +2704,64 @@ Fensterhöhe. Der Rasterkasten war 740 hoch, sein Inhalt 1513, und der
 Faden lief unten heraus. Sticky hält sich an den Elternkasten, und der
 endete bei 740. Ein `align-self: flex-start` lässt den Kasten mit dem
 Inhalt wachsen.
+
+---
+
+## 04.09.2026, nachts — warum BRouter abbricht, und was die Meldung jetzt sagt
+
+**Was Friedrich sah.** Ein Toast mit dem Wortlaut „Routing fehlgeschlagen:
+operation killed by thread-priority-watchdog after 1 seconds". Englisches
+Technikdeutsch, direkt vom BRouter-Server durchgereicht, für niemanden
+einzuordnen.
+
+**Die erste Erklärung war falsch, und das gehört hierher.** Sie lautete:
+Der kostenlose BRouter-Server gibt jeder Adresse ein Rechenzeit-Budget, das
+mit der Nutzung schrumpft; nach ein paar Minuten Ruhe geht es wieder. Das
+klang plausibel, weil die App tatsächlich ein Vielfraß ist (vier Anfragen je
+Route mit Kurvigkeit, bis zu 42 je Rundtour). Es stimmte aber nicht: Nach
+deutlich mehr als fünf Minuten Pause kam derselbe Fehler.
+
+**Was wirklich dahintersteckt**, nachgemessen an einem Nachmittag, alle
+Anfragen innerhalb weniger Minuten von derselben Adresse:
+
+| Anfrage | Ergebnis |
+|---|---|
+| 37 km, alle vier Varianten | läuft |
+| 120 km, Varianten 0 und 1 | läuft |
+| 200 km Rundtour über vier Punkte | läuft |
+| 309 km, Variante 0 | läuft, 2,9 s |
+| 309 km, Varianten 1 bis 3 | **abgebrochen** |
+| ~500 km, Variante 0 | **abgebrochen**, „after 0 seconds" |
+
+Es hängt an der **Rechenlast der einzelnen Anfrage**, nicht an einer Sperre
+für den Nutzer. Im selben Moment lief die kurze Route und die lange nicht.
+Warten hilft deshalb nicht, und eine Meldung, die es verspricht, schickt
+den Nutzer auf eine falsche Fährte.
+
+Zweiter Befund, der vorher niemandem aufgefallen war: **Die Varianten 1 bis
+3 kosten deutlich mehr als die Hauptroute.** Ab etwa 300 km fallen sie
+regelmäßig weg. `calculateRoute()` benutzt `Promise.allSettled`, die Route
+kommt also trotzdem zustande — nur wählt `curviness()` dann aus einer
+Variante statt aus vieren. Die Kurvigkeitsauswahl, das Kernstück des
+Planers, ist auf langen Strecken also stillschweigend wirkungslos. Das
+steht als eigener Punkt in `doku/AUFGABEN.md`.
+
+**Was geändert wurde.** `routingFehlerText()` in `app.js` übersetzt die
+bekannten BRouter-Fehler in deutsche Sätze: Abbruch durch den Wächter,
+kein Netz, Wegpunkt außerhalb der Kartendaten, keine durchgehende Straße.
+Alles Unbekannte bekommt einen deutschen Satz davor und behält den
+Wortlaut in Klammern — eine kryptische Zeile ist besser als gar kein
+Hinweis, wenn eine Meldung es noch nicht in die Liste geschafft hat.
+
+Drei Fundstellen benutzen die Übersetzung: die normale Berechnung, die
+Neuberechnung während der Navigation und die Rundtour. Die Rundtour war
+der heikelste Fall: `sucheRundtour()` in `kern.js` verschluckt einzelne
+Fehler mit Absicht, danach weiß niemand mehr, warum nichts herauskam. Sie
+riet deshalb pauschal zu einem anderen Startpunkt — bei einem Abbruch des
+Servers ein falscher Rat, denn dann ist die Distanz das Problem. Ein
+Zeitstempel (`zuletztGebremst`) in `app.js` merkt sich, ob der Server
+zuletzt abgebrochen hat, und die Rundtour fragt ihn.
+
+**Nicht geändert: die Zahl der Anfragen.** Sparsamer zu werden ist der
+richtige nächste Schritt, aber er kostet Qualität und gehört besprochen,
+nicht nebenbei gemacht.

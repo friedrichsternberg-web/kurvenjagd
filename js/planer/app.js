@@ -620,6 +620,81 @@ function brouterUrl(points, profile, altIdx) {
     + einschränkungen.map(e => `&${e}`).join('');
 }
 
+/* --- Wenn BRouter nicht kann: verstaendlich sagen, warum -------------------
+
+   BRouter meldet seine Fehler als englischen Klartext, und der landete
+   frueher unveraendert im Toast. "operation killed by thread-priority-
+   watchdog after 1 seconds" kann niemand einordnen - auch niemand, der
+   die App gebaut hat.
+
+   DER HAEUFIGSTE FALL: Der Waechter des kostenlosen BRouter-Servers
+   bricht Anfragen ab, die ihm zu teuer sind. Am 04.09.2026 nachgemessen,
+   alles innerhalb weniger Minuten von derselben Adresse:
+
+     37 km,  alle vier Varianten        laeuft
+     120 km, Varianten 0 und 1          laeuft
+     200 km Rundtour ueber vier Punkte  laeuft
+     309 km, Variante 0                 laeuft (2,9 s)
+     309 km, Varianten 1 bis 3          abgebrochen
+     500 km, Variante 0                 abgebrochen ("after 0 seconds")
+
+   Daraus folgt zweierlei. Erstens haengt es an der RECHENLAST der
+   einzelnen Anfrage, nicht an einer Sperre fuer diesen Nutzer - im selben
+   Moment lief die kurze Route und die lange nicht. Warten hilft deshalb
+   NICHT, und die Meldung darf es auch nicht versprechen. Zweitens kosten
+   die Varianten 1 bis 3 deutlich mehr als die Hauptroute: Ab etwa 300 km
+   fallen sie regelmaessig weg, und curviness() waehlt dann nur noch aus
+   dem, was uebrig blieb.
+
+   Das trifft immer nur EINEN Nutzer: Die Anfrage geht direkt vom Geraet
+   an brouter.de, BRouter sieht also die Adresse des Geraets, nicht die
+   der App. Was noch fehlt, steht in doku/AUFGABEN.md. */
+const BROUTER_GEBREMST = /thread-priority-watchdog|too many requests|rate.?limit|server overloaded/i;
+
+/* Wann zuletzt abgebrochen wurde. Die Rundtour-Suche in kern.js
+   verschluckt einzelne Fehler mit Absicht (ein misslungener Versuch von
+   zwanzig ist kein Grund aufzugeben) - danach weiss nur noch dieser
+   Zeitstempel, dass der Server abgebrochen hat und es nicht an der Gegend
+   lag. Ohne ihn riete die App zu einem anderen Startpunkt, obwohl die
+   Laenge das Problem ist. */
+let zuletztGebremst = 0;
+const BREMSE_GILT_MS = 60000;
+
+function kuerzlichGebremst() {
+  return Date.now() - zuletztGebremst < BREMSE_GILT_MS;
+}
+
+function routingFehlerText(fehler) {
+  const roh = (fehler && fehler.message) || '';
+
+  if (BROUTER_GEBREMST.test(roh)) {
+    return 'Der Routing-Dienst konnte die Strecke gerade nicht berechnen. '
+         + 'Bei langen Routen kommt das häufiger vor - mit einer kürzeren Etappe klappt es meistens.';
+  }
+
+  /* Kein Netz. fetch() wirft dann einen TypeError, dessen Wortlaut je
+     Browser anders ausfaellt ("Failed to fetch", "Load failed", "NetworkError"). */
+  if (/failed to fetch|load failed|networkerror|network request failed/i.test(roh)) {
+    return 'Keine Verbindung zum Routing-Dienst. Prüf die Netzverbindung und versuch es noch einmal.';
+  }
+
+  // Ein Wegpunkt liegt ausserhalb der Kartendaten - im Wasser, im Feld,
+  // oder in einer Gegend, fuer die BRouter keine Daten vorhaelt.
+  if (/position not mapped|not mapped in existing datafile/i.test(roh)) {
+    return 'Ein Wegpunkt liegt zu weit von einer Straße entfernt. Setz ihn näher an einen Weg.';
+  }
+
+  if (/target island|no route|unreachable/i.test(roh)) {
+    return 'Zwischen diesen Punkten findet sich keine durchgehende Straße.';
+  }
+
+  // Alles Uebrige: den Wortlaut zeigen, aber mit einem deutschen Satz davor.
+  // Lieber eine kryptische Zeile als gar kein Hinweis - sie ist das
+  // Einzige, was bei einer Fehlermeldung weiterhilft, die es noch nicht
+  // in diese Liste geschafft hat.
+  return 'Die Route ließ sich nicht berechnen.' + (roh ? ' (' + roh.slice(0, 120) + ')' : '');
+}
+
 async function fetchRoute(points, profile, altIdx) {
   const res = await fetch(brouterUrl(points, profile, altIdx));
   const text = await res.text();
@@ -627,7 +702,10 @@ async function fetchRoute(points, profile, altIdx) {
   // BRouter meldet Fehler als reinen Text, nicht als JSON.
   let data;
   try { data = JSON.parse(text); }
-  catch { throw new Error(text.slice(0, 200) || 'Unbekannte Antwort von BRouter'); }
+  catch {
+    if (BROUTER_GEBREMST.test(text)) zuletztGebremst = Date.now();
+    throw new Error(text.slice(0, 200) || 'Unbekannte Antwort von BRouter');
+  }
 
   const feat = data.features && data.features[0];
   if (!feat) throw new Error('Keine Route gefunden');
@@ -665,7 +743,7 @@ async function calculateRoute() {
 
   if (routes.length === 0) {
     const err = results.find(r => r.status === 'rejected');
-    showToast('Routing fehlgeschlagen: ' + (err ? err.reason.message : 'unbekannt'));
+    showToast(routingFehlerText(err && err.reason));
     return;
   }
 
@@ -981,7 +1059,11 @@ async function generateRoundTrip() {
   setBusy(false);
 
   if (!ergebnis) {
-    showToast('Rundtour fehlgeschlagen - anderen Startpunkt oder andere Distanz probieren.');
+    /* Hat der Server abgebrochen, liegt es an der Laenge und NICHT am
+       Startpunkt - der alte Rat waere dann eine falsche Faehrte. */
+    showToast(kuerzlichGebremst()
+      ? 'Der Routing-Dienst konnte die Runde gerade nicht berechnen. Probier eine kürzere Distanz.'
+      : 'Rundtour fehlgeschlagen - anderen Startpunkt oder andere Distanz probieren.');
     return;
   }
 
@@ -1955,7 +2037,7 @@ async function routeNeuBerechnenAbPosition(lat, lon) {
     nav.manöver = berechneManoever(route.coords);
     nav.nächsterIndex = 0;
   } catch (err) {
-    showToast('Neuberechnung fehlgeschlagen: ' + err.message);
+    showToast(routingFehlerText(err));
   }
 }
 

@@ -8,6 +8,36 @@ Sortiert nach Dringlichkeit, nicht nach Aufwand.
 
 ---
 
+## Routing: BRouter bricht lange Anfragen ab (seit 04.09.2026 bekannt)
+
+Gemessen: Ab etwa 300 km fallen die Routenvarianten 1 bis 3 weg, ab etwa
+500 km auch die Hauptroute. Der Wächter des kostenlosen BRouter-Servers
+bricht ab, was ihm zu teuer ist. Die Messwerte stehen in
+`doku/ENTSCHEIDUNGEN.md` zum 04.09.2026.
+
+**Erledigt:** Die Meldung ist übersetzt (`routingFehlerText()` in `app.js`).
+
+**Offen, nach Dringlichkeit:**
+
+1. **Die Kurvigkeitsauswahl ist auf langen Strecken wirkungslos.** Das ist
+   der schwerwiegendste Punkt, und er war vorher unbekannt.
+   `calculateRoute()` holt vier Varianten und wählt die kurvigste. Ab 300 km
+   kommt nur noch Variante 0 zurück, `Promise.allSettled` schluckt den Rest,
+   und die App wählt aus einer Variante. Der Nutzer schiebt den Regler und
+   nichts passiert. Denkbar: bei langen Strecken die Route in Abschnitte
+   teilen und je Abschnitt Varianten holen, oder dem Nutzer sagen, dass die
+   Auswahl hier nicht greift.
+2. **Zweiter Versuch nach Pause.** Bei Anfragen nahe der Grenze hilft
+   Wiederholen. Wichtig: warten, nicht sofort nachlegen.
+3. **Weniger Anfragen je Rundtour.** Heute bis zu 42 (1 Fixkosten, 20 mal 2
+   Versuche, 2 Feinschliff). Abbrechen, sobald eine sackgassenfreie Runde
+   nah genug an der Zielentfernung liegt, statt stur bis 20 zu zählen.
+   Kostet unter Umständen Qualität, deshalb vorher besprechen.
+4. **Eigener BRouter-Server.** Beseitigt die Grenze ganz. Kosten und die
+   datenschutzrechtliche Folge (die Wegpunkte gingen dann an einen Server
+   von uns statt an brouter.de, Punkt 3 der Datenschutzerklärung müsste
+   umgeschrieben werden) stehen in `doku/ENTSCHEIDUNGEN.md`.
+
 ## Reise planen (seit 04.09.2026)
 
 Die erste Ausbaustufe steht: Tage anlegen, Routen zuweisen, umsortieren,
