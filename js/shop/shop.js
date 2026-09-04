@@ -203,8 +203,34 @@ const ausruestungFilter = {
   seiten: 1,
 };
 
+/* "Beliebt" ist die Zahl der Groessen und Farben, die ein Haendler fuehrt -
+   das ehrlichste Mass, das ein Feed hergibt, aber ein grobes. Es wird in
+   Stufen zu je drei verglichen, nicht auf die Zahl genau: Ob eine Tasche
+   in zwei oder drei Farben kommt, sagt nichts ueber sie, entscheidet aber
+   sonst, welcher Haendler oben steht - motoin zaehlt Farben als Varianten,
+   POLO fuehrt sie einzeln. Innerhalb einer Stufe ordnet ein fester Streuwert
+   aus dem Schluessel, damit sich die Haendler mischen statt dass der zuerst
+   geladene Katalog die ersten 48 Karten stellt. */
+const BELIEBT_STUFE = 3;
+
+function streuwert(text) {
+  let h = 0;
+  for (let i = 0; i < text.length; i++) h = (h * 31 + text.charCodeAt(i)) >>> 0;
+  return h;
+}
+
+// "Beliebt" zaehlt nur, wo es Groessen gibt: Eine Jacke in neun Groessen ist
+// eine gefuehrte Baureihe. Bei Taschen, Sturzpads und Traegern gibt es keine
+// Groessen, und was da als Variante zaehlt (Farben), haengt am Haendler, nicht
+// an der Ware - also Stufe 0 fuer alle, und die Streuung ordnet.
+function beliebtStufe(produkt) {
+  if (!produkt.groessen || !produkt.groessen.length) return 0;
+  return Math.floor((produkt.beliebt || 0) / BELIEBT_STUFE);
+}
+
 const SORTIERUNGEN = {
-  relevanz:  { name: 'Beliebt',  vergleich: (a, b) => (b.beliebt - a.beliebt) || (preisAb(a) - preisAb(b)) },
+  relevanz:  { name: 'Beliebt',  vergleich: (a, b) =>
+    (beliebtStufe(b) - beliebtStufe(a)) || (streuwert(a.schluessel) - streuwert(b.schluessel)) },
   preisAuf:  { name: 'Preis ↑',  vergleich: (a, b) => preisAb(a) - preisAb(b) },
   preisAb:   { name: 'Preis ↓',  vergleich: (a, b) => preisAb(b) - preisAb(a) },
 };
