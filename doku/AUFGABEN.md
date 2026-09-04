@@ -8,6 +8,42 @@ Sortiert nach Dringlichkeit, nicht nach Aufwand.
 
 ---
 
+## Reise planen (seit 04.09.2026)
+
+Die erste Ausbaustufe steht: Tage anlegen, Routen zuweisen, umsortieren,
+Reisekarte mit allen Tagen. Was als Nächstes kommt, in der Reihenfolge, in
+der es Sinn ergibt:
+
+1. **Übernachtungen.** Der Faden hat die Stelle schon: Das Stück zwischen
+   Scheibe 1 und Scheibe 2 IST die erste Nacht. Darauf eine kleine Glaspille
+   „Nacht 1 · Hotel wählen", nach der Wahl Name, Preis und das Abzeichen
+   „Anzeige". Auf der Reisekarte wird das Ziel jedes Tages (`ziele[]` aus
+   `kartenBildMehrere`) zur Bettmarke. Datenform `tag.uebernachtung =
+   { hotelId, name, preis, link, partner }`. Der Partnerlink geht durch
+   `partner.js` und die dortige Einwilligung. **Vorher:** ein
+   Partnerprogramm mit Motorradhotels finden und die Häuser von Hand
+   auswählen – das war der ausdrückliche Wunsch.
+2. **Freunde.** `reise.teilnehmer = [{ nutzerId, name, bild }]`, die Reise
+   wandert in eine Supabase-Tabelle mit `reise_teilnehmer`; `geaendert`
+   ist schon da und wird zum Abgleich. Im Kopf neben dem Namen die
+   Profilbilder als `.glas-rund.klein` und ein Plus.
+3. **Ausgaben.** `tag.ausgaben = [{ wer, betrag, wofuer, fuerWen[] }]`, ein
+   vierter Wert im Bilanzstreifen, unter dem Faden „Wer schuldet wem" –
+   gerechnet in einer eigenen Datei `js/reise/kasse.js` nach dem Vorbild
+   von `bilanz.js` (reines Rechnen).
+4. **Ziehen zum Umsortieren.** Heute Pfeile im Sortiermodus und
+   Pfeiltasten auf der Scheibe. Ziehen erst, wenn der Wegpunkt-Ziehcode in
+   `app.js` zu einem Helfer `ziehbareListe()` verallgemeinert ist – siehe
+   ENTSCHEIDUNGEN.md zum 04.09.2026, warum nicht gleich.
+5. **Warnen beim Löschen einer Tour**, die in einer Reise hängt: „wird in
+   Alpen 2027 als Tag 3 verwendet". Gehört in `verkabeleGespeicherteListe()`
+   in `app.js`; `ladeReisen()` liefert die Zuordnung.
+6. **Der Speichern-Dialog des Planers** bekommt bei offener Reise die
+   Vorbelegung „Als Tag 3 von Alpen 2027" – das schließt den Rückweg aus
+   „Neue Route im Planer bauen" mit einem Feld statt fünf Tippern.
+7. **Die Reisekarte teilen**: als Bild, das man Freunden schickt. Das SVG
+   steht schon, es fehlt der Weg in ein PNG (Canvas) und `geraet.teilen()`.
+
 ## Vor der ersten Veröffentlichung in den Stores
 
 ### 1. Konto löschen in der App — ERLEDIGT, bis auf einen Handgriff

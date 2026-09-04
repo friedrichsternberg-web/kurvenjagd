@@ -145,40 +145,17 @@ function mercatorY(lat, z) {
          * Math.pow(2, z) * KACHEL;
 }
 
-function kartenBild(linie, rand = 26) {
-  const punkte = vorschauLinie(linie);
-  if (punkte.length < 2) return null;
-
-  const laengen = punkte.map(p => p[0]), breiten = punkte.map(p => p[1]);
-  const lonMin = Math.min(...laengen), lonMax = Math.max(...laengen);
-  const latMin = Math.min(...breiten), latMax = Math.max(...breiten);
-
-  /* Der groesste Zoom, bei dem die Tour samt Rand in den Rahmen passt.
-     Von oben heruntergezaehlt, damit die Karte so nah heran ist wie
-     moeglich - je naeher, desto mehr erkennt man von der Gegend. */
-  let zoom = ZOOM_MINDESTENS;
-  for (let z = ZOOM_HOECHSTENS; z >= ZOOM_MINDESTENS; z--) {
-    const passtBreite = mercatorX(lonMax, z) - mercatorX(lonMin, z) <= KARTE_BREITE - 2 * rand;
-    const passtHoehe  = mercatorY(latMin, z) - mercatorY(latMax, z) <= KARTE_HOEHE  - 2 * rand;
-    if (passtBreite && passtHoehe) { zoom = z; break; }
-  }
-
-  // Der Rahmen liegt mittig ueber der Tour. ursprungX/Y ist die
-  // Weltkoordinate seiner linken oberen Ecke.
-  const mitteX = (mercatorX(lonMin, zoom) + mercatorX(lonMax, zoom)) / 2;
-  const mitteY = (mercatorY(latMax, zoom) + mercatorY(latMin, zoom)) / 2;
-  const ursprungX = mitteX - KARTE_BREITE / 2;
-  const ursprungY = mitteY - KARTE_HOEHE / 2;
-
-  /* Die Kacheln, die den Rahmen fuellen: von der Kachel unter der linken
-     oberen Ecke bis zu der unter der rechten unteren. Am Kartenrand der
-     Welt (noerdlich von Spitzbergen) gaebe es negative Namen - die werden
-     weggelassen, dort bleibt der Rahmen leer. Fuer Touren in Deutschland
-     kommt das nie vor, aber eine Rechnung soll nicht am Datenrand kippen. */
+/* Die Kacheln, die einen Rahmen mit dieser linken oberen Ecke fuellen: von
+   der Kachel unter der Ecke bis zu der unter der rechten unteren. Am
+   Kartenrand der Welt (noerdlich von Spitzbergen) gaebe es negative Namen -
+   die werden weggelassen, dort bleibt der Rahmen leer. Fuer Touren in
+   Deutschland kommt das nie vor, aber eine Rechnung soll nicht am
+   Datenrand kippen. */
+function kachelnImRahmen(ursprungX, ursprungY, zoom, breite = KARTE_BREITE, hoehe = KARTE_HOEHE) {
   const kacheln = [];
   const hoechste = Math.pow(2, zoom) - 1;
-  for (let kx = Math.floor(ursprungX / KACHEL); kx * KACHEL < ursprungX + KARTE_BREITE; kx++) {
-    for (let ky = Math.floor(ursprungY / KACHEL); ky * KACHEL < ursprungY + KARTE_HOEHE; ky++) {
+  for (let kx = Math.floor(ursprungX / KACHEL); kx * KACHEL < ursprungX + breite; kx++) {
+    for (let ky = Math.floor(ursprungY / KACHEL); ky * KACHEL < ursprungY + hoehe; ky++) {
       if (kx < 0 || ky < 0 || kx > hoechste || ky > hoechste) continue;
       kacheln.push({
         zoom, x: kx, y: ky,
@@ -187,21 +164,92 @@ function kartenBild(linie, rand = 26) {
       });
     }
   }
+  return kacheln;
+}
 
-  const bild = punkte.map(p => [
+/* MEHRERE Routen in EINEM Rahmen - die Karte einer Reise, jeder Tag eine
+   Linie. Zoom, Ursprung und Kacheln kommen aus den gemeinsamen Grenzen
+   aller Linien; heraus kommt je Linie ein eigener Pfad samt Start und
+   Ziel, in derselben Reihenfolge wie hineingegeben. Linien mit weniger
+   als zwei Punkten fallen weg, auch ihre Plaetze in den Listen - wer die
+   Tage danach beschriften will, sollte vorher dieselbe Auswahl treffen.
+
+   Der Rahmen ist waehlbar: Die Tourenliste nimmt die flache Vorgabe
+   (640 x 280), die Reisekarte ein 4:3-Bild (640 x 480), das auf dem Handy
+   fast quadratisch steht - ein Streifen waere fuer ein Bild, das eine
+   ganze Reise zeigt, zu wenig.
+
+   kartenBild() darunter ist seit dem Reiseplaner der Sonderfall mit genau
+   einer Linie und bleibt, damit die Tourenliste und der Selbsttest nichts
+   davon merken. */
+function kartenBildMehrere(linien, rand = 26, rahmen = {}) {
+  const breite = rahmen.breite || KARTE_BREITE;
+  const hoehe = rahmen.hoehe || KARTE_HOEHE;
+  /* Freigehaltene Streifen oben und unten, in Bildpunkten des Rahmens:
+     Die Reisekarte traegt oben den Namen und unten den Bilanzstreifen,
+     und die Routen sollen in dem Band dazwischen liegen, nicht darunter.
+     Der Zoom wird auf das Band gerechnet, und das Band liegt mittig ueber
+     den Linien - nicht der ganze Rahmen. */
+  const freiOben = (rahmen.frei && rahmen.frei.oben) || 0;
+  const freiUnten = (rahmen.frei && rahmen.frei.unten) || 0;
+  const bandHoehe = hoehe - freiOben - freiUnten;
+  const teile = (Array.isArray(linien) ? linien : [])
+    .map(linie => vorschauLinie(linie))
+    .filter(punkte => punkte.length >= 2);
+  if (!teile.length) return null;
+
+  const alle = teile.flat();
+  const laengen = alle.map(p => p[0]), breiten = alle.map(p => p[1]);
+  const lonMin = Math.min(...laengen), lonMax = Math.max(...laengen);
+  const latMin = Math.min(...breiten), latMax = Math.max(...breiten);
+
+  /* Der groesste Zoom, bei dem alles samt Rand in den Rahmen passt.
+     Von oben heruntergezaehlt, damit die Karte so nah heran ist wie
+     moeglich - je naeher, desto mehr erkennt man von der Gegend. */
+  let zoom = ZOOM_MINDESTENS;
+  for (let z = ZOOM_HOECHSTENS; z >= ZOOM_MINDESTENS; z--) {
+    const passtBreite = mercatorX(lonMax, z) - mercatorX(lonMin, z) <= breite - 2 * rand;
+    const passtHoehe  = mercatorY(latMin, z) - mercatorY(latMax, z) <= bandHoehe - 2 * rand;
+    if (passtBreite && passtHoehe) { zoom = z; break; }
+  }
+
+  // Der Rahmen liegt mittig ueber allem. ursprungX/Y ist die
+  // Weltkoordinate seiner linken oberen Ecke.
+  const mitteX = (mercatorX(lonMin, zoom) + mercatorX(lonMax, zoom)) / 2;
+  const mitteY = (mercatorY(latMax, zoom) + mercatorY(latMin, zoom)) / 2;
+  const ursprungX = mitteX - breite / 2;
+  const ursprungY = mitteY - (freiOben + bandHoehe / 2);
+
+  const insBild = p => [
     +(mercatorX(p[0], zoom) - ursprungX).toFixed(1),
     +(mercatorY(p[1], zoom) - ursprungY).toFixed(1),
-  ]);
+  ];
+  const teileImBild = teile.map(punkte => punkte.map(insBild));
 
   return {
-    breite: KARTE_BREITE,
-    hoehe: KARTE_HOEHE,
+    breite,
+    hoehe,
     zoom,
-    kacheln,
-    pfad: 'M' + bild.map(p => p[0] + ' ' + p[1]).join('L'),
-    start: { x: bild[0][0], y: bild[0][1] },
-    ziel:  { x: bild[bild.length - 1][0], y: bild[bild.length - 1][1] },
-    punkte: bild.length,
+    kacheln: kachelnImRahmen(ursprungX, ursprungY, zoom, breite, hoehe),
+    pfade: teileImBild.map(t => 'M' + t.map(p => p[0] + ' ' + p[1]).join('L')),
+    starts: teileImBild.map(t => ({ x: t[0][0], y: t[0][1] })),
+    ziele:  teileImBild.map(t => ({ x: t[t.length - 1][0], y: t[t.length - 1][1] })),
+    punkte: alle.length,
+  };
+}
+
+function kartenBild(linie, rand = 26) {
+  const bild = kartenBildMehrere([linie], rand);
+  if (!bild) return null;
+  return {
+    breite: bild.breite,
+    hoehe: bild.hoehe,
+    zoom: bild.zoom,
+    kacheln: bild.kacheln,
+    pfad: bild.pfade[0],
+    start: bild.starts[0],
+    ziel: bild.ziele[0],
+    punkte: bild.punkte,
   };
 }
 

@@ -19,6 +19,7 @@ reines HTML, CSS und JavaScript ohne Build-Schritt.
 | `js/garage/` | Garage, Motorrad-Finder, Freisteller |
 | `js/fahrten/` | Bilanz, „Meine Stats", Fahrstil |
 | `js/konto/` | Anmeldung, geteilte Touren, Besuchszählung |
+| `js/reise/` | Reise planen: Tage, Routen, die Reisekarte |
 | `js/shop/` | Partnerprogramme, Katalog, Ausrüstung, Merkliste, Reifen |
 | `daten/` | die drei Produktkataloge und die Serienbereifung. Reine Daten, von Hand nicht anfassen |
 | `werkzeug/` | `pruefe.sh`, der Selbsttest und die Skripte, die Kataloge und Bilder bauen |

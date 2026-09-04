@@ -325,6 +325,41 @@
   .reifen-wahl { margin-bottom: 0; justify-content: center; }
   .reifen-held-name { font-size: 38px; }
 
+  /* --- 10. Reise planen: die Karte links stehend, der Faden rechts -----------
+     Im Hochformat liegt die Reisekarte ueber dem Faden und scrollt mit ihm
+     weg. Im Breiten bleibt sie links stehen (sticky), waehrend rechts die
+     Tage laufen - so sieht man beim Waehlen einer Route sofort, wie die
+     Linie oben dazukommt. Der Halter ist noetig: Ein Element mit overflow
+     hidden und Rundung klebt nicht zuverlaessig, ein schlichter Halter
+     darum schon. align-items: start ist Pflicht - ein gestrecktes
+     Rasterkind kann nicht kleben. */
+  #reiseScreen .start-screen-inner { max-width: var(--feed-max); }
+  #reiseInner {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: var(--s6);
+    align-items: start;
+    /* .listen-screen streckt seine Kinder auf Fensterhoehe (align-items:
+       stretch); der Faden liefe dann unten aus dem Kasten heraus, und die
+       Karte haette nichts, woran sie kleben kann - sticky haelt sich an den
+       Elternkasten. So waechst der Kasten mit dem Inhalt. */
+    align-self: flex-start;
+  }
+  #reiseInner .reise-kopf { grid-column: 1 / -1; }
+  #reiseInner .reise-held-halter { position: sticky; top: var(--s5); }
+  #reiseInner .reise-held { margin-bottom: 0; }
+  #reiseInner .reise-name { font-size: 32px; }
+
+  /* Die Liste der Reisen im selben Zweispalter wie die Touren daneben. */
+  #reisenListe .reisen-liste {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--s3);
+    align-items: start;
+  }
+  #reisenListe .reisen-liste > li { margin-bottom: 0; }
+  #reisenListe .empty { grid-column: 1 / -1; }
+
   /* --- 9. Der Startfilm im Liegen ---------------------------------------------
      Das liegende BILD des Films haengt an der Form des Fensters, nicht an
      dieser Grenze - es steht deshalb in style.css unter

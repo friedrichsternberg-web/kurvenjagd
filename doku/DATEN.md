@@ -24,6 +24,7 @@ Gerät nicht, solange niemand angemeldet ist.
 |---|---|
 | `kurvenjagd.routen` | gespeicherte Touren: Wegpunkte, Streckenverlauf, Kurvigkeit, Fotos als Daten-URL |
 | `kurvenjagd.garage` | Motorräder (Marke, Modell, Baujahr, Hubraum, Leistung, Bild) und Ausrüstung |
+| `kurvenjagd.reisen` | geplante Reisen: Name, Startdatum, die Tage in Reihenfolge, je Tag ein Verweis auf eine gespeicherte Route (nur die Kennung, keine Kopie) und ein freier Titel wie „Anreise“. Seit dem 04.09.2026 |
 | `kurvenjagd.shop` | Merkliste: Produkt-Schlüssel (`motoin:88484`), Datum, Marke und Name beim Merken, dazu die eigene Preisbeobachtung – höchstens zwölf Punkte je Eintrag |
 | `kurvenjagd.neigungBasis` | Nullpunkt für die Schräglage: die Einbaulage des Handys als drei Achsen, dazu der Ruhefehler des Gyroskops |
 | `kurvenjagd.reifenmass` | die eingetragene Reifengröße je Motorrad, getrennt für vorn und hinten – drei Zahlen, sonst nichts. Die **Serienbereifung** der gängigen Modelle steht daneben in `reifen-massen.js`, einer Datei der App – nachgeschlagen wird auf dem Gerät, dafür geht nichts ins Netz |

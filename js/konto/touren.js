@@ -763,6 +763,8 @@ function zeigeTourenTeil(teil) {
   });
   document.getElementById('tourenTeilMeine').hidden = teil !== 'meine';
   document.getElementById('tourenTeilEntdecken').hidden = teil !== 'entdecken';
+  const reisen = document.getElementById('tourenTeilReisen');
+  if (reisen) reisen.hidden = teil !== 'reisen';
 
   zeichneTourenBildschirm();
 }
@@ -772,6 +774,9 @@ function zeigeTourenTeil(teil) {
    Besuch noch die Liste vom ersten. */
 function zeichneTourenBildschirm() {
   if (tourenTeil === 'entdecken') { zeigeLage(); zeichneEntdecken(); }
+  // Die Reisen zeichnet reise.js, das NACH dieser Datei geladen wird -
+  // dieselbe Absicherung wie ueberall: Fehlt die Datei, fehlt der Teil.
+  else if (tourenTeil === 'reisen') { if (typeof zeichneReisenListe === 'function') zeichneReisenListe(); }
   else zeichneRoutenListe('tourenList', true);
 }
 

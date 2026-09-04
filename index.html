@@ -1269,8 +1269,9 @@
           <p class="label">2. Daten auf deinem Ger&auml;t</p>
           <p>
             Routen, aufgezeichnete Ausfahrten samt Fotos, deine Garage, deine
-            Merkliste samt dem beobachteten Preisverlauf und deine
-            Einstellungen liegen im lokalen Speicher deines Browsers.
+            geplanten Reisen, deine Merkliste samt dem beobachteten
+            Preisverlauf und deine Einstellungen liegen im lokalen Speicher
+            deines Browsers.
             Sie verlassen dein Ger&auml;t nicht, solange du kein Konto
             benutzt. L&ouml;schen kannst du sie jederzeit &uuml;ber die App
             oder die Browserdaten. <strong>Das Abmelden l&ouml;scht sie
@@ -1738,10 +1739,20 @@
       <div class="segmented touren-umschalter" id="tourenUmschalter">
         <button class="seg active" data-touren-teil="meine">Meine</button>
         <button class="seg" data-touren-teil="entdecken">Entdecken</button>
+        <button class="seg" data-touren-teil="reisen">Reisen</button>
       </div>
 
       <div id="tourenTeilMeine">
         <ul id="tourenList" class="saved-list"></ul>
+      </div>
+
+      <!-- Reisen: mehrere Tage, jeder mit einer der gespeicherten Routen,
+           zu einem Plan geformt. Die Liste zeichnet reise.js; ein Tipp auf
+           eine Reise oeffnet #reiseScreen. Warum hier und nicht als eigener
+           Eintrag in der Leiste: Eine Reise besteht aus Touren, und die
+           Leiste hat mit fuenf Eintraegen ihr Mass. -->
+      <div id="tourenTeilReisen" hidden>
+        <div id="reisenListe"></div>
       </div>
 
       <div id="tourenTeilEntdecken" hidden>
@@ -1807,6 +1818,14 @@
        Bildschirmen und wird nie per Skript angefasst: Alle Preise sind
        vorerst Beispieldaten, und dieser Hinweis darf durch keinen
        Skriptfehler verschwinden koennen. ===== -->
+  <!-- ===== Reise planen =====
+       Eine Reise: Tage untereinander, jeder mit einer gespeicherten Route.
+       Fuellt reise.js komplett - hier steht nur die Huelle, damit der
+       Bildschirm in BILDSCHIRME (app.js) einen Partner hat. -->
+  <div id="reiseScreen" class="start-screen listen-screen reise-screen" hidden>
+    <div class="start-screen-inner reise-inner" id="reiseInner"></div>
+  </div>
+
   <div id="shopScreen" class="start-screen listen-screen" hidden>
     <div class="start-screen-inner">
       <div class="ausruestung-kopf">
@@ -2577,6 +2596,22 @@
        Ein einziges Fenster fuer Motorrad UND Ausruestung. Was darin steht,
        fuellt garage.js beim Oeffnen ein. Zwei fast gleiche Fenster
        nebeneinander waeren zwei Stellen, die auseinanderlaufen koennen. -->
+  <!-- Das Blatt des Reiseplaners: neue Reise, Umbenennen, Route waehlen,
+       Loeschen - alles in EINEM Blatt, das reise.js je nach Anlass fuellt.
+       Dieselben Klassen wie der Garagendialog darunter, aber ein eigenes
+       Element: Der Garagendialog traegt fest "Speichern", und beim Waehlen
+       einer Route ist der Tipp auf die Zeile schon die Entscheidung. -->
+  <div id="reiseBlatt" class="garage-dialog" hidden>
+    <div class="garage-dialog-blatt glas">
+      <header class="garage-dialog-kopf">
+        <h3 id="reiseBlattTitel"></h3>
+        <button class="glas-rund klein" id="btnReiseBlattZu" title="Schlie&szlig;en" aria-label="Schlie&szlig;en">&times;</button>
+      </header>
+      <div class="garage-dialog-inhalt" id="reiseBlattInhalt"></div>
+      <footer class="garage-dialog-fuss" id="reiseBlattFuss"></footer>
+    </div>
+  </div>
+
   <div id="garageDialog" class="garage-dialog" hidden>
     <div class="garage-dialog-blatt glas">
       <header class="garage-dialog-kopf">
@@ -2665,6 +2700,10 @@
        Tourensammlung), dasselbe Muster wie ein Katalog vor seiner Logik. -->
   <script src="js/konto/serpa-touren.js?v=110"></script>
   <script src="js/konto/touren.js?v=110"></script>
+  <!-- Reise planen: Tage aus gespeicherten Routen. Nach app.js
+       (zeigeBildschirm, loadSaved, vorschauBildHtml) und nach touren.js,
+       das den Teil "Reisen" an diese Datei weiterreicht. -->
+  <script src="js/reise/reise.js?v=110"></script>
   <!-- Der Bildschirm "Meine Stats". Nach app.js (zeigeBildschirm, verkabele,
        vorschauBildHtml) und nach bilanz.js, dessen Rechnungen er zeichnet. -->
   <script src="js/fahrten/rueckblick.js?v=110"></script>

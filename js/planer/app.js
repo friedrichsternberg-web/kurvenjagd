@@ -3361,7 +3361,12 @@ function tourLinie(tour) {
 
    Das Bild traegt aria-hidden: Ein Kartenausschnitt ohne Beschriftung sagt
    einem Screenreader nichts, was nicht zwei Zeilen weiter als Text steht. */
-function vorschauBildHtml(tour) {
+/* zusatz ist fertiges HTML, das AUF das Bild gelegt wird - vor der
+   OpenStreetMap-Nennung, damit die unten rechts oben bleibt. Der
+   Reiseplaner schreibt damit Kilometer und Kurvigkeit auf die Tageskarte.
+   Ohne den Parameter muesste er das fertige Markup aufschneiden, und das
+   braeche beim naechsten Umbau der Vorschau still. */
+function vorschauBildHtml(tour, zusatz = '') {
   if (typeof kartenBild !== 'function') return '';
   const bild = kartenBild(tourLinie(tour));
   if (!bild) return '';
@@ -3380,7 +3385,7 @@ function vorschauBildHtml(tour) {
         <path class="vorschau-saum" d="${bild.pfad}"/>
         <path class="vorschau-linie" d="${bild.pfad}"/>
         <circle class="vorschau-start" cx="${bild.start.x}" cy="${bild.start.y}" r="6"/>
-      </svg>
+      </svg>${zusatz}
       <span class="vorschau-osm">&copy; OpenStreetMap</span>
     </span>`;
 }
@@ -3456,7 +3461,7 @@ function symbol(name, zusatz = '') {
    zeigeBildschirm() alles und blendet nichts ein. Die App zeigt dann eine
    schwarze Flaeche, ohne einen Fehler zu melden. */
 const BILDSCHIRME = [
-  'garageScreen', 'tourenScreen', 'app', 'rideScreen', 'statsScreen',
+  'garageScreen', 'tourenScreen', 'reiseScreen', 'app', 'rideScreen', 'statsScreen',
   'rechtlichesScreen', 'reifenScreen', 'shopScreen', 'shopProduktScreen',
   'merklisteScreen',
   'kontoScreen', 'profilScreen', 'passwortNeuScreen', 'kontoLoeschenScreen',
@@ -3505,6 +3510,9 @@ function aktualisiereLeiste(sichtbareId) {
   // Die Merkliste haengt an der Ausruestung: Sie ist von dort und aus der
   // Garage erreichbar, hat aber keinen eigenen Platz in der Leiste.
   if (sichtbareId === 'merklisteScreen') leuchtZiel = 'shopScreen';
+  // Eine Reise besteht aus Touren und wird von dort aus geoeffnet - also
+  // leuchtet "Touren", solange man an ihr plant.
+  if (sichtbareId === 'reiseScreen') leuchtZiel = 'tourenScreen';
   leiste.querySelectorAll('.nav-tab').forEach(knopf => {
     knopf.classList.toggle('aktiv', knopf.dataset.ziel === leuchtZiel);
   });

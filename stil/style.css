@@ -644,7 +644,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
    ueber dem verwischten Werkstattfoto wurden unruhig. Also Schwarz mit
    einem leisen Lichtkegel von oben - das gibt den Glaskanten etwas zu
    fangen, ohne mit den Fotos zu streiten. */
-#shopScreen, #merklisteScreen {
+#shopScreen, #merklisteScreen, #reiseScreen {
   background:
     radial-gradient(120% 55% at 50% -12%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 62%),
     var(--bg);
@@ -4961,3 +4961,382 @@ body.nav-modus .karten-knopf { display: none; }
   background: color-mix(in srgb, var(--accent) 30%, transparent);
   border-color: color-mix(in srgb, var(--accent-hell) 45%, transparent);
 }
+
+
+/* ============================================================
+   REISE PLANEN
+   Oben die Reisekarte - alle Tage auf einem echten Kartenausschnitt,
+   der Name darauf, unten quer ein Glasstreifen mit der Bilanz. Darunter
+   der Etappenfaden: je Tag ein Glied aus Nummernscheibe und Tageskarte,
+   verbunden durch eine Linie, die im Plus fuer den naechsten Tag endet.
+   Der Bauplan mit den drei Entwuerfen und der Bewertung steht in
+   doku/ENTSCHEIDUNGEN.md zum 04.09.2026.
+   ============================================================ */
+
+/* ---------- Die Liste der Reisen (Bildschirm Touren, Teil Reisen) ---------- */
+.reise-neu {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
+  margin: 0 0 var(--s4);
+}
+.reisen-liste { margin: 0; }
+/* Das Leerbild einer Reise ohne Route: derselbe Rahmen wie ein Kartenbild,
+   nur ohne Kacheln - die gestrichelte Linie mit den hohlen Scheiben. */
+.reise-leer-bild {
+  background:
+    radial-gradient(70% 90% at 50% 100%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%),
+    var(--raum-dunkel);
+}
+
+/* ---------- Der Bildschirm ---------- */
+.reise-kopf { margin-bottom: var(--s2); }
+.reise-kopf .back-btn { margin-bottom: 0; }
+
+/* ---------- Die Reisekarte ----------
+   4:3 statt des flachen 640x280 der Tourenliste: Ein Bild, das eine ganze
+   Reise zeigt, braucht Hoehe. Auf 358 Punkten Breite sind das 268 hoch. */
+.reise-held {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  margin: 0 0 var(--s5);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--raum-dunkel);
+  border: 1px solid var(--glas-rand);
+  box-shadow:
+    inset 0 1px 0 var(--glas-heller),
+    0 16px 40px var(--schatten-mittel);
+}
+.reise-held.leer {
+  background:
+    radial-gradient(70% 90% at 50% 100%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%),
+    var(--raum-dunkel);
+}
+.reise-karte { display: block; width: 100%; height: 100%; }
+/* Die Kacheln der Reisekarte dunkler als die der Tageskarten: Auf ihr
+   liegen der Name und der Streifen, und bei Zoomstufen, die halb
+   Deutschland zeigen, ist OpenStreetMap fast nur blasses Gruen. */
+.reise-held .vorschau-karte { filter: grayscale(0.45) brightness(0.5) contrast(1.08); }
+/* Die Namensnennung wandert nach oben rechts: unten liegt der Streifen. */
+.reise-held .vorschau-osm { bottom: auto; top: var(--s2); }
+/* Ein Schleier hinter dem Namen, von oben nach unten auslaufend. Ein
+   Verlauf, der Text lesbar macht - nicht der Verlaufstext, den design.css
+   ausschliesst. */
+.reise-held::before {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 30%;
+  background: linear-gradient(to bottom, var(--schatten-tief), transparent);
+  pointer-events: none;
+}
+
+/* Der Name liegt AUF der Karte, oben links, in der Handschrift der
+   Ueberschriften. Der Schatten loest ihn von hellen Kacheln. */
+.reise-held-kopf {
+  position: absolute;
+  top: var(--s3);
+  left: var(--s4);
+  right: var(--s4);
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+}
+.reise-name {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  font-family: var(--schrift-display);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--metall-glanz);
+  text-shadow: 0 1px 3px var(--schatten-stark), 0 0 14px var(--schatten-tief);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Der Bilanzstreifen: Glas ueber den Kacheln, unten quer. Eine Linse ueber
+   etwas Echtem - genau der Fall, den design.css meint. */
+.reise-bilanz {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+  padding: var(--s2) var(--s4) var(--s3);
+  background: var(--glas-hell);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border-top: 1px solid var(--glas-rand);
+  box-shadow: inset 0 1px 0 var(--glas-licht);
+}
+.reise-werte {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s4);
+}
+.reise-bilanz .wert {
+  font-family: var(--schrift-display);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--metall-glanz);
+  white-space: nowrap;
+}
+.reise-bilanz .wert i {
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin-left: 4px;
+  color: var(--muted);
+}
+.reise-offen { margin-left: auto; font-size: 12.5px; white-space: nowrap; }
+
+/* Das Etappenprofil: je Tag ein Balken. Breite nach Kilometern, Farbe nach
+   Kurvigkeit auf der Messskala des Planers - Farbe, die Daten bedeutet. */
+.reise-profil {
+  display: flex;
+  gap: var(--s1);
+  height: var(--s2);
+}
+.reise-profil-tag {
+  flex: var(--km, 1) 1 0;
+  min-width: var(--s1);
+  border-radius: var(--r-pill);
+  background: var(--skala-mittel);
+}
+.reise-profil-tag.wenig { background: var(--skala-wenig); }
+.reise-profil-tag.viel { background: var(--skala-viel); }
+.reise-profil-tag.leer {
+  flex: 0 0 var(--s5);
+  background: transparent;
+  border: 1px dashed var(--glas-rand);
+}
+
+/* ---------- Was im SVG der Reisekarte liegt ----------
+   Saum, Linie und Kacheln kommen aus dem Vorschaubild (.vorschau-*).
+   Neu sind die Nacht, das Ziel und die Marken. */
+.reise-nacht {
+  fill: none;
+  stroke: var(--metall);
+  stroke-width: 2.5;
+  stroke-dasharray: 6 8;
+  stroke-linecap: round;
+}
+.reise-ziel {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 3;
+}
+.reise-marke circle, .reise-marke rect {
+  fill: var(--accent);
+  stroke: var(--accent-ink);
+  stroke-width: 2;
+}
+.reise-marke text {
+  fill: var(--accent-ink);
+  font-family: var(--schrift-display);
+  font-weight: 700;
+  text-anchor: middle;
+  pointer-events: none;
+}
+/* Die hohlen Scheiben des Leerbilds: noch kein Tag hat eine Route. */
+.reise-marke.hohl circle { fill: var(--raum-dunkel); stroke: var(--metall); }
+.reise-marke.hohl text { fill: var(--metall-glanz); }
+/* Was leuchtet, ist gewaehlt: der gewaehlte Tag bleibt, die anderen dimmen. */
+.reise-karte.mit-auswahl .vorschau-linie:not(.aktiv),
+.reise-karte.mit-auswahl .vorschau-saum:not(.aktiv) { opacity: 0.4; }
+.reise-karte .vorschau-linie.aktiv { stroke: var(--accent-hell); }
+
+/* ---------- Der Etappenfaden ---------- */
+.reise-tage-kopf {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  margin: 0 0 var(--s3);
+}
+.etappen {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+/* Ein Glied: links die Scheibe, rechts die Karte. Der Faden ist das
+   ::before, von der Unterkante der Scheibe bis ins naechste Glied. */
+.etappe {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--s6) minmax(0, 1fr);
+  gap: var(--s3);
+  margin-bottom: var(--s3);
+}
+.etappe::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--s6) / 2 - 1px);
+  top: var(--s6);
+  bottom: calc(-1 * var(--s3));
+  width: 2px;
+  background: var(--glas-rand);
+}
+.etappe.leer::before, .etappe.fehlt::before {
+  background: repeating-linear-gradient(to bottom, var(--glas-rand) 0 6px, transparent 6px 12px);
+}
+.etappe.anhaengen::before { display: none; }
+
+.etappe-nummer {
+  align-self: start;
+  width: var(--s6);
+  height: var(--s6);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--glas-hell);
+  border: 1px solid var(--glas-heller);
+  box-shadow: inset 0 1px 0 var(--glas-licht), 0 4px 12px var(--schatten-weich);
+  font-family: var(--schrift-display);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--metall-glanz);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.etappe.leer .etappe-nummer, .etappe.fehlt .etappe-nummer {
+  border-style: dashed;
+  background: var(--glas-hauch);
+  color: var(--muted);
+}
+.etappe.aktiv .etappe-nummer {
+  background: var(--accent);
+  border-color: var(--accent-glanz);
+  color: var(--accent-ink);
+}
+.etappe.anhaengen .etappe-nummer { color: var(--muted); cursor: default; }
+
+/* Die Tageskarte: dieselbe Glasplatte wie eine Tour auf dem Bildschirm
+   Touren. Das Bild ist die unveraenderte .tour-vorschau, randlos durch
+   ihre eigenen negativen Raender. */
+.etappe-karte {
+  position: relative;
+  padding: var(--s3);
+  border-radius: var(--r-md);
+  background: var(--glas-hauch);
+  border: 1px solid var(--glas-hell);
+  box-shadow: inset 0 1px 0 var(--glas-rand);
+  transition: border-color 0.15s ease, background 0.25s ease;
+}
+.etappe.aktiv .etappe-karte { border-color: color-mix(in srgb, var(--accent-hell) 45%, transparent); }
+.etappe.leuchtet .etappe-karte { background: var(--glas-hell); }
+/* Kilometer und Kurvigkeit liegen AUF dem Bild, unten links. Der Schatten
+   macht sie auf jeder Karte lesbar. */
+.etappe-werte {
+  position: absolute;
+  left: var(--s3);
+  bottom: var(--s2);
+  font-family: var(--schrift-display);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  text-shadow: 0 1px 3px var(--schatten-stark);
+}
+.etappe-werte i { font-style: normal; opacity: 0.55; margin: 0 3px; }
+.etappe-karte .label {
+  display: block;
+  font-family: var(--schrift-display);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.etappe-karte .label i { font-style: normal; opacity: 0.5; margin: 0 3px; }
+.etappe-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+  font-size: 17px;
+  font-weight: 600;
+  min-width: 0;
+}
+.etappe-aktionen {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--s3);
+  margin-top: var(--s2);
+}
+.etappe-aktionen .linkbtn { margin-right: auto; font-size: 14px; }
+
+/* Ein Tag ohne Route: dieselbe Platte, nur gestrichelt, mit der einen
+   Sache, die man tun kann. Die Hoehe haelt den Faden gespannt. */
+.etappe.leer .etappe-karte, .etappe.fehlt .etappe-karte {
+  min-height: calc(var(--s8) * 2);
+  display: grid;
+  place-items: center;
+  gap: var(--s2);
+  border-style: dashed;
+  border-color: var(--glas-rand);
+  text-align: center;
+  color: var(--muted);
+  cursor: pointer;
+}
+.etappe.leer .etappe-karte .ic.gross, .etappe.fehlt .etappe-karte .ic.gross { width: 28px; height: 28px; opacity: 0.6; }
+.etappe-leer-text { font-size: 14px; }
+.etappe.leer .del, .etappe.fehlt .del { position: absolute; top: var(--s2); right: var(--s2); }
+
+/* Die Pfeile zum Verschieben gibt es nur im Sortiermodus. */
+.etappe-pfeile { display: none; margin-left: auto; }
+/* Der Sortiermodus: die Karten klappen zu Zeilen zusammen, das Bild geht
+   weg, alle Zeilen gleich hoch - sieben Tage auf einen Bildschirm, nichts
+   scrollt, und man sieht, in welche Luecke ein Tag faellt. */
+.etappen.sortiert .tour-vorschau,
+.etappen.sortiert .etappe-aktionen,
+.etappen.sortiert .etappe-leer-text,
+.etappen.sortiert .etappe-karte .ic.gross,
+.etappen.sortiert .etappe-karte .btn,
+.etappen.sortiert .etappe-karte .del { display: none; }
+.etappen.sortiert .etappe-karte {
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s2) var(--s2) var(--s2) var(--s3);
+  text-align: left;
+  cursor: default;
+}
+.etappen.sortiert .etappe-karte .label { flex: 0 0 auto; }
+.etappen.sortiert .etappe-name { flex: 1; margin: 0; font-size: 15px; }
+.etappen.sortiert .etappe-pfeile { display: flex; }
+.etappen.sortiert .etappe::before { top: var(--s6); }
+
+/* Das letzte Glied: das Plus, in das der Faden laeuft. */
+.etappe-anhaengen { width: 100%; justify-content: center; }
+
+.reise-fuss {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s1);
+  margin: var(--s5) 0 var(--s3);
+}
+.reise-fuss .hint { margin: 0; }
+
+/* ---------- Das Blatt: Route waehlen ---------- */
+.reise-wahl { margin-top: var(--s2); }
+.reise-wahl li { border: 1px solid transparent; }
+.reise-wahl li.aktuell { border-color: color-mix(in srgb, var(--accent-hell) 45%, transparent); }
+.reise-wahl .badge { flex: 0 0 auto; }

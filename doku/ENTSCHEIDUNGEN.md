@@ -2619,3 +2619,88 @@ Vorschlag an, wenn sich wirklich etwas geändert hat. Er fasst mit `git add`
 ausschließlich die vier Dateien an, die ein Preislauf anfassen darf, nie
 `git add -A`. Und `pruefe.sh` läuft im selben Durchgang mit, damit ein
 Importlauf, der eine Grenze reißt, im Protokoll steht.
+
+---
+
+## 04.09.2026, abends — Reise planen: die erste Ausbaustufe
+
+**Der Auftrag.** Ein Reiseplaner, „super bildlich, optisch cool und nützlich":
+mehrere Tage anlegen, jedem eine Route geben, daraus eine Reise formen.
+Hotels, gemeinsames Bearbeiten mit Freunden und Ausgaben kommen später.
+
+**Wo er wohnt.** Als dritter Teil im Bildschirm „Touren" neben „Meine" und
+„Entdecken", nicht als sechster Eintrag in der Leiste. Eine Reise besteht
+aus Touren, und die Leiste hat mit fünf Einträgen ihr Maß. Ein Tipp auf eine
+Reise öffnet den eigenen Bildschirm `reiseScreen`; die Leiste leuchtet dabei
+weiter bei „Touren", wie die Merkliste bei „Ausrüstung". Sollte der
+Reiseplaner mit Hotels und Freunden zur eigenen Säule werden, ist der
+Umzug in die Leiste ein Eintrag in `BILDSCHIRME` und ein Knopf.
+
+### Drei Entwürfe, drei Juroren
+
+Weil der Fokus auf dem Bild lag, wurden drei Ansätze unabhängig voneinander
+entworfen und von drei Juroren mit verschiedenem Blick bewertet (Gestalter,
+Entwickler, Fahrer mit Handschuhen). Punkte auf fünf Achsen: Bildwirkung,
+Serpa-Sprache, Baubarkeit, Nutzen, Anschluss für später.
+
+| Entwurf | Bild | Summe |
+|---|---|---|
+| **Der Etappenfaden** – Reisekarte oben, Tage als Glieder an einem Faden | eine Linie, die Tage hängen daran | **115** |
+| Die Perlenschnur – 4:3-Karte mit Name darauf, Perlen als Griff zum Ziehen | Reise als Kette | 104 |
+| Der Faden – Perlenkette über flacher Karte, Etappenprofil | Faden über der Karte | 102 |
+
+**Warum der Etappenfaden gewann.** Zwei Gründe. Er hält die Designsprache:
+Glas über echten Kacheln, Metall für Zahlen, Blau nur für Routen und das
+Gewählte; die beiden anderen färbten die Struktur blau, und dann bedeutet
+das Blau eines Knopfs nichts mehr. Und er baut auf dem auf, was schon lag:
+Speicher, Rechnen und Ändern in `reise.js`, der Reiter, die Hülle. Die
+anderen hätten daneben gebaut.
+
+**Was aus den Unterlegenen übernommen wurde**, weil alle drei Juroren es
+nannten: der 4:3-Held mit dem Namen auf der Karte und den gestrichelten
+**Nachtlinien** vom Ziel eines Tages zum Start des nächsten (Perlenschnur),
+das **Etappenprofil** als Balkenzeile mit Breite nach Kilometern und Farbe
+nach Kurvigkeit auf der Messskala des Planers, der **Sortiermodus**, der die
+Karten zu Zeilen zusammenklappt (Faden), die **Regel für kollidierende
+Marken** bei Sternfahrten vom selben Hotel („1–3"), das schematische
+**Leerbild** mit gestrichelter Linie und hohlen Scheiben statt einer
+Textplatte, und die Gewichtung der Kurvigkeit nach Kilometern.
+
+**Was bewusst NICHT gebaut wurde: Ziehen.** Alle drei Juroren nannten es
+als das riskanteste Stück. Der Ziehcode der Wegpunktliste hängt an
+`#panelScroll`, und Ziehen in einem scrollenden `.listen-screen` auf iOS ist
+der klassische Stolperstein jeder Drag-Liste. Stattdessen: Pfeile im
+Sortiermodus und Pfeiltasten auf der Nummernscheibe. Beides ruft
+`verschiebeTag(±1)`, das es schon gab. Ziehen kann später dazukommen, wenn
+das Muster in `app.js` verallgemeinert ist.
+
+### Was gebaut wurde, in Stichworten
+
+- `kartenBildMehrere()` in `vorschau.js`: mehrere Linien in einem Rahmen,
+  mit wählbarem Rahmen und freigehaltenen Streifen oben und unten, damit
+  Name und Bilanzstreifen nicht auf den Routen liegen. `kartenBild()` ist
+  seitdem der Sonderfall mit einer Linie.
+- `vorschauBildHtml(tour, zusatz)`: ein zweiter Parameter legt Markup auf
+  das Bild – die Kilometer und Grad/km auf der Tageskarte.
+- Der Speicher `kurvenjagd.reisen`, eine Route wird verwiesen, nicht
+  kopiert. Löscht man sie in der Tourenliste, zeigt der Tag „Die Route wurde
+  gelöscht" statt still eine Kopie.
+- Ein Blatt für alles, was den Bildschirm kurz unterbricht: neue Reise,
+  Umbenennen, Route wählen, Löschen. Dieselben Klassen wie der
+  Garagendialog, aber ein eigenes Element mit eigenem Fuß.
+- Querformat: Karte links stehend (sticky), Faden rechts.
+
+### Zwei Dinge, die beim Bau aufgefallen sind
+
+**Der Bilanzstreifen deckte Tag 4 zu.** Beim ersten Anlauf lag der
+Streifen als Glas über dem unteren Drittel der Karte, und die Routen waren
+über den ganzen Rahmen verteilt. Die Marke von Tag 4 saß genau unter dem
+Streifen. Deshalb bekam `kartenBildMehrere()` die freigehaltenen Streifen:
+Der Zoom wird auf das Band zwischen Name und Bilanz gerechnet, nicht auf
+den ganzen Rahmen.
+
+**Sticky klebte nicht.** `.listen-screen` streckt seine Kinder auf
+Fensterhöhe. Der Rasterkasten war 740 hoch, sein Inhalt 1513, und der
+Faden lief unten heraus. Sticky hält sich an den Elternkasten, und der
+endete bei 740. Ein `align-self: flex-start` lässt den Kasten mit dem
+Inhalt wachsen.
