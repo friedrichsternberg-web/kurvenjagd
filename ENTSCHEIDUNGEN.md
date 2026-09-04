@@ -2357,3 +2357,55 @@ leisen Lichtkegel statt auf dem verwischten Foto – Produktfotos auf
 weißen Karten über dem Foto wurden unruhig. Und die Merkliste in der
 Garage ist jetzt immer da, leer als Einladung: Eine Platte, die erst
 erscheint, wenn man sie schon benutzt hat, erklärt sich niemandem.
+
+---
+
+## 03.09.2026 — Reifentiefpreis, und der Shop bekommt Welten und Facetten
+
+**Reifentiefpreis DE** war bei AWIN längst zugelassen (Advertiser 14701,
+2 bis 3 Prozent, Cookie 60 Tage, Versand frei, Betreiber MD-Tuning in
+Mulda). Es ist der zweite Reifenhändler und damit der Preisvergleich bei
+den Reifen: 2.782 Reifen gibt es bei beiden, und bei 2.666 davon ist
+Reifentiefpreis günstiger. Gemessen am Feed vom 03.09.2026.
+
+**Der Reifenkatalog trägt jetzt Angebote statt eines Preises.** Je Reifen
+eine Liste `a` aus [Händler, Produktnummer, Preis, Versand], das
+günstigste zuerst; `i`, `p`, `k` obenauf bleiben die Werte des
+günstigsten, damit nichts bricht, was nur ein Angebot kennt. Die Karte
+zeigt alle Angebote untereinander mit eigenem Knopf. Zusammengeführt
+wird über die EAN im Importskript, wie bei den Helmen – bei Reifen ist
+sie eindeutig, weil jede Größe eine eigene hat. Der Feed von
+Reifentiefpreis nennt die Größe nur im Namen („130/90-15", „120/70R19"),
+ein zweites Muster liest sie dort; die alten Zollmaße („MT90-16") fallen
+wie bisher heraus.
+
+**Der Katalog ist von 273 auf 365 KB gewachsen**, 4.272 statt 3.829
+Reifen. Zwei Bildquellen, weil jeder Händler seine eigene hat.
+
+**Der Shop war eine Liste mit sechzig Zeilen, jetzt ist er ein System.**
+Friedrichs Einwand traf: „Ich sehe nur eine begrenzte Auswahl, ich muss
+erst ein Suchwort eingeben." Was jetzt gilt:
+
+- Oben stehen **Welten**: Helme, Bekleidung, Handschuhe, Stiefel,
+  Protektoren, Gepäck, Anbauteile, Schlösser. Bekleidung fasst Jacken,
+  Hosen, Kombis, Regen und Airbag zusammen.
+- In einer Welt filtert man über **Facetten**, und jede Welt hat ihre
+  eigenen: Helme nach Helmart und Marke, Bekleidung nach Teil, Material
+  und Marke, Stiefel nach Art. Die Werte kommen aus der **Unterart**, die
+  die Importskripte jetzt mitschreiben (Integral, Jet, Klapp; Textil,
+  Leder, Jeans; Tour, Sport, Cross). Jeder Chip trägt seine Zahl, und die
+  Zahl zählt gegen die Auswahl der *anderen* Facetten – ein Haken nimmt
+  seinen Nachbarn nichts weg.
+- Sortiert wird nach **Beliebt**, Preis auf- oder absteigend. „Beliebt" ist
+  die Zahl der Größen und Farben, in denen der Händler die Ware führt,
+  gedeckelt bei 30. Verkaufszahlen gibt es nicht; das ist das ehrlichste
+  Maß, das ein Feed hergibt, und die Highlights sagen es dazu.
+- Das Raster zeigt **48 Karten je Seite** mit „Mehr anzeigen (noch
+  1.969)". Alles auf einmal legte das Handy lahm, und wer 2.000 sieht,
+  sieht keinen.
+- Ohne Welt stehen oben die **Highlights** (nur Ausrüstung, die man trägt,
+  nicht das billigste Viertel – sonst führte eine Halterung in dreißig
+  Farben die Liste an), dann „Für dich", dann die Regale.
+
+Die zwei neuen Felder kosten Platz: motoin ist im selben Budget von 6.100
+auf 5.808 Produkte gerutscht.

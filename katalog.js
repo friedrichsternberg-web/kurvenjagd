@@ -184,6 +184,12 @@ function katalogGeladen(id) {
      versand     in Cent
      gesamt      Preis plus Versand, in Cent
      gtin        Zahl oder 0
+     unterart    die Art innerhalb der Warengruppe: 'integral', 'jet',
+                 'textil', 'leder' ... - wonach man filtert. null, wenn
+                 der Katalog keine kennt
+     beliebt     0 bis 30: in wie vielen Groessen und Farben der Haendler
+                 die Ware fuehrt. Kein Verkaufsmass, sondern das
+                 ehrlichste, das ein Feed hergibt - siehe motoin-import.py
      produktNummer  die Nummer, mit der das Netzwerk einen Produktlink
                  baut (AWIN pclick) - oder null, dann gilt ziel()
      gleichWie   Schluessel desselben Produkts bei einem ANDEREN Haendler,
@@ -275,7 +281,7 @@ function ohneMarke(titel, marke) {
 }
 
 function baueMotoinProdukt(zeile, daten) {
-  const [nummer, gruppe, marke, titel, groessen, preis, versand, gtin, stamm, bildNr] = zeile;
+  const [nummer, gruppe, marke, titel, groessen, preis, versand, gtin, stamm, bildNr, unterart, beliebt] = zeile;
   const markeName = daten.marken[marke];
   const dateiname = bildNr < 0
     ? stamm
@@ -293,6 +299,8 @@ function baueMotoinProdukt(zeile, daten) {
     versand,
     gesamt: preis + versand,
     gtin: gtin || 0,
+    unterart: daten.unterarten ? daten.unterarten[unterart] || null : null,
+    beliebt: beliebt || 0,
     produktNummer: null,
     gleichWie: null,
     bild(art) {
@@ -333,7 +341,7 @@ meldeKatalog({
 const HELMEXPRESS_BILDGROESSEN = { klein: 200, gross: 480 };
 
 function baueHelmexpressProdukt(zeile, daten) {
-  const [awNummer, marke, titel, groessen, preis, versand, gtin, pfad, quelle, signatur, motoinNummer] = zeile;
+  const [awNummer, marke, titel, groessen, preis, versand, gtin, pfad, quelle, signatur, motoinNummer, unterart, beliebt] = zeile;
   const markeName = daten.marken[marke];
   return {
     schluessel: produktSchluessel('helmexpress', awNummer),
@@ -347,6 +355,8 @@ function baueHelmexpressProdukt(zeile, daten) {
     versand,
     gesamt: preis + versand,
     gtin: gtin || 0,
+    unterart: daten.unterarten ? daten.unterarten[unterart] || null : null,
+    beliebt: beliebt || 0,
     produktNummer: String(awNummer),
     gleichWie: motoinNummer ? produktSchluessel('motoin', motoinNummer) : null,
     bild(art) {

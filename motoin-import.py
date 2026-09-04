@@ -98,34 +98,79 @@ NICHT_AUFNEHMEN = [
 ]
 
 WARENGRUPPEN = [
-    ('Helme>Integral-Helme',        'helm'),
-    ('Helme>Klapp-Helme',           'helm'),
-    ('Helme>Jet-Helme',             'helm'),
-    ('Helme>Cross- / Enduro-Helme', 'helm'),
-    ('Helme>Modular-Helme',         'helm'),
-    ('Helme>Kinder-Helme',          'helm'),
-    ('Bekleidung>Jacken>',          'jacke'),
-    ('Bekleidung>Hosen>',           'hose'),
-    ('Bekleidung>Handschuhe>',      'handschuh'),
-    ('Bekleidung>Stiefel>',         'stiefel'),
-    ('Bekleidung>Protektoren>',     'protektor'),
-    ('Bekleidung>Lederkombis>',     'kombi'),
-    ('Bekleidung>Regenbekleidung',  'regen'),
-    ('Bekleidung>Airbag-Bekleidung','airbag'),
-    ('Zubehör>Koffer / Gepäck>',    'koffer'),
-    ('Koffer / Gepäck>',            'koffer'),
-    ('Zubehör>Anbauteile>',         'anbau'),
-    ('Zubehör>Diebstahlschutz',     'schloss'),
+    # (Pfad bei motoin, Warengruppe in der App, Unterart)
+    # Die Unterart ist das, wonach man innerhalb einer Warengruppe filtert:
+    # Helmart, Material, Stiefelart. Sie kommt aus dem letzten Glied des
+    # motoin-Pfads und steht im Katalog als Platz in "unterarten".
+    ('Helme>Integral-Helme',        'helm', 'integral'),
+    ('Helme>Klapp-Helme',           'helm', 'klapp'),
+    ('Helme>Jet-Helme',             'helm', 'jet'),
+    ('Helme>Cross- / Enduro-Helme', 'helm', 'cross'),
+    ('Helme>Modular-Helme',         'helm', 'modular'),
+    ('Helme>Kinder-Helme',          'helm', 'kinder'),
+    ('Bekleidung>Jacken>Textiljacken',  'jacke', 'textil'),
+    ('Bekleidung>Jacken>Lederjacken',   'jacke', 'leder'),
+    ('Bekleidung>Jacken>Meshjacken',    'jacke', 'mesh'),
+    ('Bekleidung>Jacken>Westen',        'jacke', 'weste'),
+    ('Bekleidung>Jacken>Freizeit Look', 'jacke', 'freizeit'),
+    ('Bekleidung>Hosen>Textilhosen',    'hose', 'textil'),
+    ('Bekleidung>Hosen>Lederhosen',     'hose', 'leder'),
+    ('Bekleidung>Hosen>Jeans',          'hose', 'jeans'),
+    ('Bekleidung>Handschuhe>Cross-Handschuhe',          'handschuh', 'cross'),
+    ('Bekleidung>Handschuhe>Sport Handschuhe',          'handschuh', 'sport'),
+    ('Bekleidung>Handschuhe>Touren / Chopper Handschuhe', 'handschuh', 'touren'),
+    ('Bekleidung>Handschuhe>Unter / Überzieh Handschuhe', 'handschuh', 'unterzieh'),
+    ('Bekleidung>Handschuhe>Winter-Handschuhe',         'handschuh', 'winter'),
+    ('Bekleidung>Stiefel>Chopper-Stiefel', 'stiefel', 'chopper'),
+    ('Bekleidung>Stiefel>Cross-Stiefel',   'stiefel', 'cross'),
+    ('Bekleidung>Stiefel>Motorrad Schuhe', 'stiefel', 'schuh'),
+    ('Bekleidung>Stiefel>Sport-Stiefel',   'stiefel', 'sport'),
+    ('Bekleidung>Stiefel>Tour-Stiefel',    'stiefel', 'tour'),
+    ('Bekleidung>Protektoren>Ellenbogenprotektoren',     'protektor', 'ellenbogen'),
+    ('Bekleidung>Protektoren>Genickschutz',              'protektor', 'genick'),
+    ('Bekleidung>Protektoren>Hüftprotektoren',           'protektor', 'huefte'),
+    ('Bekleidung>Protektoren>Knieprotektoren',           'protektor', 'knie'),
+    ('Bekleidung>Protektoren>Protektorenhosen',          'protektor', 'hose'),
+    ('Bekleidung>Protektoren>Protektorenjacken',         'protektor', 'jacke'),
+    ('Bekleidung>Protektoren>Protektorenshirts',         'protektor', 'shirt'),
+    ('Bekleidung>Protektoren>Protektorenwesten',         'protektor', 'weste'),
+    ('Bekleidung>Protektoren>Rücken- / Brustprotektoren', 'protektor', 'ruecken'),
+    ('Bekleidung>Protektoren>Schulterprotektoren',       'protektor', 'schulter'),
+    ('Bekleidung>Lederkombis>Lederkombis 1tlg.', 'kombi', 'einteiler'),
+    ('Bekleidung>Lederkombis>Lederkombis 2tlg.', 'kombi', 'zweiteiler'),
+    ('Bekleidung>Regenbekleidung',  'regen', 'regen'),
+    ('Bekleidung>Airbag-Bekleidung', 'airbag', 'airbag'),
+    ('Zubehör>Koffer / Gepäck>Gepäcktaschen',       'koffer', 'tasche'),
+    ('Zubehör>Koffer / Gepäck>Koffer / Topcases',   'koffer', 'koffer'),
+    ('Zubehör>Koffer / Gepäck>Motorrad Rucksäcke',  'koffer', 'rucksack'),
+    ('Zubehör>Koffer / Gepäck>Motorrad Taschen',    'koffer', 'tasche'),
+    ('Zubehör>Koffer / Gepäck>Reisetaschen',        'koffer', 'tasche'),
+    ('Zubehör>Koffer / Gepäck>Satteltaschen / Gepäck', 'koffer', 'sattel'),
+    ('Zubehör>Koffer / Gepäck>Tankrucksäcke',       'koffer', 'tank'),
+    ('Zubehör>Koffer / Gepäck>Werkzeugtaschen',     'koffer', 'werkzeug'),
+    ('Koffer / Gepäck>Zubehör',                     'koffer', 'zubehoer'),
+    ('Zubehör>Anbauteile>Batterien / Ladegeräte / Adapter', 'anbau', 'strom'),
+    ('Zubehör>Anbauteile>Instrumente / Cockpit',    'anbau', 'cockpit'),
+    ('Zubehör>Anbauteile>Lenker / Griffe',          'anbau', 'lenker'),
+    ('Zubehör>Anbauteile>Licht / Blinker',          'anbau', 'licht'),
+    ('Zubehör>Anbauteile>Scheiben',                 'anbau', 'scheibe'),
+    ('Zubehör>Anbauteile>Schutzbügel',              'anbau', 'schutz'),
+    ('Zubehör>Anbauteile>Sonstiges',                'anbau', 'sonstiges'),
+    ('Zubehör>Anbauteile>Ständer',                  'anbau', 'staender'),
+    ('Zubehör>Anbauteile>Tanks',                    'anbau', 'tank'),
+    ('Zubehör>Anbauteile>Verkleidungen',            'anbau', 'verkleidung'),
+    ('Zubehör>Anbauteile>Werkzeuge',                'anbau', 'werkzeug'),
+    ('Zubehör>Diebstahlschutz',                     'schloss', 'schloss'),
 ]
 
 
 def warengruppe(pfad):
-    """Der App-Schluessel zu einem motoin-Pfad, oder None fuer 'nicht aufnehmen'."""
+    """(Warengruppe, Unterart) zu einem motoin-Pfad, oder None fuer 'nicht aufnehmen'."""
     if pfad in NICHT_AUFNEHMEN:
         return None
-    for anfang, schlüssel in WARENGRUPPEN:
+    for anfang, schlüssel, unterart in WARENGRUPPEN:
         if pfad == anfang or pfad.startswith(anfang):
-            return schlüssel
+            return schlüssel, unterart
     return None
 
 
@@ -163,15 +208,17 @@ def fasse_zusammen(feedpfad):
     with io.open(feedpfad, encoding='utf-8', newline='') as datei:
         for zeile in csv.DictReader(datei):
             zeilen += 1
-            gruppe = warengruppe(zeile['product_category'])
-            if not gruppe:
+            zuordnung = warengruppe(zeile['product_category'])
+            if not zuordnung:
                 übersprungen[zeile['product_category']] += 1
                 continue
+            gruppe, unterart = zuordnung
             if zeile['availability'] != 'in stock':
                 continue
 
             produkt = produkte.setdefault(zeile['item_group_id'], {
                 'gruppe': gruppe,
+                'unterart': unterart,
                 'marke': zeile['brand'].strip(),
                 'titel': zeile['title'].strip(),
                 'bild': zeile['image_link'],
@@ -305,6 +352,8 @@ def main():
 
     gruppen = sorted({p['gruppe'] for p in produkte.values()})
     gruppen_platz = {g: i for i, g in enumerate(gruppen)}
+    unterarten = sorted({p['unterart'] for p in produkte.values()})
+    unterarten_platz = {u: i for i, u in enumerate(unterarten)}
 
     # Groessensaetze kommen staendig doppelt vor ("S,M,L,XL,XXL" bei
     # hunderten Jacken). Was sich mindestens dreimal wiederholt, wandert
@@ -326,7 +375,12 @@ def main():
         satz = tuple(sorted(produkt['größen']))
         # Die Reihenfolge der Felder steht im Kopf von katalog.js:
         # Nummer, Warengruppe, Marke, Titel, Groessen, Preis, Versand,
-        # GTIN, Bildstamm, Bildnummer.
+        # GTIN, Bildstamm, Bildnummer, Unterart, Beliebt.
+        #
+        # "Beliebt" ist die Zahl der Feedzeilen, also Groessen mal Farben,
+        # gedeckelt bei 30. Verkaufszahlen gibt es nicht; das hier ist das
+        # ehrlichste Mass, das der Feed hergibt: Was ein Haendler in
+        # vielen Groessen und Farben fuehrt, fuehrt er, weil es geht.
         zeile = [
             nummer,
             gruppen_platz[produkt['gruppe']],
@@ -338,6 +392,8 @@ def main():
             int(produkt['gtin']) if produkt['gtin'].isdigit() else 0,
             stamm,
             laufend,
+            unterarten_platz[produkt['unterart']],
+            min(30, produkt['varianten']),
         ]
         nach_gruppe[produkt['gruppe']].append(
             {'zeile': zeile, 'varianten': produkt['varianten']})
@@ -355,6 +411,7 @@ def main():
             'bildBasis': 'www.motoin.de/images/product_images/',
             'zielBasis': 'www.motoin.de/',
             'warengruppen': gruppen,
+            'unterarten': unterarten,
             'marken': marken,
             'groessensaetze': [list(s) for s in sätze],
             'produkte': zeilen,

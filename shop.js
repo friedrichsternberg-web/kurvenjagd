@@ -8,10 +8,11 @@
      1. Warengruppen
      2. Das Bild eines Produkts
      3. Die Produktkarte
-     4. Filter und Trefferliste
-     5. Das Schaufenster: Regale in wechselnder Form
-     6. Der Bildschirm
-     7. Verkabelung
+     4. Welten, Facetten, Sortierung
+     5. Die Welt-Ansicht
+     6. Das Schaufenster: Highlights und Regale
+     7. Der Bildschirm
+     8. Verkabelung
 
    WARUM DER BEREICH NICHT MEHR "SHOP" HEISST: Wir verkaufen nichts, wir
    empfehlen und verlinken. "Shop" behauptet etwas anderes. Die Ids im
@@ -104,6 +105,7 @@ function produktKarte(produkt, { grund = '', hinweis = '' } = {}) {
       <span class="produkt-karte-name">${escapeHtml(produkt.marke)} ${escapeHtml(produkt.name)}</span>
       ${grund ? `<span class="produkt-karte-grund">${escapeHtml(grund)}</span>` : ''}
       <span class="produkt-karte-meta">${hinweis ? escapeHtml(hinweis) + ' <i>&middot;</i> ' : ''}${escapeHtml(preisAbText(produkt))}${angeboteFuer(produkt).length > 1 ? ' <span class="zwei-shops">2 Shops</span>' : ''}</span>
+      ${anzeigeAbzeichen()}
     </div>`;
 }
 
@@ -125,76 +127,225 @@ function produktZeile(produkt) {
 }
 
 
-/* --- 4. Filter und Trefferliste --------------------------------------------- */
+/* --- 4. Welten, Facetten, Sortierung ----------------------------------------
 
-// kategorie null heisst "Alle". Die Suche liegt kleingeschrieben, damit
-// der Vergleich nicht an Gross- und Kleinschreibung haengt.
-const ausruestungFilter = { kategorie: null, suche: '' };
+   Eine WELT ist, was oben als Chip steht: Helme, Bekleidung, Handschuhe
+   ... Sie fasst eine oder mehrere Warengruppen zusammen (Bekleidung =
+   Jacken, Hosen, Kombis, Regen, Airbag). In einer Welt filtert man ueber
+   FACETTEN: bei Helmen nach Helmart und Marke, bei Bekleidung nach Teil,
+   Material und Marke. Welche Facetten es gibt, sagt die Welt; welche
+   Werte darin stehen, sagen die Produkte, die gerade uebrig sind.
 
-/* Wie viele Zeilen hoechstens auf einmal. Sechstausend Produkte als eine
-   Liste zu zeichnen legt das Handy fuer Sekunden lahm; wer sucht, findet
-   ueber Filter und Suchfeld, nicht ueber Scrollen. */
-const LISTE_HOECHSTENS = 60;
+   "unterart" kommt aus den Importskripten (Helmart, Material, Stiefelart),
+   "kategorie" ist die Warengruppe, "marke" die Marke. Ein drittes Glied je
+   Facette grenzt die Werte ein, wo die Unterart mehreres mischt. */
 
-function zeichneKategorien() {
-  const behälter = document.getElementById('shopKategorien');
-  if (!behälter) return;
-  const vorhandene = new Set(sortiment().map(p => p.kategorie));
-  const chips = WARENGRUPPEN_NAMEN.filter(g => vorhandene.has(g.schlüssel));
+const WELTEN = [
+  { id: 'helm',       name: 'Helme',       gruppen: ['helm'],
+    facetten: [['Helmart', 'unterart'], ['Marke', 'marke']] },
+  { id: 'bekleidung', name: 'Bekleidung',  gruppen: ['jacke', 'hose', 'kombi', 'regen', 'airbag'],
+    facetten: [['Teil', 'kategorie'],
+               ['Material', 'unterart', ['textil', 'leder', 'jeans', 'mesh']],
+               ['Marke', 'marke']] },
+  { id: 'handschuh',  name: 'Handschuhe',  gruppen: ['handschuh'],
+    facetten: [['Art', 'unterart'], ['Marke', 'marke']] },
+  { id: 'stiefel',    name: 'Stiefel',     gruppen: ['stiefel'],
+    facetten: [['Art', 'unterart'], ['Marke', 'marke']] },
+  { id: 'protektor',  name: 'Protektoren', gruppen: ['protektor'],
+    facetten: [['Art', 'unterart'], ['Marke', 'marke']] },
+  { id: 'koffer',     name: 'Gepäck',      gruppen: ['koffer'],
+    facetten: [['Art', 'unterart'], ['Marke', 'marke']] },
+  { id: 'anbau',      name: 'Anbauteile',  gruppen: ['anbau'],
+    facetten: [['Art', 'unterart'], ['Marke', 'marke']] },
+  { id: 'schloss',    name: 'Schlösser',   gruppen: ['schloss'],
+    facetten: [['Marke', 'marke']] },
+];
 
-  behälter.innerHTML = [
-    `<button type="button" class="marken-chip ${ausruestungFilter.kategorie === null ? 'active' : ''}"
-             data-kategorie="">Alle</button>`,
-    ...chips.map(gruppe => `
-      <button type="button" class="marken-chip ${ausruestungFilter.kategorie === gruppe.schlüssel ? 'active' : ''}"
-              data-kategorie="${escapeHtml(gruppe.schlüssel)}">${escapeHtml(gruppe.name)}</button>`),
-  ].join('');
+// Wie eine Unterart auf dem Chip heisst. Was hier fehlt, erscheint so,
+// wie es im Katalog steht - lieber ein roher Schluessel als ein Chip ohne Text.
+const UNTERART_NAMEN = {
+  integral: 'Integral', jet: 'Jet', klapp: 'Klapp', cross: 'Cross / Enduro', modular: 'Modular',
+  kinder: 'Kinder', textil: 'Textil', leder: 'Leder', jeans: 'Jeans', mesh: 'Mesh', weste: 'Weste',
+  freizeit: 'Freizeit', touren: 'Touren', sport: 'Sport', winter: 'Winter', unterzieh: 'Unterzieh',
+  chopper: 'Chopper', schuh: 'Schuhe', tour: 'Touring', ellenbogen: 'Ellenbogen', genick: 'Genick',
+  huefte: 'Hüfte', knie: 'Knie', hose: 'Hose', jacke: 'Jacke', shirt: 'Shirt', ruecken: 'Rücken / Brust',
+  schulter: 'Schulter', einteiler: 'Einteiler', zweiteiler: 'Zweiteiler', regen: 'Regen', airbag: 'Airbag',
+  tasche: 'Taschen', koffer: 'Koffer / Topcase', rucksack: 'Rucksäcke', sattel: 'Satteltaschen',
+  tank: 'Tank', werkzeug: 'Werkzeug', zubehoer: 'Zubehör', strom: 'Strom', cockpit: 'Cockpit',
+  lenker: 'Lenker / Griffe', licht: 'Licht / Blinker', scheibe: 'Scheiben', schutz: 'Schutzbügel',
+  sonstiges: 'Sonstiges', staender: 'Ständer', verkleidung: 'Verkleidung', schloss: 'Schlösser',
+};
+
+function weltNach(id) {
+  return WELTEN.find(welt => welt.id === id) || null;
 }
 
-function gefilterteProdukte() {
+function weltFuerGruppe(gruppe) {
+  return WELTEN.find(welt => welt.gruppen.includes(gruppe)) || null;
+}
+
+// Wie ein Facettenwert auf dem Chip heisst.
+function facettenWertName(feld, wert) {
+  if (feld === 'kategorie') return warengruppeName(wert);
+  if (feld === 'unterart') return UNTERART_NAMEN[wert] || wert;
+  return wert;
+}
+
+/* Der Zustand: welche Welt, welches Suchwort, welche Facettenwerte
+   angehakt sind, wie sortiert wird, wie viele Seiten offen sind. */
+const ausruestungFilter = {
+  welt: null,
+  suche: '',
+  facetten: {},          // feld -> Set der angehakten Werte
+  sortierung: 'relevanz',
+  seiten: 1,
+};
+
+const SORTIERUNGEN = {
+  relevanz:  { name: 'Beliebt',  vergleich: (a, b) => (b.beliebt - a.beliebt) || (preisAb(a) - preisAb(b)) },
+  preisAuf:  { name: 'Preis ↑',  vergleich: (a, b) => preisAb(a) - preisAb(b) },
+  preisAb:   { name: 'Preis ↓',  vergleich: (a, b) => preisAb(b) - preisAb(a) },
+};
+
+// Wie viele Karten je Seite. Nicht alles auf einmal: 1.200 Helme als ein
+// Raster legen das Handy lahm, und wer 1.200 sieht, sieht keinen.
+const JE_SEITE = 48;
+
+function setzeWelt(id) {
+  ausruestungFilter.welt = id || null;
+  ausruestungFilter.facetten = {};
+  ausruestungFilter.seiten = 1;
+}
+
+function facetteUmschalten(feld, wert) {
+  const werte = ausruestungFilter.facetten[feld] || new Set();
+  if (werte.has(wert)) werte.delete(wert); else werte.add(wert);
+  ausruestungFilter.facetten[feld] = werte;
+  ausruestungFilter.seiten = 1;
+}
+
+// Die Produkte der Welt, nur ueber Welt und Suchwort eingegrenzt.
+function weltProdukte() {
+  const welt = weltNach(ausruestungFilter.welt);
   return sortiment().filter(produkt => {
-    if (ausruestungFilter.kategorie && produkt.kategorie !== ausruestungFilter.kategorie) return false;
+    if (welt && !welt.gruppen.includes(produkt.kategorie)) return false;
     if (!ausruestungFilter.suche) return true;
     return `${produkt.marke} ${produkt.titel}`.toLowerCase().includes(ausruestungFilter.suche);
   });
 }
 
-/* Die Trefferliste: Was zur Warengruppe oder zum Suchwort passt, nach
-   Gesamtpreis sortiert. Sie erscheint NUR, wenn gefiltert oder gesucht
-   wird - ohne beides steht das Schaufenster (Abschnitt 5). */
-function zeichneProduktListe() {
-  const liste = document.getElementById('shopProduktListe');
-  const mehr = document.getElementById('shopMehrZeile');
-  if (!liste) return;
+/* Die Facetten anwenden. "ausser" laesst eine Facette aus - so zaehlt
+   jede Facette ihre Werte gegen die Auswahl der ANDEREN, und ein
+   angehakter Wert nimmt seinen Nachbarn nicht die Zahl weg. Innerhalb
+   einer Facette gilt ODER, zwischen Facetten UND. */
+function facettenAnwenden(produkte, ausser = null) {
+  return produkte.filter(produkt =>
+    Object.entries(ausruestungFilter.facetten).every(([feld, werte]) =>
+      feld === ausser || !werte.size || werte.has(produkt[feld])));
+}
 
-  const treffer = gefilterteProdukte().sort((a, b) => preisAb(a) - preisAb(b));
+function gefilterteProdukte() {
+  const sortierung = SORTIERUNGEN[ausruestungFilter.sortierung] || SORTIERUNGEN.relevanz;
+  return facettenAnwenden(weltProdukte()).sort(sortierung.vergleich);
+}
+
+
+/* --- 5. Die Welt-Ansicht ---------------------------------------------------- */
+
+function zeichneWeltChips() {
+  const behälter = document.getElementById('shopKategorien');
+  if (!behälter) return;
+  const vorhandene = new Set(sortiment().map(p => p.kategorie));
+  const welten = WELTEN.filter(welt => welt.gruppen.some(g => vorhandene.has(g)));
+  const aktiv = ausruestungFilter.welt;
+  behälter.innerHTML = [
+    `<button type="button" class="marken-chip ${aktiv === null ? 'active' : ''}" data-welt="">Alle</button>`,
+    ...welten.map(welt => `
+      <button type="button" class="marken-chip ${aktiv === welt.id ? 'active' : ''}"
+              data-welt="${escapeHtml(welt.id)}">${escapeHtml(welt.name)}</button>`),
+  ].join('');
+}
+
+function zeichneFacetten() {
+  const behälter = document.getElementById('weltFacetten');
+  if (!behälter) return;
+  const welt = weltNach(ausruestungFilter.welt);
+  if (!welt) { behälter.innerHTML = ''; return; }
+  const grund = weltProdukte();
+
+  behälter.innerHTML = welt.facetten.map(([name, feld, erlaubt]) => {
+    const angehakt = ausruestungFilter.facetten[feld] || new Set();
+    const zaehler = new Map();
+    facettenAnwenden(grund, feld).forEach(produkt => {
+      const wert = produkt[feld];
+      // Eine Facette darf ihre Werte eingrenzen: "Material" bei Bekleidung
+      // zeigt Textil und Leder, nicht "Regen" - das ist schon das Teil.
+      if (!wert || (erlaubt && !erlaubt.includes(wert))) return;
+      zaehler.set(wert, (zaehler.get(wert) || 0) + 1);
+    });
+    if (zaehler.size < 2 && !angehakt.size) return '';
+    const werte = [...zaehler].sort((a, b) => b[1] - a[1]);
+    return `
+      <div class="facette">
+        <span class="facette-name">${escapeHtml(name)}</span>
+        <div class="warengruppen-band facette-band">
+          ${werte.map(([wert, anzahl]) => `
+            <button type="button" class="marken-chip ${angehakt.has(wert) ? 'active' : ''}"
+                    data-facette="${escapeHtml(feld)}" data-wert="${escapeHtml(wert)}">
+              ${escapeHtml(facettenWertName(feld, wert))} <i>${anzahl}</i></button>`).join('')}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function zeichneWeltKopf(anzahl) {
+  const kopf = document.getElementById('weltKopf');
+  const sortierung = document.getElementById('weltSortierung');
+  if (!kopf) return;
+  const welt = weltNach(ausruestungFilter.welt);
+  const titel = welt ? welt.name : 'Suche';
+  const was = ausruestungFilter.suche
+    ? `${anzahl} Treffer für „${ausruestungFilter.suche}“`
+    : `${anzahl.toLocaleString('de-DE')} Artikel`;
+  kopf.innerHTML = `<h2 class="regal-titel">${escapeHtml(titel)} ${anzeigeAbzeichen()}</h2>
+    <p class="regal-grund">${escapeHtml(was)}</p>`;
+  if (sortierung) {
+    sortierung.innerHTML = Object.entries(SORTIERUNGEN).map(([id, eintrag]) => `
+      <button type="button" class="seg ${ausruestungFilter.sortierung === id ? 'active' : ''}"
+              data-sortierung="${id}">${escapeHtml(eintrag.name)}</button>`).join('');
+  }
+}
+
+function zeichneWeltRaster() {
+  const raster = document.getElementById('weltRaster');
+  const mehr = document.getElementById('btnWeltMehr');
+  if (!raster) return;
+  const treffer = gefilterteProdukte();
+  zeichneWeltKopf(treffer.length);
+  zeichneFacetten();
+
   if (!treffer.length) {
-    liste.innerHTML = '<li class="empty">Nichts gefunden &ndash; anderes Stichwort oder eine andere Warengruppe versuchen.</li>';
+    raster.innerHTML = '<p class="empty">Nichts gefunden &ndash; anderes Stichwort, oder einen Haken weniger.</p>';
     if (mehr) mehr.hidden = true;
     return;
   }
-
-  liste.innerHTML = treffer.slice(0, LISTE_HOECHSTENS).map(produktZeile).join('');
-
-  // Kein stiller Deckel: Wer nicht alles sieht, soll wenigstens wissen,
-  // dass da mehr ist.
+  const sichtbar = treffer.slice(0, JE_SEITE * ausruestungFilter.seiten);
+  raster.innerHTML = sichtbar.map(produkt => produktKarte(produkt)).join('');
   if (mehr) {
-    const rest = treffer.length - LISTE_HOECHSTENS;
+    const rest = treffer.length - sichtbar.length;
     mehr.hidden = rest <= 0;
-    mehr.textContent = `${treffer.length} Treffer, die ${LISTE_HOECHSTENS} günstigsten stehen oben. `
-      + 'Suchwort oder Warengruppe eingrenzen zeigt den Rest.';
+    mehr.textContent = `Mehr anzeigen (noch ${rest.toLocaleString('de-DE')})`;
   }
 }
 
 
-/* --- 5. Das Schaufenster: Regale in wechselnder Form -----------------------
+/* --- 6. Das Schaufenster: Highlights und Regale ----------------------------
 
-   Ohne Filter und Suchwort ist die Seite kein Katalog, sondern ein
-   Schaufenster: je Warengruppe ein Regal mit einer Handvoll Produkten,
-   und die Regale wechseln ihre Form - erst ein wischbares Band, dann ein
-   Raster zu zweit, dann drei Zeilen untereinander, und wieder von vorn.
-   Eine Seite, auf der jedes Regal gleich aussieht, liest sich wie eine
-   Tabelle.
+   Ohne Welt und Suchwort ist die Seite kein Katalog, sondern ein
+   Schaufenster: oben die Highlights, dann "Fuer dich", dann je Welt ein
+   Regal mit einer Handvoll Produkten, und die Regale wechseln ihre Form -
+   erst ein wischbares Band, dann ein Raster zu zweit, dann drei Zeilen
+   untereinander, und wieder von vorn.
 
    WELCHE Regale zuerst kommen, entscheiden die Signale, die die App hat,
    in dieser Reihenfolge: Warengruppen, aus denen etwas auf der Merkliste
@@ -206,6 +357,43 @@ function zeichneProduktListe() {
 const REGAL_FORMEN = ['band', 'raster', 'zeile'];
 const REGALE_HOECHSTENS = 6;
 const JE_REGAL = { band: 8, raster: 4, zeile: 3 };
+const HIGHLIGHTS_WIE_VIELE = 10;
+const HIGHLIGHTS_JE_GRUPPE = 3;
+// Nur die Ausruestung, die man traegt: Eine Halterung in dreissig Farben
+// fuehrt die Beliebtheitsliste sonst an, und das ist kein Highlight.
+const HIGHLIGHT_GRUPPEN = ['helm', 'jacke', 'hose', 'kombi', 'handschuh', 'stiefel', 'protektor'];
+
+/* Die Highlights: was die Haendler in den meisten Groessen und Farben
+   fuehren, quer durch die Warengruppen, hoechstens drei je Gruppe. Kein
+   Verkaufsmass, sondern das ehrlichste, das ein Feed hergibt - und die
+   Ueberschrift sagt das auch. */
+function zeichneHighlights() {
+  const behälter = document.getElementById('ausruestungHighlights');
+  if (!behälter) return;
+  const jeGruppe = {};
+  const auswahl = [];
+  const alle = sortiment();
+  const grenzen = grenzpreiseJeWarengruppe(alle);
+  alle.slice().sort(SORTIERUNGEN.relevanz.vergleich).forEach(produkt => {
+    if (auswahl.length >= HIGHLIGHTS_WIE_VIELE) return;
+    if (!HIGHLIGHT_GRUPPEN.includes(produkt.kategorie)) return;
+    if (produkt.gesamt < (grenzen.get(produkt.kategorie) || 0)) return;
+    if ((jeGruppe[produkt.kategorie] || 0) >= HIGHLIGHTS_JE_GRUPPE) return;
+    jeGruppe[produkt.kategorie] = (jeGruppe[produkt.kategorie] || 0) + 1;
+    auswahl.push(produkt);
+  });
+  if (!auswahl.length) { behälter.innerHTML = ''; return; }
+  behälter.innerHTML = `
+    <section class="regal regal-band">
+      <div class="regal-kopf">
+        <div>
+          <h2 class="regal-titel">Highlights ${anzeigeAbzeichen()}</h2>
+          <p class="regal-grund">Was unsere Partner in den meisten Größen und Farben führen</p>
+        </div>
+      </div>
+      <div class="produkt-band">${auswahl.map(produkt => produktKarte(produkt)).join('')}</div>
+    </section>`;
+}
 
 function regalReihenfolge(produkte) {
   const gruende = new Map();
@@ -297,7 +485,7 @@ function zeichneAusruestungStand() {
 }
 
 
-/* --- 6. Der Bildschirm ------------------------------------------------------ */
+/* --- 7. Der Bildschirm ------------------------------------------------------ */
 
 function zeigeAusruestung() {
   zeigeBildschirm('shopScreen');
@@ -320,62 +508,88 @@ function zeigeAusruestung() {
   });
 }
 
-// Schaufenster oder Trefferliste - je nachdem, ob gefiltert wird.
+// Schaufenster oder Welt - je nachdem, ob eine gewaehlt ist oder gesucht wird.
 function zeichneAusruestung() {
-  const schaufenster = !ausruestungFilter.kategorie && !ausruestungFilter.suche;
-  zeichneKategorien();
+  const schaufenster = !ausruestungFilter.welt && !ausruestungFilter.suche;
+  zeichneWeltChips();
   const fenster = document.getElementById('ausruestungSchaufenster');
   const treffer = document.getElementById('ausruestungTreffer');
   if (fenster) fenster.hidden = !schaufenster;
   if (treffer) treffer.hidden = schaufenster;
   if (schaufenster) {
+    zeichneHighlights();
     zeichneVorschläge();
     zeichneRegale();
   } else {
-    zeichneProduktListe();
+    zeichneWeltRaster();
   }
   zeichneAusruestungStand();
 }
 
-// "Alle ->" an einem Regal: dieselbe Warengruppe als Filter, oben beginnen.
+// "Alle ->" an einem Regal: die Welt dieser Warengruppe, oben beginnen.
 function zeigeWarengruppe(gruppe) {
-  ausruestungFilter.kategorie = gruppe || null;
+  const welt = weltFuerGruppe(gruppe);
+  setzeWelt(welt ? welt.id : null);
+  // Bei einer Welt mit mehreren Warengruppen gleich auf diese eine
+  // eingrenzen - wer "Alle Jacken" tippt, will Jacken, nicht Bekleidung.
+  if (welt && welt.gruppen.length > 1) ausruestungFilter.facetten.kategorie = new Set([gruppe]);
   zeichneAusruestung();
   document.getElementById('shopScreen').scrollTop = 0;
 }
 
 
-/* --- 7. Verkabelung ---------------------------------------------------------
-   Die Chips und die Regale werden bei jedem Zeichnen neu erzeugt, deshalb
-   haengen ihre Horcher am BEHAELTER und nicht am einzelnen Knopf. Ueberall
-   gilt: Herz VOR Karte, sonst oeffnet das Herz die Produktseite. */
+/* --- 8. Verkabelung ---------------------------------------------------------
+   Chips, Facetten und Regale werden bei jedem Zeichnen neu erzeugt,
+   deshalb haengen ihre Horcher am BEHAELTER und nicht am einzelnen Knopf.
+   Ueberall gilt: Herz VOR Karte, sonst oeffnet das Herz die Produktseite. */
 
 verkabele('shopKategorien', 'click', ereignis => {
   const chip = ereignis.target.closest('.marken-chip');
   if (!chip) return;
-  zeigeWarengruppe(chip.dataset.kategorie);
+  setzeWelt(chip.dataset.welt);
+  zeichneAusruestung();
+  document.getElementById('shopScreen').scrollTop = 0;
 });
 
 verkabele('shopSuche', 'input', ereignis => {
   ausruestungFilter.suche = ereignis.target.value.trim().toLowerCase();
+  ausruestungFilter.seiten = 1;
   zeichneAusruestung();
 });
 
-verkabele('shopProduktListe', 'click', ereignis => {
-  const herz = ereignis.target.closest('[data-merken]');
-  if (herz) { merkenUmschalten(herz.dataset.merken); return; }
-  const zeile = ereignis.target.closest('[data-produkt]');
-  if (zeile) zeigeProdukt(zeile.dataset.produkt, 'ausruestung');
+verkabele('weltFacetten', 'click', ereignis => {
+  const chip = ereignis.target.closest('[data-facette]');
+  if (!chip) return;
+  facetteUmschalten(chip.dataset.facette, chip.dataset.wert);
+  zeichneWeltRaster();
 });
 
-verkabele('ausruestungRegale', 'click', ereignis => {
-  const herz = ereignis.target.closest('[data-merken]');
-  if (herz) { merkenUmschalten(herz.dataset.merken); return; }
-  const alle = ereignis.target.closest('[data-alle]');
-  if (alle) { zeigeWarengruppe(alle.dataset.alle); return; }
-  const karte = ereignis.target.closest('[data-produkt]');
-  if (karte) zeigeProdukt(karte.dataset.produkt, 'ausruestung');
+verkabele('weltSortierung', 'click', ereignis => {
+  const knopf = ereignis.target.closest('[data-sortierung]');
+  if (!knopf) return;
+  ausruestungFilter.sortierung = knopf.dataset.sortierung;
+  ausruestungFilter.seiten = 1;
+  zeichneWeltRaster();
 });
+
+verkabele('btnWeltMehr', 'click', () => {
+  ausruestungFilter.seiten += 1;
+  zeichneWeltRaster();
+});
+
+function verkabeleProduktBehaelter(id, herkunft) {
+  verkabele(id, 'click', ereignis => {
+    const herz = ereignis.target.closest('[data-merken]');
+    if (herz) { merkenUmschalten(herz.dataset.merken); return; }
+    const alle = ereignis.target.closest('[data-alle]');
+    if (alle) { zeigeWarengruppe(alle.dataset.alle); return; }
+    const karte = ereignis.target.closest('[data-produkt]');
+    if (karte) zeigeProdukt(karte.dataset.produkt, herkunft);
+  });
+}
+verkabeleProduktBehaelter('weltRaster', 'ausruestung');
+verkabeleProduktBehaelter('ausruestungRegale', 'ausruestung');
+verkabeleProduktBehaelter('ausruestungHighlights', 'ausruestung');
 
 verkabele('btnAusruestungMerkliste', 'click', () => {
   ladeMerklistenKataloge().then(zeigeMerkliste);

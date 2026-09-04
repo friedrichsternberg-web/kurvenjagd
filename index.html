@@ -1431,8 +1431,10 @@
           <p>
             Im Bereich &bdquo;Reifen&ldquo; zeigt die App Angebote von
             <b>reifen.com</b> (reifencom GmbH, S&uuml;dfeldstra&szlig;e 16,
-            30453 Hannover), vermittelt &uuml;ber das Partnernetzwerk
-            <b>AWIN</b> (Awin AG, Eichhornstra&szlig;e 3, 10785 Berlin).
+            30453 Hannover) und <b>Reifentiefpreis</b> (MD-Tuning,
+            Helbigsdorf 83, 09619 Mulda), beide vermittelt &uuml;ber das
+            Partnernetzwerk <b>AWIN</b> (Awin AG, Eichhornstra&szlig;e 3,
+            10785 Berlin).
             Im Bereich &bdquo;Ausr&uuml;stung&ldquo; zeigt sie Angebote von
             <b>motoin</b> (motoin GmbH, Hamburg), vermittelt &uuml;ber
             <b>Webgains</b> (Webgains GmbH, Deutschland), und bei Helmen
@@ -1451,8 +1453,9 @@
           </p>
           <p class="label">Produktfotos</p>
           <p>
-            Die Fotos der Reifen und der Helme von Helmexpress liegen beim
-            Bilddienst des Netzwerks (images2.productserve.com, Awin), die
+            Die Fotos der Reifen beider H&auml;ndler und der Helme von
+            Helmexpress liegen beim Bilddienst des Netzwerks
+            (images2.productserve.com, Awin), die
             Fotos der Ausr&uuml;stung von motoin beim H&auml;ndler selbst
             (www.motoin.de). Beide werden von dort
             geladen, sobald du den jeweiligen Bereich &ouml;ffnest. Dabei
@@ -1816,19 +1819,25 @@
            weder gefiltert noch gesucht wird. Fuellen vorschlaege.js und
            shop.js. -->
       <div id="ausruestungSchaufenster">
+        <div id="ausruestungHighlights"></div>
         <div id="ausruestungVorschlaege"></div>
         <div id="ausruestungRegale"></div>
       </div>
 
-      <!-- Die Trefferliste: sobald eine Warengruppe gewaehlt ist oder ein
-           Suchwort drinsteht. Fuellt shop.js. -->
+      <!-- Die Welt-Ansicht: sobald oben eine Welt gewaehlt ist oder ein
+           Suchwort drinsteht. Kopf mit Zahl, Facetten zum Filtern,
+           Sortierung, dann das Raster seitenweise. Fuellt shop.js. -->
       <div id="ausruestungTreffer" hidden>
-        <ul id="shopProduktListe" class="saved-list produkt-liste">
-          <!-- Dieser Text ist nur zu sehen, wenn shop.js gar nicht laeuft -
-               im Normalfall ersetzt zeichneAusruestung() ihn vor dem Einblenden. -->
-          <li class="empty">Die Ausr&uuml;stung konnte nicht geladen werden. Einmal neu laden hilft meistens.</li>
-        </ul>
-        <p class="tiny" id="shopMehrZeile" hidden></p>
+        <div class="welt-kopf">
+          <div id="weltKopf"></div>
+          <div class="segmented welt-sortierung" id="weltSortierung"></div>
+        </div>
+        <div id="weltFacetten"></div>
+        <div class="produkt-raster welt-raster" id="weltRaster">
+          <!-- Dieser Text ist nur zu sehen, wenn shop.js gar nicht laeuft. -->
+          <p class="empty">Die Ausr&uuml;stung konnte nicht geladen werden. Einmal neu laden hilft meistens.</p>
+        </div>
+        <button class="btn ghost welt-mehr" id="btnWeltMehr" hidden>Mehr anzeigen</button>
       </div>
 
       <p class="tiny">Angebote unserer Partner-Shops. Kaufst du dar&uuml;ber,

@@ -397,6 +397,15 @@ der Zeit vor motoin gilt eng ausgelegt nur für reifen.com.
 Programme verbieten das ausdrücklich (Cookie-Dropping), und die App baut
 den Link deshalb erst im Moment des Klicks.
 
+### Reifentiefpreis: der Preisvergleich bei den Reifen (seit 03.09.2026)
+
+Der Reifen-Bildschirm zeigt zusätzlich Angebote von **Reifentiefpreis**
+(MD-Tuning, Mulda), ebenfalls über AWIN. Ein Reifen ist derselbe, wenn
+beide Feeds dieselbe EAN nennen; das prüft das Importskript, nicht die
+App. Je Reifen stehen dann beide Angebote in der Karte, das günstigste
+zuerst. Datenverarbeitung wie bei reifen.com: Klick über awin1.com mit
+Produktnummer, Fotos über den Bilddienst des Netzwerks ohne Cookie.
+
 ### Helmexpress und der erste Preisvergleich (seit 03.09.2026)
 
 Bei Helmen zeigt die App zusätzlich Angebote von **Helmexpress** (Loitz

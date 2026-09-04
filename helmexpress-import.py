@@ -78,6 +78,16 @@ KEIN_HELM = re.compile(
     r'reit|ski|fahrrad|bike|snowboard|kletter|skate|bmx|mtb|downhill',
     re.I)
 HELM_MINDESTPREIS_CENT = 3000
+# Die Helmart aus dem Namen - der Feed hat kein Feld dafuer.
+UNTERARTEN = [
+    (re.compile(r'klapp', re.I), 'klapp'),
+    (re.compile(r'modular', re.I), 'modular'),
+    (re.compile(r'cross|enduro|mx\b|offroad', re.I), 'cross'),
+    (re.compile(r'jet|halbschal|braincap', re.I), 'jet'),
+    (re.compile(r'integral|fullface|full-face', re.I), 'integral'),
+    (re.compile(r'kinder|youth|junior', re.I), 'kinder'),
+]
+UNTERART_SONST = 'integral'   # "Helm" ohne Zusatz ist bei einem Helmshop fast immer einer
 # Marken, die keine Motorradhelme bauen. Ein "Kinderhelm" von Puky ist ein
 # Fahrradhelm, und das Wort verraet es nicht.
 KEINE_MOTORRADMARKE = {
@@ -176,6 +186,8 @@ def fasse_zusammen(text):
         })
         p['varianten'] += 1
         p['namen'][zeile['product_name'].strip()] += 1
+        if 'unterart' not in p:
+            p['unterart'] = next((u for muster, u in UNTERARTEN if muster.search(name)), UNTERART_SONST)
         if zeile['ean']:
             p['eans'].add(zeile['ean'].strip())
         farbe = zeile['colour'] or ''
@@ -215,6 +227,8 @@ def main():
     treffer, mehrdeutig = zuordnung_zu_motoin(produkte, motoin_eans)
     print(f'{len(treffer)} Helme mit Gegenstueck bei motoin, {mehrdeutig} mehrdeutig weggelassen')
 
+    unterarten = sorted({p['unterart'] for p in produkte.values()})
+    unterarten_platz = {u: i for i, u in enumerate(unterarten)}
     marken = [m for m, _ in collections.Counter(p['marke'] for p in produkte.values()).most_common()]
     marken_platz = {m: i for i, m in enumerate(marken)}
     häufig = collections.Counter(tuple(sorted(p['groessen'])) for p in produkte.values() if p['groessen'])
@@ -232,7 +246,8 @@ def main():
         name = p['namen'].most_common(1)[0][0]
         # Feldfolge, siehe katalog.js: AWIN-Produktnummer, Marke, Name,
         # Groessen, Preis, Versand, GTIN, Adresspfad, Bildquelle,
-        # Bildsignatur, motoin-Nummer (0 = kein Gegenstueck).
+        # Bildsignatur, motoin-Nummer (0 = kein Gegenstueck), Unterart,
+        # Beliebt (Zahl der Feedzeilen, gedeckelt bei 30).
         reihen.append([
             int(p['awid']),
             marken_platz[p['marke']],
@@ -245,6 +260,8 @@ def main():
             quelle,
             signatur,
             treffer.get(adresse, 0),
+            unterarten_platz[p['unterart']],
+            min(30, p['varianten']),
         ])
     reihen.sort(key=lambda r: r[4])
 
@@ -253,6 +270,7 @@ def main():
         'stand': datetime.date.today().isoformat(),
         'partner': 'helmexpress',
         'warengruppen': ['helm'],
+        'unterarten': unterarten,
         'zielBasis': ADRESS_BASIS,
         'bildDienst': 'https://images2.productserve.com/',
         'bildQuelle': BILD_QUELLE,

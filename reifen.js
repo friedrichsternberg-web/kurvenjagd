@@ -40,7 +40,15 @@
    Die Felder je Reifen sind kurz gehalten, weil es fast viertausend sind.
    Was sie bedeuten:
 
-     i  die Produktnummer bei AWIN - daraus wird der Provisionslink
+     a  die ANGEBOTE, je eines pro Haendler, der diesen Reifen fuehrt:
+        [Haendlerplatz, Produktnummer bei AWIN, Preis, Versand], das
+        guenstigste zuerst. Der Haendlerplatz zeigt in die Liste
+        "haendler" im Kopf des Katalogs. Zusammengefuehrt wird im
+        Importskript ueber die EAN (siehe reifen-import.py).
+     i  Produktnummer des guenstigsten Angebots (= a[0][1])
+     p  Preis des guenstigsten Angebots       (= a[0][2])
+     k  Versand des guenstigsten Angebots     (= a[0][3])
+     bb welche Bildquelle (Platz in "bildBasen")
      m  Platz der Marke in der Liste "marken"
      n  Modellname, kurz: "Angel GT 2"
      v  die volle Bezeichnung des Haendlers, unveraendert
@@ -48,8 +56,6 @@
      q  Querschnitt in Prozent      (70)
      z  Felgendurchmesser in Zoll   (17)
      l  'v' vorn, 'h' hinten, 'b' ohne Angabe des Haendlers
-     p  Preis in Euro
-     k  Versandkosten in Euro
      f  Pfadrest des Produktbilds (null: keines)
      g  Signatur des Bildservers dazu */
 
@@ -124,10 +130,10 @@ function ladeReifenKatalog() {
    Der KLICK auf ein Angebot ist etwas anderes: Dort setzt awin1.com eine
    Kennung mit 30 Tagen Laufzeit, und dafuer fragt partner.js. */
 function reifenBildAdresse(reifen, groesse) {
-  if (!reifen.f || !reifen.g || !reifenKatalog?.bildBasis) return null;
+  if (!reifen.f || !reifen.g || !reifenKatalog?.bildBasen) return null;
   return 'https://images2.productserve.com/?w=' + groesse + '&h=' + groesse
     + '&bg=white&trim=5&t=letterbox&url='
-    + encodeURIComponent('ssl:' + reifenKatalog.bildBasis + reifen.f)
+    + encodeURIComponent('ssl:' + reifenKatalog.bildBasen[reifen.bb || 0] + reifen.f)
     + '&feedId=' + encodeURIComponent(reifenKatalog.feed || '')
     + '&k=' + encodeURIComponent(reifen.g);
 }
@@ -502,9 +508,6 @@ function zeichneReifenMarken() {
    Vergleich der Reifenpreise nicht verwischen. Sortiert wird ohnehin nach
    der Summe. */
 function reifenZeileHtml(reifen) {
-  const versand = reifen.k === 0
-    ? 'versandkostenfrei'
-    : `zzgl. ${preisText(reifen.k)} Versand &middot; gesamt ${preisText(reifen.p + reifen.k)}`;
   const lage = reifen.l === 'v' ? 'Vorderreifen'
     : reifen.l === 'h' ? 'Hinterreifen' : 'vorn oder hinten';
 
@@ -518,20 +521,44 @@ function reifenZeileHtml(reifen) {
     : `<span class="reifen-symbol" aria-hidden="true">${symbol('reifen')}</span>`;
 
   return `
-    <li class="reifen-karte">
+    <li class="reifen-karte${reifen.a.length > 1 ? ' reifen-vergleich' : ''}">
       ${bildFeld}
       <span class="reifen-text">
         <span class="reifen-marke">${escapeHtml(reifenMarke(reifen))}</span>
         <span class="reifen-modell">${escapeHtml(reifen.n)}</span>
         <span class="reifen-bezeichnung">${escapeHtml(reifen.v)}</span>
-        <span class="reifen-meta">${lage} <i>&middot;</i> ${versand}</span>
+        <span class="reifen-meta">${lage}${reifen.a.length > 1 ? ' <i>&middot;</i> bei ' + reifen.a.length + ' Shops' : ''}</span>
       </span>
       <span class="reifen-preis-spalte">
-        <span class="reifen-preis">${preisText(reifen.p)}</span>
         <span class="badge anzeige">Anzeige</span>
-        <button class="btn klein" data-reifen="${escapeHtml(reifen.i)}">Zum Shop</button>
+        ${reifen.a.map((angebot, stelle) => reifenAngebotHtml(angebot, stelle === 0 && reifen.a.length > 1)).join('')}
       </span>
     </li>`;
+}
+
+/* Ein Angebot in der Preisspalte: Haendler, Preis, Versand, Knopf. Der
+   Preis ist der Reifenpreis, nicht die Summe - sonst staende darunter
+   "zzgl. Versand" und meinte etwas, das schon drin ist. Kostet der Versand
+   etwas, steht die Summe daneben; der Gesamtpreis muss sichtbar sein (BGH
+   "Froogle"), und sortiert wird ohnehin nach der Summe. Bei zwei Haendlern
+   traegt das guenstigste Angebot die Signalfarbe. */
+function reifenAngebotHtml(angebot, guenstigstes) {
+  const [haendlerPlatz, nummer, preis, versand] = angebot;
+  const haendlerId = reifenKatalog.haendler[haendlerPlatz];
+  const haendlerName = partnerNach(haendlerId)?.name || 'Partner-Shop';
+  const versandText = versand === 0
+    ? 'versandkostenfrei'
+    : `zzgl. ${preisText(versand)} &middot; gesamt ${preisText(preis + versand)}`;
+  return `
+    <span class="reifen-angebot${guenstigstes ? ' guenstigstes' : ''}">
+      <span class="reifen-angebot-text">
+        <span class="reifen-angebot-shop">${escapeHtml(haendlerName)}</span>
+        <span class="reifen-preis">${preisText(preis)}</span>
+        <span class="reifen-angebot-versand">${versandText}</span>
+      </span>
+      <button class="btn klein" data-reifen="${escapeHtml(nummer)}"
+              data-haendler="${escapeHtml(haendlerId)}">Zum Shop</button>
+    </span>`;
 }
 
 function zeichneReifenListe() {
@@ -569,8 +596,8 @@ function zeichneReifenListe() {
    Alles laeuft ueber oeffnePartnerLink() in partner.js - dort steht die
    Einwilligung davor. Hier wird nur der Link gebaut. */
 
-function öffneReifenAngebot(produktNummer) {
-  const partner = partnerNach('reifencom');
+function öffneReifenAngebot(produktNummer, haendlerId) {
+  const partner = partnerNach(haendlerId || 'reifencom');
   const adresse = partnerProduktLink(partner, produktNummer);
   if (!adresse) { showToast('Dieses Angebot lässt sich gerade nicht öffnen.'); return; }
   öffnePartnerLink(adresse, partner);
@@ -628,7 +655,7 @@ verkabele('reifenMarken', 'click', ereignis => {
 
 verkabele('reifenListe', 'click', ereignis => {
   const knopf = ereignis.target.closest('button[data-reifen]');
-  if (knopf) öffneReifenAngebot(knopf.dataset.reifen);
+  if (knopf) öffneReifenAngebot(knopf.dataset.reifen, knopf.dataset.haendler);
 });
 
 verkabele('btnReifenMehr', 'click', () => {

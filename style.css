@@ -4228,6 +4228,39 @@ body.nav-modus .leaflet-control-container { display: none; }
 }
 .regal-grund { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); }
 
+/* ---------- Die Welt-Ansicht ----------
+   Kopf mit Zahl und Sortierung, darunter je Facette eine Zeile Chips, dann
+   das Raster. Die Facettenzeilen wischen wie die Warengruppen oben. */
+.welt-kopf {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--s3);
+  flex-wrap: wrap;
+  margin: var(--s4) 0 var(--s3);
+}
+.welt-kopf .regal-titel { margin: 0; }
+.welt-sortierung { flex: 0 0 auto; margin: 0; }
+.welt-sortierung .seg { padding: 6px 12px; font-size: 12.5px; white-space: nowrap; }
+.facette { display: flex; align-items: center; gap: var(--s2); margin-bottom: 2px; }
+.facette-name {
+  flex: 0 0 76px;
+  font-family: var(--schrift-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.facette-band { flex: 1 1 auto; min-width: 0; margin: 0 calc(-1 * var(--s4)) 0 0; padding: 2px var(--s4) var(--s2) 0; }
+.facette-band .marken-chip i { font-style: normal; opacity: 0.55; margin-left: 4px; font-size: 11px; }
+.welt-raster { margin-top: var(--s3); }
+.welt-raster .empty { grid-column: 1 / -1; }
+.welt-mehr { margin-top: var(--s4); }
+/* Das Abzeichen auf der Karte: winzig, unten links, damit auch ein
+   Raster aus achtundvierzig Karten an jeder gekennzeichnet ist. */
+.produkt-karte .badge.anzeige { font-size: 9px; padding: 0 6px; margin-top: 2px; }
+
 /* Die Merkliste in der Garage: dieselbe Platte wie die anderen, nur mit
    der Signalfarbe im Rand und in der Ecke. Die eigenen Sachen duerfen
    das eine Regal sein, das leuchtet. */
@@ -4793,6 +4826,21 @@ body.nav-modus .karten-knopf { display: none; }
   line-height: 1;
   color: var(--text);
 }
+/* Ein Angebot in der Preisspalte. Bei zwei Haendlern stehen zwei davon
+   untereinander; das guenstigste traegt die Signalfarbe am Preis. */
+.reifen-angebot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--s2);
+  padding-top: 5px;
+}
+.reifen-angebot + .reifen-angebot { border-top: 1px solid var(--glas-hell); }
+.reifen-angebot-text { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.reifen-angebot-shop { font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+.reifen-angebot-versand { font-size: 11px; color: var(--muted); text-align: right; }
+.reifen-angebot.guenstigstes .reifen-preis { color: var(--accent-hell); }
+.reifen-angebot .btn.klein { flex: 0 0 auto; }
 
 .reifen-offen { margin-top: var(--s5); }
 .reifen-offen b { color: var(--text); font-weight: 600; }
@@ -4865,15 +4913,18 @@ body.nav-modus .karten-knopf { display: none; }
      unter beide. Ein Symbol allein in der ersten Zeile saehe aus, als
      fehle daneben etwas. */
   .reifen-text { flex: 1 1 0; min-width: 60%; }
+  /* Die Angebote untereinander, jedes als eigene Zeile ueber die volle
+     Breite: Haendler und Preis links, der Knopf rechts. Seit es zwei
+     Haendler gibt, passen sie nebeneinander in keine Handybreite. */
   .reifen-preis-spalte {
     flex: 1 1 100%;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-end;
-    gap: var(--s3);
+    align-items: stretch;
     margin-top: var(--s1);
   }
-  .reifen-preis { margin-right: auto; }
+  .reifen-preis-spalte .badge.anzeige { align-self: flex-end; }
+  .reifen-angebot { justify-content: space-between; }
+  .reifen-angebot-text { align-items: flex-start; }
+  .reifen-angebot-versand { text-align: left; }
 }
 
 /* Produktfoto in der Angebotszeile. Die Fotos kommen vom Bildserver des

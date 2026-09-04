@@ -87,6 +87,18 @@ const PARTNER = [
     bilderErlaubt: true,
   },
   {
+    id: 'reifentiefpreis',
+    name: 'Reifentiefpreis',
+    betreiber: 'MD-Tuning, Mulda (Sachsen)',
+    netz: 'awin',
+    kennung: { publisher: AWIN_PUBLISHER, mid: '14701' },
+    start: 'https://www.reifentiefpreis.de/',
+    cookieTage: 60,
+    provision: '2 bis 3 Prozent vom Warenwert',
+    versandfrei: 'Reifentiefpreis liefert Reifen frachtfrei.',
+    bilderErlaubt: true,
+  },
+  {
     id: 'helmexpress',
     name: 'Helmexpress',
     betreiber: 'Loitz GmbH & Co KG, Lauterach (Österreich)',

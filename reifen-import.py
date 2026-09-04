@@ -38,6 +38,7 @@ import json
 import os
 import re
 import sys
+import urllib.parse
 import urllib.request
 from datetime import date
 
@@ -46,19 +47,40 @@ from datetime import date
 # richtigen Konto gehoert.
 PUBLISHER = '3056191'
 
-# Das Partnerprogramm. MID ist die Advertiser-Nummer bei AWIN, FEED die
-# Nummer des Produktdatenfeeds. Kommt ein zweiter Haendler dazu, wird das
-# hier eine Liste - und der Katalog bekommt je Reifen ein Feld "haendler".
-MID = '7605'
-FEED = '30599'
-HAENDLER = 'reifencom'
+# Die Partnerprogramme. Seit dem 03.09.2026 sind es ZWEI Haendler, und der
+# Katalog traegt je Reifen eine Liste von Angeboten. Zusammengefuehrt wird
+# ueber die EAN: Ein Reifen ist derselbe, wenn beide Feeds dieselbe
+# Strichcode-Nummer nennen - das ist bei Reifen eindeutig, weil jede
+# Groesse eine eigene hat. Gemessen am 03.09.2026: 2.782 Reifen gibt es bei
+# beiden, und bei 2.666 davon ist Reifentiefpreis guenstiger.
+#
+#   id        der Schluessel in partner.js
+#   mid       die Advertiser-Nummer bei AWIN
+#   feed      die Nummer des Produktdatenfeeds
+#   spalten   was der Feed liefern soll - die beiden Feeds heissen ihre
+#             Spalten verschieden, deshalb je Haendler eine Liste
+HAENDLER = [
+    {
+        'id': 'reifencom',
+        'mid': '7605',
+        'feed': '30599',
+        'spalten': ('aw_product_id,ean,brand_name,product_name,dimensions,search_price,'
+                    'delivery_cost,in_stock,merchant_product_category_path,'
+                    'aw_image_url,merchant_image_url'),
+    },
+    {
+        'id': 'reifentiefpreis',
+        'mid': '14701',
+        'feed': '37241',
+        'spalten': ('aw_product_id,ean,brand_name,product_name,search_price,'
+                    'delivery_cost,in_stock,merchant_category,aw_image_url'),
+    },
+]
 
 FEED_ADRESSE = (
     'https://productdata.awin.com/datafeed/download/apikey/{schluessel}'
-    '/fid/' + FEED + '/format/csv/language/de/delimiter/%2C/compression/gzip'
-    '/columns/aw_product_id%2Cbrand_name%2Cproduct_name%2Cdimensions'
-    '%2Csearch_price%2Cdelivery_cost%2Cin_stock%2Cdelivery_time'
-    '%2Cmerchant_product_category_path%2Caw_image_url%2Cmerchant_image_url/'
+    '/fid/{feed}/format/csv/language/de/delimiter/%2C/compression/gzip'
+    '/columns/{spalten}/'
 )
 
 # Eine JS-Datei, kein JSON. Grund: Die App laedt den Katalog als
@@ -74,8 +96,12 @@ ZIEL = 'reifen-katalog.js'
 # der Groesse (w=70 und w=400 tragen dieselbe). Deshalb speichern wir je
 # Reifen nur den Pfadrest und die Signatur, und die App setzt die Adresse
 # in der Groesse zusammen, die sie gerade braucht.
-BILD_PRAEFIX = 'https://www.reifen.com/images/thumbs/'
+BILD_QUELLEN = {
+    'reifencom': 'www.reifen.com/images/thumbs/',
+    'reifentiefpreis': 'www.reifentiefpreis.de/bild/feed/',
+}
 SIGNATUR = re.compile(r'[?&]k=([0-9a-f]{40})')
+QUELLE = re.compile(r'[?&]url=([^&]+)')
 
 # Nur was reifen.com selbst als Motorradreifen fuehrt. Autoreifen tragen
 # dasselbe Groessenmuster (205/55 R16) - ohne diese Pruefung landeten sie
@@ -87,6 +113,12 @@ KATEGORIE = 'Motorrad > Motorradreifen'
 # heraus - sie passen an kein Motorrad, fuer das Serpa gemacht ist, und
 # die Groessenwahl der App waere mit ihnen unbedienbar.
 MASS = re.compile(r'^(\d{2,3})/(\d{2,3}) R(\d{2})$')
+# Reifentiefpreis liefert keine Spalte "dimensions"; die Groesse steht im
+# Namen: "130/90-15", "120/70R19", "170/60 R17". Die alten Zollmasse
+# ("MT90-16") fallen wie bei reifen.com heraus.
+MASS_IM_NAMEN = re.compile(r'(\d{2,3})/(\d{2,3})\s*(?:ZR|R|B|-)?\s*-?\s*(\d{2})\b')
+# Nur die Motorradgruppen des Feeds - Autoreifen tragen dasselbe Mass.
+KATEGORIEN_REIFENTIEFPREIS = ('Motorrad-Strasse', 'Motorrad-Enduro')
 
 # Zwei Sorten rutschen durch das Muster durch und gehoeren trotzdem nicht
 # in den Katalog:
@@ -129,10 +161,11 @@ def schluessel_holen():
             '(siehe Kopf dieser Datei)')
 
 
-def feed_lesen(schluessel):
-    """Laedt den gepackten Feed und gibt die Zeilen als Woerterbuecher."""
-    adresse = FEED_ADRESSE.format(schluessel=schluessel)
-    print('Hole den Feed von AWIN ...')
+def feed_lesen(schluessel, haendler):
+    """Laedt den gepackten Feed eines Haendlers und gibt die Zeilen als Woerterbuecher."""
+    adresse = FEED_ADRESSE.format(schluessel=schluessel, feed=haendler['feed'],
+                                  spalten=haendler['spalten'].replace(',', '%2C'))
+    print(f'Hole den Feed von {haendler["id"]} ...')
     with urllib.request.urlopen(adresse, timeout=180) as antwort:
         gepackt = antwort.read()
     print(f'  {len(gepackt) // 1024} KB gepackt')
@@ -161,100 +194,150 @@ def kurzname(name):
     return re.sub(r'\s+', ' ', ohne_kuerzel).strip()
 
 
-def bild_feld(zeile):
+def bild_feld(zeile, haendler_id):
     """Pfadrest und Signatur des Produktbilds, oder (None, None).
 
-    Beides zusammen ergibt in der App wieder die signierte Adresse. Ein
-    Reifen ohne Bild bekommt in der App das gezeichnete Symbol."""
-    haendler_bild = zeile.get('merchant_image_url', '')
+    Beides zusammen ergibt in der App wieder die signierte Adresse. Die
+    Quelle steht in der Adresse des Bilddiensts selbst (url=ssl:...), so
+    braucht es die Haendler-Bildspalte nicht. Ein Reifen ohne Bild bekommt
+    in der App das gezeichnete Symbol."""
     netz_bild = zeile.get('aw_image_url', '')
     unterschrift = SIGNATUR.search(netz_bild)
-    if not haendler_bild.startswith(BILD_PRAEFIX) or not unterschrift:
+    quelle = QUELLE.search(netz_bild)
+    if not unterschrift or not quelle:
         return None, None
-    return haendler_bild[len(BILD_PRAEFIX):], unterschrift.group(1)
+    pfad = urllib.parse.unquote(quelle.group(1))
+    basis = 'ssl:' + BILD_QUELLEN[haendler_id]
+    if not pfad.startswith(basis):
+        return None, None
+    return pfad[len(basis):], unterschrift.group(1)
 
 
-def katalog_bauen(zeilen):
+def mass_lesen(zeile, haendler_id):
+    """(Breite, Querschnitt, Zoll) oder None - je nachdem, wo der Feed
+    die Groesse hinschreibt."""
+    if haendler_id == 'reifencom':
+        treffer = MASS.match(zeile.get('dimensions', ''))
+    else:
+        treffer = MASS_IM_NAMEN.search(zeile['product_name'])
+    if not treffer:
+        return None
+    return int(treffer.group(1)), int(treffer.group(2)), int(treffer.group(3))
+
+
+def ist_motorradreifen(zeile, haendler_id):
+    if haendler_id == 'reifencom':
+        return zeile['merchant_product_category_path'].startswith(KATEGORIE)
+    return zeile['merchant_category'] in KATEGORIEN_REIFENTIEFPREIS
+
+
+def katalog_bauen(feeds):
+    """feeds: Liste aus (haendler, zeilen). Der erste Haendler gibt die
+    Reihenfolge und die Namen vor; was ein spaeterer ueber die EAN trifft,
+    wird zum weiteren ANGEBOT desselben Reifens, was er nicht trifft, zum
+    eigenen Eintrag."""
     marken = []
     reifen = []
+    nach_ean = {}
     uebersprungen = 0
     ohne_bild = 0
+    zusammengefuehrt = 0
+    haendler_ids = [h['id'] for h, _ in feeds]
 
-    for zeile in zeilen:
-        if not zeile['merchant_product_category_path'].startswith(KATEGORIE):
-            continue
-        mass = MASS.match(zeile['dimensions'])
-        if not mass:
-            uebersprungen += 1
-            continue
-        if zeile['in_stock'] != '1':
-            continue
-        breite, querschnitt = int(mass.group(1)), int(mass.group(2))
-        if breite < BREITE_MINDESTENS or querschnitt > QUERSCHNITT_HOECHSTENS:
-            uebersprungen += 1
-            continue
+    for platz, (haendler, zeilen) in enumerate(feeds):
+        hid = haendler['id']
+        for zeile in zeilen:
+            if not ist_motorradreifen(zeile, hid) or zeile['in_stock'] != '1':
+                continue
+            mass = mass_lesen(zeile, hid)
+            if not mass:
+                uebersprungen += 1
+                continue
+            breite, querschnitt, zoll = mass
+            if breite < BREITE_MINDESTENS or querschnitt > QUERSCHNITT_HOECHSTENS:
+                uebersprungen += 1
+                continue
 
-        marke = zeile['brand_name'].strip()
-        if marke not in marken:
-            marken.append(marke)
+            angebot = [
+                platz,                                         # Haendler
+                zeile['aw_product_id'],                        # Produktnummer bei AWIN
+                round(float(zeile['search_price']), 2),        # Preis
+                round(float(zeile['delivery_cost'] or 0), 2),  # Versand, aus dem Feed
+            ]
+            ean = (zeile.get('ean') or '').strip()
 
-        name = zeile['product_name'].strip()
-        bild_pfad, bild_signatur = bild_feld(zeile)
-        if bild_pfad is None:
-            ohne_bild += 1
-        reifen.append({
-            'i': zeile['aw_product_id'],
-            'm': marken.index(marke),
-            'n': kurzname(name) or name,
-            'v': name,
-            'b': breite,
-            'q': querschnitt,
-            'z': int(mass.group(3)),
-            'l': lage_bestimmen(name),
-            'p': round(float(zeile['search_price']), 2),
-            # Versandkosten stehen je Reifen im Feed und werden NICHT
-            # pauschal angenommen: reifen.com liefert Motorradreifen
-            # frachtfrei, aber das kann sich aendern, und ein Preis ohne
-            # Versand waere irrefuehrend (BGH "Froogle").
-            'k': round(float(zeile['delivery_cost'] or 0), 2),
-            # Produktbild: Pfadrest hinter BILD_PRAEFIX und die Signatur.
-            # None heisst: kein Bild, die App zeichnet ihr Symbol.
-            'f': bild_pfad,
-            'g': bild_signatur,
-        })
+            # Schon da? Dann nur das Angebot dazu.
+            if ean and ean in nach_ean:
+                nach_ean[ean]['a'].append(angebot)
+                zusammengefuehrt += 1
+                continue
 
-    # Guenstigster zuerst. Die App sortiert selbst, aber ein sortierter
-    # Katalog packt sich besser und liest sich von Hand angenehmer.
-    reifen.sort(key=lambda eintrag: eintrag['p'])
-    print(f'  {len(reifen)} Motorradreifen, {len(marken)} Marken')
-    print(f'  {uebersprungen} uebersprungen (Zoll-, Quad- und Slickmasse)')
+            marke = zeile['brand_name'].strip()
+            if marke not in marken:
+                marken.append(marke)
+            name = zeile['product_name'].strip()
+            bild_pfad, bild_signatur = bild_feld(zeile, hid)
+            if bild_pfad is None:
+                ohne_bild += 1
+            eintrag = {
+                'm': marken.index(marke),
+                'n': kurzname(name) or name,
+                'v': name,
+                'b': breite, 'q': querschnitt, 'z': zoll,
+                'l': lage_bestimmen(name),
+                'f': bild_pfad,
+                'g': bild_signatur,
+                'bb': platz,        # welche Bildquelle
+                'a': [angebot],
+            }
+            reifen.append(eintrag)
+            if ean:
+                nach_ean[ean] = eintrag
+
+    # Je Reifen das guenstigste Angebot (Preis plus Versand) nach vorn, und
+    # seine Werte auch als i/p/k obenauf - so bleibt die App lesbar, die
+    # nur EIN Angebot je Reifen kennt.
+    for eintrag in reifen:
+        eintrag['a'].sort(key=lambda a: a[2] + a[3])
+        bestes = eintrag['a'][0]
+        eintrag['i'] = bestes[1]
+        eintrag['p'] = bestes[2]
+        eintrag['k'] = bestes[3]
+    reifen.sort(key=lambda eintrag: eintrag['p'] + eintrag['k'])
+
+    mit_zwei = sum(1 for r in reifen if len(r['a']) > 1)
+    print(f'  {len(reifen)} Motorradreifen, {len(marken)} Marken, '
+          f'{mit_zwei} davon bei beiden Haendlern ({zusammengefuehrt} zusammengefuehrt)')
+    print(f'  {uebersprungen} uebersprungen (Zoll-, Quad- und Slickmasse, ohne Mass)')
     print(f'  {ohne_bild} ohne Produktbild')
 
     return {
         'stand': date.today().isoformat(),
-        'haendler': HAENDLER,
+        'haendler': haendler_ids,
         'publisher': PUBLISHER,
-        'mid': MID,
-        'feed': FEED,
-        'bildBasis': BILD_PRAEFIX.replace('https://', ''),
+        'bildBasen': [BILD_QUELLEN[hid] for hid in haendler_ids],
         'marken': marken,
         'reifen': reifen,
     }
 
 
 def main():
-    zeilen = feed_lesen(schluessel_holen())
-    print(f'  {len(zeilen)} Zeilen im Feed')
-    katalog = katalog_bauen(zeilen)
+    schluessel = schluessel_holen()
+    feeds = []
+    for haendler in HAENDLER:
+        zeilen = feed_lesen(schluessel, haendler)
+        print(f'  {len(zeilen)} Zeilen im Feed')
+        feeds.append((haendler, zeilen))
+    katalog = katalog_bauen(feeds)
     if len(katalog['reifen']) < 1000:
         sys.exit(f'Nur {len(katalog["reifen"])} Reifen - das sieht nach einem '
                  'kaputten Feed aus. Der alte Katalog bleibt stehen.')
     with open(ZIEL, 'w', encoding='utf-8') as datei:
         datei.write(
             '/* REIFEN-KATALOG - GENERIERTE DATEI, nicht von Hand anfassen.\n'
-            '   Erzeugt von reifen-import.py aus dem AWIN-Produktdatenfeed\n'
-            '   von reifen.com. Was die Kurzfelder bedeuten, steht im Kopf\n'
-            '   von reifen.js. */\n'
+            '   Erzeugt von reifen-import.py aus den AWIN-Produktdatenfeeds\n'
+            '   von reifen.com und Reifentiefpreis. Was die Kurzfelder bedeuten,\n'
+            '   steht im Kopf von reifen.js. */\n'
             'const REIFEN_KATALOG = ')
         json.dump(katalog, datei, ensure_ascii=False, separators=(',', ':'))
         datei.write(';\n')

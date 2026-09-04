@@ -431,10 +431,10 @@ braucht deshalb den motoin-Feed unter `~/Downloads/products.csv`.
 - **Katalog frisch halten:** `python3 helmexpress-import.py` holt den
   Feed selbst (AWIN-Schlüssel wie bei den Reifen). Vorher den
   motoin-Feed herunterladen, sonst fehlen die Verknüpfungen.
-- **Reifentiefpreis DE ist ebenfalls angenommen** (AWIN 14701, Feed
-  37241, 57.915 Artikel). Das wäre der zweite Reifenhändler und damit der
-  Preisvergleich bei den Reifen – dasselbe Muster wie bei den Helmen,
-  nur ist dort die Dimension der Schlüssel, nicht die EAN.
+- **Reifentiefpreis DE ist eingebaut** (03.09.2026): zweiter
+  Reifenhändler, Vergleich über die EAN, 2.480 Reifen bei beiden. Der
+  Reifenkatalog ist damit 365 KB gepackt; alle vier Kataloge zusammen
+  rund 665 KB. Budget neu vereinbaren, siehe oben.
 
 ### Wen als Nächstes beantragen
 
