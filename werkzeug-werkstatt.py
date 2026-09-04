@@ -1,6 +1,6 @@
 # werkzeug-werkstatt.py - baut die beiden Bilder der Garagen-Buehne.
 #
-# AUFRUF im Projektordner (die Vorlage muss danebenliegen):
+# AUFRUF im Projektordner (die Vorlage liegt in arbeitsmaterial/vorlagen):
 #
 #     python3 werkzeug-werkstatt.py [breite] [tiefe] [helligkeit] [farbe]
 #
@@ -22,7 +22,7 @@ import sys
 from PIL import Image, ImageDraw, ImageFilter, ImageEnhance, ImageChops
 
 PROJEKT = '/Users/friedrichsternberg/Documents/motorrad-app/'
-QUELLE = PROJEKT + 'NEUE WERKSTATT V2.png'
+QUELLE = PROJEKT + 'arbeitsmaterial/vorlagen/NEUE WERKSTATT V2.png'
 BIKE = PROJEKT + 'img/bike-standard.webp'
 
 # Ausgeliefert wird in anderthalbfacher Groesse der Quelle - dasselbe

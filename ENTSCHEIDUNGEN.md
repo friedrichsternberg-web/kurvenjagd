@@ -2409,3 +2409,63 @@ erst ein Suchwort eingeben." Was jetzt gilt:
 
 Die zwei neuen Felder kosten Platz: motoin ist im selben Budget von 6.100
 auf 5.808 Produkte gerutscht.
+
+---
+
+## 04.09.2026 — Rechtstexte nachgezogen, Projektordner aufgeräumt
+
+**Was war.** Die Datenschutzerklärung stammte in ihrer Kurzfassung noch aus
+der Zeit vor dem Ausrüstungs-Bereich. Dort stand wörtlich „Die App zeigt
+keine Werbung" und „Im Bereich Reifen zeigen wir Angebote **eines**
+Partnershops" – während Punkt 10 im selben Dokument vier Händler nannte und
+jede Produktkarte ein Abzeichen „Anzeige" trug. Ein Text, der sich selbst
+widerspricht, ist schlechter als gar keiner: Er beweist, dass niemand
+hingesehen hat.
+
+Genauso die Offenlegung unter der Reifenliste. Sie sagte „Alle Reifen auf
+dieser Seite stammen von reifen.com" und nannte die Liste „kein
+Marktvergleich, das Sortiment eines einzigen Händlers". Seit Reifentiefpreis
+dazukam, **ist** die Liste ein Vergleich – sie stellt zwei Händler
+gegenüber und sortiert nach Preis. Damit greift die Anforderung, dass
+dastehen muss, wer verglichen wird und wer nicht.
+
+**Was jetzt gilt.** Kurzfassung nennt beide Bereiche, vier Shops und die
+Kennzeichnung; der Satz „Andere Werbung zeigt die App nicht" ersetzt den
+falschen. Die Cookie-Frist steht nicht mehr pauschal mit 30 Tagen da,
+sondern mit dem Zusatz für Reifentiefpreis (60 Tage) – das
+Einwilligungsfenster nannte schon vorher die richtige Zahl je Händler, nur
+die Erklärung nicht. Die Merkliste taucht in Punkt 2 als etwas auf, das auf
+dem Gerät liegt. Die Reifen-Offenlegung nennt beide Firmen mit Sitz, beide
+Provisionshöhen und sagt, dass zwei Händler nicht der Markt sind. Ausrüstung
+und Merkliste haben dieselbe Offenlegung bekommen, samt „Preise inklusive
+Mehrwertsteuer" – die stand vorher nur unter den Reifen, obwohl im
+Ausrüstungsbereich genauso Preise stehen.
+
+**Die Regel dahinter**, sie stand schon als Kommentar über dem Bildschirm
+und gilt jetzt schwarz auf weiß: Ändert sich, was die App verschickt oder
+anzeigt, ändert sich derselbe Tag der Rechtstext. Ein neuer Partner ist
+nie nur ein Katalog.
+
+**Der Ordner.** Im Projektstamm lagen rund 40 MB Arbeitsmaterial zwischen
+den 50 Quelltextdateien: Bildvorlagen, KI-Entwürfe, eine PDF-Sammlung von
+Alpenpässen, dazu drei alte Aufnahmen in `img/`, wo eigentlich nur liegt,
+was ausgeliefert wird. Alles davon war bereits in `.gitignore`, im
+öffentlichen Repository war also nie etwas davon – die Unordnung war rein
+örtlich, und genau deshalb hat sie niemand bemerkt.
+
+Neu: ein Ordner `arbeitsmaterial/` mit `vorlagen/`, `inspiration/`,
+`recherche/`, `auftraege/` und `alte-bilder/`, dazu eine `LIESMICH.md`, die
+sagt, was wohin gehört. In `.gitignore` ersetzt eine Zeile die sechs
+Einzelregeln, die vorher jeden Dateinamen einzeln nannten. Der Hinweis auf
+die zerlegten Umlaute bleibt bei `*.pdf` stehen: Diese Falle hat das
+Projekt schon einmal fast eine Datei ins öffentliche Netz gekostet.
+
+`werkzeug-werkstatt.py` liest die Vorlage jetzt aus `arbeitsmaterial/
+vorlagen/`. Gelöscht wurde nichts.
+
+**`RECHTLICHES-ENTWURF.md` ist überholt** und trägt oben einen Vermerk
+darüber. Der Entwurf beschreibt den Stand vom 24.08.2026 mit der Shop-Demo
+und sagt ebenfalls „Die App zeigt keine Werbung" – er liegt im öffentlichen
+Repository. Er bleibt liegen, weil in ihm die Begründungen stehen, warum
+welcher Abschnitt nötig ist; das steht sonst nirgends. Ob er ganz
+verschwindet, entscheidet Friedrich.

@@ -4,15 +4,15 @@
 # Falls später Pakete dazukommen
 node_modules/
 
+# Arbeitsmaterial: Bildvorlagen, Entwuerfe, Recherche, alte Aufnahmen.
+# Zusammen rund 40 MB, und die App braucht nichts davon - was gebraucht
+# wird, liegt fertig gerechnet in img/. Am 04.09.2026 aus dem Stamm in
+# einen Ordner geraeumt, damit der Projektordner wieder zeigt, woraus die
+# App besteht. Was drin liegt, steht in arbeitsmaterial/LIESMICH.md.
+arbeitsmaterial/
+
 # Heruntergeladene Routen
 *.gpx
-
-# Unbearbeitete Kamera-Originale - viel zu groß fürs Repo, die
-# schlanke Version fürs Web liegt direkt daneben (start-hintergrund.jpg)
-img/IMG_*.JPG
-
-# iPhone-Screenshots zum Debuggen, kein Teil der App
-img/Kurvenjagd - Motorrad-Routenplaner*.png
 
 # Persönliche Projektnotizen - bleiben absichtlich nur lokal, weil das
 # GitHub-Repository öffentlich ist (nötig für die kostenlose Auslieferung
@@ -31,21 +31,6 @@ _git_muell/
 # Repository - settings.local.json enthaelt die erteilten Berechtigungen.
 .claude/
 
-# Die Rohvorlage des Werkstattraums (1,9 MB). Die App benutzt die beiden
-# gerechneten WebP-Fassungen in img/; wer den Raum neu bauen will, braucht
-# das Skript aus ENTSCHEIDUNGEN.md und diese Datei - beides gehoert nicht
-# ins oeffentliche Repository.
-NEUE WERKSTATT*.png
-
-# Die PNG-Originale des Garagenbilds (2 MB je Stueck) - die App benutzt die
-# WebP-Fassung in img/, die Originale bleiben nur lokal liegen.
-#
-# Das Sternchen steht fuer das "ue": macOS legt Umlaute im Dateinamen
-# ZERLEGT ab (u + Umlautpunkte), git vergleicht aber Zeichen fuer Zeichen -
-# ein ausgeschriebenes "Bühne" traefe die Datei nie. Derselbe Fehler steckte
-# schon einmal in diesem Projekt, siehe *.pdf weiter unten.
-Bild We*.png
-
 # Der Sicherheitsbericht. Er beschreibt Lücken, von denen einige noch OFFEN
 # sind (A8, A9, B3/B4) - in einem öffentlichen Repository wäre das eine
 # Anleitung. Er gehört in dieselbe Schublade wie CLAUDE.md und dashboard.html:
@@ -55,20 +40,6 @@ Bild We*.png
 # zu veröffentlichen - offen gelegte Sicherheitsarbeit schafft Vertrauen. Bis
 # dahin bleibt er hier.
 SICHERHEIT.md
-
-# Die Vorlagen, aus denen Symbol und Schriftzug gerechnet werden. Zusammen
-# 4,6 MB, und die App braucht keine davon: Was gebraucht wird, liegt fertig
-# in img/ (app-icon-quelle.png und logo-quelle.png sind die Archivfassungen
-# dort, die reichen fuer jede kuenftige Groesse).
-App Icon.png
-Logo.png
-
-# Quellmaterial fuer die Gestaltung: KI-Entwuerfe, Vorlagen, Schriftreste.
-# Beim Zusammenfuehren der drei Zweige am 20.08.2026 sind diese Ordner
-# versehentlich mitgewandert und lagen dadurch oeffentlich auf GitHub Pages.
-# Sie gehoeren nicht in die App - was daraus gebraucht wird, liegt in img/.
-Design Inspro/
-fonts 2/
 
 # Das Betreiber-Dashboard bleibt lokal: In seine STECKPLAETZE kommen
 # spaeter Zugaenge (AWIN, Besucherzaehler), und das Repository ist

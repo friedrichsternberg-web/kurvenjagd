@@ -1,5 +1,14 @@
 # Impressum und Datenschutzerklärung – Entwurf zum Ausfüllen
 
+> **Überholt seit dem 04.09.2026.** Dieser Entwurf beschreibt den Stand
+> vom 24.08.2026, als der Shop noch Beispieldaten zeigte. Maßgeblich ist
+> allein der Text, der in `index.html` im Bildschirm „Rechtliches" steht –
+> er nennt vier Partnershops und die Kennzeichnung als Anzeige. Zwei Sätze
+> hier unten stimmen deshalb nicht mehr: „Die App zeigt keine Werbung" und
+> „Der Shop zeigt derzeit ausschließlich mitgelieferte Beispieldaten".
+> Die Datei bleibt liegen, weil in ihr die **Begründungen** stehen, warum
+> welcher Abschnitt nötig ist – die stehen sonst nirgends.
+
 **Stand: 24.08.2026. Das ist ein Entwurf, kein Rechtsrat.** Vor dem
 Store-Gang sollte ein Fachanwalt für IT-Recht einmal darüberschauen. Für
 den jetzigen Zustand (öffentliche Web-App mit Konto-Anmeldung und
