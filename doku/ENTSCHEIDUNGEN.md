@@ -2538,3 +2538,84 @@ Umbenennung – die Geschichte jeder einzelnen bleibt lesbar.
 **Neu im Stamm: `LIESMICH.md`.** Der Wegweiser, der sagt, wo was liegt und
 wie man startet. Er ist das einzige, was ein Fremder lesen muss, um sich
 zurechtzufinden – `CLAUDE.md` bleibt privat und liegt nicht im Repository.
+
+---
+
+## 04.09.2026, abends — die Preise ziehen sich selbst nach
+
+**Der Anlass.** Bei der Rechtsprüfung am selben Tag blieb ein Punkt offen,
+den kein Rechtstext löst: Der Katalog war vom 3. September, und niemand
+hatte einen Grund, ihn nächste Woche wieder zu holen. Ein Preis, den der
+Shop nicht mehr verlangt, ist irreführende Werbung, ganz gleich wie
+sorgfältig die Offenlegung darunter formuliert ist.
+
+**Was jetzt läuft.** `.github/workflows/preise.yml`, montags um 5 Uhr UTC.
+Er holt die drei AWIN-Feeds, baut die Kataloge neu und **öffnet einen Pull
+Request**. Er pusht nicht nach `main`.
+
+Das ist der Kern der Entscheidung. Es gibt in diesem Projekt die Regel, dass
+nichts ohne ausdrückliches Wort live geht, aufgestellt am 26.08.2026 nach
+sechs Veröffentlichungen an einem Tag. Ein Auftrag, der wöchentlich selbst
+nach `main` schiebt, hätte diese Regel ausgehöhlt, auch wenn er nur Daten
+anfasst. Ein Vorschlag hält beides zusammen: Die Arbeit passiert von allein,
+die Entscheidung bleibt ein Klick.
+
+**Was er nicht kann: motoin.** Deren Feed liegt bei Webgains hinter der
+angemeldeten Sitzung, es gibt keinen Schlüssel, den man einem Skript
+mitgeben könnte. Das war schon beim Bau des Importers so und steht in
+dessen Kopf. Bleibt Handarbeit, etwa einmal im Monat.
+
+### Drei Dinge mussten dafür erst gebaut werden
+
+**1. Der Helm-Importer hätte in der Cloud alle Preisvergleiche verloren.**
+Und zwar stillschweigend, was das Schlimme daran ist. Er ordnet Helme über
+die EAN dem motoin-Gegenstück zu und braucht dafür den motoin-Feed. In der
+Cloud gibt es den nicht, `motoin_eans_lesen()` hätte ein leeres Verzeichnis
+zurückgegeben, jeder Helm hätte die Nummer 0 bekommen, und der
+Zwei-Shop-Vergleich wäre verschwunden, ohne dass irgendwo ein Fehler
+aufgetaucht wäre.
+
+Jetzt schreibt der Importer die gefundenen Paare nach
+`daten/helm-motoin-paare.json` und liest sie zurück, wenn der Feed fehlt.
+Die Adresse eines Helms bei Helmexpress ist stabil, deshalb passt die alte
+Zuordnung auf den frischen Feed. Was seit dem letzten Handlauf neu dazukam,
+hat vorerst keinen Vergleich. Das ist der Preis, und er ist klein gegen den
+Verlust aller 218 Paare.
+
+**2. Die Kataloge haben einen eigenen Stempel bekommen.** Vorher hingen sie
+an der App-Version `?v=`. Das ging, solange Preise und App zusammen
+veröffentlicht wurden. Sobald die Preise wöchentlich laufen, führt es in
+eine Sackgasse: Entweder verbraucht jeder Preislauf eine Version, oder die
+frischen Preise erreichen niemanden, der die Seite schon einmal besucht hat.
+
+Deshalb sind es jetzt zwei getrennte Zahlen. `?v=` heißt weiter „neue
+Fassung der App" und wird selten hochgezählt. `<meta name="katalog-stand">`
+heißt „neuer Preisstand" und wird von jedem Importlauf gesetzt.
+`katalogStempel()` in `js/shop/katalog.js` liest ihn, `reifen.js` benutzt
+denselben. Fehlt das meta-Element, fällt die App auf `?v=` zurück, dann ist
+der Katalog höchstens so alt wie die letzte Veröffentlichung.
+
+**3. Ein gemeinsames Modul `werkzeug/katalogstempel.py`.** Alle drei
+Importer setzen den Stempel, sobald sie schreiben. Als kopierte Funktion in
+drei Dateien wäre die Regel dreimal da und irgendwann zweimal falsch.
+
+### Was Friedrich einmalig einrichten muss
+
+Ohne diese beiden Schritte läuft der Auftrag ins Leere:
+
+1. **Settings → Secrets and variables → Actions → New repository secret.**
+   Name `AWIN_SCHLUESSEL`, Wert der Schlüssel aus `.awin-schluessel`.
+2. **Settings → Actions → General → Workflow permissions.**
+   „Allow GitHub Actions to create and approve pull requests" anhaken.
+
+Der Schlüssel liegt damit in GitHubs Tresor, nicht im Repository. Er taucht
+in keinem Protokoll auf, GitHub maskiert Secrets in der Ausgabe.
+
+### Wogegen der Auftrag absichert
+
+`reifen-import.py` bricht ab, wenn der Feed unplausibel wenige Reifen
+liefert, und lässt den alten Katalog stehen. Der Auftrag legt nur einen
+Vorschlag an, wenn sich wirklich etwas geändert hat. Er fasst mit `git add`
+ausschließlich die vier Dateien an, die ein Preislauf anfassen darf, nie
+`git add -A`. Und `pruefe.sh` läuft im selben Durchgang mit, damit ein
+Importlauf, der eine Grenze reißt, im Protokoll steht.

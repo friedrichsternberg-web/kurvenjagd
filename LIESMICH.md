@@ -28,6 +28,7 @@ reines HTML, CSS und JavaScript ohne Build-Schritt.
 | `extern/` `modell/` | fremde Bibliotheken und das Freisteller-Modell, jeweils mit Lizenz |
 | `supabase/` | die Serverfunktionen und die Datenbankschritte |
 | `arbeitsmaterial/` | alles, woraus etwas gemacht wurde. Nicht im Repository |
+| `.github/` | der wöchentliche Preislauf |
 
 ## Vor jedem Commit
 
@@ -40,5 +41,26 @@ nur in `geraet.js`, keine festen Farben in den Anordnungsdateien, `kern.js`
 ohne Oberfläche, keine Funktion über 80 Zeilen, keine Datei über 1200,
 eine einheitliche Versionsnummer. Keine Ausgabe unter einer Überschrift
 heißt: Grenze eingehalten.
+
+## Die Preise
+
+Die Produktkataloge in `daten/` werden nicht von Hand gepflegt. Ein Auftrag
+bei GitHub holt sie montags neu und legt das Ergebnis als Pull Request ab –
+er veröffentlicht nichts, das bleibt ein Klick. Von Hand geht es auch:
+
+```
+python3 werkzeug/reifen-import.py
+python3 werkzeug/helmexpress-import.py
+python3 werkzeug/motoin-import.py
+```
+
+Der letzte braucht die Datei `~/Downloads/products.csv`, die man bei
+Webgains anhaken und herunterladen muss. Die anderen beiden holen sich ihren
+Feed selbst und brauchen dafür den AWIN-Schlüssel, entweder in
+`.awin-schluessel` oder in der Umgebungsvariablen `AWIN_SCHLUESSEL`.
+
+Jeder Lauf setzt den Preisstand in `index.html` (`<meta name="katalog-stand">`).
+Der hängt bewusst **nicht** an `?v=`: Preise laufen wöchentlich, die App wird
+viel seltener veröffentlicht.
 
 Die Begründungen zu allem stehen in `doku/ENTSCHEIDUNGEN.md`.

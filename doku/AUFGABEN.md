@@ -299,11 +299,19 @@ allein der Klick zum Shop. Alles Weitere in `DATEN.md` und
 
 ### Was danach ansteht
 
-- **Den Katalog frisch halten.** `python3 reifen-import.py`, zur
-  Reifensaison (Oktober/November, April/Mai) einmal die Woche, sonst
-  alle zwei bis drei Wochen. Die App zeigt das Standdatum an jedem Preis
-  und warnt ab 14 Tagen. Später kann das eine GitHub Action erledigen –
-  der Schlüssel wäre dann ein Repository-Secret.
+- **Den Katalog frisch halten — ERLEDIGT (04.09.2026).**
+  `.github/workflows/preise.yml` holt montags die drei AWIN-Feeds und legt
+  das Ergebnis als **Pull Request** ab. Er pusht nicht nach `main`, es geht
+  also nichts ohne einen Klick live. Von Hand geht es weiter mit
+  `python3 werkzeug/reifen-import.py`.
+
+  **Zwei Schritte fehlen noch, und ohne sie läuft der Auftrag ins Leere:**
+  das Secret `AWIN_SCHLUESSEL` in den Repository-Einstellungen anlegen
+  (Settings → Secrets and variables → Actions), und unter
+  Settings → Actions → General die Option „Allow GitHub Actions to create
+  and approve pull requests" anhaken. Danach den Auftrag einmal von Hand
+  anstoßen (Actions → Preise nachziehen → Run workflow) und nachsehen, ob
+  ein Vorschlag entsteht.
 - **Reifengröße aus dem Motorrad ableiten — ERLEDIGT (01.09.2026).**
   `reifen-massen.js` kennt die Serienbereifung der gängigsten Modelle;
   `serienEintrag()` in `reifen.js` schlägt sie nach, wenn der Fahrer
@@ -356,9 +364,18 @@ stehen in `ENTSCHEIDUNGEN.md` (02.09.2026), das Konzept in
   `platform-api.webgains.com/auth/publishers/1426402/campaigns/1749874/feeds/products?format=csv`
   hängt an der angemeldeten Sitzung. Also von Hand herunterladen
   (Werbemittel → Produktfeeds → Feed herunterladen, CSV) und
-  `python3 motoin-import.py` laufen lassen. **Zu prüfen:** ob Webgains
-  einen API-Schlüssel für den Feed anbietet – dann ginge es wie bei
-  reifen.com automatisch.
+  `python3 werkzeug/motoin-import.py` laufen lassen. Etwa monatlich.
+
+  **Zu prüfen:** ob Webgains inzwischen einen Schlüssel für den Feed
+  anbietet. Dann könnte motoin in denselben wöchentlichen Auftrag wie die
+  AWIN-Händler, und die Handarbeit fiele ganz weg. Programme ändern ihre
+  Schnittstellen, der letzte Blick ist vom August 2026.
+
+  **Achtung beim Helm-Vergleich:** `helmexpress-import.py` braucht diesen
+  Feed, um Helme ihrem motoin-Gegenstück zuzuordnen. Läuft es ohne, greift
+  es auf `daten/helm-motoin-paare.json` zurück und behält die alten Paare.
+  Neue Helme bekommen dann erst beim nächsten Handlauf einen Vergleich –
+  ein Grund, motoin nicht ein halbes Jahr liegen zu lassen.
 - **Bildgrößen schriftlich bestätigen lassen.** Der Feed nennt
   `original_images`, die App nimmt die kleineren `info_images` und
   `popup_images` vom selben Server. Dasselbe Bild, dieselbe Quelle, nur
