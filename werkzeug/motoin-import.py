@@ -51,9 +51,10 @@ import os
 import re
 import sys
 
-PROJEKT = os.path.dirname(os.path.abspath(__file__))
+# Das Skript liegt in werkzeug/, der Projektordner ist eine Ebene hoeher.
+PROJEKT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FEED_VORGABE = os.path.expanduser('~/Downloads/products.csv')
-ZIEL = os.path.join(PROJEKT, 'motoin-katalog.js')
+ZIEL = os.path.join(PROJEKT, 'daten', 'motoin-katalog.js')
 
 # Wie gross die fertige Datei GEPACKT hoechstens werden darf. Das Budget
 # fuer beide Kataloge zusammen sind 500 KB; der Reifenkatalog belegt

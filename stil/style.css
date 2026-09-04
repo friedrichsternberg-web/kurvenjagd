@@ -39,7 +39,7 @@
       var(--schatten-mittel) 55%,
       var(--schatten-tief) 78%,
       var(--schatten-voll) 100%),
-    url('img/hintergrund-weich.jpg') center / cover no-repeat fixed;
+    url('../img/hintergrund-weich.jpg') center / cover no-repeat fixed;
 }
 
 .start-screen-inner {
@@ -360,8 +360,8 @@
   inset: 0;
   opacity: 0;
   mix-blend-mode: screen;
-  -webkit-mask-image: url(img/logo-serpa.webp);
-  mask-image: url(img/logo-serpa.webp);
+  -webkit-mask-image: url(../img/logo-serpa.webp);
+  mask-image: url(../img/logo-serpa.webp);
   -webkit-mask-size: 100% 100%;
   mask-size: 100% 100%;
   -webkit-mask-repeat: no-repeat;
@@ -2665,7 +2665,7 @@ body.nav-modus .leaflet-control-container { display: none; }
   pointer-events: none;
   /* Nur der Rueckfall fuers allererste Zeichnen - welches der beiden
      Raumbilder wirklich gilt, setzt zeichneBuehne() in garage.js. */
-  background-image: url('img/garage-werkstatt-standard.webp');
+  background-image: url('../img/garage-werkstatt-standard.webp');
   background-repeat: no-repeat;
   background-size: var(--platte-groesse, cover);
   background-position: var(--platte-lage, center 62%);

@@ -315,7 +315,7 @@ function baueMotoinProdukt(zeile, daten) {
 
 meldeKatalog({
   id: 'motoin',
-  datei: 'motoin-katalog.js',
+  datei: 'daten/motoin-katalog.js',
   holen: () => (typeof MOTOIN_KATALOG !== 'undefined' ? MOTOIN_KATALOG : null),
   baueProdukt: baueMotoinProdukt,
   warengruppen: null,
@@ -373,7 +373,7 @@ function baueHelmexpressProdukt(zeile, daten) {
 
 meldeKatalog({
   id: 'helmexpress',
-  datei: 'helmexpress-katalog.js',
+  datei: 'daten/helmexpress-katalog.js',
   holen: () => (typeof HELMEXPRESS_KATALOG !== 'undefined' ? HELMEXPRESS_KATALOG : null),
   baueProdukt: baueHelmexpressProdukt,
   warengruppen: ['helm'],

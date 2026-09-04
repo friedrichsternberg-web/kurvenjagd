@@ -2,7 +2,7 @@
 
    Aufruf über pruefe.sh, oder von Hand im Projektordner:
 
-     /System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Helpers/jsc pruefe-kern.js
+     /System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Helpers/jsc werkzeug/pruefe-kern.js
 
    jsc liegt auf jedem Mac, es muss also nichts installiert werden. Die
    Datei läuft auch im Browser: Wenn kern.js dort schon geladen ist, kann
@@ -16,9 +16,9 @@
    in bestimmten Gegenden auftritt und den man dort nicht auf Zuruf
    herbeiführen kann.                                                      */
 
-if (typeof sucheRundtour === 'undefined') load('kern.js');
-if (typeof kartenBild === 'undefined') load('vorschau.js');
-if (typeof sammleAusfahrten === 'undefined') load('bilanz.js');
+if (typeof sucheRundtour === 'undefined') load('js/grundlage/kern.js');
+if (typeof kartenBild === 'undefined') load('js/planer/vorschau.js');
+if (typeof sammleAusfahrten === 'undefined') load('js/fahrten/bilanz.js');
 
 // jsc kennt print(), der Browser kennt console.log(). Auf print() darf hier
 // nicht geprüft werden: Im Browser gibt es das auch, dort öffnet es aber
@@ -477,7 +477,7 @@ prüfeFall('ohne Punkte gibt es keinen Startpunkt',
 
 /* --- kartenBild(): der Kartenausschnitt hinter der Route ------------------ */
 (function () {
-  if (typeof kartenBild === 'undefined') load('vorschau.js');
+  if (typeof kartenBild === 'undefined') load('js/planer/vorschau.js');
 
   // Eine Harzrunde: ein Rechteck von rund 20 mal 11 Kilometern.
   const runde = [[10.5, 51.75], [10.8, 51.75], [10.8, 51.85], [10.5, 51.85], [10.5, 51.75]];

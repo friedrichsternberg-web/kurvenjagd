@@ -87,7 +87,10 @@ FEED_ADRESSE = (
 # <script>-Element nach, nicht per fetch() - das funktioniert auch dann,
 # wenn die Seite ohne Server direkt aus einer Datei geoeffnet wird
 # (fetch ist dort gesperrt, script nicht).
-ZIEL = 'reifen-katalog.js'
+# Das Skript liegt in werkzeug/, geschrieben wird eine Ebene hoeher nach
+# daten/. Vom Skript aus gerechnet, damit der Aufrufordner egal ist.
+PROJEKT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ZIEL = os.path.join(PROJEKT, 'daten', 'reifen-katalog.js')
 
 # Die Produktbilder liegen auf dem Bildserver des Netzwerks
 # (images2.productserve.com). Jede Adresse traegt eine SIGNATUR (&k=...),
@@ -151,7 +154,7 @@ def schluessel_holen():
     if aus_umgebung:
         return aus_umgebung
     try:
-        with open('.awin-schluessel', encoding='utf-8') as datei:
+        with open(os.path.join(PROJEKT, '.awin-schluessel'), encoding='utf-8') as datei:
             return datei.read().strip()
     except FileNotFoundError:
         sys.exit(

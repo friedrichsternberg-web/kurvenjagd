@@ -59,7 +59,7 @@
      f  Pfadrest des Produktbilds (null: keines)
      g  Signatur des Bildservers dazu */
 
-const REIFEN_KATALOG_DATEI = 'reifen-katalog.js';
+const REIFEN_KATALOG_DATEI = 'daten/reifen-katalog.js';
 
 // Ab wann der Stand als alt gilt und die App das dazusagt. Zwei Wochen:
 // Reifenpreise bewegen sich langsam, aber ein Monat alte Zahlen als

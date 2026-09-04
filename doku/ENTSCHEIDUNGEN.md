@@ -2469,3 +2469,72 @@ und sagt ebenfalls „Die App zeigt keine Werbung" – er liegt im öffentlichen
 Repository. Er bleibt liegen, weil in ihm die Begründungen stehen, warum
 welcher Abschnitt nötig ist; das steht sonst nirgends. Ob er ganz
 verschwindet, entscheidet Friedrich.
+
+---
+
+## 04.09.2026, nachmittags — der Quelltext in Themenordner
+
+**Was war.** Nach dem Ausräumen des Arbeitsmaterials lagen immer noch 50
+Dateien nebeneinander im Stamm: drei CSS-Dateien, 23 JavaScript-Dateien,
+drei Kataloge, vier Skripte, sechs Papiere, dazu index.html und das
+Dashboard. Alphabetisch sortiert stand `app.js` neben `AUFGABEN.md` und
+`bilanz.js` neben `besucher.js` – Nachbarschaften, die nichts bedeuten. Wer
+etwas suchte, musste den Dateinamen kennen.
+
+**Was jetzt gilt.** Der Quelltext ist nach **Bereichen der App** geteilt,
+nicht nach Dateityp:
+
+```
+stil/       design.css  style.css  quer.css
+js/grundlage/  geraet.js  kern.js  start.js
+js/planer/     app.js  vorschau.js
+js/garage/     garage.js  finder.js  freisteller.js
+js/fahrten/    bilanz.js  rueckblick.js  fahrstil.js
+js/konto/      konto.js  touren.js  serpa-touren.js  besucher.js
+js/shop/       partner.js  katalog.js  shop.js  merkliste.js
+               vorschlaege.js  produktseite.js  reifen.js
+daten/      die drei Kataloge und reifen-massen.js
+werkzeug/   die Importskripte, pruefe.sh, pruefe-kern.js
+doku/       die fünf Papiere
+betrieb/    dashboard.html  post.json
+```
+
+Der Sinn: Man muss wissen, **wo in der App** etwas passiert, nicht wie die
+Datei heißt. Wer am Preisvergleich arbeitet, öffnet `js/shop/`, und alles,
+was dazugehört, liegt beisammen. Die Aufteilung folgt genau der, die in
+`CLAUDE.md` ohnehin schon beschrieben stand – sie war nur nie im Dateisystem
+abgebildet.
+
+**Warum zwei Ebenen und nicht eine.** Ein einzelner `js/`-Ordner hätte 23
+Dateien enthalten, also dieselbe Wand wie vorher, nur eine Etage tiefer.
+Drei bis sieben Dateien je Ordner sind eine Menge, die man mit einem Blick
+erfasst.
+
+**Was daran hing, und was angefasst werden musste:**
+
+- 26 Verweise in `index.html`
+- die `url()`-Angaben in `design.css` und `style.css` – die CSS-Dateien
+  liegen jetzt eine Ebene tiefer, Schriften und Bilder brauchen `../`
+- die drei Katalogpfade, die `katalog.js` und `reifen.js` zur Laufzeit
+  nachladen
+- beide Dateilisten in `pruefe.sh` und jeder darin genannte Dateiname. Das
+  Skript springt jetzt mit `cd "$(dirname "$0")/.."` selbst in den
+  Projektordner, damit der Aufrufordner egal ist
+- die drei `load()`-Aufrufe in `pruefe-kern.js`
+- die Ausgabepfade der drei Importskripte. `reifen-import.py` schrieb
+  vorher relativ zum **Aufrufordner** – von `werkzeug/` aus hätte es den
+  Katalog am falschen Ort abgelegt und den AWIN-Schlüssel nicht gefunden.
+  Jetzt rechnen alle drei vom Skript aus
+- der Bildpfad in `dashboard.html`
+
+**Nachgeprüft:** alle 39 Dateien, die die Seite lädt, antworten mit 200;
+beide Schriftschnitte geladen; Konsole ohne Fehler; die Kataloge kommen an
+(6.689 Produkte, 199 Reifen mit 29 Preisvergleichen); das Freisteller-Modell
+ist erreichbar; `pruefe.sh` meldet dieselben Befunde wie vor dem Umzug.
+
+**Verschoben wurde mit `git mv`**, git erkennt alle 40 Dateien als
+Umbenennung – die Geschichte jeder einzelnen bleibt lesbar.
+
+**Neu im Stamm: `LIESMICH.md`.** Der Wegweiser, der sagt, wo was liegt und
+wie man startet. Er ist das einzige, was ein Fremder lesen muss, um sich
+zurechtzufinden – `CLAUDE.md` bleibt privat und liegt nicht im Repository.

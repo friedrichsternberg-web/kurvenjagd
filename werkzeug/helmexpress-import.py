@@ -53,8 +53,9 @@ import sys
 import urllib.parse
 import urllib.request
 
-PROJEKT = os.path.dirname(os.path.abspath(__file__))
-ZIEL = os.path.join(PROJEKT, 'helmexpress-katalog.js')
+# Das Skript liegt in werkzeug/, der Projektordner ist eine Ebene hoeher.
+PROJEKT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ZIEL = os.path.join(PROJEKT, 'daten', 'helmexpress-katalog.js')
 MOTOIN_FEED = os.path.expanduser('~/Downloads/products.csv')
 
 MID = '121690'
