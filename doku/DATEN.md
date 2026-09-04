@@ -421,6 +421,32 @@ entscheidet das Importskript** über die Strichcode-Nummern aller
 Varianten – nicht die App, und nicht der Nutzer. Es geht dabei nichts
 vom Gerät weg.
 
+### POLO Motorrad: der fünfte Partner (seit 05.09.2026)
+
+Im Bereich „Ausrüstung" zeigt die App zusätzlich Angebote von **POLO
+Motorrad** (POLO Motorrad und Sportswear GmbH, Jüchen), vermittelt über
+**Webgains** wie motoin: Klick über track.webgains.com (Programm 309425),
+Fotos vom Händler selbst (`www.polo-motorrad.com`). Der Bildserver setzt
+**kein Cookie** (nachgemessen am 05.09.2026, Antwort ohne Set-Cookie); für
+die Datenverarbeitung gilt alles, was bei motoin steht.
+
+Zwei Katalogdateien desselben Händlers: `daten/polo-katalog.js` (Ware am
+Körper) und `daten/polo-teile-katalog.js` (Gepäck, Anbauteile). Die App lädt
+je Warengruppe nur die, die sie führt. Beide stammen aus
+`werkzeug/polo-import.py`.
+
+**Der Preisvergleich über drei Shops.** Führen motoin, POLO oder Helmexpress
+dieselbe Ware, stehen auf der Produktseite alle Preise, der günstigste zuerst.
+Welche Ware dieselbe ist, entscheidet das Importskript über die
+Strichcode-Nummern; Zuordnungen, bei denen mehrere POLO-Artikel auf eine
+motoin-Gruppe zeigen (Fahrzeugvarianten), lässt es weg. Nichts davon läuft
+auf dem Gerät, nichts geht vom Gerät weg.
+
+**Der Preislauf** holt die Webgains-Feeds nur, wenn ihre Adressen als
+Repository-Secrets hinterlegt sind (`WEBGAINS_FEED_URL_MOTOIN`,
+`WEBGAINS_FEED_URL_POLO`). Die Adressen tragen den Zugang selbst und stehen
+nirgends im Repository.
+
 ### Vorschläge aus den eigenen Fahrten (opt-in, seit 02.09.2026)
 
 Serpa kann aus den aufgezeichneten Ausfahrten einen groben Fahrstil

@@ -1,0 +1,2946 @@
+{
+ "0000107338001000": {
+  "helmexpress": 0,
+  "motoin": 101708
+ },
+ "0000243999040743": {
+  "helmexpress": 0,
+  "motoin": 80658
+ },
+ "0000244999041769": {
+  "helmexpress": 0,
+  "motoin": 84638
+ },
+ "0000245999031769": {
+  "helmexpress": 0,
+  "motoin": 84601
+ },
+ "0000246999042748": {
+  "helmexpress": 0,
+  "motoin": 84545
+ },
+ "0000247999001769": {
+  "helmexpress": 0,
+  "motoin": 84591
+ },
+ "0000247999188746": {
+  "helmexpress": 0,
+  "motoin": 93179
+ },
+ "0000250999001767": {
+  "helmexpress": 0,
+  "motoin": 84592
+ },
+ "0000251999043012": {
+  "helmexpress": 0,
+  "motoin": 84569
+ },
+ "0000252999001013": {
+  "helmexpress": 0,
+  "motoin": 84568
+ },
+ "0000316219001000": {
+  "helmexpress": 0,
+  "motoin": 100323
+ },
+ "0000317204001000": {
+  "helmexpress": 0,
+  "motoin": 100301
+ },
+ "0000323999048013": {
+  "helmexpress": 0,
+  "motoin": 84414
+ },
+ "0000324999031312": {
+  "helmexpress": 0,
+  "motoin": 84393
+ },
+ "0000431189000000": {
+  "helmexpress": 0,
+  "motoin": 87859
+ },
+ "0000432212000000": {
+  "helmexpress": 0,
+  "motoin": 88168
+ },
+ "0000433212000000": {
+  "helmexpress": 0,
+  "motoin": 88169
+ },
+ "0000452999001013": {
+  "helmexpress": 0,
+  "motoin": 92340
+ },
+ "0000453001001245": {
+  "helmexpress": 0,
+  "motoin": 80894
+ },
+ "0000474005001015": {
+  "helmexpress": 0,
+  "motoin": 87392
+ },
+ "0000511999009013": {
+  "helmexpress": 0,
+  "motoin": 75344
+ },
+ "0000584023000000": {
+  "helmexpress": 0,
+  "motoin": 76147
+ },
+ "0000584023000001": {
+  "helmexpress": 0,
+  "motoin": 76148
+ },
+ "0000584023000002": {
+  "helmexpress": 0,
+  "motoin": 76174
+ },
+ "0000586020000000": {
+  "helmexpress": 0,
+  "motoin": 76150
+ },
+ "0000590202000001": {
+  "helmexpress": 0,
+  "motoin": 100286
+ },
+ "0000592189000000": {
+  "helmexpress": 0,
+  "motoin": 100276
+ },
+ "0000594181000000": {
+  "helmexpress": 0,
+  "motoin": 100341
+ },
+ "0000594181000001": {
+  "helmexpress": 0,
+  "motoin": 100342
+ },
+ "0000601003001257": {
+  "helmexpress": 0,
+  "motoin": 87066
+ },
+ "0000601003054257": {
+  "helmexpress": 0,
+  "motoin": 95950
+ },
+ "0000612999031011": {
+  "helmexpress": 0,
+  "motoin": 84564
+ },
+ "0000613999031011": {
+  "helmexpress": 0,
+  "motoin": 84565
+ },
+ "0000716020000000": {
+  "helmexpress": 0,
+  "motoin": 76416
+ },
+ "0000775999001000": {
+  "helmexpress": 0,
+  "motoin": 91984
+ },
+ "0000788999082008": {
+  "helmexpress": 0,
+  "motoin": 91909
+ },
+ "0000790999076306": {
+  "helmexpress": 0,
+  "motoin": 91899
+ },
+ "0000797999031304": {
+  "helmexpress": 0,
+  "motoin": 89348
+ },
+ "0000802999093311": {
+  "helmexpress": 0,
+  "motoin": 89349
+ },
+ "0000813007001814": {
+  "helmexpress": 0,
+  "motoin": 89337
+ },
+ "0000819999014012": {
+  "helmexpress": 0,
+  "motoin": 92611
+ },
+ "0000819999034010": {
+  "helmexpress": 43219465973,
+  "motoin": 0
+ },
+ "0000819999035012": {
+  "helmexpress": 44882864821,
+  "motoin": 0
+ },
+ "0000819999036008": {
+  "helmexpress": 44882864805,
+  "motoin": 92624
+ },
+ "0000923999034014": {
+  "helmexpress": 0,
+  "motoin": 89384
+ },
+ "0000926999034013": {
+  "helmexpress": 0,
+  "motoin": 89388
+ },
+ "0000929999001014": {
+  "helmexpress": 0,
+  "motoin": 89391
+ },
+ "0000930999001013": {
+  "helmexpress": 0,
+  "motoin": 89390
+ },
+ "0000935999010013": {
+  "helmexpress": 0,
+  "motoin": 84659
+ },
+ "0000936999059013": {
+  "helmexpress": 0,
+  "motoin": 84399
+ },
+ "0000942999001013": {
+  "helmexpress": 0,
+  "motoin": 79472
+ },
+ "0000943999001012": {
+  "helmexpress": 0,
+  "motoin": 79474
+ },
+ "0000949999033032": {
+  "helmexpress": 44882864544,
+  "motoin": 0
+ },
+ "0000971022000000": {
+  "helmexpress": 0,
+  "motoin": 76146
+ },
+ "0001066181000000": {
+  "helmexpress": 0,
+  "motoin": 89413
+ },
+ "0001067181000000": {
+  "helmexpress": 0,
+  "motoin": 84806
+ },
+ "0001070005001015": {
+  "helmexpress": 0,
+  "motoin": 95836
+ },
+ "0001075005001011": {
+  "helmexpress": 0,
+  "motoin": 92351
+ },
+ "0001077999034311": {
+  "helmexpress": 0,
+  "motoin": 53656
+ },
+ "0001082999001014": {
+  "helmexpress": 0,
+  "motoin": 89380
+ },
+ "0001083999001013": {
+  "helmexpress": 0,
+  "motoin": 89381
+ },
+ "0001086999001015": {
+  "helmexpress": 0,
+  "motoin": 89373
+ },
+ "0001089999058013": {
+  "helmexpress": 0,
+  "motoin": 84409
+ },
+ "0001090999001083": {
+  "helmexpress": 0,
+  "motoin": 58729
+ },
+ "0001101001001015": {
+  "helmexpress": 0,
+  "motoin": 89362
+ },
+ "0001103999011010": {
+  "helmexpress": 0,
+  "motoin": 72867
+ },
+ "0001105999011000": {
+  "helmexpress": 0,
+  "motoin": 72869
+ },
+ "0001107999011000": {
+  "helmexpress": 0,
+  "motoin": 72871
+ },
+ "0001108999011000": {
+  "helmexpress": 0,
+  "motoin": 72872
+ },
+ "0001110999011000": {
+  "helmexpress": 0,
+  "motoin": 72874
+ },
+ "0001112999011010": {
+  "helmexpress": 0,
+  "motoin": 72901
+ },
+ "0001113999011000": {
+  "helmexpress": 0,
+  "motoin": 94913
+ },
+ "0001119999001012": {
+  "helmexpress": 0,
+  "motoin": 72862
+ },
+ "0001124999011000": {
+  "helmexpress": 0,
+  "motoin": 66071
+ },
+ "0001142999001014": {
+  "helmexpress": 0,
+  "motoin": 72876
+ },
+ "0001144007001812": {
+  "helmexpress": 0,
+  "motoin": 18267
+ },
+ "0001152007115814": {
+  "helmexpress": 0,
+  "motoin": 31475
+ },
+ "0001155006001814": {
+  "helmexpress": 0,
+  "motoin": 89307
+ },
+ "0001156006001814": {
+  "helmexpress": 0,
+  "motoin": 89309
+ },
+ "0001160999001750": {
+  "helmexpress": 0,
+  "motoin": 89394
+ },
+ "0001161999006750": {
+  "helmexpress": 0,
+  "motoin": 66068
+ },
+ "0001223208000001": {
+  "helmexpress": 0,
+  "motoin": 100320
+ },
+ "0001224197000001": {
+  "helmexpress": 0,
+  "motoin": 100311
+ },
+ "0001227218000000": {
+  "helmexpress": 0,
+  "motoin": 100305
+ },
+ "0001229190000000": {
+  "helmexpress": 0,
+  "motoin": 100340
+ },
+ "0001232208000001": {
+  "helmexpress": 0,
+  "motoin": 100319
+ },
+ "0001276197000000": {
+  "helmexpress": 0,
+  "motoin": 100300
+ },
+ "0001315999028012": {
+  "helmexpress": 44882864689,
+  "motoin": 0
+ },
+ "0001377197000000": {
+  "helmexpress": 0,
+  "motoin": 92181
+ },
+ "0001378208000000": {
+  "helmexpress": 0,
+  "motoin": 60767
+ },
+ "0001379218000000": {
+  "helmexpress": 0,
+  "motoin": 94287
+ },
+ "0001381197000000": {
+  "helmexpress": 0,
+  "motoin": 63587
+ },
+ "0001382208000000": {
+  "helmexpress": 0,
+  "motoin": 63589
+ },
+ "0001383197000000": {
+  "helmexpress": 0,
+  "motoin": 63590
+ },
+ "0001384197000000": {
+  "helmexpress": 0,
+  "motoin": 63591
+ },
+ "0001401999001013": {
+  "helmexpress": 0,
+  "motoin": 62609
+ },
+ "0001430181000000": {
+  "helmexpress": 0,
+  "motoin": 96150
+ },
+ "0001431181000000": {
+  "helmexpress": 0,
+  "motoin": 96149
+ },
+ "0001435005000000": {
+  "helmexpress": 0,
+  "motoin": 69039
+ },
+ "0001459190000001": {
+  "helmexpress": 0,
+  "motoin": 100318
+ },
+ "0001493069000000": {
+  "helmexpress": 0,
+  "motoin": 102693
+ },
+ "0001504212000000": {
+  "helmexpress": 0,
+  "motoin": 92182
+ },
+ "0001505197000000": {
+  "helmexpress": 0,
+  "motoin": 92183
+ },
+ "0001506212000000": {
+  "helmexpress": 0,
+  "motoin": 63822
+ },
+ "0001507189000000": {
+  "helmexpress": 0,
+  "motoin": 74440
+ },
+ "0001509217000000": {
+  "helmexpress": 0,
+  "motoin": 92185
+ },
+ "0001510217000000": {
+  "helmexpress": 0,
+  "motoin": 92184
+ },
+ "0001512000000000": {
+  "helmexpress": 0,
+  "motoin": 88182
+ },
+ "0001513190000000": {
+  "helmexpress": 0,
+  "motoin": 94244
+ },
+ "0001566075000000": {
+  "helmexpress": 0,
+  "motoin": 100347
+ },
+ "0001567204000000": {
+  "helmexpress": 0,
+  "motoin": 100348
+ },
+ "0001568217000001": {
+  "helmexpress": 0,
+  "motoin": 100317
+ },
+ "0001587999014012": {
+  "helmexpress": 0,
+  "motoin": 97046
+ },
+ "0001588999023012": {
+  "helmexpress": 0,
+  "motoin": 97052
+ },
+ "0001590999014012": {
+  "helmexpress": 0,
+  "motoin": 97076
+ },
+ "0001590999035009": {
+  "helmexpress": 0,
+  "motoin": 97082
+ },
+ "0001591999014012": {
+  "helmexpress": 45852570166,
+  "motoin": 0
+ },
+ "0001597999014012": {
+  "helmexpress": 0,
+  "motoin": 98193
+ },
+ "0001597999031012": {
+  "helmexpress": 45863588404,
+  "motoin": 98196
+ },
+ "0001598999029012": {
+  "helmexpress": 0,
+  "motoin": 96740
+ },
+ "0001598999037012": {
+  "helmexpress": 0,
+  "motoin": 96744
+ },
+ "0001672001001013": {
+  "helmexpress": 0,
+  "motoin": 100560
+ },
+ "0001673007031007": {
+  "helmexpress": 0,
+  "motoin": 100566
+ },
+ "0001681005001013": {
+  "helmexpress": 0,
+  "motoin": 100573
+ },
+ "0001740033000000": {
+  "helmexpress": 0,
+  "motoin": 101699
+ },
+ "0001742112000000": {
+  "helmexpress": 0,
+  "motoin": 101680
+ },
+ "0001743113000001": {
+  "helmexpress": 0,
+  "motoin": 101683
+ },
+ "0001744084000000": {
+  "helmexpress": 0,
+  "motoin": 101698
+ },
+ "0001746112000000": {
+  "helmexpress": 0,
+  "motoin": 101752
+ },
+ "0001747113000000": {
+  "helmexpress": 0,
+  "motoin": 101684
+ },
+ "0001749033000000": {
+  "helmexpress": 0,
+  "motoin": 101677
+ },
+ "0001760084000000": {
+  "helmexpress": 0,
+  "motoin": 83861
+ },
+ "0001761113000000": {
+  "helmexpress": 0,
+  "motoin": 83729
+ },
+ "0001763112000000": {
+  "helmexpress": 0,
+  "motoin": 83849
+ },
+ "0001766029000000": {
+  "helmexpress": 0,
+  "motoin": 101706
+ },
+ "0001768113000000": {
+  "helmexpress": 0,
+  "motoin": 101750
+ },
+ "0001769112000000": {
+  "helmexpress": 0,
+  "motoin": 101751
+ },
+ "0001781112000000": {
+  "helmexpress": 0,
+  "motoin": 101679
+ },
+ "0001785113000000": {
+  "helmexpress": 0,
+  "motoin": 83711
+ },
+ "0001795999001012": {
+  "helmexpress": 0,
+  "motoin": 96866
+ },
+ "0001796007001814": {
+  "helmexpress": 0,
+  "motoin": 89345
+ },
+ "0001803999001015": {
+  "helmexpress": 0,
+  "motoin": 96858
+ },
+ "0001821003031012": {
+  "helmexpress": 0,
+  "motoin": 88677
+ },
+ "0001822003035012": {
+  "helmexpress": 0,
+  "motoin": 88680
+ },
+ "0001825003035012": {
+  "helmexpress": 0,
+  "motoin": 88661
+ },
+ "0001843999001743": {
+  "helmexpress": 0,
+  "motoin": 59144
+ },
+ "0001846999001742": {
+  "helmexpress": 0,
+  "motoin": 54351
+ },
+ "0001848999001745": {
+  "helmexpress": 0,
+  "motoin": 68365
+ },
+ "0001849999001747": {
+  "helmexpress": 0,
+  "motoin": 68366
+ },
+ "0001850999006746": {
+  "helmexpress": 0,
+  "motoin": 93230
+ },
+ "0001854999001745": {
+  "helmexpress": 0,
+  "motoin": 79104
+ },
+ "0001856999010745": {
+  "helmexpress": 0,
+  "motoin": 93229
+ },
+ "0001859999001746": {
+  "helmexpress": 0,
+  "motoin": 79108
+ },
+ "0001862999001010": {
+  "helmexpress": 0,
+  "motoin": 95161
+ },
+ "0001869999001012": {
+  "helmexpress": 0,
+  "motoin": 95157
+ },
+ "0001873999033012": {
+  "helmexpress": 0,
+  "motoin": 95141
+ },
+ "0001928999001012": {
+  "helmexpress": 0,
+  "motoin": 100564
+ },
+ "0001998033000000": {
+  "helmexpress": 0,
+  "motoin": 102309
+ },
+ "0002019999028013": {
+  "helmexpress": 0,
+  "motoin": 80203
+ },
+ "0002030999058013": {
+  "helmexpress": 0,
+  "motoin": 72848
+ },
+ "0002037002167010": {
+  "helmexpress": 0,
+  "motoin": 91979
+ },
+ "0002038002167009": {
+  "helmexpress": 0,
+  "motoin": 91980
+ },
+ "0002048002001013": {
+  "helmexpress": 0,
+  "motoin": 84335
+ },
+ "0002049001001376": {
+  "helmexpress": 0,
+  "motoin": 99229
+ },
+ "0002052999001013": {
+  "helmexpress": 0,
+  "motoin": 99218
+ },
+ "0002054002001012": {
+  "helmexpress": 0,
+  "motoin": 84323
+ },
+ "0002057003090013": {
+  "helmexpress": 0,
+  "motoin": 91865
+ },
+ "0002062999001013": {
+  "helmexpress": 0,
+  "motoin": 84341
+ },
+ "0002064999001012": {
+  "helmexpress": 0,
+  "motoin": 84343
+ },
+ "0002075999001746": {
+  "helmexpress": 0,
+  "motoin": 99188
+ },
+ "0002079999001011": {
+  "helmexpress": 0,
+  "motoin": 84318
+ },
+ "0002081007001013": {
+  "helmexpress": 0,
+  "motoin": 85671
+ },
+ "0002084007001009": {
+  "helmexpress": 0,
+  "motoin": 96677
+ },
+ "0002088007175011": {
+  "helmexpress": 0,
+  "motoin": 85702
+ },
+ "0002089007170013": {
+  "helmexpress": 0,
+  "motoin": 91956
+ },
+ "0002090007001012": {
+  "helmexpress": 0,
+  "motoin": 91955
+ },
+ "0002094003001012": {
+  "helmexpress": 0,
+  "motoin": 84340
+ },
+ "0002097003001014": {
+  "helmexpress": 0,
+  "motoin": 79396
+ },
+ "0002134999016011": {
+  "helmexpress": 0,
+  "motoin": 93181
+ },
+ "0002135999911012": {
+  "helmexpress": 0,
+  "motoin": 93164
+ },
+ "0002139999043012": {
+  "helmexpress": 0,
+  "motoin": 74934
+ },
+ "0002140999043009": {
+  "helmexpress": 0,
+  "motoin": 74935
+ },
+ "0002142999184008": {
+  "helmexpress": 0,
+  "motoin": 93182
+ },
+ "0002143001001011": {
+  "helmexpress": 0,
+  "motoin": 52745
+ },
+ "0002144999001012": {
+  "helmexpress": 0,
+  "motoin": 93167
+ },
+ "0002145003001298": {
+  "helmexpress": 0,
+  "motoin": 93184
+ },
+ "0002146999001011": {
+  "helmexpress": 0,
+  "motoin": 93185
+ },
+ "0002148003001297": {
+  "helmexpress": 0,
+  "motoin": 89639
+ },
+ "0002151999001010": {
+  "helmexpress": 0,
+  "motoin": 62625
+ },
+ "0002153999001012": {
+  "helmexpress": 0,
+  "motoin": 55752
+ },
+ "0002159007031012": {
+  "helmexpress": 0,
+  "motoin": 93171
+ },
+ "0002161007186011": {
+  "helmexpress": 0,
+  "motoin": 93187
+ },
+ "0002162007001012": {
+  "helmexpress": 0,
+  "motoin": 52753
+ },
+ "0002166999915743": {
+  "helmexpress": 0,
+  "motoin": 93146
+ },
+ "0002167999001741": {
+  "helmexpress": 0,
+  "motoin": 95262
+ },
+ "0002220199000000": {
+  "helmexpress": 0,
+  "motoin": 102683
+ },
+ "0002237999033313": {
+  "helmexpress": 0,
+  "motoin": 84437
+ },
+ "0002241999192013": {
+  "helmexpress": 0,
+  "motoin": 58719
+ },
+ "0002243999033016": {
+  "helmexpress": 0,
+  "motoin": 84405
+ },
+ "0002244999033013": {
+  "helmexpress": 0,
+  "motoin": 84404
+ },
+ "0002246003001048": {
+  "helmexpress": 0,
+  "motoin": 79469
+ },
+ "0002247999001748": {
+  "helmexpress": 0,
+  "motoin": 66069
+ },
+ "0002251999001015": {
+  "helmexpress": 0,
+  "motoin": 72878
+ },
+ "0002252999034013": {
+  "helmexpress": 0,
+  "motoin": 53729
+ },
+ "0002253999034015": {
+  "helmexpress": 0,
+  "motoin": 53730
+ },
+ "0002254007001812": {
+  "helmexpress": 0,
+  "motoin": 72903
+ },
+ "0002255007001806": {
+  "helmexpress": 0,
+  "motoin": 72902
+ },
+ "0002258999001022": {
+  "helmexpress": 0,
+  "motoin": 5456
+ },
+ "0002259007031814": {
+  "helmexpress": 0,
+  "motoin": 84429
+ },
+ "0002269013001089": {
+  "helmexpress": 0,
+  "motoin": 96700
+ },
+ "0002277211000000": {
+  "helmexpress": 0,
+  "motoin": 100321
+ },
+ "0002294002001013": {
+  "helmexpress": 0,
+  "motoin": 100563
+ },
+ "0002322197000000": {
+  "helmexpress": 0,
+  "motoin": 100312
+ },
+ "0002362006001015": {
+  "helmexpress": 0,
+  "motoin": 67647
+ },
+ "0003191197000000": {
+  "helmexpress": 0,
+  "motoin": 98079
+ },
+ "0031701192000180": {
+  "helmexpress": 0,
+  "motoin": 70455
+ },
+ "0031701192000181": {
+  "helmexpress": 0,
+  "motoin": 70456
+ },
+ "0031911000000180": {
+  "helmexpress": 0,
+  "motoin": 100282
+ },
+ "1006421999006313": {
+  "helmexpress": 0,
+  "motoin": 79460
+ },
+ "1006441999005410": {
+  "helmexpress": 0,
+  "motoin": 79461
+ },
+ "1103361999001309": {
+  "helmexpress": 0,
+  "motoin": 73688
+ },
+ "2011841999001013": {
+  "helmexpress": 0,
+  "motoin": 45415
+ },
+ "2011881999003008": {
+  "helmexpress": 0,
+  "motoin": 45401
+ },
+ "2011921999002015": {
+  "helmexpress": 0,
+  "motoin": 42812
+ },
+ "2016491999007112": {
+  "helmexpress": 0,
+  "motoin": 67606
+ },
+ "2016551999001015": {
+  "helmexpress": 0,
+  "motoin": 68025
+ },
+ "2017271999001013": {
+  "helmexpress": 0,
+  "motoin": 73008
+ },
+ "2017391999001111": {
+  "helmexpress": 0,
+  "motoin": 75339
+ },
+ "2018111999009009": {
+  "helmexpress": 0,
+  "motoin": 55263
+ },
+ "2018321999009020": {
+  "helmexpress": 0,
+  "motoin": 67865
+ },
+ "2018791999001011": {
+  "helmexpress": 0,
+  "motoin": 88800
+ },
+ "2019631999001015": {
+  "helmexpress": 0,
+  "motoin": 72849
+ },
+ "2100021999036257": {
+  "helmexpress": 0,
+  "motoin": 92348
+ },
+ "2100281999007016": {
+  "helmexpress": 0,
+  "motoin": 71990
+ },
+ "2100521003001572": {
+  "helmexpress": 0,
+  "motoin": 66054
+ },
+ "2107811003001012": {
+  "helmexpress": 0,
+  "motoin": 66056
+ },
+ "2107861003001014": {
+  "helmexpress": 0,
+  "motoin": 66764
+ },
+ "2107941999001112": {
+  "helmexpress": 0,
+  "motoin": 67608
+ },
+ "2109741003002013": {
+  "helmexpress": 0,
+  "motoin": 38389
+ },
+ "2110451999009020": {
+  "helmexpress": 0,
+  "motoin": 67863
+ },
+ "2110671999001012": {
+  "helmexpress": 0,
+  "motoin": 88801
+ },
+ "2111381003007012": {
+  "helmexpress": 0,
+  "motoin": 78218
+ },
+ "2111411003007016": {
+  "helmexpress": 0,
+  "motoin": 72847
+ },
+ "2111441003001016": {
+  "helmexpress": 0,
+  "motoin": 79470
+ },
+ "2208041999009070": {
+  "helmexpress": 0,
+  "motoin": 49870
+ },
+ "2405291999005008": {
+  "helmexpress": 0,
+  "motoin": 65847
+ },
+ "3003231999108748": {
+  "helmexpress": 0,
+  "motoin": 71484
+ },
+ "3003911999001744": {
+  "helmexpress": 0,
+  "motoin": 29662
+ },
+ "3004181999001746": {
+  "helmexpress": 0,
+  "motoin": 29651
+ },
+ "3004181999002751": {
+  "helmexpress": 0,
+  "motoin": 29652
+ },
+ "3004181999003748": {
+  "helmexpress": 0,
+  "motoin": 29653
+ },
+ "3004181999004750": {
+  "helmexpress": 0,
+  "motoin": 59307
+ },
+ "3004181999005747": {
+  "helmexpress": 0,
+  "motoin": 59306
+ },
+ "3004191999001747": {
+  "helmexpress": 0,
+  "motoin": 29677
+ },
+ "3004201999001745": {
+  "helmexpress": 0,
+  "motoin": 29668
+ },
+ "3004351999001741": {
+  "helmexpress": 0,
+  "motoin": 47955
+ },
+ "3005511999043769": {
+  "helmexpress": 0,
+  "motoin": 55717
+ },
+ "3005581999006745": {
+  "helmexpress": 0,
+  "motoin": 53736
+ },
+ "3005611999002741": {
+  "helmexpress": 0,
+  "motoin": 53742
+ },
+ "3006711999004745": {
+  "helmexpress": 0,
+  "motoin": 72897
+ },
+ "3006771999001746": {
+  "helmexpress": 0,
+  "motoin": 71455
+ },
+ "3006791999001815": {
+  "helmexpress": 0,
+  "motoin": 78184
+ },
+ "3007081999006742": {
+  "helmexpress": 0,
+  "motoin": 49672
+ },
+ "3007211999001748": {
+  "helmexpress": 0,
+  "motoin": 73032
+ },
+ "3007631999001737": {
+  "helmexpress": 0,
+  "motoin": 92353
+ },
+ "3007641999001746": {
+  "helmexpress": 0,
+  "motoin": 79485
+ },
+ "3007651999001750": {
+  "helmexpress": 0,
+  "motoin": 58725
+ },
+ "3007671999022747": {
+  "helmexpress": 0,
+  "motoin": 66690
+ },
+ "3008041999001744": {
+  "helmexpress": 0,
+  "motoin": 29669
+ },
+ "3008291999001748": {
+  "helmexpress": 0,
+  "motoin": 35912
+ },
+ "3008321999007746": {
+  "helmexpress": 0,
+  "motoin": 35980
+ },
+ "3008481999001744": {
+  "helmexpress": 0,
+  "motoin": 29679
+ },
+ "3008721999001751": {
+  "helmexpress": 0,
+  "motoin": 29663
+ },
+ "3108791007102013": {
+  "helmexpress": 0,
+  "motoin": 75343
+ },
+ "3110551007001942": {
+  "helmexpress": 0,
+  "motoin": 53758
+ },
+ "3110701999001010": {
+  "helmexpress": 0,
+  "motoin": 55753
+ },
+ "3110711007001012": {
+  "helmexpress": 0,
+  "motoin": 50949
+ },
+ "3111451007001013": {
+  "helmexpress": 0,
+  "motoin": 60374
+ },
+ "3111471007004013": {
+  "helmexpress": 0,
+  "motoin": 59375
+ },
+ "3111501007001012": {
+  "helmexpress": 0,
+  "motoin": 50947
+ },
+ "3111591006001942": {
+  "helmexpress": 0,
+  "motoin": 58694
+ },
+ "3111601006001944": {
+  "helmexpress": 0,
+  "motoin": 49829
+ },
+ "3111611006001934": {
+  "helmexpress": 0,
+  "motoin": 49828
+ },
+ "3114211999002011": {
+  "helmexpress": 0,
+  "motoin": 69228
+ },
+ "3114591006001946": {
+  "helmexpress": 0,
+  "motoin": 58703
+ },
+ "3114601006001940": {
+  "helmexpress": 0,
+  "motoin": 66028
+ },
+ "3115411007001934": {
+  "helmexpress": 0,
+  "motoin": 72908
+ },
+ "3115531006001011": {
+  "helmexpress": 0,
+  "motoin": 66739
+ },
+ "3116051007001013": {
+  "helmexpress": 0,
+  "motoin": 67819
+ },
+ "3117831007001012": {
+  "helmexpress": 0,
+  "motoin": 92339
+ },
+ "3117901006001942": {
+  "helmexpress": 0,
+  "motoin": 79483
+ },
+ "3203641999003009": {
+  "helmexpress": 0,
+  "motoin": 29277
+ },
+ "3205711999003999": {
+  "helmexpress": 0,
+  "motoin": 41388
+ },
+ "3210421999000999": {
+  "helmexpress": 0,
+  "motoin": 49657
+ },
+ "3210551999001008": {
+  "helmexpress": 0,
+  "motoin": 43825
+ },
+ "3210901999003999": {
+  "helmexpress": 0,
+  "motoin": 71587
+ },
+ "3211161999000999": {
+  "helmexpress": 0,
+  "motoin": 60382
+ },
+ "3211351999004999": {
+  "helmexpress": 0,
+  "motoin": 63102
+ },
+ "3213201999002999": {
+  "helmexpress": 0,
+  "motoin": 75380
+ },
+ "3213811999001013": {
+  "helmexpress": 0,
+  "motoin": 88802
+ },
+ "3214121999000999": {
+  "helmexpress": 0,
+  "motoin": 89596
+ },
+ "3215441999001010": {
+  "helmexpress": 0,
+  "motoin": 85059
+ },
+ "4603751999014011": {
+  "helmexpress": 0,
+  "motoin": 69388
+ },
+ "4603761999014012": {
+  "helmexpress": 0,
+  "motoin": 84302
+ },
+ "4603901999014012": {
+  "helmexpress": 0,
+  "motoin": 76350
+ },
+ "4604181999001012": {
+  "helmexpress": 44882864094,
+  "motoin": 0
+ },
+ "4701201999024012": {
+  "helmexpress": 0,
+  "motoin": 90318
+ },
+ "4701311999060011": {
+  "helmexpress": 44882863434,
+  "motoin": 0
+ },
+ "4701311999062012": {
+  "helmexpress": 44142154692,
+  "motoin": 92089
+ },
+ "4701311999070011": {
+  "helmexpress": 44882865331,
+  "motoin": 0
+ },
+ "4701321999014012": {
+  "helmexpress": 43219453502,
+  "motoin": 0
+ },
+ "4701351999014013": {
+  "helmexpress": 44142153574,
+  "motoin": 79178
+ },
+ "4701351999030008": {
+  "helmexpress": 0,
+  "motoin": 79176
+ },
+ "4701351999061011": {
+  "helmexpress": 44882865337,
+  "motoin": 0
+ },
+ "4701361999024012": {
+  "helmexpress": 43997644236,
+  "motoin": 0
+ },
+ "4701371999055013": {
+  "helmexpress": 43997644579,
+  "motoin": 75953
+ },
+ "4701381999014012": {
+  "helmexpress": 44010098934,
+  "motoin": 0
+ },
+ "4701381999061012": {
+  "helmexpress": 44987754128,
+  "motoin": 0
+ },
+ "4701401999014013": {
+  "helmexpress": 0,
+  "motoin": 82705
+ },
+ "4701431999001008": {
+  "helmexpress": 44882863166,
+  "motoin": 78114
+ },
+ "4701461999014012": {
+  "helmexpress": 44131435006,
+  "motoin": 90921
+ },
+ "4701491999044012": {
+  "helmexpress": 0,
+  "motoin": 90296
+ },
+ "4701491999045012": {
+  "helmexpress": 0,
+  "motoin": 90285
+ },
+ "4801201999014012": {
+  "helmexpress": 0,
+  "motoin": 71810
+ },
+ "4801201999034012": {
+  "helmexpress": 0,
+  "motoin": 97097
+ },
+ "4801321999004012": {
+  "helmexpress": 43508223540,
+  "motoin": 0
+ },
+ "4905511999001012": {
+  "helmexpress": 0,
+  "motoin": 71797
+ },
+ "4905571999014012": {
+  "helmexpress": 43219458686,
+  "motoin": 79212
+ },
+ "4905581999014012": {
+  "helmexpress": 0,
+  "motoin": 77952
+ },
+ "4905621999014012": {
+  "helmexpress": 0,
+  "motoin": 96105
+ },
+ "4905621999043012": {
+  "helmexpress": 0,
+  "motoin": 96103
+ },
+ "4905621999056012": {
+  "helmexpress": 0,
+  "motoin": 96104
+ },
+ "5017331026000391": {
+  "helmexpress": 0,
+  "motoin": 84033
+ },
+ "5518591033003300": {
+  "helmexpress": 0,
+  "motoin": 84129
+ },
+ "5538881020003372": {
+  "helmexpress": 0,
+  "motoin": 83961
+ },
+ "5538961174010013": {
+  "helmexpress": 0,
+  "motoin": 84076
+ },
+ "5547221032000260": {
+  "helmexpress": 0,
+  "motoin": 94993
+ },
+ "5552541029000772": {
+  "helmexpress": 0,
+  "motoin": 84197
+ },
+ "5556371033003883": {
+  "helmexpress": 0,
+  "motoin": 84104
+ },
+ "5558181033003790": {
+  "helmexpress": 0,
+  "motoin": 84128
+ },
+ "5560491029000830": {
+  "helmexpress": 0,
+  "motoin": 84029
+ },
+ "5560971029000841": {
+  "helmexpress": 0,
+  "motoin": 84178
+ },
+ "5567941189000540": {
+  "helmexpress": 0,
+  "motoin": 92157
+ },
+ "5567941189001270": {
+  "helmexpress": 0,
+  "motoin": 32382
+ },
+ "5587931000000391": {
+  "helmexpress": 0,
+  "motoin": 76144
+ },
+ "5589151029000881": {
+  "helmexpress": 0,
+  "motoin": 83873
+ },
+ "5614151000000481": {
+  "helmexpress": 0,
+  "motoin": 100268
+ },
+ "5614151000000484": {
+  "helmexpress": 0,
+  "motoin": 100269
+ },
+ "5618931110000000": {
+  "helmexpress": 0,
+  "motoin": 32572
+ },
+ "5625881000001780": {
+  "helmexpress": 0,
+  "motoin": 102674
+ },
+ "5625881068001021": {
+  "helmexpress": 0,
+  "motoin": 64117
+ },
+ "5625881068001130": {
+  "helmexpress": 0,
+  "motoin": 64114
+ },
+ "5625881068001140": {
+  "helmexpress": 0,
+  "motoin": 64118
+ },
+ "5637831189000005": {
+  "helmexpress": 0,
+  "motoin": 102689
+ },
+ "5637831195000008": {
+  "helmexpress": 0,
+  "motoin": 102692
+ },
+ "5637851189000000": {
+  "helmexpress": 0,
+  "motoin": 102699
+ },
+ "5637851189000001": {
+  "helmexpress": 0,
+  "motoin": 102700
+ },
+ "5637851195001070": {
+  "helmexpress": 0,
+  "motoin": 64107
+ },
+ "5638221085999050": {
+  "helmexpress": 0,
+  "motoin": 64390
+ },
+ "5638841181010051": {
+  "helmexpress": 0,
+  "motoin": 87440
+ },
+ "5639471022000650": {
+  "helmexpress": 0,
+  "motoin": 101719
+ },
+ "5641201020000670": {
+  "helmexpress": 0,
+  "motoin": 101721
+ },
+ "5641211029001010": {
+  "helmexpress": 0,
+  "motoin": 83685
+ },
+ "5652501184000390": {
+  "helmexpress": 0,
+  "motoin": 93788
+ },
+ "5653461181999000": {
+  "helmexpress": 0,
+  "motoin": 70979
+ },
+ "5659861189000190": {
+  "helmexpress": 0,
+  "motoin": 40810
+ },
+ "5659861189000191": {
+  "helmexpress": 0,
+  "motoin": 40811
+ },
+ "5660261189000000": {
+  "helmexpress": 0,
+  "motoin": 94282
+ },
+ "5662641189000140": {
+  "helmexpress": 0,
+  "motoin": 64123
+ },
+ "5663211000000500": {
+  "helmexpress": 0,
+  "motoin": 70520
+ },
+ "5663551170000070": {
+  "helmexpress": 0,
+  "motoin": 69047
+ },
+ "5664151070000160": {
+  "helmexpress": 0,
+  "motoin": 69054
+ },
+ "5671641199001490": {
+  "helmexpress": 0,
+  "motoin": 64113
+ },
+ "5671871000001841": {
+  "helmexpress": 0,
+  "motoin": 75962
+ },
+ "5686871189001000": {
+  "helmexpress": 0,
+  "motoin": 98060
+ },
+ "5686871189001101": {
+  "helmexpress": 0,
+  "motoin": 40815
+ },
+ "5686881189000550": {
+  "helmexpress": 0,
+  "motoin": 32601
+ },
+ "5686881189000551": {
+  "helmexpress": 0,
+  "motoin": 32598
+ },
+ "5686881189000554": {
+  "helmexpress": 0,
+  "motoin": 32599
+ },
+ "5686921189001001": {
+  "helmexpress": 0,
+  "motoin": 92217
+ },
+ "5686921189001190": {
+  "helmexpress": 0,
+  "motoin": 47099
+ },
+ "5687871085000005": {
+  "helmexpress": 0,
+  "motoin": 64391
+ },
+ "5687871085000030": {
+  "helmexpress": 0,
+  "motoin": 64375
+ },
+ "5687871085000040": {
+  "helmexpress": 0,
+  "motoin": 64378
+ },
+ "5687871085000050": {
+  "helmexpress": 0,
+  "motoin": 64379
+ },
+ "5687871085000130": {
+  "helmexpress": 0,
+  "motoin": 64384
+ },
+ "5687871085000180": {
+  "helmexpress": 0,
+  "motoin": 64376
+ },
+ "5687871085000190": {
+  "helmexpress": 0,
+  "motoin": 64377
+ },
+ "5687871085000200": {
+  "helmexpress": 0,
+  "motoin": 64373
+ },
+ "5687871085000240": {
+  "helmexpress": 0,
+  "motoin": 64381
+ },
+ "5688201000000090": {
+  "helmexpress": 0,
+  "motoin": 63976
+ },
+ "5690111195001062": {
+  "helmexpress": 0,
+  "motoin": 64131
+ },
+ "5690201021000011": {
+  "helmexpress": 0,
+  "motoin": 76089
+ },
+ "5690271022000050": {
+  "helmexpress": 0,
+  "motoin": 76129
+ },
+ "5690581033003991": {
+  "helmexpress": 0,
+  "motoin": 83801
+ },
+ "5690611033004000": {
+  "helmexpress": 0,
+  "motoin": 84106
+ },
+ "5690811029001052": {
+  "helmexpress": 0,
+  "motoin": 84177
+ },
+ "5690821029001060": {
+  "helmexpress": 0,
+  "motoin": 84195
+ },
+ "5690981050016000": {
+  "helmexpress": 0,
+  "motoin": 70895
+ },
+ "5690981068008048": {
+  "helmexpress": 0,
+  "motoin": 64967
+ },
+ "5690981068008072": {
+  "helmexpress": 0,
+  "motoin": 69068
+ },
+ "5690981173999832": {
+  "helmexpress": 0,
+  "motoin": 70410
+ },
+ "5692211184000500": {
+  "helmexpress": 0,
+  "motoin": 93789
+ },
+ "5693851022001061": {
+  "helmexpress": 0,
+  "motoin": 76090
+ },
+ "5695611113004432": {
+  "helmexpress": 0,
+  "motoin": 101730
+ },
+ "5695841159001240": {
+  "helmexpress": 0,
+  "motoin": 69495
+ },
+ "5695851189001250": {
+  "helmexpress": 0,
+  "motoin": 32379
+ },
+ "5695851189001251": {
+  "helmexpress": 0,
+  "motoin": 63288
+ },
+ "5695851195001252": {
+  "helmexpress": 0,
+  "motoin": 69443
+ },
+ "5695871189001260": {
+  "helmexpress": 0,
+  "motoin": 32381
+ },
+ "5695891189001000": {
+  "helmexpress": 0,
+  "motoin": 92165
+ },
+ "5695891189001280": {
+  "helmexpress": 0,
+  "motoin": 32380
+ },
+ "5695921189000570": {
+  "helmexpress": 0,
+  "motoin": 34358
+ },
+ "5696081189000003": {
+  "helmexpress": 0,
+  "motoin": 94252
+ },
+ "5696081189000005": {
+  "helmexpress": 0,
+  "motoin": 94245
+ },
+ "5696081189000110": {
+  "helmexpress": 0,
+  "motoin": 20103
+ },
+ "5696081189000230": {
+  "helmexpress": 0,
+  "motoin": 20132
+ },
+ "5696081189000251": {
+  "helmexpress": 0,
+  "motoin": 20092
+ },
+ "5696081189000280": {
+  "helmexpress": 0,
+  "motoin": 20120
+ },
+ "5696081189000510": {
+  "helmexpress": 0,
+  "motoin": 32507
+ },
+ "5696081189000520": {
+  "helmexpress": 0,
+  "motoin": 20131
+ },
+ "5696081189001150": {
+  "helmexpress": 0,
+  "motoin": 22818
+ },
+ "5696081189001151": {
+  "helmexpress": 0,
+  "motoin": 32511
+ },
+ "5696081189001153": {
+  "helmexpress": 0,
+  "motoin": 32513
+ },
+ "5696081195001570": {
+  "helmexpress": 0,
+  "motoin": 92167
+ },
+ "5696081195001700": {
+  "helmexpress": 0,
+  "motoin": 92159
+ },
+ "5696181181000120": {
+  "helmexpress": 0,
+  "motoin": 32590
+ },
+ "5696241000000600": {
+  "helmexpress": 0,
+  "motoin": 100283
+ },
+ "5696361189000190": {
+  "helmexpress": 0,
+  "motoin": 100270
+ },
+ "5696371000000640": {
+  "helmexpress": 0,
+  "motoin": 100265
+ },
+ "5696381189000203": {
+  "helmexpress": 0,
+  "motoin": 100361
+ },
+ "5696411189000220": {
+  "helmexpress": 0,
+  "motoin": 100357
+ },
+ "5697421189000190": {
+  "helmexpress": 0,
+  "motoin": 64119
+ },
+ "5697921000001583": {
+  "helmexpress": 0,
+  "motoin": 101696
+ },
+ "5698321061001630": {
+  "helmexpress": 0,
+  "motoin": 83876
+ },
+ "5698531189000220": {
+  "helmexpress": 0,
+  "motoin": 64129
+ },
+ "5698541189000230": {
+  "helmexpress": 0,
+  "motoin": 64105
+ },
+ "5698541189000232": {
+  "helmexpress": 0,
+  "motoin": 64109
+ },
+ "5698661190000060": {
+  "helmexpress": 0,
+  "motoin": 70494
+ },
+ "5699211189001341": {
+  "helmexpress": 0,
+  "motoin": 88181
+ },
+ "5699231020000291": {
+  "helmexpress": 0,
+  "motoin": 76092
+ },
+ "5699231020000311": {
+  "helmexpress": 0,
+  "motoin": 76094
+ },
+ "5699741146004060": {
+  "helmexpress": 0,
+  "motoin": 76156
+ },
+ "5699771189000270": {
+  "helmexpress": 0,
+  "motoin": 100290
+ },
+ "5700001112004520": {
+  "helmexpress": 0,
+  "motoin": 83725
+ },
+ "5701191189000000": {
+  "helmexpress": 0,
+  "motoin": 87858
+ },
+ "5701191195001660": {
+  "helmexpress": 0,
+  "motoin": 74131
+ },
+ "5701191195001670": {
+  "helmexpress": 0,
+  "motoin": 74132
+ },
+ "5701191195001680": {
+  "helmexpress": 0,
+  "motoin": 74133
+ },
+ "5701281197000140": {
+  "helmexpress": 0,
+  "motoin": 40818
+ },
+ "5703181189000610": {
+  "helmexpress": 0,
+  "motoin": 40845
+ },
+ "5703181189000611": {
+  "helmexpress": 0,
+  "motoin": 40843
+ },
+ "5703461197010000": {
+  "helmexpress": 0,
+  "motoin": 70461
+ },
+ "5703471197010010": {
+  "helmexpress": 0,
+  "motoin": 69212
+ },
+ "5703471197010020": {
+  "helmexpress": 0,
+  "motoin": 69213
+ },
+ "5703521217000010": {
+  "helmexpress": 0,
+  "motoin": 70416
+ },
+ "5703551200001050": {
+  "helmexpress": 0,
+  "motoin": 70457
+ },
+ "5704181189001187": {
+  "helmexpress": 0,
+  "motoin": 32505
+ },
+ "5704181189001473": {
+  "helmexpress": 0,
+  "motoin": 20062
+ },
+ "5705371020000771": {
+  "helmexpress": 0,
+  "motoin": 83975
+ },
+ "5705451020000850": {
+  "helmexpress": 0,
+  "motoin": 101703
+ },
+ "5705481029001092": {
+  "helmexpress": 0,
+  "motoin": 83850
+ },
+ "5705521029001130": {
+  "helmexpress": 0,
+  "motoin": 83869
+ },
+ "5705541029001150": {
+  "helmexpress": 0,
+  "motoin": 84202
+ },
+ "5705581029001190": {
+  "helmexpress": 0,
+  "motoin": 84025
+ },
+ "5705591029001200": {
+  "helmexpress": 0,
+  "motoin": 84201
+ },
+ "5705821112004541": {
+  "helmexpress": 0,
+  "motoin": 83767
+ },
+ "5705851113004570": {
+  "helmexpress": 0,
+  "motoin": 84065
+ },
+ "5705871113004590": {
+  "helmexpress": 0,
+  "motoin": 83809
+ },
+ "5705901113004622": {
+  "helmexpress": 0,
+  "motoin": 101729
+ },
+ "5705941022000860": {
+  "helmexpress": 0,
+  "motoin": 83688
+ },
+ "5706161023000610": {
+  "helmexpress": 0,
+  "motoin": 83404
+ },
+ "5706221029001240": {
+  "helmexpress": 0,
+  "motoin": 83732
+ },
+ "5706351113004650": {
+  "helmexpress": 0,
+  "motoin": 83706
+ },
+ "5706361113004660": {
+  "helmexpress": 0,
+  "motoin": 101728
+ },
+ "5706371113004671": {
+  "helmexpress": 0,
+  "motoin": 83805
+ },
+ "5706411020000914": {
+  "helmexpress": 0,
+  "motoin": 84168
+ },
+ "5706521029001311": {
+  "helmexpress": 0,
+  "motoin": 84170
+ },
+ "5706531029001320": {
+  "helmexpress": 0,
+  "motoin": 84194
+ },
+ "5706561032000300": {
+  "helmexpress": 0,
+  "motoin": 94992
+ },
+ "5706631212000180": {
+  "helmexpress": 0,
+  "motoin": 69466
+ },
+ "5707881189001420": {
+  "helmexpress": 0,
+  "motoin": 54315
+ },
+ "5708391000010100": {
+  "helmexpress": 0,
+  "motoin": 74476
+ },
+ "5708391000010120": {
+  "helmexpress": 0,
+  "motoin": 74475
+ },
+ "5708701000005160": {
+  "helmexpress": 0,
+  "motoin": 83794
+ },
+ "5709161033004430": {
+  "helmexpress": 0,
+  "motoin": 83745
+ },
+ "5709201020000000": {
+  "helmexpress": 0,
+  "motoin": 82962
+ },
+ "5709211020000011": {
+  "helmexpress": 0,
+  "motoin": 82963
+ },
+ "5709291102080000": {
+  "helmexpress": 0,
+  "motoin": 76977
+ },
+ "5710771029001440": {
+  "helmexpress": 0,
+  "motoin": 83709
+ },
+ "5710781000001610": {
+  "helmexpress": 0,
+  "motoin": 83713
+ },
+ "5710841020000970": {
+  "helmexpress": 0,
+  "motoin": 83730
+ },
+ "5710881020000990": {
+  "helmexpress": 0,
+  "motoin": 83621
+ },
+ "5710961029001470": {
+  "helmexpress": 0,
+  "motoin": 83623
+ },
+ "5710991029001521": {
+  "helmexpress": 0,
+  "motoin": 83791
+ },
+ "5711041000005170": {
+  "helmexpress": 0,
+  "motoin": 83795
+ },
+ "5711081189000290": {
+  "helmexpress": 0,
+  "motoin": 100274
+ },
+ "5712311020001100": {
+  "helmexpress": 0,
+  "motoin": 84022
+ },
+ "5723661185000483": {
+  "helmexpress": 0,
+  "motoin": 93781
+ },
+ "5725661000000140": {
+  "helmexpress": 0,
+  "motoin": 63974
+ },
+ "5725671020001010": {
+  "helmexpress": 0,
+  "motoin": 76879
+ },
+ "5725681020001100": {
+  "helmexpress": 0,
+  "motoin": 76880
+ },
+ "5725981121005000": {
+  "helmexpress": 0,
+  "motoin": 94272
+ },
+ "5725981121005001": {
+  "helmexpress": 0,
+  "motoin": 94273
+ },
+ "5725981121005002": {
+  "helmexpress": 0,
+  "motoin": 94274
+ },
+ "5726701022000000": {
+  "helmexpress": 0,
+  "motoin": 76151
+ },
+ "5726701022000071": {
+  "helmexpress": 0,
+  "motoin": 76136
+ },
+ "5726951029030011": {
+  "helmexpress": 0,
+  "motoin": 76081
+ },
+ "5726951029030020": {
+  "helmexpress": 0,
+  "motoin": 76082
+ },
+ "5727791113004711": {
+  "helmexpress": 0,
+  "motoin": 83707
+ },
+ "5728711000999100": {
+  "helmexpress": 0,
+  "motoin": 102703
+ },
+ "5728711068999010": {
+  "helmexpress": 0,
+  "motoin": 70552
+ },
+ "5728711068999060": {
+  "helmexpress": 0,
+  "motoin": 70553
+ },
+ "5728711068999080": {
+  "helmexpress": 0,
+  "motoin": 70550
+ },
+ "5728711068999090": {
+  "helmexpress": 0,
+  "motoin": 70554
+ },
+ "5729161000000002": {
+  "helmexpress": 0,
+  "motoin": 76083
+ },
+ "5729171000001181": {
+  "helmexpress": 0,
+  "motoin": 102696
+ },
+ "5729171000001770": {
+  "helmexpress": 0,
+  "motoin": 102670
+ },
+ "5729171068001132": {
+  "helmexpress": 0,
+  "motoin": 64164
+ },
+ "5729171068001141": {
+  "helmexpress": 0,
+  "motoin": 69079
+ },
+ "5729381001005000": {
+  "helmexpress": 0,
+  "motoin": 100322
+ },
+ "5730761020000010": {
+  "helmexpress": 0,
+  "motoin": 76095
+ },
+ "5730781020000020": {
+  "helmexpress": 0,
+  "motoin": 76097
+ },
+ "5730801029030050": {
+  "helmexpress": 0,
+  "motoin": 76080
+ },
+ "5730821023000640": {
+  "helmexpress": 0,
+  "motoin": 83405
+ },
+ "5730861189002041": {
+  "helmexpress": 0,
+  "motoin": 60884
+ },
+ "5730901023000650": {
+  "helmexpress": 0,
+  "motoin": 83402
+ },
+ "5730941033004470": {
+  "helmexpress": 0,
+  "motoin": 83734
+ },
+ "5730941033004471": {
+  "helmexpress": 0,
+  "motoin": 83735
+ },
+ "5730951112004770": {
+  "helmexpress": 0,
+  "motoin": 101724
+ },
+ "5731001172000080": {
+  "helmexpress": 0,
+  "motoin": 74789
+ },
+ "5731001172000200": {
+  "helmexpress": 0,
+  "motoin": 74769
+ },
+ "5731001172000260": {
+  "helmexpress": 0,
+  "motoin": 74762
+ },
+ "5731001172000330": {
+  "helmexpress": 0,
+  "motoin": 74788
+ },
+ "5731001172000350": {
+  "helmexpress": 0,
+  "motoin": 74777
+ },
+ "5731001172000370": {
+  "helmexpress": 0,
+  "motoin": 74775
+ },
+ "5731001172000390": {
+  "helmexpress": 0,
+  "motoin": 74771
+ },
+ "5731001172000430": {
+  "helmexpress": 0,
+  "motoin": 74780
+ },
+ "5731001172000450": {
+  "helmexpress": 0,
+  "motoin": 74782
+ },
+ "5731001172000490": {
+  "helmexpress": 0,
+  "motoin": 74764
+ },
+ "5731001172000530": {
+  "helmexpress": 0,
+  "motoin": 74772
+ },
+ "5731001172000570": {
+  "helmexpress": 0,
+  "motoin": 74790
+ },
+ "5731001172000601": {
+  "helmexpress": 0,
+  "motoin": 74793
+ },
+ "5731001172000630": {
+  "helmexpress": 0,
+  "motoin": 74797
+ },
+ "5731001172000650": {
+  "helmexpress": 0,
+  "motoin": 74798
+ },
+ "5731001172000660": {
+  "helmexpress": 0,
+  "motoin": 74796
+ },
+ "5731551033004480": {
+  "helmexpress": 0,
+  "motoin": 83718
+ },
+ "5731811102999140": {
+  "helmexpress": 0,
+  "motoin": 81686
+ },
+ "5731841102999230": {
+  "helmexpress": 0,
+  "motoin": 82951
+ },
+ "5731871101999030": {
+  "helmexpress": 0,
+  "motoin": 82949
+ },
+ "5731881020002001": {
+  "helmexpress": 0,
+  "motoin": 76885
+ },
+ "5732441189000260": {
+  "helmexpress": 0,
+  "motoin": 32508
+ },
+ "5732441189000261": {
+  "helmexpress": 0,
+  "motoin": 32509
+ },
+ "5732461022010001": {
+  "helmexpress": 0,
+  "motoin": 76132
+ },
+ "5732471112004790": {
+  "helmexpress": 0,
+  "motoin": 83844
+ },
+ "5732481000004801": {
+  "helmexpress": 0,
+  "motoin": 101682
+ },
+ "5732491113004810": {
+  "helmexpress": 0,
+  "motoin": 83843
+ },
+ "5732811033004490": {
+  "helmexpress": 0,
+  "motoin": 84092
+ },
+ "5733221197000000": {
+  "helmexpress": 0,
+  "motoin": 94220
+ },
+ "5733271022001190": {
+  "helmexpress": 0,
+  "motoin": 83686
+ },
+ "5733311033004502": {
+  "helmexpress": 0,
+  "motoin": 83598
+ },
+ "5733341112004830": {
+  "helmexpress": 0,
+  "motoin": 83812
+ },
+ "5733351112004840": {
+  "helmexpress": 0,
+  "motoin": 83813
+ },
+ "5733621212001510": {
+  "helmexpress": 0,
+  "motoin": 70481
+ },
+ "5733661116007070": {
+  "helmexpress": 0,
+  "motoin": 83835
+ },
+ "5733731120006110": {
+  "helmexpress": 0,
+  "motoin": 69041
+ },
+ "5733731120006111": {
+  "helmexpress": 0,
+  "motoin": 69040
+ },
+ "5733761020000031": {
+  "helmexpress": 0,
+  "motoin": 82961
+ },
+ "5733901212001540": {
+  "helmexpress": 0,
+  "motoin": 64169
+ },
+ "5733901212001550": {
+  "helmexpress": 0,
+  "motoin": 64170
+ },
+ "5734811113004860": {
+  "helmexpress": 0,
+  "motoin": 83724
+ },
+ "5734841020001210": {
+  "helmexpress": 0,
+  "motoin": 83720
+ },
+ "5734851029001580": {
+  "helmexpress": 0,
+  "motoin": 83721
+ },
+ "5734861020001220": {
+  "helmexpress": 0,
+  "motoin": 83771
+ },
+ "5734871020001230": {
+  "helmexpress": 0,
+  "motoin": 83773
+ },
+ "5734891029001590": {
+  "helmexpress": 0,
+  "motoin": 83774
+ },
+ "5734901029001600": {
+  "helmexpress": 0,
+  "motoin": 83775
+ },
+ "5734911020001240": {
+  "helmexpress": 0,
+  "motoin": 83776
+ },
+ "5734921020001250": {
+  "helmexpress": 0,
+  "motoin": 83778
+ },
+ "5734931033004530": {
+  "helmexpress": 0,
+  "motoin": 83777
+ },
+ "5734941029001610": {
+  "helmexpress": 0,
+  "motoin": 83779
+ },
+ "5734951029001620": {
+  "helmexpress": 0,
+  "motoin": 83783
+ },
+ "5734961020001260": {
+  "helmexpress": 0,
+  "motoin": 83780
+ },
+ "5734971020001270": {
+  "helmexpress": 0,
+  "motoin": 83782
+ },
+ "5735001020001280": {
+  "helmexpress": 0,
+  "motoin": 83784
+ },
+ "5735031029001630": {
+  "helmexpress": 0,
+  "motoin": 83787
+ },
+ "5735061000005200": {
+  "helmexpress": 0,
+  "motoin": 83693
+ },
+ "5735071000001683": {
+  "helmexpress": 0,
+  "motoin": 83865
+ },
+ "5735311020001320": {
+  "helmexpress": 0,
+  "motoin": 101722
+ },
+ "5736141000001190": {
+  "helmexpress": 0,
+  "motoin": 74761
+ },
+ "5736141104000009": {
+  "helmexpress": 0,
+  "motoin": 74754
+ },
+ "5736141104000140": {
+  "helmexpress": 0,
+  "motoin": 74742
+ },
+ "5736141104000350": {
+  "helmexpress": 0,
+  "motoin": 74755
+ },
+ "5736141104000420": {
+  "helmexpress": 0,
+  "motoin": 74756
+ },
+ "5736141104000440": {
+  "helmexpress": 0,
+  "motoin": 74746
+ },
+ "5736141104000450": {
+  "helmexpress": 0,
+  "motoin": 74741
+ },
+ "5736141104000660": {
+  "helmexpress": 0,
+  "motoin": 74745
+ },
+ "5736141104000661": {
+  "helmexpress": 0,
+  "motoin": 74753
+ },
+ "5736141104000821": {
+  "helmexpress": 0,
+  "motoin": 74757
+ },
+ "5736141104001030": {
+  "helmexpress": 0,
+  "motoin": 74760
+ },
+ "5736141104001040": {
+  "helmexpress": 0,
+  "motoin": 74758
+ },
+ "5736141104001050": {
+  "helmexpress": 0,
+  "motoin": 74740
+ },
+ "5736141104001060": {
+  "helmexpress": 0,
+  "motoin": 74751
+ },
+ "5736141104001090": {
+  "helmexpress": 0,
+  "motoin": 74743
+ },
+ "5736141104001170": {
+  "helmexpress": 0,
+  "motoin": 74759
+ },
+ "5736161020003511": {
+  "helmexpress": 0,
+  "motoin": 82954
+ },
+ "5737191000000000": {
+  "helmexpress": 0,
+  "motoin": 63928
+ },
+ "5737201000000010": {
+  "helmexpress": 0,
+  "motoin": 63927
+ },
+ "5737211000000020": {
+  "helmexpress": 0,
+  "motoin": 63926
+ },
+ "5737221000000030": {
+  "helmexpress": 0,
+  "motoin": 63922
+ },
+ "5737231000000040": {
+  "helmexpress": 0,
+  "motoin": 63925
+ },
+ "5737241000000050": {
+  "helmexpress": 0,
+  "motoin": 63923
+ },
+ "5737251000000060": {
+  "helmexpress": 0,
+  "motoin": 63924
+ },
+ "5737261000001530": {
+  "helmexpress": 0,
+  "motoin": 70463
+ },
+ "5737261000001531": {
+  "helmexpress": 0,
+  "motoin": 70464
+ },
+ "5737301200000550": {
+  "helmexpress": 0,
+  "motoin": 88374
+ },
+ "5737311217010000": {
+  "helmexpress": 0,
+  "motoin": 64102
+ },
+ "5737591212000100": {
+  "helmexpress": 0,
+  "motoin": 70484
+ },
+ "5737601212000110": {
+  "helmexpress": 0,
+  "motoin": 70485
+ },
+ "5737611212000120": {
+  "helmexpress": 0,
+  "motoin": 70486
+ },
+ "5737621212000130": {
+  "helmexpress": 0,
+  "motoin": 70487
+ },
+ "5737861189000450": {
+  "helmexpress": 0,
+  "motoin": 100292
+ },
+ "5737881189000000": {
+  "helmexpress": 0,
+  "motoin": 100995
+ },
+ "5738351020000031": {
+  "helmexpress": 0,
+  "motoin": 76086
+ },
+ "5738861210000320": {
+  "helmexpress": 0,
+  "motoin": 54290
+ },
+ "5738941190999020": {
+  "helmexpress": 0,
+  "motoin": 40821
+ },
+ "5739511220000120": {
+  "helmexpress": 0,
+  "motoin": 60170
+ },
+ "5739711197000130": {
+  "helmexpress": 0,
+  "motoin": 63471
+ },
+ "5739741200000180": {
+  "helmexpress": 0,
+  "motoin": 51144
+ },
+ "5740121000001720": {
+  "helmexpress": 0,
+  "motoin": 101692
+ },
+ "5740241000001731": {
+  "helmexpress": 0,
+  "motoin": 83614
+ },
+ "5740261000001742": {
+  "helmexpress": 0,
+  "motoin": 83613
+ },
+ "5740271000001752": {
+  "helmexpress": 0,
+  "motoin": 83610
+ },
+ "5740281000001760": {
+  "helmexpress": 0,
+  "motoin": 84043
+ },
+ "5740311020001340": {
+  "helmexpress": 0,
+  "motoin": 83701
+ },
+ "5740331020001680": {
+  "helmexpress": 0,
+  "motoin": 83703
+ },
+ "5740341033004590": {
+  "helmexpress": 0,
+  "motoin": 83736
+ },
+ "5740351033004600": {
+  "helmexpress": 0,
+  "motoin": 83737
+ },
+ "5740441189000060": {
+  "helmexpress": 0,
+  "motoin": 100271
+ },
+ "5740441189000150": {
+  "helmexpress": 0,
+  "motoin": 100278
+ },
+ "5740441189000231": {
+  "helmexpress": 0,
+  "motoin": 100275
+ },
+ "5740441189000310": {
+  "helmexpress": 0,
+  "motoin": 100376
+ },
+ "5740441189000460": {
+  "helmexpress": 0,
+  "motoin": 100273
+ },
+ "5740441189000520": {
+  "helmexpress": 0,
+  "motoin": 100272
+ },
+ "5740441189001530": {
+  "helmexpress": 0,
+  "motoin": 100375
+ },
+ "5740461212000150": {
+  "helmexpress": 0,
+  "motoin": 70488
+ },
+ "5740531023000010": {
+  "helmexpress": 0,
+  "motoin": 76158
+ },
+ "5740531023000020": {
+  "helmexpress": 0,
+  "motoin": 76159
+ },
+ "5740531023000030": {
+  "helmexpress": 0,
+  "motoin": 76160
+ },
+ "5740531023000070": {
+  "helmexpress": 0,
+  "motoin": 76164
+ },
+ "5740531023000120": {
+  "helmexpress": 0,
+  "motoin": 76168
+ },
+ "5740531023000140": {
+  "helmexpress": 0,
+  "motoin": 76170
+ },
+ "5740641120000001": {
+  "helmexpress": 0,
+  "motoin": 86770
+ },
+ "5740651104000002": {
+  "helmexpress": 0,
+  "motoin": 93906
+ },
+ "5740671121010000": {
+  "helmexpress": 0,
+  "motoin": 71187
+ },
+ "5740671121010004": {
+  "helmexpress": 0,
+  "motoin": 86772
+ },
+ "5740671121010031": {
+  "helmexpress": 0,
+  "motoin": 71189
+ },
+ "5741151199000000": {
+  "helmexpress": 0,
+  "motoin": 94222
+ },
+ "5741211000000070": {
+  "helmexpress": 0,
+  "motoin": 70469
+ },
+ "5741271000001560": {
+  "helmexpress": 0,
+  "motoin": 87426
+ },
+ "5741551181010060": {
+  "helmexpress": 0,
+  "motoin": 57771
+ },
+ "5741581181010050": {
+  "helmexpress": 0,
+  "motoin": 60540
+ },
+ "5741651181010110": {
+  "helmexpress": 0,
+  "motoin": 71041
+ },
+ "5741661173010090": {
+  "helmexpress": 0,
+  "motoin": 71040
+ },
+ "5742261075000730": {
+  "helmexpress": 0,
+  "motoin": 93866
+ },
+ "5742261075000750": {
+  "helmexpress": 0,
+  "motoin": 93868
+ },
+ "5742261075000770": {
+  "helmexpress": 0,
+  "motoin": 93870
+ },
+ "5743421000000010": {
+  "helmexpress": 0,
+  "motoin": 54297
+ },
+ "5743531000000000": {
+  "helmexpress": 0,
+  "motoin": 94237
+ },
+ "5743541000000000": {
+  "helmexpress": 0,
+  "motoin": 94238
+ },
+ "5743691020000050": {
+  "helmexpress": 0,
+  "motoin": 76176
+ },
+ "5743701027030090": {
+  "helmexpress": 0,
+  "motoin": 76175
+ },
+ "5743761195000006": {
+  "helmexpress": 0,
+  "motoin": 102690
+ },
+ "5743761195000007": {
+  "helmexpress": 0,
+  "motoin": 102691
+ },
+ "5743971189000000": {
+  "helmexpress": 0,
+  "motoin": 54322
+ },
+ "5743981189000100": {
+  "helmexpress": 0,
+  "motoin": 54323
+ },
+ "5744011199000300": {
+  "helmexpress": 0,
+  "motoin": 100299
+ },
+ "5744021199010010": {
+  "helmexpress": 0,
+  "motoin": 100327
+ },
+ "5744081120000000": {
+  "helmexpress": 0,
+  "motoin": 86776
+ },
+ "5744081120000020": {
+  "helmexpress": 0,
+  "motoin": 93829
+ },
+ "5744441194000740": {
+  "helmexpress": 0,
+  "motoin": 100266
+ },
+ "5745091118000520": {
+  "helmexpress": 0,
+  "motoin": 98283
+ },
+ "5745321199000190": {
+  "helmexpress": 0,
+  "motoin": 102677
+ },
+ "5745341199000210": {
+  "helmexpress": 0,
+  "motoin": 102675
+ },
+ "5745361199000230": {
+  "helmexpress": 0,
+  "motoin": 102676
+ },
+ "5745441194000300": {
+  "helmexpress": 0,
+  "motoin": 74438
+ },
+ "5745451217007100": {
+  "helmexpress": 0,
+  "motoin": 63588
+ },
+ "5745461000000100": {
+  "helmexpress": 0,
+  "motoin": 74502
+ },
+ "5745491199000000": {
+  "helmexpress": 0,
+  "motoin": 92179
+ },
+ "5745511190999000": {
+  "helmexpress": 0,
+  "motoin": 88162
+ },
+ "5745541217007120": {
+  "helmexpress": 0,
+  "motoin": 74448
+ },
+ "5745591210000000": {
+  "helmexpress": 0,
+  "motoin": 94221
+ },
+ "5745621210000000": {
+  "helmexpress": 0,
+  "motoin": 94224
+ },
+ "5745761000000000": {
+  "helmexpress": 0,
+  "motoin": 94235
+ },
+ "5745781210000000": {
+  "helmexpress": 0,
+  "motoin": 94240
+ },
+ "5750351189000193": {
+  "helmexpress": 0,
+  "motoin": 40809
+ },
+ "5750641180999020": {
+  "helmexpress": 0,
+  "motoin": 79040
+ },
+ "5750651023999030": {
+  "helmexpress": 0,
+  "motoin": 80794
+ },
+ "5750691023011010": {
+  "helmexpress": 0,
+  "motoin": 79046
+ },
+ "5750721023011100": {
+  "helmexpress": 0,
+  "motoin": 79050
+ },
+ "5750731023011110": {
+  "helmexpress": 0,
+  "motoin": 79051
+ },
+ "5750751023011120": {
+  "helmexpress": 0,
+  "motoin": 79052
+ },
+ "5750791023011141": {
+  "helmexpress": 0,
+  "motoin": 92529
+ },
+ "5750801023011150": {
+  "helmexpress": 0,
+  "motoin": 79062
+ },
+ "5750811023011160": {
+  "helmexpress": 0,
+  "motoin": 79063
+ },
+ "5750821023011020": {
+  "helmexpress": 0,
+  "motoin": 79064
+ },
+ "5750961113004990": {
+  "helmexpress": 0,
+  "motoin": 101733
+ },
+ "5750971066005000": {
+  "helmexpress": 0,
+  "motoin": 101732
+ },
+ "5750991066005010": {
+  "helmexpress": 0,
+  "motoin": 101731
+ },
+ "5751071194000000": {
+  "helmexpress": 0,
+  "motoin": 94241
+ },
+ "5751251194000281": {
+  "helmexpress": 0,
+  "motoin": 77181
+ },
+ "5751261194000000": {
+  "helmexpress": 0,
+  "motoin": 92178
+ },
+ "5751261194000002": {
+  "helmexpress": 0,
+  "motoin": 94254
+ },
+ "5751291210000570": {
+  "helmexpress": 0,
+  "motoin": 69447
+ },
+ "5751331217007140": {
+  "helmexpress": 0,
+  "motoin": 60755
+ },
+ "5751361210000000": {
+  "helmexpress": 0,
+  "motoin": 96054
+ },
+ "5751431075000000": {
+  "helmexpress": 0,
+  "motoin": 93844
+ },
+ "5751821000999000": {
+  "helmexpress": 0,
+  "motoin": 100309
+ },
+ "5751821199000001": {
+  "helmexpress": 0,
+  "motoin": 100308
+ },
+ "5751831000999031": {
+  "helmexpress": 0,
+  "motoin": 100304
+ },
+ "5751841000999001": {
+  "helmexpress": 0,
+  "motoin": 100307
+ },
+ "5751841000999020": {
+  "helmexpress": 0,
+  "motoin": 101000
+ },
+ "5751841000999021": {
+  "helmexpress": 0,
+  "motoin": 87598
+ },
+ "5753291195000000": {
+  "helmexpress": 0,
+  "motoin": 102705
+ },
+ "5753291195000260": {
+  "helmexpress": 0,
+  "motoin": 102694
+ },
+ "5753291195000261": {
+  "helmexpress": 0,
+  "motoin": 102695
+ },
+ "5753481020000110": {
+  "helmexpress": 0,
+  "motoin": 94390
+ },
+ "5753511020030111": {
+  "helmexpress": 0,
+  "motoin": 94388
+ },
+ "5753581172010273": {
+  "helmexpress": 0,
+  "motoin": 74794
+ },
+ "6090361022000480": {
+  "helmexpress": 0,
+  "motoin": 76114
+ },
+ "6090521022000621": {
+  "helmexpress": 0,
+  "motoin": 76116
+ },
+ "6090531022000630": {
+  "helmexpress": 0,
+  "motoin": 76112
+ },
+ "6090881022000990": {
+  "helmexpress": 0,
+  "motoin": 76173
+ },
+ "6090951022001060": {
+  "helmexpress": 0,
+  "motoin": 76111
+ },
+ "6091041022001110": {
+  "helmexpress": 0,
+  "motoin": 76145
+ },
+ "6091071022001190": {
+  "helmexpress": 0,
+  "motoin": 76123
+ }
+}

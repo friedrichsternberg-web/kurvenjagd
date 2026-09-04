@@ -399,6 +399,78 @@ meldeKatalog({
 });
 
 
+/* POLO Motorrad. Die Zeilenform steht im Kopf von polo-import.py. Drei
+   Unterschiede zu motoin:
+
+   a) ZWEI Katalogdateien desselben Haendlers: Ware am Koerper (polo) und
+      Teile fuers Motorrad (polo-teile). Wer Helme ansieht, laedt keine
+      viertausend Sturzpads mit - ladeKatalogeFuer() holt je Warengruppe
+      nur den Katalog, der sie fuehrt. Der Schluessel eines Produkts traegt
+      die KATALOG-Kennung ("polo-teile:8500..."), denn produktNach() sucht
+      darueber; der Klick laeuft fuer beide ueber den einen Partner "polo".
+
+   b) Die Produktnummer bleibt Text: 16 Stellen sind zu viel fuer eine
+      JavaScript-Zahl ohne Rundung.
+
+   c) Die Adresse braucht den vollen Slug, die Nummer allein gibt 404.
+      Das Bild liegt unter einem je Produkt eigenen Pfad mit eigenem
+      Dateinamen - beides steht im Katalog, nichts wird gebaut.
+
+   Die letzten beiden Zahlen der Zeile sind die Gegenstuecke bei motoin
+   und bei Helmexpress (0 = keines). Traegt ein Produkt eines, ist es das
+   Zweitangebot; motoin geht vor, weil dort die Liste am breitesten ist. */
+
+const POLO_BILDENDUNGEN = ['jpg', 'png', 'webp'];
+
+function bauePoloProdukt(zeile, daten, katalogId) {
+  const [nummer, marke, titel, groessen, preis, versand, gtin, slug, bildpfad, bilddatei, bildendung,
+         gruppe, unterart, beliebt, motoinNummer, helmexpressNummer] = zeile;
+  const markeName = daten.marken[marke];
+  return {
+    schluessel: produktSchluessel(katalogId || daten.partner || 'polo', nummer),
+    partnerId: 'polo',
+    kategorie: daten.warengruppen[gruppe],
+    marke: markeName,
+    name: ohneMarke(titel, markeName),
+    titel,
+    groessen: groessen || [],
+    preis,
+    versand,
+    gesamt: preis + versand,
+    gtin: gtin ? Number(gtin) || gtin : 0,
+    unterart: unterart >= 0 && daten.unterarten ? daten.unterarten[unterart] || null : null,
+    // Wie bei motoin: die Zahl der Groessen, die POLO fuehrt. Der Feed hat
+    // je Groesse eine Zeile, der Importer hat sie zusammengefasst.
+    beliebt: beliebt || 0,
+    produktNummer: null,
+    gleichWie: motoinNummer ? produktSchluessel('motoin', motoinNummer)
+      : (helmexpressNummer ? produktSchluessel('helmexpress', helmexpressNummer) : null),
+    bild() {
+      return `${daten.bildBasis}${bildpfad}/${bilddatei}.${POLO_BILDENDUNGEN[bildendung] || 'jpg'}`;
+    },
+    ziel() {
+      return `${daten.zielBasis}${slug}/${nummer}/pdp`;
+    },
+  };
+}
+
+meldeKatalog({
+  id: 'polo',
+  datei: 'daten/polo-katalog.js',
+  holen: () => (typeof POLO_KATALOG !== 'undefined' ? POLO_KATALOG : null),
+  baueProdukt: (zeile, daten) => bauePoloProdukt(zeile, daten, 'polo'),
+  warengruppen: ['helm', 'jacke', 'hose', 'kombi', 'handschuh', 'stiefel', 'protektor', 'regen', 'airbag'],
+});
+
+meldeKatalog({
+  id: 'polo-teile',
+  datei: 'daten/polo-teile-katalog.js',
+  holen: () => (typeof POLO_TEILE_KATALOG !== 'undefined' ? POLO_TEILE_KATALOG : null),
+  baueProdukt: (zeile, daten) => bauePoloProdukt(zeile, daten, 'polo-teile'),
+  warengruppen: ['koffer', 'anbau'],
+});
+
+
 /* --- 5. Verknuepfung: dasselbe Produkt bei zwei Haendlern -------------------
 
    Der Abgleich passiert NICHT hier, sondern im Importskript, ueber alle
@@ -427,8 +499,20 @@ function merkeVerknuepfung(produkt) {
    nicht erfunden, sondern fehlt - die Produktseite laedt vorher, was
    fuer die Warengruppe noetig ist (ladeKatalogeFuer). */
 function angeboteFuer(produkt) {
-  const weitere = [...(VERKNUEPFUNGEN.get(produkt.schluessel) || [])]
-    .map(produktNach).filter(Boolean);
+  /* Die Verknuepfungen sind Paare (POLO-motoin, Helmexpress-motoin). Dass
+     POLO und Helmexpress dann ebenfalls dieselbe Ware sind, weiss keine
+     einzelne Zeile - deshalb werden alle Nachbarn der Nachbarn eingesammelt,
+     bis nichts Neues mehr kommt. Bei drei Haendlern sind das zwei Schritte. */
+  const gesehen = new Set([produkt.schluessel]);
+  const offen = [produkt.schluessel];
+  while (offen.length) {
+    const naechster = offen.pop();
+    for (const nachbar of VERKNUEPFUNGEN.get(naechster) || []) {
+      if (!gesehen.has(nachbar)) { gesehen.add(nachbar); offen.push(nachbar); }
+    }
+  }
+  gesehen.delete(produkt.schluessel);
+  const weitere = [...gesehen].map(produktNach).filter(Boolean);
   return [produkt, ...weitere].sort(nachGesamtpreis);
 }
 

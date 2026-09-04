@@ -3088,9 +3088,13 @@ function teileTourWennGewollt(tour, beschreibung, oeffentlich) {
 function saveRoute() {
   if (!state.route) return;
 
+  /* Entsteht die Route fuer einen Tag einer Reise, schlaegt reise.js
+     Titel und Namen vor ("Alpen 2027, Tag 3"). Die Datei laedt NACH
+     dieser - dieselbe Absicherung wie bei Garage und Server. */
+  const vorgaben = typeof reisePlanungVorgaben === 'function' ? reisePlanungVorgaben() : null;
   frageTourAn({
-    titel: 'Route speichern',
-    namensVorschlag: 'Tour vom ' + new Date().toLocaleDateString('de-DE'),
+    titel: vorgaben ? vorgaben.titel : 'Route speichern',
+    namensVorschlag: vorgaben ? vorgaben.namensVorschlag : 'Tour vom ' + new Date().toLocaleDateString('de-DE'),
     aufgezeichnet: false,
   }, angaben => legeRouteAb(angaben));
 }
@@ -3113,6 +3117,12 @@ function legeRouteAb({ name, beschreibung, oeffentlich }) {
     roundtripRichtung: istRundtour ? document.getElementById('roundtripRichtung').value : undefined,
     distance: state.route.distance,
     curviness: state.route.curviness,
+    // Fahrzeit und Hoehenmeter kommen vom Routing gleich mit. Seit dem
+    // Reiseplaner werden sie gebraucht: Eine Reise rechnet daraus ihre
+    // Fahrzeit und ihre Hoehenmeter. Aeltere Touren haben sie nicht -
+    // wer damit rechnet, muss mit 0 leben koennen.
+    time: state.route.time || 0,
+    ascend: state.route.ascend || 0,
     // Die ausgeduennte Linie fuers Vorschaubild. Ohne sie muesste die
     // Liste die Route erst neu berechnen, um einen Strich zu zeichnen.
     vorschau: typeof vorschauSpeichern === 'function'
@@ -3124,6 +3134,10 @@ function legeRouteAb({ name, beschreibung, oeffentlich }) {
   zeichneBeideRoutenListen();
   showToast('Gespeichert: ' + name);
   teileTourWennGewollt(neueTour, beschreibung, oeffentlich);
+  // Der Reiseplaner will wissen, welche Tour es geworden ist - er haengt
+  // sie an den Tag, fuer den geplant wurde. Fehlt reise.js, fehlt nur das.
+  if (typeof nachRouteGespeichert === 'function') nachRouteGespeichert(neueTour);
+  return neueTour;
 }
 
 // HTML für eine Zeile in einer Liste gespeicherter Routen - genutzt sowohl

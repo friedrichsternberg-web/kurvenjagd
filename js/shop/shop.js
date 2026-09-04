@@ -174,6 +174,8 @@ const UNTERART_NAMEN = {
   tank: 'Tank', werkzeug: 'Werkzeug', zubehoer: 'Zubehör', strom: 'Strom', cockpit: 'Cockpit',
   lenker: 'Lenker / Griffe', licht: 'Licht / Blinker', scheibe: 'Scheiben', schutz: 'Schutzbügel',
   sonstiges: 'Sonstiges', staender: 'Ständer', verkleidung: 'Verkleidung', schloss: 'Schlösser',
+  antrieb: 'Antrieb', auspuff: 'Auspuff', bremse: 'Bremse', fahrwerk: 'Fahrwerk', spiegel: 'Spiegel',
+  kennzeichen: 'Kennzeichen',
 };
 
 function weltNach(id) {

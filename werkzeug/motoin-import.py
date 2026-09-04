@@ -341,8 +341,31 @@ def schreibe(daten):
     return roh, gepackt
 
 
+def feed_besorgen(feedpfad):
+    """Steht WEBGAINS_FEED_URL_MOTOIN in der Umgebung, wird der Feed von dort
+    geholt und unter feedpfad abgelegt - so kann der Preislauf auf GitHub
+    ihn ziehen, und helmexpress-import.py und polo-import.py finden ihn
+    danach am selben Ort fuer den EAN-Abgleich. Die Adresse steht bei
+    Webgains im Download-Dialog unter "Datenfeed-URL" und traegt den
+    Zugang selbst; sie gehoert in ein Repository-Secret, nie ins Repo."""
+    adresse = os.environ.get('WEBGAINS_FEED_URL_MOTOIN', '').strip()
+    if not adresse:
+        return
+    import urllib.request
+    print('motoin-Feed wird geholt ...')
+    with urllib.request.urlopen(adresse, timeout=600) as antwort, io.open(feedpfad, 'wb') as datei:
+        while True:
+            stueck = antwort.read(1 << 20)
+            if not stueck:
+                break
+            datei.write(stueck)
+
+
 def main():
-    feedpfad = sys.argv[1] if len(sys.argv) > 1 else FEED_VORGABE
+    # Der Pfad ist auch ueber MOTOIN_FEED_PFAD setzbar, damit alle drei
+    # Importer im Preislauf dieselbe Datei meinen.
+    feedpfad = sys.argv[1] if len(sys.argv) > 1 else (os.environ.get('MOTOIN_FEED_PFAD') or FEED_VORGABE)
+    feed_besorgen(feedpfad)
     if not os.path.exists(feedpfad):
         print(f'Feed nicht gefunden: {feedpfad}')
         print('Herunterladen: https://platform.webgains.io/publisher/1426402/ads/product-feeds')

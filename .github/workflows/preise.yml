@@ -13,19 +13,26 @@
 # aus main - solange der Vorschlag nicht uebernommen ist, aendert sich
 # draussen nichts. Uebernehmen ist ein Klick, Verwerfen auch.
 #
-# WAS ER NICHT KANN: motoin. Deren Feed liegt bei Webgains hinter der
-# angemeldeten Sitzung, es gibt keinen Schluessel fuer ein Skript. Der
-# bleibt Handarbeit, siehe Kopf von werkzeug/motoin-import.py. Damit die
-# Helm-Preisvergleiche dabei nicht verlorengehen, greift
-# helmexpress-import.py auf daten/helm-motoin-paare.json zurueck.
+# WEBGAINS (motoin und POLO Motorrad): Der Download-Dialog bei Webgains
+# zeigt unter "Datenfeed-URL" eine Adresse, die den Zugang selbst traegt
+# ("Code kopieren"). Steht sie als Secret bereit, holt der Lauf auch diese
+# beiden Feeds; fehlt sie, ueberspringt er sie und die Kataloge bleiben,
+# wie sie sind. Der motoin-Feed wird dabei unter MOTOIN_FEED_PFAD abgelegt,
+# damit helmexpress-import.py und polo-import.py ihre Preisvergleiche
+# daran abgleichen koennen - ohne ihn greifen beide auf die gesicherten
+# Paare (daten/*-paare.json) zurueck.
 #
 # EINMALIG EINZURICHTEN, sonst laeuft er ins Leere:
 #   1. Settings -> Secrets and variables -> Actions -> New secret
 #      Name: AWIN_SCHLUESSEL, Wert: der Schluessel aus .awin-schluessel
 #   2. Settings -> Actions -> General -> Workflow permissions:
 #      "Allow GitHub Actions to create and approve pull requests" anhaken
+#   3. Optional, fuer Webgains: zwei weitere Secrets
+#      WEBGAINS_FEED_URL_MOTOIN und WEBGAINS_FEED_URL_POLO, je die
+#      Datenfeed-URL aus dem Download-Dialog (Produktfeeds -> Feed anhaken
+#      -> Feed herunterladen -> Datenfeed-URL -> Code kopieren).
 #
-# Beides ist am 04.09.2026 eingerichtet worden.
+# 1 und 2 sind am 04.09.2026 eingerichtet worden, 3 steht noch aus.
 #
 # FALLS DER ERSTE LAUF an "git push" oder "gh pr create" scheitert und von
 # fehlenden Rechten spricht: Dieselbe Seite, Workflow permissions auf
@@ -78,9 +85,36 @@ jobs:
           AWIN_SCHLUESSEL: ${{ secrets.AWIN_SCHLUESSEL }}
         run: python3 werkzeug/reifen-import.py
 
+      # Webgains zuerst motoin, denn dessen Feed ist die Vergleichsbasis
+      # fuer Helmexpress und POLO. Ohne Secret wird der Schritt uebersprungen
+      # - dann bleibt der motoin-Katalog stehen, und die anderen greifen auf
+      # ihre gesicherten Paare zurueck.
+      - name: motoin holen (Webgains, wenn Secret vorhanden)
+        env:
+          WEBGAINS_FEED_URL_MOTOIN: ${{ secrets.WEBGAINS_FEED_URL_MOTOIN }}
+          MOTOIN_FEED_PFAD: ${{ runner.temp }}/motoin-products.csv
+        run: |
+          if [ -z "$WEBGAINS_FEED_URL_MOTOIN" ]; then
+            echo "Kein Secret WEBGAINS_FEED_URL_MOTOIN - motoin bleibt, wie es ist."
+            exit 0
+          fi
+          python3 werkzeug/motoin-import.py
+
+      - name: POLO Motorrad holen (Webgains, wenn Secret vorhanden)
+        env:
+          WEBGAINS_FEED_URL_POLO: ${{ secrets.WEBGAINS_FEED_URL_POLO }}
+          MOTOIN_FEED_PFAD: ${{ runner.temp }}/motoin-products.csv
+        run: |
+          if [ -z "$WEBGAINS_FEED_URL_POLO" ]; then
+            echo "Kein Secret WEBGAINS_FEED_URL_POLO - POLO bleibt, wie es ist."
+            exit 0
+          fi
+          python3 werkzeug/polo-import.py
+
       - name: Helme holen (Helmexpress)
         env:
           AWIN_SCHLUESSEL: ${{ secrets.AWIN_SCHLUESSEL }}
+          MOTOIN_FEED_PFAD: ${{ runner.temp }}/motoin-products.csv
         run: python3 werkzeug/helmexpress-import.py
 
       - name: Grenzen nachpruefen
@@ -98,6 +132,10 @@ jobs:
           git add daten/reifen-katalog.js \
                   daten/helmexpress-katalog.js \
                   daten/helm-motoin-paare.json \
+                  daten/motoin-katalog.js \
+                  daten/polo-katalog.js \
+                  daten/polo-teile-katalog.js \
+                  daten/polo-paare.json \
                   index.html
 
           if git diff --cached --quiet; then
@@ -112,8 +150,8 @@ jobs:
           git checkout -b "$ZWEIG"
           git commit -q -m "Preise vom $(date +%d.%m.%Y)" -m \
             "Automatisch geholt von .github/workflows/preise.yml. Enthaelt die
-          beiden Reifenhaendler und Helmexpress; motoin bleibt Handarbeit,
-          weil Webgains keinen Schluessel fuer Skripte herausgibt.
+          beiden Reifenhaendler und Helmexpress, dazu motoin und POLO, wenn
+          deren Webgains-Adressen als Secrets hinterlegt sind.
 
           Vor dem Uebernehmen ein Blick auf die Zahl der Produkte: Faellt
           sie stark, war der Feed kaputt und der Vorschlag gehoert
@@ -124,9 +162,9 @@ jobs:
             --title "Preise vom $(date +%d.%m.%Y)" \
             --body "Woechentlicher Preislauf.
 
-          **Enthalten:** reifen.com, Reifentiefpreis, Helmexpress.
-          **Nicht enthalten:** motoin. Deren Feed haengt bei Webgains an der
-          angemeldeten Sitzung und muss von Hand geholt werden.
+          **Enthalten:** reifen.com, Reifentiefpreis, Helmexpress - und
+          motoin sowie POLO Motorrad, sofern ihre Webgains-Adressen als
+          Secrets hinterlegt sind (siehe Protokoll des Laufs).
 
           Der Katalogstempel in \`index.html\` ist mitgesetzt, die App holt
           die neuen Preise also auch bei Besuchern, die schon einmal da

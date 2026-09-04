@@ -5001,7 +5001,7 @@ body.nav-modus .karten-knopf { display: none; }
 .reise-held {
   position: relative;
   aspect-ratio: 4 / 3;
-  margin: 0 0 var(--s5);
+  margin: 0 0 var(--s2);
   border-radius: var(--r-lg);
   overflow: hidden;
   background: var(--raum-dunkel);
@@ -5042,8 +5042,20 @@ body.nav-modus .karten-knopf { display: none; }
   left: var(--s4);
   right: var(--s4);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--s2);
+}
+.reise-held-titel { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+/* Der Zeitraum unter dem Namen, wenn ein Startdatum gesetzt ist - die
+   Frage "wann", die sonst nirgends auf der Reisekarte steht. */
+.reise-held-zeitraum {
+  font-family: var(--schrift-display);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--metall);
+  text-shadow: 0 1px 3px var(--schatten-stark);
 }
 .reise-name {
   margin: 0;
@@ -5071,16 +5083,38 @@ body.nav-modus .karten-knopf { display: none; }
   flex-direction: column;
   gap: var(--s2);
   padding: var(--s2) var(--s4) var(--s3);
-  background: var(--glas-hell);
-  backdrop-filter: blur(16px) saturate(160%);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  background: linear-gradient(to top, var(--schatten-tief), var(--schatten-mittel));
+  backdrop-filter: blur(16px) saturate(120%);
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
   border-top: 1px solid var(--glas-rand);
-  box-shadow: inset 0 1px 0 var(--glas-licht);
+  box-shadow: inset 0 1px 0 var(--glas-hell);
 }
 .reise-werte {
   display: flex;
   align-items: baseline;
   gap: var(--s4);
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+/* Die eine grosse Zahl: die Gesamtstrecke. Auf 320 Punkten etwas kleiner,
+   damit die Zeile nicht umbricht. */
+.reise-held-zahl {
+  font-family: var(--schrift-display);
+  font-size: clamp(30px, 10vw, 36px);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--metall-glanz);
+  text-shadow: 0 1px 2px var(--schatten-stark);
+  white-space: nowrap;
+}
+.reise-held-zahl i {
+  font-style: normal;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin-left: 5px;
+  color: var(--metall);
 }
 .reise-bilanz .wert {
   font-family: var(--schrift-display);
@@ -5089,15 +5123,18 @@ body.nav-modus .karten-knopf { display: none; }
   line-height: 1;
   font-variant-numeric: tabular-nums;
   color: var(--metall-glanz);
+  text-shadow: 0 1px 2px var(--schatten-stark);
   white-space: nowrap;
 }
+/* Einheiten in Metall statt --muted: --muted kaeme auf hellem Glas nur auf
+   3,5:1, Metall haelt 4,4:1 auch im schlimmsten Fall. */
 .reise-bilanz .wert i {
   font-style: normal;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.04em;
   margin-left: 4px;
-  color: var(--muted);
+  color: var(--metall);
 }
 .reise-offen { margin-left: auto; font-size: 12.5px; white-space: nowrap; }
 
@@ -5106,21 +5143,111 @@ body.nav-modus .karten-knopf { display: none; }
 .reise-profil {
   display: flex;
   gap: var(--s1);
-  height: var(--s2);
+  height: var(--s3);
 }
+/* Jeder Balken ist ein Knopf; die Trefferflaeche reicht per ::after ueber
+   den Strich hinaus, sonst traefe ein Daumen den Zwoelf-Punkte-Strich nie. */
 .reise-profil-tag {
+  position: relative;
   flex: var(--km, 1) 1 0;
   min-width: var(--s1);
+  padding: 0;
+  border: 0;
   border-radius: var(--r-pill);
   background: var(--skala-mittel);
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.15s ease;
 }
+.reise-profil-tag::after { content: ""; position: absolute; inset: calc(-1 * var(--s2)) 0; }
+.reise-profil.mit-auswahl .reise-profil-tag:not(.aktiv) { opacity: 0.35; }
+.reise-profil-tag.aktiv { transform: scaleY(1.35); }
 .reise-profil-tag.wenig { background: var(--skala-wenig); }
 .reise-profil-tag.viel { background: var(--skala-viel); }
 .reise-profil-tag.leer {
   flex: 0 0 var(--s5);
   background: transparent;
-  border: 1px dashed var(--glas-rand);
+  border: 1px dashed var(--glas-heller);
 }
+
+/* ---------- Die Kacheln unter der Karte ----------
+   Die Handschrift von "Meine Stats" (.stat), zwei Spalten, direkt unter
+   der Karte, damit sie als ihr Fuss gelesen werden. Eine Kachel mit
+   Tagesnummer ist ein Knopf und waehlt den Tag; das blaue Zeichen sagt es. */
+.reise-zahlen {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s2);
+  margin: 0 0 var(--s5);
+  text-align: left;
+}
+.reise-zahlen .stat { color: var(--text); font-family: var(--schrift-text); }
+.reise-zahlen .stat.breit { grid-column: 1 / -1; }
+.reise-zahlen .stat .v { color: var(--metall-glanz); }
+.reise-zahlen .stat .v i {
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin-left: 4px;
+  color: var(--metall);
+}
+.reise-zahlen .stat .unter { font-size: 11.5px; color: var(--muted); }
+.reise-zahlen .stat .unter i { font-style: normal; }
+.reise-zahlen .stat.tippbar {
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+.reise-zahlen .stat.tippbar:active { transform: scale(0.985); }
+.reise-zahlen .stat.aktiv { border-color: color-mix(in srgb, var(--accent-hell) 45%, transparent); }
+.reise-tipp-pfeil { color: var(--accent-hell); font-style: normal; font-size: 15px; margin-left: 2px; }
+/* Der Punkt in der Skalenfarbe vor der kurvigsten Etappe - zugleich die
+   Legende fuer das Profil oben, ohne eine eigene zu bauen. */
+.reise-stufe-punkt {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--skala-mittel);
+  vertical-align: 3px;
+}
+.reise-stufe-punkt.wenig { background: var(--skala-wenig); }
+.reise-stufe-punkt.viel { background: var(--skala-viel); }
+/* Der Bereichsbalken: kuerzeste - Schnitt - laengste Etappe in einer Zeile. */
+.reise-bereich { margin-top: var(--s2); }
+.reise-bereich-rinne {
+  position: relative;
+  height: var(--s1);
+  border-radius: var(--r-pill);
+  background: var(--glas-heller);
+}
+.reise-bereich-marke {
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--metall-glanz);
+  box-shadow: 0 0 0 2px var(--bg);
+}
+.reise-bereich-enden {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s2);
+  margin-top: var(--s1);
+}
+.reise-bereich-enden .linkbtn {
+  font-family: var(--schrift-display);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  color: var(--muted);
+}
+.reise-bereich-enden .linkbtn i { font-style: normal; opacity: 0.5; margin: 0 2px; }
+.reise-bereich-enden .linkbtn:hover { color: var(--accent-hell); }
+.reise-zahlen-hinweis { margin: calc(-1 * var(--s3)) 0 var(--s5); }
 
 /* ---------- Was im SVG der Reisekarte liegt ----------
    Saum, Linie und Kacheln kommen aus dem Vorschaubild (.vorschau-*).
@@ -5340,3 +5467,44 @@ body.nav-modus .karten-knopf { display: none; }
 .reise-wahl li { border: 1px solid transparent; }
 .reise-wahl li.aktuell { border-color: color-mix(in srgb, var(--accent-hell) 45%, transparent); }
 .reise-wahl .badge { flex: 0 0 auto; }
+
+/* ---------- Der Planer im Reise-Modus ----------
+   Das Band oben im Bedienfeld, solange eine Route fuer einen Tag einer
+   Reise entsteht. Blau, weil es einen Zustand meldet, den man beenden
+   kann - der Abbrechen-Link ist die Bedienung dazu. */
+.reise-planung-band {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  margin: 0 0 var(--s3);
+  padding: var(--s2) var(--s3);
+  border-radius: var(--r-sm);
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-hell) 45%, transparent);
+  box-shadow: inset 0 1px 0 var(--glas-rand);
+  font-size: 14px;
+  color: var(--text);
+}
+.reise-planung-band b { font-weight: 600; }
+.reise-planung-band .linkbtn { flex: 0 0 auto; font-size: 13px; }
+
+/* Die zwei Wege auf einer Tageskarte ohne Route: waehlen oder erstellen. */
+.etappe-leer-knoepfe { display: flex; gap: var(--s2); flex-wrap: wrap; justify-content: center; }
+/* Ein Ruhetag ist kein offener Tag: kein gestrichelter Rahmen, kein Faden
+   in Gestrichelt, ein Koffer statt der Route - der Tag ist entschieden. */
+.etappe.ruhe .etappe-karte {
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  gap: var(--s2);
+  text-align: center;
+  color: var(--muted);
+}
+.etappe.ruhe .etappe-karte .ic.gross { width: 28px; height: 28px; opacity: 0.6; }
+.etappe.ruhe .del { position: absolute; top: var(--s2); right: var(--s2); }
+.etappe.ruhe .etappe-nummer { color: var(--muted); }
+/* Im Etappenprofil: ein schmaler Strich in Metall, kein gestrichelter Leerbalken. */
+.reise-profil-tag.ruhe { flex: 0 0 var(--s4); background: var(--glas-hell); }
+/* Der Eintrag "Neue Route erstellen" ganz oben im Blatt. */
+.reise-wahl-erstellen .saved-marke { color: var(--accent-hell); }

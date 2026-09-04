@@ -2765,3 +2765,127 @@ zuletzt abgebrochen hat, und die Rundtour fragt ihn.
 **Nicht geändert: die Zahl der Anfragen.** Sparsamer zu werden ist der
 richtige nächste Schritt, aber er kostet Qualität und gehört besprochen,
 nicht nebenbei gemacht.
+
+---
+
+## 05.09.2026 — Reise planen, zweite Stufe: Route erstellen, die Statistik, POLO
+
+### Route erstellen aus dem Tag heraus
+
+**Der Wunsch:** Wer einen Tag plant, soll nicht nur eine gespeicherte Route
+wählen, sondern eine neue direkt dafür bauen können. Die Route soll dann im
+Tag liegen und trotzdem normal gespeichert und geteilt werden.
+
+**Kein zweiter Planer.** Es gibt den einen, und er bekommt ein Band oben im
+Bedienfeld: „Du planst Tag 3 von Alpen 2027" mit Abbrechen. Der Speichern-
+Dialog schlägt Titel und Namen vor („Als Tag 3 speichern", „Alpen 2027,
+Tag 3"), die Tour landet wie jede andere in der Tourenliste, hängt sich
+zusätzlich an den Tag, und die App kehrt zur Reise zurück. Der Draht zu
+`app.js` besteht aus zwei `typeof`-Prüfungen dort (`reisePlanungVorgaben`,
+`nachRouteGespeichert`), wie bei Garage und Server: Fehlt `reise.js`, fehlt
+nur das.
+
+Dabei nebenbei: `legeRouteAb()` speichert jetzt auch **Fahrzeit und
+Höhenmeter** der Route (`time`, `ascend`). Beides kam vom Routing schon
+immer mit und wurde weggeworfen. Ältere Touren haben es nicht; die
+Reisestatistik sagt dann „aus 2 von 4 Etappen", statt eine Summe zu zeigen,
+die stillschweigend Etappen auslässt.
+
+### „Offen" heißt jetzt: weder Route noch Titel
+
+Vorher zählte jeder Tag ohne Route als offen, auch der „Anreise"-Tag, den
+Friedrich bewusst ohne Tour gelassen hatte. Jetzt entscheidet `tagIstOffen()`:
+offen ist, wo weder Route noch Titel steht, oder wo die Route in der
+Tourenliste gelöscht wurde. Ein Ruhetag bekommt eine eigene Gestalt: Koffer
+statt Route, kein gestrichelter Rahmen, im Profil ein kurzer Strich statt
+des hohlen Balkens.
+
+### Die Statistik: drei Entwürfe, zwei Juroren
+
+Friedrichs Bild zeigte das Problem: Die drei Werte im hellen Glasstreifen
+waren auf hellen Kacheln fast unsichtbar, und drei Werte sind keine
+Statistik. Drei Ansätze wurden unabhängig entworfen (Cockpit, Plakat,
+Datenkarte), zwei Juroren bewerteten.
+
+| Entwurf | Summe |
+|---|---|
+| **Das Cockpit** – dunkles Glas, eine große Zahl, Kacheln darunter | **81** |
+| Das Plakat – Sockel mit vier Werten auf einer Grundlinie | 71 |
+| Die Datenkarte – Tafel mit Infografiken | 67 |
+
+**Warum das Cockpit gewann:** Es war der einzige Entwurf, dessen Anordnung
+auf 358 Punkten nachweislich aufgeht. Es hatte die Breite von „17 h 10 min"
+gemessen und daraus zwei Spalten gemacht, während das Plakat vier
+Blockbeschriftungen in 326 Punkte zwängte und die Datenkarte drei Spalten
+setzte, in die die Fahrzeit nicht passt. Ein Entwurf, dessen wichtigste
+Zeile umbricht, ist nicht episch, sondern kaputt.
+
+**Der Kern der Lesbarkeit:** `--glas-hell` ist zehn Prozent Weiß über
+Kacheln, die nur auf die Hälfte gedimmt sind. Bei Kacheln, die halb Bayern
+zeigen, ist das ein mittleres Grau, und Metall-Glanz darauf kam auf etwa
+2,3:1. Der Streifen ist jetzt ein Verlauf aus den Schattenstufen; die
+Zahlen fallen nie unter 9:1, egal welche Kachel darunter liegt. Der Verlauf
+spiegelt den Schleier hinter dem Namen, die Karte wird oben und unten
+dieselbe Linse.
+
+**Übernommen aus den Unterlegenen:** die Gesamtstrecke als große Zahl (36
+Punkte), der Zeitraum unter dem Namen, das Profil als tippbare Knöpfe mit
+Trefferfläche über den Strich hinaus, der **Bereichsbalken** kürzeste – Ø –
+längste Etappe in der breiten Kachel, der Skalenpunkt an der kurvigsten
+Etappe als Legende fürs Profil, die Fahrzeit ab zehn Stunden nur in
+Stunden, Rekordkacheln erst ab zwei Fahrtagen, tippbare Kacheln mit blauem
+Zeichen. Alles aus Werten, die `reiseBilanz()` schon hatte oder mit sechs
+Zeilen bekam (die Tagesnummern der Rekorde).
+
+### POLO Motorrad: der fünfte Partner
+
+Von Webgains angenommen, 36.287 Feedzeilen. Vier Dinge waren anders als bei
+motoin, und jedes davon hätte ohne Nachmessen einen Fehler gegeben:
+
+1. **Jede Größe ist ein eigener Artikel** ohne Gruppenkennung. Der erste
+   Katalog hatte deshalb 8.521 „Produkte", davon dieselbe Jacke in neun
+   Größen. Jetzt gruppiert der Importer über den Titel ohne Größenwort:
+   2.318 Kleidungsstücke mit Größenlisten, „beliebt" wieder ehrlich als
+   Zahl der Größen.
+2. **Die Nummer allein gibt 404**, die Adresse braucht den Slug. Der steht
+   im Katalog.
+3. **Der Bilddateiname trägt die Nummer des ersten Artikels der Gruppe**,
+   nicht die eigene. Der erste Anlauf, ihn zu bauen, gab 404. Er wird
+   gespeichert. Und: POLO liefert **keine verkleinerten Bilder**, jedes ist
+   das Original mit 250 bis 860 KB. Die Kacheln laden träge, trotzdem ist
+   das der teuerste Bildweg der App; steht in AUFGABEN.md.
+4. **Die Zuordnung war mehrdeutig.** motoin fasst sechzehn
+   fahrzeugspezifische Adapterkabel in einer Gruppe zusammen, POLO führt
+   jedes einzeln – alle sechzehn zeigten auf dieselbe motoin-Gruppe, und
+   der Preisvergleich hätte sechzehn „Angebote" für ein Kabel gezeigt. Von
+   2.042 Zuordnungen waren 1.318 solche Varianten. Weg damit, auf beiden
+   Seiten; übrig bleiben 722 saubere Paare. Dieselbe Falle steckte seit
+   dem Helm-Import in 67 Helmen (Farbvarianten), auch die sind jetzt
+   draußen.
+
+**Zwei Kataloge für einen Händler.** Ware am Körper (`polo-katalog.js`, 113
+KB) und Teile fürs Motorrad (`polo-teile-katalog.js`, 260 KB). Die App lädt
+je Warengruppe nur den, der sie führt; wer Helme ansieht, lädt keine 4.700
+Sturzpads mit. Die Anbauteile bekamen dafür sechs neue Unterarten (Antrieb,
+Auspuff, Bremse, Fahrwerk, Spiegel, Kennzeichen).
+
+**Die Verknüpfung ist jetzt transitiv.** POLO zeigt auf motoin, Helmexpress
+zeigt auf motoin; dass POLO und Helmexpress dann dieselbe Ware sind, wusste
+keine einzelne Zeile. `angeboteFuer()` sammelt jetzt die Nachbarn der
+Nachbarn ein.
+
+**Provision und Cookie-Frist von POLO stehen noch nicht im Code** (`null`).
+Die Programmseite war über die Webgains-Oberfläche nicht zu finden, vier
+Adressen gaben 404. Statt zu raten: Das Einwilligungsblatt sagt „innerhalb
+der Frist, die das Netzwerk dafür setzt", die Offenlegung nennt die
+Provision ohne Prozentsatz. Nachtragen, sobald Friedrich sie abliest.
+
+**Die Preisautomatik für Webgains.** Der Download-Dialog bei Webgains
+zeigt eine „Datenfeed-URL", die den Zugang selbst trägt – die
+Chrome-Erweiterung hat sie als Zugangsdaten ausgeblendet, was genau richtig
+ist. Als Secrets `WEBGAINS_FEED_URL_MOTOIN` und `WEBGAINS_FEED_URL_POLO`
+holt der wöchentliche Lauf beide Feeds selbst; der motoin-Feed dient dabei
+zugleich als Vergleichsbasis für Helmexpress und POLO. Fehlen die Secrets,
+überspringt der Lauf die Schritte und die Kataloge bleiben stehen. Damit
+ist die Annahme vom 04.09.2026, Webgains gebe keinen Schlüssel heraus,
+überholt.

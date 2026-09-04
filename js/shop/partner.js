@@ -110,6 +110,26 @@ const PARTNER = [
     versandfrei: 'Ab 499 Euro Warenwert liefert Helmexpress frachtfrei, darunter 6,90 Euro.',
     bilderErlaubt: true,
   },
+  /* POLO Motorrad, seit dem 05.09.2026, ueber Webgains wie motoin. Die
+     Programmkennung steht in jedem Produktlink des Feeds (wgprogramid).
+     Cookie-Frist und Provisionshoehe sind noch nicht eingetragen (null):
+     Das Einwilligungsblatt sagt dann "innerhalb der Frist des Netzwerks"
+     statt einer Zahl, und die Offenlegung nennt die Provision ohne
+     Prozentsatz. Eine erfundene Zahl in einem Rechtstext waere schlimmer
+     als eine fehlende - nachtragen, sobald sie aus dem Webgains-Konto
+     abgelesen ist. */
+  {
+    id: 'polo',
+    name: 'POLO Motorrad',
+    betreiber: 'POLO Motorrad und Sportswear GmbH, Jüchen',
+    netz: 'webgains',
+    kennung: { kampagne: WEBGAINS_KAMPAGNE, programm: '309425' },
+    start: 'https://www.polo-motorrad.com/de-de/',
+    cookieTage: null,
+    provision: null,
+    versandfrei: null,
+    bilderErlaubt: true,
+  },
 ];
 
 function partnerNach(id) {
@@ -367,7 +387,9 @@ function schreibePartnerBlatt(partner) {
       ? `Du verl&auml;sst Serpa und landest bei <b>${escapeHtml(partner.name)}</b>. `
         + `Der Link l&auml;uft &uuml;ber unser Partnernetzwerk `
         + `<b>${escapeHtml(netzName(partner))}</b>, das dabei eine Kennung vergibt: `
-        + `Kaufst du innerhalb von <b>${partner.cookieTage} Tagen</b> etwas, wird uns `
+        + (partner.cookieTage
+            ? `Kaufst du innerhalb von <b>${partner.cookieTage} Tagen</b> etwas, wird uns `
+            : 'Kaufst du innerhalb der Frist, die das Netzwerk daf&uuml;r setzt, etwas, wird uns ')
         + 'eine Provision gutgeschrieben. <b>Am Preis &auml;ndert das nichts.</b>'
       : 'Du verl&auml;sst Serpa und landest bei einem unserer Partner-Shops. '
         + 'Der Link l&auml;uft &uuml;ber ein Partnernetzwerk, das dabei eine Kennung '

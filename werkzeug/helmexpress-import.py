@@ -68,7 +68,7 @@ ZIEL = os.path.join(PROJEKT, 'daten', 'helmexpress-katalog.js')
 # automatische Lauf saemtliche Preisvergleiche bei den Helmen - und zwar
 # stillschweigend, was schlimmer waere als ein Abbruch.
 PAARE = os.path.join(PROJEKT, 'daten', 'helm-motoin-paare.json')
-MOTOIN_FEED = os.path.expanduser('~/Downloads/products.csv')
+MOTOIN_FEED = os.environ.get('MOTOIN_FEED_PFAD') or os.path.expanduser('~/Downloads/products.csv')
 
 MID = '121690'
 FEED = '111977'
@@ -240,6 +240,18 @@ def zuordnung_zu_motoin(produkte, motoin_eans):
             mehrdeutig += 1
             continue
         treffer[adresse] = bestes[0][0]
+
+    # Die Gegenrichtung, seit dem 05.09.2026: Zeigen MEHRERE Helme auf
+    # DIESELBE motoin-Gruppe, fasst motoin dort Farben zusammen, die
+    # Helmexpress einzeln fuehrt. Das sind Varianten, nicht dieselbe Ware -
+    # als "Angebote" eines Helms waeren es vier falsche Preise. Weg damit,
+    # so wie in polo-import.py.
+    haeufig = collections.Counter(treffer.values())
+    doppelt = {ziel for ziel, n in haeufig.items() if n > 1}
+    varianten = sum(1 for ziel in treffer.values() if ziel in doppelt)
+    treffer = {a: z for a, z in treffer.items() if z not in doppelt}
+    if varianten:
+        print(f'{varianten} Helme zeigten zu mehreren auf dieselbe motoin-Gruppe (Farbvarianten) - weggelassen')
     return treffer, mehrdeutig
 
 

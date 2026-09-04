@@ -110,6 +110,17 @@ function routeZuTag(tag) {
   return loadSaved().find(route => String(route.id) === String(tag.routeId)) || null;
 }
 
+/* Ein Tag ohne Route ist nicht automatisch "offen": Wer ihn "Anreise"
+   oder "Ruhetag" genannt hat, hat entschieden. Offen ist nur, wo weder
+   Route noch Titel steht - und wo die Route in der Tourenliste geloescht
+   wurde, denn da muss jemand ran. */
+function tagIstOffen(tag) {
+  const route = routeZuTag(tag);
+  if (route) return false;
+  if (tag.routeId != null) return true;          // Route fehlt, muss ersetzt werden
+  return !(tag.titel || '').trim();
+}
+
 function reiseBilanz(reise) {
   const tage = Array.isArray(reise?.tage) ? reise.tage : [];
   const routen = tage.map(routeZuTag).filter(Boolean);
@@ -119,11 +130,38 @@ function reiseBilanz(reise) {
   const kurven = meter
     ? routen.reduce((summe, route) => summe + (route.curviness || 0) * (route.distance || 0), 0) / meter
     : 0;
+  const offen = tage.filter(tagIstOffen).length;
+  // Die Rekorde samt dem Tag, der sie haelt - die Kacheln unter der Karte
+  // fuehren per Tipp dorthin.
+  const fahrtage = tage.map((tag, stelle) => ({ tag, stelle, route: routeZuTag(tag) })).filter(e => e.route);
+  const nach = (mass, groesser) => fahrtage.reduce((best, e) =>
+    (!best || (groesser ? mass(e.route) > mass(best.route) : mass(e.route) < mass(best.route))) ? e : best, null);
+  const laengster = nach(r => r.distance || 0, true);
+  const kuerzester = nach(r => r.distance || Infinity, false);
+  const kurvigster = nach(r => r.curviness || 0, true);
   return {
     tage: tage.length,
     mitRoute: routen.length,
+    ruhetage: tage.length - routen.length - offen,
+    offen,
     km: Math.round(meter / 1000),
     kurven: Math.round(kurven),
+    schnittKm: routen.length ? Math.round(meter / 1000 / routen.length) : 0,
+    laengsteKm: laengster ? Math.round(laengster.route.distance / 1000) : 0,
+    laengsteStelle: laengster ? laengster.stelle : -1,
+    laengsteTagId: laengster ? laengster.tag.id : null,
+    kuerzesteKm: kuerzester ? Math.round(kuerzester.route.distance / 1000) : 0,
+    kuerzesteStelle: kuerzester ? kuerzester.stelle : -1,
+    kuerzesteTagId: kuerzester ? kuerzester.tag.id : null,
+    kurvigste: kurvigster ? Math.round(kurvigster.route.curviness || 0) : 0,
+    kurvigsteStelle: kurvigster ? kurvigster.stelle : -1,
+    kurvigsteTagId: kurvigster ? kurvigster.tag.id : null,
+    // Fahrzeit und Hoehenmeter gibt es erst bei Touren, die seit dem
+    // Reiseplaner gespeichert wurden; aeltere zaehlen 0 und fehlen ehrlich.
+    fahrzeitMin: Math.round(routen.reduce((summe, route) => summe + (route.time || 0), 0) / 60),
+    hoehenmeter: Math.round(routen.reduce((summe, route) => summe + (route.ascend || 0), 0)),
+    mitZeit: routen.filter(route => route.time).length,
+    mitHoehe: routen.filter(route => route.ascend).length,
   };
 }
 
@@ -135,6 +173,21 @@ function tagesDatum(reise, stelle) {
   if (Number.isNaN(datum.getTime())) return null;
   datum.setDate(datum.getDate() + stelle);
   return datum;
+}
+
+// Die Stufe auf der Messskala des Planers: unter 150 Grad/km Landstrasse,
+// bis 300 gute Motorradstrecke, darueber Pass. Dieselben Schwellen wie
+// beim Kurvigkeitsbalken - Farbe, die Daten bedeutet, siehe CLAUDE.md.
+function kurvenStufe(grad) {
+  return grad < 150 ? 'wenig' : grad <= 300 ? 'mittel' : 'viel';
+}
+
+// "8 h 4 min", ab zehn Stunden nur noch "23 h" - haelt die Kachel schmal.
+function fahrzeitText(minuten) {
+  if (!minuten) return '–';
+  const stunden = Math.floor(minuten / 60), rest = Math.round(minuten % 60);
+  if (stunden >= 10) return `${Math.round(minuten / 60)} h`;
+  return stunden ? `${stunden} h ${rest} min` : `${rest} min`;
 }
 
 function datumKurz(datum) {
@@ -237,7 +290,7 @@ function zeichneReisenListe() {
 
 function reiseKarteHtml(reise) {
   const bilanz = reiseBilanz(reise);
-  const offen = bilanz.tage - bilanz.mitRoute;
+  const offen = bilanz.offen;
   const karte = reiseKartenSvg(reise, { marke: 12 });
   const zeitraum = reise.start ? datumKurz(tagesDatum(reise, 0)) + ' bis ' + datumKurz(tagesDatum(reise, bilanz.tage - 1)) : '';
   return `
@@ -281,7 +334,7 @@ let sortierModus = false;
 
 // 4:3, siehe kartenBildMehrere(). Oben bleibt Platz fuer den Namen, unten
 // fuer den Bilanzstreifen - die Routen liegen im Band dazwischen.
-const REISE_RAHMEN = { breite: 640, hoehe: 480, frei: { oben: 70, unten: 125 } };
+const REISE_RAHMEN = { breite: 640, hoehe: 480, frei: { oben: 108, unten: 135 } };
 const MARKEN_MINDESTABSTAND = 24;                    // Bildpunkte, darunter werden Marken zusammengelegt
 
 function oeffneReise(id) {
@@ -311,7 +364,7 @@ function zeichneReise() {
     <div class="reise-kopf">
       <button class="btn ghost back-btn" id="btnReiseZurueck">&larr; Touren</button>
     </div>
-    <div class="reise-held-halter">${reiseHeldHtml(reise)}</div>
+    <div class="reise-held-halter">${reiseHeldHtml(reise)}${reiseZahlenHtml(reise, reiseBilanz(reise))}</div>
     <div class="reise-faden">
       <div class="reise-tage-kopf">
         <h2 class="regal-titel">Tage</h2>
@@ -341,26 +394,101 @@ function zeichneReise() {
    kommt. */
 function reiseHeldHtml(reise) {
   const bilanz = reiseBilanz(reise);
-  const offen = bilanz.tage - bilanz.mitRoute;
   const karte = reiseKartenSvg(reise, { marke: 16, rahmen: REISE_RAHMEN, sofort: true });
+  const zeitraum = reise.start && bilanz.tage > 1
+    ? `${datumKurz(tagesDatum(reise, 0))} – ${datumKurz(tagesDatum(reise, bilanz.tage - 1))}`
+    : (reise.start ? datumKurz(tagesDatum(reise, 0)) : '');
+  const fahrtage = bilanz.mitRoute === bilanz.tage
+    ? `${bilanz.mitRoute}<i>${bilanz.mitRoute === 1 ? 'Fahrtag' : 'Fahrtage'}</i>`
+    : `${bilanz.mitRoute}<i>von ${bilanz.tage}</i>`;
   return `
     <section class="reise-held${karte ? '' : ' leer'}" id="reiseHeld">
       ${karte || reiseLeerSvg(bilanz.tage, REISE_RAHMEN)}
       ${karte ? '<span class="vorschau-osm">&copy; OpenStreetMap</span>' : ''}
       <header class="reise-held-kopf">
-        <h2 class="reise-name">${escapeHtml(reise.name)}</h2>
+        <div class="reise-held-titel">
+          <h2 class="reise-name">${escapeHtml(reise.name)}</h2>
+          ${zeitraum ? `<span class="reise-held-zeitraum">${zeitraum}</span>` : ''}
+        </div>
         <button class="glas-rund klein" id="btnReiseName" title="Umbenennen" aria-label="Reise umbenennen">${symbol('stift', 'klein')}</button>
       </header>
       <div class="reise-bilanz">
         <div class="reise-werte">
-          <span class="wert">${bilanz.tage}<i>${bilanz.tage === 1 ? 'Tag' : 'Tage'}</i></span>
-          <span class="wert">${bilanz.km.toLocaleString('de-DE')}<i>km</i></span>
-          <span class="wert">${bilanz.kurven}<i>&deg;/km</i></span>
-          ${offen ? `<button class="linkbtn reise-offen" data-zum-leeren>${offen} offen</button>` : ''}
+          <span class="reise-held-zahl">${bilanz.km.toLocaleString('de-DE')}<i>km</i></span>
+          <span class="wert">${fahrtage}</span>
+          <span class="wert">&Oslash; ${bilanz.kurven}<i>&deg;/km</i></span>
+          ${bilanz.offen ? `<button class="linkbtn reise-offen" data-zum-leeren>${bilanz.offen} offen</button>` : ''}
         </div>
         ${reiseProfilHtml(reise)}
       </div>
     </section>`;
+}
+
+/* Die Kacheln unter der Karte: was die Karte nicht mehr tragen soll, in
+   der Handschrift von "Meine Stats" (.stat). Ein Tipp auf eine Kachel mit
+   Tagesnummer waehlt den Tag, wie die Marken auf der Karte.
+
+   Rekorde erst ab zwei Fahrtagen: Bei einem sind Schnitt, laengste und
+   kurvigste dieselbe Zahl, das saehe nach Fuellmaterial aus.
+
+   Fahrzeit und Hoehenmeter kennt die App erst fuer Touren, die seit dem
+   Reiseplaner gespeichert wurden. Fehlen sie bei einem Teil der Etappen,
+   steht das dabei ("aus 2 von 4 Etappen") - eine Summe, die stillschweigend
+   Etappen auslaesst, waere eine falsche Zahl. */
+function reiseZahlenHtml(reise, bilanz) {
+  if (!bilanz.mitRoute) return '';
+  const tag = stelle => `Tag ${stelle + 1}`;
+  const teilweise = zahl => zahl < bilanz.mitRoute ? `aus ${zahl} von ${bilanz.mitRoute} Etappen` : '';
+  const kacheln = [];
+
+  if (bilanz.mitRoute >= 2) {
+    const spanne = Math.max(1, bilanz.laengsteKm - bilanz.kuerzesteKm);
+    const lage = Math.round((bilanz.schnittKm - bilanz.kuerzesteKm) / spanne * 100);
+    kacheln.push(`
+      <div class="stat breit">
+        <span class="k">&Oslash; je Fahrtag</span>
+        <span class="v">${bilanz.schnittKm}<i>km</i></span>
+        <div class="reise-bereich" aria-hidden="true">
+          <div class="reise-bereich-rinne"><span class="reise-bereich-marke" style="left: ${lage}%"></span></div>
+          <div class="reise-bereich-enden">
+            <button class="linkbtn" data-marke="${escapeHtml(bilanz.kuerzesteTagId)}">k&uuml;rzeste ${bilanz.kuerzesteKm} km <i>&middot;</i> ${tag(bilanz.kuerzesteStelle)}</button>
+            <button class="linkbtn" data-marke="${escapeHtml(bilanz.laengsteTagId)}">l&auml;ngste ${bilanz.laengsteKm} km <i>&middot;</i> ${tag(bilanz.laengsteStelle)}</button>
+          </div>
+        </div>
+      </div>`);
+  }
+  kacheln.push(`
+    <div class="stat">
+      <span class="k">Fahrzeit</span>
+      <span class="v">${fahrzeitText(bilanz.fahrzeitMin)}</span>
+      <span class="unter">${bilanz.mitZeit ? teilweise(bilanz.mitZeit) : '&auml;ltere Routen ohne Zeit'}</span>
+    </div>
+    <div class="stat">
+      <span class="k">H&ouml;henmeter</span>
+      <span class="v">${bilanz.hoehenmeter ? bilanz.hoehenmeter.toLocaleString('de-DE') + '<i>Hm</i>' : '–'}</span>
+      <span class="unter">${bilanz.mitHoehe ? teilweise(bilanz.mitHoehe) : '&auml;ltere Routen ohne H&ouml;he'}</span>
+    </div>`);
+  if (bilanz.mitRoute >= 2) {
+    kacheln.push(`
+      <button class="stat tippbar" data-marke="${escapeHtml(bilanz.kurvigsteTagId)}">
+        <span class="k">Kurvigste Etappe</span>
+        <span class="v"><span class="reise-stufe-punkt ${kurvenStufe(bilanz.kurvigste)}"></span>${bilanz.kurvigste}<i>&deg;/km</i></span>
+        <span class="unter">${tag(bilanz.kurvigsteStelle)} <i class="reise-tipp-pfeil">&rsaquo;</i></span>
+      </button>`);
+  }
+  const rest = [bilanz.ruhetage ? `${bilanz.ruhetage} ${bilanz.ruhetage === 1 ? 'Ruhetag' : 'Ruhetage'}` : '',
+                bilanz.offen ? `${bilanz.offen} offen` : ''].filter(Boolean).join(', ');
+  kacheln.push(`
+    <div class="stat">
+      <span class="k">Fahrtage</span>
+      <span class="v">${bilanz.mitRoute}<i>von ${bilanz.tage}</i></span>
+      <span class="unter">${rest || 'alle Tage fahren'}</span>
+    </div>`);
+  const hinweis = bilanz.mitZeit < bilanz.mitRoute || bilanz.mitHoehe < bilanz.mitRoute
+    ? `<p class="hint reise-zahlen-hinweis">Fahrzeit und H&ouml;henmeter kennt die App erst f&uuml;r Routen,
+         die seit dem 04.09.2026 gespeichert wurden. &Auml;ltere: im Planer &ouml;ffnen und neu speichern.</p>`
+    : '';
+  return `<div class="reise-zahlen">${kacheln.join('')}</div>${hinweis}`;
 }
 
 /* Das Etappenprofil: je Tag ein flacher Balken, Breite nach Kilometern,
@@ -372,14 +500,21 @@ function reiseHeldHtml(reise) {
 function reiseProfilHtml(reise) {
   const balken = reise.tage.map((tag, stelle) => {
     const route = routeZuTag(tag);
-    if (!route) return `<span class="reise-profil-tag leer" title="Tag ${stelle + 1}: noch ohne Route"></span>`;
+    const kennung = `data-marke="${escapeHtml(tag.id)}" data-tag-id="${escapeHtml(tag.id)}"`;
+    if (!route) {
+      return tagIstOffen(tag)
+        ? `<button class="reise-profil-tag leer" ${kennung} aria-label="Tag ${stelle + 1}: noch ohne Route" title="Tag ${stelle + 1}: noch ohne Route"></button>`
+        : `<button class="reise-profil-tag ruhe" ${kennung} aria-label="Tag ${stelle + 1}: ${escapeHtml(tag.titel)}" title="Tag ${stelle + 1}: ${escapeHtml(tag.titel)}"></button>`;
+    }
     const km = Math.max(1, Math.round((route.distance || 0) / 1000));
-    const grad = route.curviness || 0;
-    const stufe = grad < 150 ? 'wenig' : grad <= 300 ? 'mittel' : 'viel';
-    return `<span class="reise-profil-tag ${stufe}" style="--km: ${km}"
-                  title="Tag ${stelle + 1}: ${km} km, ${Math.round(grad)} Grad/km"></span>`;
+    const grad = Math.round(route.curviness || 0);
+    const text = `Tag ${stelle + 1}: ${km} km, ${grad} Grad/km`;
+    // Jeder Balken ist ein Knopf: ein Tipp waehlt den Tag, wie die Marke
+    // auf der Karte. Die Trefferflaeche macht das CSS groesser als den Strich.
+    return `<button class="reise-profil-tag ${kurvenStufe(grad)}" ${kennung} style="--km: ${km}"
+                    aria-label="${text}" title="${text}"></button>`;
   }).join('');
-  return `<div class="reise-profil" aria-hidden="true">${balken}</div>`;
+  return `<div class="reise-profil">${balken}</div>`;
 }
 
 /* Alle Tage einer Reise auf EINER Karte. Erst alle Saeume, dann alle
@@ -491,14 +626,18 @@ function etappeHtml(reise, tag, stelle) {
     </span>`;
 
   if (!route) {
+    const ruhetag = !fehlt && !tagIstOffen(tag);
     return `
-    <li class="etappe ${fehlt ? 'fehlt' : 'leer'}" data-tag-id="${escapeHtml(tag.id)}">
+    <li class="etappe ${fehlt ? 'fehlt' : (ruhetag ? 'ruhe' : 'leer')}" data-tag-id="${escapeHtml(tag.id)}">
       ${scheibe}
-      <div class="etappe-karte" data-waehle="${escapeHtml(tag.id)}">
+      <div class="etappe-karte">
         <span class="label">${beschriftung}</span>
-        ${symbol('route', 'gross')}
-        <span class="etappe-leer-text">${fehlt ? 'Die Route wurde gel&ouml;scht' : (tag.titel ? 'Kein Fahrtag' : 'Noch keine Route')}</span>
-        <span class="btn ghost klein">${fehlt ? 'Andere Route w&auml;hlen' : 'Route w&auml;hlen'}</span>
+        ${symbol(ruhetag ? 'koffer' : 'route', 'gross')}
+        <span class="etappe-leer-text">${fehlt ? 'Die Route wurde gel&ouml;scht' : (ruhetag ? 'Kein Fahrtag' : 'Noch keine Route')}</span>
+        <span class="etappe-leer-knoepfe">
+          <button class="btn ghost klein" data-waehle="${escapeHtml(tag.id)}">${fehlt ? 'Andere w&auml;hlen' : 'Route w&auml;hlen'}</button>
+          <button class="btn klein" data-erstelle="${escapeHtml(tag.id)}">Route erstellen</button>
+        </span>
         <button class="del" data-entferne="${escapeHtml(tag.id)}" title="Tag entfernen">&times;</button>
         ${pfeile}
       </div>
@@ -534,9 +673,14 @@ function markiereAuswahl() {
   inner.querySelectorAll('.etappe[data-tag-id]').forEach(glied => {
     glied.classList.toggle('aktiv', glied.dataset.tagId === gewaehlt);
   });
-  inner.querySelectorAll('.reise-karte [data-tag-id]').forEach(pfad => {
+  inner.querySelectorAll('.reise-karte [data-tag-id], .reise-profil [data-tag-id]').forEach(pfad => {
     pfad.classList.toggle('aktiv', pfad.dataset.tagId === gewaehlt);
   });
+  inner.querySelectorAll('.reise-zahlen [data-marke]').forEach(kachel => {
+    kachel.classList.toggle('aktiv', kachel.dataset.marke === gewaehlt);
+  });
+  const profil = inner.querySelector('.reise-profil');
+  if (profil) profil.classList.toggle('mit-auswahl', gewaehlt !== null);
   const karte = inner.querySelector('.reise-karte');
   if (karte) karte.classList.toggle('mit-auswahl', gewaehlt !== null && !!inner.querySelector(`.reise-karte [data-tag-id="${CSS.escape(gewaehlt)}"]`));
 }
@@ -553,6 +697,78 @@ function rolleZuTag(tagId) {
   glied.scrollIntoView({ behavior: 'smooth', block: 'center' });
   glied.classList.add('leuchtet');
   setTimeout(() => glied.classList.remove('leuchtet'), 700);
+}
+
+
+/* --- 5b. Eine Route fuer einen Tag ERSTELLEN ------------------------------------
+
+   Kein zweiter Planer, sondern der eine, den es gibt - mit einem Band
+   oben, das sagt, fuer welchen Tag gerade geplant wird. Wer dort speichert,
+   bekommt Titel und Namen vorgeschlagen ("Alpen 2027, Tag 3"), die Tour
+   landet wie jede andere in der Tourenliste (und laesst sich teilen), und
+   zusaetzlich haengt sie sich an den Tag. Danach kehrt die App zur Reise
+   zurueck. Wer abbricht, kommt ohne Route zurueck.
+
+   Der Draht zu app.js ist duenn und laeuft ueber typeof-Pruefungen dort:
+   reisePlanungVorgaben() fuer den Speichern-Dialog, nachRouteGespeichert()
+   fuer die fertige Tour.                                                       */
+
+let reisePlanung = null;   // { reiseId, tagId, stelle, reiseName } oder null
+
+function planeRouteFuerTag(tagId) {
+  const reise = reiseNach(offeneReiseId);
+  const stelle = reise ? reise.tage.findIndex(tag => String(tag.id) === String(tagId)) : -1;
+  if (!reise || stelle < 0) return;
+  reisePlanung = { reiseId: reise.id, tagId: reise.tage[stelle].id, stelle, reiseName: reise.name };
+
+  // Der Planer soll leer beginnen - derselbe Weg wie der Knopf "Leeren",
+  // damit es genau eine Stelle gibt, die weiss, was Leeren heisst.
+  document.getElementById('btnClear')?.click();
+  zeigePlaner();
+  zeigeReisePlanungBand();
+  showToast(`Plan die Route für Tag ${stelle + 1} und speichere sie - sie landet dann in der Reise.`);
+}
+
+function zeigeReisePlanungBand() {
+  const band = document.getElementById('reisePlanungBand');
+  const text = document.getElementById('reisePlanungText');
+  if (!band || !text) return;
+  band.hidden = !reisePlanung;
+  if (reisePlanung) {
+    text.innerHTML = `Du planst <b>Tag ${reisePlanung.stelle + 1}</b> von <b>${escapeHtml(reisePlanung.reiseName)}</b>`;
+  }
+}
+
+// Fuer den Speichern-Dialog in app.js: Titel und Namensvorschlag.
+function reisePlanungVorgaben() {
+  if (!reisePlanung) return null;
+  return {
+    titel: `Als Tag ${reisePlanung.stelle + 1} speichern`,
+    namensVorschlag: `${reisePlanung.reiseName}, Tag ${reisePlanung.stelle + 1}`,
+  };
+}
+
+// app.js ruft das nach jedem Speichern - nur im Reise-Modus tut es etwas.
+function nachRouteGespeichert(tour) {
+  if (!reisePlanung || !tour) return;
+  const { reiseId, tagId, stelle } = reisePlanung;
+  reisePlanung = null;
+  zeigeReisePlanungBand();
+  setzeTagRoute(reiseId, tagId, tour.id);
+  oeffneReise(reiseId);
+  // Nach dem Oeffnen, denn oeffneReise() setzt die Auswahl zurueck.
+  gewaehlterTagId = tagId;
+  markiereAuswahl();
+  rolleZuTag(tagId);
+  showToast(`Tag ${stelle + 1} hat jetzt seine Route.`);
+}
+
+function brichReisePlanungAb() {
+  if (!reisePlanung) return;
+  const { reiseId } = reisePlanung;
+  reisePlanung = null;
+  zeigeReisePlanungBand();
+  oeffneReise(reiseId);
 }
 
 
@@ -675,6 +891,13 @@ function oeffneRoutenwahl(tagId) {
       <label for="feldTagTitel">Titel des Tages (optional)</label>
       <input id="feldTagTitel" type="text" value="${escapeHtml(tag.titel || '')}" placeholder="z. B. Anreise, Ruhetag" maxlength="40" autocomplete="off">
       <ul class="saved-list reise-wahl">
+        <li data-erstelle="${escapeHtml(tag.id)}" class="reise-wahl-erstellen">
+          <span class="saved-marke">${symbol('plus', 'klein')}</span>
+          <span class="saved-text">
+            <span class="saved-name">Neue Route erstellen</span>
+            <span class="saved-meta">Im Planer, kommt danach direkt in diesen Tag</span>
+          </span>
+        </li>
         <li data-route="" class="${tag.routeId == null ? 'aktuell' : ''}">
           <span class="saved-marke">${symbol('koffer', 'klein')}</span>
           <span class="saved-text">
@@ -792,6 +1015,8 @@ function beiTippImReiseBildschirm(ereignis) {
   }
   const waehle = trifft('[data-waehle]');
   if (waehle) { oeffneRoutenwahl(tagAusAttribut(waehle, 'waehle')); return; }
+  const erstelle = trifft('[data-erstelle]');
+  if (erstelle) { planeRouteFuerTag(tagAusAttribut(erstelle, 'erstelle')); return; }
 
   // Scheibe: waehlen und zur Reisekarte hochrollen. Marke auf der Karte:
   // waehlen und zur Tageskarte hinunterrollen. Beide zusammen machen aus
@@ -843,6 +1068,8 @@ function beiTippImBlatt(ereignis) {
     return;
   }
   if (ziel.closest('[data-zum-planer]')) { schliesseBlatt(); zeigePlaner(); return; }
+  const erstelle = ziel.closest('[data-erstelle]');
+  if (erstelle) { schliesseBlatt(); planeRouteFuerTag(tagAusAttribut(erstelle, 'erstelle')); return; }
   if (blattBeimKlick && ziel.closest('#reiseBlattInhalt')) blattBeimKlick(ziel);
 }
 
@@ -858,3 +1085,4 @@ verkabele('reiseInner', 'click', beiTippImReiseBildschirm);
 verkabele('reiseInner', 'keydown', beiTasteImReiseBildschirm);
 verkabele('reiseBlatt', 'click', beiTippImBlatt);
 verkabele('reiseBlatt', 'keydown', beiTasteImBlatt);
+verkabele('btnReisePlanungAbbrechen', 'click', brichReisePlanungAb);

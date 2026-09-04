@@ -8,6 +8,29 @@ Sortiert nach Dringlichkeit, nicht nach Aufwand.
 
 ---
 
+## Ausrüstung: POLO Motorrad (seit 05.09.2026)
+
+- **Provision und Cookie-Frist nachtragen.** In `partner.js` stehen beide
+  auf `null`, das Einwilligungsblatt und die Offenlegung formulieren
+  deshalb ohne Zahl. Im Webgains-Konto unter dem Programm POLO Motorrad
+  (309425) ablesen und eintragen; dann in `index.html` den Prozentsatz in
+  der Offenlegung der Ausrüstung ergänzen.
+- **Die Webgains-Adressen als Secrets hinterlegen**, damit der Preislauf
+  motoin und POLO selbst holt: Produktfeeds → Feed anhaken → Feed
+  herunterladen → „Datenfeed-URL" → Code kopieren → GitHub Settings →
+  Secrets → `WEBGAINS_FEED_URL_MOTOIN` bzw. `WEBGAINS_FEED_URL_POLO`.
+  Danach den Lauf einmal von Hand anstoßen.
+- **Die Bilder sind Originale.** POLO liefert keine verkleinerten Bilder,
+  jedes hängt mit 250 bis 860 KB an der Karte (nachgemessen am
+  05.09.2026: `?width=` wird ignoriert, Shopware-Thumbnails geben 404).
+  Auf dem Handy im Mobilfunk ist ein Raster mit 48 POLO-Karten ein
+  Problem. Auswege: POLO fragen, ob es einen Thumbnail-Pfad gibt; oder ein
+  eigener Bild-Zwischenspeicher, der verkleinert (kostet einen Server).
+- **1.318 Varianten ohne Vergleich.** motoin fasst Fahrzeugvarianten in
+  einer Gruppe zusammen, POLO führt sie einzeln; solche Zuordnungen lässt
+  der Importer weg. Wer sie zurückholen will, muss motoin-Gruppen nach
+  Titel aufspalten – nur mit dem Feed möglich, nicht mit dem Katalog.
+
 ## Routing: BRouter bricht lange Anfragen ab (seit 04.09.2026 bekannt)
 
 Gemessen: Ab etwa 300 km fallen die Routenvarianten 1 bis 3 weg, ab etwa
@@ -40,9 +63,16 @@ bricht ab, was ihm zu teuer ist. Die Messwerte stehen in
 
 ## Reise planen (seit 04.09.2026)
 
-Die erste Ausbaustufe steht: Tage anlegen, Routen zuweisen, umsortieren,
-Reisekarte mit allen Tagen. Was als Nächstes kommt, in der Reihenfolge, in
-der es Sinn ergibt:
+Stand 05.09.2026: Tage anlegen, Routen wählen **oder direkt im Planer
+erstellen**, umsortieren, Reisekarte mit allen Tagen, Statistik mit
+Gesamtstrecke, Schnitt je Fahrtag, längster und kürzester Etappe, Fahrzeit,
+Höhenmeter, kurvigster Etappe. Was als Nächstes kommt:
+
+0. **Fahrzeit und Höhenmeter älterer Touren.** Beides wird erst seit dem
+   05.09.2026 mitgespeichert. Ältere Touren zeigen in der Reise „aus 2 von 4
+   Etappen". Ein Knopf „Werte nachholen", der die Route einmal neu rechnet
+   und die beiden Zahlen nachträgt, wäre die saubere Lösung – kostet je
+   Tour eine BRouter-Anfrage.
 
 1. **Übernachtungen.** Der Faden hat die Stelle schon: Das Stück zwischen
    Scheibe 1 und Scheibe 2 IST die erste Nacht. Darauf eine kleine Glaspille

@@ -53,10 +53,11 @@ er veröffentlicht nichts, das bleibt ein Klick. Von Hand geht es auch:
 python3 werkzeug/reifen-import.py
 python3 werkzeug/helmexpress-import.py
 python3 werkzeug/motoin-import.py
+python3 werkzeug/polo-import.py
 ```
 
-Der letzte braucht die Datei `~/Downloads/products.csv`, die man bei
-Webgains anhaken und herunterladen muss. Die anderen beiden holen sich ihren
+motoin und POLO brauchen ihre Feeds aus dem Webgains-Konto (`~/Downloads/products.csv`
+und `~/Downloads/polo-products.csv`), oder die Datenfeed-URL in der Umgebung. Die anderen beiden holen sich ihren
 Feed selbst und brauchen dafür den AWIN-Schlüssel, entweder in
 `.awin-schluessel` oder in der Umgebungsvariablen `AWIN_SCHLUESSEL`.
 
