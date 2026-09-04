@@ -4921,7 +4921,15 @@ body.nav-modus .karten-knopf { display: none; }
     align-items: stretch;
     margin-top: var(--s1);
   }
-  .reifen-preis-spalte .badge.anzeige { align-self: flex-end; }
+  /* Die Kennzeichnung wandert in die obere rechte Ecke der Karte, auf
+     die Zeile der Marke. Als eigene Zeile ueber den Angeboten stand sie
+     allein in der Luft und kostete eine ganze Zeile Hoehe. */
+  .reifen-karte { position: relative; }
+  .reifen-preis-spalte .badge.anzeige {
+    position: absolute;
+    top: var(--s2);
+    right: var(--s3);
+  }
   .reifen-angebot { justify-content: space-between; }
   .reifen-angebot-text { align-items: flex-start; }
   .reifen-angebot-versand { text-align: left; }

@@ -370,18 +370,23 @@ const HIGHLIGHT_GRUPPEN = ['helm', 'jacke', 'hose', 'kombi', 'handschuh', 'stief
 function zeichneHighlights() {
   const behälter = document.getElementById('ausruestungHighlights');
   if (!behälter) return;
-  const jeGruppe = {};
-  const auswahl = [];
   const alle = sortiment();
   const grenzen = grenzpreiseJeWarengruppe(alle);
-  alle.slice().sort(SORTIERUNGEN.relevanz.vergleich).forEach(produkt => {
-    if (auswahl.length >= HIGHLIGHTS_WIE_VIELE) return;
-    if (!HIGHLIGHT_GRUPPEN.includes(produkt.kategorie)) return;
-    if (produkt.gesamt < (grenzen.get(produkt.kategorie) || 0)) return;
-    if ((jeGruppe[produkt.kategorie] || 0) >= HIGHLIGHTS_JE_GRUPPE) return;
-    jeGruppe[produkt.kategorie] = (jeGruppe[produkt.kategorie] || 0) + 1;
-    auswahl.push(produkt);
-  });
+  /* Erst je Warengruppe die Beliebtesten, dann reihum eines aus jeder
+     Gruppe. Wirft man alles in einen Topf, gewinnen immer Handschuhe und
+     Stiefel, weil die in den meisten Groessen und Farben kommen - und der
+     Helm, das wichtigste Teil, taucht ganz oben nicht auf. */
+  const jeGruppe = HIGHLIGHT_GRUPPEN.map(gruppe => alle
+    .filter(produkt => produkt.kategorie === gruppe
+      && produkt.gesamt >= (grenzen.get(gruppe) || 0))
+    .sort(SORTIERUNGEN.relevanz.vergleich)
+    .slice(0, HIGHLIGHTS_JE_GRUPPE));
+  const auswahl = [];
+  for (let runde = 0; runde < HIGHLIGHTS_JE_GRUPPE; runde++) {
+    jeGruppe.forEach(liste => {
+      if (liste[runde] && auswahl.length < HIGHLIGHTS_WIE_VIELE) auswahl.push(liste[runde]);
+    });
+  }
   if (!auswahl.length) { behälter.innerHTML = ''; return; }
   behälter.innerHTML = `
     <section class="regal regal-band">
