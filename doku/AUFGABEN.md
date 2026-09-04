@@ -305,13 +305,22 @@ allein der Klick zum Shop. Alles Weitere in `DATEN.md` und
   also nichts ohne einen Klick live. Von Hand geht es weiter mit
   `python3 werkzeug/reifen-import.py`.
 
-  **Zwei Schritte fehlen noch, und ohne sie läuft der Auftrag ins Leere:**
-  das Secret `AWIN_SCHLUESSEL` in den Repository-Einstellungen anlegen
-  (Settings → Secrets and variables → Actions), und unter
-  Settings → Actions → General die Option „Allow GitHub Actions to create
-  and approve pull requests" anhaken. Danach den Auftrag einmal von Hand
-  anstoßen (Actions → Preise nachziehen → Run workflow) und nachsehen, ob
-  ein Vorschlag entsteht.
+  **Eingerichtet am 04.09.2026:** Das Secret `AWIN_SCHLUESSEL` liegt in den
+  Repository-Einstellungen, und „Allow GitHub Actions to create and approve
+  pull requests" ist angehakt.
+
+  **Beim ersten Lauf zu prüfen.** Der Auftrag läuft erst, wenn er auf `main`
+  liegt. Danach einmal von Hand anstoßen: Actions → Preise nachziehen →
+  Run workflow.
+
+  Scheitert er dabei am `git push` oder am `gh pr create` mit einer Meldung
+  über fehlende Rechte, gibt es genau einen Schalter dafür: Settings →
+  Actions → General → Workflow permissions auf **„Read and write
+  permissions"** stellen. Sie steht bewusst auf der sparsamen Voreinstellung,
+  weil der Auftrag sich seine Rechte in der YAML-Datei selbst erteilt
+  (`contents: write`, `pull-requests: write`) und das normalerweise reicht.
+  Ob eine restriktive Voreinstellung diese Angabe deckelt, ließ sich ohne
+  einen echten Lauf nicht klären – deshalb steht der Ausweg hier.
 - **Reifengröße aus dem Motorrad ableiten — ERLEDIGT (01.09.2026).**
   `reifen-massen.js` kennt die Serienbereifung der gängigsten Modelle;
   `serienEintrag()` in `reifen.js` schlägt sie nach, wenn der Fahrer

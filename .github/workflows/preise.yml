@@ -24,6 +24,15 @@
 #      Name: AWIN_SCHLUESSEL, Wert: der Schluessel aus .awin-schluessel
 #   2. Settings -> Actions -> General -> Workflow permissions:
 #      "Allow GitHub Actions to create and approve pull requests" anhaken
+#
+# Beides ist am 04.09.2026 eingerichtet worden.
+#
+# FALLS DER ERSTE LAUF an "git push" oder "gh pr create" scheitert und von
+# fehlenden Rechten spricht: Dieselbe Seite, Workflow permissions auf
+# "Read and write permissions" stellen. Die sparsame Voreinstellung steht
+# dort mit Absicht - der Auftrag erteilt sich seine Rechte unten selbst -
+# aber ob sie diese Angabe deckelt, liess sich ohne echten Lauf nicht
+# klaeren.
 
 name: Preise nachziehen
 
