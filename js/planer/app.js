@@ -3557,7 +3557,7 @@ function symbol(name, zusatz = '') {
    zeigeBildschirm() alles und blendet nichts ein. Die App zeigt dann eine
    schwarze Flaeche, ohne einen Fehler zu melden. */
 const BILDSCHIRME = [
-  'garageScreen', 'tourenScreen', 'reiseScreen', 'app', 'rideScreen', 'statsScreen',
+  'garageScreen', 'tourenScreen', 'reiseScreen', 'planerWahlScreen', 'app', 'rideScreen', 'statsScreen',
   'rechtlichesScreen', 'reifenScreen', 'shopScreen', 'shopProduktScreen',
   'merklisteScreen',
   'kontoScreen', 'profilScreen', 'passwortNeuScreen', 'kontoLoeschenScreen',
@@ -3608,9 +3608,10 @@ function aktualisiereLeiste(sichtbareId) {
   // Die Merkliste haengt an der Ausruestung: Sie ist von dort und aus der
   // Garage erreichbar, hat aber keinen eigenen Platz in der Leiste.
   if (sichtbareId === 'merklisteScreen') leuchtZiel = 'shopScreen';
-  // Eine Reise besteht aus Touren und wird von dort aus geoeffnet - also
-  // leuchtet "Touren", solange man an ihr plant.
-  if (sichtbareId === 'reiseScreen') leuchtZiel = 'tourenScreen';
+  // Der Einstieg "Tour oder Reise?" und die Reise selbst gehoeren zum
+  // Planen - also leuchtet "Planer", solange man dort ist. Die Liste der
+  // Reisen liegt unter "Meine Touren", dorthin fuehrt Zurueck.
+  if (sichtbareId === 'planerWahlScreen' || sichtbareId === 'reiseScreen') leuchtZiel = 'app';
   leiste.querySelectorAll('.nav-tab').forEach(knopf => {
     knopf.classList.toggle('aktiv', knopf.dataset.ziel === leuchtZiel);
   });
@@ -3658,6 +3659,9 @@ function zeigeGarage() {
   // auch der Weg, auf dem eine gerade eingetragene Groesse in der Garage
   // ankommt - man kommt ja durch diese Funktion zurueck.
   if (typeof zeichneGarageReifen === 'function') zeichneGarageReifen();
+  // Und die Reisekarte aus einstieg.js - so steht nach dem Anlegen einer
+  // Reise beim naechsten Besuch der Garage gleich die neue da.
+  if (typeof zeichneGarageReise === 'function') zeichneGarageReise();
 }
 
 /* Die Ausruestung. Der Bildschirm heisst im HTML weiter shopScreen, damit
@@ -3979,7 +3983,9 @@ verkabeleNaviWisch();
 document.querySelectorAll('.nav-tab').forEach(knopf => {
   knopf.addEventListener('click', () => {
     const ziel = knopf.dataset.ziel;
-    if (ziel === 'app') zeigePlaner();
+    // "Planer" fragt seit dem 05.09.2026 zuerst: Tour oder Reise? Das steht
+    // in einstieg.js - fehlt die Datei, geht es wie frueher auf die Karte.
+    if (ziel === 'app') { if (typeof zeigePlanerWahl === 'function') zeigePlanerWahl(); else zeigePlaner(); }
     else if (ziel === 'rideScreen') { zeigeRideScreen(); if (!ride.aktiv) rideZurücksetzen(); }
     else if (ziel === 'tourenScreen') zeigeMeineTouren();
     /* zeigeStats() steht in rueckblick.js - fehlt die Datei, faellt der

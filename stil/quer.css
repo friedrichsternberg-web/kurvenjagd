@@ -364,6 +364,13 @@
   #reisenListe .reisen-liste > li { margin-bottom: 0; }
   #reisenListe .empty { grid-column: 1 / -1; }
 
+  /* --- 11. Planer-Einstieg: die zwei Karten nebeneinander ---------------------
+     Im Hochformat stehen sie untereinander, hier ist Platz fuer beide in
+     einer Reihe - und die Frage "Tour oder Reise?" liest sich dann als
+     Entweder-oder, nicht als Liste. */
+  .wahl-karten { grid-template-columns: 1fr 1fr; }
+  .wahl-karte { align-items: flex-start; }
+
   /* --- 9. Der Startfilm im Liegen ---------------------------------------------
      Das liegende BILD des Films haengt an der Form des Fensters, nicht an
      dieser Grenze - es steht deshalb in style.css unter

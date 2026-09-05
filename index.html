@@ -634,6 +634,14 @@
         </div>
       </div>
 
+      <!-- Die naechste Reise. Zeigt die zuletzt angelegte Reise mit ihrem
+           Kartenbild und fuehrt mit einem Tipp hinein - oder laedt ein, die
+           erste zu planen. Gefuellt von einstieg.js (zeichneGarageReise);
+           faellt es aus, bleibt die Platte verborgen. Warum sie in der
+           Garage steht, obwohl die Kacheln am 03.09.2026 gingen: siehe
+           Kopf von Abschnitt 3 in einstieg.js. -->
+      <div id="garageReise" class="garage-platte garage-reise" hidden></div>
+
       <!-- Die Merkliste, ganz vorn: das Regal mit den eigenen Sachen. Nur
            sichtbar, wenn etwas drinliegt; jede Karte sagt, was der Preis
            seit dem Merken gemacht hat. Gefuellt von merkliste.js. -->
@@ -1731,6 +1739,14 @@
        aus zwei Blickrichtungen, und die untere Leiste hat nur fuenf
        Plaetze. Der Umschalter ist derselbe .segmented wie im Planer bei der
        Planungsart - ein Muster im Haus, nicht zwei. ===== -->
+  <!-- ===== Planer-Einstieg: Tour oder Reise? =====
+       Der Eintrag "Planer" in der Leiste fuehrt seit dem 05.09.2026 zuerst
+       hierher. Fuellt einstieg.js komplett; hier steht nur die Huelle, damit
+       der Bildschirm in BILDSCHIRME (app.js) einen Partner hat. ===== -->
+  <div id="planerWahlScreen" class="start-screen listen-screen" hidden>
+    <div class="start-screen-inner" id="planerWahlInner"></div>
+  </div>
+
   <div id="tourenScreen" class="start-screen listen-screen" hidden>
     <div class="start-screen-inner">
       <!-- Kein Zurueck-Knopf mehr: die untere Leiste ist auf diesem
@@ -1739,7 +1755,9 @@
            bleibt im HTML, damit die Verkabelung in app.js nicht ins Leere
            greift, ist aber ausgeblendet. -->
       <button class="btn ghost back-btn" id="btnTourenZurueck" hidden>&larr; Zurück</button>
-      <h2>Touren</h2>
+      <!-- "Meine Touren", nicht "Touren": Hier liegt, was man selbst hat -
+           die gespeicherten Touren und die Reisen. Geplant wird im Planer. -->
+      <h2>Meine Touren</h2>
 
       <div class="segmented touren-umschalter" id="tourenUmschalter">
         <button class="seg active" data-touren-teil="meine">Meine</button>
@@ -2539,7 +2557,7 @@
       <svg class="ic gross"><use href="#icon-aufnahme"></use></svg><span>Ride</span>
     </button>
     <button class="nav-tab" data-ziel="tourenScreen">
-      <svg class="ic gross"><use href="#icon-touren"></use></svg><span>Touren</span>
+      <svg class="ic gross"><use href="#icon-touren"></use></svg><span>Meine Touren</span>
     </button>
     <button class="nav-tab" data-ziel="shopScreen">
       <svg class="ic gross"><use href="#icon-shop"></use></svg><span>Ausr&uuml;stung</span>
@@ -2723,6 +2741,9 @@
        (zeigeBildschirm, loadSaved, vorschauBildHtml) und nach touren.js,
        das den Teil "Reisen" an diese Datei weiterreicht. -->
   <script src="js/reise/reise.js?v=110"></script>
+  <!-- Der Einstieg in den Planer (Tour oder Reise?) und die Reisekarte in
+       der Garage. Nach reise.js, dessen Reisen es zeigt. -->
+  <script src="js/planer/einstieg.js?v=110"></script>
   <!-- Der Bildschirm "Meine Stats". Nach app.js (zeigeBildschirm, verkabele,
        vorschauBildHtml) und nach bilanz.js, dessen Rechnungen er zeichnet. -->
   <script src="js/fahrten/rueckblick.js?v=110"></script>

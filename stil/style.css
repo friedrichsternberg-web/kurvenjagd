@@ -5536,3 +5536,117 @@ body.nav-modus .karten-knopf { display: none; }
 .reise-profil-tag.ruhe { flex: 0 0 var(--s4); background: var(--glas-hell); }
 /* Der Eintrag "Neue Route erstellen" ganz oben im Blatt. */
 .reise-wahl-erstellen .saved-marke { color: var(--accent-hell); }
+
+/* ============================================================
+   PLANER-EINSTIEG: Tour oder Reise?
+   Zwei grosse Glaskarten, jede ein Knopf. Das Symbol sitzt in derselben
+   Pille wie der aktive Eintrag der Leiste - dieselbe Sprache fuer
+   "hier geht es weiter". Gezeichnet von einstieg.js.
+   ============================================================ */
+.wahl-karten {
+  display: grid;
+  gap: var(--s3);
+  text-align: left;
+}
+.wahl-karte {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  width: 100%;
+  padding: var(--s4);
+  text-align: left;
+  font: inherit;
+  color: var(--text);
+  cursor: pointer;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--glas-rand);
+  background: var(--glas-hell);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  box-shadow:
+    inset 0 1px 0 var(--glas-heller),
+    inset 0 -1px 0 var(--schatten-hauch),
+    0 12px 34px var(--schatten-mittel);
+  transition: transform 0.15s cubic-bezier(0.2,0.8,0.2,1), background 0.15s ease;
+}
+.wahl-karte:hover { background: var(--glas-heller); }
+.wahl-karte:active { transform: scale(0.985); }
+.wahl-symbol {
+  flex: 0 0 auto;
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-md);
+  color: var(--accent-hell);
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-hell) 35%, transparent);
+  box-shadow: inset 0 1px 0 var(--glas-rand);
+}
+.wahl-symbol .ic { width: 30px; height: 30px; }
+.wahl-text { flex: 1 1 auto; min-width: 0; display: grid; gap: 3px; }
+.wahl-titel {
+  font-family: var(--schrift-display);
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1.1;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--metall-glanz);
+}
+.wahl-satz { font-size: 14px; line-height: 1.45; color: var(--text); }
+.wahl-meta { font-size: 12.5px; color: var(--muted); }
+.wahl-pfeil { flex: 0 0 auto; font-size: 22px; color: var(--accent-hell); }
+
+/* ============================================================
+   DIE REISEKARTE IN DER GARAGE
+   Eine Platte wie die Ausruestungsleiste, aber mit EINEM Inhalt: die
+   zuletzt angelegte Reise als Kartenbild mit Zeile darunter, die ganze
+   Karte ein Knopf. Ohne Reise die Einladung. Gezeichnet von einstieg.js.
+   ============================================================ */
+/* Das Bergsymbol im Kopf in der Signalfarbe - die Regel fuer den Kopf der
+   Shop-Platten faerbt Symbole rot, das gilt dem Herz der Merkliste. */
+.garage-reise .garage-shop-kopf h3 .ic { color: var(--accent-hell); }
+/* Weil die ganze Karte ein Knopf ist, traegt die Platte einen Hauch der
+   Signalfarbe am Rand - so sieht man, dass hier etwas weitergeht. */
+.garage-reise.mit-reise { border-color: color-mix(in srgb, var(--accent-hell) 30%, var(--glas-hell)); }
+.garage-reise-karte {
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+/* Das Kartenbild sitzt IN der Platte, nicht randlos wie in der Tourenliste:
+   die negativen Raender von .tour-vorschau gelten dort fuer Zeilen mit
+   eigenem Innenabstand. Hier bekommt es alle vier Ecken rund. */
+.garage-reise-karte .tour-vorschau {
+  margin: 0 0 var(--s3);
+  border-radius: var(--r-md);
+}
+.garage-reise-zeile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+}
+.garage-reise-weiter {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--accent-hell);
+}
+.garage-reise-satz { margin: 0 0 var(--s3); }
+.garage-reise-knopf {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
+}
