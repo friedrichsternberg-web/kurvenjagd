@@ -3005,3 +3005,84 @@ Weg zur Reise und die Reisekarte in der Garage. `reise.js` stand mit 1088
 Zeilen zu nah an der Grenze, `app.js` liegt längst darüber. Der Draht zu
 `app.js` sind zwei `typeof`-Prüfungen: Fehlt die Datei, führt „Planer" wie
 früher direkt auf die Karte, und die Garage zeigt keine Reisekarte.
+
+---
+
+## 05.09.2026, abends — POLO: 5 Prozent, und die Datenfeed-URL ist gar kein Schlüssel
+
+### Was im Webgains-Konto stand
+
+Am 04.09.2026 ließ sich die Programmseite von POLO nicht finden, vier
+geratene Adressen gaben 404. Der Fehler war banal: Der Pfad heißt
+`/advertisers/programs`, mit **s**. Wer stattdessen das Menü aufklappt und
+den Link ausliest, findet ihn beim ersten Versuch. Merke für das nächste
+Mal: **nicht URLs raten, das Menü lesen.**
+
+Abgelesen (Advertiser → Programme → POLO Motorrad DE, Programm 309425):
+
+| | |
+|---|---|
+| Provision | **5 %**, Stufe „Default", Verkaufsprovision, aktiv |
+| Cookie-Laufzeit | **30 Tage** |
+| Conversion Rate | 2,65 % |
+| AOV | 170,44 € |
+
+Die Übersicht nennt daneben „1,5 % – 5 %". Das ist die **Spanne über alle
+Provisionsstufen des Netzwerks**, nicht unser Satz; maßgeblich ist die
+Stufe, auf der wir stehen, und das ist „Default" mit 5 %. Beides steht
+jetzt in `partner.js`, das Einwilligungsblatt sagt „innerhalb von 30
+Tagen" statt der Ersatzformel, und die Offenlegung in `index.html` nennt
+die Zahl.
+
+**Zwei Bedingungen, die für diese App zählen** und die vorher niemand
+gelesen hatte:
+
+- Der Marketingkanal **„Preisvergleich" ist ausdrücklich freigegeben**
+  (grüner Haken in der Kanalliste). Das ist genau unser Fall.
+- Bedingung 5: Produktbilder dürfen verwendet werden, **sofern sie über
+  den Produktfeed bereitgestellt sind.** Genau daher kommen sie — der
+  Importer schreibt Bildpfad und Dateiname unverändert aus dem Feed in den
+  Katalog und baut nichts zusammen. Wer das ändert, bricht die Bedingung.
+  Das ist auch der Grund, warum die offene Frage „POLO-Bilder verkleinern"
+  nicht einfach über einen eigenen Bildumrechner zu lösen ist.
+
+### Die Datenfeed-URL trägt keinen Zugang — die Annahme vom 04.09. war falsch
+
+Gestern stand hier, die „Datenfeed-URL" aus dem Download-Dialog „trägt den
+Zugang selbst". Das stimmt nicht. Sie lautet
+
+```
+https://platform-api.webgains.com/auth/publishers/1426402/campaigns/1749874/feeds/products?feedIds[]=34486&format=csv
+```
+
+und besteht ausschließlich aus der Publisher-Nummer, der Kampagnennummer
+und der Feed-Nummer. **Kein Schlüssel, kein Kennwort, kein Token.**
+Nachgemessen aus dem Terminal, ohne Cookie und ohne Anmeldung: HTTP 200
+und 70 MB für POLO, 130 MB für motoin. Publisher- und Kampagnennummer
+stehen ohnehin in jedem Werbelink, den die App öffnet (siehe `partner.js`,
+sie sind dort als „KEINE Geheimzahlen" gekennzeichnet).
+
+**Trotzdem bleibt sie ein Repository-Secret**, und das ist eine
+Entscheidung, keine Notwendigkeit: Dieses Repository ist öffentlich. Wer
+die Adresse hat, zieht den kompletten Warenkatalog des Händlers. Der Feed
+ist uns als Publisher gegeben, nicht der Allgemeinheit — ihn öffentlich
+zu verlinken wäre nicht unsere Sache. Ein Secret kostet nichts und beendet
+die Frage. Die Alternative, die Adresse in den Importskripten aus drei
+Zahlen zusammenzubauen, wäre technisch bequemer und wurde genau deshalb
+verworfen.
+
+Beide Secrets liegen seit dem 05.09.2026 in den Repository-Einstellungen:
+`WEBGAINS_FEED_URL_MOTOIN` (Feed 7978) und `WEBGAINS_FEED_URL_POLO`
+(Feed 34486). Beide Läufe sind lokal mit gesetzter Umgebungsvariable
+durchgeprüft, also auf demselben Weg, den GitHub geht.
+
+### Der Preislauf kann noch gar nicht laufen
+
+Beim Prüfen fiel auf, was die ganze Einrichtung bisher wirkungslos macht:
+**`.github/workflows/preise.yml` liegt nicht auf `main`.** Die Datei steckt
+in einem der unveröffentlichten Commits; `origin/main` steht noch bei
+„Version 109". GitHub kennt einen Auftrag erst, wenn er auf dem Hauptzweig
+liegt — vorher lässt er sich weder planen noch von Hand anstoßen. Das gilt
+unabhängig von den Secrets und war seit dem 04.09.2026 so, ohne dass es
+jemandem aufgefallen wäre. Mit dem nächsten Push erledigt es sich; danach
+einmal von Hand anstoßen und zusehen.

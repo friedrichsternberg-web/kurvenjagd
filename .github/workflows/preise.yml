@@ -14,25 +14,28 @@
 # draussen nichts. Uebernehmen ist ein Klick, Verwerfen auch.
 #
 # WEBGAINS (motoin und POLO Motorrad): Der Download-Dialog bei Webgains
-# zeigt unter "Datenfeed-URL" eine Adresse, die den Zugang selbst traegt
-# ("Code kopieren"). Steht sie als Secret bereit, holt der Lauf auch diese
-# beiden Feeds; fehlt sie, ueberspringt er sie und die Kataloge bleiben,
-# wie sie sind. Der motoin-Feed wird dabei unter MOTOIN_FEED_PFAD abgelegt,
-# damit helmexpress-import.py und polo-import.py ihre Preisvergleiche
-# daran abgleichen koennen - ohne ihn greifen beide auf die gesicherten
-# Paare (daten/*-paare.json) zurueck.
+# zeigt unter "Datenfeed-URL" eine Adresse ("Code kopieren"). Steht sie als
+# Secret bereit, holt der Lauf auch diese beiden Feeds; fehlt sie,
+# ueberspringt er sie und die Kataloge bleiben, wie sie sind. Der
+# motoin-Feed wird dabei unter MOTOIN_FEED_PFAD abgelegt, damit
+# helmexpress-import.py und polo-import.py ihre Preisvergleiche daran
+# abgleichen koennen - ohne ihn greifen beide auf die gesicherten Paare
+# (daten/*-paare.json) zurueck.
 #
-# EINMALIG EINZURICHTEN, sonst laeuft er ins Leere:
-#   1. Settings -> Secrets and variables -> Actions -> New secret
-#      Name: AWIN_SCHLUESSEL, Wert: der Schluessel aus .awin-schluessel
+# Diese Adresse enthaelt KEINEN Schluessel; sie ist trotzdem ein Secret,
+# weil dieses Repository oeffentlich ist. Die Begruendung steht bei
+# feed_besorgen() in motoin-import.py.
+#
+# EINMALIG EINZURICHTEN, sonst laeuft er ins Leere - ALLES ERLEDIGT:
+#   1. AWIN_SCHLUESSEL als Repository-Secret (04.09.2026)
 #   2. Settings -> Actions -> General -> Workflow permissions:
-#      "Allow GitHub Actions to create and approve pull requests" anhaken
-#   3. Optional, fuer Webgains: zwei weitere Secrets
-#      WEBGAINS_FEED_URL_MOTOIN und WEBGAINS_FEED_URL_POLO, je die
-#      Datenfeed-URL aus dem Download-Dialog (Produktfeeds -> Feed anhaken
-#      -> Feed herunterladen -> Datenfeed-URL -> Code kopieren).
+#      "Allow GitHub Actions to create and approve pull requests" (04.09.2026)
+#   3. WEBGAINS_FEED_URL_MOTOIN und WEBGAINS_FEED_URL_POLO (05.09.2026)
 #
-# 1 und 2 sind am 04.09.2026 eingerichtet worden, 3 steht noch aus.
+# WAS NOCH FEHLT: Diese Datei muss auf main liegen, sonst kennt GitHub den
+# Auftrag nicht und er laesst sich weder planen noch von Hand anstossen.
+# Solange das nicht gepusht ist, laeuft nichts - unabhaengig von den
+# Secrets.
 #
 # FALLS DER ERSTE LAUF an "git push" oder "gh pr create" scheitert und von
 # fehlenden Rechten spricht: Dieselbe Seite, Workflow permissions auf

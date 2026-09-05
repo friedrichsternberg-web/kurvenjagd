@@ -288,8 +288,10 @@ ENDUNGEN = {'jpg': 0, 'jpeg': 0, 'png': 1, 'webp': 2}
 
 
 def feed_holen(pfad):
-    """Der Feed als Text: aus der Datei oder, wenn WEBGAINS_FEED_URL gesetzt
-    ist, frisch von Webgains. Die Adresse traegt den Zugang selbst."""
+    """Der Feed als Text: aus der Datei oder, wenn WEBGAINS_FEED_URL_POLO
+    gesetzt ist, frisch von Webgains. Warum die Adresse ein Secret ist,
+    obwohl sie keinen Schluessel enthaelt: siehe feed_besorgen() in
+    motoin-import.py."""
     adresse = os.environ.get('WEBGAINS_FEED_URL_POLO', '').strip()
     if adresse:
         print('Feed wird geholt ...')

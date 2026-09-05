@@ -345,9 +345,20 @@ def feed_besorgen(feedpfad):
     """Steht WEBGAINS_FEED_URL_MOTOIN in der Umgebung, wird der Feed von dort
     geholt und unter feedpfad abgelegt - so kann der Preislauf auf GitHub
     ihn ziehen, und helmexpress-import.py und polo-import.py finden ihn
-    danach am selben Ort fuer den EAN-Abgleich. Die Adresse steht bei
-    Webgains im Download-Dialog unter "Datenfeed-URL" und traegt den
-    Zugang selbst; sie gehoert in ein Repository-Secret, nie ins Repo."""
+    danach am selben Ort fuer den EAN-Abgleich.
+
+    Die Adresse steht bei Webgains im Download-Dialog unter
+    "Datenfeed-URL". Sie enthaelt KEINEN Schluessel und KEIN Kennwort -
+    nachgemessen am 05.09.2026: Aus dem Terminal, ohne Cookie und ohne
+    Anmeldung, antwortet sie mit 200 und liefert die vollen 130 MB. Sie
+    besteht aus der Publisher- und der Kampagnennummer, die ohnehin in
+    jedem Werbelink stehen, plus der Feed-Nummer.
+
+    Trotzdem gehoert sie in ein Repository-Secret und NICHT ins Repo:
+    Dieses Repository ist oeffentlich, und wer die Adresse hat, zieht den
+    kompletten Warenkatalog des Haendlers. Das ist nicht unsere Sache,
+    die weiterzugeben - der Feed ist uns als Publisher gegeben, nicht der
+    Allgemeinheit. Ein Secret kostet nichts und beendet die Frage."""
     adresse = os.environ.get('WEBGAINS_FEED_URL_MOTOIN', '').strip()
     if not adresse:
         return

@@ -10,16 +10,32 @@ Sortiert nach Dringlichkeit, nicht nach Aufwand.
 
 ## Ausrüstung: POLO Motorrad (seit 05.09.2026)
 
-- **Provision und Cookie-Frist nachtragen.** In `partner.js` stehen beide
-  auf `null`, das Einwilligungsblatt und die Offenlegung formulieren
-  deshalb ohne Zahl. Im Webgains-Konto unter dem Programm POLO Motorrad
-  (309425) ablesen und eintragen; dann in `index.html` den Prozentsatz in
-  der Offenlegung der Ausrüstung ergänzen.
-- **Die Webgains-Adressen als Secrets hinterlegen**, damit der Preislauf
-  motoin und POLO selbst holt: Produktfeeds → Feed anhaken → Feed
-  herunterladen → „Datenfeed-URL" → Code kopieren → GitHub Settings →
-  Secrets → `WEBGAINS_FEED_URL_MOTOIN` bzw. `WEBGAINS_FEED_URL_POLO`.
-  Danach den Lauf einmal von Hand anstoßen.
+- **Provision und Cookie-Frist — ERLEDIGT (05.09.2026).** Im Webgains-Konto
+  abgelesen: **5 Prozent**, Cookie **30 Tage**, Stufe „Default". Steht in
+  `partner.js`, die Offenlegung in `index.html` nennt die Zahl. Die
+  Übersicht dort zeigt „1,5 % – 5 %“ — das ist die Spanne über alle Stufen
+  des Netzwerks, nicht unser Satz. Ebenfalls dort nachgelesen: der Kanal
+  **„Preisvergleich" ist ausdrücklich freigegeben**, und Produktbilder sind
+  erlaubt, solange sie aus dem Produktfeed stammen (Bedingung 5) — genau so
+  macht es der Importer.
+- **Die Webgains-Adressen als Secrets — ERLEDIGT (05.09.2026).**
+  `WEBGAINS_FEED_URL_MOTOIN` (Feed 7978) und `WEBGAINS_FEED_URL_POLO`
+  (Feed 34486) liegen in den Repository-Einstellungen.
+
+  **Dabei kam heraus, dass die Annahme vom 04.09.2026 falsch war:** Die
+  Datenfeed-URL trägt *keinen* Zugang. Sie lautet
+  `platform-api.webgains.com/auth/publishers/1426402/campaigns/1749874/feeds/products?feedIds[]=…&format=csv`
+  und antwortet aus dem Terminal ohne Cookie und ohne Anmeldung mit 200.
+  Publisher- und Kampagnennummer stehen ohnehin in jedem Werbelink. Sie
+  bleibt trotzdem ein Secret, weil dieses Repository öffentlich ist und
+  der Warenkatalog des Händlers uns als Publisher gegeben ist, nicht der
+  Allgemeinheit.
+- **Der Preislauf kann noch nicht laufen: `preise.yml` liegt nicht auf
+  `main`.** Die Datei steckt in einem der unveröffentlichten Commits.
+  GitHub kennt einen Auftrag erst, wenn er auf dem Hauptzweig liegt —
+  vorher lässt er sich weder planen noch von Hand anstoßen. Mit dem
+  nächsten Push erledigt sich das; danach einmal Actions → Preise
+  nachziehen → Run workflow.
 - **Die Bilder sind Originale.** POLO liefert keine verkleinerten Bilder,
   jedes hängt mit 250 bis 860 KB an der Karte (nachgemessen am
   05.09.2026: `?width=` wird ignoriert, Shopware-Thumbnails geben 404).
