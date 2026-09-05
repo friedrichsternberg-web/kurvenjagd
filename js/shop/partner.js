@@ -112,12 +112,19 @@ const PARTNER = [
   },
   /* POLO Motorrad, seit dem 05.09.2026, ueber Webgains wie motoin. Die
      Programmkennung steht in jedem Produktlink des Feeds (wgprogramid).
-     Cookie-Frist und Provisionshoehe sind noch nicht eingetragen (null):
-     Das Einwilligungsblatt sagt dann "innerhalb der Frist des Netzwerks"
-     statt einer Zahl, und die Offenlegung nennt die Provision ohne
-     Prozentsatz. Eine erfundene Zahl in einem Rechtstext waere schlimmer
-     als eine fehlende - nachtragen, sobald sie aus dem Webgains-Konto
-     abgelesen ist. */
+
+     Provision und Cookie-Frist am 05.09.2026 im Webgains-Konto abgelesen
+     (Advertiser -> Programme -> POLO Motorrad DE): Verkaufsprovision,
+     Stufe "Default", 5 Prozent, Cookie 30 Tage. Die Uebersicht dort nennt
+     "1,5 % - 5 %" - das ist die Spanne ueber alle Stufen des Netzwerks,
+     nicht unser Satz; massgeblich ist die Stufe, auf der wir stehen.
+
+     Ebenfalls dort nachgelesen und fuer diese App entscheidend: Der
+     Marketingkanal "Preisvergleich" ist ausdruecklich freigegeben, und
+     Produktbilder duerfen verwendet werden, SOFERN sie aus dem Produktfeed
+     stammen (Bedingung 5). Genau daher kommen sie - der Importer schreibt
+     Bildpfad und Dateiname unveraendert aus dem Feed in den Katalog und
+     baut nichts zusammen. Wer das aendert, bricht die Bedingung. */
   {
     id: 'polo',
     name: 'POLO Motorrad',
@@ -125,8 +132,8 @@ const PARTNER = [
     netz: 'webgains',
     kennung: { kampagne: WEBGAINS_KAMPAGNE, programm: '309425' },
     start: 'https://www.polo-motorrad.com/de-de/',
-    cookieTage: null,
-    provision: null,
+    cookieTage: 30,
+    provision: '5 Prozent vom Warenwert',
     versandfrei: null,
     bilderErlaubt: true,
   },
