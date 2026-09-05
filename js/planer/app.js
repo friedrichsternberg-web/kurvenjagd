@@ -3596,10 +3596,12 @@ function aktualisiereLeiste(sichtbareId) {
   if (sichtbareId === 'shopProduktScreen') {
     leuchtZiel = typeof produktLeuchtZiel === 'function' ? produktLeuchtZiel() : 'shopScreen';
   }
-  // Die Reifen haben ebenfalls keinen eigenen Eintrag - sie sind ueber die
-  // Garage erreichbar und gehoeren zur eigenen Maschine. Also leuchtet die
-  // Garage weiter, statt dass die Leiste ins Leere zeigt.
-  if (sichtbareId === 'reifenScreen') leuchtZiel = 'garageScreen';
+  // Die Reifen haben ebenfalls keinen eigenen Eintrag. Sie sind aus der
+  // Garage UND aus der Ausruestung erreichbar - reifen.js weiss, woher
+  // man kam, und dieser Eintrag leuchtet weiter.
+  if (sichtbareId === 'reifenScreen') {
+    leuchtZiel = typeof reifenLeuchtZiel === 'function' ? reifenLeuchtZiel() : 'garageScreen';
+  }
   // Die Stats haengen an der Aufzeichnung und haben keinen eigenen
   // Eintrag - also leuchtet "Ride", solange sie offen sind.
   if (sichtbareId === 'statsScreen') leuchtZiel = 'rideScreen';

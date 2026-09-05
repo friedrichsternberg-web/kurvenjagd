@@ -371,7 +371,16 @@ function preisText(betrag) {
   return betrag.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
 }
 
-function zeigeReifen() {
+/* Woher man kam. Seit dem 05.09.2026 fuehren zwei Wege hierher: die
+   Reifenleiste in der Garage und der Chip "Reifen" in der Ausruestung.
+   Die Herkunft entscheidet, wohin Zurueck fuehrt und welcher Eintrag
+   der Leiste leuchtet - dasselbe Muster wie bei der Produktseite. */
+let reifenHerkunft = 'garage';
+
+function zeigeReifen(herkunft) {
+  // Der Knopf "Nochmal versuchen" ruft diese Funktion mit dem Ereignis
+  // als Argument - das ist keine Herkunft, dann bleibt die alte stehen.
+  if (typeof herkunft === 'string') reifenHerkunft = herkunft;
   zeichneReifenHeld();
   zeigeBildschirm('reifenScreen');
   document.getElementById('reifenScreen').scrollTop = 0;
@@ -410,6 +419,16 @@ function zeigeReifen() {
       document.getElementById('reifenLaden').hidden = true;
       document.getElementById('reifenFehler').hidden = false;
     });
+}
+
+// Fuer aktualisiereLeiste() in app.js.
+function reifenLeuchtZiel() {
+  return reifenHerkunft === 'ausruestung' ? 'shopScreen' : 'garageScreen';
+}
+
+function zurueckVonReifen() {
+  if (reifenHerkunft === 'ausruestung' && typeof zeigeAusruestung === 'function') { zeigeAusruestung(); return; }
+  zeigeGarage();
 }
 
 function zeichneReifenAlles() {
@@ -662,7 +681,7 @@ verkabele('btnReifenMehr', 'click', () => {
 });
 
 verkabele('btnReifenShop', 'click', öffneReifenStartseite);
-verkabele('btnReifenZurueck', 'click', () => zeigeGarage());
+verkabele('btnReifenZurueck', 'click', zurueckVonReifen);
 verkabele('btnReifenNochmal', 'click', zeigeReifen);
 verkabele('btnGarageReifenAlle', 'click', () => {
   if (typeof zeigeReifen === 'function') zeigeReifen();
@@ -784,6 +803,46 @@ function zeichneGarageReifen() {
   if (!karten.length && !einladung) { platte.hidden = true; return; }
   band.innerHTML = einladung + karten.join('');
   platte.hidden = false;
+}
+
+
+/* --- 8. Das Reifen-Regal in der Ausruestung ------------------------------------
+   Seit dem 05.09.2026 stehen die Reifen auch im Schaufenster der
+   Ausruestung, als erstes Regal: dieselben Karten wie in der Garagenleiste,
+   dieselbe ehrliche Beschriftung (siehe Abschnitt 7). shop.js ruft das
+   beim Zeichnen der Regale; ist der Katalog noch nicht da, kommt ein leerer
+   Text zurueck, und sobald er geladen ist, zeichnet shop.js noch einmal.
+   Jede Karte und "Alle" fuehren auf den Reifen-Bildschirm - nicht direkt
+   zum Haendler, aus demselben Grund wie in der Garage.                     */
+
+function reifenRegalHtml() {
+  if (!reifenKatalog) {
+    ladeReifenKatalog()
+      .then(() => { if (typeof zeichneRegale === 'function') zeichneRegale(); })
+      .catch(() => {});
+    return '';
+  }
+  const motorrad = (typeof motorradAktiv === 'function') ? motorradAktiv() : null;
+  const maschine = motorrad
+    ? (`${motorrad.marke || ''} ${motorrad.modell || ''}`.trim() || 'Maschine') : '';
+  const kenntGroesse = groesseBekannt();
+  const titel = kenntGroesse && maschine ? `Reifen für deine ${maschine}` : 'Motorradreifen';
+  const grund = kenntGroesse
+    ? 'In deiner Größe, die günstigsten zuerst'
+    : 'Zwei Händler im Vergleich – trag deine Größe ein, dann passen sie zu deiner Maschine';
+  const karten = garageReifenKarten(kenntGroesse);
+  if (!karten.length) return '';
+  return `
+    <section class="regal regal-band regal-reifen">
+      <div class="regal-kopf">
+        <div>
+          <h2 class="regal-titel">${escapeHtml(titel)} ${anzeigeAbzeichen()}</h2>
+          <p class="regal-grund">${escapeHtml(grund)}</p>
+        </div>
+        <button type="button" class="linkbtn" data-reifen-alle>Alle &rarr;</button>
+      </div>
+      <div class="produkt-band">${karten.join('')}</div>
+    </section>`;
 }
 
 /* Einmal beim Laden zeichnen - aus demselben Grund wie am Ende von

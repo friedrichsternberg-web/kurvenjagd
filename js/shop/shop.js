@@ -286,8 +286,12 @@ function zeichneWeltChips() {
   const vorhandene = new Set(sortiment().map(p => p.kategorie));
   const welten = WELTEN.filter(welt => welt.gruppen.some(g => vorhandene.has(g)));
   const aktiv = ausruestungFilter.welt;
+  // "Reifen" gleich nach "Alle": Sie sind kein Teil des Sortiments hier,
+  // sondern ein eigener Bereich mit Groessenwahl (reifen.js) - aber wer
+  // Ausruestung sucht, sucht sie auch hier. Der Chip fuehrt hinueber.
   behälter.innerHTML = [
     `<button type="button" class="marken-chip ${aktiv === null ? 'active' : ''}" data-welt="">Alle</button>`,
+    `<button type="button" class="marken-chip" data-welt="reifen">Reifen</button>`,
     ...welten.map(welt => `
       <button type="button" class="marken-chip ${aktiv === welt.id ? 'active' : ''}"
               data-welt="${escapeHtml(welt.id)}">${escapeHtml(welt.name)}</button>`),
@@ -335,8 +339,14 @@ function zeichneWeltKopf(anzahl) {
   const was = ausruestungFilter.suche
     ? `${anzahl} Treffer für „${ausruestungFilter.suche}“`
     : `${anzahl.toLocaleString('de-DE')} Artikel`;
+  // Wer hier nach Reifen sucht, findet keine - die haben ihren eigenen
+  // Bereich mit Groessenwahl. Statt "0 Treffer" der Weg dorthin.
+  const reifenWink = /reifen|pirelli|michelin|metzeler|bridgestone|continental|dunlop/.test(ausruestungFilter.suche)
+    ? `<p class="hint reifen-wink">Reifen haben ihren eigenen Bereich mit Gr&ouml;&szlig;enwahl.
+         <button type="button" class="linkbtn" data-reifen-alle>Zu den Reifen &rarr;</button></p>`
+    : '';
   kopf.innerHTML = `<h2 class="regal-titel">${escapeHtml(titel)} ${anzeigeAbzeichen()}</h2>
-    <p class="regal-grund">${escapeHtml(was)}</p>`;
+    <p class="regal-grund">${escapeHtml(was)}</p>${reifenWink}`;
   if (sortierung) {
     sortierung.innerHTML = Object.entries(SORTIERUNGEN).map(([id, eintrag]) => `
       <button type="button" class="seg ${ausruestungFilter.sortierung === id ? 'active' : ''}"
@@ -495,7 +505,10 @@ function zeichneRegale() {
   const behälter = document.getElementById('ausruestungRegale');
   if (!behälter) return;
   const produkte = sortiment();
-  behälter.innerHTML = regalReihenfolge(produkte).map(([gruppe, grund], stelle) => {
+  // Die Reifen zuerst: das groesste Sortiment mit den meisten echten
+  // Vergleichen. Kommt aus reifen.js, das VOR dieser Datei geladen wird.
+  const reifen = typeof reifenRegalHtml === 'function' ? reifenRegalHtml() : '';
+  behälter.innerHTML = reifen + regalReihenfolge(produkte).map(([gruppe, grund], stelle) => {
     const form = REGAL_FORMEN[stelle % REGAL_FORMEN.length];
     return regalHtml(gruppe, grund, form, regalAuswahl(produkte, gruppe, JE_REGAL[form]));
   }).join('');
@@ -579,6 +592,7 @@ function zeigeWarengruppe(gruppe) {
 verkabele('shopKategorien', 'click', ereignis => {
   const chip = ereignis.target.closest('.marken-chip');
   if (!chip) return;
+  if (chip.dataset.welt === 'reifen') { zeigeReifen('ausruestung'); return; }
   setzeWelt(chip.dataset.welt);
   zeichneAusruestung();
   document.getElementById('shopScreen').scrollTop = 0;
@@ -616,10 +630,14 @@ function verkabeleProduktBehaelter(id, herkunft) {
     if (herz) { merkenUmschalten(herz.dataset.merken); return; }
     const alle = ereignis.target.closest('[data-alle]');
     if (alle) { zeigeWarengruppe(alle.dataset.alle); return; }
+    // Das Reifen-Regal und der Wink in der Suche: beide fuehren auf den
+    // Reifen-Bildschirm, der weiss dann, dass er von hier kam.
+    if (ereignis.target.closest('[data-reifen-band], [data-reifen-alle]')) { zeigeReifen('ausruestung'); return; }
     const karte = ereignis.target.closest('[data-produkt]');
     if (karte) zeigeProdukt(karte.dataset.produkt, herkunft);
   });
 }
+verkabeleProduktBehaelter('weltKopf', 'ausruestung');
 verkabeleProduktBehaelter('weltRaster', 'ausruestung');
 verkabeleProduktBehaelter('ausruestungRegale', 'ausruestung');
 verkabeleProduktBehaelter('ausruestungHighlights', 'ausruestung');
