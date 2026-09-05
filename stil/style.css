@@ -3929,16 +3929,38 @@ body.nav-modus .leaflet-control-container { display: none; }
   place-items: center;
   align-content: center;
   gap: var(--s2);
-  height: 230px;
+  /* Kein festes Mass mehr, sondern 3:2 von der Breite her, nach oben
+     gedeckelt: Auf dem Handy wird der Rahmen so etwa 240 Punkte hoch, am
+     Schreibtisch nicht hoeher als 320 - und er passt sich der Spalte an. */
+  aspect-ratio: 3 / 2;
+  max-height: 320px;
+  position: relative;         /* Anker fuer das Foto, siehe unten */
   margin: 0;
   border: 1px solid var(--glas-rand);
   border-radius: var(--r-md);
   background: var(--glas-hell);
 }
+/* Mit Foto wird der Rahmen weiss, denn alle Haendlerfotos kommen auf
+   weissem Grund - auf Glas stuende sonst ein weisses Rechteck im grauen
+   Kasten. Dasselbe wie bei .produkt-mini-bild img. */
+.galerie-bild.mit-foto { background: var(--accent-ink); border-color: var(--accent-ink); }
 .galerie-bild .ic { width: 84px; height: 84px; color: var(--accent-hell); }
+/* Das Foto bekommt seine natuerliche Groesse und wird NUR verkleinert,
+   nie vergroessert - vergroessern macht es unscharf. Die Obergrenze
+   setzt produktseite.js aus den Bildpunkten des Fotos (begrenzeProduktBild).
+   Absolut verankert und mit margin:auto zentriert, aus demselben Grund wie
+   bei .produkt-mini-bild img: So kann es gar nicht anders, als in den
+   Rahmen zu passen. */
 .galerie-bild img {
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: auto;
+  height: auto;
+  /* Das kleinere von beiden: der Rahmen oder die scharfe Groesse des
+     Fotos. Ohne gesetzte Variable gilt allein der Rahmen. */
+  max-width: min(100%, var(--foto-breite, 100%));
+  max-height: min(100%, var(--foto-hoehe, 100%));
   object-fit: contain;
   border-radius: var(--r-md);
 }
@@ -3995,6 +4017,12 @@ body.nav-modus .leaflet-control-container { display: none; }
 
 .produkt-titel { margin: 0; }
 .produkt-kategorie { margin: 2px 0 var(--s3); }
+
+/* Die Produktseite steht auf Schwarz, nicht auf dem weichgezeichneten
+   Startfoto wie die uebrigen Listenbildschirme: Hier traegt das
+   Produktfoto in seinem weissen Rahmen das Bild, und ein zweites Foto
+   dahinter machte die Seite unruhig. Entschieden am 05.09.2026. */
+#shopProduktScreen { background: var(--bg); }
 
 /* Die Groessen als stumme Chips - reine Information, keine Auswahl.
    Gewaehlt wird die Groesse spaeter im Shop, nicht hier. */

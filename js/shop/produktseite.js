@@ -77,9 +77,29 @@ function zeichneProduktBild(produkt) {
     return `<figure class="galerie-bild">${symbol('helm', 'gross')}
       <figcaption>Foto derzeit nicht verf&uuml;gbar</figcaption></figure>`;
   }
-  return `<figure class="galerie-bild"><img
+  // mit-foto: weisser Rahmen, denn alle Haendlerfotos kommen auf Weiss.
+  return `<figure class="galerie-bild mit-foto"><img
     src="${escapeHtml(produkt.bild('gross'))}"
     alt="${escapeHtml(produkt.marke + ' ' + produkt.name)}"></figure>`;
+}
+
+/* Das Foto darf nicht groesser gezeigt werden, als es Bildpunkte hat -
+   sonst wird es unscharf, und genau das war bis zum 05.09.2026 der Fall:
+   Ein 400 Punkte breites Bild wurde auf die volle Breite gezogen.
+
+   Die Grenze ist "zwei Bildpunkte je CSS-Punkt", denn ab dieser Dichte
+   sieht kein Bildschirm mehr einen Unterschied zum Original. Auf einem
+   Bildschirm mit einfacher Dichte gilt die einfache Groesse. Kleiner als
+   die Grenze darf das Bild immer sein - der Rahmen begrenzt es dann. */
+function begrenzeProduktBild(bild) {
+  if (!bild || !bild.naturalWidth) return;
+  const teiler = Math.min(geraet.pixelDichte(), 2);
+  // Als CSS-Variablen, nicht als max-width direkt: Ein Inline-Mass wuerde
+  // das "hoechstens 100 Prozent" des Rahmens aus style.css ueberstimmen,
+  // und ein grosses Foto liefe ueber den Rand. So gilt das kleinere von
+  // beiden - siehe .galerie-bild img.
+  bild.style.setProperty('--foto-breite', Math.round(bild.naturalWidth / teiler) + 'px');
+  bild.style.setProperty('--foto-hoehe', Math.round(bild.naturalHeight / teiler) + 'px');
 }
 
 function zeichneProduktDaten(produkt) {
@@ -199,6 +219,14 @@ function zeichneProduktSeite() {
     ${zeichneGroessen(produkt)}
     ${zeichneProduktDaten(produkt)}
     ${zeichneAngebot(produkt)}`;
+
+  // Das Mass des Fotos steht erst fest, wenn es geladen ist. Kommt es aus
+  // dem Browserspeicher, ist es das schon - dann gleich begrenzen.
+  const bild = inhalt.querySelector('.galerie-bild img');
+  if (bild) {
+    if (bild.complete) begrenzeProduktBild(bild);
+    else bild.addEventListener('load', () => begrenzeProduktBild(bild), { once: true });
+  }
 }
 
 

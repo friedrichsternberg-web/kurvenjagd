@@ -48,6 +48,14 @@ const geraet = {
               && window.Capacitor.isNativePlatform());
   },
 
+  /* --- Bildschirmdichte -----------------------------------------------------
+     Wie viele Bildpunkte des Geraets auf einen CSS-Punkt fallen: 1 am
+     einfachen Monitor, 2 oder 3 auf Handys. Die Produktseite begrenzt
+     damit ihre Fotos auf die Groesse, die sie scharf zeigen koennen. */
+  pixelDichte() {
+    return window.devicePixelRatio || 1;
+  },
+
 
   /* --- Standort ------------------------------------------------------------
      Absichtlich mit Rückrufen statt mit Promises: Genau so ruft die App es

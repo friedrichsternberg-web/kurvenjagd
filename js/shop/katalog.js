@@ -274,7 +274,12 @@ function alleProdukte() {
    c) Der Groessensatz. Steht dort eine Zahl, ist es ein Platz im
       Woerterbuch; steht eine Liste, gilt sie unmittelbar. */
 
-const MOTOIN_BILDGROESSEN = { klein: 'info_images', gross: 'popup_images' };
+/* Die Bildordner von motoin, nachgemessen am 05.09.2026 an 40 Produkten:
+   thumbnail 100, info 200, popup 400 Punkte breit, original 371 bis 1300
+   (im Mittel 1141). Die Produktseite nimmt seit dem 05.09.2026 das
+   Original, denn popup war auf ihr sichtbar unscharf; die Kacheln in den
+   Listen kommen mit info aus, sie sind 74 Punkte gross. */
+const MOTOIN_BILDGROESSEN = { klein: 'info_images', gross: 'original_images' };
 
 // Aus "Alpinestars Fluid Drag, Trikot" wird
 // "Alpinestars-Fluid-Drag-Trikot". Muss nicht auf das Zeichen genau
@@ -357,7 +362,9 @@ meldeKatalog({
    in den Listen, sondern auf der Produktseite des motoin-Helms als
    zweiter Preis. */
 
-const HELMEXPRESS_BILDGROESSEN = { klein: 200, gross: 480 };
+// 900 statt 480 fuer die Produktseite: Der Bilddienst rechnet jede Groesse,
+// und mit 480 Punkten war das Foto auf der Produktseite unscharf.
+const HELMEXPRESS_BILDGROESSEN = { klein: 200, gross: 900 };
 
 function baueHelmexpressProdukt(zeile, daten) {
   const [awNummer, marke, titel, groessen, preis, versand, gtin, pfad, quelle, signatur, motoinNummer, unterart, beliebt] = zeile;
