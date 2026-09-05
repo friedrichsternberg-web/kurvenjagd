@@ -699,6 +699,16 @@ Datenschutzerklärung, siehe oben.
   hoch und kostet viermal so viele Kachelanfragen; die Gegenüberstellung
   steht in ENTSCHEIDUNGEN.md, das Ergebnis war „nicht einbauen".
 
+- **Marke doppelt im Titel** bei Helmexpress: „O'Neal ONEAL Volt Corp
+  Jethelm". `ohneMarke()` in `katalog.js` streicht die Marke nur, wenn der
+  Titel wörtlich mit ihr beginnt; Apostroph und Großschreibung fallen
+  durch. Vergleich ohne Satzzeichen und Groß/Klein würde es lösen.
+  (Aufgefallen 05.09.2026.)
+- **Produktseite am Schreibtisch zweispaltig**: Foto links, Daten und
+  Angebote rechts. Heute steht das Foto in einem 1000 Punkte breiten, 320
+  hohen weißen Rahmen und ist darin klein. Hochformat bleibt, wie es ist.
+  (05.09.2026)
+
 ## Vektorkacheln statt Rasterkacheln (offen seit 31.08.2026)
 
 Zwei Probleme mit einer Ursache, und beide lösen sich mit demselben Schritt:

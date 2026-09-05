@@ -2889,3 +2889,119 @@ zugleich als Vergleichsbasis für Helmexpress und POLO. Fehlen die Secrets,
 überspringt der Lauf die Schritte und die Kataloge bleiben stehen. Damit
 ist die Annahme vom 04.09.2026, Webgains gebe keinen Schlüssel heraus,
 überholt.
+
+---
+
+## 05.09.2026, abends — Produktfotos scharf, Reifen in der Ausrüstung, der Planer fragt zuerst
+
+### Die Produktseite: warum die Fotos unscharf waren
+
+**Der Befund:** Friedrich schickte ein Bild der Produktseite eines
+Lenkergewichts, das Foto matschig. Nachgemessen: motoin liefert im Ordner
+`popup_images` 400 Bildpunkte Breite, und die Seite zog das auf die volle
+Breite des Rahmens, auf einem Retina-Bildschirm also auf 700 Gerätepunkte
+und mehr. Vergrößern macht unscharf, das ist die ganze Ursache.
+
+**Zwei Hebel, beide nötig.** Erstens die Quelle: motoin hat einen Ordner
+`original_images`, den die App nie benutzt hat. An 40 quer über den Katalog
+verteilten Produkten geprüft: alle vorhanden, 371 bis 1300 Bildpunkte
+breit, im Mittel 1141, je 25 bis 40 KB. Der Bilddienst von Helmexpress
+rechnet jede Größe, dort steht die Produktseite jetzt auf 900 statt 480.
+POLO liefert ohnehin Originale mit 2500 Bildpunkten.
+
+Zweitens die Regel, dass ein Foto **nie größer gezeigt wird, als es
+Bildpunkte hat**. `begrenzeProduktBild()` in `produktseite.js` setzt nach
+dem Laden zwei CSS-Variablen aus `naturalWidth` und `naturalHeight`, geteilt
+durch die Bildschirmdichte, höchstens aber durch 2. Zwei Bildpunkte je
+CSS-Punkt sind die Grenze, ab der kein Bildschirm mehr einen Unterschied
+zum Original sieht; auf einem 3x-Handy darf das Foto also um die Hälfte
+wachsen und bleibt trotzdem schärfer als auf jedem Monitor. Das Stylesheet
+nimmt `min(100%, var(--foto-breite))`: das Kleinere von Rahmen und scharfer
+Größe.
+
+**Ein Fehler auf dem Weg:** Die erste Fassung setzte `max-width` direkt als
+Inline-Stil. Der überstimmt das `max-width: 100%` aus dem Stylesheet, und
+das POLO-Foto lief mit 1250 Punkten über den Rahmen hinaus. Deshalb die
+Variablen statt des Maßes.
+
+**Schwarz statt Startfoto.** Die Produktseite stand wie alle
+Listenbildschirme auf dem weichgezeichneten Startfoto. Friedrich wollte
+Schwarz, und es stimmt: Das Produktfoto in seinem weißen Rahmen trägt das
+Bild, ein zweites Foto dahinter machte die Seite unruhig. Der Rahmen ist
+jetzt weiß (`--accent-ink`), wie bei den kleinen Kacheln, denn alle
+Händlerfotos kommen auf Weiß; auf Glas stand vorher ein weißes Rechteck im
+grauen Kasten. Der Rahmen misst 3:2 von der Breite her, höchstens 320
+Punkte hoch.
+
+**Verworfen:** die Produktseite in `quer.css` auf `--feed-max` zu weiten.
+Das sind 1440 Punkte, breiter als die Lesebreite. Sie bleibt bei den 1080
+der Textseiten. Eine zweispaltige Produktseite am Schreibtisch, Foto links,
+Daten rechts, wäre die bessere Antwort und steht in AUFGABEN.md.
+
+### Reifen gehören auch in die Ausrüstung
+
+Bis heute führte nur die Reifenleiste in der Garage zum Reifenbildschirm.
+Wer unter „Ausrüstung" nach Reifen suchte, bekam null Treffer. Jetzt:
+
+- Ein Chip **„Reifen"** direkt nach „Alle". Er ist keine Welt des
+  Sortiments, sondern führt hinüber, denn Reifen haben ihre eigene
+  Größenwahl.
+- Das **erste Regal** im Schaufenster sind die Reifen, mit denselben Karten
+  und derselben ehrlichen Beschriftung wie in der Garage („Motorradreifen"
+  oder „Reifen für deine Honda ADV150"). `reifenRegalHtml()` steht in
+  `reifen.js`, das vor `shop.js` geladen wird.
+- Wer **„reifen"** oder eine Reifenmarke ins Suchfeld tippt, sieht statt „0
+  Treffer" den Weg: „Reifen haben ihren eigenen Bereich mit Größenwahl."
+- Der Reifenbildschirm kennt jetzt seine **Herkunft** (`reifenHerkunft`),
+  wie die Produktseite: Zurück führt in die Ausrüstung oder in die Garage,
+  und in der Leiste leuchtet der passende Eintrag.
+
+Die Offenlegung der Ausrüstung nennt jetzt fünf Händler samt Sitz und
+Provision, denn auf dieser Seite stehen nun auch Reifenpreise. „Sortiment
+dreier Händler" wurde „fünf ausgewählter Händler".
+
+### Der Planer fragt zuerst: Tour oder Reise?
+
+**Der Wunsch:** Der Reiseplaner soll Teil des Planers sein. Wer in der
+Leiste „Planer" tippt, soll wählen: eine Tour oder eine ganze Reise. Dazu
+ein präsenter Weg aus der Garage, und „Touren" heißt „Meine Touren".
+
+**Der Einstieg** ist ein eigener Bildschirm `planerWahlScreen` mit zwei
+Glaskarten, jede ein Knopf: „Eine Tour" (Strecke für heute oder morgen) und
+„Eine Reise" (mehrere Tage, jeder eine Etappe). Jede Karte sagt, wie viel
+davon schon da ist. Am Schreibtisch stehen sie nebeneinander. Das ist ein
+Tipp mehr auf dem Weg zur Karte, und der ist es wert, weil beide Wege
+gleich wichtig sind. Eine Ausnahme: Solange eine Route für einen Reisetag
+entsteht (`reisePlanung`), führt „Planer" direkt auf die Karte, die Frage
+ist dann schon beantwortet.
+
+**„Eine Reise"** führt zur Liste der Reisen unter „Meine Touren", dort
+steht „Neue Reise planen" obenan. Gibt es noch keine Reise, öffnet sich
+gleich das Blatt für die erste, über dem Einstieg. Eine leere Liste mit
+einem Knopf wäre ein Umweg ohne Nutzen.
+
+**Welcher Eintrag leuchtet:** Einstieg und Reisebildschirm zählen zum
+Planer. Bis heute leuchtete bei einer offenen Reise „Touren", weil sie von
+dort geöffnet wurde. Zurück aus der Reise führt weiter in die Reisenliste,
+denn dort liegen alle Reisen; das ist derselbe Schnitt wie bei der
+Produktseite: Zurück geht, woher man kam, die Leiste zeigt, in welchem
+Bereich man ist.
+
+**Die Reisekarte in der Garage.** Eine Platte unter dem Datenblatt, mit
+der zuletzt angelegten Reise als Kartenbild, Name, Tagen, Kilometern und
+„Weiterplanen", die ganze Karte ein Knopf; daneben „Neue Reise". Ohne Reise
+die Einladung: „Deine nächste große Reise. Mehrere Tage, eine Karte, jeder
+Tag eine Etappe." Das steht nicht im Widerspruch zum 03.09.2026, als die
+Kacheln aus der Garage gingen: Die Kacheln waren ein Menü in andere
+Bereiche, diese Platte zeigt etwas Eigenes wie das Datenblatt. Ein Hauch
+der Signalfarbe am Rand sagt, dass hier etwas weitergeht.
+
+**„Meine Touren."** Der Bildschirm und der Eintrag in der Leiste heißen so.
+Nachgemessen: Das Wort belegt 67 von 78 Punkten je Eintrag auf einem 390er
+Handy, es passt. Die drei Teile bleiben: Meine, Entdecken, Reisen.
+
+**Neue Datei `js/planer/einstieg.js`** (181 Zeilen) für den Einstieg, den
+Weg zur Reise und die Reisekarte in der Garage. `reise.js` stand mit 1088
+Zeilen zu nah an der Grenze, `app.js` liegt längst darüber. Der Draht zu
+`app.js` sind zwei `typeof`-Prüfungen: Fehlt die Datei, führt „Planer" wie
+früher direkt auf die Karte, und die Garage zeigt keine Reisekarte.
