@@ -2691,7 +2691,24 @@ button.karte:active { transform: scale(0.985); }
   border-radius: var(--r-xl);
   overflow: hidden;
   isolation: isolate;
+  /* Zwei Spalten, vier Zeilen. Links Kopf, Name, Werte, Knopf; rechts die
+     Buehne, die ALLE Zeilen spannt - so reicht die Werkstatt dahinter von
+     der Ober- bis zur Unterkante der Karte, wie in der Vorlage. Bis zum
+     06.09.2026 sass die Buehne unter dem Namen in einem eigenen Raster,
+     und der Raum begann erst dort. 44 zu 56: Die Maschine ist doppelt so
+     breit wie hoch und braucht die Breite mehr als die Werte. */
+  display: grid;
+  grid-template-columns: minmax(0, 46%) minmax(0, 1fr);
+  grid-template-rows: auto auto 1fr auto;
+  column-gap: var(--s3);
 }
+/* Der Kopf liegt ueber beiden Spalten - das Plus rechts steht damit ueber
+   der Werkstatt, wie der Knopf in der Vorlage. */
+.bike-karte .widget-kopf { grid-column: 1 / -1; grid-row: 1; position: relative; z-index: 3; }
+.bike-karte .widget-name { grid-column: 1; grid-row: 2; position: relative; z-index: 1; }
+.bike-karte .widget-werte { grid-column: 1; grid-row: 3; position: relative; z-index: 1; }
+.bike-karte .widget-knopf { grid-column: 1; grid-row: 4; align-self: end; position: relative; z-index: 1; }
+.bike-karte .bike-buehne { grid-column: 2; grid-row: 1 / -1; }
 /* Die Werkstatt als Untergrund der rechten Kartenhaelfte. Sie ersetzt das
    unscharf hinterlegte eigene Foto, das hier zuerst stand: Zwei
    Untergruende in einer Karte waren einer zu viel, und der Raum sagt mehr.
@@ -2706,16 +2723,20 @@ button.karte:active { transform: scale(0.985); }
      weichen Uebergang zu den Werten. */
   inset: calc(-1 * var(--s4)) calc(-1 * var(--s4)) calc(-1 * var(--s4)) -44px;
   z-index: 0;
-  /* Zwei Schichten: oben ein dunkler Schleier, der das Ringlicht der
-     Werkstatt daempft (es haengt sonst als heller Bogen hinter dem Namen),
-     darunter das Bild. */
-  /* Die halbe Ueberhangbreite nach rechts: Damit liegt die Tellermitte des
-     Bildes genau auf der Mitte der BUEHNE - und die Maschine steht auf dem
-     Teller statt daneben. Der Wert haengt nur am Ueberhang oben, nicht an
-     der Kartenbreite, und stimmt deshalb in jedem Format. */
-  background:
-    linear-gradient(to bottom, var(--schatten-voll) 6%, var(--schatten-tief) 34%, transparent 62%),
-    url("../img/bike-raum.webp") calc(50% + 22px) bottom / cover no-repeat;
+  /* Der Raum steht ohne Schleier da - Ringlicht, Werkzeugwand, Werkbank,
+     Teller. Hier lag zuerst ein dunkler Verlauf ueber dem oberen Teil, der
+     das Ringlicht daempfen sollte; er verschluckte den halben Raum, und
+     genau das sah nach "abgeschnitten" aus. Der Name steht jetzt in der
+     linken Spalte und nicht mehr ueber dem Raum, das Ringlicht stoert also
+     nichts mehr.
+
+     Die Verschiebung nach rechts: Der Raum ragt links 44 und rechts 16
+     Punkte ueber die Buehne hinaus, seine Mitte liegt also 14 Punkte links
+     der Buehnenmitte. Um diese 14 Punkte rueckt das Bild nach rechts,
+     damit die Tellermitte auf der Buehnenmitte liegt und die Maschine auf
+     dem Teller steht statt daneben. Der Wert haengt nur am Ueberhang,
+     nicht an der Kartenbreite, und stimmt deshalb in jedem Format. */
+  background: url("../img/bike-raum.webp") calc(50% + 14px) bottom / cover no-repeat;
   /* Der Uebergang zu den Werten: ein linearer Verlauf, der am linken Rand
      WIRKLICH bei null ist. Hier stand zuerst ein radialer vom Teller aus -
      der war am linken Rand noch bei rund einem Drittel Deckkraft, und
@@ -2749,10 +2770,18 @@ button.karte:active { transform: scale(0.985); }
 /* :not([hidden]) ist noetig: Der Umschalter steht auch bei einer Maschine
    im HTML, nur versteckt - und "+" sieht ihn trotzdem. */
 .widget-kopf .motorrad-umschalter:not([hidden]) + .glas-rund.klein { margin-left: 0; }
-.widget-name {
+/* Mit ".karte" davor, nicht allein: Der Bikename ist eine h2 in einem
+   Listenbildschirm, und ".start-screen-inner h2" (28 Punkte, Abstand s4)
+   wog schwerer als ".widget-name" allein - daher der Umbruch und die zu
+   grosse Luecke zu den Werten, die zweimal aufgefallen war. */
+.karte .widget-name {
   margin: 0 0 var(--s2);
   font-family: var(--schrift-display);
-  font-size: 24px;
+  /* Waechst mit dem Fenster: In der linken Spalte der Bike-Karte stehen
+     auf dem Handy rund 150 Punkte, und "Honda CB650R" braucht bei 24
+     Punkten 165 - bei 19,5 passt es in eine Zeile (nachgemessen: bei 21
+     brach es noch um). */
+  font-size: clamp(19px, 5vw, 24px);
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.15;
@@ -2762,16 +2791,23 @@ button.karte:active { transform: scale(0.985); }
 /* Links die Werte und der Knopf, rechts die Buehne mit dem Foto. 46 zu 54:
    Die Werte-Zeilen brauchen in Inter rund 140 Punkte ("1.084 cm³" bei 17
    Punkten), die Maschine bekommt den Rest. */
+/* Das Raster der Reisekarte: links das Kartenbild, rechts die Zeilen und
+   der Knopf. Beide Spalten gleich hoch (stretch) - und die Textspalte
+   verteilt ihren Inhalt: Zeilen oben, Knopf unten. Ohne das stand der
+   Knopf mitten in der Spalte und darunter blieb Leere, das sah aus wie
+   verschoben. */
 .widget-inhalt {
   display: grid;
-  grid-template-columns: minmax(0, 49%) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 52%) minmax(0, 1fr);
   gap: var(--s3);
-  align-items: end;
+  align-items: stretch;
 }
-/* In der Reisekarte traegt die rechte Spalte das Kartenbild - es soll die
-   Hoehe der Wertezeilen daneben aufnehmen, nicht unten kleben. */
-.reise-widget .widget-inhalt { align-items: stretch; }
-.widget-text { display: flex; flex-direction: column; min-width: 0; }
+.widget-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+}
 .widget-knopf {
   /* Nicht wachsen: .btn traegt flex: 1, und in der Textspalte der
      Reisekarte streckte sich der Knopf dadurch ueber die ganze Resthoehe -
@@ -2825,9 +2861,10 @@ button.karte:active { transform: scale(0.985); }
   /* Der Raum ragt ueber die Buehne hinaus - die Karte selbst schneidet ihn
      an ihren Kanten ab (sie hat overflow: hidden). Der Innenabstand unten
      haelt die Maschine von der Kartenkante fern, sie soll auf dem Teller
-     stehen. */
+     stehen. Die Hoehe kommt aus den Zeilen der Karte, die Buehne spannt
+     sie alle; 200 ist die Untergrenze fuer den Leerzustand. */
   padding-bottom: var(--s2);
-  min-height: 186px;
+  min-height: 200px;
   align-self: stretch;
   display: flex;
   align-items: flex-end;
@@ -2871,10 +2908,12 @@ button.karte:active { transform: scale(0.985); }
 .buehne-hinweis {
   position: absolute;
   z-index: 5;
-  /* Im oberen Viertel und schmal: Die Maschine steht unten auf dem Teller,
-     die Tafel gehoert DARUEBER an die Wand - nicht auf den Tank. */
+  /* Ueber der Maschine, nicht auf ihr: Sie steht unten auf dem Teller, die
+     Tafel haengt davor an der Wand. Auf dem Handy ist die Buehne hoch und
+     die Maschine flach - dort sitzt die Tafel tiefer (quer.css setzt sie
+     im Breiten wieder hoeher). */
   left: 8%; right: 8%;
-  top: 22%;
+  top: 50%;
   transform: translateY(-50%);
   display: flex;
   justify-content: center;
@@ -3024,16 +3063,17 @@ button.karte:active { transform: scale(0.985); }
      Karte zu ueberstehen. */
   overflow: hidden;
 }
-/* Das Kartenbild laeuft nach links und unten bis an die Kartenkante - wie
-   die Werkstatt im Bike-Widget. Gerundet ist es deshalb nur rechts; links
-   und unten uebernimmt die Karte selbst das Runden. */
 .reise-bild {
   position: relative;
   display: block;
   padding: 0;
-  margin: 0 0 calc(-1 * var(--s4)) calc(-1 * var(--s4));
-  border: 0;
-  border-radius: 0 var(--r-md) var(--r-md) 0;
+  /* Eingefasst mit gleichem Rand rundum und vier runden Ecken, wie in der
+     Vorlage. Randlos bis an die Kartenkante war es kurz - dort lag es um
+     die Rahmenlinie der Karte versetzt und die Ecke unten links stritt mit
+     der Kartenrundung. */
+  margin: 0;
+  border: 1px solid var(--glas-rand);
+  border-radius: var(--r-md);
   overflow: hidden;
   cursor: pointer;
   /* Damit die Karte auch bei einem kurzen Namen etwas hermacht. */
@@ -3041,9 +3081,7 @@ button.karte:active { transform: scale(0.985); }
   background: var(--raum-dunkel);
   transition: transform 0.15s cubic-bezier(0.2,0.8,0.2,1);
 }
-/* Kein Nachgeben beim Antippen: Das Bild sitzt in der Kartenkante, ein
-   Zusammenziehen liesse dort einen Spalt aufblitzen. */
-.reise-bild:active { transform: none; }
+.reise-bild:active { transform: scale(0.985); }
 /* .tour-vorschau ist die Vorschau der TOURENLISTE: Dort sitzt sie oben in
    der Karte, ist deshalb nur oben gerundet, hat negative Margen und ein
    festes Seitenverhaeltnis von 640:280. Hier steht sie in einem eigenen

@@ -510,11 +510,12 @@
         </div>
       </header>
 
-      <!-- Die Bike-Karte: Abzeichen, Name, links die Werte als Zeilen mit
-           Symbol, rechts das eigene Foto auf einer kleinen Buehne. Gefuellt
-           von garage.js (zeichneGarage). Das Foto liegt ein zweites Mal
-           unscharf hinter der ganzen Karte (--bike-bild, gesetzt von
-           zeichneMotorradBild) - Grundsatz 4: Glas ueber etwas Echtem. -->
+      <!-- Die Bike-Karte ist ein Raster aus zwei Spalten: links Abzeichen,
+           Name, die Werte als Zeilen mit Symbol und der Knopf; rechts die
+           Buehne, die ALLE Zeilen spannt - dadurch reicht die Werkstatt
+           hinter ihr von der Ober- bis zur Unterkante der Karte, wie in
+           der Vorlage. Der Kopf mit dem Plus liegt ueber beiden Spalten.
+           Gefuellt von garage.js (zeichneGarage). -->
       <section id="garageDatenblatt" class="karte bike-karte" hidden>
         <div class="widget-kopf">
           <span class="abzeichen">Mein Bike</span>
@@ -524,42 +525,38 @@
           </button>
         </div>
         <h2 id="motorradName" class="widget-name"></h2>
-        <div class="widget-inhalt">
-          <div class="widget-text">
-            <div class="widget-werte" id="motorradWerte" hidden></div>
-            <!-- Der Knopf steht in der linken Spalte, nicht ueber die volle
-                 Breite: Sonst laege er auf dem Drehteller der Werkstatt. -->
-            <button class="btn ghost widget-knopf" id="btnMotorradBearbeiten">
-              <svg class="ic klein"><use href="#icon-stift"></use></svg> Bike bearbeiten
-            </button>
-          </div>
-          <div class="bike-buehne">
-            <!-- Die Werkstatt als Untergrund: derselbe Raum, in dem die
-                 Maschine bis zum 05.09.2026 auf einem Drehteller stand,
-                 jetzt als Bild statt als gerechnete Buehne. Er steht IN der
-                 Buehne und nicht daneben in der Karte - nur so liegen der
-                 Teller im Bild und die Maschine darauf uebereinander. Nach
-                 links laeuft er weich aus, damit die Werte lesbar bleiben. -->
-            <span class="bike-raum" aria-hidden="true"></span>
-            <img id="motorradBild" class="bike-bild" alt="">
-            <!-- Solange kein eigenes Foto da ist, steht dort das
-                 Standardmotorrad und darauf diese Tafel: Sucherwinkel,
-                 Kamerasymbol, und ein Abzeichen, das langsam auf die
-                 Maschine nickt. Ein Druck fuehrt geradewegs zur
-                 Fotoauswahl (garage.js). -->
-            <button type="button" class="buehne-hinweis" id="buehneHinweis" hidden>
-              <span class="hinweis-tafel">
-                <svg class="hinweis-winkel" viewBox="0 0 100 74" aria-hidden="true" preserveAspectRatio="none">
-                  <path d="M4 22V8a4 4 0 0 1 4-4h14M78 4h14a4 4 0 0 1 4 4v14M96 52v14a4 4 0 0 1-4 4H78M22 70H8a4 4 0 0 1-4-4V52"/>
-                </svg>
-                <svg class="ic hinweis-kamera"><use href="#icon-kamera"></use></svg>
-                <span class="hinweis-text">Dein Bike einf&uuml;gen</span>
-                <span class="hinweis-marke" aria-hidden="true">
-                  <svg viewBox="0 0 24 24"><path d="M5 9.5 12 16l7-6.5"/></svg>
-                </span>
+        <div class="widget-werte" id="motorradWerte" hidden></div>
+        <!-- Der Knopf steht in der linken Spalte: Sonst laege er auf dem
+             Drehteller der Werkstatt. -->
+        <button class="btn ghost widget-knopf" id="btnMotorradBearbeiten">
+          <svg class="ic klein"><use href="#icon-stift"></use></svg> Bike bearbeiten
+        </button>
+        <div class="bike-buehne">
+          <!-- Die Werkstatt als Untergrund: derselbe Raum, in dem die
+               Maschine bis zum 05.09.2026 auf einem Drehteller stand,
+               jetzt als Bild statt als gerechnete Buehne. Er steht IN der
+               Buehne und nicht daneben in der Karte - nur so liegen der
+               Teller im Bild und die Maschine darauf uebereinander. Nach
+               links laeuft er weich in die Werte aus. -->
+          <span class="bike-raum" aria-hidden="true"></span>
+          <img id="motorradBild" class="bike-bild" alt="">
+          <!-- Solange kein eigenes Foto da ist, steht dort das
+               Standardmotorrad und darueber diese Tafel: Sucherwinkel,
+               Kamerasymbol, und ein Abzeichen, das langsam auf die
+               Maschine nickt. Ein Druck fuehrt geradewegs zur
+               Fotoauswahl (garage.js). -->
+          <button type="button" class="buehne-hinweis" id="buehneHinweis" hidden>
+            <span class="hinweis-tafel">
+              <svg class="hinweis-winkel" viewBox="0 0 100 74" aria-hidden="true" preserveAspectRatio="none">
+                <path d="M4 22V8a4 4 0 0 1 4-4h14M78 4h14a4 4 0 0 1 4 4v14M96 52v14a4 4 0 0 1-4 4H78M22 70H8a4 4 0 0 1-4-4V52"/>
+              </svg>
+              <svg class="ic hinweis-kamera"><use href="#icon-kamera"></use></svg>
+              <span class="hinweis-text">Dein Bike einf&uuml;gen</span>
+              <span class="hinweis-marke" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M5 9.5 12 16l7-6.5"/></svg>
               </span>
-            </button>
-          </div>
+            </span>
+          </button>
         </div>
       </section>
 

@@ -228,30 +228,29 @@
      Seite auseinanderlaufen, und "Bike bearbeiten" ist ein Knopf, keine
      Leiste - er steht links unter den Werten wie auf dem Handy, nur ohne
      die volle Breite zu nehmen. */
-  .widget-inhalt {
-    /* Halbe und halbe statt einer festen Textspalte: Sonst wuchs allein die
-       Buehne mit der Kartenbreite, wurde immer flacher, und das Raumbild
-       verlor bei "cover" oben immer mehr - Ringlicht und Werkbank waren
-       weg, uebrig blieb der Teller. */
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    /* Oben statt unten: Auf dem Handy stehen die Werte buendig mit der
-       Maschine, hier ist die Buehne so hoch, dass zwischen Name und Werten
-       sonst eine Luecke klafft. */
-    align-items: start;
-  }
   .widget-knopf { width: auto; align-self: flex-start; padding-inline: var(--s5); font-size: 15px; }
   /* Die Buehne behaelt das Seitenverhaeltnis des Raumbildes (960 zu 860).
      Damit zeigt "cover" den Raum vollstaendig, egal wie breit die Karte
      wird - und die Werkstatt bleibt die Werkstatt statt eines Streifens
      Drehteller. */
-  .bike-buehne { aspect-ratio: 960 / 860; min-height: 0; }
+  /* Die Buehne behaelt das Seitenverhaeltnis des Raumbildes (960 zu 860)
+     und richtet sich oben aus statt sich zu strecken: Ist sie dadurch
+     hoeher als die linke Spalte, waechst die Karte mit - und "cover"
+     zeigt den Raum vollstaendig, egal wie breit die Karte wird. Auf dem
+     Handy gilt das nicht, dort ist die Buehne schmal und muss die volle
+     Hoehe der Karte fuellen (stretch). */
+  .bike-karte { grid-template-columns: minmax(0, 46%) minmax(0, 1fr); }
+  .bike-buehne { align-self: start; aspect-ratio: 960 / 860; min-height: 100%; }
   .bike-bild { max-height: none; }
+  /* Im Breiten ist die Maschine hoch und die Buehne fast quadratisch - die
+     Tafel rueckt nach oben, sonst laege sie auf dem Tank. */
+  .buehne-hinweis { top: 21%; }
 
   /* Das Kartenbild im Breiten: hoeher, damit es die Hoehe der Bike-Karte
      daneben mittraegt, und etwas mehr als die halbe Karte - die Zeilen
      daneben brauchen weniger Platz als die Werte des Bikes. */
   .reise-widget .widget-inhalt { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
-  .reise-bild { min-height: 300px; }
+  .reise-bild { min-height: 280px; }
   /* Der Knopf steht links unter den Zeilen, nicht ueber die ganze Spalte. */
   .reise-widget .widget-knopf { width: 100%; }
 

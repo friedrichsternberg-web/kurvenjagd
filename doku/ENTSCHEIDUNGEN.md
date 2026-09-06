@@ -3427,3 +3427,46 @@ Zusammenziehen einen Spalt aufblitzen.
 Punkten. Ursache: `.btn` trägt `flex: 1`, und in der Textspalte der
 Reisekarte streckte sich der Knopf dadurch über die ganze Resthöhe.
 `flex: 0 0 auto` auf `.widget-knopf`; jetzt 278 × 44.
+
+### Nachtrag, 07.09.2026: die Werkstatt ganz, die Karte eingefasst
+
+Friedrich: „das Werkstattbild war falsch … Im angehängten Bild 1 siehst du,
+wie es aktuell aussieht und im 2. Bild das Bild der Werkstatt. Ich habe dir
+alles genau beschrieben wie es aussehen soll. … Beim Reise-Widget ist wieder
+die Karte verschoben (sowohl im Hoch- als auch im Querformat)."
+
+**Zwei Fehler hatten den Raum verschluckt.** Erstens lag über seinem oberen
+Teil ein dunkler Verlauf (`--schatten-voll` bis 62 Prozent der Höhe), den
+ich gesetzt hatte, weil das Ringlicht „hinter dem Namen hing" — er nahm
+Ringlicht, Werkzeugwand und die halbe Werkbank mit, übrig blieb der Teller.
+Zweitens begann die Bühne erst unter dem Namen, der Raum also erst in der
+Kartenmitte; in der Vorlage reicht die Werkstatt von der Ober- bis zur
+Unterkante.
+
+Beides zusammen gelöst über den Aufbau der Karte: **Die Bike-Karte ist ein
+Raster aus zwei Spalten** — links Kopf, Name, Werte, Knopf in vier Zeilen,
+rechts die Bühne, die alle vier Zeilen spannt. Der Raum in ihr ragt um den
+Innenabstand über sie hinaus und erreicht damit die Kartenkanten. Der Name
+steht in der linken Spalte, nicht mehr über dem Raum — das Ringlicht stört
+also nichts, und der Schleier ist ersatzlos weg. Im Breiten hält die Bühne
+das Seitenverhältnis des Bildes (960:860) und richtet sich oben aus; ist sie
+dadurch höher als die linke Spalte, wächst die Karte mit. So zeigt `cover`
+den Raum vollständig, bei 672 wie bei 936 Punkten Kartenbreite nachgemessen.
+
+**Die Tellermitte** lag 8 Punkte daneben: Der Raum ragt links 44 und rechts
+16 Punkte über die Bühne, seine Mitte also 14 Punkte links der Bühnenmitte —
+ich hatte mit 22 gerechnet, als gäbe es nur den linken Überhang. Jetzt
+`calc(50% + 14px)`, Bild- und Bühnenmitte nachgemessen deckungsgleich.
+
+**Der Bikename war 28 statt 21 Punkte groß**, und das war zugleich der
+Grund für die zu große Lücke zu den Werten: Er ist eine `h2` in einem
+Listenbildschirm, und `.start-screen-inner h2` (28 Punkte, Abstand s4) wog
+schwerer als `.widget-name`. Jetzt `.karte .widget-name`.
+
+**Die Reisekarte** war randlos bis an die Kartenkante gezogen — dort lag sie
+um die Rahmenlinie der Karte versetzt, und ihre eckige Ecke unten links
+stritt mit der Kartenrundung. Das war meine Deutung von „alles ausfüllen";
+die Vorlage zeigt das Bild eingefasst. Also wieder Rand rundum, vier runde
+Ecken, und die Textspalte verteilt ihren Inhalt (`space-between`): Zeilen
+oben, Knopf unten, bündig mit dem Bild. Vorher stand der Knopf mitten in
+der Spalte, darunter Leere — auch das las sich als verschoben.
