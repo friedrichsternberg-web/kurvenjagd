@@ -121,40 +121,44 @@ function zeichneGarageReise() {
 
 function garageReiseHtml(reise) {
   const bilanz = reiseBilanz(reise);
+  // Das Kartenbild fuellt sein Fenster (4:3, links in der Karte): Das SVG
+  // aus reise.js traegt "slice" und schneidet den Rand an, statt zu schweben.
   const karte = reiseKartenSvg(reise, { marke: 12 });
   const zeitraum = reise.start
     ? datumKurz(tagesDatum(reise, 0)) + ' bis ' + datumKurz(tagesDatum(reise, bilanz.tage - 1))
     : '';
+  const zeile = (name, text) => `<span class="start-reise-zeile">${symbol(name, 'klein')} ${text}</span>`;
   return `
     <div class="garage-shop-kopf">
       <h3>${symbol('berg')} Deine n&auml;chste Reise</h3>
-      <button type="button" class="linkbtn" data-reise-neu>Neue Reise</button>
+      <button type="button" class="linkbtn" data-reise-neu>Neue Reise &rsaquo;</button>
     </div>
-    <button type="button" class="garage-reise-karte" data-reise-oeffnen="${escapeHtml(reise.id)}">
-      ${karte
-        ? `<span class="tour-vorschau" aria-hidden="true">${karte}<span class="vorschau-osm">&copy; OpenStreetMap</span></span>`
-        : reiseLeerBildHtml(bilanz.tage)}
-      <span class="garage-reise-zeile">
-        <span class="saved-text">
-          <span class="saved-name">${escapeHtml(reise.name)}</span>
-          <span class="saved-meta">${bilanz.tage} ${bilanz.tage === 1 ? 'Tag' : 'Tage'}
-            <i>&middot;</i> ${bilanz.km} km${bilanz.offen ? ` <i>&middot;</i> ${bilanz.offen} offen` : ''}${zeitraum ? ` <i>&middot;</i> ${zeitraum}` : ''}</span>
-        </span>
-        <span class="garage-reise-weiter">Weiterplanen &rarr;</span>
+    <button type="button" class="karte start-reise" data-reise-oeffnen="${escapeHtml(reise.id)}">
+      <span class="start-reise-bild" aria-hidden="true">${karte
+        ? `<span class="tour-vorschau">${karte}<span class="vorschau-osm">&copy; OpenStreetMap</span></span>`
+        : reiseLeerBildHtml(bilanz.tage)}</span>
+      <span class="start-reise-text">
+        <span class="start-reise-name">${escapeHtml(reise.name)}</span>
+        ${zeitraum ? zeile('kalender', escapeHtml(zeitraum)) : zeile('kalender', `${bilanz.tage} ${bilanz.tage === 1 ? 'Tag' : 'Tage'}`)}
+        ${zeile('route', `${bilanz.km} km`)}
+        ${zeile('berg', `${bilanz.tage} ${bilanz.tage === 1 ? 'Etappe' : 'Etappen'}${bilanz.offen ? `, ${bilanz.offen} offen` : ''}`)}
       </span>
+      <span class="start-reise-weiter btn ghost">Weiterplanen &rarr;</span>
     </button>`;
 }
 
 function garageReiseEinladungHtml() {
   return `
     <div class="garage-shop-kopf">
-      <h3>${symbol('berg')} Deine n&auml;chste gro&szlig;e Reise</h3>
+      <h3>${symbol('berg')} Deine n&auml;chste Reise</h3>
     </div>
-    <p class="hint garage-reise-satz">Mehrere Tage, eine Karte, jeder Tag eine Etappe.
-      Plan die ganze Reise hier &ndash; aus deinen Touren oder direkt auf der Karte.</p>
-    <button type="button" class="btn garage-reise-knopf" data-reise-neu>
-      ${symbol('plus', 'klein')} Reise planen
-    </button>`;
+    <div class="karte reise-einladung">
+      <p class="hint">Mehrere Tage, eine Karte, jeder Tag eine Etappe.
+        Plan die ganze Reise hier &ndash; aus deinen Touren oder direkt auf der Karte.</p>
+      <button type="button" class="btn" data-reise-neu>
+        ${symbol('plus', 'klein')} Reise planen
+      </button>
+    </div>`;
 }
 
 

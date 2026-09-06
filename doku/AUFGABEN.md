@@ -236,18 +236,12 @@ where has_function_privilege(r.rolname, p.oid, 'EXECUTE')
   Werkstattraum ein Schriftzug? Trägt die Beispielmaschine eine erkennbare
   Tankform? Auch zufällige Ähnlichkeit ist abmahnfähig, und die Haftung
   liegt beim Verwender, nicht beim Generator. Einmalig, halbe Stunde.
-- **Herkunft von `img/bike-standard.webp` klären — der wichtigste offene
-  Punkt der Rechtsprüfung.** Beim Ansehen der Bilder am 01.09.2026 ist
-  aufgefallen: Das ist **keine Fantasiemaschine**. Tankverkleidung,
-  Vierfach-Krümmer, Scheinwerferform und die blaue Lackierung ähneln sehr
-  deutlich einem real erhältlichen Modell (dem Augenschein nach die
-  Kawasaki-Z-Reihe). Fremde Schriftzüge sind keine darauf, aber zwei Fragen
-  bleiben: Woher stammt die Vorlage (ein Pressefoto wäre ein **echtes**
-  Urheberrecht, kein KI-Thema), und ist die Form nah genug an einem
-  eingetragenen Geschmacksmuster? Seit dem 01.09.2026 ist das Bild fest in
-  das Werkstattbild eingerechnet — es ist also sichtbarer geworden. Ausweg,
-  falls sich nichts klären lässt: eine eigene Fantasiemaschine erzeugen,
-  wie sie im Werkstattbild schon steht.
+- **Herkunft von `img/bike-standard.webp` — ERLEDIGT durch Löschen
+  (05.09.2026).** Die Beispielmaschine ähnelte einem realen Modell; seit
+  dem Umbau auf den Startbildschirm gibt es ohne eigenes Foto keine
+  Maschine mehr, die Datei ist aus dem Repository. Die Frage ist damit
+  erledigt, nicht beantwortet — wer sie je wieder zeigen will, muss sie
+  vorher klären.
 - **Herkunft von `hintergrund-weich.jpg` klären.** Dieselbe vage
   Formulierung („beziehungsweise von ihm geliefertes Bild"). Die
   Kachelbilder unter `img/kacheln/`, zu denen dieselbe Frage stand, sind

@@ -73,10 +73,16 @@
     flex: 0 0 auto;
     flex-direction: row;
     gap: var(--s2);
-    padding: 0 var(--s4);
+    /* s3 statt s4: Mit s4 stand die Leiste zwischen 1101 und 1140 Punkten
+       einen Punkt ueber und schob den Konto-Knopf an den Rand (gemessen
+       05.09.2026 bei 1104). */
+    padding: 0 var(--s3);
     height: 100%;
-    font-size: 16px;
-    letter-spacing: 0.06em;
+    /* Gemischte Schrift ohne Sperrung, wie unten: So passen Marke, fuenf
+       Eintraege und Konto auch zwischen 1100 und 1108 Punkten, wo
+       Versalien in Inter die Leiste sprengten (nachgerechnet 05.09.2026). */
+    font-size: 15px;
+    letter-spacing: 0;
   }
   .nav-tab .ic { width: 24px; height: 24px; }
 
@@ -102,8 +108,8 @@
     /* Kleiner als auf den grossen Bildschirmen, aber mit derselben weiten
        Laufweite - so bleibt die Zeile genauso breit wie der Schriftzug. */
     font-size: 10px;
-    letter-spacing: 0.19em;
-    text-indent: 0.19em;
+    letter-spacing: 0.12em;
+    text-indent: 0.12em;
   }
 
   /* Der rechte Bereich: schiebt sich selbst an den Rand. */
@@ -121,7 +127,7 @@
      breit, danach passt es mit Luft. */
   @media (max-width: 1100px) {
     .haupt-nav { padding-inline: var(--s4); gap: var(--s2); }
-    .nav-tab { padding: 0 var(--s3); font-size: 15px; }
+    .nav-tab { padding: 0 var(--s3); font-size: 14px; }
     .nav-marke { margin-right: var(--s4); }
     .nav-marke .wortmarke-bild { width: 118px; }
   }
@@ -135,7 +141,7 @@
      unwichtigste Zeile, ein fehlender Reiter dagegen ein fehlender Weg. */
   @media (max-width: 1000px) {
     .haupt-nav { padding-inline: var(--s3); }
-    .nav-tab { padding: 0 var(--s2); font-size: 14px; letter-spacing: 0.03em; }
+    .nav-tab { padding: 0 var(--s2); font-size: 13px; }
     .nav-tab .ic { width: 20px; height: 20px; }
     .nav-marke .wortmarke-sub { display: none; }
     .nav-marke .wortmarke-bild { width: 104px; }
@@ -166,73 +172,45 @@
      app.js der Seite die Klasse mit-nav, --nav-raum faellt auf 0, und
      damit verschwinden Marge und Hoehenabzug gemeinsam. */
   body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-top)); }
-  .start-screen, .app-layout, .ride-screen, .garage-screen {
+  .start-screen, .app-layout, .ride-screen {
     margin-top: var(--nav-raum);
   }
 
-  /* --- 3. Die Garage als Zweispalter ------------------------------------------
-     Im Hochformat stapelt sich alles untereinander und die Seite scrollt.
-     Im Querformat steht der Werkstattraum links und fuellt die Hoehe, rechts
-     laeuft eine Spalte mit Datenblatt, Shop und Menue - nur SIE scrollt,
-     der Raum steht.
+  /* --- 3. Der Start im Breiten ------------------------------------------------
+     Im Hochformat stapeln sich die Karten. Ab 1100 Punkten stehen sie in
+     zwei Spalten: links die Bike-Karte, die beim Scrollen stehen bleibt,
+     rechts der Stapel aus Reise, Merkliste, Vorschlaegen und Reifen.
+     Zwischen 900 und 1100 bleibt es eine Spalte in Lesebreite - zwei
+     Spalten mit je 430 Punkten truegen weder die Buehne noch das Regal.
 
-     WICHTIG, und das ist die eine eiserne Regel dieses Blocks: Zwischen
-     .garage-raum und .garage-buehne darf NIE ein positionierter Wrapper
-     oder ein transform dazukommen. Die Buehnenrechnung in garage.js misst
-     ueber die offsetParent-Kette, und ein Glied dazwischen wuerde die
-     Maschine neben den Teller stellen. Der Zweispalter braucht deshalb
-     keinerlei JavaScript: Raum und Inhaltsspalte sind im HTML schon
-     Geschwister, und der ResizeObserver auf dem Raum rechnet die Buehne
-     bei jeder Spaltenbreite von selbst neu. */
-  .garage-screen {
-    display: grid;
-    /* Halbe und halbe: Der Raum ist das Schaufenster und die Spalte das
-       Menue, keines ordnet sich dem anderen unter. Die gleiche Teilung ist
-       zugleich die bessere fuer das hochformatige Werkstattbild - je
-       schmaler der Raum, desto mehr Werkstatt zeigt derselbe Ausschnitt.
-       Was hier vorher stand und warum es gekippt wurde: ENTSCHEIDUNGEN.md,
-       26.08.2026. */
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr);
-    overflow: hidden;   /* das Scrollen uebernimmt die rechte Spalte */
+     Bis zum 05.09.2026 stand hier der Zweispalter des Werkstattraums
+     (Raum links in voller Hoehe, Spalte rechts), samt der Regel, dass
+     kein Wrapper zwischen Raum und Buehne treten darf - beides ging mit
+     dem Raum. Die 900er-Grenze dieser Datei bleibt trotzdem: Marke, fuenf
+     Reiter und Konto passen erst ab 900 in die Leiste (siehe Abschnitt 1). */
+  #garageScreen .start-screen-inner { max-width: var(--feed-max); }
+
+  @media (min-width: 1100px) {
+    #startInner {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      column-gap: var(--s6);
+      row-gap: var(--s5);
+      align-items: start;
+    }
+    #startInner .bike-karte {
+      grid-column: 1;
+      grid-row: 1 / span 12;
+      position: sticky;
+      top: calc(var(--nav-raum) + var(--s5));
+    }
+    #startInner .start-abschnitt,
+    #startInner .rechts-fuss { grid-column: 2; }
+    /* Auf der halben Seite darf die Maschine groesser sprechen. */
+    #startInner .bike-buehne { min-height: 260px; }
+    #startInner .bike-bild { max-height: 360px; }
+    #startInner .bike-name { font-size: 30px; }
   }
-
-  /* Der Raum fuellt die linke Spalte. Die Hochformat-Hoehenformel (64svh
-     usw.) rechnet mit dem FENSTER und wuerde hier einen falschen Ausschnitt
-     waehlen - die Spaltenhoehe ist die richtige Ansage. */
-  .garage-raum { height: 100%; }
-
-  /* Die rechte Spalte scrollt fuer sich. Der -20px-Ueberlapp des
-     Hochformats (die Platte schiebt sich dort unter den Raum) ergibt
-     nebeneinander keinen Sinn.
-
-     "safe center" heisst: Ist der Inhalt niedriger als die Spalte, steht
-     er mittig statt oben angeklebt - die halbe Bildschirmseite soll
-     gefuellt wirken, nicht wie eine Liste mit Leere darunter. Waechst der
-     Inhalt ueber die Spalte hinaus (Datenblatt samt Justierung), sorgt
-     das "safe" dafuer, dass oben nichts unerreichbar abgeschnitten wird,
-     sondern normal gescrollt werden kann. */
-  .garage-inhalt {
-    overflow-y: auto;
-    min-height: 0;
-    margin-top: 0;
-    /* Oben ausgerichtet, nicht zentriert: Die Leisten haengen unter dem
-       Datenblatt, und darunter darf die Spalte einfach enden. */
-    justify-content: flex-start;
-    gap: var(--s4);
-    padding: var(--s5) var(--s7);
-  }
-
-  /* Dieselbe Stufe fuer das Datenblatt, wenn ein eigenes Motorrad da ist:
-     Name und Werte duerfen auf der halben Seite groesser sprechen als auf
-     dem Handy. Die Werte-Regel traegt die id davor, und das ist kein
-     Schmuck: style.css setzt die Groesse als "#garageDatenblatt .stat .v",
-     und gegen eine id verliert jeder reine Klassen-Selektor - egal in
-     welcher Datei er steht. Ein nacktes ".stat .v" haette ausserdem die
-     Statistikbloecke von Ride und Planer mitvergroessert, die dieselbe
-     Klasse tragen. */
-  .motorrad-kopf h3 { font-size: 29px; }
-  #garageDatenblatt .stat .v { font-size: 24px; }
 
   /* --- 4. Listenbildschirme in Lesebreite -------------------------------------
      Touren (und spaeter Rechtliches, und der Shop, wenn er wiederkommt)
@@ -260,8 +238,7 @@
   .toast { top: calc(var(--nav-raum) + var(--s4)); }
 
   /* Der Zuschlag fuer die Geraete-Aussparung (Notch) steckt oben bereits
-     in der Leiste - Garagenkopf und Listeninhalt haetten ihn doppelt. */
-  .garage-kopf { padding-top: var(--s4); }
+     in der Leiste - der Listeninhalt haette ihn doppelt. */
   .listen-screen .start-screen-inner { padding-top: var(--s5); }
 
   /* --- 7. Touren und Stats im Breiten -----------------------------------------

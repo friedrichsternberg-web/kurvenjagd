@@ -3086,3 +3086,109 @@ liegt — vorher lässt er sich weder planen noch von Hand anstoßen. Das gilt
 unabhängig von den Secrets und war seit dem 04.09.2026 so, ohne dass es
 jemandem aufgefallen wäre. Mit dem nächsten Push erledigt es sich; danach
 einmal von Hand anstoßen und zusehen.
+
+---
+
+## 05.09.2026, nachts — Start statt Garage, Inter statt Barlow
+
+### Der Anlass, wörtlich
+
+„Die ‚Garage' als solches kommt weg. Stattdessen kommt wieder ‚Start' und
+wir bauen das Design um, mit dem Ziel, die Designsprache einer modernen App
+(iOS im Fokus) zu erhalten. Schriftart → wechsel auf INTER. Im Idealfall
+soll es so aussehen wie in dem angehängten Bild, nur mit noch mehr Liquid
+Glass und natürlich dem präsenten SERPA-Logo, dem eigenen Profil oben
+rechts. Auch darauf achten, dass die App als Webseite im Querformat top
+aussieht." Das Referenzbild: reines Schwarz, darauf eine Bike-Karte (Name,
+drei Werte mit Symbol, Foto rechts), eine Reisekarte, eine Merkliste.
+
+### Drei eigene Entscheidungen, die damit kippen
+
+1. **24.08.2026: „‚Start' wird es nicht mehr geben, Garage wird der neue
+   Start."** Der damalige Start fiel, weil er Menüpunkte der Leiste als
+   Kacheln doppelte und mit Foto-plus-Milchglas nach „austauschbarer App"
+   aussah. Der neue Start wiederholt das nicht: Er hat **nur
+   Inhaltskarten** (Bike, nächste Reise, Merkliste, Vorschläge, Reifen),
+   keine Karte führt in einen Bereich der Leiste. Die Regel vom 03.09.
+   („Die Leiste ist der eine Weg") bleibt.
+2. **26.08.2026: „halbe und halbe", der Raum als Schaufenster.** Der
+   Werkstattraum mit Drehteller ist gegangen, samt Bühnenrechnung (rund
+   830 Zeilen in garage.js: Räder finden, Teller, Lampen, Kontaktschatten,
+   Handjustierung), rund 660 Zeilen CSS, dem Zweispalter in quer.css,
+   beiden Raumbildern und `werkzeug-werkstatt.py`. Die Vorlage
+   `NEUE WERKSTATT V2.png` bleibt in `arbeitsmaterial/vorlagen/` liegen.
+   garage.js ist von 1567 auf 724 Zeilen gefallen und hält Regel 4 wieder.
+3. **Barlow „sieht nach Instrument aus" (18.08.2026).** Inter hat keine
+   Condensed-Breite; der Charakter kommt jetzt aus Gewicht, Tabellenziffern
+   und enger Sperrung bei Titeln.
+
+### Was gebaut wurde
+
+- **Der Start** ist ein Listenbildschirm (`start-screen listen-screen`,
+  id bleibt `garageScreen`), damit quer.css ihn wie Touren und Stats
+  behandelt. Kopf: Wortmarke 150 Punkte (vorher 104: „klein, damit sie
+  nicht mit ‚Meine Garage' streitet" – die Überschrift ist weg, das Logo
+  ist der Titel) und der Konto-Knopf, beide nur im Hochformat; im
+  Querformat trägt die Kopfleiste beides. Keine große Überschrift: Die
+  Leiste sagt „Start".
+- **Die Bike-Karte:** Abzeichen „Mein Bike", Name, links drei Zeilen
+  (Symbolkreis, Beschriftung, Wert), rechts die Bühne mit dem
+  freigestellten Foto, darunter „Bike bearbeiten" über die volle Breite.
+  Das Foto liegt ein zweites Mal unscharf hinter der ganzen Karte
+  (`--bike-bild`). Freigestellte Fotos haben viel leeren Rand – die Karte
+  beschneidet sie beim Laden einmal auf ihren Inhalt (`zugeschnitten()`,
+  gecacht). Der Kontaktschatten kommt aus `drop-shadow` auf der Silhouette
+  plus einer Ellipse als Boden, ohne Canvas.
+- **Ohne Foto gibt es keine Maschine mehr.** `bike-standard.webp` ist
+  gelöscht; damit ist die offene Herkunftsfrage aus der Rechtsprüfung vom
+  01.09. erledigt (nicht beantwortet). `bildAdresse()` liefert null, die
+  Karte zeigt den Knopf „Foto hinzufügen".
+- **Eine Kartenform** `.karte`: Füllung `--glas-hell` (10 %; die 5 % von
+  `--glas-hauch` sind auf Schwarz mit 1,08:1 unsichtbar), Filter und
+  Schatten als Marken `--glas-filter`/`--glas-schatten`, Lichtkante als
+  maskierter Saum. Abschnittstitel in EINER Form (17 px, gemischt) statt
+  drei Größen. Reisekarte: Bild links, Text rechts, Knopf unten.
+- **Querformat:** ab 1100 Punkten Zweispalter, Bike-Karte links
+  `sticky`, rechts der Stapel; zwischen 900 und 1100 eine Spalte in
+  Lesebreite. Die 900er-Grenze bleibt (Leiste).
+
+### Die Designsprache, neu gefasst
+
+Grundsatz 4 sagte „Glas über blankem Schwarz bleibt tot" – und das
+Referenzbild ist Schwarz. Lösung: `--start-licht`, der Lichtkegel, der
+seit dem 02.09. in vier Abschriften in style.css stand, ist jetzt EINE
+Marke, und Grundsatz 1 nennt „Glas einen Untergrund geben" als dritten
+erlaubten Zweck eines Verlaufs. Grundsatz 4 sagt jetzt, dass Inhaltskarten
+eine Form sind und unter jedem Bildschirm `--start-licht`, eine Karte, ein
+Foto oder das eigene Motorrad liegt. `--licht-warm` (der Leuchtsaum der
+Bühne) ist gestrichen, `--r-xl` 28 für die große Karte dazu.
+
+### Inter, in Zahlen
+
+Eine Datei `fonts/inter-4.1-variable-latin.woff2`, 100 KB (Barlow: fünf
+Dateien, 77 KB), aus dem Release-Zip von rsms/inter mit `pyftsubset` auf
+Latin beschnitten, beide Achsen (wght 100–900, opsz 14–32), alle
+OpenType-Features (tnum, case, …), Lizenz daneben. Version im Dateinamen,
+nicht als `?v=`, weil pruefe.sh `?v=` nur in index.html zählt.
+
+Inter-Versalien sind 30–50 % breiter als Barlow Condensed. Deshalb: Tabs
+gemischt 10,5 px ohne Sperrung („Meine Touren" → „Touren" in der Leiste,
+der Bildschirm heißt weiter so); „Ausrüstung" braucht auf 360 Punkten 59
+von 72 – passt. Kopfleiste im Querformat gemischt 15/14/13 px; mit s4
+Innenabstand stand sie zwischen 1101 und 1140 einen Punkt über, mit s3
+nicht. h2 der Listenbildschirme 28 px gemischt, –0.02em statt 26 px
+Versalien. Labels 0.06em statt 0.09, Wortmarken-Unterzeile 0.14 statt
+0.22em, Startfilm 0.2 statt 0.32em (in start.js mitgezogen). Der
+Reise-Bilanzstreifen darf umbrechen (nowrap wäre mit Inter 40 Punkte zu
+breit).
+
+### Zwei Fehler beim Bauen, für das nächste Mal
+
+- **Die Bike-Karte war ein 40 Punkte hoher Streifen.** Ein Flex-Kind mit
+  `overflow: hidden` darf unter seine Inhaltshöhe schrumpfen; `flex: 0 0
+  auto` für alle Karten des Starts behebt es.
+- **Namenskollision.** Das Karten-SVG aus reise.js trägt selbst die Klasse
+  `reise-karte`. Die neue Knopfklasse hieß erst genauso, und eine
+  Umbenennung per Regex erwischte auch die SVG-Regeln. Die Knopfklasse
+  heißt `start-reise`; vor dem Vergeben eines Klassennamens einmal
+  grep.

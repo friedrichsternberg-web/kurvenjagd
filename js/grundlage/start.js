@@ -277,7 +277,10 @@ function zeigeMarke(zeit) {
      Einzug mitlaufen - sonst wandert die Zeile aus der Mitte (dieselbe
      Ueberlegung wie bei .wortmarke-sub in style.css). */
   const sub = FILM.marke - 0.1;
-  const sperrung = bewege(zeit, sub, 1.0, 0.5, 0.32).toFixed(3);
+  // Endwert 0.2em - derselbe wie in .startfilm-sub in style.css; wer den
+  // einen aendert, zieht den anderen mit (Inter braucht weniger Sperrung
+  // als die alte Condensed, seit dem 05.09.2026).
+  const sperrung = bewege(zeit, sub, 1.0, 0.4, 0.2).toFixed(3);
   startfilmTeile.sub.style.opacity = bewege(zeit, sub, 0.55, 0, 1).toFixed(3);
   startfilmTeile.sub.style.letterSpacing = `${sperrung}em`;
   startfilmTeile.sub.style.textIndent = `${sperrung}em`;

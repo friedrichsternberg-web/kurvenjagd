@@ -72,9 +72,11 @@
   margin: 0 0 var(--s4);
   font-family: var(--schrift-display);
   font-weight: 700;
-  font-size: 26px;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
+  /* Der grosse Titel eines Bildschirms, wie iOS ihn setzt: gemischt,
+     eng gesperrt, 28 Punkte. Versalien waeren in Inter zu breit. */
+  font-size: 28px;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
   color: var(--metall-glanz);
 }
 /* --- Die Wortmarke ---------------------------------------------------------
@@ -107,10 +109,10 @@
   text-transform: uppercase;
   /* Weit gesperrt, damit die kurze Zeile die Breite des Schriftzugs
      aufnimmt statt darunter zu verschwinden. */
-  letter-spacing: 0.22em;
+  letter-spacing: 0.14em;
   /* Der Zeichenabstand haengt rechts am letzten Buchstaben und schoebe die
      Zeile sonst nach links aus der Mitte. */
-  text-indent: 0.22em;
+  text-indent: 0.14em;
   line-height: 1;
   color: var(--metall);
 }
@@ -173,8 +175,8 @@
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  text-indent: 0.12em;
+  letter-spacing: 0.08em;
+  text-indent: 0.08em;
   line-height: 1.5;
   white-space: nowrap;
 }
@@ -187,19 +189,9 @@
   gap: var(--s2);
 }
 
-/* Der Schriftzug ueber der Garagen-Ueberschrift, mit dem Abzeichen daneben.
-   Er steht NUR im Hochformat (siehe .nur-hoch), denn im Querformat traegt
-   die Kopfleiste beides schon.
-
-   Klein gehalten - 104 Punkte, gut ein Drittel der Anmeldegroesse: Der
-   Schriftzug soll die Seite als Serpa ausweisen, nicht mit "Meine Garage"
-   um die Aufmerksamkeit streiten. Das kostet den Raum darunter rund 20
-   Punkte Hoehe; die Buehne rechnet ihre Groesse ohnehin aus dem, was
-   uebrigbleibt (setzeBuehnenPlatz in garage.js). */
-.wortmarke-garage {
-  margin: 0 0 var(--s3);
-}
-.wortmarke-garage .wortmarke-bild { width: 104px; }
+/* Der Schriftzug im Kopf des Starts: Regeln beim Start-Block (.start-kopf),
+   Groesse dort begruendet. Er steht NUR im Hochformat (.nur-hoch), im
+   Querformat traegt die Kopfleiste ihn. */
 
 
 /* ---------- Der Startfilm ---------------------------------------------------
@@ -383,8 +375,8 @@
   font-weight: 600;
   text-transform: uppercase;
   line-height: 1;
-  letter-spacing: 0.32em;
-  text-indent: 0.32em;
+  letter-spacing: 0.2em;
+  text-indent: 0.2em;
   color: var(--metall);
   opacity: 0;
 }
@@ -523,10 +515,12 @@
   cursor: pointer;
   padding: 0;
   font-family: var(--schrift-display);
-  font-size: 11.5px;
+  /* Wie die Tab-Leiste von iOS: klein, gemischt, ohne Sperrung. Fuenf
+     Eintraege muessen auf 360 Punkte passen - "Ausrüstung" braucht so
+     rund 58 Punkte von 72. */
+  font-size: 10.5px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0;
   transition: color 0.15s ease, transform 0.15s cubic-bezier(0.2,0.8,0.2,1);
 }
 .nav-tab:active { transform: scale(0.92); }
@@ -1849,7 +1843,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   color: var(--muted);
 }
 .stat .v {
@@ -1951,7 +1945,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   text-transform: uppercase;
   letter-spacing: 0.06em; font-size: 15px; color: var(--muted); }
 .ride-status { text-align: center; margin: 0 0 12px; }
-/* Dieselbe Handschrift wie .garage-titel und die Ueberschriften der
+/* Dieselbe Handschrift wie .bike-name und die Ueberschriften der
    Startbildschirme: Anzeigeschrift, Versalien, Silberton. Nur kleiner - der
    Ride-Titel steht in einem Bedienfeld und nicht auf einer ganzen Seite. */
 .ride-titel {
@@ -2569,727 +2563,298 @@ body.nav-modus .leaflet-control-container { display: none; }
   body.nav-modus #panel { height: 0 !important; }
 }
 /* ============================================================================
-   Die Garage
+   DER START
+   Der erste Bildschirm: Wortmarke und Konto oben, darunter Inhaltskarten -
+   das eigene Bike, die naechste Reise, die Merkliste, Vorschlaege, Reifen.
+   Seit dem 05.09.2026; davor stand hier der Werkstattraum mit Drehteller
+   (rund 660 Zeilen Raum, Lampen, Buehne, Lauflicht, Hinweis-Tafel). Warum
+   er ging: ENTSCHEIDUNGEN.md zu diesem Datum.
 
-   Aufgebaut als RAUM: hinten die Wand mit der Hakenleiste, davor der Boden,
-   darauf steht die Maschine.
-
-   DREI REGELN, die hier zusammenwirken und die man nicht einzeln kippen darf:
-
-   1. DER RAUM HAT EINE FESTE HOEHE, die Seite darunter scrollt. Frueher
-      stand hier "ohne Scrollen": Der Raum bekam den Rest, den die Platten
-      uebrig liessen. Das raechte sich, sobald unten etwas dazukam - der
-      Raum wurde kleiner, das Raumbild bekam einen anderen Ausschnitt, und
-      die ganze Seite sah verschoben aus. Jetzt sagt
-      --garage-raum-hoehe die Hoehe an, und was darunter steht, kann
-      wachsen, ohne oben etwas zu verruecken.
-
-   2. LIQUID GLASS heisst Linse, nicht Schleier. Unter allem liegt dasselbe
-      weichgezeichnete Motorradfoto wie bei Konto und Touren. Wand und Boden
-      sind halbdurchsichtig darueber gelegt. Wuerde man sie deckend machen,
-      saehe es fast gleich aus, aber das Glas waere tot.
-
-   3. FARBE KOMMT AUS LICHT, nicht aus Flaechen. Die Garage hat drei
-      Lichtquellen: eine warme Lampe oben, einen kalten Schein von links und
-      einen Strahler hinter der Maschine. Farbige Flaechen waeren Deko,
-      farbiges Licht erklaert den Raum.
+   Der Bildschirm ist ein Listenbildschirm (.start-screen.listen-screen) und
+   erbt dessen Scrollen und Hoehe; hier stehen nur Untergrund, Kopf und die
+   Karten.
    ============================================================================ */
 
-.garage-screen {
-  /* WIE HOCH DER RAUM MIT DEM MOTORRAD IST - eine Ansage, kein Rest.
-
-     Das ist die wichtigste Zeile dieses Abschnitts: Haengt die Hoehe am
-     uebrigen Platz, verschiebt JEDES Element, das unten dazukommt, oben den
-     Bildausschnitt des Raumbildes. Die Seite sieht dann verschoben aus.
-
-     Die Formel liest sich von innen nach aussen: hoechstens 64 Prozent
-     der Bildschirmhoehe, aber nie breiter als 132 Prozent der Breite
-     (sonst wird der Raum auf einem kurzen, breiten Schirm zum Schlauch),
-     und nie unter 400 Punkten, sonst passt die Maschine nicht mehr drauf.
-     svh statt vh: Die kleine Fassung der Bildschirmhoehe aendert sich
-     NICHT, wenn die Adresszeile des Browsers ein- und ausfaehrt - mit vh
-     wuerde der Raum bei jedem Scrollen neu gerechnet. */
-  --garage-raum-hoehe: calc(max(min(64svh, 132vw), 400px) + env(safe-area-inset-top));
-
-  height: calc(100% - var(--nav-raum));
-  /* Die Seite SCROLLT. Frueher galt hier "alles muss auf eine Seite
-     passen"; seit die Garage der Startbildschirm ist, haengen unter dem
-     Raum der Shop und das Menue, und dafuer braucht es den Weg nach
-     unten. "contain" haelt das Wischen im Bildschirm, statt die Seite
-     dahinter mitzuziehen. */
-  overflow-y: auto;
-  overscroll-behavior-y: contain;
-  -webkit-overflow-scrolling: touch;
+/* Der Untergrund: Schwarz mit dem Lichtkegel aus design.css, damit die
+   Glaskanten etwas zu fangen haben (Grundsatz 1 und 4). */
+.start-seite { background: var(--start-licht), var(--bg); }
+.start-seite .start-screen-inner {
   display: flex;
   flex-direction: column;
-  /* Reines Schwarz statt des weichgezeichneten Fotos: Unter dem Raum haengen
-     Suchknopf und Kacheln, und die stehen ruhiger auf der Grundflaeche der
-     App als auf einem zweiten Bild. Den Uebergang macht die Blende unten
-     am Raum (.garage-raum). */
-  background: var(--bg);
+  gap: var(--s5);
+  width: 100%;
+  max-width: none;
+  padding-bottom: var(--s6);
 }
+/* Keine Karte darf schrumpfen. Ein Flex-Kind mit overflow: hidden (die
+   Bike-Karte, wegen des unscharfen Fotos dahinter) darf sonst unter seine
+   Inhaltshoehe fallen, sobald die Spalte voll ist - sie war beim ersten
+   Ansehen ein 40 Punkte hoher Streifen. */
+.start-seite .start-screen-inner > * { flex: 0 0 auto; }
 
-/* ---------- Der Raum ----------
-   Frueher standen hier zwei Farbverlaeufe fuer Wand und Boden und drei
-   gemalte Lichtflecken. Das ist alles raus: Der Raum IST jetzt ein Bild -
-   der gerenderte Werkstattraum mit dem Drehteller. Was frueher die Verlaeufe
-   andeuten mussten (Kante zwischen Wand und Boden, Lichter), bringt das
-   Bild selbst mit. */
-.garage-raum {
-  position: relative;
-  /* Feste Hoehe statt Restplatz - die Begruendung steht oben bei
-     --garage-raum-hoehe. position, overflow und die Flex-Spalte muessen
-     bleiben: An ihnen haengt die Rechnung in setzeBuehnenPlatz(). */
-  flex: 0 0 auto;
-  height: var(--garage-raum-hoehe);
+/* ---------- Der Kopf ----------
+   Wortmarke links, Konto rechts, wie die Navigationszeile einer iOS-App.
+   Keine zweite Ueberschrift: Die Leiste sagt "Start", das Logo ist der
+   Titel. Der Zuschlag fuer die Geraete-Aussparung (Notch) sitzt hier, weil
+   dieser Kopf im Hochformat die oberste Zeile ist. */
+.start-kopf {
   display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background: var(--bg);
-  /* Die Blende: Das Raumbild laeuft unten weich ins Schwarz der Seite aus,
-     statt an einer Kante zu enden. Eine Maske statt eines aufgelegten
-     Verlaufs, damit wirklich die Seite durchscheint - der Boden des Fotos
-     ist nicht schwarz, ein Verlauf darueber muesste seine Farbe raten.
-     Die letzten sechs Prozent sind ganz durchsichtig, die Maschine steht
-     hoeher und bleibt unangetastet. */
-  -webkit-mask-image: linear-gradient(to bottom, black 86%, transparent 100%);
-  mask-image: linear-gradient(to bottom, black 86%, transparent 100%);
-}
-
-/* Schicht 1: das Raumbild. Groesse und Lage rechnet zeichneBuehne() aus und
-   schreibt sie in die beiden Variablen - so landet der Drehteller auf jeder
-   Bildschirmgroesse an derselben Stelle relativ zur Maschine. Solange die
-   Rechnung noch nicht gelaufen ist, deckt "cover" den Raum ordentlich ab. */
-.buehne-platte {
-  position: absolute; inset: 0;
-  pointer-events: none;
-  /* Nur der Rueckfall fuers allererste Zeichnen - welches der beiden
-     Raumbilder wirklich gilt, setzt zeichneBuehne() in garage.js. */
-  background-image: url('../img/garage-werkstatt-standard.webp');
-  background-repeat: no-repeat;
-  background-size: var(--platte-groesse, cover);
-  background-position: var(--platte-lage, center 62%);
-}
-
-/* Schicht 6: die Dunstschicht. Oben dunkel fuer Ueberschrift und
-   Hakenleiste, unten laeuft das Bild in die Grundflaeche aus, damit an der
-   Glasplatte darunter keine harte Fotokante steht. */
-.buehne-dunst {
-  position: absolute; inset: 0;
-  pointer-events: none;
-  background:
-    linear-gradient(to bottom,
-      color-mix(in srgb, black calc(var(--dunst-oben, 0.86) * 100%), transparent) 0%,
-      color-mix(in srgb, black calc(var(--dunst-oben, 0.86) *  72%), transparent) 12%,
-      color-mix(in srgb, black calc(var(--dunst-oben, 0.86) *  34%), transparent) 24%,
-      transparent 38%),
-    linear-gradient(to top,    var(--schatten-voll) 0%, var(--schatten-weich) 9%,  transparent 20%);
-}
-
-/* ---------- Das Lampenflackern ----------
-   Ueber jeder Lampe des Raumbilds liegt ein dunkler Lichtfleck (angelegt
-   von garage.js, platziert von setzeBuehnenPlatz). "multiply" rechnet ihn
-   in das Bild darunter hinein: Statt einen grauen Klecks DARAUF zu legen,
-   nimmt er der Lampe anteilig ihr Licht - genau so sieht Dimmen aus.
-
-   Fast die ganze Zeit steht die Deckkraft auf null, die Flecken sind
-   unsichtbar und kosten nichts. Nur an wenigen Stellen des Durchlaufs
-   sacken sie fuer Sekundenbruchteile ab. Absichtlich selten und kurz -
-   die Garage soll leben, nicht blinken. */
-.buehne-lampen {
-  position: absolute; inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-.buehne-lampe {
-  position: absolute;
-  mix-blend-mode: multiply;
-  opacity: 0;
-  /* Takt und Startversatz setzt garage.js je Lampe, deshalb hier nur der
-     Name der Animation und ihre Gangart. "steps" gibt es nicht: Licht
-     bricht weich ein, nicht in Stufen. */
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-}
-/* Die Leuchtstoffroehre: laenglicher Fleck. Sein dunkelster Punkt liegt
-   bei 30 Prozent der Hoehe, nicht in der Mitte - unter der Roehre haengt
-   ihr Lichtschein an der Wand, und der soll mit abdunkeln. garage.js
-   setzt den Fleck deshalb so, dass die 30-Prozent-Marke AUF der Roehre
-   liegt (der "anker" in der GARAGEN-Liste). Vorher war der Fleck auf die
-   Roehre zentriert und sein Schwerpunkt hing sichtbar DARUEBER. */
-.lampe-roehre {
-  background: radial-gradient(ellipse 50% 42% at 50% 30%,
-    color-mix(in srgb, var(--raum-dunkel) 90%, transparent),
-    color-mix(in srgb, var(--raum-dunkel) 35%, transparent) 55%,
-    transparent 100%);
-  animation-name: lampe-stottern;
-}
-/* Die Haengelampen: runder Schein, dichter Kern, nach aussen weich. Zwei
-   Muster (a und b) mit Aussetzern an verschiedenen Stellen des Durchlaufs -
-   zusammen mit den verschiedenen Takten wirken die beiden Lampen dadurch
-   wirklich unabhaengig statt wie zwei Kopien derselben Stoerung. */
-.lampe-schirm, .lampe-schirm2 {
-  background: radial-gradient(closest-side,
-    color-mix(in srgb, var(--raum-dunkel) 92%, transparent),
-    color-mix(in srgb, var(--raum-dunkel) 40%, transparent) 45%,
-    transparent 88%);
-}
-.lampe-schirm  { animation-name: lampe-durchhaengen-a; }
-.lampe-schirm2 { animation-name: lampe-durchhaengen-b; }
-/* Der Leuchtstoff-Stotterer, gemaechlich: einmal absacken, kurz fangen,
-   tiefer absacken, langsam erholen - gut eine Sekunde. Spaeter im
-   Durchlauf noch ein einzelner weicher Schlag. Bei 19 Sekunden Laufzeit
-   ist ein Prozent 190 Millisekunden. */
-@keyframes lampe-stottern {
-  0%, 30%   { opacity: 0; }
-  31.5%     { opacity: 0.85; }
-  33%       { opacity: 0.3; }
-  34.5%     { opacity: 0.95; }
-  37%       { opacity: 0; }
-  63%       { opacity: 0; }
-  64.5%     { opacity: 0.6; }
-  67.5%     { opacity: 0; }
-  100%      { opacity: 0; }
-}
-/* Die Haengelampen stottern nicht, sie haengen durch wie bei einer
-   Spannungsschwankung: ein wackliger Durchhaenger von gut zwei Sekunden,
-   spaeter ein kurzer einzelner. Muster a und b unterscheiden sich in
-   Lage und Tiefe der Aussetzer. */
-@keyframes lampe-durchhaengen-a {
-  0%, 40% { opacity: 0; }
-  43%     { opacity: 0.8; }
-  45%     { opacity: 0.45; }
-  47.5%   { opacity: 0.75; }
-  51%     { opacity: 0; }
-  75%     { opacity: 0; }
-  76.5%   { opacity: 0.5; }
-  79%     { opacity: 0; }
-  100%    { opacity: 0; }
-}
-@keyframes lampe-durchhaengen-b {
-  0%, 22% { opacity: 0; }
-  24%     { opacity: 0.75; }
-  26%     { opacity: 0.35; }
-  27.5%   { opacity: 0.7; }
-  30%     { opacity: 0; }
-  58%     { opacity: 0; }
-  60%     { opacity: 0.55; }
-  63%     { opacity: 0; }
-  100%    { opacity: 0; }
-}
-
-.garage-raum > *:not(.buehne-platte):not(.buehne-lampen):not(.buehne-dunst) { position: relative; z-index: 1; }
-
-.garage-kopf {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: var(--s3);
-  padding: calc(var(--s4) + env(safe-area-inset-top)) var(--s4) 0;
+  padding-top: env(safe-area-inset-top);
+  margin-bottom: calc(-1 * var(--s2));
 }
-.garage-titel {
-  margin: 0;
-  font-family: var(--schrift-display);
-  font-weight: 700;
-  font-size: clamp(23px, 7vw, 32px);
-  line-height: 1;
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
-  color: var(--metall-glanz);
-  text-shadow: 0 2px 14px var(--schatten-tief);
-}
+.start-kopf .wortmarke-garage { margin: 0; }
+/* 150 Punkte: gut zwei Drittel der Anmeldegroesse (220). Die alte Regel
+   "klein, damit es nicht mit Meine Garage streitet" ist mit dieser
+   Ueberschrift gegangen - das Logo IST jetzt der Titel der Seite. */
+.wortmarke-garage .wortmarke-bild { width: 150px; }
 
-/* ---------- Die Buehne mit dem Motorrad ----------
+/* ---------- Die Karte ----------
+   EINE Scheibe fuer alle Karten des Starts, spaeter fuer alle Karten der
+   App. Das Rezept ist das der Planer-Wahlkarte (der juengsten Karte der
+   App), nur mit Marken statt Zahlen: Fuellung --glas-hell (10 Prozent -
+   die 5 Prozent von --glas-hauch sind auf Schwarz unsichtbar), Filter und
+   Schatten aus design.css, Lichtkante oben, dunkle Kante unten.
 
-   Die Maschine steht auf dem Drehteller des Raumbilds. Damit ein
-   freigestelltes Foto dort STEHT statt zu kleben, liegen fuenf Schichten
-   uebereinander, von unten nach oben:
-
-     .buehne-spiegel    die Spiegelung auf der Tellerflaeche
-     .buehne-schatten   die gestauchte Silhouette als weicher Grundschatten
-     .buehne-kontakt    harte, dunkle Aufsetzpunkte unter den Reifen,
-                        gezeichnet aus der Bodenlinie des Freistellers
-     .motorrad-bild     die Maschine selbst
-     .buehne-glut       das orange Licht des LED-Rings, das von unten an
-                        die Maschine schlaegt
-
-   Von den vieren um das Bild herum ist der Schatten der wichtigste: Ein
-   Motorrad ohne Schatten schwebt, und das sieht jeder sofort, ohne sagen zu
-   koennen warum.
-
-   WO und WIE GROSS der Stapel steht, setzt zeichneBuehne() in garage.js -
-   left, bottom und width kommen von dort, ausgerechnet aus der Lage des
-   Drehtellers im Bild. Deshalb steht hier keine Groesse. */
-.garage-buehne {
+   Die Karte hat GENAU EINEN backdrop-filter. Was in ihr liegt (Zeilen,
+   Symbolkreise, Knoepfe), bekommt Fuellung und Kante, aber keinen zweiten
+   Filter - der Browser rechnet jeden davon je Bild. */
+.karte {
   position: relative;
-  flex: 1;              /* bekommt allen Platz, der uebrigbleibt */
-  min-height: 0;
-}
-
-.motorrad-ansicht {
-  position: absolute;   /* left/bottom/width setzt zeichneBuehne() */
-  pointer-events: none;
-}
-
-/* Der Leuchtsaum: dieselbe Aufnahme noch einmal, deckungsgleich UNTER dem
-   Original. Ihre drop-shadows folgen der Silhouette des Fotos - und weil
-   das Original alles andere abdeckt, bleibt von dieser Kopie nur der
-   schmale orange Schein rund um die Kontur uebrig.
-
-   Warum drei Schatten: Der erste, enge, ist der eigentliche Farbstreifen.
-   Die beiden weiteren lassen ihn nach aussen weich auslaufen, sonst saehe
-   er aus wie ein aufgemalter Umriss. Nebenbei uebertuscht der Saum
-   ausgefranste Kanten des Freistellers - dunkler Fotorand auf orangem
-   Schein liest sich als Gegenlicht, nicht als Schnittfehler.
-
-   Das langsame Atmen macht ihn lebendig, ohne aufzufallen: acht Sekunden
-   je Zug, und nie ganz aus. */
-.buehne-rand {
-  position: absolute;
-  z-index: 2;
-  top: 0; left: 0;
-  width: 100%;
-  /* Drei Schatten, von innen nach aussen: ein haarfeiner, zum Weissen hin
-     aufgehellter Kern direkt an der Kante, eine dichte orange Lage, aussen
-     ein breiter, halbdurchsichtiger Schein. Der helle Kern ist der
-     Unterschied zwischen "Gegenlicht" und "orange angemalt", und dass der
-     Aussenschein DURCHSICHTIG ist statt einfach breit, haelt den Streifen
-     schlank - vier volle Lagen uebereinander wurden beim Ausprobieren
-     sofort zum Aufkleberrand.
-
-     Beide Zusatztoene sind per color-mix aus EINER Farbe abgeleitet, es
-     kommt also keine zweite ins Spiel. Die erste filter-Zeile ist der
-     Rueckfall fuer Browser ohne color-mix - dann eben ohne gluehenden
-     Kern, aber nie ganz ohne Saum.
-
-     Diese Farbe ist --licht-warm und NICHT die Signalfarbe der App: Der
-     Saum ist Licht des Raumes, keine Marke. Als die Signalfarbe auf
-     RAL 5005 wechselte, wurde der Saum blau auf blauem Raum und die
-     Maschine verschwand darin - seitdem haengt er an einer eigenen Marke. */
-  filter: drop-shadow(0 0 1px var(--licht-warm))
-          drop-shadow(0 0 2px var(--licht-warm))
-          drop-shadow(0 0 9px var(--licht-warm));
-  filter: drop-shadow(0 0 1px color-mix(in srgb, var(--licht-warm) 60%, white))
-          drop-shadow(0 0 2px var(--licht-warm))
-          drop-shadow(0 0 13px color-mix(in srgb, var(--licht-warm) 40%, transparent));
-  /* Wie stark der Saum ueberhaupt zu sehen ist, sagt die Garage: Im hellen
-     Raum ist er Gegenlicht, im dunklen wuerde derselbe Saum zum
-     Heiligenschein. Der Faktor kommt aus der GARAGEN-Liste. */
-  animation: rand-atmen 8s ease-in-out infinite;
-}
-@keyframes rand-atmen {
-  0%, 100% { opacity: calc(var(--saum-staerke, 1) * 0.6); }
-  50%      { opacity: calc(var(--saum-staerke, 1) * 0.85); }
-}
-
-/* Die weisse Kantenlinie: eine duenne, STAENDIG sichtbare Linie direkt an
-   der Kontur - sie atmet nicht mit, das ist Absicht: Das Orange dahinter
-   lebt, die Linie steht. Drei gleiche drop-shadows uebereinander
-   verdichten die Linie zu voller Staerke, ohne sie zu verbreitern; mit
-   zweien blieb sie an hellen Bildstellen zu blass. Das Weiss ist das
-   Textweiss der Designsprache, kein reines Weiss.
-
-   Der vierte Schatten ist der HELLE SCHEIN: ein breites, halbdurchsichtiges
-   Aufhellen rund um die Linie, ebenfalls staendig da. Er liegt auf
-   derselben Schicht wie die Linie, damit beide zusammen stehen - Kante,
-   heller Saum, und erst dahinter das atmende Orange. Halbdurchsichtig per
-   color-mix, sonst wuerde der Schein zur dicken weissen Wolke; die erste
-   filter-Zeile ist der Rueckfall fuer Browser ohne color-mix. */
-.buehne-kante-linie {
-  position: absolute;
-  z-index: 2;
-  top: 0; left: 0;
-  width: 100%;
-  filter: drop-shadow(0 0 1px var(--text))
-          drop-shadow(0 0 1px var(--text))
-          drop-shadow(0 0 1px var(--text));
-  filter: drop-shadow(0 0 1px var(--text))
-          drop-shadow(0 0 1px var(--text))
-          drop-shadow(0 0 1px var(--text))
-          drop-shadow(0 0 7px color-mix(in srgb, var(--text) 55%, transparent));
-  /* Dieselbe Staerke wie beim orangen Saum, aus demselben Grund: Auf
-     dunklem Grund traegt schon eine viel duennere Linie. */
-  opacity: var(--saum-staerke, 1);
-}
-
-/* ---------- Das Lauflicht ----------
-   Ein kleiner weisser Streifen, der pausenlos im Uhrzeigersinn an der
-   Aussenlinie der Maschine entlangwandert.
-
-   Wie das ohne Wegberechnung geht: Das Bild in der Huelle traegt weisse
-   drop-shadows, also einen Leuchtrand um die ganze Silhouette. Die HUELLE
-   traegt eine Maske in Form eines Tortenstuecks - nur ein schmales
-   Winkelfenster mit weichem Schweif ist durchlaessig - und dreht sich.
-   Das Bild darin dreht exakt gegenlaeufig (gleiche Dauer, gleiche
-   Gangart) und steht deshalb still. Es wandert also nur das Fenster im
-   Kreis, und sichtbar ist immer genau das Stueck Leuchtrand, das gerade
-   darin liegt: ein Lichtpunkt, der der Kontur folgt.
-
-   Die Huelle ist um den Schattenweg groesser als das Bild (inset -24px
-   gegen die Buehne, das Bild sitzt 24px eingerueckt), denn die Maske
-   schneidet an der Huellenkante ab - saesse sie knapp, waere der
-   Leuchtrand oben und unten gekappt. */
-.buehne-lauf {
-  position: absolute;
-  z-index: 2;
-  inset: -24px;
-  pointer-events: none;
-  animation: lauf-drehen 8.4s linear infinite;
-  -webkit-mask-image: conic-gradient(from 0deg,
-    transparent 0deg 295deg,
-    color-mix(in srgb, black 25%, transparent) 322deg,
-    color-mix(in srgb, black 70%, transparent) 344deg,
-    black 353deg,
-    black 358deg,
-    transparent 360deg);
-          mask-image: conic-gradient(from 0deg,
-    transparent 0deg 295deg,
-    color-mix(in srgb, black 25%, transparent) 322deg,
-    color-mix(in srgb, black 70%, transparent) 344deg,
-    black 353deg,
-    black 358deg,
-    transparent 360deg);
-}
-.buehne-lauf > img {
-  position: absolute;
-  top: 24px; left: 24px;
-  width: calc(100% - 48px);
-  animation: lauf-gegendrehen 8.4s linear infinite;
-  /* Der Leuchtrand des Laeufers: genauso SCHMAL wie die stehende
-     Kantenlinie, nur dichter. Er soll exakt AUF der Linie entlanglaufen,
-     nicht als Wolke darum herum - deshalb kein breiter Schein hier. Wo
-     der Laeufer vorbeikommt, verdoppelt sich die Dichte der Linie, und
-     genau das ist der sichtbare Lichtpunkt. */
-  filter: drop-shadow(0 0 1px var(--text))
-          drop-shadow(0 0 1px var(--text))
-          drop-shadow(0 0 2px var(--text));
-}
-@keyframes lauf-drehen       { to { transform: rotate(360deg); } }
-@keyframes lauf-gegendrehen  { to { transform: rotate(-360deg); } }
-
-.motorrad-bild {
-  position: relative;
-  z-index: 3;
-  display: block;
-  width: 100%;
-  -webkit-user-drag: none;
-  /* Leicht abgedunkelt und entsaettigt: Das Foto entstand bei Tageslicht,
-     der Raum ist eine dunkle Werkstatt. Ohne den Angleich wirkt die
-     Maschine wie ein Aufkleber - zu hell fuer ihre Umgebung. Der Wert
-     kommt je Garage aus der GARAGEN-Liste. */
-  filter: brightness(var(--buehne-helligkeit, 0.9)) saturate(0.95) contrast(1.04);
-}
-
-/* Die Spiegelung: dasselbe Bild kopfueber unter dem Aufsetzpunkt, nach
-   unten schnell auslaufend und leicht verwaschen - eine polierte
-   Metallflaeche spiegelt weich, nicht wie ein Badezimmerspiegel.
-
-   Das ersetzt das fruehere -webkit-box-reflect: Das spiegelte die ganze
-   Schicht mitsamt Schatten und fehlte in Firefox. Der alte Einwand gegen
-   ein zweites <img> (verschiedene Massstaebe durch contain/cover) gilt
-   nicht mehr, seit beide Bilder dieselbe ausgerechnete Breite haben.
-
-   Der clip-path begrenzt die Spiegelung auf die Ellipse der Tellerflaeche,
-   sonst laeuft sie ueber den Podestrand auf den Betonboden - Werte von
-   zeichneBuehne(). */
-.buehne-spiegel {
-  position: absolute;
-  z-index: 1;
-  top: var(--spiegel-oben, 100%);
-  left: 0;
-  width: 100%;
-  transform: scaleY(-1);
-  opacity: 0.30;
-  filter: blur(2px) brightness(0.75) saturate(0.8);
-  -webkit-mask-image: linear-gradient(to bottom, color-mix(in srgb, black 90%, transparent) 0%, color-mix(in srgb, black 25%, transparent) 22%, transparent 46%);
-          mask-image: linear-gradient(to bottom, color-mix(in srgb, black 90%, transparent) 0%, color-mix(in srgb, black 25%, transparent) 22%, transparent 46%);
-  clip-path: ellipse(var(--teller-rx, 60%) var(--teller-ry, 26px) at 50% 0);
-}
-
-/* Der Grundschatten: die Silhouette der Maschine, am Boden auf ein Sechstel
-   gestaucht, geschwaerzt und verwaschen. Weil er aus dem Bild selbst
-   entsteht, folgt er jeder Maschine von allein - laenger unter einem
-   Tourer, kuerzer unter einer Supermoto. */
-.buehne-schatten {
-  position: absolute;
-  z-index: 2;
-  bottom: var(--schatten-unten, 0px);
-  left: 0;
-  width: 100%;
-  transform: scaleY(0.16);
-  transform-origin: bottom;
-  filter: brightness(0) blur(10px);
-  opacity: var(--schatten-staerke, 0.62);
-}
-
-/* Die Aufsetzpunkte: dort, wo die Bodenlinie am tiefsten ist - unter den
-   Reifen - wird der Schatten hart und fast schwarz. zeichneBuehne() malt
-   sie in diese Leinwand. Ohne Bodenlinie (Standardbild, alte Eintraege)
-   bleibt die Leinwand leer und der Grundschatten allein. */
-.buehne-kontakt {
-  position: absolute;
-  z-index: 2;
-  /* bottom, left und width setzt setzeBuehnenPlatz() - der Kontaktschatten
-     gehoert unter die RAEDER, nicht unter die Bildkante. */
-  height: 5%;
-  filter: blur(3px);
-}
-
-/* Die Glut: das orange Licht des LED-Rings von unten. Eine eingefaerbte
-   Kopie der Maschine, auf das untere Viertel maskiert und aufhellend
-   daruebergelegt. Bewusst schwach - uebertrieben saehe es aus wie ein
-   Aufkleber mit Leuchtrand. */
-.buehne-glut {
-  position: absolute;
-  z-index: 4;
-  top: 0;
-  left: 0;
-  width: 100%;
-  opacity: var(--glut-staerke, 0.4);
-  filter: sepia(1) saturate(5) hue-rotate(-18deg) brightness(1.35) blur(1px);
-  mix-blend-mode: screen;
-  /* Der Verlauf beginnt an der BODENLINIE der Maschine, nicht an der
-     Bildkante - sonst leuchtet der leere Rand statt der Reifen. */
-  -webkit-mask-image: linear-gradient(to top, transparent var(--glut-kante, 0%), color-mix(in srgb, black 95%, transparent) var(--glut-kante, 0%), color-mix(in srgb, black 30%, transparent) calc(var(--glut-kante, 0%) + 14%), transparent calc(var(--glut-kante, 0%) + 30%));
-          mask-image: linear-gradient(to top, transparent var(--glut-kante, 0%), color-mix(in srgb, black 95%, transparent) var(--glut-kante, 0%), color-mix(in srgb, black 30%, transparent) calc(var(--glut-kante, 0%) + 14%), transparent calc(var(--glut-kante, 0%) + 30%));
-}
-
-/* ---------- Der Hinweis "Dein Bike einfuegen" ----------
-   Er erscheint nur, solange kein eigenes Foto da ist. Dann steht im Raum
-   eine Beispielmaschine, die zum Bild gehoert - der Hinweis sagt, dass das
-   nicht die eigene ist und wie man das aendert.
-
-   Gestaltet als Tafel an der Werkstattwand, nicht als Bedienelement der
-   App: Sucherwinkel statt Rahmen, Glas statt Flaeche. Lage und Groesse
-   rechnet setzeBuehnenPlatz() aus, damit die Tafel ueber dem Drehteller
-   sitzt und der Pfeil auf die Maschine zeigt. */
-.buehne-hinweis {
-  position: absolute;       /* left, bottom und width setzt garage.js */
-  z-index: 5;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--text);
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  animation: hinweis-auftauchen 0.5s ease-out both;
-}
-
-@keyframes hinweis-auftauchen {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: none; }
-}
-
-.hinweis-tafel {
-  position: relative;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  /* Unten mehr Luft als oben: Dort haengt das Abzeichen halb in der Kante,
-     und ohne diesen Abstand draengt es sich an die Schrift. */
-  padding: 26px 30px 34px;
-  border-radius: var(--r-lg);
-  /* Glas ueber dem Raumbild: Die Werkstatt bleibt dahinter erkennbar, der
-     Text wird trotzdem lesbar. Genau der Fall, fuer den die Designsprache
-     Glas vorsieht - eine Linse ueber etwas Echtem.
-
-     DUNKEL getoent, nicht hell: Dahinter liegt eine helle Werkstatt mit
-     einer Werkzeugwand voller Kleinteile. Auf hellem Glas haette weisse
-     Schrift dort keine Chance. */
-  background: linear-gradient(var(--schatten-mittel), var(--schatten-weich));
-  -webkit-backdrop-filter: blur(16px) saturate(1.05);
-          backdrop-filter: blur(16px) saturate(1.05);
-  box-shadow:
-    inset 0 1px 0 var(--glas-licht),
-    inset 0 -1px 0 var(--schatten-hauch),
-    0 12px 34px var(--schatten-weich);
-  /* Fuer das Nachgeben beim Antippen weiter unten
-     (.buehne-hinweis:active .hinweis-tafel). */
-  transition: transform 0.12s ease-out;
-}
-
-/* Die vier Sucherwinkel in den Ecken. Sie sagen "hier kommt ein Bild hin",
-   ohne dass ein Wort dafuer noetig waere. preserveAspectRatio="none" laesst
-   sie mit der Tafel mitwachsen; die Ecken bleiben trotzdem rechtwinklig,
-   weil sie kurz sind. */
-.hinweis-winkel {
-  position: absolute;
-  inset: 7px;
-  width: calc(100% - 14px);
-  height: calc(100% - 14px);
-  fill: none;
-  stroke: color-mix(in srgb, white 85%, transparent);
-  stroke-width: 2.2;
-  stroke-linecap: round;
-  vector-effect: non-scaling-stroke;
-}
-
-.hinweis-kamera {
-  width: 34px; height: 34px;
-  stroke-width: 1.3;
-  color: color-mix(in srgb, white 92%, transparent);
-}
-
-.hinweis-text {
-  font-family: var(--schrift-display);
-  font-weight: 600;
-  font-size: 16px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, white 95%, transparent);
-  text-shadow: 0 1px 10px var(--schatten-mittel);
-}
-
-/* Der Zeiger nach unten.
-
-   HIER STAND VORHER ein geschwungener, gestrichelter Pfeil in Weiss. Er war
-   auf dem hellen, unruhigen Werkstattbild kaum zu sehen und wirkte wie ein
-   Fremdkoerper - ein duenner Strich, der neben der Tafel schwebte.
-
-   Der Ersatz macht drei Dinge anders:
-
-     Er HAENGT an der Tafel, halb in ihre Unterkante eingesenkt, statt
-     daneben zu schweben. Dadurch liest er sich als Teil davon.
-
-     Er traegt die SIGNALFARBE, und zwar deren hellen Ton. Weiss geht auf
-     diesem Bild unter, weil es selbst voller Weiss ist - und RAL 5005 in
-     seiner vollen Tiefe geht auf der grau-blauen Werkstattwand ebenso
-     unter. Der helle Ton ist derselbe Farbton, nur so weit aufgehellt,
-     dass er sich von der Wand loest.
-
-     Er ist eine FLAECHE mit Schatten, kein Strich. Eine Scheibe von 36
-     Punkten setzt sich gegen jeden Untergrund durch, ein 2,6 Punkte breiter
-     Strich nicht. */
-.hinweis-marke {
-  position: absolute;
-  left: 50%;
-  bottom: -18px;
-  width: 36px; height: 36px;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: var(--accent-hell);
-  box-shadow:
-    0 6px 16px var(--schatten-mittel),
-    0 0 0 4px var(--schatten-weich);
-  animation: marke-nicken 1.9s ease-in-out infinite;
-}
-.hinweis-marke svg {
-  width: 22px; height: 22px;
-  fill: none;
-  stroke: var(--accent-ink);
-  stroke-width: 2.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-/* Das Nicken ist der zweite Grund, warum der Zeiger auffaellt: Bewegung
-   sieht das Auge noch am Rand des Blickfelds, Farbe erst beim Hinsehen.
-   Bewusst langsam und klein - ein huepfendes Element waere Reklame. */
-@keyframes marke-nicken {
-  0%, 62%, 100% { transform: translateX(-50%) translateY(0); }
-  78%           { transform: translateX(-50%) translateY(5px); }
-}
-
-/* Beim Antippen gibt die Tafel spuerbar nach - dieselbe Sprache wie bei den
-   uebrigen Glasflaechen der App. Die dazugehoerige Uebergangsdauer steht
-   oben im Block von .hinweis-tafel. */
-.buehne-hinweis:active .hinweis-tafel { transform: scale(0.97); }
-
-@media (prefers-reduced-motion: reduce) {
-  .buehne-hinweis, .hinweis-marke { animation: none; }
-  /* Der Leuchtsaum bleibt stehen, nur sein Atmen entfaellt; das
-     Lampenflackern entfaellt ganz. */
-  .buehne-rand  { animation: none; opacity: 0.75; }
-  .buehne-lampe { animation: none; opacity: 0; }
-  /* Ohne Drehung staende vom Lauflicht nur ein einzelnes Segment fest im
-     Bild - das saehe kaputt aus, also faellt es ganz weg. Kantenlinie
-     und heller Schein stehen ohnehin. */
-  .buehne-lauf  { display: none; }
-}
-
-/* Die Ausgaben neben den Justier-Reglern brauchen etwas mehr Platz als die
-   im Freisteller, sonst bricht "100 %" auf zwei Zeilen um. */
-#buehneJustierung output { min-width: 46px; white-space: nowrap; }
-
-/* Die Justier-Knoepfe unter den drei Reglern. */
-.justierung-knoepfe {
-  display: flex;
-  gap: var(--s3);
-  margin-top: var(--s2);
-}
-.justierung-knoepfe .btn.klein { padding: 10px 14px; font-size: 14px; }
-
-/* ---------- Das Datenblatt unter dem Raum ---------- */
-.garage-inhalt {
-  flex: 0 0 auto;
-  position: relative;
-  z-index: 2;
-  margin-top: -20px;    /* schiebt sich unter den Raum, weicher Uebergang */
-  padding: 0 var(--s4) var(--s4);
-  /* Eine Spalte mit Luft dazwischen. Ohne den Abstand stossen Datenblatt
-     und Shop-Leiste aneinander und ihre beiden grossen Radien verschmelzen
-     zu einer liegenden Acht. */
-  display: flex;
-  flex-direction: column;
-  gap: var(--s3);
-}
-
-.garage-platte {
   padding: var(--s4);
   border-radius: var(--r-lg);
-  background: var(--glas-hauch);
-  backdrop-filter: blur(22px) saturate(160%);
-  -webkit-backdrop-filter: blur(22px) saturate(160%);
-  border: 1px solid var(--glas-hell);
+  color: var(--text);
+  background: var(--glas-hell);
+  backdrop-filter: var(--glas-filter);
+  -webkit-backdrop-filter: var(--glas-filter);
+  border: 1px solid var(--glas-rand);
   box-shadow:
     inset 0 1px 0 var(--glas-heller),
     inset 0 -1px 0 var(--schatten-hauch),
-    0 12px 34px var(--schatten-mittel);
+    var(--glas-schatten);
+}
+/* Die Lichtkante als Saum, der nach unten auslaeuft - das, was eine
+   Scheibe von einem Kasten unterscheidet. Ein Verlauf, aber einer, der
+   einer Glaskante ihr Licht gibt (Grundsatz 1, dritter Fall): Er liegt als
+   eigene Schicht auf dem Rand und ist ueber eine Maske auf den Rand
+   beschraenkt. */
+.karte::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(to bottom, var(--glas-licht), transparent 60%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+button.karte {
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition: transform 0.15s cubic-bezier(0.2,0.8,0.2,1), background 0.15s ease;
+}
+button.karte:hover { background: var(--glas-rand); }
+button.karte:active { transform: scale(0.985); }
+
+/* Das Abzeichen oben in einer Karte ("Mein Bike"): eine Pille in der
+   Signalfarbe, gedaempft - sie beschriftet, sie ist kein Knopf. */
+.abzeichen {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px var(--s2);
+  border-radius: var(--r-pill);
+  font-family: var(--schrift-display);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  line-height: 1.3;
+  color: var(--accent-hell);
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-hell) 35%, transparent);
 }
 
-.garage-leer { display: flex; flex-direction: column; gap: var(--s3); }
-.garage-leer .hint { margin: 0; }
-
-.motorrad-umschalter { margin-bottom: var(--s3); }
-
-.motorrad-kopf {
+/* ---------- Die Bike-Karte ---------- */
+.bike-karte {
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  isolation: isolate;
+}
+/* Das eigene Foto ein zweites Mal, unscharf, hinter der ganzen Karte. Nach
+   unten laeuft es ins Glas aus, damit die Werte darauf lesbar bleiben. */
+.bike-karte.mit-bild::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  z-index: -1;
+  background: var(--bike-bild) center / cover no-repeat;
+  filter: blur(34px) saturate(120%);
+  opacity: 0.45;
+  -webkit-mask-image: linear-gradient(to bottom, black 20%, transparent 95%);
+  mask-image: linear-gradient(to bottom, black 20%, transparent 95%);
+  pointer-events: none;
+}
+.bike-kopf {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--s3);
+  align-items: center;
+  gap: var(--s2);
   margin-bottom: var(--s3);
 }
-.motorrad-kopf-text { min-width: 0; }
-.motorrad-kopf h3 {
-  margin: 0;
+.bike-kopf .motorrad-umschalter { margin-left: auto; }
+.bike-kopf .glas-rund.klein { margin-left: auto; }
+/* :not([hidden]) ist noetig: Der Umschalter steht auch bei einer Maschine
+   im HTML, nur versteckt - und "+" sieht ihn trotzdem. */
+.bike-kopf .motorrad-umschalter:not([hidden]) + .glas-rund.klein { margin-left: 0; }
+.bike-name {
+  margin: 0 0 var(--s3);
   font-family: var(--schrift-display);
+  font-size: 24px;
   font-weight: 700;
-  font-size: clamp(19px, 5.6vw, 25px);
-  line-height: 1.1;
-  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--metall-glanz);
+  overflow-wrap: anywhere;
 }
-.motorrad-kopf .sub { margin-top: 2px; }
+/* Links die Werte und der Knopf, rechts die Buehne mit dem Foto. 46 zu 54:
+   Die Werte-Zeilen brauchen in Inter rund 140 Punkte ("1.084 cm³" bei 17
+   Punkten), die Maschine bekommt den Rest. */
+.bike-inhalt {
+  display: grid;
+  grid-template-columns: minmax(0, 46%) minmax(0, 1fr);
+  gap: var(--s3);
+  align-items: end;
+}
+.bike-text { display: flex; flex-direction: column; min-width: 0; }
+.bike-knopf { margin-top: var(--s3); width: 100%; }
+.bike-werte { display: flex; flex-direction: column; }
+.bike-wert {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s2) 0;
+  border-bottom: 1px solid var(--glas-hauch);
+}
+.bike-wert:last-child { border-bottom: 0; }
+/* Der Symbolkreis: Fuellung und Kante, kein eigener Filter (siehe .karte). */
+.bike-wert-symbol {
+  flex: 0 0 auto;
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: var(--glas-hauch);
+  border: 1px solid var(--glas-rand);
+  box-shadow: inset 0 1px 0 var(--glas-hell);
+  color: var(--metall);
+}
+.bike-wert-symbol .ic { width: 18px; height: 18px; }
+.bike-wert-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.bike-wert .wert { font-size: 17px; line-height: 1.25; color: var(--text); white-space: nowrap; }
 
-/* Kleinere Fassung des runden Glasknopfs, fuer Stift und Schliessen. */
-.glas-rund.klein { width: 36px; height: 36px; font-size: 20px; line-height: 1; }
+/* Die Buehne: unten die Maschine, darunter ein weicher Schatten als Boden.
+   Der Schatten folgt ueber drop-shadow der Silhouette des freigestellten
+   Fotos und legt sich damit unter die Raeder - das ist der Kontaktschatten,
+   der die Maschine vom "Schweben" befreit, ohne Zeichenflaeche. */
+.bike-buehne {
+  position: relative;
+  min-height: 176px;
+  align-self: stretch;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.bike-buehne::before {
+  content: "";
+  position: absolute;
+  left: 6%; right: 6%; bottom: 2px;
+  height: 14%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, var(--schatten-stark), transparent 72%);
+}
+.bike-bild {
+  position: relative;
+  width: 100%;
+  height: auto;
+  max-height: 260px;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 10px 8px var(--schatten-mittel));
+}
+.bike-foto-knopf { margin: auto; }
+.bike-leer { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s3); }
+.bike-leer .abzeichen { margin-bottom: 0; }
+.bike-leer .bike-name { margin: 0; }
+.bike-leer .hint { margin: 0; }
+.bike-leer .btn { width: auto; }
 
-/* Drei Werte nebeneinander: Hubraum, Leistung, Baujahr. Untereinander
-   braeuchten sie die doppelte Hoehe, und die fehlt auf einer Seite ohne
-   Scrollen. */
-#garageDatenblatt .stats { grid-template-columns: repeat(3, 1fr); gap: var(--s2); }
-#garageDatenblatt .stat { padding: 6px var(--s2); }
-#garageDatenblatt .stat .v { font-size: clamp(16px, 4.8vw, 20px); }
-#garageDatenblatt .linkbtn { margin-top: var(--s3); }
+/* ---------- Die Abschnitte ----------
+   Kopfzeile (Titel links, "Alle ansehen" rechts) und darunter die Karten.
+   Der Abschnitt selbst ist KEIN Glas - die Karten darin sind es. So sieht
+   es aus wie die gruppierten Listen von iOS: Titel ueber der Gruppe. */
+.start-abschnitt { display: flex; flex-direction: column; gap: var(--s3); }
+.start-abschnitt .garage-shop-kopf { margin-bottom: 0; }
+.start-abschnitt .produkt-band { margin: 0 calc(-1 * var(--s4)); padding: var(--s1) var(--s4); }
+.start-seite .produkt-karte {
+  background: var(--glas-hell);
+  border: 1px solid var(--glas-rand);
+  box-shadow: inset 0 1px 0 var(--glas-heller);
+}
+.start-abschnitt .garage-merkliste-leer { align-items: flex-start; }
+
+/* ---------- Die Reisekarte ----------
+   Kartenbild links, rechts Name und drei Zeilen, unten ueber die volle
+   Breite der Knopf "Weiterplanen". Die ganze Karte ist ein Knopf
+   (einstieg.js), der Knopf darin nur die Aufforderung. */
+.start-reise {
+  display: grid;
+  grid-template-columns: minmax(0, 42%) minmax(0, 1fr);
+  gap: var(--s3) var(--s4);
+}
+.start-reise-bild {
+  position: relative;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  background: var(--surface-2);
+}
+.start-reise-bild .tour-vorschau,
+.start-reise-bild svg { display: block; width: 100%; height: 100%; aspect-ratio: auto; }
+.start-reise-text { display: flex; flex-direction: column; gap: var(--s2); min-width: 0; align-self: center; }
+.start-reise-name {
+  font-family: var(--schrift-display);
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+.start-reise-zeile {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  font-size: 14px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.start-reise-zeile .ic { color: var(--metall); }
+.start-reise-weiter {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
+  color: var(--accent-hell);
+}
+.reise-einladung { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s3); }
+.reise-einladung .hint { margin: 0; }
+.reise-einladung .btn { width: auto; }
 
 /* ---------- Das Fenster zum Anlegen und Aendern ----------
    Es liegt ueber allem, auch ueber der unteren Leiste (z-index hoeher als
@@ -4091,7 +3656,6 @@ body.nav-modus .leaflet-control-container { display: none; }
 /* Derselbe Innenabstand wie bei den anderen Platten - sonst steht die
    Ueberschrift der Leiste vier Punkte weiter links als der Motorradname
    darueber, und das faellt genau dann auf, wenn beides untereinander steht. */
-.garage-shop { padding: var(--s4); }
 .garage-shop-kopf {
   display: flex;
   align-items: center;
@@ -4099,21 +3663,24 @@ body.nav-modus .leaflet-control-container { display: none; }
   gap: var(--s3);
   margin-bottom: var(--s3);
 }
+/* Die EINE Form fuer Abschnittstitel ueber Kartenreihen (seit dem
+   05.09.2026; vorher drei Groessen 15/17/18): gemischt, 17 Punkte, eng.
+   Der Titel darf umbrechen, "Alle ansehen" nicht. */
 .garage-shop-kopf h3 {
   margin: 0;
   display: flex;
   align-items: center;
   gap: var(--s2);
+  min-width: 0;
   font-family: var(--schrift-display);
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
   color: var(--metall-glanz);
 }
 .garage-shop-kopf h3 .ic { width: 18px; height: 18px; color: var(--danger); }
-/* "Alle ansehen" bleibt eine Zeile, auch wenn der Titel daneben lang ist. */
-.garage-shop-kopf .linkbtn { flex: 0 0 auto; white-space: nowrap; text-decoration: none; font-size: 13.5px; }
+.garage-shop-kopf .linkbtn { flex: 0 0 auto; white-space: nowrap; text-decoration: none; font-size: 15px; }
 
 /* ---------- Produktkarten, Baender, Raster, Regale ----------
    EINE Karte fuer alles, was Produkte nebeneinander zeigt: die Leisten in
@@ -4247,11 +3814,13 @@ body.nav-modus .leaflet-control-container { display: none; }
   display: flex;
   align-items: center;
   gap: var(--s2);
+  /* Dieselbe Form wie die Abschnittstitel des Starts (.garage-shop-kopf h3):
+     gemischt, 17 Punkte, eng - seit dem 05.09.2026 EINE Form fuer alle
+     Titel ueber Kartenreihen. */
   font-family: var(--schrift-display);
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  letter-spacing: -0.01em;
   color: var(--metall-glanz);
 }
 .regal-grund { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); }
@@ -4504,8 +4073,7 @@ body.nav-modus .karten-knopf { display: none; }
   font-family: var(--schrift-display);
   font-weight: 700;
   font-size: 17px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: -0.01em;
   color: var(--metall-glanz);
 }
 
@@ -5120,8 +4688,10 @@ body.nav-modus .karten-knopf { display: none; }
 .reise-werte {
   display: flex;
   align-items: baseline;
-  gap: var(--s4);
-  flex-wrap: nowrap;
+  gap: var(--s1) var(--s4);
+  /* Darf umbrechen: Mit Inter sind die drei Werte auf 326 Punkten rund
+     40 Punkte zu breit; abgeschnitten waere schlimmer als zweizeilig. */
+  flex-wrap: wrap;
   min-width: 0;
 }
 /* Die eine grosse Zahl: die Gesamtstrecke. Auf 320 Punkten etwas kleiner,
@@ -5606,47 +5176,6 @@ body.nav-modus .karten-knopf { display: none; }
    ============================================================ */
 /* Das Bergsymbol im Kopf in der Signalfarbe - die Regel fuer den Kopf der
    Shop-Platten faerbt Symbole rot, das gilt dem Herz der Merkliste. */
+/* Die Reisekarte auf dem Start steht seit dem 05.09.2026 im Start-Block
+   (.reise-karte); hier nur noch das Symbol im Abschnittskopf. */
 .garage-reise .garage-shop-kopf h3 .ic { color: var(--accent-hell); }
-/* Weil die ganze Karte ein Knopf ist, traegt die Platte einen Hauch der
-   Signalfarbe am Rand - so sieht man, dass hier etwas weitergeht. */
-.garage-reise.mit-reise { border-color: color-mix(in srgb, var(--accent-hell) 30%, var(--glas-hell)); }
-.garage-reise-karte {
-  display: block;
-  width: 100%;
-  padding: 0;
-  margin: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  text-align: left;
-  font: inherit;
-  cursor: pointer;
-}
-/* Das Kartenbild sitzt IN der Platte, nicht randlos wie in der Tourenliste:
-   die negativen Raender von .tour-vorschau gelten dort fuer Zeilen mit
-   eigenem Innenabstand. Hier bekommt es alle vier Ecken rund. */
-.garage-reise-karte .tour-vorschau {
-  margin: 0 0 var(--s3);
-  border-radius: var(--r-md);
-}
-.garage-reise-zeile {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--s3);
-}
-.garage-reise-weiter {
-  flex: 0 0 auto;
-  white-space: nowrap;
-  font-weight: 600;
-  font-size: 14px;
-  color: var(--accent-hell);
-}
-.garage-reise-satz { margin: 0 0 var(--s3); }
-.garage-reise-knopf {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--s2);
-}

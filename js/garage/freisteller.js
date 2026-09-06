@@ -13,8 +13,11 @@
    Aufbau dieser Datei:
      1. Die Automatik (das Modell u2netp)
      2. Der Freisteller als Werkzeug (Pinsel, Radierer, Rueckgaengig)
-     3. Die Bodenlinie - wo die Reifen den Boden beruehren
-     4. Verkabelung
+     3. Verkabelung
+
+   Bis zum 05.09.2026 gab es hier einen Abschnitt "Bodenlinie": wo die
+   Reifen im Foto den Boden beruehren, fuer den Drehteller der Werkstatt.
+   Mit dem Werkstattraum ist er gegangen (ENTSCHEIDUNGEN.md).
 
    Diese Datei wird NACH garage.js geladen: Der Dialog dort ruft
    oeffneFreisteller() nur auf Knopfdruck, umgekehrt braucht der Freisteller
@@ -361,7 +364,6 @@ function öffneFreisteller(datenUrl, sofortAutomatik = false) {
 
 function schließeFreisteller() {
   document.getElementById('freiFenster').hidden = true;
-  neuesFotoImFluss = false;
   freiFortschrittAus();
   frei = null;
 }
@@ -614,49 +616,6 @@ function freiKnöpfeAnzeigen() {
   if (zurück) zurück.disabled = !frei || frei.verlauf.length === 0;
 }
 
-/* --- 3. Die Bodenlinie -----------------------------------------------------
-   Wo beruehrt das Motorrad den Boden?
-
-   WOZU DAS GUT IST: Ein freigestelltes Motorrad ohne Schatten schwebt, und
-   das sieht jeder sofort, ohne sagen zu koennen warum. Ein einzelner Fleck
-   unter der Mitte hilft wenig - in Wirklichkeit beruehren nur die beiden
-   Reifen den Boden, und genau dort ist der Schatten hart und dunkel.
-
-   WOHER WIR ES WISSEN, ohne irgendetwas zu raten: Die Maske aus dem
-   Freisteller weiss fuer jede Bildspalte, wo der unterste sichtbare Punkt
-   liegt. Traegt man diese Werte nebeneinander auf, ergibt sich die
-   Unterkante der Maschine - und ihre beiden tiefsten Stellen SIND die
-   Reifen.
-
-   Herauskommen 48 Zahlen zwischen 0 und 1, gemessen vom oberen Bildrand.
-   Das sind ein paar hundert Byte und passen problemlos mit ins gespeicherte
-   Motorrad; ein zweites Bild waere hier voellig unangemessen.
-
-   -1 heisst: In dieser Spalte ist nichts, dort ragt nichts nach unten. */
-function bodenlinieAusMaske(maske, breite, hoehe, felder = 48) {
-  const linie = new Array(felder).fill(-1);
-
-  for (let feld = 0; feld < felder; feld++) {
-    const vonX = Math.floor(feld * breite / felder);
-    const bisX = Math.max(vonX + 1, Math.floor((feld + 1) * breite / felder));
-
-    // Innerhalb eines Feldes zaehlt die TIEFSTE Stelle, nicht der Mittelwert.
-    // Ein Mittelwert wuerde den Reifen mit der Luft daneben verrechnen und
-    // den Aufsetzpunkt nach oben ziehen.
-    let tiefste = -1;
-    for (let x = vonX; x < bisX; x++) {
-      for (let y = hoehe - 1; y >= 0; y--) {
-        if (maske[y * breite + x] > 127) {
-          if (y > tiefste) tiefste = y;
-          break;                       // in dieser Spalte sind wir fertig
-        }
-      }
-    }
-    linie[feld] = tiefste < 0 ? -1 : Number((tiefste / (hoehe - 1)).toFixed(4));
-  }
-
-  return linie;
-}
 
 // Das Ergebnis in voller Groesse zurueckgeben: Originalbild, Maske darauf.
 function freiÜbernehmen() {
@@ -687,36 +646,15 @@ function freiÜbernehmen() {
     }
     stift.putImageData(flaeche, 0, 0);
 
-    /* Guete 0,92: Das Bild durchlaeuft hier die ZWEITE Kompression (die
-       erste war das Einlesen). Wer zweimal presst, presst die Fehler der
-       ersten Runde gleich mit - deshalb an beiden Stellen sparsam. */
-    dialogFoto = voll.toDataURL('image/webp', 0.92);
-    // Die Bodenlinie MUSS hier entstehen, solange die Maske noch da ist.
-    // Nach dem Schliessen ist sie weg, und aus dem fertigen Bild liesse sie
-    // sich nur mit einigem Aufwand zurueckrechnen.
-    dialogBodenlinie = bodenlinieAusMaske(frei.maske, frei.breite, frei.hoehe);
-    // MERKEN VOR DEM SCHLIESSEN: schließeFreisteller() loescht die Flagge,
-    // damit ein Abbruch nicht spaeter unvermittelt ins Anpassen fuehrt.
-    const gleichAusrichten = neuesFotoImFluss;
     schließeFreisteller();
     zeichneFotoVorschau();
-
-    /* Bei einem frisch hereingekommenen Foto geht es direkt weiter ins
-       Anpassen: Der Nutzer sieht seine Maschine auf dem Teller und kann
-       sie gleich zurechtruecken, statt den Weg ueber den Dialogknopf zu
-       suchen. Beim Nachbessern eines vorhandenen Fotos bleibt es beim
-       gewohnten Ruecksprung in den Dialog. */
-    if (gleichAusrichten) {
-      positionAnpassen();
-    } else {
-      showToast('Freigestellt. Mit "Original zurück" kommst du jederzeit zum Ausgangsbild.');
-    }
+    showToast('Freigestellt. Mit "Original zurück" kommst du jederzeit zum Ausgangsbild.');
   };
   bild.src = frei.quelle;
 }
 
 
-/* --- 4. Verkabelung --------------------------------------------------------
+/* --- 3. Verkabelung --------------------------------------------------------
    Die Leinwand bekommt EINEN Satz Zeigerereignisse fuer alle Werkzeuge. Was
    beim Tippen passiert, entscheidet frei.werkzeug - nicht drei getrennte
    Zuhoerer, die sich gegenseitig ins Gehege kommen. */

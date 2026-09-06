@@ -146,7 +146,12 @@ function baujahre() {
    hier gebuendelt und nicht verstreut im Code.
    --------------------------------------------------------------------------- */
 
-const STANDARD_BILD = 'img/bike-standard.webp';
+/* Bis zum 05.09.2026 stand hier ein Standardbild (img/bike-standard.webp),
+   das ohne eigenes Foto in der Werkstatt stand. Es ist entfernt: Seine
+   Herkunft war ungeklaert (es aehnelte einem realen Modell), und in einer
+   Karte "Mein Bike" waere eine fremde Maschine ohnehin die falsche Aussage.
+   Ohne Foto liefert bildAdresse() jetzt null, und die Karte zeigt den Weg
+   zum Foto. */
 
 /* Bildquelle. Leer = das Standardbild wird benutzt.
    Geprueft am 19.08.2026: carimagesapi.com hat 602 Marken und ueber 9300
@@ -174,10 +179,10 @@ const BILD_API_SCHLÜSSEL = '';
    power: "52.3 HP (38.2 kW) @ 8000 RPM". Ebenfalls ungetestet. */
 const DATEN_API_SCHLÜSSEL = '';   // siehe die Warnung beim Bild-Schluessel oben
 
-// Welches Bild auf der Buehne steht. Eigenes Foto schlaegt Datenbank,
-// Datenbank schlaegt Standardbild.
+// Welches Bild in der Karte steht. Eigenes Foto schlaegt Datenbank; gibt
+// es keines von beiden, kommt null zurueck.
 function bildAdresse(motorrad) {
-  if (!motorrad) return STANDARD_BILD;
+  if (!motorrad) return null;
   if (motorrad.bild) return motorrad.bild;
 
   if (BILD_API_SCHLÜSSEL && motorrad.marke && motorrad.modell) {
@@ -187,7 +192,7 @@ function bildAdresse(motorrad) {
     });
     return `https://carimagesapi.com/api/v1/signed-url?${felder}`;
   }
-  return STANDARD_BILD;
+  return null;
 }
 
 /* Holt Hubraum und Leistung zu einem Motorrad.

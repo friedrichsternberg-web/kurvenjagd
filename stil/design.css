@@ -52,55 +52,59 @@
 
    Was weiterhin gilt:
 
-     1. Farbverlaeufe nur, wo sie Daten bedeuten oder Text lesbar machen.
-        Der Kurvigkeitsbalken darf einen, ein Knopf nicht.
+     1. Farbverlaeufe nur, wo sie Daten bedeuten, Text lesbar machen oder
+        Glas einen Untergrund geben. Der Kurvigkeitsbalken darf einen, ein
+        Knopf nicht. Der Untergrund heisst --start-licht und ist EIN
+        Verlauf fuer alle Bildschirme ohne eigenes Bild - niemand schreibt
+        ihn ab, jeder benutzt die Marke (seit dem 05.09.2026, vorher
+        standen vier Abschriften davon in style.css).
      2. Kein Verlaufstext, kein Neonleuchten.
      3. Keine Emoji als Symbole - dafuer gibt es die SVG-Sammlung in
         index.html.
      4. JEDE Flaeche ist Glas, auch Knoepfe, Eingabefelder und Umschalter.
-        Damit das ueberall wirkt, liegt unter jedem Bildschirm etwas, das
-        durchscheinen kann (Foto, Karte, Raum) - Glas ueber blankem Schwarz
-        bleibt tot. Frueher galt hier "Bedienelemente ohne Bild bleiben
-        matt", siehe ENTSCHEIDUNGEN.md.
+        Inhaltskarten sind EINE Form (.karte in style.css): eine dunkle
+        Scheibe in --glas-hell mit Lichtkante oben, wie die gruppierten
+        Karten von iOS auf Schwarz. Damit das Glas lebt, liegt unter jedem
+        Bildschirm etwas, das durchscheinen kann: --start-licht, eine
+        Karte, ein Foto oder das eigene Motorrad - Glas ueber blankem
+        Schwarz bleibt tot. Wo eine Karte ein eigenes Bild hat (die
+        Bike-Karte), scheint es unscharf hinter ihr durch. Frueher galt
+        hier "Bedienelemente ohne Bild bleiben matt" und spaeter der
+        Werkstattraum als Untergrund, siehe ENTSCHEIDUNGEN.md
+        (20.08. und 05.09.2026).
 
    RAL 5005 ist die EINZIGE Signalfarbe und wird sparsam eingesetzt. Wenn
    alles die Signalfarbe traegt, bedeutet sie nichts mehr.
    ============================================================ */
 
 /* ---------- Schrift ----------
-   Barlow, eine leicht technische Grotesk. Eine Familie in zwei Breiten
-   statt zweier verschiedener Schriften - das wirkt ruhiger und ist
-   schwerer falsch zu machen.
+   Inter, eine neutrale Grotesk, fuer Bildschirme gezeichnet: grosse
+   x-Hoehe, offene Formen, Tabellenziffern. Sie ist der offene Zwilling
+   von Apples Systemschrift - genau die Wirkung, die eine App haben soll,
+   die sich wie eine iOS-App anfuehlen will. Eine einzige Datei als
+   Variable Font traegt alle Gewichte von 100 bis 900 und eine optische
+   Groesse (opsz), die Titel ab 20 Punkten etwas enger setzt.
 
-   Die Dateien liegen ABSICHTLICH im eigenen Ordner und werden nicht per
-   Link von Google geladen: Google Fonts direkt einzubinden ist in
-   Deutschland datenschutzrechtlich angreifbar, weil dabei die IP-Adresse
-   des Besuchers an Google geht. Lizenz ist SIL OFL 1.1, der Text liegt
-   in fonts/LIZENZ-Barlow-OFL.txt.
+   Bis zum 05.09.2026 war es Barlow in zwei Breiten; die Condensed-Breite
+   gab Messwerten und Titeln den Instrumentencharakter. Inter hat keine
+   Condensed - der Charakter kommt jetzt aus Gewicht, Tabellenziffern und
+   enger Sperrung bei Titeln. Warum gewechselt wurde: ENTSCHEIDUNGEN.md.
+
+   Die Datei liegt ABSICHTLICH im eigenen Ordner und wird nicht per Link
+   von Google geladen: Google Fonts direkt einzubinden ist in Deutschland
+   datenschutzrechtlich angreifbar, weil dabei die IP-Adresse des
+   Besuchers an Google geht. Lizenz ist SIL OFL 1.1, der Text liegt in
+   fonts/LIZENZ-Inter-OFL.txt. Die Version steht im Dateinamen, nicht als
+   ?v= - pruefe.sh zaehlt ?v= nur in index.html, und ein vergessener
+   Parameter hier hiesse: alte Schrift aus dem Browser-Speicher.
 
    font-display: swap heisst: Text erscheint sofort in der Systemschrift
-   und wechselt nach, sobald Barlow geladen ist. Ohne das bliebe die App
+   und wechselt nach, sobald Inter geladen ist. Ohne das bliebe die App
    fuer einen Moment leer. */
 
 @font-face {
-  font-family: "Barlow"; font-style: normal; font-weight: 400;
-  font-display: swap; src: url("../fonts/barlow-400.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Barlow"; font-style: normal; font-weight: 500;
-  font-display: swap; src: url("../fonts/barlow-500.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Barlow"; font-style: normal; font-weight: 600;
-  font-display: swap; src: url("../fonts/barlow-600.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Barlow Condensed"; font-style: normal; font-weight: 600;
-  font-display: swap; src: url("../fonts/barlow-condensed-600.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Barlow Condensed"; font-style: normal; font-weight: 700;
-  font-display: swap; src: url("../fonts/barlow-condensed-700.woff2") format("woff2");
+  font-family: "Inter"; font-style: normal; font-weight: 100 900;
+  font-display: swap; src: url("../fonts/inter-4.1-variable-latin.woff2") format("woff2");
 }
 
 :root {
@@ -152,14 +156,6 @@
   --skala-mittel: #FACC15;
   --skala-viel:   #FF6B00;
 
-  /* Das warme Licht in der Garage: der Schein, den der Raum auf die Kante
-     der Maschine wirft. Auch das ist keine Markenfarbe, sondern LICHT, und
-     es haengt deshalb absichtlich nicht an --accent.
-
-     Nachgesehen beim Wechsel auf RAL 5005: Mit blauem Saum verschwand die
-     Maschine im Raum. Der Werkstattraum ist selbst blau-grau - ein warmer
-     Schein trennt die Maschine davon ab, ein blauer verschmilzt damit. */
-  --licht-warm: #FF6B00;
   --danger:     #FF5A52;   /* Loeschen und Verwerfen */
 
   /* Radien. Frueher bewusst klein (6/12/16) - mit dem Schritt zu vollem
@@ -170,6 +166,7 @@
   --r-sm: 12px;   /* Chips, Eingabefelder, Knoepfe */
   --r-md: 18px;   /* Karten */
   --r-lg: 24px;   /* grosse Bloecke, Oberkante der Schublade */
+  --r-xl: 28px;   /* die grosse Karte des Starts - iOS setzt Karten dieser Groesse mit 26-28 */
   --r-pill: 999px;
   --radius: var(--r-sm);   /* Altname aus der ersten Fassung, damit bestehende Regeln weiter gelten */
 
@@ -188,6 +185,21 @@
   --glas-rand:   rgba(255, 255, 255, 0.14);   /* die uebliche Kante */
   --glas-heller: rgba(255, 255, 255, 0.20);   /* gedrueckt / hervorgehoben */
   --glas-licht:  rgba(255, 255, 255, 0.32);   /* obere Lichtkante (inset) */
+
+  /* Der Filter und der Schatten jeder Glaskarte, als Marken - in style.css
+     standen einmal zwoelf verschiedene Blur-Radien nebeneinander. Eine
+     Karte hat GENAU EINEN backdrop-filter; was in ihr liegt (Kacheln,
+     Zeilen), bekommt Fuellung und Kante, aber keinen zweiten Filter -
+     der Browser rechnet jeden davon je Bild. */
+  --glas-filter:   blur(22px) saturate(160%);
+  --glas-schatten: 0 12px 34px var(--schatten-mittel);
+
+  /* Der Untergrund fuer Bildschirme ohne eigenes Bild: ein leiser
+     Lichtkegel von oben in der Signalfarbe, der bis gut zur Haelfte
+     auslaeuft - darunter ist die Flaeche reines Schwarz. Er gibt den
+     Glaskanten etwas zu fangen (Grundsatz 4), ohne mit Fotos oder Karten
+     zu streiten. Grundsatz 1 nennt ihn ausdruecklich. */
+  --start-licht: radial-gradient(120% 55% at 50% -12%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 62%);
 
   /* Metall. Die Wortmarke ist gerendertes, gebuerstetes Metall - vollstaendig
      neutral, ohne jeden Farbstich (gemessene Saettigung 0,03). Text und
@@ -295,10 +307,12 @@
   --spalte-panel: 330px;   /* Bedienfeld des Planers als Seitenleiste */
   --spalte-ride: 380px;    /* Wertefeld beim Aufzeichnen als Seitenspalte */
 
-  /* Zwei Schriftrollen: Condensed fuer Ueberschriften und Messwerte,
-     die normale Breite fuer alles zum Lesen. */
-  --schrift-text: "Barlow", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --schrift-display: "Barlow Condensed", "Barlow", -apple-system, BlinkMacSystemFont, sans-serif;
+  /* Zwei Rollen, seit dem 05.09.2026 dieselbe Schrift: --schrift-display
+     steht an Ueberschriften, Messwerten und Beschriftungen, --schrift-text
+     an allem zum Lesen. Die Marke bleibt getrennt, damit die Rollen im
+     Code sichtbar sind und eine spaetere Display-Schrift eine Zeile ist. */
+  --schrift-text: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --schrift-display: var(--schrift-text);
 }
 
 * { box-sizing: border-box; }
@@ -328,8 +342,6 @@ html, body {
 
      dvh ist die Hoehe, die gerade wirklich da ist. Sie aendert sich beim
      Ein- und Ausfahren der Adresszeile, und genau das ist hier richtig.
-     Der Garagenraum bleibt davon unberuehrt, der rechnet bewusst in svh
-     (siehe --garage-raum-hoehe in style.css).
 
      Die 100% davor sind der Rueckfall fuer Browser, die dvh nicht kennen -
      sie ueberlesen die zweite Zeile einfach. */
@@ -353,24 +365,30 @@ html, body {
 .titel {
   font-family: var(--schrift-display);
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.01em;
-  line-height: 1.05;
+  /* Gemischte Schrift mit enger Sperrung statt Versalien: Inter-Versalien
+     sind ein Drittel breiter als die alten Condensed-Versalien und wuerden
+     auf dem Handy umbrechen. So setzt auch iOS seine grossen Titel. */
+  letter-spacing: -0.02em;
+  line-height: 1.1;
   margin: 0;
 }
 .label {
   font-family: var(--schrift-display);
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.09em;
-  font-size: 12px;
+  /* Versalien in Inter brauchen Luft, aber weniger als frueher: 0.06em
+     statt 0.09 - die Schrift ist von sich aus breiter. */
+  letter-spacing: 0.06em;
+  font-size: 11px;
   color: var(--muted);
 }
 .wert {
   font-family: var(--schrift-display);
-  font-weight: 700;
+  font-weight: 600;
+  /* Tabellenziffern: alle Ziffern gleich breit, ein hochzaehlender Wert
+     huepft nicht. Inter kann das ueber dasselbe Schluesselwort. */
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.01em;
+  letter-spacing: 0;
 }
 
 /* ---------- Symbole ----------

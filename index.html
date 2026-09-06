@@ -228,6 +228,10 @@
        js/shop/katalog.js. -->
   <meta name="katalog-stand" content="2026-09-05">
 
+  <!-- Die Schrift vorladen, sonst faengt der Browser erst mit ihr an, wenn
+       design.css sie nennt - ein sichtbarer Sprung von der Systemschrift zu
+       Inter. crossorigin ist bei Schriften Pflicht, ohne laedt er sie doppelt. -->
+  <link rel="preload" href="fonts/inter-4.1-variable-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="stil/design.css?v=110">
   <link rel="stylesheet" href="stil/style.css?v=110">
   <!-- Die Anordnung fuer breite Bildschirme. Laedt NACH style.css und
@@ -358,6 +362,21 @@
         <path d="M12 21.5s7-6 7-11.5a7 7 0 1 0-14 0c0 5.5 7 11.5 7 11.5Z"/>
         <circle cx="12" cy="10" r="2.6"/>
       </symbol>
+      <!-- Start: ein Haus. Es war bis zum 24.08.2026 das Symbol des ersten
+
+           Startbildschirms und kommt mit "Start" zurueck; das Garagentor darunter
+
+           bleibt fuer den Motorrad-Finder und den Leerzustand der Bike-Karte. -->
+
+      <symbol id="icon-start" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-6h4v6"/></symbol>
+
+      <!-- Die drei Zeilen der Bike-Karte: Hubraum, Leistung, Baujahr. -->
+
+      <symbol id="icon-motor" viewBox="0 0 24 24"><path d="M7.5 9.5h6l2 2h3v7h-3l-2 2h-6l-2-2v-7z"/><path d="M9.5 6v3.5M13 6v3.5M8 6h6M2.5 12.5h3M2.5 16h3"/></symbol>
+
+      <symbol id="icon-leistung" viewBox="0 0 24 24"><path d="M13 2.5 4.5 13.5H11l-1 8 8.5-11H12z"/></symbol>
+
+      <symbol id="icon-kalender" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></symbol>
       <symbol id="icon-garage" viewBox="0 0 24 24">
         <path d="M2.5 10 12 4.2 21.5 10"/>
         <path d="M4.5 10.6V20.5h15V10.6"/>
@@ -448,66 +467,39 @@
     </defs>
   </svg>
 
-  <!-- ===== Meine Garage =====
-       Ein Raum statt einer Liste: hinten die Wand mit der Hakenleiste, an der
-       die Ausruestung haengt, davor der Boden, darauf steht das Motorrad.
-       Wand und Boden sind halbdurchsichtige CSS-Flaechen ueber dem
-       weichgezeichneten Foto - Glas braucht etwas, worueber es liegen kann.
+  <!-- ===== Start =====
+       Der erste Bildschirm der App. Seit dem 05.09.2026 eine Kartenseite im
+       Stil einer iOS-App statt des Werkstattraums (warum: ENTSCHEIDUNGEN.md
+       zu diesem Datum). Oben die Wortmarke und das Konto, darunter
+       Inhaltskarten: das eigene Bike, die naechste Reise, die Merkliste,
+       Vorschlaege und Reifen. KEINE Karte fuehrt in einen Bereich der
+       Leiste - die Leiste ist der eine Weg dorthin (03.09.2026).
 
-       Seit die Garage der Startbildschirm ist, SCROLLT die Seite: oben der
-       Raum mit der Maschine, darunter das Datenblatt, der Shop und das
-       Menue. Die Regel "alles muss auf eine Seite passen" galt, solange
-       hier nur das Datenblatt stand - sie hat den Raum aber jedes Mal
-       kleiner gemacht, wenn unten etwas dazukam. Der Raum hat deshalb
-       eine feste Hoehe (--garage-raum-hoehe in style.css).
+       Die Kennungen tragen weiter das Wort "garage" (garageScreen,
+       garageReise, garageMerkliste, garageShop, garageReifen,
+       garageDatenblatt): Vier fremde Dateien (einstieg.js, merkliste.js,
+       vorschlaege.js, reifen.js) fuellen ihre Karte ueber genau diese
+       Kennung, app.js zeigt den Bildschirm ueber zeigeGarage(), und der
+       Startfilm dockt an .wortmarke-garage an. Ein Umbenennen waere ein
+       Dutzend Fundstellen ohne Gewinn.
 
-       Die Ausruestungsleiste steht ABSICHTLICH im normalen Fluss und nicht
-       absolut positioniert. Vorher lag sie auf festen Pixelwerten und ist
-       auf dem iPhone in die Ueberschrift gelaufen, weil die Statusleiste den
-       Kopf nach unten schiebt. Im Fluss kann das nicht mehr passieren. -->
-  <div id="garageScreen" class="garage-screen">
+       Der Bildschirm ist ein Listenbildschirm (start-screen listen-screen):
+       So greifen im Querformat dieselben Regeln wie fuer Touren und Stats
+       (Abstand unter der Kopfleiste, Lesebreite), ohne eigene Ausnahme. -->
+  <div id="garageScreen" class="start-screen listen-screen start-seite">
+    <div class="start-screen-inner" id="startInner">
 
-    <div class="garage-raum" id="garageRaum">
-
-      <!-- Schicht 1: der gerenderte Werkstattraum mit dem leeren Drehteller.
-           Groesse und Ausschnitt rechnet zeichneBuehne() in garage.js aus,
-           damit der Teller unabhaengig von der Bildschirmgroesse an der
-           richtigen Stelle liegt. Das Motorrad wird NICHT ins Bild
-           eingebrannt, sondern liegt als eigene Schicht darauf - nur so
-           laesst sich die Garage spaeter austauschen, ohne jedes Motorrad
-           neu freizustellen. -->
-      <div class="buehne-platte" id="buehnePlatte" aria-hidden="true"></div>
-
-      <!-- Schicht 1b: das Lampenflackern. Ueber jeder Lampe des Raumbilds
-           liegt ein kleiner dunkler Lichtfleck, der fast immer unsichtbar
-           ist und alle paar Sekunden kurz aufwacht - dann sackt die Lampe
-           sichtbar ab. Die Flecken selbst legt garage.js an, denn WO die
-           Lampen haengen, weiss nur die GARAGEN-Liste dort. -->
-      <div class="buehne-lampen" id="buehneLampen" aria-hidden="true"></div>
-
-      <!-- Schicht 6: dunkler Verlauf oben und unten. Oben macht er die
-           Ueberschrift und die Hakenleiste lesbar, unten laesst er das
-           Raumbild in die Grundflaeche der App auslaufen, damit an der
-           Glasplatte keine harte Kante entsteht. -->
-      <div class="buehne-dunst" aria-hidden="true"></div>
-
-      <header class="garage-kopf">
-        <div>
-          <!-- Schriftzug und Abzeichen stehen NUR im Hochformat hier. Die
-               Garage ist der Startbildschirm, und ohne Kopfleiste waere das
-               Handy sonst der einzige Weg durch die App, auf dem die Marke
-               nirgends auftaucht. Im Querformat traegt die Leiste oben
-               beides - dort waere es die zweite Ausgabe im selben Bild. -->
-          <p class="wortmarke-garage nur-hoch">
-            <span class="wortmarke-zeile">
-              <img class="wortmarke-bild" src="img/logo-serpa.webp?v=110" alt="Serpa" width="800" height="155">
-              <span class="alpha-schild" title="Fr&uuml;he Fassung: Es wird noch gebaut, Funktionen k&ouml;nnen sich &auml;ndern.">Alpha</span>
-            </span>
-          </p>
-          <h2 class="garage-titel">Meine Garage</h2>
-        </div>
-        <!-- Nur noch das Konto. Der Neu-laden-Knopf, der hier daneben
-             stand, ist am 27.08.2026 entfallen (ENTSCHEIDUNGEN.md). -->
+      <!-- Der Kopf: Wortmarke links, Konto rechts. NUR im Hochformat - im
+           Querformat traegt die Kopfleiste beides (quer.css). Keine zweite
+           Ueberschrift daneben: Die Leiste sagt "Start", die Wortmarke ist
+           der Titel, und die erste Karte darunter sagt, worum es geht. -->
+      <header class="start-kopf nur-hoch">
+        <p class="wortmarke-garage">
+          <span class="wortmarke-zeile">
+            <img class="wortmarke-bild" src="img/logo-serpa.webp?v=110" alt="Serpa" width="800" height="155">
+            <span class="alpha-schild" title="Fr&uuml;he Fassung: Es wird noch gebaut, Funktionen k&ouml;nnen sich &auml;ndern.">Alpha</span>
+          </span>
+        </p>
         <div class="kopf-knoepfe">
           <button class="glas-rund" id="btnKontoRund" title="Konto" aria-label="Konto">
             <!-- Ist ein Profilbild da, tritt es an die Stelle des Symbols
@@ -518,186 +510,106 @@
         </div>
       </header>
 
-      <!-- Die Buehne. Sie haelt nur noch den Platz frei - WO die Maschine
-           steht, bestimmt der Drehteller im Raumbild, ausgerechnet von
-           zeichneBuehne(). Der Stapel #motorradAnsicht wird von dort aus
-           punktgenau auf den Teller gesetzt.
-
-           Die Reihenfolge der Schichten ist die Zeichenreihenfolge:
-           Spiegelung unter allem, dann der Schatten, dann die Maschine,
-           zuoberst das orange Kantenlicht vom LED-Ring des Tellers. -->
-      <div class="garage-buehne">
-        <!-- Der Hinweis, solange kein eigenes Foto da ist. Er sitzt im Bild
-             wie eine Tafel an der Werkstattwand: Glasplatte mit
-             Sucherwinkeln, Kamerasymbol, und ein geschwungener Pfeil hinunter
-             zur Maschine, damit ohne Worte klar ist, worum es geht.
-             Ein Druck darauf fuehrt geradewegs zur Fotoauswahl. -->
-        <button type="button" class="buehne-hinweis" id="buehneHinweis" hidden>
-          <span class="hinweis-tafel">
-            <svg class="hinweis-winkel" viewBox="0 0 100 74" aria-hidden="true" preserveAspectRatio="none">
-              <path d="M4 22V8a4 4 0 0 1 4-4h14M78 4h14a4 4 0 0 1 4 4v14M96 52v14a4 4 0 0 1-4 4H78M22 70H8a4 4 0 0 1-4-4V52"/>
-            </svg>
-            <svg class="ic hinweis-kamera"><use href="#icon-kamera"></use></svg>
-            <span class="hinweis-text">Dein Bike einf&uuml;gen</span>
-            <!-- Das Abzeichen sitzt halb in der Unterkante der Tafel und
-                 zeigt nach unten auf die Maschine. Es haengt an der Tafel,
-                 statt als eigenes Zeichen daneben zu schweben - deshalb
-                 wirkt es wie ein Teil davon und nicht wie Beiwerk. -->
-            <span class="hinweis-marke" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M5 9.5 12 16l7-6.5"/></svg>
-            </span>
-          </span>
-        </button>
-
-        <div class="motorrad-ansicht" id="motorradAnsicht">
-          <img id="motorradSpiegel" class="buehne-spiegel" alt="" aria-hidden="true">
-          <img id="motorradSchatten" class="buehne-schatten" alt="" aria-hidden="true">
-          <canvas id="motorradKontakt" class="buehne-kontakt" aria-hidden="true"></canvas>
-          <!-- Der Leuchtsaum: dieselbe Aufnahme noch einmal, exakt unter dem
-               Original. Sichtbar bleibt nur der orange Schein, den ihre
-               drop-shadows um die Silhouette legen - das Original deckt den
-               Rest ab. So bekommt die Maschine einen schmalen Farbstreifen
-               entlang ihrer Kontur, der nebenbei ausgefranste Schnittkanten
-               des Freistellers uebertuscht. -->
-          <img id="motorradRand" class="buehne-rand" alt="" aria-hidden="true">
-          <!-- Die weisse Kantenlinie: noch eine Kopie, ZWISCHEN dem orangen
-               Schein und der Maschine. Ihre weissen drop-shadows zeichnen
-               eine duenne, staendig sichtbare Linie direkt an der Kontur -
-               das Orange dahinter laeuft dann nach aussen aus. Weiss innen,
-               Farbe aussen ist die Reihenfolge von echtem Gegenlicht. -->
-          <img id="motorradKante" class="buehne-kante-linie" alt="" aria-hidden="true">
-          <!-- Das Lauflicht: ein kleiner weisser Streifen, der pausenlos im
-               Uhrzeigersinn an der Aussenlinie entlangwandert. Der Kniff:
-               Die Huelle traegt eine Tortenstueck-Maske und DREHT SICH,
-               das Bild darin dreht exakt gegenlaeufig und steht dadurch
-               still - nur das Maskenfenster wandert im Kreis und gibt
-               immer gerade ein Stueck des weissen Leuchtrands frei.
-               Die Huelle ist um den Schattenweg groesser als das Bild
-               (inset -24px), sonst schnitte die Maske den Rand ab. -->
-          <div id="motorradLauf" class="buehne-lauf" aria-hidden="true">
-            <img id="motorradLaufBild" alt="" aria-hidden="true">
-          </div>
-          <img id="motorradBild" class="motorrad-bild" alt="">
-          <img id="motorradGlut" class="buehne-glut" alt="" aria-hidden="true">
-        </div>
-      </div>
-    </div>
-
-    <div class="garage-inhalt">
-
-      <div id="garageOhneMotorrad" class="garage-leer garage-platte" hidden>
-        <button class="btn" id="btnMotorradNeu">
-          <svg class="ic klein"><use href="#icon-plus"></use></svg> Dein Motorrad suchen
-        </button>
-      </div>
-
-      <div id="garageDatenblatt" class="garage-platte" hidden>
-        <div class="motorrad-umschalter segmented" id="motorradUmschalter" hidden></div>
-
-        <div class="motorrad-kopf">
-          <div class="motorrad-kopf-text">
-            <h3 id="motorradName"></h3>
-          </div>
-          <button class="glas-rund klein" id="btnMotorradBearbeiten" title="Bearbeiten" aria-label="Motorrad bearbeiten">
-            <svg class="ic"><use href="#icon-stift"></use></svg>
+      <!-- Die Bike-Karte: Abzeichen, Name, links die Werte als Zeilen mit
+           Symbol, rechts das eigene Foto auf einer kleinen Buehne. Gefuellt
+           von garage.js (zeichneGarage). Das Foto liegt ein zweites Mal
+           unscharf hinter der ganzen Karte (--bike-bild, gesetzt von
+           zeichneMotorradBild) - Grundsatz 4: Glas ueber etwas Echtem. -->
+      <section id="garageDatenblatt" class="karte bike-karte" hidden>
+        <div class="bike-kopf">
+          <span class="abzeichen">Mein Bike</span>
+          <div class="motorrad-umschalter segmented" id="motorradUmschalter" hidden></div>
+          <button class="glas-rund klein" id="btnMotorradWeiteres" title="Weiteres Motorrad" aria-label="Weiteres Motorrad hinzuf&uuml;gen">
+            <svg class="ic"><use href="#icon-plus"></use></svg>
           </button>
         </div>
-
-        <div class="stats" id="motorradWerte" hidden></div>
-
-        <button class="linkbtn" id="btnMotorradWeiteres">Weiteres Motorrad hinzuf&uuml;gen</button>
-      </div>
-
-      <!-- Von Hand nachjustieren. Die Erkennung setzt die Maschine von
-           selbst auf den Teller; wo sie danebenliegt, hat der Nutzer hier
-           das letzte Wort. Die Regler wirken sofort auf die Buehne - man
-           dreht und sieht. -->
-      <div id="buehneJustierung" class="garage-platte" hidden>
-        <div class="frei-zeile">
-          <label for="justGroesse">Gr&ouml;&szlig;e</label>
-          <input type="range" id="justGroesse" class="slider" min="55" max="160" step="1" value="100">
-          <output id="justGroesseWert">100&thinsp;%</output>
+        <h2 id="motorradName" class="bike-name"></h2>
+        <div class="bike-inhalt">
+          <div class="bike-text">
+            <div class="bike-werte" id="motorradWerte" hidden></div>
+          </div>
+          <div class="bike-buehne">
+            <img id="motorradBild" class="bike-bild" alt="" hidden>
+            <!-- Solange kein eigenes Foto da ist: der Weg dorthin, direkt in
+                 die Dateiauswahl (garage.js). Keine Beispielmaschine mehr -
+                 in einer Karte "Mein Bike" waere sie die falsche Aussage. -->
+            <button type="button" class="btn ghost klein bike-foto-knopf" id="btnBikeFoto" hidden>
+              <svg class="ic klein"><use href="#icon-kamera"></use></svg> Foto hinzuf&uuml;gen
+            </button>
+          </div>
         </div>
-        <div class="frei-zeile">
-          <label for="justHoehe">H&ouml;he</label>
-          <input type="range" id="justHoehe" class="slider" min="-100" max="100" step="1" value="0">
-          <output id="justHoeheWert">0</output>
-        </div>
-        <div class="frei-zeile">
-          <label for="justWinkel">Neigung</label>
-          <input type="range" id="justWinkel" class="slider" min="-25" max="25" step="0.5" value="0">
-          <output id="justWinkelWert">0&deg;</output>
-        </div>
-        <div class="justierung-knoepfe">
-          <button class="btn ghost klein" id="btnJustZurücksetzen">Automatik</button>
-          <button class="btn klein" id="btnJustFertig">Fertig</button>
-        </div>
-      </div>
+        <button class="btn ghost bike-knopf" id="btnMotorradBearbeiten">
+          <svg class="ic klein"><use href="#icon-stift"></use></svg> Bike bearbeiten
+        </button>
+      </section>
 
-      <!-- Die naechste Reise. Zeigt die zuletzt angelegte Reise mit ihrem
-           Kartenbild und fuehrt mit einem Tipp hinein - oder laedt ein, die
-           erste zu planen. Gefuellt von einstieg.js (zeichneGarageReise);
-           faellt es aus, bleibt die Platte verborgen. Warum sie in der
-           Garage steht, obwohl die Kacheln am 03.09.2026 gingen: siehe
-           Kopf von Abschnitt 3 in einstieg.js. -->
-      <div id="garageReise" class="garage-platte garage-reise" hidden></div>
+      <!-- Ohne Motorrad: dieselbe Karte als Einladung. -->
+      <section id="garageOhneMotorrad" class="karte bike-karte bike-leer" hidden>
+        <span class="abzeichen">Mein Bike</span>
+        <h2 class="bike-name">Dein Motorrad fehlt noch</h2>
+        <p class="hint">Marke und Modell reichen &ndash; Hubraum und Leistung sucht Serpa dazu,
+          und ein Foto stellt es vom Hintergrund frei.</p>
+        <button class="btn" id="btnMotorradNeu">
+          <svg class="ic klein"><use href="#icon-plus"></use></svg> Motorrad eintragen
+        </button>
+      </section>
 
-      <!-- Die Merkliste, ganz vorn: das Regal mit den eigenen Sachen. Nur
-           sichtbar, wenn etwas drinliegt; jede Karte sagt, was der Preis
-           seit dem Merken gemacht hat. Gefuellt von merkliste.js. -->
-      <div id="garageMerkliste" class="garage-platte garage-shop garage-merkliste" hidden>
+      <!-- Die naechste Reise: Kopfzeile plus eine Karte mit Kartenbild,
+           Name, Tagen, Kilometern und dem Knopf "Weiterplanen" - oder die
+           Einladung, die erste zu planen. Gefuellt von einstieg.js
+           (zeichneGarageReise); faellt es aus, bleibt der Abschnitt
+           verborgen. Warum sie hier steht, obwohl die Kacheln am
+           03.09.2026 gingen: Kopf von Abschnitt 3 in einstieg.js. -->
+      <section id="garageReise" class="start-abschnitt garage-reise" hidden></section>
+
+      <!-- Die Merkliste: das Regal mit den eigenen Sachen. Jede Karte sagt,
+           was der Preis seit dem Merken gemacht hat. Gefuellt von
+           merkliste.js. -->
+      <section id="garageMerkliste" class="start-abschnitt garage-merkliste" hidden>
         <div class="garage-shop-kopf">
           <h3><svg class="ic" aria-hidden="true"><use href="#icon-herz"></use></svg>
             Merkliste <span class="badge anzeige">Anzeige</span></h3>
-          <button class="linkbtn" id="btnGarageMerklisteAlle">Alle ansehen &rarr;</button>
+          <button class="linkbtn" id="btnGarageMerklisteAlle">Alle ansehen &rsaquo;</button>
         </div>
         <div class="produkt-band" id="garageMerklisteBand"></div>
         <!-- Solange nichts gemerkt ist: die Einladung. -->
-        <div class="garage-merkliste-leer" id="garageMerklisteLeer" hidden>
+        <div class="garage-merkliste-leer karte" id="garageMerklisteLeer" hidden>
           <p class="hint">Such dir raus, was du im Blick behalten willst &ndash;
             ein Tipp auf das Herz an einem Produkt, und es liegt hier. Wir
             merken uns den Preis und sagen dir, wenn er f&auml;llt.</p>
-          <button class="btn ghost klein" id="btnGarageMerklisteStoebern">St&ouml;bern &rarr;</button>
+          <button class="btn ghost klein" id="btnGarageMerklisteStoebern">St&ouml;bern &rsaquo;</button>
         </div>
-      </div>
+      </section>
 
-      <!-- Die Ausruestung in der Garage: Vorschlaege zur eigenen Maschine
-           als schmale Querleiste zum Wischen. Gefuellt von vorschlaege.js;
-           faellt es aus, bleibt die Platte einfach verborgen. -->
-      <div id="garageShop" class="garage-platte garage-shop" hidden>
+      <!-- Vorschlaege zur eigenen Maschine als Querleiste zum Wischen.
+           Gefuellt von vorschlaege.js. Die Anzeige-Kennzeichnung steht hier
+           NOCH EINMAL, weil diese Leiste Preise ausserhalb des
+           Ausruestungs-Bildschirms zeigt - dessen Offenlegung ist von hier
+           aus nicht zu sehen. -->
+      <section id="garageShop" class="start-abschnitt" hidden>
         <div class="garage-shop-kopf">
-          <!-- Die Anzeige-Kennzeichnung steht hier NOCH EINMAL, weil diese
-               Leiste Preise ausserhalb des Ausruestungs-Bildschirms zeigt -
-               dessen Offenlegung ist von hier aus nicht zu sehen. -->
           <h3>F&uuml;r dich <span class="badge anzeige">Anzeige</span></h3>
-          <button class="linkbtn" id="btnGarageShopAlle">Alle ansehen &rarr;</button>
+          <button class="linkbtn" id="btnGarageShopAlle">Alle ansehen &rsaquo;</button>
         </div>
         <div class="produkt-band" id="garageShopBand"></div>
-      </div>
+      </section>
 
-      <!-- Die Reifen-Leiste: dieselbe Form wie die Ausruestungs-Leiste
-           darueber, mit Angeboten aus dem Partnerprogramm von reifen.com.
-           Die Anzeige-Kennzeichnung steht hier aus demselben Grund wie
-           dort. Gefuellt von reifen.js (zeichneGarageReifen). "Alle
-           ansehen" fuehrt zum Reifen-Bildschirm; seit dem 05.09.2026 tut
-           das auch der Chip "Reifen" in der Ausruestung. Die Kachel, die
-           hier bis zum 03.09.2026 stand, gibt es nicht mehr. -->
-      <div id="garageReifen" class="garage-platte garage-shop" hidden>
+      <!-- Die Reifen: dieselbe Form, Angebote aus den Partnerprogrammen.
+           Die Ueberschrift setzt reifen.js: "Reifen fuer deine Honda
+           ADV150", sobald die Groesse bekannt ist, sonst "Motorradreifen" -
+           ein Versprechen, das die Auswahl nicht halten kann, waere hier
+           das Schlimmste. -->
+      <section id="garageReifen" class="start-abschnitt" hidden>
         <div class="garage-shop-kopf">
-          <!-- Die Ueberschrift setzt reifen.js: Sie sagt "Reifen fuer deine
-               Honda ADV150", sobald die Groesse bekannt ist, sonst nur
-               "Motorradreifen". Ein Versprechen, das die Auswahl nicht
-               halten kann, waere hier das Schlimmste. -->
           <h3><span id="garageReifenKopf">Motorradreifen</span>
             <span class="badge anzeige">Anzeige</span></h3>
-          <button class="linkbtn" id="btnGarageReifenAlle">Alle ansehen &rarr;</button>
+          <button class="linkbtn" id="btnGarageReifenAlle">Alle ansehen &rsaquo;</button>
         </div>
         <div class="produkt-band" id="garageReifenBand"></div>
-      </div>
+      </section>
 
       <!-- Die Pflichtangaben. Dezent im Fuss, wie auf jeder Webseite, aber
-           lesbar und auf dem Startbildschirm - von hier aus ist es aus der
-           ganzen App ein Tipp auf "Garage" und ein zweiter hierher. -->
+           lesbar und auf dem Startbildschirm. -->
       <p class="rechts-fuss">
         <button class="linkbtn" id="btnRechtlichesGarage">Impressum &amp; Datenschutz</button>
       </p>
@@ -1712,11 +1624,11 @@
         <div class="rechts-text">
           <p>
             Ein Teil der Bilder dieser App wurde mit einem KI-Bildgenerator
-            erstellt: das App-Symbol, der Schriftzug &bdquo;Serpa&ldquo;, der
-            Werkstattraum der Garage und die Beispielmaschine, die dort steht,
-            solange du kein eigenes Foto hinterlegt hast &ndash; dazu die
-            Kachelbilder, die aus diesem Werkstattbild ausgeschnitten sind.
-            Sie zeigen keine wirklichen Orte, Gegenst&auml;nde oder Personen.
+            erstellt: das App-Symbol und der Schriftzug &bdquo;Serpa&ldquo;.
+            Bis zum 05.09.2026 geh&ouml;rten auch der Werkstattraum der Garage
+            und die Beispielmaschine darin dazu; beide zeigt die App nicht
+            mehr. Die Bilder zeigen keine wirklichen Orte, Gegenst&auml;nde
+            oder Personen.
           </p>
           <p>
             Stellst du dein eigenes Foto frei, trennt ein gelerntes Modell
@@ -2548,7 +2460,7 @@
          unten auf dem Handy wie oben am Desktop - frueher stand die Garage
          in der Mitte, die Abwaegung dazu steht in ENTSCHEIDUNGEN.md. -->
     <button class="nav-tab" data-ziel="garageScreen">
-      <svg class="ic gross"><use href="#icon-garage"></use></svg><span>Garage</span>
+      <svg class="ic gross"><use href="#icon-start"></use></svg><span>Start</span>
     </button>
     <button class="nav-tab" data-ziel="app">
       <svg class="ic gross"><use href="#icon-route"></use></svg><span>Planer</span>
@@ -2557,7 +2469,7 @@
       <svg class="ic gross"><use href="#icon-aufnahme"></use></svg><span>Ride</span>
     </button>
     <button class="nav-tab" data-ziel="tourenScreen">
-      <svg class="ic gross"><use href="#icon-touren"></use></svg><span>Meine Touren</span>
+      <svg class="ic gross"><use href="#icon-touren"></use></svg><span>Touren</span>
     </button>
     <button class="nav-tab" data-ziel="shopScreen">
       <svg class="ic gross"><use href="#icon-shop"></use></svg><span>Ausr&uuml;stung</span>

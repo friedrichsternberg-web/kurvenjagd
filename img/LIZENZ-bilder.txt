@@ -5,51 +5,18 @@ Festgehalten aus demselben Grund wie bei Modell und Schrift: Die App ist
 oeffentlich und soll ueber Werbung finanziert werden. Jedes Bild muss dafuer
 eine geklaerte Herkunft haben.
 
-garage-werkstatt.webp
-garage-werkstatt-standard.webp
-  KI-generiertes Bild (dunkle Werkstatt mit Drehteller), erstellt von
-  Friedrich Sternberg im September 2026 mit einem KI-Bildgenerator als
-  Vorlage fuer die Garagen-Buehne der App. Es loeste am 01.09.2026 die
-  hellere blau-weisse Werkstatt ab, die seit August 2026 dort stand.
-  Keine fremden Markenzeichen im Bild.
-
-  ZWEI Fassungen aus EINER Vorlage, gerechnet statt gerendert:
-    garage-werkstatt.webp           der leere Drehteller, unveraendert.
-    garage-werkstatt-standard.webp  derselbe Raum mit bike-standard.webp
-                                    eingepasst - abgedunkelt, mit einem
-                                    Kontaktschatten unter jedem Reifen und
-                                    einer blassen Spiegelung. Das Skript
-                                    dazu steht in ENTSCHEIDUNGEN.md,
-                                    01.09.2026.
-  Fuer die Beispielmaschine gilt damit alles, was unten unter
-  bike-standard.webp steht - einschliesslich der offenen Herkunftsfrage.
-
-  Beide ausgeliefert in anderthalbfacher Groesse der Quelle: 2103 x 1683
-  aus 1402 x 1122. Der Faktor ist gerechnet, nicht gegriffen - ein Handy
-  mit dreifacher Punktdichte zeigt den Raum rund 1545 Punkte hoch, und in
-  der Quellaufloesung muesste der Browser hochrechnen.
+garage-werkstatt.webp, garage-werkstatt-standard.webp
+  ENTFERNT am 05.09.2026 mit dem Werkstattraum (die App hat seit dem
+  Umbau einen Startbildschirm aus Karten, siehe ENTSCHEIDUNGEN.md).
+  Beide waren aus Friedrich Sternbergs eigenem KI-Bild vom September 2026
+  gerechnet; die Vorlage liegt weiter in arbeitsmaterial/vorlagen/.
 
 bike-standard.webp
-  Freigestelltes Standardmotorrad, aus einem von Friedrich Sternberg
-  gelieferten Bild, freigestellt im August 2026.
-
-  OFFEN, geprueft am 01.09.2026: Diese Herkunft ist die einzige unklare in
-  dieser Datei, und sie ist es an der ungeeignetsten Stelle. Anders als bei
-  den KI-Bildern zeigt dieses Bild KEINE Fantasiemaschine - Tankverkleidung,
-  Vierfach-Kruemmer, Scheinwerferform und die blaue Lackierung aehneln sehr
-  deutlich einem real erhaeltlichen Modell (dem Augenschein nach der
-  Kawasaki-Z-Reihe). Fremde Schriftzuege sind keine darauf.
-  Zwei Fragen sind deshalb zu klaeren, bevor die App Werbung traegt:
-    1. Woher stammt die Vorlage? Ein Pressefoto oder ein fremdes Bild waere
-       ein Urheberrecht, und zwar ein echtes - kein KI-Thema.
-    2. Ist die Form nah genug an einem eingetragenen Geschmacksmuster?
-  Bis dahin gilt: Das Bild ist seit dem 01.09.2026 SICHTBARER geworden,
-  nicht weniger. Es steht als Rueckfall auf der Buehne, und seit dem
-  Austausch des Werkstattraums ist es zusaetzlich fest in
-  garage-werkstatt-standard.webp eingerechnet. Damit haengt an dieser
-  einen offenen Frage der Startbildschirm.
-  Der Ausweg, falls sich die Herkunft nicht klaeren laesst: eine eigene
-  Fantasiemaschine erzeugen, so wie sie im Werkstattbild schon steht.
+  ENTFERNT am 05.09.2026. Das war die freigestellte Beispielmaschine, die
+  ohne eigenes Foto in der Werkstatt stand - mit ungeklaerter Herkunft (sie
+  aehnelte einem realen Modell). Auf dem neuen Startbildschirm gibt es ohne
+  eigenes Foto keine Maschine mehr, nur den Weg zum Foto; damit ist die
+  offene Herkunftsfrage erledigt, nicht beantwortet.
 
 hintergrund-weich.jpg
   Eigenes Foto von Friedrich Sternberg beziehungsweise von ihm geliefertes
