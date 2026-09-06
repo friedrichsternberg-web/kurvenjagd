@@ -23,21 +23,24 @@ garage-werkstatt.webp, garage-werkstatt-standard.webp
 
 bike-standard.webp
   Das Standardmotorrad in der Bike-Karte, solange kein eigenes Foto da ist.
-  Es ist die Beispielmaschine aus dem ERSTEN Werkstattbild der App (der
-  hellen blau-weissen Werkstatt vom August 2026) und damit dieselbe
-  Maschine, die die Bildpruefung vom 01.09.2026 ausdruecklich als
-  FANTASIEMASCHINE eingestuft hat - futuristische Form, keine erkennbare
-  Marke, kein reales Vorbild.
+  Freigestellt geliefert von Friedrich Sternberg am 06.09.2026; das Skript
+  werkzeug/bike-standard.py beschneidet es nur auf den sichtbaren Inhalt und
+  verkleinert es. Die Vorlage liegt in arbeitsmaterial/vorlagen/ als
+  "Motorrad neu.png".
 
-  Freigestellt am 06.09.2026 von werkzeug/bike-standard.py aus der Vorlage
-  arbeitsmaterial/vorlagen/"Bild Werkstatt default.png", mit u2netp -
-  demselben Modell, das auch der Freisteller der App benutzt.
+  Es zeigt ein Naked Bike ohne erkennbare Marke: keine Schriftzuege, keine
+  Embleme, keine Typbezeichnung.
 
-  ERSETZT die frueher hier liegende Datei: eine blaue Maschine aus einem
-  von Friedrich Sternberg gelieferten Bild, die einem real erhaeltlichen
-  Modell sehr aehnelte (dem Augenschein nach der Kawasaki-Z-Reihe) und
-  deren Herkunft ungeklaert war. Sie war die einzige unklare Herkunft in
-  diesem Ordner; mit dem Tausch ist der Punkt erledigt.
+  OFFEN: Wie das Bild entstanden ist, ist hier noch nicht festgehalten.
+  Davon haengt zweierlei ab - ob es unter die KI-Kennzeichnung im
+  Rechtlichen faellt (Art. 50 KI-Verordnung), und ob eine fremde Vorlage
+  dahintersteht. Nachzutragen, sobald Friedrich es sagt; bis dahin steht
+  der Punkt in AUFGABEN.md.
+
+  Ersetzt zwei Vorgaenger: eine blaue Maschine, die einem real
+  erhaeltlichen Modell sehr aehnelte (Herkunft ungeklaert), und einen
+  Versuch vom 06.09.2026, die Fantasiemaschine aus dem ersten Werkstattbild
+  mit u2netp freizustellen - das Ergebnis war an den Kanten nicht gut genug.
 
 hintergrund-weich.jpg
   Eigenes Foto von Friedrich Sternberg beziehungsweise von ihm geliefertes

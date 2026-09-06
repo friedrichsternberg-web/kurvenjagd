@@ -236,15 +236,16 @@ where has_function_privilege(r.rolname, p.oid, 'EXECUTE')
   Werkstattraum ein Schriftzug? Trägt die Beispielmaschine eine erkennbare
   Tankform? Auch zufällige Ähnlichkeit ist abmahnfähig, und die Haftung
   liegt beim Verwender, nicht beim Generator. Einmalig, halbe Stunde.
-- **Herkunft von `img/bike-standard.webp` — ERLEDIGT am 06.09.2026, durch
-  Tausch.** Die blaue Maschine, die einem real erhältlichen Modell ähnelte
-  (dem Augenschein nach der Kawasaki-Z-Reihe), wird nicht mehr
-  ausgeliefert. An ihrer Stelle steht die Beispielmaschine aus dem ersten
-  Werkstattbild der App — dieselbe, die die Bildprüfung vom 01.09.2026
-  ausdrücklich als **Fantasiemaschine** eingestuft hat. Freigestellt von
-  `werkzeug/bike-standard.py` mit u2netp aus der Vorlage in
-  `arbeitsmaterial/vorlagen/`. Damit ist die einzige unklare Bildherkunft
-  im Ordner `img/` beseitigt.
+- **Herkunft von `img/bike-standard.webp` angeben.** Die blaue Maschine,
+  die einem real erhältlichen Modell ähnelte, ist raus — an ihrer Stelle
+  steht seit dem 06.09.2026 ein von Friedrich geliefertes, freigestelltes
+  Bild eines Naked Bikes **ohne erkennbare Marke** (keine Schriftzüge, keine
+  Embleme). Das entschärft den Punkt deutlich, erledigt ihn aber nicht:
+  **Wie das Bild entstanden ist, muss Friedrich noch sagen.** Davon hängt
+  ab, ob es unter die KI-Kennzeichnung im Rechtlichen fällt (Art. 50
+  KI-Verordnung) und ob eine fremde Vorlage dahintersteht. Bis dahin nennt
+  der KI-Hinweis in `index.html` die Beispielmaschine weiter mit — das ist
+  die vorsichtigere Angabe, aber sie muss stimmen.
 - **Herkunft von `hintergrund-weich.jpg` klären.** Dieselbe vage
   Formulierung („beziehungsweise von ihm geliefertes Bild"). Die
   Kachelbilder unter `img/kacheln/`, zu denen dieselbe Frage stand, sind

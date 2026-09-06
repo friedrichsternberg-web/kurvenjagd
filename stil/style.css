@@ -1945,7 +1945,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   text-transform: uppercase;
   letter-spacing: 0.06em; font-size: 15px; color: var(--muted); }
 .ride-status { text-align: center; margin: 0 0 12px; }
-/* Dieselbe Handschrift wie .bike-name und die Ueberschriften der
+/* Dieselbe Handschrift wie .widget-name und die Ueberschriften der
    Startbildschirme: Anzeigeschrift, Versalien, Silberton. Nur kleiner - der
    Ride-Titel steht in einem Bedienfeld und nicht auf einer ganzen Seite. */
 .ride-titel {
@@ -2730,18 +2730,26 @@ button.karte:active { transform: scale(0.985); }
    sie setzte die Tafel von absolut auf relativ und schob sie aus dem Bild. */
 .bike-karte::before { z-index: 2; }
 
-.bike-kopf {
+.widget-kopf {
   display: flex;
   align-items: center;
   gap: var(--s2);
   margin-bottom: var(--s3);
 }
-.bike-kopf .motorrad-umschalter { margin-left: auto; }
-.bike-kopf .glas-rund.klein { margin-left: auto; }
+/* Der Link im Kopf steht neben dem Abzeichen, nicht in einem Fliesstext -
+   unterstrichen saehe er dort aus wie ein Fehler. */
+.widget-kopf .linkbtn {
+  margin-left: auto;
+  text-decoration: none;
+  white-space: nowrap;
+  font-size: 14px;
+}
+.widget-kopf .motorrad-umschalter { margin-left: auto; }
+.widget-kopf .glas-rund.klein { margin-left: auto; }
 /* :not([hidden]) ist noetig: Der Umschalter steht auch bei einer Maschine
    im HTML, nur versteckt - und "+" sieht ihn trotzdem. */
-.bike-kopf .motorrad-umschalter:not([hidden]) + .glas-rund.klein { margin-left: 0; }
-.bike-name {
+.widget-kopf .motorrad-umschalter:not([hidden]) + .glas-rund.klein { margin-left: 0; }
+.widget-name {
   margin: 0 0 var(--s2);
   font-family: var(--schrift-display);
   font-size: 24px;
@@ -2754,14 +2762,17 @@ button.karte:active { transform: scale(0.985); }
 /* Links die Werte und der Knopf, rechts die Buehne mit dem Foto. 46 zu 54:
    Die Werte-Zeilen brauchen in Inter rund 140 Punkte ("1.084 cm³" bei 17
    Punkten), die Maschine bekommt den Rest. */
-.bike-inhalt {
+.widget-inhalt {
   display: grid;
   grid-template-columns: minmax(0, 49%) minmax(0, 1fr);
   gap: var(--s3);
   align-items: end;
 }
-.bike-text { display: flex; flex-direction: column; min-width: 0; }
-.bike-knopf {
+/* In der Reisekarte traegt die rechte Spalte das Kartenbild - es soll die
+   Hoehe der Wertezeilen daneben aufnehmen, nicht unten kleben. */
+.reise-widget .widget-inhalt { align-items: stretch; }
+.widget-text { display: flex; flex-direction: column; min-width: 0; }
+.widget-knopf {
   margin-top: var(--s3);
   width: 100%;
   /* Etwas enger als der Standardknopf: In der linken Spalte stehen auf dem
@@ -2772,8 +2783,8 @@ button.karte:active { transform: scale(0.985); }
   font-size: clamp(13px, 3.6vw, 14px);
   white-space: nowrap;
 }
-.bike-werte { display: flex; flex-direction: column; }
-.bike-wert {
+.widget-werte { display: flex; flex-direction: column; }
+.widget-wert {
   display: flex;
   align-items: center;
   gap: var(--s3);
@@ -2781,13 +2792,13 @@ button.karte:active { transform: scale(0.985); }
 }
 /* Die erste Zeile schliesst direkt an den Namen an - ihr eigener
    Innenabstand oben addierte sich sonst zum Abstand darueber. */
-.bike-wert:first-child {
+.widget-wert:first-child {
   padding-top: 0;
   border-bottom: 1px solid var(--glas-hauch);
 }
-.bike-wert:last-child { border-bottom: 0; }
+.widget-wert:last-child { border-bottom: 0; }
 /* Der Symbolkreis: Fuellung und Kante, kein eigener Filter (siehe .karte). */
-.bike-wert-symbol {
+.widget-wert-symbol {
   flex: 0 0 auto;
   width: 36px; height: 36px;
   display: flex; align-items: center; justify-content: center;
@@ -2797,9 +2808,9 @@ button.karte:active { transform: scale(0.985); }
   box-shadow: inset 0 1px 0 var(--glas-hell);
   color: var(--metall);
 }
-.bike-wert-symbol .ic { width: 18px; height: 18px; }
-.bike-wert-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-.bike-wert .wert { font-size: 17px; line-height: 1.25; color: var(--text); white-space: nowrap; }
+.widget-wert-symbol .ic { width: 18px; height: 18px; }
+.widget-wert-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.widget-wert .wert { font-size: 17px; line-height: 1.25; color: var(--text); white-space: nowrap; }
 
 /* Die Buehne: unten die Maschine, darunter ein weicher Schatten als Boden.
    Der Schatten folgt ueber drop-shadow der Silhouette des freigestellten
@@ -2969,7 +2980,7 @@ button.karte:active { transform: scale(0.985); }
 }
 .bike-leer { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s3); }
 .bike-leer .abzeichen { margin-bottom: 0; }
-.bike-leer .bike-name { margin: 0; }
+.bike-leer .widget-name { margin: 0; }
 .bike-leer .hint { margin: 0; }
 .bike-leer .btn { width: auto; }
 
@@ -2991,34 +3002,35 @@ button.karte:active { transform: scale(0.985); }
    Kartenbild links, rechts Name und drei Zeilen, unten ueber die volle
    Breite der Knopf "Weiterplanen". Die ganze Karte ist ein Knopf
    (einstieg.js), der Knopf darin nur die Aufforderung. */
-/* Bild links, Text rechts, Knopf ueber die volle Breite darunter. Beide
-   Spalten sind GLEICH HOCH (align-items: stretch, kein aspect-ratio am
-   Bild): Vorher hatte das Bild ein festes Seitenverhaeltnis und der Text
-   stand mittig daneben - dadurch blieben oben und unten ungleiche Raender
-   und die Karte war halb leer. Jetzt bestimmt die hoehere der beiden
-   Spalten die Hoehe, und das Bild fuellt sie. */
-.start-reise {
-  display: grid;
-  grid-template-columns: minmax(0, 54%) minmax(0, 1fr);
-  gap: var(--s3) var(--s4);
-  align-items: stretch;
-}
-.start-reise-bild {
-  grid-row: 1;
+/* ---------- Die Reisekarte ----------
+   Sie ist der Zwilling der Bike-Karte und benutzt dieselben Bausteine
+   (.widget-kopf, .widget-name, .widget-inhalt, .widget-werte,
+   .widget-knopf). Hier steht nur, was sie unterscheidet: rechts das
+   Kartenbild statt der Werkstatt.
+
+   Sie heisst .reise-widget und NICHT .reise-karte - den Namen traegt schon
+   das Karten-SVG aus reise.js. Vor dem Vergeben eines Klassennamens einmal
+   grep, das ist hier zum zweiten Mal aufgefallen. */
+.reise-widget { border-radius: var(--r-xl); }
+.reise-bild {
   position: relative;
+  display: block;
+  padding: 0;
+  border: 1px solid var(--glas-rand);
   border-radius: var(--r-md);
   overflow: hidden;
+  cursor: pointer;
   /* Damit die Karte auch bei einem kurzen Namen etwas hermacht. */
   min-height: 212px;
   background: var(--raum-dunkel);
+  transition: transform 0.15s cubic-bezier(0.2,0.8,0.2,1);
 }
+.reise-bild:active { transform: scale(0.985); }
 /* .tour-vorschau ist die Vorschau der TOURENLISTE: Dort sitzt sie oben in
    der Karte, ist deshalb nur oben gerundet, hat negative Margen und ein
    festes Seitenverhaeltnis von 640:280. Hier steht sie in einem eigenen
-   Fenster - alle vier Ecken rund, keine Margen, kein festes Verhaeltnis.
-   Genau diese geerbten Regeln waren der Grund, warum die Karte oben links
-   rund und sonst scharfkantig war. */
-.start-reise-bild .tour-vorschau {
+   Fenster - alle vier Ecken rund, keine Margen, kein festes Verhaeltnis. */
+.reise-bild .tour-vorschau {
   position: absolute;
   inset: 0;
   margin: 0;
@@ -3027,47 +3039,9 @@ button.karte:active { transform: scale(0.985); }
   border-bottom: 0;
   background: none;
 }
-.start-reise-bild svg { display: block; width: 100%; height: 100%; }
-.start-reise-text {
-  grid-row: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: var(--s2);
-  min-width: 0;
-  padding: var(--s1) 0;
-}
-.start-reise-name {
-  font-family: var(--schrift-display);
-  font-size: 21px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
-  color: var(--text);
-  overflow-wrap: anywhere;
-}
-.start-reise-zeile {
-  display: flex;
-  align-items: center;
-  gap: var(--s2);
-  /* 14 statt 15: Die Textspalte ist neben dem groesseren Kartenfenster nur
-     noch rund 154 Punkte breit, und ein Zeitraum mit Jahr braucht sie ganz. */
-  font-size: 14px;
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-}
-.start-reise-zeile .ic { flex: 0 0 auto; color: var(--metall); }
-.start-reise-weiter {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--s2);
-  color: var(--accent-hell);
-}
-.reise-einladung { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s3); }
-.reise-einladung .hint { margin: 0; }
-.reise-einladung .btn { width: auto; }
+.reise-bild svg { display: block; width: 100%; height: 100%; }
+.reise-einladung .hint { margin: 0 0 var(--s3); }
+.reise-einladung .widget-knopf { width: auto; }
 
 /* ---------- Das Fenster zum Anlegen und Aendern ----------
    Es liegt ueber allem, auch ueber der unteren Leiste (z-index hoeher als

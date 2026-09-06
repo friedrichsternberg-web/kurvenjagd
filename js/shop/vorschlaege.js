@@ -160,7 +160,12 @@ function grenzpreiseJeWarengruppe(produkte) {
    Sprossen 3 bis 6 kommen auch dann zum Zug, und ohne sie stuende der
    Bereich fuer jeden Neuen leer da. */
 
-const VORSCHLAEGE_WIE_VIELE = 6;
+/* Zehn statt der frueheren sechs: Auf dem Handy sieht man ohnehin nur zwei
+   bis drei und wischt weiter, auf einem 1440 Punkte breiten Bildschirm
+   endete die Reihe dagegen nach sechs Karten mitten im Bild. Die Leiter der
+   Gruende darunter bleibt unveraendert - es werden nur mehr Sprossen
+   ausgeschoepft, keine schlechteren Gruende erfunden. */
+const VORSCHLAEGE_WIE_VIELE = 10;
 
 // Die Arten der Garage heissen an drei Stellen anders als die
 // Warengruppen des Katalogs. Die Uebersetzung steht hier, an einer Stelle.
@@ -269,7 +274,7 @@ function zeichneGarageBand(band, platte) {
   const einträge = [];
   const schonDrin = new Set(shopAblage.merkliste.map(eintrag => eintrag.schluessel));
   persönlicheVorschläge(produkte).vorschläge.forEach(({ produkt, grund }) => {
-    if (schonDrin.has(produkt.schluessel) || einträge.length >= 8) return;
+    if (schonDrin.has(produkt.schluessel) || einträge.length >= VORSCHLAEGE_WIE_VIELE) return;
     schonDrin.add(produkt.schluessel);
     einträge.push({ produkt, grund });
   });

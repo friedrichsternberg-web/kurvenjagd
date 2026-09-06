@@ -516,20 +516,20 @@
            unscharf hinter der ganzen Karte (--bike-bild, gesetzt von
            zeichneMotorradBild) - Grundsatz 4: Glas ueber etwas Echtem. -->
       <section id="garageDatenblatt" class="karte bike-karte" hidden>
-        <div class="bike-kopf">
+        <div class="widget-kopf">
           <span class="abzeichen">Mein Bike</span>
           <div class="motorrad-umschalter segmented" id="motorradUmschalter" hidden></div>
           <button class="glas-rund klein" id="btnMotorradWeiteres" title="Weiteres Motorrad" aria-label="Weiteres Motorrad hinzuf&uuml;gen">
             <svg class="ic"><use href="#icon-plus"></use></svg>
           </button>
         </div>
-        <h2 id="motorradName" class="bike-name"></h2>
-        <div class="bike-inhalt">
-          <div class="bike-text">
-            <div class="bike-werte" id="motorradWerte" hidden></div>
+        <h2 id="motorradName" class="widget-name"></h2>
+        <div class="widget-inhalt">
+          <div class="widget-text">
+            <div class="widget-werte" id="motorradWerte" hidden></div>
             <!-- Der Knopf steht in der linken Spalte, nicht ueber die volle
                  Breite: Sonst laege er auf dem Drehteller der Werkstatt. -->
-            <button class="btn ghost bike-knopf" id="btnMotorradBearbeiten">
+            <button class="btn ghost widget-knopf" id="btnMotorradBearbeiten">
               <svg class="ic klein"><use href="#icon-stift"></use></svg> Bike bearbeiten
             </button>
           </div>
@@ -566,7 +566,7 @@
       <!-- Ohne Motorrad: dieselbe Karte als Einladung. -->
       <section id="garageOhneMotorrad" class="karte bike-karte bike-leer" hidden>
         <span class="abzeichen">Mein Bike</span>
-        <h2 class="bike-name">Dein Motorrad fehlt noch</h2>
+        <h2 class="widget-name">Dein Motorrad fehlt noch</h2>
         <p class="hint">Marke und Modell reichen &ndash; Hubraum und Leistung sucht Serpa dazu,
           und ein Foto stellt es vom Hintergrund frei.</p>
         <button class="btn" id="btnMotorradNeu">

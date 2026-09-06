@@ -3353,3 +3353,45 @@ Dazu: Die Lücke zwischen Namen und Werten von 12 auf 8 Punkte (die erste
 Wertezeile addierte ihren eigenen Innenabstand dazu), und das Kartenfenster
 der Reise noch einmal um 30 Prozent gewachsen (auf dem Handy 176 × 212, im
 Breiten 380 × 330).
+
+### Nachtrag, 06.09.2026 spät: geliefertes Bike, und die Reise wird ein Zwilling
+
+Friedrich: „das mit dem Freistellen sieht leider nicht gut aus. Nimm das
+angehängte Motorrad mit der Garage von eben … Im Querformat sollten die
+Widgets genau gleich groß sein → Baue dafür ‚deine nächste Reise' in das
+Widget rein im gleichen Design wie ‚mein bike' darüber. Die Listen im
+Querformat mit den Produkten sind auch nicht lang genug."
+
+**Der Freisteller ist raus.** Der Versuch, die Fantasiemaschine mit u2netp
+aus dem alten Werkstattbild zu schneiden, war an den Kanten nicht gut genug —
+Friedrich hat ein sauber freigestelltes Bild geliefert (RGBA, 70 Prozent
+transparent). `werkzeug/bike-standard.py` beschneidet es jetzt nur noch auf
+den sichtbaren Inhalt und verkleinert es auf 900 Punkte; der ganze
+ONNX-Teil ist gestrichen. Die Lehre: Ein geliefertes Bild schlägt ein
+gerechnetes, und ein Freisteller im Werkzeugordner ist Aufwand für ein
+Ergebnis, das einmal gebraucht wird.
+
+**Die Herkunft des neuen Bildes ist noch nicht festgehalten** — die Maschine
+trägt keine erkennbare Marke, was den alten Punkt entschärft, aber davon
+hängt der KI-Hinweis im Rechtlichen ab. Steht in `AUFGABEN.md`.
+
+**Die Reisekarte ist jetzt der Zwilling der Bike-Karte.** Sie trug ihren
+Titel ÜBER der Karte und war dadurch im Querformat um dessen Höhe niedriger
+als die Bike-Karte daneben. Jetzt benutzen beide dieselben Bausteine:
+`.widget-kopf` mit Abzeichen, `.widget-name`, `.widget-inhalt` mit den
+Wertezeilen links (Symbolkreis, Beschriftung, Wert) und dem Bild rechts,
+`.widget-knopf` unten. Die Klassen hießen vorher `bike-*` — sie gehören
+jetzt beiden, also heißen sie `widget-*`. Im Querformat stehen die zwei
+Widgets in einem Raster aus zwei gleichen Spalten und sind nachgemessen
+**exakt gleich groß** (672 × 404).
+
+**Zum zweiten Mal ein Namenskonflikt:** `.reise-karte` gehört schon dem
+Karten-SVG aus `reise.js`. Das neue Widget heißt `.reise-widget`. Vor dem
+Vergeben eines Klassennamens einmal grep — beim ersten Mal (`start-reise`)
+hat eine Umbenennung per Regex fremde Regeln miterwischt.
+
+**Die Produktreihen** endeten auf einem breiten Bildschirm mitten im Bild:
+„Für dich" lieferte sechs Karten, die Reifen acht. Jetzt zehn und zwölf —
+nachgemessen füllen sie damit 1428 beziehungsweise 1896 Punkte bei 1408
+sichtbaren. Die Leiter der Gründe in `vorschlaege.js` bleibt unverändert, es
+werden nur mehr ihrer Sprossen ausgeschöpft.

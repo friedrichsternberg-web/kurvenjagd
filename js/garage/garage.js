@@ -253,9 +253,9 @@ function zeichneDatenblatt() {
   const zeilen = document.getElementById('motorradWerte');
   zeilen.hidden = werte.length === 0;
   zeilen.innerHTML = werte.map(eintrag => `
-    <div class="bike-wert">
-      <span class="bike-wert-symbol"><svg class="ic"><use href="#icon-${eintrag.symbol}"></use></svg></span>
-      <span class="bike-wert-text">
+    <div class="widget-wert">
+      <span class="widget-wert-symbol"><svg class="ic"><use href="#icon-${eintrag.symbol}"></use></svg></span>
+      <span class="widget-wert-text">
         <span class="label">${escapeHtml(eintrag.name)}</span>
         <span class="wert">${escapeHtml(eintrag.wert)}</span>
       </span>

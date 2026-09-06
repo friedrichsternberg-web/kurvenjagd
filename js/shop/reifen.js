@@ -715,7 +715,9 @@ verkabele('garageReifenBand', 'click', ereignis => {
    Steht ein Motorrad in der Garage, ohne dass die Groesse bekannt ist,
    fuehrt zusaetzlich eine Einladungskarte an den Anfang. */
 
-const GARAGE_REIFEN_JE_LAGE = 4;
+/* Sechs je Lage, also zwoelf Karten: Mit vier endete die Reihe auf einem
+   breiten Bildschirm mitten im Bild. */
+const GARAGE_REIFEN_JE_LAGE = 6;
 
 function garageReifenKarteHtml(reifen, hinweis) {
   const bildAdresse = reifenBildAdresse(reifen, 260);

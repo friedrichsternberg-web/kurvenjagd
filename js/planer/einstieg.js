@@ -144,6 +144,14 @@ function zeitraumKurz(reise, tage) {
     + `\u2009–\u2009${bis.toLocaleDateString('de-DE', lang)}`;
 }
 
+/* Die Reisekarte ist der Zwilling der Bike-Karte: dieselbe Huelle
+   (.karte), derselbe Kopf mit Abzeichen, derselbe grosse Name, dieselben
+   Wertezeilen mit Symbolkreis, derselbe Knopf unten - nur steht rechts das
+   Kartenbild statt der Werkstatt. Dadurch stehen im Querformat zwei
+   gleich gebaute und gleich hohe Widgets nebeneinander.
+
+   Frueher trug sie einen Abschnittstitel UEBER der Karte; der machte sie
+   um dessen Hoehe niedriger als die Bike-Karte daneben. */
 function garageReiseHtml(reise) {
   const bilanz = reiseBilanz(reise);
   /* Das Kartenbild wird in dem Verhaeltnis GERECHNET, in dem es auch
@@ -154,35 +162,54 @@ function garageReiseHtml(reise) {
      Zoom fuer genau dieses Fenster. */
   const karte = reiseKartenSvg(reise, { marke: 12, rahmen: { breite: 420, hoehe: 440 } });
   const zeitraum = zeitraumKurz(reise, bilanz.tage);
-  const zeile = (name, text) => `<span class="start-reise-zeile">${symbol(name, 'klein')} ${text}</span>`;
-  return `
-    <div class="garage-shop-kopf">
-      <h3>${symbol('berg')} Deine n&auml;chste Reise</h3>
-      <button type="button" class="linkbtn" data-reise-neu>Neue Reise &rsaquo;</button>
-    </div>
-    <button type="button" class="karte start-reise" data-reise-oeffnen="${escapeHtml(reise.id)}">
-      <span class="start-reise-bild" aria-hidden="true">${karte
-        ? `<span class="tour-vorschau">${karte}<span class="vorschau-osm">&copy; OpenStreetMap</span></span>`
-        : reiseLeerBildHtml(bilanz.tage)}</span>
-      <span class="start-reise-text">
-        <span class="start-reise-name">${escapeHtml(reise.name)}</span>
-        ${zeitraum ? zeile('kalender', escapeHtml(zeitraum)) : zeile('kalender', `${bilanz.tage} ${bilanz.tage === 1 ? 'Tag' : 'Tage'}`)}
-        ${zeile('route', `${bilanz.km} km`)}
-        ${zeile('berg', `${bilanz.tage} ${bilanz.tage === 1 ? 'Etappe' : 'Etappen'}${bilanz.offen ? `, ${bilanz.offen} offen` : ''}`)}
+  const zeile = (symbolName, beschriftung, wert) => `
+    <div class="widget-wert">
+      <span class="widget-wert-symbol">${symbol(symbolName)}</span>
+      <span class="widget-wert-text">
+        <span class="label">${beschriftung}</span>
+        <span class="wert">${wert}</span>
       </span>
-      <span class="start-reise-weiter btn ghost">Weiterplanen &rarr;</span>
-    </button>`;
+    </div>`;
+  return `
+    <div class="karte reise-widget">
+      <div class="widget-kopf">
+        <span class="abzeichen">N&auml;chste Reise</span>
+        <button type="button" class="linkbtn" data-reise-neu>Neue Reise &rsaquo;</button>
+      </div>
+      <h3 class="widget-name">${escapeHtml(reise.name)}</h3>
+      <div class="widget-inhalt">
+        <div class="widget-text">
+          <div class="widget-werte">
+            ${zeile('kalender', 'Zeitraum', zeitraum
+              ? escapeHtml(zeitraum)
+              : `${bilanz.tage} ${bilanz.tage === 1 ? 'Tag' : 'Tage'}`)}
+            ${zeile('route', 'Strecke', `${bilanz.km} km`)}
+            ${zeile('berg', 'Etappen', `${bilanz.tage}${bilanz.offen ? `, ${bilanz.offen} offen` : ''}`)}
+          </div>
+          <button type="button" class="btn ghost widget-knopf" data-reise-oeffnen="${escapeHtml(reise.id)}">
+            Weiterplanen &rarr;
+          </button>
+        </div>
+        <button type="button" class="reise-bild" data-reise-oeffnen="${escapeHtml(reise.id)}"
+                aria-label="Reise ${escapeHtml(reise.name)} &ouml;ffnen">
+          ${karte
+            ? `<span class="tour-vorschau">${karte}<span class="vorschau-osm">&copy; OpenStreetMap</span></span>`
+            : reiseLeerBildHtml(bilanz.tage)}
+        </button>
+      </div>
+    </div>`;
 }
 
 function garageReiseEinladungHtml() {
   return `
-    <div class="garage-shop-kopf">
-      <h3>${symbol('berg')} Deine n&auml;chste Reise</h3>
-    </div>
-    <div class="karte reise-einladung">
+    <div class="karte reise-karte reise-einladung">
+      <div class="widget-kopf">
+        <span class="abzeichen">N&auml;chste Reise</span>
+      </div>
+      <h3 class="widget-name">Noch keine Reise geplant</h3>
       <p class="hint">Mehrere Tage, eine Karte, jeder Tag eine Etappe.
         Plan die ganze Reise hier &ndash; aus deinen Touren oder direkt auf der Karte.</p>
-      <button type="button" class="btn" data-reise-neu>
+      <button type="button" class="btn widget-knopf" data-reise-neu>
         ${symbol('plus', 'klein')} Reise planen
       </button>
     </div>`;
