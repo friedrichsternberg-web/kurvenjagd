@@ -2773,6 +2773,10 @@ button.karte:active { transform: scale(0.985); }
 .reise-widget .widget-inhalt { align-items: stretch; }
 .widget-text { display: flex; flex-direction: column; min-width: 0; }
 .widget-knopf {
+  /* Nicht wachsen: .btn traegt flex: 1, und in der Textspalte der
+     Reisekarte streckte sich der Knopf dadurch ueber die ganze Resthoehe -
+     ein 163 zu 132 Punkte grosses Quadrat. */
+  flex: 0 0 auto;
   margin-top: var(--s3);
   width: 100%;
   /* Etwas enger als der Standardknopf: In der linken Spalte stehen auf dem
@@ -3014,13 +3018,22 @@ button.karte:active { transform: scale(0.985); }
    Sie heisst .reise-widget und NICHT .reise-karte - den Namen traegt schon
    das Karten-SVG aus reise.js. Vor dem Vergeben eines Klassennamens einmal
    grep, das ist hier zum zweiten Mal aufgefallen. */
-.reise-widget { border-radius: var(--r-xl); }
+.reise-widget {
+  border-radius: var(--r-xl);
+  /* Damit das Kartenbild bis an die Kante laufen darf, ohne die Ecke der
+     Karte zu ueberstehen. */
+  overflow: hidden;
+}
+/* Das Kartenbild laeuft nach links und unten bis an die Kartenkante - wie
+   die Werkstatt im Bike-Widget. Gerundet ist es deshalb nur rechts; links
+   und unten uebernimmt die Karte selbst das Runden. */
 .reise-bild {
   position: relative;
   display: block;
   padding: 0;
-  border: 1px solid var(--glas-rand);
-  border-radius: var(--r-md);
+  margin: 0 0 calc(-1 * var(--s4)) calc(-1 * var(--s4));
+  border: 0;
+  border-radius: 0 var(--r-md) var(--r-md) 0;
   overflow: hidden;
   cursor: pointer;
   /* Damit die Karte auch bei einem kurzen Namen etwas hermacht. */
@@ -3028,7 +3041,9 @@ button.karte:active { transform: scale(0.985); }
   background: var(--raum-dunkel);
   transition: transform 0.15s cubic-bezier(0.2,0.8,0.2,1);
 }
-.reise-bild:active { transform: scale(0.985); }
+/* Kein Nachgeben beim Antippen: Das Bild sitzt in der Kartenkante, ein
+   Zusammenziehen liesse dort einen Spalt aufblitzen. */
+.reise-bild:active { transform: none; }
 /* .tour-vorschau ist die Vorschau der TOURENLISTE: Dort sitzt sie oben in
    der Karte, ist deshalb nur oben gerundet, hat negative Margen und ein
    festes Seitenverhaeltnis von 640:280. Hier steht sie in einem eigenen

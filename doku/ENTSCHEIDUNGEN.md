@@ -3411,3 +3411,19 @@ bei einem Verhältnis von 2,7 zogen sich die Ecken sichtbar in die Länge.
 Bei 150 Punkten bricht die Zeile um, die Tafel wird 150 × 85 (1,76 statt
 2,7), und sie sitzt jetzt im oberen Viertel der Bühne statt in der Mitte —
 über der Maschine an der Wand, nicht auf dem Tank.
+
+**Die Reisekarte, dritter Anlauf:** Das Kartenbild stand rechts, weil das
+Widget den Aufbau der Bike-Karte spiegeln sollte (dort steht das Bild
+rechts). Friedrichs Vorlage hat es links, und dabei bleibt es — die
+Symmetrie war meine Idee, nicht seine Anforderung.
+
+Es läuft jetzt nach links und unten bis an die Kartenkante, wie die
+Werkstatt im Bike-Widget; gerundet ist es deshalb nur rechts, links und
+unten übernimmt die Karte selbst das Runden (`overflow: hidden`). Das
+`:active`-Nachgeben ist dort weg: In der Kartenkante ließe ein
+Zusammenziehen einen Spalt aufblitzen.
+
+**Der Knopf „Weiterplanen" war im Querformat ein Quadrat** von 163 × 132
+Punkten. Ursache: `.btn` trägt `flex: 1`, und in der Textspalte der
+Reisekarte streckte sich der Knopf dadurch über die ganze Resthöhe.
+`flex: 0 0 auto` auf `.widget-knopf`; jetzt 278 × 44.

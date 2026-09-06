@@ -248,8 +248,12 @@
   .bike-bild { max-height: none; }
 
   /* Das Kartenbild im Breiten: hoeher, damit es die Hoehe der Bike-Karte
-     daneben mittraegt. */
+     daneben mittraegt, und etwas mehr als die halbe Karte - die Zeilen
+     daneben brauchen weniger Platz als die Werte des Bikes. */
+  .reise-widget .widget-inhalt { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
   .reise-bild { min-height: 300px; }
+  /* Der Knopf steht links unter den Zeilen, nicht ueber die ganze Spalte. */
+  .reise-widget .widget-knopf { width: 100%; }
 
   /* --- 4. Listenbildschirme in Lesebreite -------------------------------------
      Touren (und spaeter Rechtliches, und der Shop, wenn er wiederkommt)

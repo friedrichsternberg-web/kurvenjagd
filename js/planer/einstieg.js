@@ -178,6 +178,12 @@ function garageReiseHtml(reise) {
       </div>
       <h3 class="widget-name">${escapeHtml(reise.name)}</h3>
       <div class="widget-inhalt">
+        <button type="button" class="reise-bild" data-reise-oeffnen="${escapeHtml(reise.id)}"
+                aria-label="Reise ${escapeHtml(reise.name)} &ouml;ffnen">
+          ${karte
+            ? `<span class="tour-vorschau">${karte}<span class="vorschau-osm">&copy; OpenStreetMap</span></span>`
+            : reiseLeerBildHtml(bilanz.tage)}
+        </button>
         <div class="widget-text">
           <div class="widget-werte">
             ${zeile('kalender', 'Zeitraum', zeitraum
@@ -190,12 +196,6 @@ function garageReiseHtml(reise) {
             Weiterplanen &rarr;
           </button>
         </div>
-        <button type="button" class="reise-bild" data-reise-oeffnen="${escapeHtml(reise.id)}"
-                aria-label="Reise ${escapeHtml(reise.name)} &ouml;ffnen">
-          ${karte
-            ? `<span class="tour-vorschau">${karte}<span class="vorschau-osm">&copy; OpenStreetMap</span></span>`
-            : reiseLeerBildHtml(bilanz.tage)}
-        </button>
       </div>
     </div>`;
 }
