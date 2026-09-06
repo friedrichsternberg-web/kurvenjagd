@@ -3292,3 +3292,64 @@ etwas übrig blieb — je enger das Format, desto weniger Karte. Jetzt gibt
 `garageReiseHtml()` einen Rahmen von 420:440 mit, und `kartenBildMehrere()`
 sucht den Zoom für genau dieses Fenster. Dazu 36 % mehr Fläche (156 × 185
 statt 143 × 148) und ein kompakter Zeitraum ohne das laufende Jahr.
+
+### Nachtrag, 06.09.2026 nachts: die richtige Maschine, und sie löst den Rechtspunkt
+
+Friedrich: „ich meine nicht das Motorrad, sondern das graue Motorrad aus der
+aktuell gepushten App … dieses Bike statt das blaue. Auch bitte nochmal die
+Position auf der Plattform prüfen, das Bike steht zu weit rechts versetzt.
+Auch bitte die Lücke zwischen Honda und Hubraum verkleinern. Bei der Reise
+die Karte nochmal 30 % größer. Im Querformat scrollt rechts mein Bike separat
+vom Rest — bitte eine passende Page mit allem als Widget-Design, ohne dass
+rechts und links separat gescrollt wird, sondern als eins."
+
+**Die graue Maschine ist die aus dem ersten Werkstattbild** (der hellen
+blau-weißen Werkstatt vom August 2026), nicht die aus `bike-standard.webp`.
+Beide sahen im dunklen Raum ähnlich aus, sind aber zwei verschiedene Bilder —
+und der Unterschied ist der wichtigste Punkt der Bildprüfung vom 01.09.2026:
+
+> „Im Werkstattbild ist kein fremdes Markenzeichen zu sehen … die
+> Beispielmaschine darauf ist eine Fantasiemaschine." Und: „Der Fund:
+> `img/bike-standard.webp` ist **keine** Fantasiemaschine."
+
+Mit dem Tausch fällt also die einzige unklare Bildherkunft im Ordner `img/`
+weg — der Punkt in `AUFGABEN.md` ist erledigt, nicht mehr nur verschoben.
+
+**Freigestellt mit u2netp**, demselben Modell, das der Freisteller der App
+benutzt: `werkzeug/bike-standard.py` rechnet mit denselben Zahlen wie
+`modellMaske()` in `freisteller.js` (Kante 320, ImageNet-Normalisierung mit
+dem größten vorkommenden Wert statt 255, Rampe statt hartem Schnitt) — sonst
+sähe ein selbst freigestelltes Foto anders aus als das Standardbild. Zwei
+Nachbehandlungen kamen dazu, beide aus dem Bild begründet: Was **blau** ist,
+gehört nicht zur Maschine (sie ist vollständig neutral, die Werkstatt
+dahinter blau — durch die Lücke zwischen Tank und Gabel hielt das Modell ein
+Stück Werkbank für einen Teil des Motorrads), und behalten wird nur, was mit
+der Bildmitte **zusammenhängt** (Fetzen des Drehtellers neben dem Vorderrad
+sind so grau wie die Maschine, also über die Farbe nicht zu fassen, berühren
+sie aber nicht).
+
+**Die Maschine stand rechts neben dem Teller**, weil die Raumschicht 66 % der
+Karte breit war, die Bühne mit dem Bild darauf aber nur 51 % — zwei
+verschiedene Mitten, rund 30 Punkte auseinander. Der Raum liegt jetzt **in**
+der Bühne statt daneben in der Karte, mit einem festen Überhang von 44
+Punkten nach links für den weichen Übergang, und
+`background-position: calc(50% + 22px)` — die halbe Überhangbreite — legt die
+Tellermitte des Bildes wieder genau auf die Bühnenmitte. Der Wert hängt nur
+am Überhang, nicht an der Kartenbreite, und stimmt deshalb in jedem Format.
+
+**Ein Fehler dabei:** Eine Regel `.bike-buehne > :not(.bike-raum) { position:
+relative }` sollte Bild und Tafel über den Raum heben — sie setzte die Tafel
+aber von `absolute` auf `relative` und schob sie aus dem Bild. Wer einen
+z-index braucht, bekommt ihn einzeln, nicht über einen Sammelselektor.
+
+**Das Querformat** war ab 1100 Punkten ein Zweispalter mit **stehender**
+(`position: sticky`) Bike-Karte links neben einer scrollenden Spalte rechts —
+das las sich wie zwei getrennte Bereiche. Jetzt ein Widget-Raster: oben die
+Bike-Karte und die nächste Reise nebeneinander und gleich hoch
+(`align-items: stretch`), darunter die Bänder über die volle Breite. Alles
+gehört zu einer Seite und scrollt gemeinsam.
+
+Dazu: Die Lücke zwischen Namen und Werten von 12 auf 8 Punkte (die erste
+Wertezeile addierte ihren eigenen Innenabstand dazu), und das Kartenfenster
+der Reise noch einmal um 30 Prozent gewachsen (auf dem Handy 176 × 212, im
+Breiten 380 × 330).

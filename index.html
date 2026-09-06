@@ -516,13 +516,6 @@
            unscharf hinter der ganzen Karte (--bike-bild, gesetzt von
            zeichneMotorradBild) - Grundsatz 4: Glas ueber etwas Echtem. -->
       <section id="garageDatenblatt" class="karte bike-karte" hidden>
-        <!-- Die Werkstatt als Untergrund der rechten Kartenhaelfte: derselbe
-             Raum, in dem die Maschine bis zum 05.09.2026 auf einem Drehteller
-             stand, jetzt als Bild in der Karte statt als gerechnete Buehne.
-             Er laeuft nach links weich aus, damit die Werte darauf lesbar
-             bleiben. Ohne eigenes Foto steht die Werkstatt leer da - genau
-             das ist der Leerzustand. -->
-        <span class="bike-raum" aria-hidden="true"></span>
         <div class="bike-kopf">
           <span class="abzeichen">Mein Bike</span>
           <div class="motorrad-umschalter segmented" id="motorradUmschalter" hidden></div>
@@ -541,6 +534,13 @@
             </button>
           </div>
           <div class="bike-buehne">
+            <!-- Die Werkstatt als Untergrund: derselbe Raum, in dem die
+                 Maschine bis zum 05.09.2026 auf einem Drehteller stand,
+                 jetzt als Bild statt als gerechnete Buehne. Er steht IN der
+                 Buehne und nicht daneben in der Karte - nur so liegen der
+                 Teller im Bild und die Maschine darauf uebereinander. Nach
+                 links laeuft er weich aus, damit die Werte lesbar bleiben. -->
+            <span class="bike-raum" aria-hidden="true"></span>
             <img id="motorradBild" class="bike-bild" alt="">
             <!-- Solange kein eigenes Foto da ist, steht dort das
                  Standardmotorrad und darauf diese Tafel: Sucherwinkel,

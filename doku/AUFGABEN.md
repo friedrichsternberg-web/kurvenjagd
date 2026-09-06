@@ -236,19 +236,15 @@ where has_function_privilege(r.rolname, p.oid, 'EXECUTE')
   Werkstattraum ein Schriftzug? Trägt die Beispielmaschine eine erkennbare
   Tankform? Auch zufällige Ähnlichkeit ist abmahnfähig, und die Haftung
   liegt beim Verwender, nicht beim Generator. Einmalig, halbe Stunde.
-- **Herkunft von `img/bike-standard.webp` klären — WIEDER OFFEN seit dem
-  06.09.2026, und der wichtigste Punkt der Rechtsprüfung.** Die
-  Beispielmaschine ähnelt sehr deutlich einem real erhältlichen Modell (dem
-  Augenschein nach der Kawasaki-Z-Reihe): Tankverkleidung, Vierfach-Krümmer,
-  Scheinwerferform, Lackierung. Zwei Fragen: Woher stammt die Vorlage (ein
-  Pressefoto wäre ein **echtes** Urheberrecht, kein KI-Thema), und ist die
-  Form nah genug an einem eingetragenen Geschmacksmuster? Auch zufällige
-  Ähnlichkeit ist abmahnbar, und die Haftung liegt beim Verwender.
-
-  Das Bild war am 05.09.2026 mit dem Werkstattumbau gelöscht und kam am
-  06.09.2026 auf Friedrichs Wunsch zurück — es steht jetzt wieder auf dem
-  **Startbildschirm**, also so sichtbar wie nur möglich. Ausweg, falls sich
-  nichts klären lässt: eine eigene Fantasiemaschine erzeugen.
+- **Herkunft von `img/bike-standard.webp` — ERLEDIGT am 06.09.2026, durch
+  Tausch.** Die blaue Maschine, die einem real erhältlichen Modell ähnelte
+  (dem Augenschein nach der Kawasaki-Z-Reihe), wird nicht mehr
+  ausgeliefert. An ihrer Stelle steht die Beispielmaschine aus dem ersten
+  Werkstattbild der App — dieselbe, die die Bildprüfung vom 01.09.2026
+  ausdrücklich als **Fantasiemaschine** eingestuft hat. Freigestellt von
+  `werkzeug/bike-standard.py` mit u2netp aus der Vorlage in
+  `arbeitsmaterial/vorlagen/`. Damit ist die einzige unklare Bildherkunft
+  im Ordner `img/` beseitigt.
 - **Herkunft von `hintergrund-weich.jpg` klären.** Dieselbe vage
   Formulierung („beziehungsweise von ihm geliefertes Bild"). Die
   Kachelbilder unter `img/kacheln/`, zu denen dieselbe Frage stand, sind

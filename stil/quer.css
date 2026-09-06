@@ -190,26 +190,36 @@
      Reiter und Konto passen erst ab 900 in die Leiste (siehe Abschnitt 1). */
   #garageScreen .start-screen-inner { max-width: var(--feed-max); }
 
+  /* Ab 1100 Punkten ein Widget-Raster: oben die Bike-Karte und die naechste
+     Reise nebeneinander und GLEICH HOCH, darunter die Baender ueber die
+     volle Breite. Alles gehoert zu EINER Seite und scrollt gemeinsam.
+
+     Hier stand zuerst eine stehende (sticky) Bike-Karte links neben einer
+     scrollenden Spalte rechts. Das las sich wie zwei getrennte Bereiche -
+     genau der Eindruck, den ein Startbildschirm nicht machen soll. */
   @media (min-width: 1100px) {
     #startInner {
       display: grid;
-      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-      column-gap: var(--s6);
-      row-gap: var(--s5);
-      align-items: start;
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+      gap: var(--s5) var(--s6);
+      /* stretch statt start: Die beiden Karten der ersten Zeile sind damit
+         gleich hoch, und erst das laesst sie als Paar erscheinen. */
+      align-items: stretch;
     }
-    #startInner .bike-karte {
-      grid-column: 1;
-      grid-row: 1 / span 12;
-      position: sticky;
-      top: calc(var(--nav-raum) + var(--s5));
-    }
-    #startInner .start-abschnitt,
-    #startInner .rechts-fuss { grid-column: 2; }
-    /* Auf der halben Seite darf die Maschine groesser sprechen. */
-    #startInner .bike-buehne { min-height: 260px; }
-    #startInner .bike-bild { max-height: 360px; }
-    #startInner .bike-name { font-size: 30px; }
+    #startInner .bike-karte,
+    #startInner .bike-leer { grid-column: 1; grid-row: 1; }
+    #startInner #garageReise { grid-column: 2; grid-row: 1; }
+    /* Die Baender sind Reihen zum Wischen - sie nehmen die volle Breite. */
+    #startInner #garageMerkliste,
+    #startInner #garageShop,
+    #startInner #garageReifen,
+    #startInner .rechts-fuss { grid-column: 1 / -1; }
+
+    /* Damit die Reisekarte die Hoehe der Bike-Karte wirklich ausfuellt und
+       nicht oben in ihrer Spalte klebt. */
+    #startInner #garageReise { display: flex; flex-direction: column; }
+    #startInner .start-reise,
+    #startInner .reise-einladung { flex: 1; }
   }
 
   /* Die Bike-Karte im Breiten: Die Werte duerfen nicht ueber die halbe
@@ -231,11 +241,11 @@
      mitwachsen - bei 1344 Punkten Kartenbreite waeren 44 Prozent ein 590
      Punkte breiter, 150 hoch flacher Streifen. Feste Obergrenze, dafuer
      hoeher. */
-  .start-reise { grid-template-columns: minmax(0, 320px) minmax(0, 1fr); }
+  .start-reise { grid-template-columns: minmax(0, 380px) minmax(0, 1fr); }
   /* Fast quadratisch wie auf dem Handy: Das Karten-SVG wird in einem
      Verhaeltnis von 440:420 gerechnet, und je naeher das Fenster daran
      liegt, desto weniger schneidet "slice" von der Route ab. */
-  .start-reise-bild { min-height: 290px; }
+  .start-reise-bild { min-height: 330px; }
 
   /* --- 4. Listenbildschirme in Lesebreite -------------------------------------
      Touren (und spaeter Rechtliches, und der Shop, wenn er wiederkommt)

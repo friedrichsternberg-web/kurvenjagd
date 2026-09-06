@@ -2701,25 +2701,33 @@ button.karte:active { transform: scale(0.985); }
    davor. */
 .bike-raum {
   position: absolute;
-  top: 0; right: 0; bottom: 0;
-  width: 66%;
+  /* Bis an die Kartenkanten (der Innenabstand wird herausgerechnet), nach
+     LINKS mit einem festen Ueberhang von 44 Punkten - der traegt den
+     weichen Uebergang zu den Werten. */
+  inset: calc(-1 * var(--s4)) calc(-1 * var(--s4)) calc(-1 * var(--s4)) -44px;
   z-index: 0;
   /* Zwei Schichten: oben ein dunkler Schleier, der das Ringlicht der
      Werkstatt daempft (es haengt sonst als heller Bogen hinter dem Namen),
      darunter das Bild. */
+  /* Die halbe Ueberhangbreite nach rechts: Damit liegt die Tellermitte des
+     Bildes genau auf der Mitte der BUEHNE - und die Maschine steht auf dem
+     Teller statt daneben. Der Wert haengt nur am Ueberhang oben, nicht an
+     der Kartenbreite, und stimmt deshalb in jedem Format. */
   background:
-    linear-gradient(to bottom, var(--schatten-tief), transparent 46%),
-    url("../img/bike-raum.webp") center bottom / cover no-repeat;
+    linear-gradient(to bottom, var(--schatten-voll) 6%, var(--schatten-tief) 34%, transparent 62%),
+    url("../img/bike-raum.webp") calc(50% + 22px) bottom / cover no-repeat;
   /* Der Uebergang zu den Werten: ein linearer Verlauf, der am linken Rand
      WIRKLICH bei null ist. Hier stand zuerst ein radialer vom Teller aus -
      der war am linken Rand noch bei rund einem Drittel Deckkraft, und
      genau daher kam die harte Kante mitten in der Karte. */
-  -webkit-mask-image: linear-gradient(to right, transparent 2%, black 52%);
-  mask-image: linear-gradient(to right, transparent 2%, black 52%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 42%);
+  mask-image: linear-gradient(to right, transparent 0%, black 42%);
   pointer-events: none;
 }
-/* Der Inhalt liegt darueber, die Lichtkante der Karte darueber hinaus. */
-.bike-karte > *:not(.bike-raum) { position: relative; z-index: 1; }
+/* Die Lichtkante der Karte liegt ueber allem. Das Bild bekommt seinen
+   z-index in seiner eigenen Regel weiter unten, die Tafel bringt ihren
+   selbst mit. Hier stand zuerst eine Regel fuer ALLE Kinder der Buehne -
+   sie setzte die Tafel von absolut auf relativ und schob sie aus dem Bild. */
 .bike-karte::before { z-index: 2; }
 
 .bike-kopf {
@@ -2734,7 +2742,7 @@ button.karte:active { transform: scale(0.985); }
    im HTML, nur versteckt - und "+" sieht ihn trotzdem. */
 .bike-kopf .motorrad-umschalter:not([hidden]) + .glas-rund.klein { margin-left: 0; }
 .bike-name {
-  margin: 0 0 var(--s3);
+  margin: 0 0 var(--s2);
   font-family: var(--schrift-display);
   font-size: 24px;
   font-weight: 700;
@@ -2770,6 +2778,11 @@ button.karte:active { transform: scale(0.985); }
   align-items: center;
   gap: var(--s3);
   padding: var(--s2) 0;
+}
+/* Die erste Zeile schliesst direkt an den Namen an - ihr eigener
+   Innenabstand oben addierte sich sonst zum Abstand darueber. */
+.bike-wert:first-child {
+  padding-top: 0;
   border-bottom: 1px solid var(--glas-hauch);
 }
 .bike-wert:last-child { border-bottom: 0; }
@@ -2794,6 +2807,11 @@ button.karte:active { transform: scale(0.985); }
    der die Maschine vom "Schweben" befreit, ohne Zeichenflaeche. */
 .bike-buehne {
   position: relative;
+  /* Der Raum ragt ueber die Buehne hinaus - die Karte selbst schneidet ihn
+     an ihren Kanten ab (sie hat overflow: hidden). Der Innenabstand unten
+     haelt die Maschine von der Kartenkante fern, sie soll auf dem Teller
+     stehen. */
+  padding-bottom: var(--s2);
   min-height: 186px;
   align-self: stretch;
   display: flex;
@@ -2812,7 +2830,12 @@ button.karte:active { transform: scale(0.985); }
 }
 .bike-bild {
   position: relative;
-  width: 100%;
+  z-index: 1;
+  /* Etwas breiter als die Buehne: Der Teller im Raumbild ist breiter als
+     sie, und die Maschine soll ihn ausfuellen statt darauf zu stehen wie
+     ein Modell auf einem Sockel. */
+  width: 112%;
+  margin-inline: -6%;
   height: auto;
   max-height: 270px;
   object-fit: contain;
@@ -2976,7 +2999,7 @@ button.karte:active { transform: scale(0.985); }
    Spalten die Hoehe, und das Bild fuellt sie. */
 .start-reise {
   display: grid;
-  grid-template-columns: minmax(0, 48%) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 54%) minmax(0, 1fr);
   gap: var(--s3) var(--s4);
   align-items: stretch;
 }
@@ -2986,7 +3009,7 @@ button.karte:active { transform: scale(0.985); }
   border-radius: var(--r-md);
   overflow: hidden;
   /* Damit die Karte auch bei einem kurzen Namen etwas hermacht. */
-  min-height: 185px;
+  min-height: 212px;
   background: var(--raum-dunkel);
 }
 /* .tour-vorschau ist die Vorschau der TOURENLISTE: Dort sitzt sie oben in

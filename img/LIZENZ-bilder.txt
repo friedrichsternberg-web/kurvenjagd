@@ -22,25 +22,22 @@ garage-werkstatt.webp, garage-werkstatt-standard.webp
   Ausschnitt bike-raum.webp, siehe oben.
 
 bike-standard.webp
-  Freigestelltes Standardmotorrad, aus einem von Friedrich Sternberg
-  gelieferten Bild, freigestellt im August 2026. Es steht in der Werkstatt
-  der Bike-Karte, solange kein eigenes Foto hinterlegt ist; darueber liegt
-  dann die Tafel "Dein Bike einfuegen".
+  Das Standardmotorrad in der Bike-Karte, solange kein eigenes Foto da ist.
+  Es ist die Beispielmaschine aus dem ERSTEN Werkstattbild der App (der
+  hellen blau-weissen Werkstatt vom August 2026) und damit dieselbe
+  Maschine, die die Bildpruefung vom 01.09.2026 ausdruecklich als
+  FANTASIEMASCHINE eingestuft hat - futuristische Form, keine erkennbare
+  Marke, kein reales Vorbild.
 
-  OFFEN, geprueft am 01.09.2026, unveraendert offen: Diese Herkunft ist die
-  einzige unklare in dieser Datei. Anders als bei den KI-Bildern zeigt
-  dieses Bild KEINE Fantasiemaschine - Tankverkleidung, Vierfach-Kruemmer,
-  Scheinwerferform und die Lackierung aehneln sehr deutlich einem real
-  erhaeltlichen Modell (dem Augenschein nach der Kawasaki-Z-Reihe). Zwei
-  Fragen bleiben: Woher stammt die Vorlage (ein Pressefoto waere ein
-  ECHTES Urheberrecht, kein KI-Thema), und ist die Form nah genug an einem
-  eingetragenen Geschmacksmuster?
+  Freigestellt am 06.09.2026 von werkzeug/bike-standard.py aus der Vorlage
+  arbeitsmaterial/vorlagen/"Bild Werkstatt default.png", mit u2netp -
+  demselben Modell, das auch der Freisteller der App benutzt.
 
-  Am 05.09.2026 war das Bild deshalb entfernt; am 06.09.2026 kam es auf
-  Friedrichs ausdruecklichen Wunsch zurueck. Die Frage ist damit NICHT
-  beantwortet - sie steht weiter in AUFGABEN.md und muss vor der
-  Veroeffentlichung geklaert sein. Ausweg, falls sich nichts klaeren
-  laesst: eine eigene Fantasiemaschine erzeugen.
+  ERSETZT die frueher hier liegende Datei: eine blaue Maschine aus einem
+  von Friedrich Sternberg gelieferten Bild, die einem real erhaeltlichen
+  Modell sehr aehnelte (dem Augenschein nach der Kawasaki-Z-Reihe) und
+  deren Herkunft ungeklaert war. Sie war die einzige unklare Herkunft in
+  diesem Ordner; mit dem Tausch ist der Punkt erledigt.
 
 hintergrund-weich.jpg
   Eigenes Foto von Friedrich Sternberg beziehungsweise von ihm geliefertes
