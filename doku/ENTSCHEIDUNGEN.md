@@ -3395,3 +3395,19 @@ hat eine Umbenennung per Regex fremde Regeln miterwischt.
 nachgemessen füllen sie damit 1428 beziehungsweise 1896 Punkte bei 1408
 sichtbaren. Die Leiter der Gründe in `vorschlaege.js` bleibt unverändert, es
 werden nur mehr ihrer Sprossen ausgeschöpft.
+
+**Nachgebessert am selben Abend:** Mit dem neuen Bike sah der Werkstattraum
+im Querformat abgeschnitten aus — übrig blieb ein Streifen Drehteller. Die
+Ursache war nicht das Bild, sondern die Bühne: Die Textspalte war auf 300
+Punkte begrenzt, also wuchs allein die Bühne mit der Kartenbreite und wurde
+immer flacher, während `background-size: cover` oben immer mehr abschnitt.
+Jetzt teilen sich Text und Bühne die Karte halbe und halbe, und die Bühne
+trägt das Seitenverhältnis des Raumbildes (960:860) als `aspect-ratio` —
+damit zeigt `cover` den Raum vollständig, egal wie breit die Karte wird.
+
+Die Tafel „Dein Bike einfügen" war 230 Punkte breit und 85 hoch. Ihre
+Sucherwinkel werden mit ihr gestreckt (`preserveAspectRatio="none"`), und
+bei einem Verhältnis von 2,7 zogen sich die Ecken sichtbar in die Länge.
+Bei 150 Punkten bricht die Zeile um, die Tafel wird 150 × 85 (1,76 statt
+2,7), und sie sitzt jetzt im oberen Viertel der Bühne statt in der Mitte —
+über der Maschine an der Wand, nicht auf dem Tank.

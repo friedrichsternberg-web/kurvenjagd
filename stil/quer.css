@@ -229,15 +229,23 @@
      Leiste - er steht links unter den Werten wie auf dem Handy, nur ohne
      die volle Breite zu nehmen. */
   .widget-inhalt {
-    grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+    /* Halbe und halbe statt einer festen Textspalte: Sonst wuchs allein die
+       Buehne mit der Kartenbreite, wurde immer flacher, und das Raumbild
+       verlor bei "cover" oben immer mehr - Ringlicht und Werkbank waren
+       weg, uebrig blieb der Teller. */
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     /* Oben statt unten: Auf dem Handy stehen die Werte buendig mit der
        Maschine, hier ist die Buehne so hoch, dass zwischen Name und Werten
        sonst eine Luecke klafft. */
     align-items: start;
   }
   .widget-knopf { width: auto; align-self: flex-start; padding-inline: var(--s5); font-size: 15px; }
-  .bike-buehne { min-height: 260px; }
-  .bike-bild { max-height: 340px; }
+  /* Die Buehne behaelt das Seitenverhaeltnis des Raumbildes (960 zu 860).
+     Damit zeigt "cover" den Raum vollstaendig, egal wie breit die Karte
+     wird - und die Werkstatt bleibt die Werkstatt statt eines Streifens
+     Drehteller. */
+  .bike-buehne { aspect-ratio: 960 / 860; min-height: 0; }
+  .bike-bild { max-height: none; }
 
   /* Das Kartenbild im Breiten: hoeher, damit es die Hoehe der Bike-Karte
      daneben mittraegt. */

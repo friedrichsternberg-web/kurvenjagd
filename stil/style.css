@@ -2867,10 +2867,10 @@ button.karte:active { transform: scale(0.985); }
 .buehne-hinweis {
   position: absolute;
   z-index: 5;
-  /* Schmaler als die Buehne und im oberen Drittel: Die Maschine darunter
-     soll erkennbar bleiben, die Tafel liegt ueber ihr statt auf ihr. */
+  /* Im oberen Viertel und schmal: Die Maschine steht unten auf dem Teller,
+     die Tafel gehoert DARUEBER an die Wand - nicht auf den Tank. */
   left: 8%; right: 8%;
-  top: 30%;
+  top: 22%;
   transform: translateY(-50%);
   display: flex;
   justify-content: center;
@@ -2889,16 +2889,19 @@ button.karte:active { transform: scale(0.985); }
 .hinweis-tafel {
   position: relative;
   width: 100%;
-  /* Auf breiten Bildschirmen ist die Buehne fast 400 Punkte breit - eine
-     Tafel ueber die volle Breite deckte die Maschine darunter zu. */
-  max-width: 230px;
+  /* Schmal halten: Die Sucherwinkel werden mit der Tafel gestreckt
+     (preserveAspectRatio="none"), und eine breite flache Tafel zieht ihre
+     Ecken in die Laenge. Bei 150 Punkten bricht die Zeile auf zwei um, die
+     Tafel wird dadurch fast so hoch wie breit - und die Winkel behalten
+     ungefaehr die Form ihrer Vorlage (100 zu 74). */
+  max-width: 150px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--s1);
+  gap: var(--s2);
   /* Unten mehr Luft als oben: Dort haengt das Abzeichen halb in der Kante. */
-  padding: var(--s3) var(--s2) var(--s4);
+  padding: var(--s4) var(--s3) var(--s5);
   border-radius: var(--r-md);
   /* Glas ueber dem Raumbild - eine Linse ueber etwas Echtem. Dunkel
      getoent, weil dahinter die helle Werkzeugwand liegt. */
