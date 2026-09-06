@@ -3470,3 +3470,26 @@ die Vorlage zeigt das Bild eingefasst. Also wieder Rand rundum, vier runde
 Ecken, und die Textspalte verteilt ihren Inhalt (`space-between`): Zeilen
 oben, Knopf unten, bündig mit dem Bild. Vorher stand der Knopf mitten in
 der Spalte, darunter Leere — auch das las sich als verschoben.
+
+**Vier Nachbesserungen am selben Tag**, alle aus Friedrichs Blick auf die
+fertige Karte:
+
+- **„Verschwommen und durchsichtig, vor allem rechts."** Zwei Ursachen.
+  `.bike-bild.ist-standard` trug `opacity: 0.8` — ich hatte das gesetzt,
+  damit das Standardmotorrad „zurücktritt"; vor dem hellen Teller sah es
+  schlicht durchsichtig aus. Dass es nicht die eigene Maschine ist, sagt die
+  Tafel darüber, das muss das Bild nicht auch andeuten. Dazu war das Bild
+  900 Punkte breit und wurde auf breiten Schirmen fast eins zu eins
+  gezeigt; jetzt 1200 (137 statt 90 KB, die Vorlage hat 1774).
+- **Der Übergang nach links** lief über 42 Prozent eines nur 44 Punkte
+  breiten Überhangs — zu kurz, um eine Kante aufzulösen. Jetzt 150 Punkte
+  Überhang und 55 Prozent Verlauf, damit reicht er weit in die Spalte der
+  Werte. Die Verschiebung des Bildes wurde mitgezogen: `(150 − 16) / 2`,
+  also 67 statt 14 Punkte.
+- **Die Maschine war zu groß für den Teller** (112 Prozent der Bühne, sie
+  stand über seine Kante hinaus). Jetzt 94 Prozent.
+- **Die Tafel saß auf einem Prozentwert der Bühnenhöhe** und lag dadurch bei
+  jeder Kartenbreite woanders — mal über der Maschine, mal auf ihrem Tank.
+  Sie steht jetzt **im Fluss**: Die Bühne ist ein Stapel (Tafel oben,
+  Maschine unten), und ein Abstand von `--s5` hält sie darüber. Das gilt in
+  jedem Format ohne einen einzigen Prozentwert.

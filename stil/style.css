@@ -2721,7 +2721,11 @@ button.karte:active { transform: scale(0.985); }
   /* Bis an die Kartenkanten (der Innenabstand wird herausgerechnet), nach
      LINKS mit einem festen Ueberhang von 44 Punkten - der traegt den
      weichen Uebergang zu den Werten. */
-  inset: calc(-1 * var(--s4)) calc(-1 * var(--s4)) calc(-1 * var(--s4)) -44px;
+  /* Nach links mit einem festen Ueberhang von 150 Punkten: Der traegt den
+     Uebergang zu den Werten, und je laenger er ist, desto weicher wird er.
+     Mit 44 war er auf ein Drittel davon gedraengt und blieb als Kante
+     sichtbar. */
+  inset: calc(-1 * var(--s4)) calc(-1 * var(--s4)) calc(-1 * var(--s4)) -150px;
   z-index: 0;
   /* Der Raum steht ohne Schleier da - Ringlicht, Werkzeugwand, Werkbank,
      Teller. Hier lag zuerst ein dunkler Verlauf ueber dem oberen Teil, der
@@ -2730,19 +2734,22 @@ button.karte:active { transform: scale(0.985); }
      linken Spalte und nicht mehr ueber dem Raum, das Ringlicht stoert also
      nichts mehr.
 
-     Die Verschiebung nach rechts: Der Raum ragt links 44 und rechts 16
-     Punkte ueber die Buehne hinaus, seine Mitte liegt also 14 Punkte links
-     der Buehnenmitte. Um diese 14 Punkte rueckt das Bild nach rechts,
-     damit die Tellermitte auf der Buehnenmitte liegt und die Maschine auf
-     dem Teller steht statt daneben. Der Wert haengt nur am Ueberhang,
-     nicht an der Kartenbreite, und stimmt deshalb in jedem Format. */
-  background: url("../img/bike-raum.webp") calc(50% + 14px) bottom / cover no-repeat;
+     Die Verschiebung nach rechts: Der Raum ragt links 150 und rechts 16
+     Punkte ueber die Buehne hinaus, seine Mitte liegt also 67 Punkte links
+     der Buehnenmitte ((150 - 16) / 2). Um genau die rueckt das Bild nach
+     rechts, damit die Tellermitte auf der Buehnenmitte liegt und die
+     Maschine auf dem Teller steht statt daneben. Der Wert haengt nur am
+     Ueberhang, nicht an der Kartenbreite, und stimmt in jedem Format. */
+  background: url("../img/bike-raum.webp") calc(50% + 67px) bottom / cover no-repeat;
   /* Der Uebergang zu den Werten: ein linearer Verlauf, der am linken Rand
      WIRKLICH bei null ist. Hier stand zuerst ein radialer vom Teller aus -
      der war am linken Rand noch bei rund einem Drittel Deckkraft, und
      genau daher kam die harte Kante mitten in der Karte. */
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 42%);
-  mask-image: linear-gradient(to right, transparent 0%, black 42%);
+  /* Der Verlauf laeuft ueber die halbe Raumbreite und beginnt schon bei
+     null - mit den 150 Punkten Ueberhang reicht er damit weit in die
+     Spalte der Werte hinein und loest die Kante ganz auf. */
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 55%);
+  mask-image: linear-gradient(to right, transparent 0%, black 55%);
   pointer-events: none;
 }
 /* Die Lichtkante der Karte liegt ueber allem. Das Bild bekommt seinen
@@ -2866,9 +2873,14 @@ button.karte:active { transform: scale(0.985); }
   padding-bottom: var(--s2);
   min-height: 200px;
   align-self: stretch;
+  /* Ein Stapel: die Tafel oben, die Maschine unten auf dem Teller. Die
+     Tafel stand vorher absolut auf einem Prozentwert der Buehnenhoehe -
+     bei jeder anderen Kartenbreite lag sie damit woanders, mal ueber der
+     Maschine, mal auf ihrem Tank. Im Fluss sitzt sie immer knapp darueber. */
   display: flex;
-  align-items: flex-end;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
 }
 /* Der Kontaktschatten auf dem Teller. Schwaecher als frueher: Der Teller
    im Bild traegt die Maschine schon optisch, der Schatten setzt sie nur auf. */
@@ -2883,20 +2895,20 @@ button.karte:active { transform: scale(0.985); }
 .bike-bild {
   position: relative;
   z-index: 1;
-  /* Etwas breiter als die Buehne: Der Teller im Raumbild ist breiter als
-     sie, und die Maschine soll ihn ausfuellen statt darauf zu stehen wie
-     ein Modell auf einem Sockel. */
-  width: 112%;
-  margin-inline: -6%;
+  /* Etwas schmaler als die Buehne: Die Maschine soll AUF dem Teller
+     stehen und ihn noch sehen lassen. Mit 112 Prozent stand sie ueber
+     seine Kante hinaus. */
+  width: 94%;
   height: auto;
   max-height: 270px;
   object-fit: contain;
   object-position: center bottom;
   filter: drop-shadow(0 10px 8px var(--schatten-mittel));
 }
-/* Das Standardmotorrad tritt zurueck: Es zeigt, dass hier eine Maschine
-   hingehoert, ist aber nicht die eigene - und darueber liegt die Tafel. */
-.bike-bild.ist-standard { opacity: 0.8; }
+/* Das Standardmotorrad steht voll da. Hier lag einmal opacity: 0.8, damit
+   es "zurueckritt" - es sah dadurch durchsichtig aus, besonders rechts vor
+   dem hellen Teller. Dass es nicht die eigene Maschine ist, sagt die Tafel
+   darueber, das muss das Bild nicht auch noch andeuten. */
 
 /* ---------- Die Tafel "Dein Bike einfuegen" ----------
    Sie liegt mittig auf dem Standardmotorrad und erscheint nur, solange kein
@@ -2906,15 +2918,14 @@ button.karte:active { transform: scale(0.985); }
    Bis zum 05.09.2026 rechnete setzeBuehnenPlatz() ihre Lage aus, weil die
    Buehne selbst gerechnet wurde; in der Karte genuegt "mittig". */
 .buehne-hinweis {
-  position: absolute;
+  /* Im Fluss ueber der Maschine, nicht absolut auf einem Prozentwert -
+     siehe die Begruendung bei .bike-buehne. */
+  position: relative;
   z-index: 5;
-  /* Ueber der Maschine, nicht auf ihr: Sie steht unten auf dem Teller, die
-     Tafel haengt davor an der Wand. Auf dem Handy ist die Buehne hoch und
-     die Maschine flach - dort sitzt die Tafel tiefer (quer.css setzt sie
-     im Breiten wieder hoeher). */
-  left: 8%; right: 8%;
-  top: 50%;
-  transform: translateY(-50%);
+  width: 100%;
+  /* Deutlich Luft nach unten: Die Tafel gehoert an die Wand ueber der
+     Maschine, nicht auf ihren Lenker. */
+  margin-bottom: var(--s5);
   display: flex;
   justify-content: center;
   padding: 0;
@@ -2926,8 +2937,8 @@ button.karte:active { transform: scale(0.985); }
   animation: hinweis-auftauchen 0.5s ease-out both;
 }
 @keyframes hinweis-auftauchen {
-  from { opacity: 0; transform: translateY(calc(-50% - 8px)); }
-  to   { opacity: 1; transform: translateY(-50%); }
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: none; }
 }
 .hinweis-tafel {
   position: relative;

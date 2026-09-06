@@ -242,9 +242,9 @@
   .bike-karte { grid-template-columns: minmax(0, 46%) minmax(0, 1fr); }
   .bike-buehne { align-self: start; aspect-ratio: 960 / 860; min-height: 100%; }
   .bike-bild { max-height: none; }
-  /* Im Breiten ist die Maschine hoch und die Buehne fast quadratisch - die
-     Tafel rueckt nach oben, sonst laege sie auf dem Tank. */
-  .buehne-hinweis { top: 21%; }
+  /* Im Breiten hat die Buehne mehr Hoehe, als Tafel und Maschine brauchen -
+     die Tafel rueckt etwas hoch, damit sie nicht auf dem Lenker klebt. */
+  .buehne-hinweis { margin-bottom: var(--s7); }
 
   /* Das Kartenbild im Breiten: hoeher, damit es die Hoehe der Bike-Karte
      daneben mittraegt, und etwas mehr als die halbe Karte - die Zeilen

@@ -14,10 +14,12 @@ das Skript laeuft also nur auf Friedrichs Rechner. Zu tun bleibt zweierlei:
      meist breite leere Raender; in der Karte wuerde die Maschine dadurch
      klein wirken, weil die Karte das leere Rechteck mitskaliert.
 
-  2. Auf 900 Punkte Breite verkleinern und als WebP speichern. Gerechnet,
-     nicht gegriffen: Die Buehne ist auf dem Handy rund 155 Punkte breit
-     (bei dreifacher Punktdichte 465), im Querformat rund 390 (bei
-     zweifacher 780). 900 deckt beides ab.
+  2. Auf 1200 Punkte Breite verkleinern und als WebP speichern. Gerechnet,
+     nicht gegriffen: Die Buehne ist auf dem Handy rund 170 Punkte breit
+     (bei dreifacher Punktdichte 510), im Querformat bis 480 (bei
+     zweifacher 960, auf einem sehr breiten Schirm mehr). Mit 900 wirkte
+     die Maschine dort weich - die Vorlage hat 1774, also ist die Reserve
+     da.
 
 HIER STAND EINMAL EIN FREISTELLER, der die Maschine mit u2netp aus dem
 alten Werkstattbild schnitt. Das Ergebnis war an den Kanten nicht gut genug
@@ -32,7 +34,7 @@ PROJEKT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 VORLAGE = os.path.join(PROJEKT, 'arbeitsmaterial', 'vorlagen', 'Motorrad neu.png')
 ZIEL = os.path.join(PROJEKT, 'img', 'bike-standard.webp')
 
-ZIEL_BREITE = 900
+ZIEL_BREITE = 1200
 GUETE = 88        # hoeher als beim Raum: Das ist das Motiv, nicht der Grund
 
 
