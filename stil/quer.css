@@ -233,14 +233,13 @@
      Damit zeigt "cover" den Raum vollstaendig, egal wie breit die Karte
      wird - und die Werkstatt bleibt die Werkstatt statt eines Streifens
      Drehteller. */
-  /* Die Buehne behaelt das Seitenverhaeltnis des Raumbildes (960 zu 860)
-     und richtet sich oben aus statt sich zu strecken: Ist sie dadurch
-     hoeher als die linke Spalte, waechst die Karte mit - und "cover"
-     zeigt den Raum vollstaendig, egal wie breit die Karte wird. Auf dem
-     Handy gilt das nicht, dort ist die Buehne schmal und muss die volle
-     Hoehe der Karte fuellen (stretch). */
-  .bike-karte { grid-template-columns: minmax(0, 46%) minmax(0, 1fr); }
-  .bike-buehne { align-self: start; aspect-ratio: 960 / 860; min-height: 100%; }
+  /* Die Buehne braucht im Breiten Hoehe, sonst wird der Raum dahinter zu
+     einem Streifen: Bei 340 Punkten und rund 350 Punkten Breite liegt sie
+     nahe am Seitenverhaeltnis des Bildes (960 zu 860), und "cover" zeigt
+     den Raum fast ganz. Kein aspect-ratio mehr: Zusammen mit einer
+     Mindesthoehe von 100 Prozent machte es die Buehne breiter als ihre
+     Spalte, und die Maschine lief rechts aus der Karte. */
+  .bike-buehne { min-height: 340px; }
   .bike-bild { max-height: none; }
   /* Im Breiten hat die Buehne mehr Hoehe, als Tafel und Maschine brauchen -
      die Tafel rueckt etwas hoch, damit sie nicht auf dem Lenker klebt. */

@@ -2698,7 +2698,11 @@ button.karte:active { transform: scale(0.985); }
      und der Raum begann erst dort. 44 zu 56: Die Maschine ist doppelt so
      breit wie hoch und braucht die Breite mehr als die Werte. */
   display: grid;
-  grid-template-columns: minmax(0, 46%) minmax(0, 1fr);
+  /* Der Anteil der Textspalte steht EINMAL hier und wird zweimal
+     gebraucht: fuer die Spalten des Rasters und fuer die linke Kante des
+     Raums (.bike-raum), die auf der Spaltengrenze liegen muss. */
+  --bike-text-anteil: 0.46;
+  grid-template-columns: minmax(0, calc(var(--bike-text-anteil) * 100%)) minmax(0, 1fr);
   grid-template-rows: auto auto 1fr auto;
   column-gap: var(--s3);
 }
@@ -2707,7 +2711,17 @@ button.karte:active { transform: scale(0.985); }
 .bike-karte .widget-kopf { grid-column: 1 / -1; grid-row: 1; position: relative; z-index: 3; }
 .bike-karte .widget-name { grid-column: 1; grid-row: 2; position: relative; z-index: 1; }
 .bike-karte .widget-werte { grid-column: 1; grid-row: 3; position: relative; z-index: 1; }
-.bike-karte .widget-knopf { grid-column: 1; grid-row: 4; align-self: end; position: relative; z-index: 1; }
+/* Der Knopf hat Inhaltsbreite und steht links unten: justify-self ist
+   noetig, weil ein Rasterkind sonst auf die Spaltenbreite gestreckt wird -
+   width: auto allein aendert daran nichts. So endet er deutlich vor dem
+   Uebergang zur Werkstatt. */
+.bike-karte .widget-knopf {
+  grid-column: 1; grid-row: 4;
+  align-self: end; justify-self: start;
+  width: auto;
+  padding-inline: var(--s3);
+  position: relative; z-index: 1;
+}
 .bike-karte .bike-buehne { grid-column: 2; grid-row: 1 / -1; }
 /* Die Werkstatt als Untergrund der rechten Kartenhaelfte. Sie ersetzt das
    unscharf hinterlegte eigene Foto, das hier zuerst stand: Zwei
@@ -2718,38 +2732,31 @@ button.karte:active { transform: scale(0.985); }
    davor. */
 .bike-raum {
   position: absolute;
-  /* Bis an die Kartenkanten (der Innenabstand wird herausgerechnet), nach
-     LINKS mit einem festen Ueberhang von 44 Punkten - der traegt den
-     weichen Uebergang zu den Werten. */
-  /* Nach links mit einem festen Ueberhang von 150 Punkten: Der traegt den
-     Uebergang zu den Werten, und je laenger er ist, desto weicher wird er.
-     Mit 44 war er auf ein Drittel davon gedraengt und blieb als Kante
-     sichtbar. */
-  inset: calc(-1 * var(--s4)) calc(-1 * var(--s4)) calc(-1 * var(--s4)) -150px;
-  z-index: 0;
-  /* Der Raum steht ohne Schleier da - Ringlicht, Werkzeugwand, Werkbank,
-     Teller. Hier lag zuerst ein dunkler Verlauf ueber dem oberen Teil, der
-     das Ringlicht daempfen sollte; er verschluckte den halben Raum, und
-     genau das sah nach "abgeschnitten" aus. Der Name steht jetzt in der
-     linken Spalte und nicht mehr ueber dem Raum, das Ringlicht stoert also
-     nichts mehr.
+  top: 0; right: 0; bottom: 0;
+  /* Die linke Kante liegt 16 Punkte vor der Buehne (im Spaltenabstand),
+     die rechte 16 Punkte hinter ihr (im Innenabstand der Karte): Der Raum
+     ist damit SYMMETRISCH um die Buehne, und "center" legt die Tellermitte
+     des Bildes von selbst auf die Buehnenmitte - die Maschine steht auf dem
+     Teller, ohne dass das Bild verschoben wuerde.
 
-     Die Verschiebung nach rechts: Der Raum ragt links 150 und rechts 16
-     Punkte ueber die Buehne hinaus, seine Mitte liegt also 67 Punkte links
-     der Buehnenmitte ((150 - 16) / 2). Um genau die rueckt das Bild nach
-     rechts, damit die Tellermitte auf der Buehnenmitte liegt und die
-     Maschine auf dem Teller steht statt daneben. Der Wert haengt nur am
-     Ueberhang, nicht an der Kartenbreite, und stimmt in jedem Format. */
-  background: url("../img/bike-raum.webp") calc(50% + 67px) bottom / cover no-repeat;
-  /* Der Uebergang zu den Werten: ein linearer Verlauf, der am linken Rand
-     WIRKLICH bei null ist. Hier stand zuerst ein radialer vom Teller aus -
-     der war am linken Rand noch bei rund einem Drittel Deckkraft, und
-     genau daher kam die harte Kante mitten in der Karte. */
-  /* Der Verlauf laeuft ueber die halbe Raumbreite und beginnt schon bei
-     null - mit den 150 Punkten Ueberhang reicht er damit weit in die
-     Spalte der Werte hinein und loest die Kante ganz auf. */
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 55%);
-  mask-image: linear-gradient(to right, transparent 0%, black 55%);
+     Hier stand zuerst ein Raum mit 150 Punkten Ueberhang nach links und
+     einer Verschiebung des Bildes um 67 Punkte nach rechts. Das rechnete
+     nur auf dem Handy: Im Breiten fuellt das Bild die Raumbreite genau aus,
+     die Verschiebung schob seine rechte Seite aus der Karte (der Teller war
+     abgeschnitten) und liess links eine harte Bildkante stehen, die das
+     Fading zunichte machte.
+
+     Die Rechnung fuer left: Innenabstand + Textspalte + Spaltenabstand,
+     davon wieder ein Innenabstand zurueck. Prozent bezieht sich hier auf
+     die Kartenbreite innerhalb des Rahmens; die Textspalte ist ein Anteil
+     der Breite innerhalb des Innenabstands. */
+  left: calc(var(--bike-text-anteil) * (100% - 2 * var(--s4)) + var(--s3));
+  z-index: 0;
+  background: url("../img/bike-raum.webp") center bottom / cover no-repeat;
+  /* Der Uebergang zu den Werten: ueber gut die Haelfte der Raumbreite, und
+     er beginnt bei null. -webkit- zuerst, Safari braucht es. */
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 58%);
+  mask-image: linear-gradient(to right, transparent 0%, black 58%);
   pointer-events: none;
 }
 /* Die Lichtkante der Karte liegt ueber allem. Das Bild bekommt seinen
@@ -2838,12 +2845,11 @@ button.karte:active { transform: scale(0.985); }
   padding: var(--s2) 0;
 }
 /* Die erste Zeile schliesst direkt an den Namen an - ihr eigener
-   Innenabstand oben addierte sich sonst zum Abstand darueber. */
-.widget-wert:first-child {
-  padding-top: 0;
-  border-bottom: 1px solid var(--glas-hauch);
-}
-.widget-wert:last-child { border-bottom: 0; }
+   Innenabstand oben addierte sich sonst zum Abstand darueber. Keine
+   Trennlinien zwischen den Zeilen: Sie standen einmal an allen, dann durch
+   einen Editierfehler nur noch an der ersten - als einzelner Strich unter
+   "Hubraum" sahen sie nach einem Fehler aus. */
+.widget-wert:first-child { padding-top: 0; }
 /* Der Symbolkreis: Fuellung und Kante, kein eigener Filter (siehe .karte). */
 .widget-wert-symbol {
   flex: 0 0 auto;
@@ -2873,6 +2879,7 @@ button.karte:active { transform: scale(0.985); }
   padding-bottom: var(--s2);
   min-height: 200px;
   align-self: stretch;
+  z-index: 1;
   /* Ein Stapel: die Tafel oben, die Maschine unten auf dem Teller. Die
      Tafel stand vorher absolut auf einem Prozentwert der Buehnenhoehe -
      bei jeder anderen Kartenbreite lag sie damit woanders, mal ueber der

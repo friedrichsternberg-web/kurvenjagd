@@ -517,6 +517,14 @@
            der Vorlage. Der Kopf mit dem Plus liegt ueber beiden Spalten.
            Gefuellt von garage.js (zeichneGarage). -->
       <section id="garageDatenblatt" class="karte bike-karte" hidden>
+        <!-- Die Werkstatt als Untergrund: derselbe Raum, in dem die
+             Maschine bis zum 05.09.2026 auf einem Drehteller stand, jetzt
+             als Bild statt als gerechnete Buehne. Er liegt ueber die volle
+             Kartenhoehe hinter der rechten Spalte, symmetrisch um die
+             Buehne - so sitzt der Teller im Bild genau unter der Maschine,
+             ohne dass etwas verschoben werden muss. Nach links laeuft er
+             weich in die Werte aus (style.css, .bike-raum). -->
+        <span class="bike-raum" aria-hidden="true"></span>
         <div class="widget-kopf">
           <span class="abzeichen">Mein Bike</span>
           <div class="motorrad-umschalter segmented" id="motorradUmschalter" hidden></div>
@@ -532,13 +540,6 @@
           <svg class="ic klein"><use href="#icon-stift"></use></svg> Bike bearbeiten
         </button>
         <div class="bike-buehne">
-          <!-- Die Werkstatt als Untergrund: derselbe Raum, in dem die
-               Maschine bis zum 05.09.2026 auf einem Drehteller stand,
-               jetzt als Bild statt als gerechnete Buehne. Er steht IN der
-               Buehne und nicht daneben in der Karte - nur so liegen der
-               Teller im Bild und die Maschine darauf uebereinander. Nach
-               links laeuft er weich in die Werte aus. -->
-          <span class="bike-raum" aria-hidden="true"></span>
           <!-- Solange kein eigenes Foto da ist, steht dort das
                Standardmotorrad und darueber diese Tafel: Sucherwinkel,
                Kamerasymbol, und ein Abzeichen, das langsam auf die

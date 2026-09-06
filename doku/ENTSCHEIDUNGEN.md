@@ -3493,3 +3493,34 @@ fertige Karte:
   Sie steht jetzt **im Fluss**: Die Bühne ist ein Stapel (Tafel oben,
   Maschine unten), und ein Abstand von `--s5` hält sie darüber. Das gilt in
   jedem Format ohne einen einzigen Prozentwert.
+
+**Nachgebessert, 07.09.2026 abends — der Raum symmetrisch um die Bühne.**
+Friedrichs Safari-Screenshot zeigte drei Fehler: kein Fading mehr, der
+Teller rechts abgeschnitten, die Maschine im Breiten aus der Karte gelaufen.
+
+Die Ursache war die Verschiebung des Bildes um 67 Punkte, mit der ich die
+Tellermitte auf die Bühnenmitte legen wollte. Sie rechnete nur auf dem
+Handy: Dort ist der Raum schmaler als das Bild, `cover` füllt die Höhe, und
+seitlich ist Luft zum Schieben. Im Breiten ist der Raum breiter als das
+Bild, `cover` füllt die BREITE — das Bild endet genau an beiden Rändern, und
+jede Verschiebung schiebt es rechts aus der Karte (Teller weg) und lässt
+links seine eigene Kante stehen (kein Fading, sondern ein harter Strich).
+
+Jetzt liegt der Raum **symmetrisch** um die Bühne — 16 Punkte links davon
+(im Spaltenabstand) und 16 rechts (im Innenabstand der Karte) — als Kind der
+Karte über ihre volle Höhe. `center` legt die Tellermitte damit von selbst
+auf die Bühnenmitte, ohne Verschiebung, in jedem Format; nachgemessen
+521 zu 521 im Breiten, auf dem Handy ebenso. Die linke Kante des Raums
+kommt aus derselben Zahl wie die Rasterspalte (`--bike-text-anteil`), damit
+beide nie auseinanderlaufen. Das Fading läuft über 58 Prozent der
+Raumbreite, `-webkit-mask-image` zuerst, weil Safari es braucht.
+
+Die Maschine lief rechts aus der Karte, weil `aspect-ratio` neben
+`min-height: 100%` die Bühne breiter rechnete als ihre Spalte; jetzt nur
+noch eine Mindesthöhe von 340 Punkten im Breiten. Der Strich unter
+„Hubraum" war ein Editierfehler — die Trennlinie stand nur noch an der
+ersten Zeile — und ist ganz weg. „Bike bearbeiten" hat Inhaltsbreite: Ein
+Rasterkind streckt sich sonst auf die Spalte, `width: auto` allein ändert
+das nicht, es braucht `justify-self: start`.
+
+Nicht selbst geprüft: Safari — die macOS-Freigabe für Bildschirmfotos fehlt.
