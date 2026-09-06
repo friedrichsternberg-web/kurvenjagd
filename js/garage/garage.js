@@ -331,15 +331,11 @@ function feldWert(id) {
 
 /* --- Motorrad ---------------------------------------------------------- */
 
-function öffneMotorradDialog(vorhandenes = null) {
-  // Das Foto lebt waehrend des Dialogs hier und wandert erst beim Speichern
-  // in die Garage. Wer abbricht, soll nichts veraendert haben.
-  dialogFoto = vorhandenes?.bild || null;
-  dialogFotoOriginal = dialogFoto;
-
-  öffneDialog({
-    titel: vorhandenes ? 'Motorrad bearbeiten' : 'Motorrad hinzufügen',
-    felder: `
+/* Das Formular des Motorrad-Dialogs als Vorlage. Eigene Funktion, damit
+   oeffneMotorradDialog() unter 80 Zeilen bleibt (Regel 5) und man das
+   Formular lesen kann, ohne durch die Speicherlogik zu scrollen. */
+function motorradDialogHtml(vorhandenes) {
+  return `
       <div class="finder">
         <span class="label">Motorrad suchen</span>
 
@@ -403,7 +399,18 @@ function öffneMotorradDialog(vorhandenes = null) {
         <p class="hint" id="fotoHinweis"></p>
       </div>
 
-    `,
+    `;
+}
+
+function öffneMotorradDialog(vorhandenes = null) {
+  // Das Foto lebt waehrend des Dialogs hier und wandert erst beim Speichern
+  // in die Garage. Wer abbricht, soll nichts veraendert haben.
+  dialogFoto = vorhandenes?.bild || null;
+  dialogFotoOriginal = dialogFoto;
+
+  öffneDialog({
+    titel: vorhandenes ? 'Motorrad bearbeiten' : 'Motorrad hinzufügen',
+    felder: motorradDialogHtml(vorhandenes),
 
     beimSpeichern: () => {
       const datensatz = {
