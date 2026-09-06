@@ -2702,6 +2702,11 @@ button.karte:active { transform: scale(0.985); }
      gebraucht: fuer die Spalten des Rasters und fuer die linke Kante des
      Raums (.bike-raum), die auf der Spaltengrenze liegen muss. */
   --bike-text-anteil: 0.46;
+  /* Wie weit der Werkstattraum ueber die Buehne hinausragt - nach BEIDEN
+     Seiten gleich, sonst laege die Tellermitte nicht mehr auf der
+     Buehnenmitte. Nach links traegt der Ueberhang das Fading zu den
+     Werten, nach rechts schneidet die Karte ihn ab. */
+  --bike-raum-ueberhang: 56px;
   grid-template-columns: minmax(0, calc(var(--bike-text-anteil) * 100%)) minmax(0, 1fr);
   grid-template-rows: auto auto 1fr auto;
   column-gap: var(--s3);
@@ -2732,12 +2737,15 @@ button.karte:active { transform: scale(0.985); }
    davor. */
 .bike-raum {
   position: absolute;
-  top: 0; right: 0; bottom: 0;
+  top: 0; bottom: 0;
+  right: calc(-1 * var(--bike-raum-ueberhang));
   /* Die linke Kante liegt 16 Punkte vor der Buehne (im Spaltenabstand),
-     die rechte 16 Punkte hinter ihr (im Innenabstand der Karte): Der Raum
-     ist damit SYMMETRISCH um die Buehne, und "center" legt die Tellermitte
-     des Bildes von selbst auf die Buehnenmitte - die Maschine steht auf dem
-     Teller, ohne dass das Bild verschoben wuerde.
+     die rechte gleich weit dahinter (ueber die Kartenkante hinaus, die
+     Karte schneidet ab): Der Raum ist damit SYMMETRISCH um die Buehne, und
+     "center" legt die Tellermitte des Bildes von selbst auf die
+     Buehnenmitte - die Maschine steht auf dem Teller, ohne dass das Bild
+     verschoben wuerde. Wer den Ueberhang aendert, aendert ihn ueber die
+     Marke und damit auf beiden Seiten zugleich.
 
      Hier stand zuerst ein Raum mit 150 Punkten Ueberhang nach links und
      einer Verschiebung des Bildes um 67 Punkte nach rechts. Das rechnete
@@ -2746,11 +2754,11 @@ button.karte:active { transform: scale(0.985); }
      abgeschnitten) und liess links eine harte Bildkante stehen, die das
      Fading zunichte machte.
 
-     Die Rechnung fuer left: Innenabstand + Textspalte + Spaltenabstand,
-     davon wieder ein Innenabstand zurueck. Prozent bezieht sich hier auf
-     die Kartenbreite innerhalb des Rahmens; die Textspalte ist ein Anteil
-     der Breite innerhalb des Innenabstands. */
-  left: calc(var(--bike-text-anteil) * (100% - 2 * var(--s4)) + var(--s3));
+     Die Rechnung fuer left: Textspalte + Spaltenabstand, davon der
+     Ueberhang zurueck. Prozent bezieht sich hier auf die Kartenbreite
+     innerhalb des Rahmens; die Textspalte ist ein Anteil der Breite
+     innerhalb des Innenabstands. */
+  left: calc(var(--bike-text-anteil) * (100% - 2 * var(--s4)) + var(--s3) - var(--bike-raum-ueberhang));
   z-index: 0;
   background: url("../img/bike-raum.webp") center bottom / cover no-repeat;
   /* Der Uebergang zu den Werten: ueber gut die Haelfte der Raumbreite, und

@@ -21,16 +21,29 @@ WAS GERECHNET WIRD, und warum jede Zahl so ist:
 
   2. Der Ausschnitt. Der Drehteller ist im Bild ausgemessen: waagerecht von
      0.163 bis 0.828, die Aufsetzlinie der Raeder bei 0.7775 der Hoehe.
-     Seitlich wird auf 0.115 bis 0.885 beschnitten (der Teller mit etwas
-     Luft), unten bei 0.862 - dadurch liegt die Aufsetzlinie bei 90 Prozent
-     der Ausschnitthoehe. Das ist der Grund fuer diesen Schnitt: Mit
-     "background-position: center bottom" steht die Maschine dann AUF dem
-     Teller und nicht davor. Oben bleibt das Ringlicht ganz im Bild; die
-     Maske in style.css blendet es weich aus.
+     Unten wird bei 0.862 beschnitten - dadurch liegt die Aufsetzlinie bei
+     90 Prozent der Ausschnitthoehe. Das ist der Grund fuer diesen Schnitt:
+     Mit "background-position: center bottom" steht die Maschine dann AUF
+     dem Teller und nicht davor. Oben bleibt das Ringlicht ganz im Bild;
+     die Maske in style.css blendet es weich aus.
 
-  3. Verkleinern auf 960 Punkte Breite. Gerechnet, nicht gegriffen: Die
-     Buehne ist auf dem Handy rund 165 Punkte breit (bei dreifacher Dichte
-     495), im Querformat rund 380 (bei zweifacher 760). 960 deckt beides ab.
+     SEITLICH fast der ganze Raum (0.02 bis 0.98). Hier stand einmal
+     0.115 bis 0.885, also nur der Teller mit etwas Luft. Der Ausschnitt
+     wurde am 07.09.2026 verbreitert, damit die Werkstatt in der Karte
+     weiter nach links reicht und das Fading zu den Werten laenger wird.
+
+     WARUM DAS NICHTS AN TELLER UND MASCHINE AENDERT: Die Karte zeigt den
+     Raum mit "cover" bei fester Hoehe, das Bild wird also ueber seine
+     HOEHE skaliert. Der Teller misst im alten Ausschnitt 86 Prozent der
+     Bildbreite (0.665 von 0.77), im neuen 69 (0.665 von 0.96) - aber das
+     neue Bild ist im selben Verhaeltnis breiter. Nachgerechnet: alt
+     0.86 x 960 x 0.392 = 324 Punkte, neu 0.69 x 1200 x 0.391 = 324. Der
+     Teller bleibt auf den Punkt gleich gross, es wird links und rechts nur
+     mehr Raum sichtbar.
+
+  3. Verkleinern auf 1200 Punkte Breite. 960 waren es, solange der
+     Ausschnitt schmaler war; mit dem breiteren Ausschnitt haelt 1200
+     dieselbe Aufloesung je Flaeche.
 
   4. Abdunkeln auf 62 Prozent. Der Raum ist Untergrund, nicht Motiv - der
      Teller ist mit einer mittleren Helligkeit von 131 die hellste Stelle
@@ -46,9 +59,9 @@ VORLAGE = os.path.join(PROJEKT, 'arbeitsmaterial', 'vorlagen', 'NEUE WERKSTATT V
 ZIEL = os.path.join(PROJEKT, 'img', 'bike-raum.webp')
 
 # Anteile der Bildflaeche, am Raum ausgemessen (siehe Kopf).
-LINKS, RECHTS = 0.115, 0.885
+LINKS, RECHTS = 0.02, 0.98
 UNTEN = 0.862
-ZIEL_BREITE = 960
+ZIEL_BREITE = 1200
 HELLIGKEIT = 0.62
 GUETE = 82
 
