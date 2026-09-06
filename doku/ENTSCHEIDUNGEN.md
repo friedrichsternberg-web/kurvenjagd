@@ -3240,3 +3240,55 @@ Punkte. Im Breiten ist die Bildspalte auf 300 Punkte begrenzt — bei 1344
 Punkten Kartenbreite wären 44 Prozent ein flacher Streifen. Dazu ein
 kompakter Zeitraum: „24. bis 26. Mai 2026" statt „So., 24.05. bis Di.,
 26.05.", das brach auf zwei Zeilen um.
+
+### Nachtrag, 06.09.2026 abends: das Standardmotorrad kommt zurück
+
+Friedrich nach dem zweiten Ansehen: „Das ‚Foto Hinzufügen' ist deplatziert.
+Bitte wieder mit so einer Animation wie früher und mittig über dem
+Standard-Motorrad → also wieder das Default-Bike hinzufügen, aber diesmal
+das graue von früher. Dann das Foto mit der Garage bitte auch wie in dem
+Beispielfoto nahtlos einbauen … aktuell ist dort einfach nur ein harter Cut.
+Dann überdeckt das ‚Bike bearbeiten' die Plattform. Bei der Reiseanzeige ist
+das Kernproblem, dass der Rand oben links sehr stark abgerundet ist und bei
+den anderen nichts → alle 4 Ränder abgerundet und Karte ca. 30 % größer."
+
+**Das Standardmotorrad (`img/bike-standard.webp`) ist wieder da**, samt der
+Tafel „Dein Bike einfügen": Sucherwinkel, Kamerasymbol und das Abzeichen,
+das langsam auf die Maschine nickt — dasselbe Stück, das bis zum 05.09.2026
+im Werkstattraum hing, nur kompakter und mittig statt von
+`setzeBuehnenPlatz()` gerechnet. Der Knopf „Foto hinzufügen", der es ersetzt
+hatte, ist weg.
+
+**Die offene Herkunftsfrage kommt damit zurück**, und zwar an prominenterer
+Stelle als je zuvor: Die Maschine ähnelt sehr deutlich einem real
+erhältlichen Modell und steht jetzt auf dem Startbildschirm. `AUFGABEN.md`,
+`img/LIZENZ-bilder.txt` und der KI-Hinweis im Rechtlichen führen sie wieder
+als **offen**. Sie muss vor der Veröffentlichung geklärt sein.
+
+**Der harte Cut** war ein Rechenfehler in der Maske: Der radiale Verlauf
+`at 80% 94%` war am linken Rand des Raums noch bei rund einem Drittel
+Deckkraft — dort brach das Bild also mit einer sichtbaren Kante ab, mitten
+in der Karte. Jetzt ein linearer Verlauf, der am linken Rand wirklich bei
+null ist (`transparent 2%, black 52%`), und das Ringlicht wird nicht mehr
+über die Maske gedämpft, sondern über eine dunkle Verlaufsschicht im
+Hintergrund selbst. **Lehre:** Bei einem radialen Verlauf als Maske
+nachrechnen, wo die Ränder des Elements auf der Radiusachse liegen.
+
+**„Bike bearbeiten"** steht wieder in der linken Spalte, wie im
+Referenzbild — über die volle Breite lag er auf dem Drehteller. Die
+Textspalte wächst dafür auf 49 %, und die Schrift des Knopfes hängt an der
+Fensterbreite, sonst bricht er auf einem 360 Punkte breiten Gerät um.
+
+**Die Reisekarte** hatte ungleiche Ecken, weil `.tour-vorschau` aus der
+Tourenliste geerbt wurde: Dort sitzt die Vorschau oben in der Karte und ist
+deshalb **nur oben** gerundet, dazu negative Margen und ein festes
+Seitenverhältnis von 640:280. Im eigenen Fenster wird das alles
+zurückgesetzt.
+
+Der zweite Teil war das eigentliche Problem: **Das Karten-SVG wurde in
+640:280 gerechnet**, angezeigt wurde es in einem fast quadratischen Fenster.
+`slice` schnitt daher links und rechts so viel ab, dass von der Route kaum
+etwas übrig blieb — je enger das Format, desto weniger Karte. Jetzt gibt
+`garageReiseHtml()` einen Rahmen von 420:440 mit, und `kartenBildMehrere()`
+sucht den Zoom für genau dieses Fenster. Dazu 36 % mehr Fläche (156 × 185
+statt 143 × 148) und ein kompakter Zeitraum ohne das laufende Jahr.

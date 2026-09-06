@@ -22,11 +22,25 @@ garage-werkstatt.webp, garage-werkstatt-standard.webp
   Ausschnitt bike-raum.webp, siehe oben.
 
 bike-standard.webp
-  ENTFERNT am 05.09.2026. Das war die freigestellte Beispielmaschine, die
-  ohne eigenes Foto in der Werkstatt stand - mit ungeklaerter Herkunft (sie
-  aehnelte einem realen Modell). Auf dem neuen Startbildschirm gibt es ohne
-  eigenes Foto keine Maschine mehr, nur den Weg zum Foto; damit ist die
-  offene Herkunftsfrage erledigt, nicht beantwortet.
+  Freigestelltes Standardmotorrad, aus einem von Friedrich Sternberg
+  gelieferten Bild, freigestellt im August 2026. Es steht in der Werkstatt
+  der Bike-Karte, solange kein eigenes Foto hinterlegt ist; darueber liegt
+  dann die Tafel "Dein Bike einfuegen".
+
+  OFFEN, geprueft am 01.09.2026, unveraendert offen: Diese Herkunft ist die
+  einzige unklare in dieser Datei. Anders als bei den KI-Bildern zeigt
+  dieses Bild KEINE Fantasiemaschine - Tankverkleidung, Vierfach-Kruemmer,
+  Scheinwerferform und die Lackierung aehneln sehr deutlich einem real
+  erhaeltlichen Modell (dem Augenschein nach der Kawasaki-Z-Reihe). Zwei
+  Fragen bleiben: Woher stammt die Vorlage (ein Pressefoto waere ein
+  ECHTES Urheberrecht, kein KI-Thema), und ist die Form nah genug an einem
+  eingetragenen Geschmacksmuster?
+
+  Am 05.09.2026 war das Bild deshalb entfernt; am 06.09.2026 kam es auf
+  Friedrichs ausdruecklichen Wunsch zurueck. Die Frage ist damit NICHT
+  beantwortet - sie steht weiter in AUFGABEN.md und muss vor der
+  Veroeffentlichung geklaert sein. Ausweg, falls sich nichts klaeren
+  laesst: eine eigene Fantasiemaschine erzeugen.
 
 hintergrund-weich.jpg
   Eigenes Foto von Friedrich Sternberg beziehungsweise von ihm geliefertes

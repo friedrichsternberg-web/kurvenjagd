@@ -2704,15 +2704,18 @@ button.karte:active { transform: scale(0.985); }
   top: 0; right: 0; bottom: 0;
   width: 66%;
   z-index: 0;
-  background: url("../img/bike-raum.webp") center bottom / cover no-repeat;
-  /* EINE Maske statt zweier: Sie geht vom Teller aus (unten rechts) und
-     faellt nach links und nach oben ab. Zwei Verlaeufe mit mask-composite
-     taeten dasselbe, fallen aber dort, wo composite fehlt, ersatzlos aus -
-     und dann stuende der Raum hart an der Kante. Nach oben abzufallen ist
-     noetig, weil das Ringlicht der Werkstatt sonst als heller Bogen hinter
-     dem Namen und dem Plus-Knopf haengt. */
-  -webkit-mask-image: radial-gradient(125% 115% at 80% 94%, black 32%, transparent 82%);
-  mask-image: radial-gradient(125% 115% at 80% 94%, black 32%, transparent 82%);
+  /* Zwei Schichten: oben ein dunkler Schleier, der das Ringlicht der
+     Werkstatt daempft (es haengt sonst als heller Bogen hinter dem Namen),
+     darunter das Bild. */
+  background:
+    linear-gradient(to bottom, var(--schatten-tief), transparent 46%),
+    url("../img/bike-raum.webp") center bottom / cover no-repeat;
+  /* Der Uebergang zu den Werten: ein linearer Verlauf, der am linken Rand
+     WIRKLICH bei null ist. Hier stand zuerst ein radialer vom Teller aus -
+     der war am linken Rand noch bei rund einem Drittel Deckkraft, und
+     genau daher kam die harte Kante mitten in der Karte. */
+  -webkit-mask-image: linear-gradient(to right, transparent 2%, black 52%);
+  mask-image: linear-gradient(to right, transparent 2%, black 52%);
   pointer-events: none;
 }
 /* Der Inhalt liegt darueber, die Lichtkante der Karte darueber hinaus. */
@@ -2745,12 +2748,22 @@ button.karte:active { transform: scale(0.985); }
    Punkten), die Maschine bekommt den Rest. */
 .bike-inhalt {
   display: grid;
-  grid-template-columns: minmax(0, 46%) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 49%) minmax(0, 1fr);
   gap: var(--s3);
   align-items: end;
 }
 .bike-text { display: flex; flex-direction: column; min-width: 0; }
-.bike-knopf { margin-top: var(--s3); width: 100%; }
+.bike-knopf {
+  margin-top: var(--s3);
+  width: 100%;
+  /* Etwas enger als der Standardknopf: In der linken Spalte stehen auf dem
+     Handy nur rund 160 Punkte zur Verfuegung - auf einem 360 Punkte breiten
+     Geraet 141. Die Schrift waechst deshalb mit der Fensterbreite, sonst
+     bricht "Bike bearbeiten" dort auf zwei Zeilen. */
+  padding-inline: var(--s2);
+  font-size: clamp(13px, 3.6vw, 14px);
+  white-space: nowrap;
+}
 .bike-werte { display: flex; flex-direction: column; }
 .bike-wert {
   display: flex;
@@ -2806,8 +2819,131 @@ button.karte:active { transform: scale(0.985); }
   object-position: center bottom;
   filter: drop-shadow(0 10px 8px var(--schatten-mittel));
 }
-/* Auf dem leeren Teller, nicht in der Mitte der leeren Flaeche. */
-.bike-foto-knopf { margin: auto auto var(--s5); }
+/* Das Standardmotorrad tritt zurueck: Es zeigt, dass hier eine Maschine
+   hingehoert, ist aber nicht die eigene - und darueber liegt die Tafel. */
+.bike-bild.ist-standard { opacity: 0.8; }
+
+/* ---------- Die Tafel "Dein Bike einfuegen" ----------
+   Sie liegt mittig auf dem Standardmotorrad und erscheint nur, solange kein
+   eigenes Foto da ist. Gestaltet als Tafel an der Werkstattwand, nicht als
+   Bedienelement der App: Sucherwinkel statt Rahmen, Glas statt Flaeche.
+
+   Bis zum 05.09.2026 rechnete setzeBuehnenPlatz() ihre Lage aus, weil die
+   Buehne selbst gerechnet wurde; in der Karte genuegt "mittig". */
+.buehne-hinweis {
+  position: absolute;
+  z-index: 5;
+  /* Schmaler als die Buehne und im oberen Drittel: Die Maschine darunter
+     soll erkennbar bleiben, die Tafel liegt ueber ihr statt auf ihr. */
+  left: 8%; right: 8%;
+  top: 30%;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  animation: hinweis-auftauchen 0.5s ease-out both;
+}
+@keyframes hinweis-auftauchen {
+  from { opacity: 0; transform: translateY(calc(-50% - 8px)); }
+  to   { opacity: 1; transform: translateY(-50%); }
+}
+.hinweis-tafel {
+  position: relative;
+  width: 100%;
+  /* Auf breiten Bildschirmen ist die Buehne fast 400 Punkte breit - eine
+     Tafel ueber die volle Breite deckte die Maschine darunter zu. */
+  max-width: 230px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s1);
+  /* Unten mehr Luft als oben: Dort haengt das Abzeichen halb in der Kante. */
+  padding: var(--s3) var(--s2) var(--s4);
+  border-radius: var(--r-md);
+  /* Glas ueber dem Raumbild - eine Linse ueber etwas Echtem. Dunkel
+     getoent, weil dahinter die helle Werkzeugwand liegt. */
+  background: linear-gradient(var(--schatten-mittel), var(--schatten-weich));
+  -webkit-backdrop-filter: blur(16px) saturate(1.05);
+          backdrop-filter: blur(16px) saturate(1.05);
+  box-shadow:
+    inset 0 1px 0 var(--glas-licht),
+    inset 0 -1px 0 var(--schatten-hauch),
+    0 12px 34px var(--schatten-weich);
+  transition: transform 0.12s ease-out;
+}
+/* Die vier Sucherwinkel in den Ecken: Sie sagen "hier kommt ein Bild hin",
+   ohne dass ein Wort dafuer noetig waere. */
+.hinweis-winkel {
+  position: absolute;
+  inset: 6px;
+  width: calc(100% - 12px);
+  height: calc(100% - 12px);
+  fill: none;
+  stroke: color-mix(in srgb, white 85%, transparent);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.hinweis-kamera {
+  width: 22px; height: 22px;
+  stroke-width: 1.3;
+  color: color-mix(in srgb, white 92%, transparent);
+}
+.hinweis-text {
+  font-family: var(--schrift-display);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  line-height: 1.25;
+  text-align: center;
+  text-wrap: balance;
+  color: color-mix(in srgb, white 95%, transparent);
+  text-shadow: 0 1px 10px var(--schatten-mittel);
+}
+/* Der Zeiger nach unten. Er HAENGT an der Tafel, halb in ihre Unterkante
+   eingesenkt, statt daneben zu schweben, und traegt die Signalfarbe in
+   ihrem hellen Ton - Weiss ginge auf dem Werkstattbild unter. Eine Flaeche
+   von 32 Punkten setzt sich gegen jeden Untergrund durch, ein Strich nicht. */
+.hinweis-marke {
+  position: absolute;
+  left: 50%;
+  bottom: -14px;
+  width: 30px; height: 30px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--accent-hell);
+  box-shadow:
+    0 6px 16px var(--schatten-mittel),
+    0 0 0 4px var(--schatten-weich);
+  animation: marke-nicken 1.9s ease-in-out infinite;
+}
+.hinweis-marke svg {
+  width: 18px; height: 18px;
+  fill: none;
+  stroke: var(--accent-ink);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* Bewegung sieht das Auge noch am Rand des Blickfelds, Farbe erst beim
+   Hinsehen. Bewusst langsam und klein - ein huepfendes Element waere Reklame. */
+@keyframes marke-nicken {
+  0%, 62%, 100% { transform: translateX(-50%) translateY(0); }
+  78%           { transform: translateX(-50%) translateY(5px); }
+}
+.buehne-hinweis:active .hinweis-tafel { transform: scale(0.97); }
+@media (prefers-reduced-motion: reduce) {
+  .buehne-hinweis, .hinweis-marke { animation: none; }
+}
 .bike-leer { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s3); }
 .bike-leer .abzeichen { margin-bottom: 0; }
 .bike-leer .bike-name { margin: 0; }
@@ -2840,7 +2976,7 @@ button.karte:active { transform: scale(0.985); }
    Spalten die Hoehe, und das Bild fuellt sie. */
 .start-reise {
   display: grid;
-  grid-template-columns: minmax(0, 44%) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 48%) minmax(0, 1fr);
   gap: var(--s3) var(--s4);
   align-items: stretch;
 }
@@ -2850,17 +2986,25 @@ button.karte:active { transform: scale(0.985); }
   border-radius: var(--r-md);
   overflow: hidden;
   /* Damit die Karte auch bei einem kurzen Namen etwas hermacht. */
-  min-height: 148px;
-  background: var(--surface-2);
+  min-height: 185px;
+  background: var(--raum-dunkel);
 }
-.start-reise-bild .tour-vorschau,
-.start-reise-bild svg {
-  display: block;
-  width: 100%;
-  height: 100%;
+/* .tour-vorschau ist die Vorschau der TOURENLISTE: Dort sitzt sie oben in
+   der Karte, ist deshalb nur oben gerundet, hat negative Margen und ein
+   festes Seitenverhaeltnis von 640:280. Hier steht sie in einem eigenen
+   Fenster - alle vier Ecken rund, keine Margen, kein festes Verhaeltnis.
+   Genau diese geerbten Regeln waren der Grund, warum die Karte oben links
+   rund und sonst scharfkantig war. */
+.start-reise-bild .tour-vorschau {
+  position: absolute;
+  inset: 0;
+  margin: 0;
   aspect-ratio: auto;
-  object-fit: cover;
+  border-radius: 0;
+  border-bottom: 0;
+  background: none;
 }
+.start-reise-bild svg { display: block; width: 100%; height: 100%; }
 .start-reise-text {
   grid-row: 1;
   display: flex;
@@ -2883,7 +3027,9 @@ button.karte:active { transform: scale(0.985); }
   display: flex;
   align-items: center;
   gap: var(--s2);
-  font-size: 15px;
+  /* 14 statt 15: Die Textspalte ist neben dem groesseren Kartenfenster nur
+     noch rund 154 Punkte breit, und ein Zeitraum mit Jahr braucht sie ganz. */
+  font-size: 14px;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }

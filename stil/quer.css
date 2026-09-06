@@ -223,7 +223,7 @@
        sonst eine Luecke klafft. */
     align-items: start;
   }
-  .bike-knopf { width: auto; align-self: flex-start; padding-inline: var(--s5); }
+  .bike-knopf { width: auto; align-self: flex-start; padding-inline: var(--s5); font-size: 15px; }
   .bike-buehne { min-height: 260px; }
   .bike-bild { max-height: 340px; }
 
@@ -231,8 +231,11 @@
      mitwachsen - bei 1344 Punkten Kartenbreite waeren 44 Prozent ein 590
      Punkte breiter, 150 hoch flacher Streifen. Feste Obergrenze, dafuer
      hoeher. */
-  .start-reise { grid-template-columns: minmax(0, 300px) minmax(0, 1fr); }
-  .start-reise-bild { min-height: 190px; }
+  .start-reise { grid-template-columns: minmax(0, 320px) minmax(0, 1fr); }
+  /* Fast quadratisch wie auf dem Handy: Das Karten-SVG wird in einem
+     Verhaeltnis von 440:420 gerechnet, und je naeher das Fenster daran
+     liegt, desto weniger schneidet "slice" von der Route ab. */
+  .start-reise-bild { min-height: 290px; }
 
   /* --- 4. Listenbildschirme in Lesebreite -------------------------------------
      Touren (und spaeter Rechtliches, und der Shop, wenn er wiederkommt)

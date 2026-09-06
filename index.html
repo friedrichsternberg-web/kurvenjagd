@@ -534,20 +534,33 @@
         <div class="bike-inhalt">
           <div class="bike-text">
             <div class="bike-werte" id="motorradWerte" hidden></div>
+            <!-- Der Knopf steht in der linken Spalte, nicht ueber die volle
+                 Breite: Sonst laege er auf dem Drehteller der Werkstatt. -->
+            <button class="btn ghost bike-knopf" id="btnMotorradBearbeiten">
+              <svg class="ic klein"><use href="#icon-stift"></use></svg> Bike bearbeiten
+            </button>
           </div>
           <div class="bike-buehne">
-            <img id="motorradBild" class="bike-bild" alt="" hidden>
-            <!-- Solange kein eigenes Foto da ist: der Weg dorthin, direkt in
-                 die Dateiauswahl (garage.js). Keine Beispielmaschine mehr -
-                 in einer Karte "Mein Bike" waere sie die falsche Aussage. -->
-            <button type="button" class="btn ghost klein bike-foto-knopf" id="btnBikeFoto" hidden>
-              <svg class="ic klein"><use href="#icon-kamera"></use></svg> Foto hinzuf&uuml;gen
+            <img id="motorradBild" class="bike-bild" alt="">
+            <!-- Solange kein eigenes Foto da ist, steht dort das
+                 Standardmotorrad und darauf diese Tafel: Sucherwinkel,
+                 Kamerasymbol, und ein Abzeichen, das langsam auf die
+                 Maschine nickt. Ein Druck fuehrt geradewegs zur
+                 Fotoauswahl (garage.js). -->
+            <button type="button" class="buehne-hinweis" id="buehneHinweis" hidden>
+              <span class="hinweis-tafel">
+                <svg class="hinweis-winkel" viewBox="0 0 100 74" aria-hidden="true" preserveAspectRatio="none">
+                  <path d="M4 22V8a4 4 0 0 1 4-4h14M78 4h14a4 4 0 0 1 4 4v14M96 52v14a4 4 0 0 1-4 4H78M22 70H8a4 4 0 0 1-4-4V52"/>
+                </svg>
+                <svg class="ic hinweis-kamera"><use href="#icon-kamera"></use></svg>
+                <span class="hinweis-text">Dein Bike einf&uuml;gen</span>
+                <span class="hinweis-marke" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M5 9.5 12 16l7-6.5"/></svg>
+                </span>
+              </span>
             </button>
           </div>
         </div>
-        <button class="btn ghost bike-knopf" id="btnMotorradBearbeiten">
-          <svg class="ic klein"><use href="#icon-stift"></use></svg> Bike bearbeiten
-        </button>
       </section>
 
       <!-- Ohne Motorrad: dieselbe Karte als Einladung. -->
@@ -1631,11 +1644,10 @@
         <div class="rechts-text">
           <p>
             Ein Teil der Bilder dieser App wurde mit einem KI-Bildgenerator
-            erstellt: das App-Symbol, der Schriftzug &bdquo;Serpa&ldquo; und
-            die Werkstatt, die auf dem Startbildschirm hinter deinem Motorrad
-            steht. Sie zeigen keine wirklichen Orte, Gegenst&auml;nde oder
-            Personen. Die Beispielmaschine, die bis zum 05.09.2026 ohne
-            eigenes Foto in dieser Werkstatt stand, zeigt die App nicht mehr.
+            erstellt: das App-Symbol, der Schriftzug &bdquo;Serpa&ldquo;, die
+            Werkstatt auf dem Startbildschirm und die Beispielmaschine, die
+            darin steht, solange du kein eigenes Foto hinterlegt hast.
+            Sie zeigen keine wirklichen Orte, Gegenst&auml;nde oder Personen.
           </p>
           <p>
             Stellst du dein eigenes Foto frei, trennt ein gelerntes Modell

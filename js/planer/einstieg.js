@@ -122,27 +122,37 @@ function zeichneGarageReise() {
 /* Der Zeitraum in EINER Zeile. datumKurz() liefert "So., 24.05." - zweimal
    davon mit "bis" dazwischen brach in der Karte um und machte die Zeile
    unruhig. Liegen Anfang und Ende im selben Monat, genuegt der Monat einmal:
-   "24. bis 26. Mai 2026". */
+   "24. - 26. Mai 2026", mit Halbgeviert und schmalen Leerzeichen - das ist
+   die Schreibweise fuer Zeitspannen und spart gegenueber "bis" die Breite,
+   die in der schmalen Textspalte der Karte fehlt. */
 function zeitraumKurz(reise, tage) {
   const von = tagesDatum(reise, 0);
   const bis = tagesDatum(reise, Math.max(0, tage - 1));
   if (!von) return '';
-  const monatJahr = { month: 'long', year: 'numeric' };
+  /* Das Jahr nur, wenn es nicht das laufende ist - so schreibt man ein
+     Datum auch sonst, und in der schmalen Textspalte der Karte sind die
+     fuenf Zeichen der Unterschied zwischen einer und zwei Zeilen. */
+  const jahr = von.getFullYear() === new Date().getFullYear() ? {} : { year: 'numeric' };
+  const lang = { day: 'numeric', month: 'long', ...jahr };
   if (!bis || von.getTime() === bis.getTime()) {
-    return von.toLocaleDateString('de-DE', { day: 'numeric', ...monatJahr });
+    return von.toLocaleDateString('de-DE', lang);
   }
   if (von.getMonth() === bis.getMonth() && von.getFullYear() === bis.getFullYear()) {
-    return `${von.getDate()}. bis ${bis.toLocaleDateString('de-DE', { day: 'numeric', ...monatJahr })}`;
+    return `${von.getDate()}.\u2009–\u2009${bis.toLocaleDateString('de-DE', lang)}`;
   }
-  const kurz = { day: 'numeric', month: 'long' };
-  return `${von.toLocaleDateString('de-DE', kurz)} bis ${bis.toLocaleDateString('de-DE', { day: 'numeric', ...monatJahr })}`;
+  return `${von.toLocaleDateString('de-DE', { day: 'numeric', month: 'long' })}`
+    + `\u2009–\u2009${bis.toLocaleDateString('de-DE', lang)}`;
 }
 
 function garageReiseHtml(reise) {
   const bilanz = reiseBilanz(reise);
-  // Das Kartenbild fuellt sein Fenster (4:3, links in der Karte): Das SVG
-  // aus reise.js traegt "slice" und schneidet den Rand an, statt zu schweben.
-  const karte = reiseKartenSvg(reise, { marke: 12 });
+  /* Das Kartenbild wird in dem Verhaeltnis GERECHNET, in dem es auch
+     angezeigt wird. Ohne Rahmen nimmt kartenBildMehrere() 640 zu 280 - ein
+     breiter Streifen. Das Fenster hier ist fast quadratisch, und "slice"
+     schnitt davon links und rechts so viel ab, dass von der Route kaum
+     etwas uebrig blieb. Mit einem passenden Rahmen sucht die Rechnung den
+     Zoom fuer genau dieses Fenster. */
+  const karte = reiseKartenSvg(reise, { marke: 12, rahmen: { breite: 420, hoehe: 440 } });
   const zeitraum = zeitraumKurz(reise, bilanz.tage);
   const zeile = (name, text) => `<span class="start-reise-zeile">${symbol(name, 'klein')} ${text}</span>`;
   return `

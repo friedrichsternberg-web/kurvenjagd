@@ -116,41 +116,40 @@ function zeichneGarage() {
   zeichneDatenblatt();
 }
 
-/* Das Foto in der Karte. Nur ein EIGENES Foto wird gezeigt; ohne Foto steht
-   der Knopf "Foto hinzufuegen" auf der Buehne. Die Beispielmaschine von
-   frueher gibt es nicht mehr (siehe bildAdresse in finder.js).
+/* Das Motorrad in der Karte. Es steht auf dem Teller der Werkstatt, die als
+   Bild hinter der rechten Kartenhaelfte liegt (.bike-raum in style.css) -
+   Glas ueber etwas Echtem, Grundsatz 4 der Designsprache.
 
-   Hinter der rechten Kartenhaelfte liegt die Werkstatt als Bild (.bike-raum
-   in style.css) - Glas ueber etwas Echtem, Grundsatz 4 der Designsprache.
-   Sie steht dort unabhaengig vom Foto; ohne Foto sieht man den leeren
-   Teller, und das ist der richtige Leerzustand. */
+   Ohne eigenes Foto steht dort das Standardmotorrad, und DARUEBER die Tafel
+   "Dein Bike einfuegen": Sie sagt, dass das nicht die eigene Maschine ist,
+   und fuehrt mit einem Druck zur Fotoauswahl. */
 function zeichneMotorradBild() {
   const motorrad = motorradAktiv();
-  const karte = document.getElementById('garageDatenblatt');
   const bild = document.getElementById('motorradBild');
-  const fotoKnopf = document.getElementById('btnBikeFoto');
-  if (!karte || !bild) return;
+  const hinweis = document.getElementById('buehneHinweis');
+  if (!bild) return;
 
-  const adresse = motorrad ? bildAdresse(motorrad) : null;
-  const eigenes = !!adresse;
-  const ohneFoto = () => {
-    bild.hidden = true;
-    bild.removeAttribute('src');
-    if (fotoKnopf) fotoKnopf.hidden = !motorrad;
+  const adresse = bildAdresse(motorrad);
+  const eigenes = adresse !== STANDARD_BILD;
+  if (hinweis) hinweis.hidden = eigenes;
+  bild.classList.toggle('ist-standard', !eigenes);
+
+  // Faellt die Bildquelle aus, das Standardbild nachreichen.
+  bild.onerror = () => {
+    if (bild.src.endsWith(STANDARD_BILD)) return;   // sonst Endlosschleife
+    bild.src = STANDARD_BILD;
   };
-  if (!eigenes) { ohneFoto(); return; }
-
-  bild.onerror = ohneFoto;
-  // Sobald das Foto da ist, auf seinen Inhalt beschneiden - einmal je Foto,
-  // siehe zugeschnitten(). Das zweite Laden loest onload nicht noch einmal aus.
-  bild.onload = () => {
+  /* Sobald ein EIGENES Foto da ist, auf seinen Inhalt beschneiden - einmal
+     je Foto, siehe zugeschnitten(). Das Standardbild ist schon knapp. */
+  bild.onload = eigenes ? () => {
     const knapp = zugeschnitten(bild);
     if (knapp) { bild.onload = null; bild.src = knapp; }
-  };
-  bild.alt = [motorrad.marke, motorrad.modell].filter(Boolean).join(' ');
+  } : null;
+  bild.alt = eigenes
+    ? [motorrad.marke, motorrad.modell].filter(Boolean).join(' ')
+    : '';
   bild.hidden = false;
   bild.src = adresse;
-  if (fotoKnopf) fotoKnopf.hidden = true;
 }
 
 /* Freigestellte Fotos haben viel leeren Rand - der Freisteller laesst ihn
@@ -569,11 +568,12 @@ verkabele('btnMotorradBearbeiten', 'click', () => {
 });
 verkabele('btnMotorradWeiteres', 'click', () => öffneMotorradDialog(null));
 
-/* Der Foto-Knopf auf der leeren Buehne der Karte fuehrt geradewegs zur
-   Fotoauswahl: Der Dialog der Maschine wird geoeffnet und die Auswahl gleich
-   aufgeklappt - der Nutzer wollte ein Foto, also bekommt er das Foto-Fenster
-   und nicht erst ein Formular. */
-verkabele('btnBikeFoto', 'click', () => {
+/* Die Tafel auf dem Standardmotorrad fuehrt geradewegs zur Fotoauswahl:
+   Der Dialog der Maschine wird geoeffnet und die Auswahl gleich
+   aufgeklappt - der Nutzer wollte ein Foto, also bekommt er das
+   Foto-Fenster und nicht erst ein Formular. Ist noch gar keine Maschine
+   da, wird eine angelegt; Marke und Modell traegt er hinterher ein. */
+verkabele('buehneHinweis', 'click', () => {
   const motorrad = motorradAktiv();
   öffneMotorradDialog(motorrad || null);
   const eingabe = document.getElementById('garageFotoEingabe');

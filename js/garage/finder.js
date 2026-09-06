@@ -146,12 +146,16 @@ function baujahre() {
    hier gebuendelt und nicht verstreut im Code.
    --------------------------------------------------------------------------- */
 
-/* Bis zum 05.09.2026 stand hier ein Standardbild (img/bike-standard.webp),
-   das ohne eigenes Foto in der Werkstatt stand. Es ist entfernt: Seine
-   Herkunft war ungeklaert (es aehnelte einem realen Modell), und in einer
-   Karte "Mein Bike" waere eine fremde Maschine ohnehin die falsche Aussage.
-   Ohne Foto liefert bildAdresse() jetzt null, und die Karte zeigt den Weg
-   zum Foto. */
+/* Das Standardmotorrad: Es steht in der Werkstatt, solange der Fahrer kein
+   eigenes Foto hinterlegt hat. Darueber liegt dann die Tafel "Dein Bike
+   einfuegen" - so ist auf einen Blick klar, dass das nicht die eigene
+   Maschine ist und wie man das aendert.
+
+   ACHTUNG, offener Punkt: Die Herkunft dieses Bildes ist ungeklaert, es
+   aehnelt einem real erhaeltlichen Modell (siehe AUFGABEN.md und
+   img/LIZENZ-bilder.txt). Es war am 05.09.2026 deshalb kurz entfernt und
+   kam auf Friedrichs Wunsch zurueck. Vor der Veroeffentlichung muss die
+   Frage beantwortet sein. */
 
 /* Bildquelle. Leer = das Standardbild wird benutzt.
    Geprueft am 19.08.2026: carimagesapi.com hat 602 Marken und ueber 9300
@@ -179,10 +183,12 @@ const BILD_API_SCHLÜSSEL = '';
    power: "52.3 HP (38.2 kW) @ 8000 RPM". Ebenfalls ungetestet. */
 const DATEN_API_SCHLÜSSEL = '';   // siehe die Warnung beim Bild-Schluessel oben
 
-// Welches Bild in der Karte steht. Eigenes Foto schlaegt Datenbank; gibt
-// es keines von beiden, kommt null zurueck.
+const STANDARD_BILD = 'img/bike-standard.webp';
+
+// Welches Bild in der Karte steht. Eigenes Foto schlaegt Datenbank,
+// Datenbank schlaegt Standardmotorrad.
 function bildAdresse(motorrad) {
-  if (!motorrad) return null;
+  if (!motorrad) return STANDARD_BILD;
   if (motorrad.bild) return motorrad.bild;
 
   if (BILD_API_SCHLÜSSEL && motorrad.marke && motorrad.modell) {
@@ -192,7 +198,7 @@ function bildAdresse(motorrad) {
     });
     return `https://carimagesapi.com/api/v1/signed-url?${felder}`;
   }
-  return null;
+  return STANDARD_BILD;
 }
 
 /* Holt Hubraum und Leistung zu einem Motorrad.
