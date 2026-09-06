@@ -5,11 +5,21 @@ Festgehalten aus demselben Grund wie bei Modell und Schrift: Die App ist
 oeffentlich und soll ueber Werbung finanziert werden. Jedes Bild muss dafuer
 eine geklaerte Herkunft haben.
 
+bike-raum.webp
+  Die Werkstatt hinter dem Motorrad auf dem Startbildschirm. Ausschnitt aus
+  Friedrich Sternbergs eigenem KI-Bild "NEUE WERKSTATT V2" vom September
+  2026 (dunkle Werkstatt mit Drehteller), gerechnet von
+  werkzeug/bike-raum.py: seitlich auf den Teller beschnitten, unten so, dass
+  die Aufsetzlinie der Raeder bei 90 Prozent der Hoehe liegt, auf 960 Punkte
+  verkleinert und auf 62 Prozent abgedunkelt. Keine fremden Markenzeichen im
+  Bild. Die Vorlage liegt in arbeitsmaterial/vorlagen/ und ist nicht im
+  Repository.
+
 garage-werkstatt.webp, garage-werkstatt-standard.webp
-  ENTFERNT am 05.09.2026 mit dem Werkstattraum (die App hat seit dem
-  Umbau einen Startbildschirm aus Karten, siehe ENTSCHEIDUNGEN.md).
-  Beide waren aus Friedrich Sternbergs eigenem KI-Bild vom September 2026
-  gerechnet; die Vorlage liegt weiter in arbeitsmaterial/vorlagen/.
+  ENTFERNT am 05.09.2026. Das waren der ganze Raum (2103 x 1683) und
+  derselbe Raum mit eingepasster Beispielmaschine, beide fuer die
+  Drehteller-Buehne der alten Garage. Ausgeliefert wird jetzt nur noch der
+  Ausschnitt bike-raum.webp, siehe oben.
 
 bike-standard.webp
   ENTFERNT am 05.09.2026. Das war die freigestellte Beispielmaschine, die

@@ -3192,3 +3192,51 @@ breit).
   Umbenennung per Regex erwischte auch die SVG-Regeln. Die Knopfklasse
   heißt `start-reise`; vor dem Vergeben eines Klassennamens einmal
   grep.
+
+### Nachtrag, 06.09.2026 vormittags: die Werkstatt kommt zurück, als Bild
+
+Friedrich nach dem Ansehen: „Bitte unterm App Logo und dem Profil-Button
+mehr Platz lassen und Logo und Button größer, dass es nicht so gequetscht
+aussieht. Bitte wie in dem Beispielfoto das Bild von vorher der Garage bei
+‚Mein Bike' mit einarbeiten, so dass es genauso aussieht wie in dem Beispiel
+(nur halt ohne das Bike). Bei dem Widget darunter ‚Deine nächste Reise'
+stimmen die ganzen Proportionen nicht, Karte und Stats nehmen lange nicht
+den ganzen Widget-Platz ein und die Ränder der Karte sind ungleichmäßig."
+
+**Der Raum ist zurück, die Bühne nicht.** Hinter der rechten Hälfte der
+Bike-Karte liegt jetzt ein Ausschnitt der Werkstatt als Bild
+(`img/bike-raum.webp`, 45 KB). Was NICHT zurückkommt, ist die Bühnenrechnung:
+kein Rädersuchen, kein Drehen, keine Handjustierung, kein ResizeObserver —
+das Bild liegt als CSS-Hintergrund da, das Foto steht mit `object-position:
+center bottom` darauf. Der Ausschnitt ist deshalb so geschnitten, dass die
+am Bild ausgemessene Aufsetzlinie der Räder (0,7775 der Bildhöhe) bei 90
+Prozent der Ausschnitthöhe liegt: Nur so steht die Maschine **auf** dem
+Teller und nicht davor. `werkzeug/bike-raum.py` rechnet ihn aus Friedrichs
+Vorlage in `arbeitsmaterial/vorlagen/` — beschneiden, auf 960 Punkte
+verkleinern, auf 62 Prozent abdunkeln. Der ganze Raum (252 KB) bleibt aus
+dem Repository, ausgeliefert wird nur der Ausschnitt.
+
+Damit entfällt das unscharf hinterlegte eigene Foto, das hier zuerst stand:
+Zwei Untergründe in einer Karte waren einer zu viel, und der Raum sagt mehr.
+**Der KI-Hinweis im Rechtlichen und `img/LIZENZ-bilder.txt` sind
+mitgezogen** — die Werkstatt ist wieder ein sichtbares KI-Bild, die
+Beispielmaschine bleibt gelöscht.
+
+Eine Maske dämpft den Raum nach links und nach oben: `radial-gradient` vom
+Teller aus. Zwei Verläufe mit `mask-composite` täten dasselbe, fallen aber
+dort, wo `composite` fehlt, ersatzlos aus — dann stünde der Raum hart an der
+Kante. Nach oben abzufallen ist nötig, weil das Ringlicht der Werkstatt
+sonst als heller Bogen hinter dem Namen hängt.
+
+**Der Kopf:** Logo von 150 auf 172 Punkte, Profilknopf von 46 auf 52, der
+Abstand zur ersten Karte von 16 auf 36 Punkte.
+
+**Die Reisekarte** hatte am Bild ein festes Seitenverhältnis (4:3) und
+daneben einen mittig stehenden Text. Dadurch war das Bild kleiner als die
+Textspalte, oben und unten blieben ungleiche Ränder, und die Karte war halb
+leer. Jetzt sind beide Spalten gleich hoch (`align-items: stretch`, kein
+`aspect-ratio`), das Bild füllt seine Spalte, die Ränder messen rundum 17
+Punkte. Im Breiten ist die Bildspalte auf 300 Punkte begrenzt — bei 1344
+Punkten Kartenbreite wären 44 Prozent ein flacher Streifen. Dazu ein
+kompakter Zeitraum: „24. bis 26. Mai 2026" statt „So., 24.05. bis Di.,
+26.05.", das brach auf zwei Zeilen um.

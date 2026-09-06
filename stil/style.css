@@ -2601,15 +2601,20 @@ body.nav-modus .leaflet-control-container { display: none; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--s3);
-  padding-top: env(safe-area-inset-top);
-  margin-bottom: calc(-1 * var(--s2));
+  gap: var(--s4);
+  padding-top: calc(env(safe-area-inset-top) + var(--s2));
+  /* Luft nach unten. Der Flex-Abstand der Seite (--s5) allein liess Logo
+     und Karte aneinanderkleben; zusammen sind es jetzt 40 Punkte. */
+  margin-bottom: var(--s3);
 }
 .start-kopf .wortmarke-garage { margin: 0; }
-/* 150 Punkte: gut zwei Drittel der Anmeldegroesse (220). Die alte Regel
+/* 172 Punkte: gut drei Viertel der Anmeldegroesse (220). Die alte Regel
    "klein, damit es nicht mit Meine Garage streitet" ist mit dieser
    Ueberschrift gegangen - das Logo IST jetzt der Titel der Seite. */
-.wortmarke-garage .wortmarke-bild { width: 150px; }
+.wortmarke-garage .wortmarke-bild { width: 172px; }
+/* Der Profilknopf ist der einzige Knopf im Kopf und darf dem Logo
+   standhalten: 52 statt der 46 Punkte der uebrigen runden Knoepfe. */
+.start-kopf .glas-rund { width: 52px; height: 52px; }
 
 /* ---------- Die Karte ----------
    EINE Scheibe fuer alle Karten des Starts, spaeter fuer alle Karten der
@@ -2687,20 +2692,33 @@ button.karte:active { transform: scale(0.985); }
   overflow: hidden;
   isolation: isolate;
 }
-/* Das eigene Foto ein zweites Mal, unscharf, hinter der ganzen Karte. Nach
-   unten laeuft es ins Glas aus, damit die Werte darauf lesbar bleiben. */
-.bike-karte.mit-bild::after {
-  content: "";
+/* Die Werkstatt als Untergrund der rechten Kartenhaelfte. Sie ersetzt das
+   unscharf hinterlegte eigene Foto, das hier zuerst stand: Zwei
+   Untergruende in einer Karte waren einer zu viel, und der Raum sagt mehr.
+   Nach links laeuft er ueber eine Maske aus, damit Name und Werte auf
+   ruhigem Glas stehen. Der Teller sitzt im Ausschnitt bei 90 Prozent der
+   Hoehe, deshalb "center bottom" - so steht die Maschine darauf und nicht
+   davor. */
+.bike-raum {
   position: absolute;
-  inset: -20%;
-  z-index: -1;
-  background: var(--bike-bild) center / cover no-repeat;
-  filter: blur(34px) saturate(120%);
-  opacity: 0.45;
-  -webkit-mask-image: linear-gradient(to bottom, black 20%, transparent 95%);
-  mask-image: linear-gradient(to bottom, black 20%, transparent 95%);
+  top: 0; right: 0; bottom: 0;
+  width: 66%;
+  z-index: 0;
+  background: url("../img/bike-raum.webp") center bottom / cover no-repeat;
+  /* EINE Maske statt zweier: Sie geht vom Teller aus (unten rechts) und
+     faellt nach links und nach oben ab. Zwei Verlaeufe mit mask-composite
+     taeten dasselbe, fallen aber dort, wo composite fehlt, ersatzlos aus -
+     und dann stuende der Raum hart an der Kante. Nach oben abzufallen ist
+     noetig, weil das Ringlicht der Werkstatt sonst als heller Bogen hinter
+     dem Namen und dem Plus-Knopf haengt. */
+  -webkit-mask-image: radial-gradient(125% 115% at 80% 94%, black 32%, transparent 82%);
+  mask-image: radial-gradient(125% 115% at 80% 94%, black 32%, transparent 82%);
   pointer-events: none;
 }
+/* Der Inhalt liegt darueber, die Lichtkante der Karte darueber hinaus. */
+.bike-karte > *:not(.bike-raum) { position: relative; z-index: 1; }
+.bike-karte::before { z-index: 2; }
+
 .bike-kopf {
   display: flex;
   align-items: center;
@@ -2763,30 +2781,33 @@ button.karte:active { transform: scale(0.985); }
    der die Maschine vom "Schweben" befreit, ohne Zeichenflaeche. */
 .bike-buehne {
   position: relative;
-  min-height: 176px;
+  min-height: 186px;
   align-self: stretch;
   display: flex;
   align-items: flex-end;
   justify-content: center;
 }
+/* Der Kontaktschatten auf dem Teller. Schwaecher als frueher: Der Teller
+   im Bild traegt die Maschine schon optisch, der Schatten setzt sie nur auf. */
 .bike-buehne::before {
   content: "";
   position: absolute;
-  left: 6%; right: 6%; bottom: 2px;
-  height: 14%;
+  left: 10%; right: 10%; bottom: 4px;
+  height: 11%;
   border-radius: 50%;
-  background: radial-gradient(ellipse at center, var(--schatten-stark), transparent 72%);
+  background: radial-gradient(ellipse at center, var(--schatten-tief), transparent 70%);
 }
 .bike-bild {
   position: relative;
   width: 100%;
   height: auto;
-  max-height: 260px;
+  max-height: 270px;
   object-fit: contain;
   object-position: center bottom;
   filter: drop-shadow(0 10px 8px var(--schatten-mittel));
 }
-.bike-foto-knopf { margin: auto; }
+/* Auf dem leeren Teller, nicht in der Mitte der leeren Flaeche. */
+.bike-foto-knopf { margin: auto auto var(--s5); }
 .bike-leer { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s3); }
 .bike-leer .abzeichen { margin-bottom: 0; }
 .bike-leer .bike-name { margin: 0; }
@@ -2811,24 +2832,47 @@ button.karte:active { transform: scale(0.985); }
    Kartenbild links, rechts Name und drei Zeilen, unten ueber die volle
    Breite der Knopf "Weiterplanen". Die ganze Karte ist ein Knopf
    (einstieg.js), der Knopf darin nur die Aufforderung. */
+/* Bild links, Text rechts, Knopf ueber die volle Breite darunter. Beide
+   Spalten sind GLEICH HOCH (align-items: stretch, kein aspect-ratio am
+   Bild): Vorher hatte das Bild ein festes Seitenverhaeltnis und der Text
+   stand mittig daneben - dadurch blieben oben und unten ungleiche Raender
+   und die Karte war halb leer. Jetzt bestimmt die hoehere der beiden
+   Spalten die Hoehe, und das Bild fuellt sie. */
 .start-reise {
   display: grid;
-  grid-template-columns: minmax(0, 42%) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 44%) minmax(0, 1fr);
   gap: var(--s3) var(--s4);
+  align-items: stretch;
 }
 .start-reise-bild {
+  grid-row: 1;
   position: relative;
   border-radius: var(--r-md);
   overflow: hidden;
-  aspect-ratio: 4 / 3;
+  /* Damit die Karte auch bei einem kurzen Namen etwas hermacht. */
+  min-height: 148px;
   background: var(--surface-2);
 }
 .start-reise-bild .tour-vorschau,
-.start-reise-bild svg { display: block; width: 100%; height: 100%; aspect-ratio: auto; }
-.start-reise-text { display: flex; flex-direction: column; gap: var(--s2); min-width: 0; align-self: center; }
+.start-reise-bild svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  object-fit: cover;
+}
+.start-reise-text {
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--s2);
+  min-width: 0;
+  padding: var(--s1) 0;
+}
 .start-reise-name {
   font-family: var(--schrift-display);
-  font-size: 19px;
+  font-size: 21px;
   font-weight: 600;
   letter-spacing: -0.01em;
   line-height: 1.2;
@@ -2839,11 +2883,11 @@ button.karte:active { transform: scale(0.985); }
   display: flex;
   align-items: center;
   gap: var(--s2);
-  font-size: 14px;
+  font-size: 15px;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
-.start-reise-zeile .ic { color: var(--metall); }
+.start-reise-zeile .ic { flex: 0 0 auto; color: var(--metall); }
 .start-reise-weiter {
   grid-column: 1 / -1;
   display: flex;

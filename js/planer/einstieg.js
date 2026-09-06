@@ -119,14 +119,31 @@ function zeichneGarageReise() {
   if (letzte && typeof beobachteVorschauen === 'function') beobachteVorschauen(platte);
 }
 
+/* Der Zeitraum in EINER Zeile. datumKurz() liefert "So., 24.05." - zweimal
+   davon mit "bis" dazwischen brach in der Karte um und machte die Zeile
+   unruhig. Liegen Anfang und Ende im selben Monat, genuegt der Monat einmal:
+   "24. bis 26. Mai 2026". */
+function zeitraumKurz(reise, tage) {
+  const von = tagesDatum(reise, 0);
+  const bis = tagesDatum(reise, Math.max(0, tage - 1));
+  if (!von) return '';
+  const monatJahr = { month: 'long', year: 'numeric' };
+  if (!bis || von.getTime() === bis.getTime()) {
+    return von.toLocaleDateString('de-DE', { day: 'numeric', ...monatJahr });
+  }
+  if (von.getMonth() === bis.getMonth() && von.getFullYear() === bis.getFullYear()) {
+    return `${von.getDate()}. bis ${bis.toLocaleDateString('de-DE', { day: 'numeric', ...monatJahr })}`;
+  }
+  const kurz = { day: 'numeric', month: 'long' };
+  return `${von.toLocaleDateString('de-DE', kurz)} bis ${bis.toLocaleDateString('de-DE', { day: 'numeric', ...monatJahr })}`;
+}
+
 function garageReiseHtml(reise) {
   const bilanz = reiseBilanz(reise);
   // Das Kartenbild fuellt sein Fenster (4:3, links in der Karte): Das SVG
   // aus reise.js traegt "slice" und schneidet den Rand an, statt zu schweben.
   const karte = reiseKartenSvg(reise, { marke: 12 });
-  const zeitraum = reise.start
-    ? datumKurz(tagesDatum(reise, 0)) + ' bis ' + datumKurz(tagesDatum(reise, bilanz.tage - 1))
-    : '';
+  const zeitraum = zeitraumKurz(reise, bilanz.tage);
   const zeile = (name, text) => `<span class="start-reise-zeile">${symbol(name, 'klein')} ${text}</span>`;
   return `
     <div class="garage-shop-kopf">

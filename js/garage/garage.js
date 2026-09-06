@@ -120,9 +120,10 @@ function zeichneGarage() {
    der Knopf "Foto hinzufuegen" auf der Buehne. Die Beispielmaschine von
    frueher gibt es nicht mehr (siehe bildAdresse in finder.js).
 
-   Dasselbe Foto liegt ein zweites Mal unscharf hinter der ganzen Karte
-   (die CSS-Marke --bike-bild, gezeichnet von .bike-karte.mit-bild::after in
-   style.css): Glas ueber etwas Echtem, Grundsatz 4 der Designsprache. */
+   Hinter der rechten Kartenhaelfte liegt die Werkstatt als Bild (.bike-raum
+   in style.css) - Glas ueber etwas Echtem, Grundsatz 4 der Designsprache.
+   Sie steht dort unabhaengig vom Foto; ohne Foto sieht man den leeren
+   Teller, und das ist der richtige Leerzustand. */
 function zeichneMotorradBild() {
   const motorrad = motorradAktiv();
   const karte = document.getElementById('garageDatenblatt');
@@ -136,8 +137,6 @@ function zeichneMotorradBild() {
     bild.hidden = true;
     bild.removeAttribute('src');
     if (fotoKnopf) fotoKnopf.hidden = !motorrad;
-    karte.classList.remove('mit-bild');
-    karte.style.removeProperty('--bike-bild');
   };
   if (!eigenes) { ohneFoto(); return; }
 
@@ -152,8 +151,6 @@ function zeichneMotorradBild() {
   bild.hidden = false;
   bild.src = adresse;
   if (fotoKnopf) fotoKnopf.hidden = true;
-  karte.classList.add('mit-bild');
-  karte.style.setProperty('--bike-bild', `url("${adresse}")`);
 }
 
 /* Freigestellte Fotos haben viel leeren Rand - der Freisteller laesst ihn

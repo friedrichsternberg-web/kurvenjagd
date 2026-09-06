@@ -212,6 +212,28 @@
     #startInner .bike-name { font-size: 30px; }
   }
 
+  /* Die Bike-Karte im Breiten: Die Werte duerfen nicht ueber die halbe
+     Seite auseinanderlaufen, und "Bike bearbeiten" ist ein Knopf, keine
+     Leiste - er steht links unter den Werten wie auf dem Handy, nur ohne
+     die volle Breite zu nehmen. */
+  .bike-inhalt {
+    grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+    /* Oben statt unten: Auf dem Handy stehen die Werte buendig mit der
+       Maschine, hier ist die Buehne so hoch, dass zwischen Name und Werten
+       sonst eine Luecke klafft. */
+    align-items: start;
+  }
+  .bike-knopf { width: auto; align-self: flex-start; padding-inline: var(--s5); }
+  .bike-buehne { min-height: 260px; }
+  .bike-bild { max-height: 340px; }
+
+  /* Die Reisekarte im Breiten: Das Kartenbild darf nicht mit der Karte
+     mitwachsen - bei 1344 Punkten Kartenbreite waeren 44 Prozent ein 590
+     Punkte breiter, 150 hoch flacher Streifen. Feste Obergrenze, dafuer
+     hoeher. */
+  .start-reise { grid-template-columns: minmax(0, 300px) minmax(0, 1fr); }
+  .start-reise-bild { min-height: 190px; }
+
   /* --- 4. Listenbildschirme in Lesebreite -------------------------------------
      Touren (und spaeter Rechtliches, und der Shop, wenn er wiederkommt)
      liefen bisher randlos ueber die volle Fensterbreite - eine 1400 Punkte
