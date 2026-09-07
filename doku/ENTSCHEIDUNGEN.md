@@ -3591,3 +3591,19 @@ entschieden am Zeitstempel `geaendert`. Zwei Leute, die im selben Moment
 denselben Tag ändern, verlieren eine der beiden Änderungen. Der ehrliche
 Weg dagegen wäre eine Live-Verbindung (Supabase Realtime) — die steht in
 `AUFGABEN.md`. Hier zählte zuerst, dass es überhaupt geht.
+
+**Ein Fehler, der beim Durchlesen auffiel, bevor er jemanden traf:** Die
+erste Fassung legte eine Reise mit zwei Anfragen aus dem Browser an —
+erst die Zeile in `reisen`, dann die Teilnehmerzeile des Besitzers. Beides
+wäre gescheitert. Die Leseregel auf `reisen` verlangt „dabei", und dabei
+ist der Besitzer erst mit der zweiten Zeile; schon das `returning id` der
+ersten Anfrage hätte nichts geliefert. Und die Schreibregel der zweiten
+Zeile fragte per Unterabfrage in `reisen` nach — eine Unterabfrage in
+einer Zeilenregel läuft mit den Rechten des Fragenden und unterliegt
+denselben Regeln, hätte also ebenfalls nichts gefunden. **Die Lehre:
+Sobald zwei Tabellen sich in ihren Regeln gegenseitig befragen, gehört
+dazwischen eine Funktion mit `security definer`** — hier
+`ist_reise_besitzer()` und `reise_anlegen()`. Dasselbe Muster wie bei
+`ist_reise_teilnehmer()`, nur an einer Stelle, an der es beim ersten
+Entwurf niemandem auffiel.
+

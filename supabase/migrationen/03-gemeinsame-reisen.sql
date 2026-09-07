@@ -176,6 +176,26 @@ $$;
 revoke all on function public.ist_reise_teilnehmer(uuid) from public, anon;
 grant execute on function public.ist_reise_teilnehmer(uuid) to authenticated;
 
+/* Dieselbe Ueberlegung fuer die Frage "gehoert mir die Reise". Sie steht
+   in den Regeln von reise_teilnehmer, und die Tabelle reisen hat selbst
+   Zeilenregeln - eine Unterabfrage darauf laeuft mit den Rechten des
+   Fragenden und faende nichts. */
+create or replace function public.ist_reise_besitzer(p_reise uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.reisen r
+    where r.id = p_reise and r.besitzer_id = auth.uid()
+  );
+$$;
+
+revoke all on function public.ist_reise_besitzer(uuid) from public, anon;
+grant execute on function public.ist_reise_besitzer(uuid) to authenticated;
+
 
 /* --- 5. Wer was darf -----------------------------------------------------
 
@@ -195,8 +215,13 @@ drop policy if exists "Reise loescht der Besitzer" on public.reisen;
 
 create policy "Reise lesen wenn dabei" on public.reisen
   for select to authenticated using (public.ist_reise_teilnehmer(id));
-create policy "Reise anlegen" on public.reisen
-  for insert to authenticated with check (auth.uid() = besitzer_id);
+/* KEINE Regel fuers Anlegen, und das ist Absicht. Eine Reise entsteht
+   ausschliesslich ueber reise_anlegen() in Abschnitt 8b, weil dabei ZWEI
+   Zeilen zusammengehoeren: die Reise und die Teilnehmerzeile ihres
+   Besitzers. Ohne die zweite kaeme er an seine eigene Reise nicht mehr
+   heran - die Leseregel verlangt "dabei", und dabei ist er erst mit
+   dieser Zeile. Aus dem Browser waeren das zwei Anfragen, zwischen denen
+   es schiefgehen kann; in der Funktion ist es ein Vorgang. */
 create policy "Reise aendern wenn dabei" on public.reisen
   for update to authenticated using (public.ist_reise_teilnehmer(id))
                                 with check (public.ist_reise_teilnehmer(id));
@@ -221,14 +246,14 @@ create policy "Teilnehmer lesen" on public.reise_teilnehmer
   for select to authenticated
   using (nutzer_id = auth.uid() or public.ist_reise_teilnehmer(reise_id));
 
-create policy "Sich selbst eintragen" on public.reise_teilnehmer
-  for insert to authenticated
-  with check (
-    nutzer_id = auth.uid()
-    and exists (select 1 from public.reisen r
-                where r.id = reise_id and r.besitzer_id = auth.uid())
-  );
+/* Auch hier keine Regel fuers Anlegen: Der Besitzer bekommt seine Zeile
+   von reise_anlegen(), alle anderen von reise_einladen(). Beide laufen
+   mit Sonderrechten und pruefen selbst - eine dritte Tuer braucht es
+   nicht.
 
+   Aendern darf jeder nur die eigene Zeile, das ist das Annehmen und
+   Ablehnen. Loeschen ebenfalls - das ist das Aussteigen -, und der
+   Besitzer darf zusaetzlich andere hinauswerfen. */
 create policy "Eigene Zeile aendern" on public.reise_teilnehmer
   for update to authenticated
   using (nutzer_id = auth.uid())
@@ -236,11 +261,7 @@ create policy "Eigene Zeile aendern" on public.reise_teilnehmer
 
 create policy "Aussteigen oder entfernen" on public.reise_teilnehmer
   for delete to authenticated
-  using (
-    nutzer_id = auth.uid()
-    or exists (select 1 from public.reisen r
-               where r.id = reise_id and r.besitzer_id = auth.uid())
-  );
+  using (nutzer_id = auth.uid() or public.ist_reise_besitzer(reise_id));
 
 /* Die Kasse gehoert der Gruppe. Eintragen darf jeder, aendern und loeschen
    ebenfalls - eine Reisekasse unter Freunden, in der man den eigenen
@@ -414,6 +435,58 @@ revoke all on function public.reise_einladen(uuid, text) from public, anon;
 grant execute on function public.reise_einladen(uuid, text) to authenticated;
 
 
+/* --- 8b. Eine Reise anlegen ----------------------------------------------
+
+   Zwei Zeilen, ein Vorgang: die Reise und die Teilnehmerzeile ihres
+   Besitzers. Warum das keine zwei Anfragen aus dem Browser sein duerfen,
+   steht bei den Regeln in Abschnitt 5 - ohne die zweite Zeile kaeme der
+   Besitzer an seine eigene Reise nicht mehr heran, und schon das blosse
+   Zurueckgeben der neuen Kennung scheiterte an der Leseregel.
+
+   Zweites Mal dasselbe: Ein zweiter Aufruf mit derselben quelle_id legt
+   keine neue Reise an, sondern gibt die vorhandene zurueck. So macht ein
+   doppelter Tipp keinen Doppelgaenger.                                    */
+
+create or replace function public.reise_anlegen(
+  p_quelle_id  text,
+  p_name       text,
+  p_beginnt_am date,
+  p_tage       jsonb
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  neue uuid;
+begin
+  if auth.uid() is null then
+    raise exception 'Dafuer braucht es ein Konto.';
+  end if;
+
+  select r.id into neue from public.reisen r
+  where r.besitzer_id = auth.uid() and r.quelle_id = p_quelle_id;
+  if found then
+    return neue;
+  end if;
+
+  insert into public.reisen (besitzer_id, quelle_id, name, beginnt_am, tage)
+  values (auth.uid(), p_quelle_id, p_name, p_beginnt_am, coalesce(p_tage, '[]'::jsonb))
+  returning id into neue;
+
+  insert into public.reise_teilnehmer
+    (reise_id, nutzer_id, rolle, status, eingeladen_von, geantwortet_am)
+  values (neue, auth.uid(), 'besitzer', 'dabei', auth.uid(), now());
+
+  return neue;
+end;
+$$;
+
+revoke all on function public.reise_anlegen(text, text, date, jsonb) from public, anon;
+grant execute on function public.reise_anlegen(text, text, date, jsonb) to authenticated;
+
+
 /* Die offenen Einladungen des Angemeldeten. Sie muss mit SECURITY DEFINER
    laufen, weil sie zwei Dinge zusammenfuehrt, die der Eingeladene beide
    noch nicht sehen darf: den Namen der Reise (die Leseregel verlangt
@@ -553,8 +626,8 @@ grant execute on function public.anteil_abhaken(uuid, uuid, boolean) to authenti
      where p.pronamespace = 'public'::regnamespace
        and r.rolname in ('anon', 'authenticated')
        and has_function_privilege(r.rolname, p.oid, 'EXECUTE')
-       and p.proname in ('ist_reise_teilnehmer', 'nutzer_suchen',
-                         'reise_einladen', 'meine_einladungen',
-                         'einladung_beantworten', 'reise_teilnehmer_liste',
-                         'anteil_abhaken')
+       and p.proname in ('ist_reise_teilnehmer', 'ist_reise_besitzer',
+                         'nutzer_suchen', 'reise_anlegen', 'reise_einladen',
+                         'meine_einladungen', 'einladung_beantworten',
+                         'reise_teilnehmer_liste', 'anteil_abhaken')
      order by p.proname, r.rolname;                                         */

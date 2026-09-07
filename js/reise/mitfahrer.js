@@ -104,34 +104,37 @@ function reiseAbschrift(reise) {
 
 /* --- 3. Hochladen und Abgleichen ----------------------------------------- */
 
-/* Der erste Schritt: Die Reise entsteht auf dem Server, und der Besitzer
-   traegt sich selbst als Teilnehmer ein. Warum er eine eigene Zeile bekommt
-   und nicht als Sonderfall gilt, steht in Abschnitt 2 der SQL-Datei. */
+/* Der erste Schritt: Die Reise entsteht auf dem Server.
+
+   Das laeuft ueber EINEN Aufruf von reise_anlegen() und nicht ueber zwei
+   Anfragen, obwohl zwei Zeilen entstehen - die Reise und die
+   Teilnehmerzeile ihres Besitzers. Der Grund steht in Abschnitt 8b der
+   SQL-Datei: Ohne die zweite Zeile kaeme der Besitzer an seine eigene
+   Reise nicht mehr heran, denn die Leseregel verlangt "dabei". Aus dem
+   Browser waeren das zwei Anfragen, zwischen denen es schiefgehen kann;
+   dort drin ist es ein Vorgang. */
 async function ladeReiseHoch(reise) {
   if (!mitfahrenMoeglich()) return { ok: false, meldung: 'Dafür brauchst du ein Konto.' };
   if (reise.serverId) return { ok: true, serverId: reise.serverId };
 
-  const { data, error } = await backend
-    .from('reisen')
-    .insert({ besitzer_id: angemeldeterNutzer.id, ...reiseAbschrift(reise) })
-    .select('id')
-    .single();
-  if (error) return { ok: false, meldung: 'Die Reise ließ sich nicht anlegen.' };
-
-  const { error: fehlerZeile } = await backend.from('reise_teilnehmer').insert({
-    reise_id: data.id, nutzer_id: angemeldeterNutzer.id,
-    rolle: 'besitzer', status: 'dabei', geantwortet_am: new Date().toISOString(),
+  const abschrift = reiseAbschrift(reise);
+  const { data, error } = await backend.rpc('reise_anlegen', {
+    p_quelle_id: abschrift.quelle_id,
+    p_name: abschrift.name,
+    p_beginnt_am: abschrift.beginnt_am,
+    p_tage: abschrift.tage,
   });
-  if (fehlerZeile) {
-    // Ohne Teilnehmerzeile kaeme der Besitzer an seine eigene Reise nicht
-    // mehr heran - die Leseregel verlangt "dabei". Lieber zuruecknehmen als
-    // eine Zeile hinterlassen, die niemand mehr sieht.
-    await backend.from('reisen').delete().eq('id', data.id);
-    return { ok: false, meldung: 'Die Reise ließ sich nicht anlegen.' };
+  // Die Datenbank wirft verstaendliche deutsche Saetze - etwa die
+  // Obergrenze von 30 Reisen je Konto. Sie werden durchgereicht.
+  if (error || !data) {
+    return { ok: false, meldung: error?.message || 'Die Reise ließ sich nicht anlegen.' };
   }
 
-  aendereReise(reise.id, eintrag => { eintrag.serverId = data.id; });
-  return { ok: true, serverId: data.id };
+  aendereReise(reise.id, eintrag => {
+    eintrag.serverId = data;
+    eintrag.besitzerId = angemeldeterNutzer.id;
+  });
+  return { ok: true, serverId: data };
 }
 
 /* Jede Aenderung an einer geteilten Reise geht hier durch. aendereReise()
