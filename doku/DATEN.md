@@ -261,6 +261,44 @@ Was das für den Bau heißt: Die Spalte mit dem Veranstalter muss `NULL`
 annehmen können und darf **nicht** auf `ON DELETE CASCADE` stehen, sonst
 reißt das Löschen eines Kontos die Ausfahrten anderer Leute mit.
 
+### Gemeinsam geplante Reisen (seit 07.09.2026)
+
+Eine Reise liegt so lange **nur auf dem Gerät**, bis jemand auf „Gemeinsam
+planen" tippt. Erst dieser Tipp legt sie auf dem Server an. Wer allein
+plant, schickt also nach wie vor nichts.
+
+**Was dann hochgeht:** Name der Reise, erster Fahrtag, die Tage in
+Reihenfolge und je Tag eine **Abschrift** der Route – Name, Länge,
+Kurvigkeit, Fahrzeit, Höhenmeter, die ausgedünnte Linie fürs Vorschaubild
+und die Wegpunkte. **Nicht** der volle Streckenverlauf. Alle Mitfahrer
+sehen das, sonst niemand; die Zeilenregeln der Datenbank lassen nur
+hinein, wer den Status „dabei" hat.
+
+**Die Suche nach Benutzernamen** (`nutzer_suchen`) gibt zu einer Anfrage
+von mindestens drei Zeichen höchstens acht Treffer heraus, und je Treffer
+genau zwei Angaben: Benutzername und Pfad des Profilbilds. Beides ist
+ohnehin dafür gedacht, gesehen zu werden. Keine E-Mail, kein Wohnort,
+keine Touren. Der eigene Name fällt aus der Liste heraus.
+
+**Die Kasse** speichert je Ausgabe: wer sie eingetragen hat, wer ausgelegt
+hat, den Betrag in Cent, einen freien Text („Hotel Nacht 1"), wahlweise
+den Reisetag und die Anteile je Person mit dem Haken „bezahlt". Das sind
+Angaben über Geld zwischen Freunden – sie stehen deshalb hinter derselben
+Regel wie die Reise und sind für Außenstehende nicht lesbar, auch nicht
+für angemeldete.
+
+**Beim Löschen eines Kontos** gilt hier dieselbe Regel wie bei den
+gemeinsamen Ausfahrten oben, und aus demselben Grund:
+
+- Die **Reise bleibt bestehen**, auch wenn ihr Besitzer geht. Die Spalte
+  `besitzer_id` steht auf `ON DELETE SET NULL`, nicht auf `CASCADE`.
+- **Ausgaben bleiben ebenfalls stehen**, mit leerem Zahler. Sie
+  verschwinden zu lassen wäre schlimmer als sie zu behalten: Es änderte
+  stillschweigend, was alle anderen einander schulden. Die App zeigt an
+  diesen Stellen „Ehemaliges Konto" – ohne Namen, ohne Bild.
+- Die **Teilnahme selbst verschwindet** (`ON DELETE CASCADE` auf
+  `reise_teilnehmer`): Wer weg ist, steht nicht mehr in der Liste.
+
 ---
 
 ## Punkte, die in der Datenschutzerklärung stehen müssen
