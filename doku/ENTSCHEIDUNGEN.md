@@ -3524,3 +3524,70 @@ Rasterkind streckt sich sonst auf die Spalte, `width: auto` allein ändert
 das nicht, es braucht `justify-self: start`.
 
 Nicht selbst geprüft: Safari — die macOS-Freigabe für Bildschirmfotos fehlt.
+
+## 07.09.2026 — Reisen zu mehreren planen und abrechnen
+
+Gebaut: Benutzernamen suchen, jemanden zu einer Reise einladen, annehmen
+oder ablehnen, gemeinsam an denselben Tagen planen, und eine Kasse, in der
+jeder eintragen kann, was er ausgelegt hat.
+
+**Die Reise wandert erst auf den Server, wenn sie geteilt wird.** Der
+naheliegende Weg wäre gewesen, alle Reisen dorthin zu legen, sobald jemand
+angemeldet ist. Dagegen steht der erste Grundsatz aus `konto.js`: Anmelden
+ist freiwillig, und der Routenplaner muss ohne Konto vollständig
+funktionieren. Also bleibt eine Reise im Gerät, bis der Tipp auf
+„Gemeinsam planen" sie anlegt. Der Preis: Die Kasse gibt es erst danach —
+wer allein rechnen will, muss die Reise teilen und bleibt eben der einzige
+Teilnehmer. Ein zweiter Speicherweg nur für den Alleinreisenden wäre
+doppelte Arbeit für einen Fall, den es kaum gibt.
+
+**Jeder Tag trägt eine Abschrift seiner Route, keinen Verweis.** Auf dem
+Gerät zeigt `tag.routeId` auf eine gespeicherte Tour, und das ist dort
+richtig: Wer sie umbenennt, sieht den neuen Namen auch in der Reise. Im
+Gerät des Mitfahrers liegt diese Tour aber nicht. Der erste Entwurf wollte
+die Tour deshalb mit hochladen; dagegen spricht die Größe — der volle
+Streckenverlauf einer Woche sind mehrere Megabyte in einer Zeile. Jetzt
+reist je Tag nur, was zum Zeichnen und Rechnen nötig ist: Name, Länge,
+Kurvigkeit, Fahrzeit, Höhenmeter, die neunzig Punkte der Vorschaulinie und
+die Wegpunkte. Wer wirklich fahren will, öffnet die Tour im Planer, und
+der rechnet sie aus den Wegpunkten neu. `routeZuTag()` in `reise.js` ist
+die eine Stelle, die beide Fälle auflöst.
+
+**Die Anteile stehen als JSON in einer Spalte, nicht in einer eigenen
+Tabelle.** Ein Anteil wird nie einzeln gesucht oder sortiert, immer nur
+mit seiner Ausgabe gelesen und geschrieben — eine zweite Tabelle wäre ein
+zweiter Zugriff für nichts. Die eine Gefahr dieser Form ist der verlorene
+Haken: Zwei Leute haken gleichzeitig verschiedene Anteile ab, und der
+zweite schreibt mit seinem veralteten Stand über den ersten. Deshalb läuft
+das Abhaken über `anteil_abhaken()` **im Server**, der nur den einen
+Eintrag anfasst, statt über ein Update der ganzen Zeile aus dem Browser.
+
+**Alles in Cent, als ganze Zahl.** In `kasse.js` gibt es keine einzige
+Kommazahl. 0,1 + 0,2 ergibt in JavaScript 0,30000000000000004, und eine
+Reisekasse, die um einen Cent daneben liegt, glaubt einem niemand mehr.
+Umgerechnet wird nur an den beiden Rändern: `textZuCent()` beim Eintippen,
+`centZuText()` beim Anzeigen.
+
+**Ein gelöschtes Konto reißt keine Reise mit.** `besitzer_id` steht auf
+`ON DELETE SET NULL`, die Ausgaben ebenso. Das folgt der Regel, die seit
+dem 20.08.2026 in `DATEN.md` für gemeinsame Ausfahrten steht, und hat bei
+der Kasse einen zweiten Grund: Verschwundene Ausgaben änderten
+stillschweigend, was alle anderen einander schulden. Die App zeigt an
+solchen Stellen „Ehemaliges Konto".
+
+**Der Fehler beim ersten Anlauf, und warum er hierher gehört:** Die
+Kästchen in der Aufteilung waren 252 Punkte breit, die Namen daneben
+null. Grund war `\.garage-dialog-inhalt input { width: 100% }` — dieselbe
+Falle, vor der der Kommentar bei `.teilen-schalter` seit Monaten warnt.
+Wer im Reise-Blatt ein Kästchen setzt, muss den Vorsatz mitschreiben.
+
+**Einladen darf jeder, der dabei ist, nicht nur der Besitzer.** Eine Reise
+zu dritt, bei der die beiden anderen den Vierten nicht dazuholen dürfen,
+wäre eine Verwaltung und keine Verabredung. Löschen bleibt beim Besitzer,
+weil es alle trifft; die anderen sehen an derselben Stelle „Aussteigen".
+
+**Der Abgleich ist bewusst einfach:** Wer zuletzt schreibt, gewinnt,
+entschieden am Zeitstempel `geaendert`. Zwei Leute, die im selben Moment
+denselben Tag ändern, verlieren eine der beiden Änderungen. Der ehrliche
+Weg dagegen wäre eine Live-Verbindung (Supabase Realtime) — die steht in
+`AUFGABEN.md`. Hier zählte zuerst, dass es überhaupt geht.

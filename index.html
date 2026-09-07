@@ -412,6 +412,23 @@
         <path d="M9 7.5V5.2a1.2 1.2 0 0 1 1.2-1.2h3.6A1.2 1.2 0 0 1 15 5.2v2.3"/>
         <path d="M3.5 12.6h17"/>
       </symbol>
+      <!-- Leute, Kasse und Haken: alles, was die gemeinsame Reise braucht.
+           Der Haken sitzt auf abgehakten Anteilen, die Kasse ueber der
+           Abrechnung, die Leute auf dem Knopf "Gemeinsam planen". -->
+      <symbol id="icon-leute" viewBox="0 0 24 24">
+        <circle cx="9" cy="8.5" r="3.2"/>
+        <path d="M2.8 19.5c0-3.2 2.8-5 6.2-5s6.2 1.8 6.2 5"/>
+        <path d="M16.2 5.8a3.2 3.2 0 0 1 0 6"/>
+        <path d="M17.6 14.8c2.3.5 3.6 2.1 3.6 4.7"/>
+      </symbol>
+      <symbol id="icon-kasse" viewBox="0 0 24 24">
+        <rect x="2.8" y="6" width="18.4" height="12" rx="2"/>
+        <circle cx="12" cy="12" r="2.6"/>
+        <path d="M6.4 9.6v4.8M17.6 9.6v4.8"/>
+      </symbol>
+      <symbol id="icon-haken" viewBox="0 0 24 24">
+        <path d="M4.8 12.6 9.6 17.4 19.2 6.8"/>
+      </symbol>
       <symbol id="icon-plus" viewBox="0 0 24 24">
         <path d="M12 5v14M5 12h14"/>
       </symbol>
@@ -2670,6 +2687,13 @@
        (zeigeBildschirm, loadSaved, vorschauBildHtml) und nach touren.js,
        das den Teil "Reisen" an diese Datei weiterreicht. -->
   <script src="js/reise/reise.js?v=110"></script>
+  <!-- Die gemeinsame Reise, in drei Schichten: kasse.js rechnet und fasst
+       nichts an, mitfahrer.js redet mit dem Server, ausgaben.js zeichnet.
+       Alle drei NACH reise.js: Sie haengen sich an dessen Bildschirm und
+       an dessen Blatt, statt es umzuschreiben. -->
+  <script src="js/reise/kasse.js?v=110"></script>
+  <script src="js/reise/mitfahrer.js?v=110"></script>
+  <script src="js/reise/ausgaben.js?v=110"></script>
   <!-- Der Einstieg in den Planer (Tour oder Reise?) und die Reisekarte in
        der Garage. Nach reise.js, dessen Reisen es zeigt. -->
   <script src="js/planer/einstieg.js?v=110"></script>

@@ -93,7 +93,14 @@ function legeReiseAn(name) {
 }
 
 function loescheReise(id) {
-  const rest = ladeReisen().filter(reise => String(reise.id) !== String(id));
+  const reise = reiseNach(id);
+  // Eine geteilte Reise gehoert mehreren: Sie muss auch dort weg, sonst
+  // steht sie bei den anderen weiter in der Liste. Loeschen darf nur der
+  // Besitzer - die Regel dazu steht in 03-gemeinsame-reisen.sql.
+  if (reise?.serverId && typeof loescheReiseAufServer === 'function') {
+    loescheReiseAufServer(reise.serverId);
+  }
+  const rest = ladeReisen().filter(eintrag => String(eintrag.id) !== String(id));
   return speichereReisen(rest);
 }
 
@@ -106,8 +113,16 @@ function loescheReise(id) {
    Reise selbst - siehe Abschnitt 1.                                          */
 
 function routeZuTag(tag) {
-  if (!tag || tag.routeId == null) return null;
-  return loadSaved().find(route => String(route.id) === String(tag.routeId)) || null;
+  if (!tag) return null;
+  if (tag.routeId != null) {
+    const eigene = loadSaved().find(route => String(route.id) === String(tag.routeId));
+    if (eigene) return eigene;
+  }
+  /* Die ABSCHRIFT einer gemeinsamen Reise. tag.routeId zeigt auf eine Tour
+     im Geraet dessen, der den Tag angelegt hat - im eigenen liegt sie
+     nicht. Was zum Zeichnen und Rechnen noetig ist, reist deshalb in
+     tag.route mit; gebaut wird das in tagAbschrift() in mitfahrer.js. */
+  return tag.route || null;
 }
 
 /* Ein Tag ohne Route ist nicht automatisch "offen": Wer ihn "Anreise"
@@ -209,7 +224,12 @@ function aendereReise(id, aenderung) {
   if (!reise) return null;
   aenderung(reise);
   reise.geaendert = new Date().toISOString();
-  return speichereReisen(liste) ? reise : null;
+  if (!speichereReisen(liste)) return null;
+  // Ist die Reise geteilt, wandert sie sofort mit hoch. Ob ueberhaupt eine
+  // gemeint ist, entscheidet mitfahrer.js - hier steht nur der Aufruf, an
+  // der einen Stelle, durch die jede Aenderung ohnehin geht.
+  if (typeof schiebeReiseHoch === 'function') schiebeReiseHoch(reise);
+  return reise;
 }
 
 function benenneReise(id, name) {
@@ -273,7 +293,9 @@ function zeichneReisenListe() {
   const behaelter = document.getElementById('reisenListe');
   if (!behaelter) return;
   const reisen = ladeReisen();
+  const einladungen = typeof einladungenHtml === 'function' ? einladungenHtml() : '';
   behaelter.innerHTML = `
+    ${einladungen}
     <button class="btn reise-neu" id="btnReiseNeu">${symbol('plus', 'klein')} Neue Reise planen</button>
     <ul class="saved-list reisen-liste">
       ${reisen.length
@@ -303,6 +325,8 @@ function reiseKarteHtml(reise) {
           <span class="saved-name">${escapeHtml(reise.name)}</span>
           <span class="saved-meta">${bilanz.tage} ${bilanz.tage === 1 ? 'Tag' : 'Tage'}
             <i>&middot;</i> ${bilanz.km} km${offen ? ` <i>&middot;</i> ${offen} offen` : ''}${zeitraum ? ` <i>&middot;</i> ${zeitraum}` : ''}</span>
+        </span>
+        <span class="reise-eintrag-marke">${reise.serverId ? symbol('leute', 'klein') : ''}
         </span>
       </span>
     </li>`;
@@ -342,6 +366,13 @@ function oeffneReise(id) {
   gewaehlterTagId = null;
   sortierModus = false;
   zeichneReise();
+  /* Mitfahrer und Kasse liegen auf dem Server und kommen eine Wimper
+     spaeter nach - beide zeichnen den Bildschirm dann selbst noch einmal.
+     Bewusst NACH dem ersten Zeichnen: Der Plan soll sofort dastehen und
+     nicht auf das Netz warten. */
+  const reise = reiseNach(id);
+  if (typeof ladeMitfahrerNach === 'function') ladeMitfahrerNach(reise);
+  if (typeof ladeAusgabenNach === 'function') ladeAusgabenNach(reise);
   zeigeBildschirm('reiseScreen');
   const bildschirm = document.getElementById('reiseScreen');
   if (bildschirm) bildschirm.scrollTop = 0;
@@ -364,7 +395,13 @@ function zeichneReise() {
     <div class="reise-kopf">
       <button class="btn ghost back-btn" id="btnReiseZurueck">&larr; Touren</button>
     </div>
-    <div class="reise-held-halter">${reiseHeldHtml(reise)}${reiseZahlenHtml(reise, reiseBilanz(reise))}</div>
+    <div class="reise-held-halter">${reiseHeldHtml(reise)}${reiseZahlenHtml(reise, reiseBilanz(reise))}${
+      /* Die Mitfahrer gehoeren IN den Halter und nicht daneben: Im
+         Querformat ist #reiseInner ein Zweispalter, und ein weiteres
+         Kind landete in der falschen Spalte. So klebt die Leiste mit der
+         Reisekarte zusammen oben - wo sie hingehoert, denn wer mitplant,
+         ist Teil des Kopfes und nicht des Etappenfadens. */
+      typeof mitfahrerLeisteHtml === 'function' ? mitfahrerLeisteHtml(reise) : ''}</div>
     <div class="reise-faden">
       <div class="reise-tage-kopf">
         <h2 class="regal-titel">Tage</h2>
@@ -377,14 +414,37 @@ function zeichneReise() {
           <button class="btn ghost etappe-anhaengen" data-anhaengen>Tag hinzuf&uuml;gen</button>
         </li>
       </ol>
-      <div class="reise-fuss">
-        <button class="linkbtn gefahr" id="btnReiseLoeschen">Reise l&ouml;schen</button>
-        <p class="hint">Liegt nur auf diesem Ger&auml;t.</p>
-      </div>
+      ${typeof ausgabenAbschnittHtml === 'function' ? ausgabenAbschnittHtml(reise) : ''}
+      ${reiseFussHtml(reise)}
     </div>`;
   beobachteVorschauen(inner);
   markiereAuswahl();
 }
+
+/* Der Fuss unter dem Etappenfaden. Drei Faelle statt einem:
+
+   allein          "Reise loeschen", und der Hinweis, dass sie nur hier liegt
+   geteilt, meine  "Reise loeschen" trifft alle - das muss dabeistehen
+   geteilt, fremde "Aussteigen": Ein Mitfahrer darf die Reise des anderen
+                   nicht wegwerfen. Die Datenbank sieht das genauso, aber
+                   ein Knopf, der nichts tut, ist schlimmer als keiner.     */
+function reiseFussHtml(reise) {
+  if (!reise.serverId) {
+    return `<div class="reise-fuss">
+        <button class="linkbtn gefahr" id="btnReiseLoeschen">Reise l&ouml;schen</button>
+        <p class="hint">Liegt nur auf diesem Ger&auml;t.</p>
+      </div>`;
+  }
+  const meine = typeof istMeineReise === 'function' ? istMeineReise(reise) : true;
+  return `<div class="reise-fuss">
+      <button class="linkbtn gefahr" id="${meine ? 'btnReiseLoeschen' : 'btnReiseAussteigen'}">
+        ${meine ? 'Reise l&ouml;schen' : 'Aussteigen'}</button>
+      <p class="hint">${meine
+        ? 'Gemeinsam geplant &ndash; L&ouml;schen nimmt sie allen weg.'
+        : 'Gemeinsam geplant. Aussteigen betrifft nur dich.'}</p>
+    </div>`;
+}
+
 
 /* Die Reisekarte samt Name und Bilanzstreifen. Ohne eine einzige Route
    steht statt der Kacheln ein schematisches Bild im selben Rahmen: eine

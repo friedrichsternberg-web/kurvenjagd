@@ -99,14 +99,37 @@ Höhenmeter, kurvigster Etappe. Was als Nächstes kommt:
    `partner.js` und die dortige Einwilligung. **Vorher:** ein
    Partnerprogramm mit Motorradhotels finden und die Häuser von Hand
    auswählen – das war der ausdrückliche Wunsch.
-2. **Freunde.** `reise.teilnehmer = [{ nutzerId, name, bild }]`, die Reise
-   wandert in eine Supabase-Tabelle mit `reise_teilnehmer`; `geaendert`
-   ist schon da und wird zum Abgleich. Im Kopf neben dem Namen die
-   Profilbilder als `.glas-rund.klein` und ein Plus.
-3. **Ausgaben.** `tag.ausgaben = [{ wer, betrag, wofuer, fuerWen[] }]`, ein
-   vierter Wert im Bilanzstreifen, unter dem Faden „Wer schuldet wem" –
-   gerechnet in einer eigenen Datei `js/reise/kasse.js` nach dem Vorbild
-   von `bilanz.js` (reines Rechnen).
+2. **Freunde und Ausgaben — GEBAUT am 07.09.2026, Datenbank fehlt noch.**
+   Benutzernamen suchen, einladen, annehmen, gemeinsam planen, Kasse mit
+   Aufteilung und Haken auf bezahlten Anteilen. Vier neue Dateien:
+   `supabase/migrationen/03-gemeinsame-reisen.sql`, `js/reise/kasse.js`
+   (reines Rechnen), `js/reise/mitfahrer.js`, `js/reise/ausgaben.js`.
+
+   **ZUERST EINSPIELEN, sonst tut nichts davon etwas:** Supabase-Dashboard
+   → SQL Editor → `03-gemeinsame-reisen.sql` hineinkopieren → Run. Danach
+   die Nachprüfung aus Abschnitt 10 der Datei laufen lassen; bei keiner
+   der sieben Funktionen darf `anon` stehen. Das ist genau die Falle vom
+   30.08.2026, die weiter unten beschrieben ist.
+
+   Danach zu zweit durchspielen: zwei Konten, einladen, annehmen, an
+   beiden Geräten einen Tag ändern, eine Ausgabe eintragen, abhaken.
+
+   **Was noch fehlt:**
+   - **Live-Verbindung (Supabase Realtime).** Heute wird beim Öffnen der
+     Reise und beim Wechsel auf den Reiter abgeglichen, Zeitstempel
+     entscheidet. Wer gleichzeitig denselben Tag ändert, verliert eine der
+     beiden Änderungen. Begründung in `ENTSCHEIDUNGEN.md` zum 07.09.2026.
+   - **Eine Nachricht, wenn jemand einlädt.** Heute sieht man die
+     Einladung erst beim nächsten Öffnen von „Reisen". Push ist dafür der
+     richtige Weg und hängt am selben Haken wie die spontanen Ausfahrten.
+   - **Kasse ohne Mitfahrer.** Sie gibt es erst, wenn die Reise geteilt
+     ist. Wer allein rechnen will, muss teilen und bleibt einziger
+     Teilnehmer. Ob das reicht, zeigt sich beim Benutzen.
+   - **Ausgleich abhaken statt Anteile.** Heute hakt man einzelne Anteile
+     ab. „Bernd hat mir die 80 Euro überwiesen" wäre ein Handgriff statt
+     dreier – dafür bräuchte es eine Tabelle `ausgleiche`.
+   - **Der Besitzer kann nicht aussteigen**, nur löschen. Eine Reise
+     weiterreichen (`rolle` auf jemand anderen umstellen) fehlt.
 4. **Ziehen zum Umsortieren.** Heute Pfeile im Sortiermodus und
    Pfeiltasten auf der Scheibe. Ziehen erst, wenn der Wegpunkt-Ziehcode in
    `app.js` zu einem Helfer `ziehbareListe()` verallgemeinert ist – siehe

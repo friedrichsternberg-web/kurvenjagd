@@ -5329,6 +5329,218 @@ body.nav-modus .karten-knopf { display: none; }
 }
 .reise-fuss .hint { margin: 0; }
 
+/* ---------- Mitfahrer und Kasse ----------
+   Zwei Zusaetze am Reisebildschirm, beide in der Handschrift, die schon da
+   ist: die Leiste borgt sich die runden Glasknoepfe der Kopfzeile, die
+   Kasse die Wertekacheln (.stat) von "Meine Stats". Nichts Eigenes
+   erfinden, wo die App die Form schon hat.                                 */
+
+.mitfahrer-leiste {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  margin: var(--s4) 0 0;
+}
+.mitfahrer-leiste .hint { margin: 0; }
+
+/* Die Punkte ueberlappen sich leicht: So liest sich eine Gruppe als eine
+   Gruppe und nicht als eine Reihe einzelner Bilder. Der letzte, das Plus,
+   sitzt an derselben Stelle wie die anderen und traegt die Randfarbe der
+   Knoepfe - er ist die Bedienung, nicht ein weiterer Mensch. */
+.mitfahrer-punkte {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.mitfahrer-punkt {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  margin-right: calc(-1 * var(--s2));
+  border-radius: var(--r-pill);
+  border: 1px solid var(--glas-rand);
+  background: var(--glas-hell);
+  backdrop-filter: var(--glas-filter);
+  -webkit-backdrop-filter: var(--glas-filter);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--metall-glanz);
+}
+.mitfahrer-punkt img { width: 100%; height: 100%; object-fit: cover; }
+/* Die Ueberlappung gilt nur fuer die Gruppe in der Leiste. In einer Liste
+   steht je Zeile genau ein Mensch, und da soll der Name Luft haben. */
+.mitfahrer-treffer .mitfahrer-punkt,
+.mitfahrer-bestand .mitfahrer-punkt { margin-right: 0; }
+/* Wer noch nicht geantwortet hat, steht blasser da - ohne dass man ihn
+   suchen muesste. */
+.mitfahrer-punkt.wartet { opacity: 0.45; }
+.mitfahrer-punkt.plus {
+  margin-right: 0;
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--accent-hell) 55%, transparent);
+  color: var(--accent-hell);
+}
+.mitfahrer-punkte:active .mitfahrer-punkt.plus { transform: scale(0.94); }
+
+.reise-eintrag-marke {
+  flex: 0 0 auto;
+  align-self: center;
+  color: var(--muted);
+}
+
+/* Das Blatt: Suche oben, Bestand unten. */
+.mitfahrer-suchzeile { display: flex; gap: var(--s2); align-items: center; }
+.mitfahrer-suchzeile input { flex: 1; }
+.mitfahrer-treffer, .mitfahrer-bestand { list-style: none; margin: var(--s2) 0 0; padding: 0; }
+.mitfahrer-treffer li, .mitfahrer-bestand li {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s2) 0;
+}
+.mitfahrer-treffer-zeile {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  width: 100%;
+  padding: var(--s1) 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.mitfahrer-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.blatt-zwischentitel {
+  margin: var(--s4) 0 0;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+/* Einladungen ueber der Reiseliste. Blau umrandet, weil sie eine Antwort
+   verlangen - alles andere in dieser Liste verlangt nichts. */
+.einladungen { margin-bottom: var(--s4); }
+.einladung {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s3);
+  border: 1px solid color-mix(in srgb, var(--accent-hell) 45%, transparent);
+  border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+.einladung-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.einladung-knoepfe { display: flex; gap: var(--s2); flex: 0 0 auto; }
+
+/* ---------- Die Kasse ---------- */
+.reise-kasse { margin-top: var(--s6); }
+.kasse-zahlen { margin-top: var(--s2); }
+.kasse-zahlen .stat.breit { grid-column: 1 / -1; }
+.kasse-zahlen .stat .v i {
+  font-style: normal;
+  font-size: 0.6em;
+  font-weight: 600;
+  margin-left: 3px;
+  color: var(--muted);
+}
+/* Nur die eine Kachel faerbt sich, und nur wenn wirklich etwas offen ist.
+   Eine Null in Warnfarbe waere eine Warnung vor nichts. */
+.kasse-zahlen .stat.offen { border-color: color-mix(in srgb, var(--danger) 50%, transparent); }
+.kasse-zahlen .stat.offen .v { color: var(--danger-glanz); }
+
+.kasse-quitt { margin: var(--s3) 0 0; color: var(--good); font-size: 14px; }
+
+.kasse-wege { list-style: none; margin: var(--s2) 0 0; padding: 0; }
+.kasse-weg {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s2) 0;
+  border-bottom: 1px solid var(--line);
+}
+.kasse-weg:last-child { border-bottom: 0; }
+.kasse-wer { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kasse-pfeil { color: var(--muted); flex: 0 0 auto; }
+.kasse-betrag { margin-left: auto; font-variant-numeric: tabular-nums; }
+
+.kasse-liste { margin-top: var(--s3); }
+.kasse-zeile { display: flex; align-items: center; gap: var(--s3); cursor: pointer; }
+.kasse-zeile-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.kasse-zeile-wert {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-variant-numeric: tabular-nums;
+}
+.kasse-zeile-wert i { font-style: normal; font-size: 11.5px; color: var(--muted); }
+
+/* Die Aufteilung im Blatt: je Zeile ein Haken, ein Name, ein Betrag.
+
+   ALLE Selektoren hier tragen .garage-dialog-inhalt vor sich her, aus
+   genau dem Grund, der schon bei .teilen-schalter weiter oben steht: Dort
+   gilt "input { width: 100% }" fuer die Textfelder des Blatts, und ohne
+   den Vorsatz gewinnt diese Regel - aus dem Kaestchen wird dann eine
+   Flaeche ueber die halbe Zeile, und der Name daneben faellt auf null.
+   Genau das ist beim ersten Anlauf passiert.                              */
+.garage-dialog-inhalt .kasse-anteile { list-style: none; margin: var(--s2) 0 0; padding: 0; }
+.garage-dialog-inhalt .kasse-anteile li {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s1) 0;
+}
+.garage-dialog-inhalt .kasse-anteil {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  flex: 1;
+  min-width: 0;
+  margin-top: 0;
+  font-size: 15px;
+  color: var(--text);
+  cursor: pointer;
+}
+.garage-dialog-inhalt .kasse-anteil.einzeln { margin-top: var(--s4); font-size: 14px; }
+.garage-dialog-inhalt .kasse-anteil input[type="checkbox"],
+.garage-dialog-inhalt .kasse-haken input[type="checkbox"] {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.garage-dialog-inhalt .kasse-anteil-betrag {
+  width: 96px;
+  flex: 0 0 auto;
+  text-align: right;
+  padding: var(--s2) var(--s3);
+}
+.garage-dialog-inhalt .kasse-haken {
+  display: flex;
+  align-items: center;
+  gap: var(--s1);
+  flex: 0 0 auto;
+  margin-top: 0;
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+}
+
 /* ---------- Das Blatt: Route waehlen ---------- */
 .reise-wahl { margin-top: var(--s2); }
 .reise-wahl li { border: 1px solid transparent; }
