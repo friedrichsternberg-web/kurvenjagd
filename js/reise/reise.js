@@ -315,23 +315,34 @@ function zeichneReisenListe() {
 
 function reiseKarteHtml(reise) {
   const bilanz = reiseBilanz(reise);
-  const offen = bilanz.offen;
   const karte = reiseKartenSvg(reise, { marke: 12 });
-  const zeitraum = reise.start ? datumKurz(tagesDatum(reise, 0)) + ' bis ' + datumKurz(tagesDatum(reise, bilanz.tage - 1)) : '';
+  const zeitraum = reise.start
+    ? datumKurz(tagesDatum(reise, 0)) + ' bis ' + datumKurz(tagesDatum(reise, bilanz.tage - 1))
+    : '';
+  /* Dieselbe Kartenform wie eine Tour: Bild oben, Kopfzeile, Name,
+     Kennzahlen, unten der Knopf. Die Kennzahlen sind hier andere - eine
+     Reise misst sich in Tagen, nicht in Kurven. */
+  const fakten = [
+    ['kalender', `${bilanz.tage} ${bilanz.tage === 1 ? 'Tag' : 'Tage'}`],
+    ['route', `${bilanz.km} km`],
+    bilanz.offen ? ['plus', `${bilanz.offen} offen`] : null,
+  ].filter(Boolean);
   return `
-    <li class="tour-karte reise-eintrag" data-reise="${escapeHtml(reise.id)}">
+    <li class="karte tour-karte reise-eintrag" data-reise="${escapeHtml(reise.id)}">
       ${karte
         ? `<span class="tour-vorschau" aria-hidden="true">${karte}<span class="vorschau-osm">&copy; OpenStreetMap</span></span>`
         : reiseLeerBildHtml(bilanz.tage)}
-      <span class="tour-karte-zeile">
-        <span class="saved-text">
-          <span class="saved-name">${escapeHtml(reise.name)}</span>
-          <span class="saved-meta">${bilanz.tage} ${bilanz.tage === 1 ? 'Tag' : 'Tage'}
-            <i>&middot;</i> ${bilanz.km} km${offen ? ` <i>&middot;</i> ${offen} offen` : ''}${zeitraum ? ` <i>&middot;</i> ${zeitraum}` : ''}</span>
-        </span>
-        <span class="reise-eintrag-marke">${reise.serverId ? symbol('leute', 'klein') : ''}
-        </span>
-      </span>
+      <div class="widget-kopf">
+        <span class="abzeichen">Reise</span>
+        ${zeitraum ? `<span class="karte-datum">${zeitraum}</span>` : ''}
+        ${reise.serverId ? `<span class="reise-eintrag-marke" title="Gemeinsam geplant">${symbol('leute', 'klein')}</span>` : ''}
+      </div>
+      <h3 class="widget-name">${escapeHtml(reise.name)}</h3>
+      <div class="widget-koerper">
+        <div class="tag-fakten">${fakten.map(([zeichen, wert]) =>
+          `<span class="tag-fakt">${symbol(zeichen, 'klein')}${wert}</span>`).join('')}</div>
+      </div>
+      <button type="button" class="btn ghost widget-knopf">Weiterplanen &rarr;</button>
     </li>`;
 }
 
@@ -742,7 +753,7 @@ function etappeHtml(reise, tag, stelle) {
         ${vorschauBildHtml(route, werte)}
         <span class="label">${beschriftung}</span>
         <span class="etappe-name">${marke}<span class="saved-name">${escapeHtml(route.name)}</span></span>
-        ${tagesFaktenHtml(route)}
+        ${faktenHtml(route)}
         <div class="etappe-aktionen">
           <button class="linkbtn" data-waehle="${escapeHtml(tag.id)}">Route wechseln</button>
           <button class="glas-rund klein" data-planer="${escapeHtml(tag.id)}" title="Im Planer &ouml;ffnen" aria-label="Im Planer öffnen">${symbol('route', 'klein')}</button>
@@ -755,25 +766,6 @@ function etappeHtml(reise, tag, stelle) {
 
 /* Die Auswahl: was leuchtet, ist gewaehlt. Nur Klassen, kein Neuzeichnen -
    sonst blitzten bei jedem Tipp die Kacheln der Reisekarte grau auf. */
-/* Die Kennzahlen eines Fahrtags, direkt auf der Karte statt erst im
-   Planer: wie kurvig, wie lang unterwegs, wieviel bergauf. Die Kilometer
-   stehen schon auf dem Bild - sie sind die Ueberschrift, der Rest die
-   Einzelheiten.
-
-   Was die Route nicht weiss, faellt weg statt als Strich dazustehen.
-   Fahrzeit und Hoehenmeter kennt die App erst fuer Touren, die seit dem
-   04.09.2026 gespeichert wurden; eine Karte mit zwei Gedankenstrichen
-   saehe kaputt aus, eine mit einer Angabe weniger nicht. */
-function tagesFaktenHtml(route) {
-  const fakten = [
-    ['drehen', `${Math.round(route.curviness || 0)} &deg;/km`],
-    route.time ? ['kalender', fahrzeitText(Math.round(route.time / 60))] : null,
-    route.ascend ? ['berg', `${Math.round(route.ascend).toLocaleString('de-DE')} Hm`] : null,
-  ].filter(Boolean);
-  return `<div class="tag-fakten">${fakten.map(([zeichen, wert]) =>
-    `<span class="tag-fakt">${symbol(zeichen, 'klein')}${wert}</span>`).join('')}</div>`;
-}
-
 function markiereAuswahl() {
   const inner = document.getElementById('reiseInner');
   if (!inner) return;

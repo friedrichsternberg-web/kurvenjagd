@@ -456,17 +456,25 @@ function geteilteTourHtml(zeile) {
   /* Die Uebersicht vom Server bringt eine ausgeduennte Linie mit, aber
      keine Strecke. Das reicht fuer den Strich und haelt die Antwort klein -
      die Begruendung steht im SQL bei der Spalte "vorschau". */
+  /* Dieselbe Kartenform wie die eigene Tour und der Reisetag: Bild oben
+     randlos, Kopfzeile, Name, Kennzahlen, unten die Knoepfe. Statt eines
+     Abzeichens steht im Kopf, wer die Tour geteilt hat - das ist bei
+     einer fremden Tour die Angabe, die dort hingehoert. */
   return `
-    <li class="geteilt" data-tour="${escapeHtml(zeile.id)}">
-      ${vorschauBildHtml({ vorschau: zeile.vorschau })}
-      <div class="geteilt-kopf">
+    <li class="karte geteilt" data-tour="${escapeHtml(zeile.id)}">
+      ${vorschauBildHtml({ vorschau: zeile.vorschau }, `<span class="etappe-werte">${kmText}</span>`)}
+      <div class="widget-kopf geteilt-kopf">
         ${nutzerBildHtml(zeile)}
         <span class="geteilt-nutzer">${escapeHtml(zeile.benutzername)}</span>
         <span class="geteilt-weg">${wo}</span>
       </div>
-      <p class="geteilt-name">${marke}${escapeHtml(zeile.name)}</p>
-      ${zeile.beschreibung ? `<p class="geteilt-text">${escapeHtml(zeile.beschreibung)}</p>` : ''}
-      <p class="saved-meta">${kmText} <i>·</i> ${kurven}</p>
+      <h3 class="widget-name">${marke}${escapeHtml(zeile.name)}</h3>
+      <div class="widget-koerper">
+        ${zeile.beschreibung ? `<p class="geteilt-text">${escapeHtml(zeile.beschreibung)}</p>` : ''}
+        <div class="tag-fakten">
+          <span class="tag-fakt">${symbol('drehen', 'klein')}${kurven}</span>
+        </div>
+      </div>
       <div class="geteilt-fuss">
         <button class="btn klein" data-oeffne="${escapeHtml(zeile.id)}">Tour öffnen</button>
         <button class="btn ghost klein" data-uebernimm="${escapeHtml(zeile.id)}">Tour speichern</button>
@@ -552,17 +560,23 @@ function serpaTourHtml(eintrag, wegKm) {
   ].filter(Boolean).join(' · ');
 
   return `
-    <li class="geteilt">
-      ${vorschauBildHtml({ vorschau: eintrag.vorschau, waypoints: eintrag.punkte.map(p => ({ lat: p[0], lon: p[1] })) })}
-      <div class="geteilt-kopf">
+    <li class="karte geteilt">
+      ${vorschauBildHtml(
+        { vorschau: eintrag.vorschau, waypoints: eintrag.punkte.map(p => ({ lat: p[0], lon: p[1] })) },
+        `<span class="etappe-werte">ca. ${Math.round(eintrag.km)} km</span>`)}
+      <div class="widget-kopf geteilt-kopf">
         <img class="geteilt-bild" src="img/favicon-32.png" alt=""
              width="32" height="32" loading="lazy">
         <span class="geteilt-nutzer">Serpa</span>
         <span class="geteilt-weg">${wo}</span>
       </div>
-      <p class="geteilt-name">${escapeHtml(eintrag.name)}</p>
-      <p class="geteilt-text">${escapeHtml(eintrag.text)}</p>
-      <p class="saved-meta">ca. ${Math.round(eintrag.km)} km <i>·</i> ${Math.round(eintrag.grad)} Grad/km</p>
+      <h3 class="widget-name">${escapeHtml(eintrag.name)}</h3>
+      <div class="widget-koerper">
+        <p class="geteilt-text">${escapeHtml(eintrag.text)}</p>
+        <div class="tag-fakten">
+          <span class="tag-fakt">${symbol('drehen', 'klein')}ca. ${Math.round(eintrag.grad)} &deg;/km</span>
+        </div>
+      </div>
       <div class="geteilt-fuss">
         <button class="btn klein" data-oeffne="${escapeHtml(eintrag.id)}">Tour öffnen</button>
         <button class="btn ghost klein" data-uebernimm="${escapeHtml(eintrag.id)}">Tour speichern</button>

@@ -1569,24 +1569,54 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   pointer-events: none;
 }
 
-/* Eine eigene Tour auf dem Bildschirm "Touren" ist eine Karte wie eine
-   geteilte, keine Zeile. Die Zeile aus .saved-list wandert dafuer unter
-   das Bild und behaelt ihre Anordnung. */
-/* Der Vorsatz .saved-list ist noetig und kein Zierrat: Weiter oben steht
+/* Eine eigene Tour auf dem Bildschirm "Touren" ist eine KARTE in der
+   Standardform - dieselbe wie der Reisetag, die Kasse und die Mitfahrer.
+   Die vier Bausteine und ihre Begruendung stehen in design.css bei
+   Grundsatz 4. Hier steht nur, was sie von einer Listenzeile trennt.
+
+   Der Vorsatz .saved-list ist noetig und kein Zierrat: Weiter oben steht
    ".saved-list li { display: flex }" fuer die schmale Zeile im Planer.
    Ohne den Vorsatz gewaenne diese Regel, und das Vorschaubild saesse links
    NEBEN dem Text statt darueber. */
 .saved-list li.tour-karte {
   display: block;
-  padding: var(--s3);
-  border-radius: var(--r-md);
-  margin-bottom: var(--s2);
+  padding: var(--s4);
+  border-radius: var(--r-xl);
+  margin-bottom: var(--s4);
 }
 .tour-karte-zeile {
   display: flex;
   align-items: center;
   gap: 9px;
 }
+/* Das Bild fuehrt die Karte an und laeuft bis an ihre Kante. Die Rundung
+   oben ist die der Karte abzueglich ihrer Randlinie - dieselbe Rechnung
+   wie bei der Tageskarte im Reiseplaner. */
+.saved-list li.tour-karte .tour-vorschau,
+.geteilt .tour-vorschau {
+  margin: calc(-1 * var(--s4)) calc(-1 * var(--s4)) var(--s3);
+  border-radius: calc(var(--r-xl) - 1px) calc(var(--r-xl) - 1px) 0 0;
+}
+/* Das Datum steht rechts im Kopf, wo bei anderen Karten der Link sitzt. */
+.karte-datum {
+  margin-left: auto;
+  font-family: var(--schrift-display);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+/* Das Werkzeug rechts, und zwar auch dann, wenn kein Datum davorsteht:
+   Der ERSTE Knopf schiebt sich nach rechts, jeder weitere rueckt nur noch
+   auf. Ohne die zweite Regel klebte alles am Abzeichen links. */
+.widget-kopf .teilen-knopf,
+.widget-kopf .del { margin-left: auto; }
+.widget-kopf .karte-datum ~ .teilen-knopf,
+.widget-kopf .karte-datum ~ .del,
+.widget-kopf .teilen-knopf ~ .del { margin-left: var(--s2); }
+.karte.tour-karte .widget-name { display: flex; align-items: center; gap: 8px; }
+.karte.tour-karte:active { transform: scale(0.99); }
 
 /* ---------- Touren: "Meine" und "Entdecken" ----------
    Der Umschalter ist derselbe .segmented wie im Planer. Er steht direkt
@@ -1633,28 +1663,16 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
    Karte - Kopf mit Name und Bild, dann die Tour, dann die Zahlen. */
 .geteilt-liste { list-style: none; margin: var(--s4) 0 0; padding: 0; }
 
+/* Eine fremde Tour traegt seit dem 10.09.2026 .karte und damit dieselbe
+   Form wie die eigene. Hier steht nur, was sie unterscheidet: im Kopf
+   das Gesicht dessen, der sie geteilt hat, statt eines Abzeichens. */
 .geteilt {
   display: block;
-  padding: var(--s3);
-  border-radius: var(--r-md);
-  margin-bottom: var(--s2);
-  background: var(--glas-hauch);
-  backdrop-filter: blur(16px) saturate(150%);
-  -webkit-backdrop-filter: blur(16px) saturate(150%);
-  border: 1px solid var(--glas-hell);
-  box-shadow:
-    inset 0 1px 0 var(--glas-heller),
-    inset 0 -1px 0 var(--schatten-hauch);
+  margin-bottom: var(--s4);
+  border-radius: var(--r-xl);
 }
 
-.geteilt .tour-vorschau { margin-bottom: var(--s3); }
-
-.geteilt-kopf {
-  display: flex;
-  align-items: center;
-  gap: var(--s2);
-  margin-bottom: var(--s2);
-}
+.geteilt-kopf { gap: var(--s2); }
 
 /* Bild und Ersatzbuchstabe teilen sich die Masse, damit die Kopfzeile
    gleich hoch bleibt, ob jemand ein Profilbild hat oder nicht. */

@@ -3744,3 +3744,27 @@ deshalb minutenlang unsichtbar, und ich habe an der falschen Stelle
 gesucht. Der Prüfserver liegt jetzt als `server.py` im Ablagefach der
 Sitzung und liefert alles mit `Cache-Control: no-store`.
 
+## 10.09.2026 (spät) — Eine Kartenform für alle drei Listen
+
+„Meine Touren" hatte drei Kartenarten nebeneinander: die eigene Tour, die
+geteilte und die Reise. Alle drei sahen ähnlich aus und waren doch
+verschieden gebaut — eigene Ränder, eigene Rundungen, eigene Abstände.
+Jetzt tragen alle drei `.karte` und die vier Bausteine aus `design.css`.
+
+Damit steht auf jeder Karte dasselbe an derselben Stelle: Bild oben mit
+den Kilometern darauf, im Kopf woher sie kommt (Abzeichen bei der eigenen,
+das Gesicht des Verfassers bei einer fremden), der Name, die Kennzahlen,
+unten der Knopf. Die Kennzahlen selbst kommen aus einer gemeinsamen
+Funktion `faktenHtml()` in `app.js` — Kurvigkeit, Fahrzeit, Höhenmeter,
+und was fehlt, fällt weg statt als Strich dazustehen.
+
+**Beim Prüfen ist mir eine Falle aufgefallen, die Zeit gekostet hat und
+die ich mir merken muss:** Der Browser hatte `app.js?v=110` noch aus der
+Zeit vor dem no-store-Server im Plattenspeicher. Ein `Cache-Control:
+no-store` auf der *neuen* Antwort hilft dann nicht — der Browser fragt
+gar nicht erst nach, sondern nimmt den alten Eintrag. Auch ein neues
+`?test=` an der Adresse ändert nichts, weil es nur den Schlüssel von
+`index.html` ändert. Der Ausweg ohne eine verbrauchte Versionsnummer: den
+Prüfserver auf einem **anderen Port** starten. Ein anderer Ursprung hat
+einen leeren Zwischenspeicher.
+

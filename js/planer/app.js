@@ -1288,7 +1288,10 @@ function zeichneHöhenprofil(coords, svgId = 'hoehenprofil', spanneId = 'hoehenp
 
 function formatTime(sec) {
   const h = Math.floor(sec / 3600), m = Math.round((sec % 3600) / 60);
-  return h > 0 ? `${h} h ${m} min` : `${m} min`;
+  if (!h) return `${m} min`;
+  // "2 h" statt "2 h 0 min": Die Null sagt nichts und liest sich wie ein
+  // Fehler.
+  return m ? `${h} h ${m} min` : `${h} h`;
 }
 
 // Für eine laufende Aufzeichnung zählt auch die Sekunde - mit formatTime()
@@ -3194,17 +3197,26 @@ function gespeicherteRouteHtml(r, mitTeilen = false) {
     </li>`;
   }
 
+  /* Die Standard-Kartenform, dieselbe wie beim Reisetag und bei Kasse und
+     Mitfahrern: Bild oben randlos, dann Kopfzeile mit Abzeichen und
+     Werkzeug, der Name, die Kennzahlen, unten der Knopf. Was die vier
+     Bausteine sind und warum, steht in design.css bei Grundsatz 4.
+
+     Der Knopf braucht keine eigene Kennung: Ein Klick darauf steigt bis
+     zum <li> auf, und dort haengt schon das Laden der Route. Loeschen und
+     Teilen werden vorher abgefangen (siehe verkabeleGespeicherteListe). */
   return `
-    <li class="tour-karte" data-id="${escapeHtml(r.id)}">
-      ${vorschauBildHtml(r)}
-      <span class="tour-karte-zeile">
-        ${marke}
-        <span class="saved-text">
-          <span class="saved-name">${escapeHtml(r.name)}</span>
-          <span class="saved-meta">${kmText} <i>&middot;</i> ${kurvenText}${datum ? ' <i>&middot;</i> ' + datum : ''}</span>
-        </span>${teilen}
+    <li class="karte tour-karte" data-id="${escapeHtml(r.id)}">
+      ${vorschauBildHtml(r, `<span class="etappe-werte">${kmText}</span>`)}
+      <div class="widget-kopf">
+        <span class="abzeichen">${r.aufgezeichnet ? 'Aufzeichnung' : 'Tour'}</span>
+        ${datum ? `<span class="karte-datum">${datum}</span>` : ''}
+        ${teilen}
         <button class="del" data-del="${escapeHtml(r.id)}" title="Löschen">&times;</button>
-      </span>
+      </div>
+      <h3 class="widget-name">${marke}${escapeHtml(r.name)}</h3>
+      <div class="widget-koerper">${faktenHtml(r)}</div>
+      <button type="button" class="btn ghost widget-knopf">Im Planer &ouml;ffnen</button>
     </li>`;
 }
 
@@ -3435,6 +3447,27 @@ function tourLinie(tour) {
     return tour.waypoints.map(w => [w.lon, w.lat]);
   }
   return [];
+}
+
+/* Die Kennzahlen einer Tour als Zeile aus Symbol und Wert: wie kurvig, wie
+   lang unterwegs, wieviel bergauf. Sie stehen auf JEDER Kartenform - der
+   eigenen Tour, der geteilten, dem Reisetag -, damit man ueberall
+   dieselben Zahlen an derselben Stelle sucht. Die Kilometer gehoeren
+   nicht dazu: Die stehen als Ueberschrift auf dem Bild.
+
+   Was die Tour nicht weiss, faellt weg statt als Strich dazustehen.
+   Fahrzeit und Hoehenmeter kennt die App erst fuer Touren, die seit dem
+   04.09.2026 gespeichert wurden; eine Karte mit zwei Gedankenstrichen
+   saehe kaputt aus, eine mit einer Angabe weniger nicht. */
+function faktenHtml(tour, zusatz = []) {
+  const fakten = [
+    ['drehen', `${Math.round(tour.curviness || 0)} &deg;/km`],
+    tour.time ? ['kalender', formatTime(tour.time)] : null,
+    tour.ascend ? ['berg', `${Math.round(tour.ascend).toLocaleString('de-DE')} Hm`] : null,
+    ...zusatz,
+  ].filter(Boolean);
+  return `<div class="tag-fakten">${fakten.map(([zeichen, wert]) =>
+    `<span class="tag-fakt">${symbol(zeichen, 'klein')}${wert}</span>`).join('')}</div>`;
 }
 
 /* Das Vorschaubild als fertiges HTML: ein echter Kartenausschnitt mit der
