@@ -8,6 +8,69 @@ Sortiert nach Dringlichkeit, nicht nach Aufwand.
 
 ---
 
+# ⚠️ Eine gespeicherte Route ist keine Route, sondern eine Anfrage
+
+**Offen seit 11.09.2026. Das ist der größte offene Punkt der App.**
+
+Eine gespeicherte Tour enthält **nicht die Strecke**. Sie enthält die
+Wegpunkte, die Kurvigkeitsstufe und ein paar Einstellungen – und bei jedem
+Öffnen wird daraus **neu gerechnet**. Die Linie, die dabei herauskommt,
+kann eine andere sein als gestern. Zu sehen in `legeRouteAb()` in
+`app.js`: gespeichert werden `waypoints`, `curveLevel`, `optionen` und
+eine ausgedünnte `linie` fürs Vorschaubild. Beim Öffnen setzt
+`state.waypoints = r.waypoints` und BRouter wird erneut gefragt.
+
+**Warum sich das Ergebnis ändern kann, gleich aus vier Richtungen:**
+
+1. **Die Kurvigkeitssuche wählt.** `curviness()` holt bis zu vier
+   Routenvarianten und nimmt die kurvigste. Antwortet BRouter bei einer
+   Variante gerade nicht (das kommt vor, siehe die 400er weiter unten),
+   gewinnt eine andere – und die Route sieht anders aus.
+2. **BRouters Kartendaten ändern sich.** Der Dienst rechnet auf
+   OpenStreetMap-Daten, die laufend fortgeschrieben werden. Eine neue
+   Sperrung, eine geänderte Straßenklasse, und die Route läuft woanders.
+3. **Eine Rundtour würfelt sogar absichtlich neu.** Die Zufallspunkte
+   werden bewusst nicht gespeichert (nur Start und feste Stopps), es steht
+   so im Kommentar in `legeRouteAb()`. Zwei Mal dieselbe Rundtour öffnen
+   heißt hier: zwei verschiedene Runden.
+4. **Fällt BRouter aus, gibt es die Tour gar nicht.** Ohne Antwort keine
+   Linie. Eine gespeicherte Tour ist ohne Netz und ohne diesen einen
+   fremden Dienst nicht wiederherstellbar.
+
+**Beim Teilen ist es am schlimmsten.** `oeffentlicheTour()` in `kern.js`
+gibt bei einer geplanten Route nur die `waypoints` weiter, keine
+Geometrie – bei einer **aufgezeichneten** Ausfahrt dagegen die echte
+`track`-Spur. Heißt: Wer eine aufgezeichnete Tour bekommt, sieht genau,
+was gefahren wurde. Wer eine **geplante** Tour bekommt – per Link oder
+über „Entdecken" –, sieht **eine neu gerechnete Route durch dieselben
+Punkte**, möglicherweise nicht die, die der Absender vor Augen hatte. Zwei
+Leute können denselben Link öffnen und zwei verschiedene Strecken sehen.
+
+Dasselbe gilt für jeden Tag einer **Reise** und für die Kennzahlen, die
+daran hängen: Länge, Fahrzeit, Höhenmeter, Kurvigkeit werden beim
+Speichern festgehalten, die Linie darunter aber jedes Mal neu geholt. Die
+Zahlen und die gezeigte Strecke können auseinanderlaufen.
+
+**Was dagegen zu tun wäre** (nicht entschieden, nur die Richtungen):
+
+- **Die Geometrie mitspeichern.** Der ehrlichste Weg: Was einmal gerechnet
+  wurde, bleibt die Route. Neu gerechnet wird nur auf ausdrücklichen
+  Wunsch („Route neu berechnen"). Kostet Platz – die ausgedünnte Linie für
+  die Vorschau gibt es ohnehin schon, eine vollständige wiegt mehr. Vor
+  einer Entscheidung nachmessen, gemeinsam mit der Frage nach dem
+  Speicherplatz (siehe „Das Garagenfoto ist zu groß").
+- **Beim Teilen die gerechnete Strecke mitgeben**, nicht die Wegpunkte.
+  Löst das Teilen-Problem allein, nicht das Öffnen-Problem.
+- **Wenigstens ehrlich sein:** einen Hinweis zeigen, wenn die neu
+  gerechnete Route von den gespeicherten Kennzahlen abweicht.
+
+Bis dahin gilt: **Serpa verspricht mit einer gespeicherten Tour mehr, als
+es hält.** Vor den Stores muss das gelöst sein – eine Navigations-App, bei
+der die gespeicherte Route heute anders verläuft als gestern, ist kaputt,
+egal wie gut alles andere ist.
+
+---
+
 ## Ausrüstung: POLO Motorrad (seit 05.09.2026)
 
 - **Provision und Cookie-Frist — ERLEDIGT (05.09.2026).** Im Webgains-Konto
