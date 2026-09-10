@@ -3871,3 +3871,21 @@ Ein Blatt ist ein eigenes Fenster mit eigener Verkabelung, und
 `mitfahrer.js` und `ausgaben.js` hängen ihre Blätter ohnehin schon von
 außen an dieselbe Hülle.
 
+## 11.09.2026 (Nachtrag) — Ein Link muss dorthin zeigen, wo der Empfänger ist
+
+Beim ersten Ausprobieren bot der Teilen-Dialog dies zum Verschicken an:
+
+    file:///Users/friedrichsternberg/Documents/motorrad-app/index.html#t=…
+
+Der Link selbst war in Ordnung — der Token stand da, `freigabe_anlegen()`
+lief also durch. Falsch war der Anfang: `teilenBasis()` baute die Adresse
+aus `window.location`, und die App lief aus einer Datei.
+
+**Der Denkfehler dahinter:** Ein geteilter Link zeigt nicht dorthin, wo
+der Absender gerade ist, sondern dorthin, wo der Empfänger die App findet.
+Das ist beim Prüfen nie derselbe Ort — `file://` und `localhost` gehören
+dem eigenen Rechner. `teilenBasis()` nimmt jetzt die öffentliche Adresse,
+sobald die aktuelle keine echte ist, und die aktuelle nur dann, wenn sie
+per http oder https von außen erreichbar wäre. So funktioniert es auch,
+falls die App eines Tages woanders liegt.
+

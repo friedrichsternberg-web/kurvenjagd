@@ -27,9 +27,28 @@
 
 /* --- 1. Einen Link erzeugen ---------------------------------------------- */
 
-// Die Adresse der App ohne alles dahinter. Der Token kommt als Raute daran.
+/* Die Adresse, unter der die App oeffentlich erreichbar ist. Sie steht
+   auch in index.html als canonical und og:url; sollte sie sich je aendern,
+   sind das die drei Stellen. */
+const APP_ADRESSE = 'https://serpa-app.de/';
+
+/* Die Adresse fuer einen geteilten Link. Der Token kommt als Raute daran.
+
+   WARUM NICHT EINFACH window.location: Weil ein Link dorthin zeigen muss,
+   wo der EMPFAENGER die App findet - und das ist nie der Rechner des
+   Absenders. Beim Pruefen laeuft die App aus einer Datei (file://) oder
+   aus einem Server auf dem eigenen Rechner (localhost), und beides ergaebe
+   einen Link, mit dem niemand sonst etwas anfangen kann. Genau das ist am
+   11.09.2026 passiert: Der Teilen-Dialog bot
+   "file:///Users/.../index.html#t=..." zum Verschicken an.
+
+   Steht die App dagegen unter einer echten Adresse, gewinnt die - dann
+   funktioniert es auch, wenn sie eines Tages woanders liegt. */
 function teilenBasis() {
-  return window.location.origin + window.location.pathname;
+  const her = window.location.origin || '';
+  const oeffentlich = /^https?:\/\//.test(her)
+    && !/^https?:\/\/(localhost|127\.|0\.0\.0\.0|\[::1\])/.test(her);
+  return oeffentlich ? her + window.location.pathname : APP_ADRESSE;
 }
 
 function teilenAmServer() {
