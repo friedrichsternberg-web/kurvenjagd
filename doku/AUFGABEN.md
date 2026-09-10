@@ -718,9 +718,13 @@ Datenschutzerklärung, siehe oben.
 
 ## Kleinkram, der irgendwann nervt
 
-- **Versionsnummer.** `?v=` steht an 23 Stellen in `index.html` (zuletzt
-  ist `touren.js` dazugekommen) und wird
-  von Hand erhöht. Genau dieser Fehler ist beim Bauen schon passiert: Die
+- **Versionsnummer.** `?v=` steht an 44 Stellen in `index.html` und an
+  **einer außerhalb davon**: `einfuehrung.js` baut das Serpa-Logo der
+  ersten Einführungskarte selbst zusammen und trägt die Nummer im Text.
+  `pruefe.sh` Regel 6 sieht nur in `index.html` nach, diese eine Stelle
+  fällt also durch – vor jedem Push mit `grep -rn "?v=<alte Nummer>"`
+  gegensuchen. Erhöht wird
+  von Hand. Genau dieser Fehler ist beim Bauen schon passiert: Die
   Datei war geändert, die Nummer nicht, der Browser lieferte die alte
   Fassung. Auf einem richtigen Webhoster ersetzen Cache-Kopfzeilen das.
 - **Nominatim** (Ortssuche) erlaubt keine starke Nutzung und verlangt
