@@ -3889,3 +3889,43 @@ sobald die aktuelle keine echte ist, und die aktuelle nur dann, wenn sie
 per http oder https von außen erreichbar wäre. So funktioniert es auch,
 falls die App eines Tages woanders liegt.
 
+
+## 11.09.2026 — Die Straße im Startfilm geht jetzt wirklich über die Pässe
+
+Friedrichs Wunsch vor dem Push: Die Straße soll „perfekt, also wirklich
+perfekt vor dem Berg verschwinden und hinter dem Berg wiederkommen".
+
+**Was tatsächlich zu sehen war:** Sie verschwand nirgends. Jeder der drei
+Abschnitte hörte mit einem runden Strichende mitten auf dem Hang auf, der
+oberste begann als sichtbarer Klecks genau auf dem Grat, und der weiche
+Schein leuchtete über die Kämme in den Berg dahinter hinein. Der Kommentar
+im Code behauptete das Gegenteil („endet in einer Kammscharte") — die
+Zahlen in `STRASSE` und `FLANKEN` passten nur nicht zusammen, und ein
+Strichende ist nun einmal ein Strichende, keine Kammlinie.
+
+**Zwei Mittel, beide nötig:**
+
+1. **Jeder Abschnitt wird auf die Form seiner Flanke beschnitten**
+   (`clipPath` mit demselben Pfad wie die Flanke). Alles über dem Kamm
+   fällt weg: das Ende, der runde Abschluss, der Schein. Der Pfad läuft
+   dafür bewusst ein gutes Stück über den Kamm hinaus — erst der Schnitt
+   macht das Ende, nicht der Pfad. Das Gratlicht kommt danach, damit die
+   helle Kammlinie über dem Schnitt liegt.
+2. **Anfänge und Enden liegen an denselben Stellen.** Wo ein Abschnitt in
+   eine Scharte hinein verschwindet, beginnt der nächste unter dem Kamm
+   der näheren Staffel und kommt direkt dahinter in derselben Richtung
+   wieder hervor — nur schmaler, weil weiter weg. Erst das liest sich als
+   eine Straße über Pässe statt als drei Striche. Der mittlere Abschnitt
+   hat dafür zwei Kehren bekommen, der obere eine.
+
+**Abgestimmt wurde mit dem Auge, nicht am Schreibtisch:** eingefrorene
+Einzelbilder, der Ausschnitt per `viewBox` auf die Pässe vergrößert, dann
+die Zahlen im Pfad nachgezogen. Zwei Runden: Erst hatte die Straße am
+mittleren Pass vor dem Verschwinden noch einen kleinen Haken nach unten
+(ein Kontrollpunkt lag unter der Scharte), und die obere Kehre saß zu
+dicht auf dem Grat.
+
+**Was man wissen muss, wenn man an den Bergen dreht:** Die Scharten sind
+in `STRASSE` als Zahlen benannt (Flanke 2 bei x=480, Flanke 1 bei x=350,
+Flanke 0 bei x=590). Wer einen Kamm in `FLANKEN` verschiebt, muss dort
+mitziehen — sonst endet die Straße wieder auf dem Hang.

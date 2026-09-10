@@ -78,21 +78,44 @@ const FLANKEN = [
     kante: 0.07, tiefe: 8 },
 ];
 
-/* Die Strasse in drei Abschnitten, je einer auf einer Bergflanke. Jeder
-   beginnt versteckt UNTER dem Kamm der Staffel davor - die wird spaeter
-   gezeichnet und deckt ihn ab - und endet in einer Kammscharte. So taucht
-   die Strasse hinter jedem Berg unter und kommt weiter oben wieder hervor.
+/* Die Strasse in drei Abschnitten, je einer auf einer Bergflanke.
+
+   WIE DAS VERSCHWINDEN UND WIEDERKOMMEN ENTSTEHT - an zwei Stellen, und
+   beide muessen stimmen:
+
+   Das VERSCHWINDEN am oberen Ende: Jeder Abschnitt laeuft ueber den Kamm
+   seiner eigenen Flanke HINAUS, ein gutes Stueck weit. Was ueber dem Kamm
+   liegt, schneidet die Flanke ab (clip-path in baueStaffelHtml). So endet
+   die Strasse nicht mit einem runden Strichende auf dem Hang, sondern
+   verschwindet genau an der Kammlinie - als fuehre sie dahinter weiter.
+
+   Das WIEDERKOMMEN am unteren Anfang: Jeder Abschnitt beginnt ein gutes
+   Stueck UNTER dem Kamm der naeheren Staffel. Die wird spaeter gezeichnet
+   und deckt ihn ab; die Strasse kommt dann ueber dieser Kammlinie hervor.
+
+   Und beides an DERSELBEN Stelle: Wo ein Abschnitt in eine Kammscharte
+   hinein verschwindet, kommt der naechste kurz dahinter wieder hervor,
+   in dieselbe Richtung weiterlaufend - nur schmaler, weil weiter weg.
+   Erst das macht aus drei Strichen eine Strasse, die ueber Paesse fuehrt.
+
+   Die Scharten stehen in FLANKEN: Flanke 2 hat eine bei x=480,
+   Flanke 1 bei x=350, Flanke 0 bei x=590. Wer an den Kaemmen dreht, muss
+   die Anfaenge und Enden hier mitziehen.
 
    "von" und "bis" sagen, welcher Teil des einen durchgehenden Striches
    dieser Abschnitt ist: Die Strasse zeichnet sich in EINEM Zug von unten
-   bis zum Pass, obwohl sie aus drei Pfaden besteht. */
+   bis zum Pass, obwohl sie aus drei Pfaden besteht. Die Zahlen sind die
+   Anteile der Pfadlaengen. */
 const STRASSE = [
-  { d: 'M430 1800 C 560 1740 780 1720 850 1660 C 920 1605 760 1620 620 1608 C 540 1601 480 1600 470 1592',
-    breite: 44, von: 0.0,  bis: 0.46, flanke: 2 },
-  { d: 'M615 1525 C 760 1445 830 1395 705 1345 C 600 1303 420 1310 340 1352',
-    breite: 22, von: 0.46, bis: 0.78, flanke: 1 },
-  { d: 'M255 1305 C 430 1205 560 1165 620 1105 C 660 1064 620 1078 578 1058',
-    breite: 11, von: 0.78, bis: 1.0,  flanke: 0 },
+  { d: 'M430 1800 C 560 1740 780 1720 850 1660 C 920 1605 760 1620 620 1608'
+     + ' C 540 1601 480 1600 470 1592 C 460 1584 448 1562 442 1535',
+    breite: 44, von: 0.0,  bis: 0.28, flanke: 2 },
+  { d: 'M478 1630 C 440 1565 400 1520 405 1470 C 410 1425 640 1425 790 1395'
+     + ' C 870 1379 770 1335 620 1330 C 470 1325 390 1330 350 1350 C 336 1357 318 1340 306 1300',
+    breite: 22, von: 0.28, bis: 0.70, flanke: 1 },
+  { d: 'M330 1385 C 295 1300 255 1240 300 1200 C 340 1165 520 1170 590 1110'
+     + ' C 605 1092 598 1050 590 1015',
+    breite: 11, von: 0.70, bis: 1.0,  flanke: 0 },
 ];
 
 /* Sterne als Bruchteile des sichtbaren Rahmens (0 bis 1), nicht als feste
@@ -181,16 +204,36 @@ function baueStrasseHtml(abschnitt, nummer, quer) {
     + `</g>`;
 }
 
-/* Eine Staffel: erst die Flanke, dann die Strasse auf ihrer Schulter. Die
-   NAECHSTE, naehere Staffel wird darueber gezeichnet und verschluckt das
-   untere Ende dieser Strasse - daher der Eindruck, sie liege im Gelaende. */
+/* Eine Staffel: die Flanke, darauf die Strasse, zuoberst das Gratlicht.
+
+   Die Strasse wird auf die FORM DER FLANKE beschnitten (clip-path mit
+   demselben Pfad). Alles von ihr, was ueber den Kamm hinausragt - ihr
+   verlaengertes Ende, der runde Strichabschluss, der weiche Schein -,
+   faellt damit weg. Ohne den Schnitt endete jeder Abschnitt als runder
+   Klecks auf dem Hang, und der Schein leuchtete ueber den Kamm in den
+   Berg dahinter hinein. Das war der Grund, warum die Strasse nie wirklich
+   hinter einem Berg verschwand.
+
+   Der Schnitt gilt im Koordinatensystem der Staffel und wandert deshalb
+   beim Auftauchen (translate in zeigeBergwelt) mit ihr mit.
+
+   Das Gratlicht kommt NACH der Strasse: So liegt die helle Kammlinie ueber
+   dem Schnitt, und das Auge liest "die Strasse geht hier drueber" statt
+   "die Strasse hoert hier auf".
+
+   Die NAECHSTE, naehere Staffel wird ueber diese gezeichnet und verschluckt
+   das untere Ende der Strasse - daher kommt sie hinter dem Berg hervor. */
 function baueStaffelHtml(flanke, nummer, quer) {
   const d = quer ? rechneAufQuerformat(flanke.d) : flanke.d;
   const nummerImWeg = STRASSE.findIndex((abschnitt) => abschnitt.flanke === nummer);
+  const schnitt = `filmFlankenSchnitt${nummer + 1}`;
   return `<g class="film-staffel" opacity="0">`
+    + `<clipPath id="${schnitt}"><path d="${d}"/></clipPath>`
     + `<path class="film-flanke film-flanke-${nummer + 1}" d="${d}"/>`
+    + (nummerImWeg >= 0
+        ? `<g clip-path="url(#${schnitt})">${baueStrasseHtml(STRASSE[nummerImWeg], nummerImWeg, quer)}</g>`
+        : '')
     + `<path class="film-grat" d="${d}" opacity="${flanke.kante}"/>`
-    + (nummerImWeg >= 0 ? baueStrasseHtml(STRASSE[nummerImWeg], nummerImWeg, quer) : '')
     + `</g>`;
 }
 
