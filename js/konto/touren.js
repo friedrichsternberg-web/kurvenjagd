@@ -466,18 +466,22 @@ function geteilteTourHtml(zeile) {
       <div class="widget-kopf geteilt-kopf">
         ${nutzerBildHtml(zeile)}
         <span class="geteilt-nutzer">${escapeHtml(zeile.benutzername)}</span>
-        <span class="geteilt-weg">${wo}</span>
+        <span class="karte-werkzeuge">
+          <button class="glas-rund karte-werkzeug" data-teile-fremd="${escapeHtml(zeile.id)}"
+                  title="Tour als Link teilen" aria-label="Tour teilen">${symbol('teilen')}</button>
+        </span>
       </div>
       <h3 class="widget-name">${marke}${escapeHtml(zeile.name)}</h3>
       <div class="widget-koerper">
+        ${wo ? `<p class="geteilt-weg">${wo}</p>` : ''}
         ${zeile.beschreibung ? `<p class="geteilt-text">${escapeHtml(zeile.beschreibung)}</p>` : ''}
         <div class="tag-fakten">
           <span class="tag-fakt">${symbol('drehen', 'klein')}${kurven}</span>
         </div>
       </div>
-      <div class="geteilt-fuss">
-        <button class="btn klein" data-oeffne="${escapeHtml(zeile.id)}">Tour öffnen</button>
-        <button class="btn ghost klein" data-uebernimm="${escapeHtml(zeile.id)}">Tour speichern</button>
+      <button type="button" class="btn ghost widget-knopf" data-oeffne="${escapeHtml(zeile.id)}">Tour öffnen</button>
+      <div class="widget-fuss-neben">
+        <button class="linkbtn" data-uebernimm="${escapeHtml(zeile.id)}">Tour speichern</button>
         <button class="linkbtn geteilt-melden" data-melde="${escapeHtml(zeile.id)}">Melden</button>
       </div>
     </li>`;
@@ -568,18 +572,22 @@ function serpaTourHtml(eintrag, wegKm) {
         <img class="geteilt-bild" src="img/favicon-32.png" alt=""
              width="32" height="32" loading="lazy">
         <span class="geteilt-nutzer">Serpa</span>
-        <span class="geteilt-weg">${wo}</span>
+        <span class="karte-werkzeuge">
+          <button class="glas-rund karte-werkzeug" data-teile-serpa="${escapeHtml(eintrag.id)}"
+                  title="Tour als Link teilen" aria-label="Tour teilen">${symbol('teilen')}</button>
+        </span>
       </div>
       <h3 class="widget-name">${escapeHtml(eintrag.name)}</h3>
       <div class="widget-koerper">
+        ${wo ? `<p class="geteilt-weg">${wo}</p>` : ''}
         <p class="geteilt-text">${escapeHtml(eintrag.text)}</p>
         <div class="tag-fakten">
           <span class="tag-fakt">${symbol('drehen', 'klein')}ca. ${Math.round(eintrag.grad)} &deg;/km</span>
         </div>
       </div>
-      <div class="geteilt-fuss">
-        <button class="btn klein" data-oeffne="${escapeHtml(eintrag.id)}">Tour öffnen</button>
-        <button class="btn ghost klein" data-uebernimm="${escapeHtml(eintrag.id)}">Tour speichern</button>
+      <button type="button" class="btn ghost widget-knopf" data-oeffne="${escapeHtml(eintrag.id)}">Tour öffnen</button>
+      <div class="widget-fuss-neben">
+        <button class="linkbtn" data-uebernimm="${escapeHtml(eintrag.id)}">Tour speichern</button>
       </div>
     </li>`;
 }
@@ -823,6 +831,9 @@ verkabele('serpaListe', 'click', ereignis => {
   if (!knopf) return;
   if (knopf.dataset.oeffne)    öffneSerpaTour(knopf.dataset.oeffne);
   if (knopf.dataset.uebernimm) uebernimmSerpaTour(knopf.dataset.uebernimm);
+  if (knopf.dataset.teileSerpa && typeof teileSerpaTourPerLink === 'function') {
+    teileSerpaTourPerLink(knopf.dataset.teileSerpa);
+  }
 });
 
 /* Ein Zuhoerer fuer die ganze Liste statt einer je Zeile: Die Zeilen werden
@@ -835,4 +846,8 @@ verkabele('entdeckenListe', 'click', ereignis => {
   if (knopf.dataset.oeffne)    öffneGeteilteTour(knopf.dataset.oeffne);
   if (knopf.dataset.uebernimm) uebernimmGeteilteTour(knopf.dataset.uebernimm);
   if (knopf.dataset.melde)     meldeGeteilteTour(knopf.dataset.melde);
+  // Weitergeben, was hier steht - teilen.js holt sich die Strecke selbst.
+  if (knopf.dataset.teileFremd && typeof teileFremdeTourPerLink === 'function') {
+    teileFremdeTourPerLink(knopf.dataset.teileFremd);
+  }
 });

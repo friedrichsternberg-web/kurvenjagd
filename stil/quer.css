@@ -227,8 +227,14 @@
   /* Die Bike-Karte im Breiten: Die Werte duerfen nicht ueber die halbe
      Seite auseinanderlaufen, und "Bike bearbeiten" ist ein Knopf, keine
      Leiste - er steht links unter den Werten wie auf dem Handy, nur ohne
-     die volle Breite zu nehmen. */
-  .widget-knopf { width: auto; align-self: flex-start; padding-inline: var(--s5); font-size: 15px; }
+     die volle Breite zu nehmen.
+
+     MIT ".bike-karte" DAVOR, und das ist seit dem 11.09.2026 noetig:
+     .widget-knopf ist inzwischen der Fussknopf JEDER Karte - der eigenen
+     Tour, der geteilten, der Reise, der Kasse. Ohne den Vorsatz schrumpfte
+     "Tour oeffnen" im Querformat auf 167 von 602 Punkten zusammen, und aus
+     dem Fuss einer Karte wurde ein verlorener Knopf links unten. */
+  .bike-karte .widget-knopf { width: auto; align-self: flex-start; padding-inline: var(--s5); font-size: 15px; }
   /* Die Buehne behaelt das Seitenverhaeltnis des Raumbildes (960 zu 860).
      Damit zeigt "cover" den Raum vollstaendig, egal wie breit die Karte
      wird - und die Werkstatt bleibt die Werkstatt statt eines Streifens

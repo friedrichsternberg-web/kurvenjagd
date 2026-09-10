@@ -18,8 +18,8 @@
 
    DER SCHLUESSEL IST DER LINK. Wer den Token hat, darf sehen; wer ihn
    nicht hat, kommt nicht heran. Dasselbe Modell wie bei einem geteilten
-   Dokument. Der Token ist 24 Zeichen aus dem Zufallsgenerator der
-   Datenbank (96 Bit) - erraten laesst sich das nicht.
+   Dokument. Der Token sind 24 Hexzeichen aus gen_random_uuid() (96 Bit) -
+   erraten laesst sich das nicht.
 
    UND ER STEHT HINTER DEM RAUTEZEICHEN: serpa-app.de/#t=<token>. Alles
    hinter der Raute schickt der Browser NICHT an den Server, der Token
@@ -106,9 +106,17 @@ revoke all on function public.link_freigaben_grenze() from public, anon, authent
 
 /* --- 4. Einen Link anlegen -----------------------------------------------
 
-   Der Token entsteht HIER und nicht im Browser: gen_random_bytes() ist der
-   Zufallsgenerator der Datenbank, und was ein Geheimnis sein soll, wuerfelt
-   man nicht dort, wo es nachher hin soll.
+   Der Token entsteht HIER und nicht im Browser: Was ein Geheimnis sein
+   soll, wuerfelt man nicht dort, wo es nachher hin soll.
+
+   Gewuerfelt wird mit gen_random_uuid() und NICHT mit gen_random_bytes().
+   Der Unterschied ist keine Feinheit: gen_random_uuid() gehoert zu
+   Postgres selbst, gen_random_bytes() zur Erweiterung pgcrypto - und die
+   liegt bei Supabase im Schema "extensions". Eine Funktion mit
+   "set search_path = public" findet sie deshalb nicht, und das Teilen
+   scheiterte mit "function gen_random_bytes(integer) does not exist".
+   Nachgemessen am 11.09.2026. Aus einer UUID sind 24 der 32 Hexzeichen
+   uebrig - 96 Bit, mehr als genug.
 
    Zweimal dasselbe teilen gibt denselben Link zurueck, mit aufgefrischten
    Daten. Sonst sammelten sich fuer eine Tour, die man dreimal
@@ -141,7 +149,7 @@ begin
     return vorhanden;
   end if;
 
-  neu := encode(gen_random_bytes(12), 'hex');
+  neu := substr(replace(gen_random_uuid()::text, '-', ''), 1, 24);
   insert into public.link_freigaben (token, besitzer_id, art, quelle_id, name, daten)
   values (neu, auth.uid(), p_art, p_quelle_id, p_name, p_daten);
   return neu;

@@ -1607,17 +1607,33 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   color: var(--muted);
   white-space: nowrap;
 }
-/* Das Werkzeug rechts, und zwar auch dann, wenn kein Datum davorsteht:
-   Der ERSTE Knopf schiebt sich nach rechts, jeder weitere rueckt nur noch
-   auf. Ohne die zweite Regel bekaeme JEDER sein margin-left: auto, und
-   dann verteilten sich zwei Knoepfe ueber die Zeile statt beieinander zu
-   stehen - genau so sass der Teilen-Knopf zuerst mitten im Kopf. */
-.widget-kopf .teilen-knopf,
-.widget-kopf .del { margin-left: auto; }
-.widget-kopf .karte-datum ~ .teilen-knopf,
-.widget-kopf .karte-datum ~ .del,
-.widget-kopf .teilen-knopf ~ .teilen-knopf,
-.widget-kopf .teilen-knopf ~ .del { margin-left: var(--s2); }
+/* Das Werkzeug einer Karte steht rechts, in EINEM Halter.
+
+   Der Halter ist der Punkt: Ohne ihn braucht jeder Knopf sein eigenes
+   "margin-left: auto", und drei davon verteilen sich dann ueber die
+   Zeile, statt beieinander zu stehen. Genau so sass der Teilen-Knopf beim
+   ersten Anlauf mitten im Kopf.
+
+   Und sie sind RUNDE GLASKNOEPFE, keine blassen Zeichen: Was man antippen
+   soll, muss aussehen wie etwas, das man antippen kann. Als graue Symbole
+   am Rand hat sie niemand gefunden. */
+.karte-werkzeuge {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  flex: 0 0 auto;
+}
+.karte-werkzeug { width: 38px; height: 38px; }
+.karte-werkzeug .ic { width: 19px; height: 19px; }
+/* Der Globus sagt einen ZUSTAND: blau heisst, die Tour steht oeffentlich.
+   Die beiden anderen sind Handlungen und bleiben still, bis man sie
+   beruehrt. */
+.karte-werkzeug.oeffentlich {
+  color: var(--accent-hell);
+  border-color: color-mix(in srgb, var(--accent-hell) 50%, transparent);
+}
+.karte-werkzeug.gefahr:hover { color: var(--danger-glanz); }
 .karte.tour-karte .widget-name { display: flex; align-items: center; gap: 8px; }
 .karte.tour-karte:active { transform: scale(0.99); }
 
@@ -1676,6 +1692,10 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 }
 
 .geteilt-kopf { gap: var(--s2); }
+/* Wo die Tour liegt - jetzt eine eigene Zeile im Koerper statt eines
+   Anhaengsels im Kopf. Dort drueckte sie den Teilen-Knopf weg, sobald
+   der Ortsname laenger als ein Wort war. */
+.widget-koerper .geteilt-weg { margin: 0; }
 
 /* Bild und Ersatzbuchstabe teilen sich die Masse, damit die Kopfzeile
    gleich hoch bleibt, ob jemand ein Profilbild hat oder nicht. */
@@ -1752,6 +1772,18 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* Unter dem Hauptknopf die leisen Nebenwege. Sie sind Links und keine
+   Knoepfe: Auf einer Karte gibt es EINE Handlung, die man erwartet - der
+   Rest steht daneben, ohne mit ihr um Aufmerksamkeit zu streiten. */
+.widget-fuss-neben {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s4);
+  margin-top: var(--s3);
+}
+.widget-fuss-neben .linkbtn { font-size: 13.5px; }
 
 .geteilt-fuss {
   display: flex;

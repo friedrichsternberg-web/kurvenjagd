@@ -3820,3 +3820,54 @@ die Route laden, bevor `teilen.js` überhaupt gefragt wird. Beide Male gilt
 dasselbe: **Wer etwas an eine bestehende Zeile hängt, muss wissen, was
 dort schon hängt.**
 
+## 11.09.2026 — Das Teilen ging nicht, und die Werkzeuge fand niemand
+
+**Der Fehler:** „function gen_random_bytes(integer) does not exist". Der
+Token für einen Teilen-Link entstand mit `gen_random_bytes()` aus
+**pgcrypto** — und die Erweiterung liegt bei Supabase im Schema
+`extensions`, nicht in `public`. Eine Funktion mit
+`set search_path = public` findet sie deshalb nicht. Sie in den Pfad
+aufzunehmen wäre der eine Weg gewesen; der bessere ist, sie gar nicht zu
+brauchen: `gen_random_uuid()` gehört zu Postgres selbst, und 24 der 32
+Hexzeichen daraus sind 96 Bit.
+
+**Die Lehre, die über diesen Fall hinausgeht:** `set search_path = public`
+ist bei `security definer` Pflicht — und schließt damit alles aus, was
+nicht in `public` liegt. Wer in so einer Funktion eine Erweiterung
+benutzt, muss wissen, in welchem Schema sie steckt. Bei Supabase ist das
+fast nie `public`.
+
+Nachgeprüft habe ich es mit einem echten Aufruf als angemeldeter Nutzer,
+in einer Transaktion mit `rollback` am Ende: `set local role
+authenticated` plus `set_config('request.jwt.claims', …)`. Das ist der
+Weg, eine Zeilenregel oder eine `auth.uid()`-Funktion zu prüfen, ohne sich
+irgendwo anzumelden und ohne eine Zeile zu hinterlassen.
+
+**Die Werkzeuge auf den Karten waren zu leise.** Teilen, öffentlich
+zeigen, löschen standen als blasse Zeichen am Rand — Friedrich hat sie
+schlicht nicht gefunden. Jetzt sind es runde Glasknöpfe: Was man antippen
+soll, muss aussehen wie etwas, das man antippen kann. Sie stehen in einem
+Halter statt jeder für sich mit `margin-left: auto` — drei Knöpfe mit
+jeweils `auto` verteilen sich über die Zeile, statt beieinanderzustehen.
+
+**Und ein alter Eingriff fiel dabei auf die Füße:** In `quer.css` stand
+seit Langem `.widget-knopf { width: auto }`, geschrieben für „Bike
+bearbeiten" auf der Bike-Karte. `.widget-knopf` ist inzwischen der
+Fußknopf **jeder** Karte — im Querformat schrumpfte „Tour öffnen" damit
+auf 167 von 602 Punkten. Die Regel trägt jetzt `.bike-karte` vor sich her.
+Dieselbe Sorte Fehler wie beim Kästchen im Blatt: **Wer eine Regel ohne
+Vorsatz schreibt, verabredet sich mit allem, was später denselben Namen
+bekommt.**
+
+**Eine fremde Tour weiterzugeben nennt ihren Urheber.** Sie geht als Kopie
+hinaus wie die eigene, aber `daten.urheber` reist mit, und der
+Empfangsbildschirm schreibt es hin: „Anna hat dir eine Tour von
+kurvenfritze geschickt". Ohne das stünde eine fremde Leistung unter dem
+eigenen Namen.
+
+**`reise.js` ist bei 1205 Zeilen an die Grenze gestoßen** und in
+`reise.js` und `blatt.js` geteilt. Der Schnitt liegt an einer echten Fuge:
+Ein Blatt ist ein eigenes Fenster mit eigener Verkabelung, und
+`mitfahrer.js` und `ausgaben.js` hängen ihre Blätter ohnehin schon von
+außen an dieselbe Hülle.
+

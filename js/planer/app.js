@@ -3146,6 +3146,34 @@ function legeRouteAb({ name, beschreibung, oeffentlich }) {
 // HTML für eine Zeile in einer Liste gespeicherter Routen - genutzt sowohl
 // im Bedienfeld des Planers (#savedList) als auch auf dem Bildschirm
 // "Meine Touren" (#tourenList), damit beide gleich aussehen.
+/* Die drei runden Knoepfe rechts im Kopf einer Tourenkarte: teilen,
+   oeffentlich zeigen, loeschen.
+
+   Sie stehen in EINEM Halter, und das ist keine Zierde: Ohne ihn braeuchte
+   jeder Knopf sein eigenes "margin-left: auto", und drei davon verteilten
+   sich ueber die Zeile statt beieinanderzustehen - genau so sass der
+   Teilen-Knopf beim ersten Anlauf mitten im Kopf.
+
+   Das Weltsymbol steht NUR auf dem Bildschirm "Touren", nicht im Bedienfeld
+   des Planers: Dort ist die Liste eine Abkuerzung zum Laden einer Route,
+   und ein Knopf mit Folgen fuer die Oeffentlichkeit gehoert nicht neben
+   eine Abkuerzung. Blau heisst oeffentlich, grau heisst privat - dieselbe
+   Sprache wie ueberall: Was leuchtet, ist an. */
+function routenWerkzeugHtml(r) {
+  const oeffentlich = typeof tourIstOeffentlich === 'function' && tourIstOeffentlich(r.id);
+  return `
+      <span class="karte-werkzeuge">
+        <button class="glas-rund karte-werkzeug" data-teile-link="${escapeHtml(r.id)}"
+                title="Tour als Link teilen" aria-label="Tour teilen">${symbol('teilen')}</button>
+        <button class="glas-rund karte-werkzeug ${oeffentlich ? 'oeffentlich' : ''}"
+                data-teile="${escapeHtml(r.id)}"
+                title="${oeffentlich ? 'Steht öffentlich' : 'Öffentlich zeigen'}"
+                aria-label="Öffentlich zeigen">${symbol('welt')}</button>
+        <button class="glas-rund karte-werkzeug gefahr" data-del="${escapeHtml(r.id)}"
+                title="Löschen" aria-label="Tour löschen">${symbol('kreuz')}</button>
+      </span>`;
+}
+
 function gespeicherteRouteHtml(r, mitTeilen = false) {
   // Aufgezeichnete Ausfahrten stehen in derselben Liste wie geplante
   // Routen - das kleine Motorrad-Zeichen macht auf einen Blick klar,
@@ -3166,18 +3194,7 @@ function gespeicherteRouteHtml(r, mitTeilen = false) {
      geteilt werden, kommt sie vom Server und damit von Fremden. Ein
      Anfuehrungszeichen darin wuerde reichen, um aus dem Attribut
      auszubrechen und eigenes HTML einzuschleusen. */
-  /* Das Weltsymbol steht NUR auf dem Bildschirm "Touren", nicht im
-     Bedienfeld des Planers: Dort ist die Liste eine Abkuerzung zum Laden
-     einer Route, und ein Knopf mit Folgen fuer die Oeffentlichkeit gehoert
-     nicht neben eine Abkuerzung. Blau heisst oeffentlich, grau heisst
-     privat - dieselbe Sprache wie ueberall: Was leuchtet, ist an. */
-  const oeffentlich = mitTeilen && typeof tourIstOeffentlich === 'function'
-                      && tourIstOeffentlich(r.id);
-  const teilen = mitTeilen ? `
-      <button class="teilen-knopf ${oeffentlich ? 'oeffentlich' : ''}"
-              data-teile="${escapeHtml(r.id)}"
-              title="${oeffentlich ? 'Steht öffentlich' : 'Tour teilen'}"
-              aria-label="Teilen">${symbol('welt', 'klein')}</button>` : '';
+  const werkzeuge = mitTeilen ? routenWerkzeugHtml(r) : '';
 
   /* Zwei Gestalten fuer dieselbe Liste. Im Bedienfeld des Planers
      (#savedList) bleibt es die schmale Zeile - dort ist die Liste eine
@@ -3211,10 +3228,7 @@ function gespeicherteRouteHtml(r, mitTeilen = false) {
       <div class="widget-kopf">
         <span class="abzeichen">${r.aufgezeichnet ? 'Aufzeichnung' : 'Tour'}</span>
         ${datum ? `<span class="karte-datum">${datum}</span>` : ''}
-        <button class="teilen-knopf karte-teilen" data-teile-link="${escapeHtml(r.id)}"
-                title="Tour als Link teilen" aria-label="Tour teilen">${symbol('teilen', 'klein')}</button>
-        ${teilen}
-        <button class="del" data-del="${escapeHtml(r.id)}" title="Löschen">&times;</button>
+        ${werkzeuge}
       </div>
       <h3 class="widget-name">${marke}${escapeHtml(r.name)}</h3>
       <div class="widget-koerper">${faktenHtml(r)}</div>

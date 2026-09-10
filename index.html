@@ -438,6 +438,12 @@
         <circle cx="18" cy="18.5" r="2.6"/>
         <path d="M8.3 10.8 15.7 6.7M8.3 13.2l7.4 4.1"/>
       </symbol>
+      <!-- Das Kreuz als Symbol und nicht als Schriftzeichen: In einem
+           runden Knopf muss es dieselbe Strichstaerke haben wie seine
+           Nachbarn, und ein "x" aus der Schrift hat sie nicht. -->
+      <symbol id="icon-kreuz" viewBox="0 0 24 24">
+        <path d="M6.6 6.6 17.4 17.4M17.4 6.6 6.6 17.4"/>
+      </symbol>
       <symbol id="icon-plus" viewBox="0 0 24 24">
         <path d="M12 5v14M5 12h14"/>
       </symbol>
@@ -2705,6 +2711,7 @@
        (zeigeBildschirm, loadSaved, vorschauBildHtml) und nach touren.js,
        das den Teil "Reisen" an diese Datei weiterreicht. -->
   <script src="js/reise/reise.js?v=110"></script>
+  <script src="js/reise/blatt.js?v=110"></script>
   <!-- Die gemeinsame Reise, in drei Schichten: kasse.js rechnet und fasst
        nichts an, mitfahrer.js redet mit dem Server, ausgaben.js zeichnet.
        Alle drei NACH reise.js: Sie haengen sich an dessen Bildschirm und

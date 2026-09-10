@@ -97,18 +97,60 @@ async function gibLinkWeiter(url, name, art) {
   showToast(url);
 }
 
-async function teileTourPerLink(tour) {
+/* Der gemeinsame Weg: Link anlegen, Link weitergeben. Alle vier
+   Teilen-Knoepfe der App laufen hier zusammen. */
+async function teilePerLink(freigabe, art) {
+  if (!freigabe) { showToast('Da ist nichts zum Teilen.'); return; }
   showToast('Link wird erstellt …');
-  const ergebnis = await erzeugeLink(tourFreigabe(tour));
+  const ergebnis = await erzeugeLink(freigabe);
   if (!ergebnis.ok) { showToast(ergebnis.meldung); return; }
-  gibLinkWeiter(ergebnis.url, tour.name || 'Tour', 'tour');
+  gibLinkWeiter(ergebnis.url, freigabe.name, art);
 }
 
-async function teileReisePerLink(reise) {
-  showToast('Link wird erstellt …');
-  const ergebnis = await erzeugeLink(reiseFreigabe(reise));
-  if (!ergebnis.ok) { showToast(ergebnis.meldung); return; }
-  gibLinkWeiter(ergebnis.url, reise.name || 'Reise', 'reise');
+function teileTourPerLink(tour) {
+  return teilePerLink(tourFreigabe(tour), 'tour');
+}
+
+function teileReisePerLink(reise) {
+  return teilePerLink(reise ? reiseFreigabe(reise) : null, 'reise');
+}
+
+/* Eine FREMDE Tour weitergeben - aus "Entdecken".
+
+   Sie geht als Kopie hinaus, wie die eigene, aber mit einem Zusatz: Wer
+   sie gemacht hat, reist als daten.urheber mit, und der Empfangsbildschirm
+   schreibt es hin ("Anna hat dir eine Tour von kurvenfritze geschickt").
+   Ohne das stuende eine fremde Leistung unter dem eigenen Namen, und das
+   waere nicht bloss unhoeflich - es waere falsch.
+
+   Die Kennung bekommt einen Vorsatz, damit eine fremde Tour nicht mit
+   einer eigenen gleicher Nummer zusammenfaellt: Die Eindeutigkeit in der
+   Datenbank geht ueber Besitzer, Art und Kennung. */
+async function teileFremdeTourPerLink(kennung) {
+  if (typeof holeGeteilteTour !== 'function') return;
+  const tour = await holeGeteilteTour(kennung);
+  // Ging es nicht, hat holeGeteilteTour() schon gesagt warum.
+  if (!tour) return;
+  const freigabe = tourFreigabe(tour);
+  if (freigabe) {
+    freigabe.quelle_id = `fremd-${kennung}`;
+    freigabe.daten.urheber = tour.geteiltVon || '';
+  }
+  return teilePerLink(freigabe, 'tour');
+}
+
+// Und eine Tour von Serpa selbst. Sie liegt rein oertlich in
+// serpa-touren.js, es braucht also keinen Umweg ueber den Server.
+function teileSerpaTourPerLink(kennung) {
+  if (typeof SERPA_TOUREN === 'undefined' || typeof serpaTourAlsTour !== 'function') return;
+  const eintrag = SERPA_TOUREN.find(e => e.id === kennung);
+  if (!eintrag) return;
+  const freigabe = tourFreigabe({ ...serpaTourAlsTour(eintrag), name: eintrag.name });
+  if (freigabe) {
+    freigabe.quelle_id = `serpa-${kennung}`;
+    freigabe.daten.urheber = 'Serpa';
+  }
+  return teilePerLink(freigabe, 'tour');
 }
 
 
@@ -188,9 +230,14 @@ function zeigeLinkFehlt() {
 function zeigeLink(zeile) {
   const istReise = zeile.art === 'reise';
   const von = zeile.benutzername ? escapeHtml(zeile.benutzername) : 'Jemand';
+  /* Wer die Tour gemacht hat, falls das jemand anders ist als der, der
+     sie geschickt hat. Steht nur bei weitergereichten Touren aus
+     "Entdecken" - siehe teileFremdeTourPerLink(). */
+  const urheber = zeile.daten?.urheber
+    ? ` von ${escapeHtml(zeile.daten.urheber)}` : '';
   zeigeLinkInhalt(`
     <div class="link-empfang">
-      <p class="link-absender">${von} hat dir ${istReise ? 'eine Reise' : 'eine Tour'} geschickt</p>
+      <p class="link-absender">${von} hat dir ${istReise ? 'eine Reise' : 'eine Tour'}${urheber} geschickt</p>
       ${istReise ? linkReiseKarteHtml(zeile) : linkTourKarteHtml(zeile)}
       ${angemeldeterNutzer ? `
         <div class="link-wahl">
