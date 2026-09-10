@@ -241,38 +241,19 @@
 </head>
 <body>
 
-  <!-- ===== Startfilm =====
-       Drei Sekunden vor der App: Bergstaffeln treten aus dem Schwarz
-       hervor, eine Passstrasse schlaengelt sich nach oben, die Wortmarke
-       kommt aus der Tiefe - und faehrt zum Schluss genau auf den Platz, an
-       dem sie in der App ohnehin steht. Deshalb steht das Logo hier auch
-       nicht als Nachbildung, sondern als DASSELBE Bild mit derselben
-       Klasse: Am Ende uebernimmt die Oberflaeche einfach.
+  <!-- ===== Die Einfuehrung beim ersten Oeffnen =====
+       Fuenf kurze Karten: vier Funktionen, dann die Empfehlung fuers Konto.
+       Was drinsteht, zeichnet einfuehrung.js (am Ende der Seite, weil es
+       den Geraetespeicher aus geraet.js braucht, um sich zu merken, dass
+       die Einfuehrung gelaufen ist). Sie erscheint nur beim ersten Oeffnen
+       und nicht bei Leuten, die schon Touren oder ein Motorrad gespeichert
+       haben - die kennen die App. Zum Nachsehen: ?einfuehrung=1 an die
+       Adresse haengen.
 
-       Warum ganz oben und mit dem Skript direkt dahinter: Der Film muss im
-       ersten gezeichneten Bild schon da sein, sonst blitzt die App kurz auf
-       und wird dann verdeckt. start.js braucht vom Rest der Seite nichts.
-
-       Ein Tipp ueberspringt den Film. Wer im Betriebssystem weniger
-       Bewegung eingestellt hat, bekommt nur kurz den Schriftzug. Und wenn
-       das Skript gar nicht laeuft, raeumt style.css die Flaeche nach 3,6
-       Sekunden von selbst weg (.startfilm, "Reissleine"). ===== -->
-  <div id="startfilm" class="startfilm" aria-hidden="true">
-    <div class="startfilm-kamera" id="startfilmKamera">
-      <div class="startfilm-glut" id="startfilmGlut"></div>
-      <svg class="startfilm-buehne" id="startfilmBuehne"></svg>
-      <div class="startfilm-vignette"></div>
-    </div>
-    <div class="startfilm-marke" id="startfilmMarke">
-      <span class="startfilm-logo">
-        <img class="wortmarke-bild" src="img/logo-serpa.webp?v=110" alt=""
-             width="800" height="155" fetchpriority="high">
-        <span class="startfilm-glanz" id="startfilmGlanz"></span>
-      </span>
-      <span class="startfilm-sub" id="startfilmSub">Deine Motorradapp</span>
-    </div>
+       Bis zum 11.09.2026 stand hier der Startfilm (abgelegt/startfilm/). -->
+  <div id="einfuehrung" class="einfuehrung" hidden>
+    <div class="karte einfuehrung-blatt" id="einfuehrungBlatt" role="dialog" aria-modal="true" aria-label="Einführung"></div>
   </div>
-  <script src="js/grundlage/start.js?v=110"></script>
 
   <!-- ===== Symbolsammlung =====
        Alle Symbole der App an einer Stelle, als SVG statt als Emoji.
@@ -2722,6 +2703,11 @@
   <!-- Touren und Reisen per Link weitergeben. Laedt NACH reise.js, weil es
        beide Formen kennen muss, und nach konto.js wegen des Servers. -->
   <script src="js/konto/teilen.js?v=110"></script>
+  <!-- Die Einfuehrung kommt als Letztes: Sie fragt beim Kontoschritt, ob
+       schon jemand angemeldet ist, und schickt auf Wunsch in den Planer,
+       zu Ride oder in die Ausruestung - alles Dinge, die vorher geladen
+       sein muessen. -->
+  <script src="js/grundlage/einfuehrung.js?v=110"></script>
   <!-- Der Einstieg in den Planer (Tour oder Reise?) und die Reisekarte in
        der Garage. Nach reise.js, dessen Reisen es zeigt. -->
   <script src="js/planer/einstieg.js?v=110"></script>

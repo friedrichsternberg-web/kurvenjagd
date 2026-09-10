@@ -241,7 +241,12 @@
 
      Sie stehen hier und nicht in style.css, weil auch der Film die
      Designsprache benutzt (Grenze 2) - und weil eine Datei mit sechs
-     Farbnamen leichter nachzustimmen ist als ein Dutzend Fundstellen. */
+     Farbnamen leichter nachzustimmen ist als ein Dutzend Fundstellen.
+
+     Seit dem 11.09.2026 liegt der Film auf Eis (abgelegt/startfilm/).
+     Die Marken bleiben trotzdem hier: Dort wartet startfilm.css auf sie,
+     und ein Comeback soll nicht damit anfangen, sechs Farben aus der
+     Geschichte zu suchen. Sonst benutzt sie nichts. */
   --nacht-1:     #141A23;   /* fernste Staffel, noch etwas Himmel darin */
   --nacht-2:     #0D1219;
   --nacht-3:     #080C11;

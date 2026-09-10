@@ -3929,3 +3929,44 @@ dicht auf dem Grat.
 in `STRASSE` als Zahlen benannt (Flanke 2 bei x=480, Flanke 1 bei x=350,
 Flanke 0 bei x=590). Wer einen Kamm in `FLANKEN` verschiebt, muss dort
 mitziehen — sonst endet die Straße wieder auf dem Hang.
+
+## 11.09.2026 — Der Startfilm geht auf Eis, eine Einführung kommt
+
+Friedrichs Entscheidung, kurz vor dem Push: Das Intro erst einmal komplett
+heraus, aber so ablegen, dass es wiederkommen kann. Stattdessen eine sehr
+kleine Einführung für alle, die die App zum ersten Mal öffnen.
+
+**Der Film liegt in `abgelegt/startfilm/`** – Skript, Stilregeln und
+Markup, dazu eine LIESMICH mit dem Weg zurück. Ein versionierter Ordner,
+kein `arbeitsmaterial/`: Das ist gitignored, und ein fertiges Stück App
+soll nicht von einer Festplatte abhängen. Die sechs `--nacht-*`-Marken
+bleiben in `design.css`, weil `startfilm.css` sie braucht und ein Comeback
+nicht mit Farbensuchen anfangen soll.
+
+**Die Einführung sind fünf Karten** an derselben Stelle: Planen, Ride,
+Teilen, Ausrüstung – und dann das Konto. Je ein Satz und ein Zeichen, mehr
+nicht. Wer mehr will, tippt auf „Gleich ausprobieren" und landet direkt in
+der Funktion. Überspringen geht jederzeit.
+
+**Wann sie läuft, und das ist der ganze Verstand darin:** genau einmal,
+beim ersten Öffnen. NICHT bei Leuten, die schon Touren, Reisen oder ein
+Motorrad gespeichert haben – die kennen die App, und wer sie vor dieser
+Fassung benutzt hat, soll nicht wie ein Neuling begrüßt werden. Für sie
+wird der Merker still gesetzt. Zum Nachsehen: `?einfuehrung=1`.
+
+**Die Kontokarte ist bewusst ungleich gewichtet.** Großer blauer Knopf
+„Konto anlegen", darunter leise „Später". Sie führt direkt ins Anlegen,
+nicht erst ins Anmelden. Wer schon angemeldet ist, sieht keine Empfehlung,
+sondern „Du bist schon drin – los geht's".
+
+**Der Merker wird beim Schließen gesetzt, nicht beim Öffnen.** Wer die
+Seite mitten in der Einführung zumacht, bekommt sie beim nächsten Mal noch
+einmal – er hat sie ja nicht gesehen.
+
+**Eine Kleinigkeit mit Folgen:** Die Hülle steht mit `display: flex` im
+Stylesheet. Das wiegt schwerer als die Browservorgabe für das Attribut
+`hidden` – ohne eine eigene Regel `.einfuehrung[hidden] { display: none }`
+wäre die Einführung immer sichtbar gewesen.
+
+Was mit dem Film im Fall eines Comebacks passiert, steht in der LIESMICH:
+beides hintereinander wäre zu viel vor der App.
