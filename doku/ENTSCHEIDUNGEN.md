@@ -4236,3 +4236,40 @@ getrennt), damit die Falle nicht wieder zuschnappt, falls jemand
 **Woran man es das nächste Mal schneller merkt:** Nach einem Push
 nachsehen, ob die Adresse die neue Nummer ausliefert, statt sich auf das
 grüne Häkchen zu verlassen — das gehörte hier zum *Push*, nicht zum *Bau*.
+
+## 11.09.2026 — Der Freisteller rechnete, warf das Ergebnis aber weg
+
+Friedrich meldete: Das Foto lässt sich freistellen, gespeichert wird aber
+immer das Ausgangsbild.
+
+**Der Fehler war eine einzige fehlende Zeile.** `freiÜbernehmen()` in
+`freisteller.js` legt das Originalfoto in voller Größe auf eine
+Zeichenfläche, rechnet die Maske Bildpunkt für Bildpunkt hinein — und
+schloss danach das Fenster, ohne die Zeichenfläche je auszulesen. Es fehlte
+
+```js
+dialogFoto = voll.toDataURL('image/webp', 0.92);
+```
+
+**Wie sie verschwinden konnte:** Am 06.09.2026 (`6b4b679`, „Start statt
+Garage") fiel die Bühnen-Ausrichtung weg — Bodenlinie, `neuesFotoImFluss`,
+der Sprung ins Anpassen. Diese Zeile stand mitten in dem Block, der dabei
+gelöscht wurde, und ist als Beifang mitgegangen. Der Unterschied zu allem
+anderen im Block: Sie gehörte nicht zur Bühne, sondern war der Zweck der
+ganzen Funktion.
+
+**Warum es fünf Tage niemand merkte.** Der Freisteller sah aus, als täte er
+etwas: Die Vorschau rechnete, der Fortschrittsbalken lief, am Ende kam die
+Meldung „Freigestellt.". Nur das Ergebnis war ein anderes Bild als das
+gezeigte. Ein Fehler, der Erfolg meldet, versteckt sich besser als einer,
+der abstürzt.
+
+**Was daraus folgt.** In der Funktion steht jetzt in Großbuchstaben, dass
+diese Zeile das Ergebnis überhaupt erst behält — nicht als Gedächtnisstütze
+für die Vergangenheit, sondern damit der nächste Aufräumer sieht, dass hier
+nicht bloß eine Zwischenrechnung endet. Und beim Herausnehmen eines Features
+gilt: Was im gelöschten Block steht, ist nicht automatisch Teil davon.
+
+Nachgemessen im Browser: Testfoto hinein, Maske geändert, übernommen —
+`dialogFoto` ist danach ein anderes Bild als vorher (WebP statt JPEG), und
+nach dem Speichern steht genau dieses Bild in der Garage.

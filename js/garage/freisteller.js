@@ -646,6 +646,17 @@ function freiÜbernehmen() {
     }
     stift.putImageData(flaeche, 0, 0);
 
+    /* DIE ZEILE, DIE DAS ERGEBNIS UEBERHAUPT ERST BEHAELT. Ohne sie wird
+       oben sauber gerechnet und das Bild danach weggeworfen - der
+       Freisteller sah dann aus, als taete er etwas, und die Garage
+       speicherte weiter das Ausgangsfoto. Warum das passieren konnte,
+       steht in ENTSCHEIDUNGEN.md unter dem 11.09.2026.
+
+       Guete 0,92: Das Bild durchlaeuft hier die ZWEITE Kompression (die
+       erste war das Einlesen). Wer zweimal presst, presst die Fehler der
+       ersten Runde gleich mit - deshalb an beiden Stellen sparsam. */
+    dialogFoto = voll.toDataURL('image/webp', 0.92);
+
     schließeFreisteller();
     zeichneFotoVorschau();
     showToast('Freigestellt. Mit "Original zurück" kommst du jederzeit zum Ausgangsbild.');
