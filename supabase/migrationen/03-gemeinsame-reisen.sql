@@ -329,8 +329,17 @@ create trigger reise_ausgaben_grenze_pruefen
   before insert on public.reise_ausgaben
   for each row execute function public.reise_ausgaben_grenze();
 
-revoke execute on function public.reisen_grenze() from anon, authenticated;
-revoke execute on function public.reise_ausgaben_grenze() from anon, authenticated;
+/* "from public, anon, authenticated", nicht nur "from anon, authenticated".
+   Das ist die Falle vom 30.08.2026 in ihrer zweiten Richtung: Eine neue
+   Funktion darf in Postgres von PUBLIC ausgefuehrt werden, und anon und
+   authenticated erben das. Wer nur die beiden Rollen namentlich
+   ausschliesst, laesst die Tuer offen, durch die sie ohnehin gekommen
+   sind. Nachgemessen am 10.09.2026: genau so stand es hier zuerst, und
+   beide Funktionen waren danach weiter aufrufbar.
+
+   Ausloeser-Funktionen haben in der Schnittstelle nichts verloren. */
+revoke all on function public.reisen_grenze() from public, anon, authenticated;
+revoke all on function public.reise_ausgaben_grenze() from public, anon, authenticated;
 
 
 /* --- 7. Jemanden finden --------------------------------------------------
@@ -630,4 +639,14 @@ grant execute on function public.anteil_abhaken(uuid, uuid, boolean) to authenti
                          'nutzer_suchen', 'reise_anlegen', 'reise_einladen',
                          'meine_einladungen', 'einladung_beantworten',
                          'reise_teilnehmer_liste', 'anteil_abhaken')
-     order by p.proname, r.rolname;                                         */
+     order by p.proname, r.rolname;
+
+   Und dieselbe Abfrage noch einmal fuer die beiden Ausloeser-Funktionen -
+   die duerfen ueberhaupt nicht auftauchen:
+
+     select p.proname, r.rolname
+     from pg_proc p, pg_roles r
+     where p.pronamespace = 'public'::regnamespace
+       and r.rolname in ('anon', 'authenticated')
+       and has_function_privilege(r.rolname, p.oid, 'EXECUTE')
+       and p.proname in ('reisen_grenze', 'reise_ausgaben_grenze');        */

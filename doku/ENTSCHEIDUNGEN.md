@@ -3607,3 +3607,40 @@ dazwischen eine Funktion mit `security definer`** — hier
 `ist_reise_teilnehmer()`, nur an einer Stelle, an der es beim ersten
 Entwurf niemandem auffiel.
 
+## 10.09.2026 — Die Rechte-Falle, diesmal andersherum
+
+Beim Einspielen von `03-gemeinsame-reisen.sql` nachgemessen: Die neun
+Funktionen der gemeinsamen Reise sind sauber, nur `authenticated` darf sie
+ausführen. Die beiden **Auslöser-Funktionen** dagegen waren weiter für
+`anon` und `authenticated` aufrufbar, obwohl direkt darüber ein `revoke`
+stand.
+
+Der Grund ist die Umkehrung der Falle vom 30.08.2026. Damals ging es
+darum, dass ein `revoke ... from public` die namentlichen Grants an `anon`
+und `authenticated` stehen lässt. Hier war es umgekehrt: Ich hatte
+`revoke execute ... from anon, authenticated` geschrieben, aber `public`
+vergessen — und eine neue Funktion darf in Postgres von PUBLIC ausgeführt
+werden, was beide Rollen erben. Wer nur die zwei Rollen namentlich
+ausschließt, lässt die Tür offen, durch die sie ohnehin hereinkommen.
+
+**Die Regel, die sich daraus ergibt:** Beim Zumachen immer alle drei
+nennen — `revoke all on function … from public, anon, authenticated`.
+Beim Aufmachen erst genauso zumachen und dann gezielt `grant … to
+authenticated`. Und nachmessen mit `has_function_privilege()`, nie am
+Vorhandensein der Zeilen.
+
+**Dasselbe stand seit dem 28.08.2026 in `01-geteilte-touren.sql`** bei
+`geteilte_touren_grenze()`. Am 10.09.2026 mitkorrigiert und im Server
+nachgezogen.
+
+Ein Loch war beides nicht: Eine Funktion mit `returns trigger` lässt sich
+nicht von Hand aufrufen („trigger functions can only be called as
+triggers"), und PostgREST bietet sie gar nicht erst als Endpunkt an. Die
+Datei hatte sich aber vorgenommen, sie zu schließen, und tat es nicht —
+und ein Kommentar, der etwas behauptet, was nicht stimmt, ist schlimmer
+als gar keiner.
+
+Nebenbei aufgefallen: Der Auslöser läuft nach dem Entzug weiter. Postgres
+prüft das Ausführungsrecht beim **Anlegen** des Auslösers, nicht bei jedem
+Feuern. Nachgesehen: alle drei stehen auf `tgenabled = 'O'`.
+

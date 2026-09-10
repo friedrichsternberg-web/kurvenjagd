@@ -291,8 +291,22 @@ grant execute on function public.geteilte_tour_holen(uuid) to authenticated;
    Zeilen oben. */
 revoke execute on function public.geteilte_tour_holen(uuid) from anon;
 
--- Ausloeser-Funktionen haben in der Schnittstelle nichts verloren.
-revoke execute on function public.geteilte_touren_grenze() from anon, authenticated;
+/* Ausloeser-Funktionen haben in der Schnittstelle nichts verloren.
+
+   NACHGEBESSERT AM 10.09.2026: Hier stand "from anon, authenticated" ohne
+   "public", und genau das reichte nicht - nachgemessen mit
+   has_function_privilege() waren danach beide Rollen weiter berechtigt.
+   Der Grund ist derselbe wie oben, nur andersherum: Eine neue Funktion
+   darf in Postgres von PUBLIC ausgefuehrt werden, und anon und
+   authenticated erben das. Wer nur die beiden Rollen namentlich
+   ausschliesst, laesst die Tuer offen, durch die sie ohnehin kommen.
+
+   Ein Loch war es nicht: Eine Funktion mit "returns trigger" laesst sich
+   gar nicht von Hand aufrufen ("trigger functions can only be called as
+   triggers"), und PostgREST bietet sie nicht als Endpunkt an. Der
+   Ausloeser laeuft weiter, denn Postgres prueft das Ausfuehrungsrecht
+   beim Anlegen des Ausloesers, nicht bei jedem Feuern. */
+revoke all on function public.geteilte_touren_grenze() from public, anon, authenticated;
 
 
 /* --- 5. Melden -----------------------------------------------------------

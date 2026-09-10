@@ -99,20 +99,23 @@ Höhenmeter, kurvigster Etappe. Was als Nächstes kommt:
    `partner.js` und die dortige Einwilligung. **Vorher:** ein
    Partnerprogramm mit Motorradhotels finden und die Häuser von Hand
    auswählen – das war der ausdrückliche Wunsch.
-2. **Freunde und Ausgaben — GEBAUT am 07.09.2026, Datenbank fehlt noch.**
-   Benutzernamen suchen, einladen, annehmen, gemeinsam planen, Kasse mit
-   Aufteilung und Haken auf bezahlten Anteilen. Vier neue Dateien:
-   `supabase/migrationen/03-gemeinsame-reisen.sql`, `js/reise/kasse.js`
-   (reines Rechnen), `js/reise/mitfahrer.js`, `js/reise/ausgaben.js`.
+2. **Freunde und Ausgaben — GEBAUT am 07.09.2026, Datenbank eingespielt
+   am 10.09.2026.** Benutzernamen suchen, einladen, annehmen, gemeinsam
+   planen, Kasse mit Aufteilung und Haken auf bezahlten Anteilen. Vier
+   neue Dateien: `supabase/migrationen/03-gemeinsame-reisen.sql`,
+   `js/reise/kasse.js` (reines Rechnen), `js/reise/mitfahrer.js`,
+   `js/reise/ausgaben.js`.
 
-   **ZUERST EINSPIELEN, sonst tut nichts davon etwas:** Supabase-Dashboard
-   → SQL Editor → `03-gemeinsame-reisen.sql` hineinkopieren → Run. Danach
-   die Nachprüfung aus Abschnitt 10 der Datei laufen lassen; bei keiner
-   der sieben Funktionen darf `anon` stehen. Das ist genau die Falle vom
-   30.08.2026, die weiter unten beschrieben ist.
+   **Nachgemessen am 10.09.2026 im SQL Editor:** drei Tabellen mit
+   Zeilensicherheit und zusammen zehn Regeln (vier auf `reise_ausgaben`,
+   je drei auf `reisen` und `reise_teilnehmer` — kein INSERT, das läuft
+   nur über die Funktionen), drei scharfe Auslöser, und alle neun
+   Funktionen ausschließlich für `authenticated`. Kein `anon`.
 
-   Danach zu zweit durchspielen: zwei Konten, einladen, annehmen, an
-   beiden Geräten einen Tag ändern, eine Ausgabe eintragen, abhaken.
+   **Was noch zu tun ist: zu zweit durchspielen.** Zwei Konten, einladen,
+   annehmen, an beiden Geräten einen Tag ändern, eine Ausgabe eintragen,
+   abhaken. Dafür braucht es ein Zweitkonto — im Projekt gibt es bisher
+   nur eines, siehe den Punkt zum Konto-Löschen weiter unten.
 
    **Was noch fehlt:**
    - **Live-Verbindung (Supabase Realtime).** Heute wird beim Öffnen der
