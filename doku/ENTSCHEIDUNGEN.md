@@ -1913,7 +1913,7 @@ Leistung schon aus der Wikipedia-Infobox, es lag also nahe, die Reifen
 gleich mitzunehmen. Gemessen an 28 gängigen Modellen: Die **deutsche**
 Infobox hat gar kein Reifenfeld (0 von 28). Die **englische** hat eines
 bei 16 von 28, aber in wechselnden Schreibweisen („120/70-ZR17M/C (58W)
-front", „{{unbulleted list | Front: 120/70-ZR17", „|rake_trail =" als
+front", „{ {unbulleted list | Front: 120/70-ZR17", „|rake_trail =" als
 Feldinhalt), und die Artikelsuche trifft daneben: „Honda CB650R" landet
 auf „Honda CB 750 Four", „Kawasaki Versys 650" auf „Versys 1000". Eine
 falsche Größe ist schlimmer als keine — der Fahrer kauft dann Reifen, die
@@ -4208,3 +4208,31 @@ ab, Ordner und Dateien – der Pfad `.../garage/...` fällt also mit
 darunter), dass `nutzer_daten` und `link_freigaben` per Fremdschlüssel am
 Konto hängen, und dass der Empfangsbildschirm den Urheber einer
 weitergeleiteten fremden Tour wirklich nennt (`teilen.js`, `daten.urheber`).
+
+## 11.09.2026 (nachts) — GitHub Pages baut nicht mehr mit Jekyll
+
+Der Push von v=111 ging durch, die Seite blieb aber auf **v=109** stehen.
+Grund: Der Schritt „Build with Jekyll" bei GitHub Pages ist
+fehlgeschlagen — und das schon länger, der letzte erfolgreiche Bau war der
+vom 01.09.2026. Alles danach lag zwar auf GitHub, aber nicht auf
+serpa-app.de.
+
+**Die Ursache** stand in dieser Datei: In der Notiz zu den Reifenmaßen
+wird eine Wikipedia-Vorlage zitiert, und dieses Zitat beginnt mit zwei
+geschweiften Klammern. Jekyll liest zwei geschweifte Klammern als Anfang
+eines Platzhalters, findet kein Ende dazu und bricht ab. Ein Satz in einer
+Notizdatei hat also die ganze Veröffentlichung angehalten.
+
+**Was jetzt gilt: eine leere Datei `.nojekyll` im Stamm.** Damit
+überspringt GitHub Pages den Jekyll-Lauf und liefert die Dateien aus, wie
+sie im Repository liegen. Das ist genau das, was dieses Projekt will — es
+gibt keinen Build-Schritt, keine Vorlagen, keine Kopfblöcke in den
+Dateien. Jekyll hat hier nie etwas beigetragen und konnte nur schaden.
+
+Das Zitat ist zusätzlich entschärft (die beiden Klammern stehen jetzt
+getrennt), damit die Falle nicht wieder zuschnappt, falls jemand
+`.nojekyll` eines Tages entfernt.
+
+**Woran man es das nächste Mal schneller merkt:** Nach einem Push
+nachsehen, ob die Adresse die neue Nummer ausliefert, statt sich auf das
+grüne Häkchen zu verlassen — das gehörte hier zum *Push*, nicht zum *Bau*.
