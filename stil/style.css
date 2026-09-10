@@ -645,8 +645,22 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 }
 .listen-screen .start-screen-inner {
   width: 100%;
-  padding: var(--s5) var(--s4);
+  /* Unten deutlich mehr als oben: Der Bildschirm endet an der Unterkante
+     der Leiste, und ohne diesen Abstand klebt die letzte Karte daran.
+     Gilt fuer alle Listenbildschirme, weil es ueberall dasselbe Problem
+     war - Touren, Ausruestung, Merkliste, Reise. */
+  padding: var(--s5) var(--s4) var(--s7);
   padding-top: max(var(--s5), env(safe-area-inset-top) + var(--s3));
+  /* Und ohne diese zwei Zeilen waere der Abstand unten wirkungslos:
+     .listen-screen streckt seine Kinder auf Fensterhoehe (align-items:
+     stretch). Der Kasten ist dann genau so hoch wie das Fenster, sein
+     Inhalt laeuft darueber hinaus, und der Innenabstand liegt irgendwo
+     mitten im Gescrollten statt am Ende. Mit flex-start waechst der
+     Kasten mit seinem Inhalt, mit min-height fuellt er trotzdem das
+     Fenster, wenn wenig drinsteht. Dieselbe Loesung stand fuer das
+     Querformat schon in quer.css - jetzt gilt sie ueberall. */
+  align-self: flex-start;
+  min-height: 100%;
 }
 .listen-screen .back-btn { flex: 0 0 auto; align-self: flex-start; }
 
@@ -5005,36 +5019,57 @@ body.nav-modus .karten-knopf { display: none; }
 }
 .reise-offen { margin-left: auto; font-size: 12.5px; white-space: nowrap; }
 
-/* Das Etappenprofil: je Tag ein Balken. Breite nach Kilometern, Farbe nach
-   Kurvigkeit auf der Messskala des Planers - Farbe, die Daten bedeutet. */
-.reise-profil {
+/* Das Tagesband unter den Zahlen: je Tag ein Stueck, so breit wie der Tag
+   lang ist, mit der Tagesnummer darin und den Kilometern daneben.
+
+   VORHER waren es nackte Striche in der Kurvigkeitsfarbe. Sie sagten
+   niemandem etwas: zwei gruene Balken ohne Beschriftung, ohne Legende.
+   Die Nummer und die Kilometer IM Stueck machen daraus eine Zeile, die
+   sich von selbst liest - und die Farbe bleibt als zweite, leisere
+   Auskunft (dieselbe Skala wie ueberall: gruen ruhig, orange kurvig). */
+.reise-band {
   display: flex;
   gap: var(--s1);
-  height: var(--s3);
+  height: 26px;
 }
-/* Jeder Balken ist ein Knopf; die Trefferflaeche reicht per ::after ueber
-   den Strich hinaus, sonst traefe ein Daumen den Zwoelf-Punkte-Strich nie. */
-.reise-profil-tag {
+.reise-band-tag {
   position: relative;
   flex: var(--km, 1) 1 0;
-  min-width: var(--s1);
-  padding: 0;
+  min-width: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 var(--s2);
   border: 0;
-  border-radius: var(--r-pill);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  white-space: nowrap;
+  font-family: var(--schrift-display);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  /* Dunkle Schrift auf den hellen Skalenfarben - das ist der einzige Ort
+     in der App, an dem Text auf Gruen oder Orange steht. */
+  color: var(--danger-ink);
   background: var(--skala-mittel);
   cursor: pointer;
   transition: opacity 0.15s ease, transform 0.15s ease;
 }
-.reise-profil-tag::after { content: ""; position: absolute; inset: calc(-1 * var(--s2)) 0; }
-.reise-profil.mit-auswahl .reise-profil-tag:not(.aktiv) { opacity: 0.35; }
-.reise-profil-tag.aktiv { transform: scaleY(1.35); }
-.reise-profil-tag.wenig { background: var(--skala-wenig); }
-.reise-profil-tag.viel { background: var(--skala-viel); }
-.reise-profil-tag.leer {
-  flex: 0 0 var(--s5);
+.reise-band-tag b { font-weight: 700; font-size: 13px; }
+.reise-band-tag i { font-style: normal; font-weight: 600; opacity: 0.72; }
+.reise-band.mit-auswahl .reise-band-tag:not(.aktiv) { opacity: 0.4; }
+.reise-band-tag.aktiv { transform: translateY(-1px); box-shadow: 0 2px 8px var(--schatten-weich); }
+.reise-band-tag.wenig { background: var(--skala-wenig); }
+.reise-band-tag.viel { background: var(--skala-viel); }
+/* Tage ohne Route nehmen nur so viel Platz, wie ihre Nummer braucht -
+   sie haben keine Laenge, mit der sie sich messen koennten. */
+.reise-band-tag.leer, .reise-band-tag.ruhe {
+  flex: 0 0 auto;
   background: transparent;
   border: 1px dashed var(--glas-heller);
+  color: var(--muted);
 }
+.reise-band-tag.ruhe { border-style: solid; }
 
 /* ---------- Die Kacheln unter der Karte ----------
    Die Handschrift von "Meine Stats" (.stat), zwei Spalten, direkt unter
@@ -5043,7 +5078,7 @@ body.nav-modus .karten-knopf { display: none; }
 .reise-zahlen {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--s2);
+  gap: var(--s3);
   margin: 0 0 var(--s5);
   text-align: left;
 }
@@ -5080,40 +5115,29 @@ body.nav-modus .karten-knopf { display: none; }
 }
 .reise-stufe-punkt.wenig { background: var(--skala-wenig); }
 .reise-stufe-punkt.viel { background: var(--skala-viel); }
-/* Der Bereichsbalken: kuerzeste - Schnitt - laengste Etappe in einer Zeile. */
-.reise-bereich { margin-top: var(--s2); }
-.reise-bereich-rinne {
-  position: relative;
-  height: var(--s1);
-  border-radius: var(--r-pill);
-  background: var(--glas-heller);
-}
-.reise-bereich-marke {
-  position: absolute;
-  top: 50%;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  background: var(--metall-glanz);
-  box-shadow: 0 0 0 2px var(--bg);
-}
-.reise-bereich-enden {
+/* Kuerzeste und laengste Etappe als schlichte Zeile unter dem Schnitt.
+   Vorher lag hier eine Rinne mit einem Punkt darauf - sie sah aus wie ein
+   Schieberegler, war aber keiner, und was der Punkt bedeutete, erschloss
+   sich nicht. Jetzt stehen die Zahlen da, und jede fuehrt zu ihrem Tag. */
+.reise-spanne {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
-  gap: var(--s2);
-  margin-top: var(--s1);
+  gap: var(--s2) var(--s4);
+  margin-top: var(--s2);
 }
-.reise-bereich-enden .linkbtn {
+.reise-spanne .linkbtn {
   font-family: var(--schrift-display);
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   text-decoration: none;
   color: var(--muted);
 }
-.reise-bereich-enden .linkbtn i { font-style: normal; opacity: 0.5; margin: 0 2px; }
-.reise-bereich-enden .linkbtn:hover { color: var(--accent-hell); }
+.reise-spanne .linkbtn b { color: var(--text); font-weight: 700; font-variant-numeric: tabular-nums; }
+.reise-spanne .linkbtn i { font-style: normal; opacity: 0.5; margin: 0 3px; }
+.reise-spanne .linkbtn:hover { color: var(--accent-hell); }
+.reise-spanne .linkbtn:hover b { color: var(--accent-hell); }
 .reise-zahlen-hinweis { margin: calc(-1 * var(--s3)) 0 var(--s5); }
 
 /* ---------- Was im SVG der Reisekarte liegt ----------
@@ -5172,14 +5196,14 @@ body.nav-modus .karten-knopf { display: none; }
   display: grid;
   grid-template-columns: var(--s6) minmax(0, 1fr);
   gap: var(--s3);
-  margin-bottom: var(--s3);
+  margin-bottom: var(--s4);
 }
 .etappe::before {
   content: "";
   position: absolute;
   left: calc(var(--s6) / 2 - 1px);
   top: var(--s6);
-  bottom: calc(-1 * var(--s3));
+  bottom: calc(-1 * var(--s4));
   width: 2px;
   background: var(--glas-rand);
 }
@@ -5218,18 +5242,24 @@ body.nav-modus .karten-knopf { display: none; }
 }
 .etappe.anhaengen .etappe-nummer { color: var(--muted); cursor: default; }
 
-/* Die Tageskarte: dieselbe Glasplatte wie eine Tour auf dem Bildschirm
-   Touren. Das Bild ist die unveraenderte .tour-vorschau, randlos durch
-   ihre eigenen negativen Raender. */
+/* Die Tageskarte traegt seit dem 10.09.2026 .karte und damit dieselbe
+   Glasplatte wie die Bike-Karte, die Reisekarte und die beiden Karten
+   oben: Rundung r-xl, Innenabstand s4, Lichtkante. Das ist die
+   Default-Form fuer alles Kartenfoermige in dieser App - hier steht nur
+   noch, was die Tageskarte davon abweichen laesst.
+
+   Das Bild bleibt randlos: seine negativen Raender muessen zum
+   Innenabstand der Karte passen, sonst bleibt ringsum ein Streifen
+   stehen. Die Rundung oben ist die der Karte abzueglich ihrer Randlinie. */
 .etappe-karte {
-  position: relative;
-  padding: var(--s3);
-  border-radius: var(--r-md);
-  background: var(--glas-hauch);
-  border: 1px solid var(--glas-hell);
-  box-shadow: inset 0 1px 0 var(--glas-rand);
+  border-radius: var(--r-xl);
   transition: border-color 0.15s ease, background 0.25s ease;
 }
+.etappe-karte .tour-vorschau {
+  margin: calc(-1 * var(--s4)) calc(-1 * var(--s4)) var(--s3);
+  border-radius: calc(var(--r-xl) - 1px) calc(var(--r-xl) - 1px) 0 0;
+}
+.etappe-karte .etappe-werte { left: var(--s4); }
 .etappe.aktiv .etappe-karte { border-color: color-mix(in srgb, var(--accent-hell) 45%, transparent); }
 .etappe.leuchtet .etappe-karte { background: var(--glas-hell); }
 /* Kilometer und Kurvigkeit liegen AUF dem Bild, unten links. Der Schatten
@@ -5277,17 +5307,25 @@ body.nav-modus .karten-knopf { display: none; }
 
 /* Ein Tag ohne Route: dieselbe Platte, nur gestrichelt, mit der einen
    Sache, die man tun kann. Die Hoehe haelt den Faden gespannt. */
+/* Ein Tag ohne Route ist eine Luecke, keine Karte. Deshalb gestrichelt,
+   ohne Glas und ohne Lichtkante - die Kante gehoert dem, was schon da
+   ist. */
 .etappe.leer .etappe-karte, .etappe.fehlt .etappe-karte {
   min-height: calc(var(--s8) * 2);
   display: grid;
   place-items: center;
   gap: var(--s2);
+  background: var(--glas-hauch);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
   border-style: dashed;
   border-color: var(--glas-rand);
   text-align: center;
   color: var(--muted);
   cursor: pointer;
 }
+.etappe.leer .etappe-karte::before, .etappe.fehlt .etappe-karte::before { display: none; }
 .etappe.leer .etappe-karte .ic.gross, .etappe.fehlt .etappe-karte .ic.gross { width: 28px; height: 28px; opacity: 0.6; }
 .etappe-leer-text { font-size: 14px; }
 .etappe.leer .del, .etappe.fehlt .del { position: absolute; top: var(--s2); right: var(--s2); }
@@ -5343,18 +5381,24 @@ body.nav-modus .karten-knopf { display: none; }
 .reise-widgets {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: var(--s3);
+  gap: var(--s4);
   /* Kein align-items: start. Nebeneinander sollen beide Karten gleich
      hoch sein, damit ihre Knoepfe auf einer Linie stehen - das erledigt
-     das gestreckte Rasterkind zusammen mit dem flex:1 auf dem Inhalt. */
-  margin: var(--s4) 0 0;
+     das gestreckte Rasterkind zusammen mit dem .widget-koerper darin. */
+  margin: var(--s6) 0 var(--s5);
 }
-.kasse-widget, .mitfahrer-widget { border-radius: var(--r-xl); }
-/* Der Knopf sitzt unten und soll bei zwei verschieden hohen Karten auf
-   derselben Linie stehen. Deshalb die Karte selbst als Spalte, in der der
-   Text waechst und der Knopf am Fuss bleibt. */
-.kasse-widget, .mitfahrer-widget { display: flex; flex-direction: column; }
-.kasse-widget .widget-werte, .mitfahrer-widget .hint { flex: 1; }
+/* Die Karte ist eine Spalte aus drei Teilen: Kopf und Name oben, der
+   KOERPER dazwischen, der Knopf unten. Nur der Koerper waechst - deshalb
+   stehen die Knoepfe zweier verschieden voller Karten auf einer Linie,
+   und zwar unabhaengig davon, wieviel darueber steht. Ohne diesen
+   Zwischenkasten hing es davon ab, welches Element gerade das letzte
+   war, und die Knoepfe standen versetzt. */
+.kasse-widget, .mitfahrer-widget {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--r-xl);
+}
+.widget-koerper { flex: 1; display: flex; flex-direction: column; gap: var(--s3); }
 .kasse-widget .hint, .mitfahrer-widget .hint { margin: 0; }
 .kasse-widget .widget-knopf, .mitfahrer-widget .widget-knopf { margin-top: var(--s4); }
 /* Die Kasse traegt als Namen einen Betrag. Ziffern in gleicher Breite,
@@ -5366,7 +5410,7 @@ body.nav-modus .karten-knopf { display: none; }
 
 /* Die Punkte ueberlappen sich leicht: So liest sich eine Gruppe als eine
    Gruppe und nicht als eine Reihe einzelner Bilder. */
-.mitfahrer-punkte { display: flex; align-items: center; margin-bottom: var(--s3); }
+.mitfahrer-punkte { display: flex; align-items: center; }
 .mitfahrer-punkt {
   width: 34px;
   height: 34px;
@@ -5386,6 +5430,18 @@ body.nav-modus .karten-knopf { display: none; }
   color: var(--metall-glanz);
 }
 .mitfahrer-punkt img { width: 100%; height: 100%; object-fit: cover; }
+/* Angedeutete Plaetze: gestrichelt, blass, mit einem Kopfsymbol darin.
+   Sie sagen ohne einen Satz, dass hier Leute hingehoeren - ein leerer
+   Streifen sagt das nicht. */
+.mitfahrer-punkt.geist {
+  border-style: dashed;
+  background: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  color: var(--muted);
+  opacity: 0.5;
+}
+.mitfahrer-punkt .ic { width: 17px; height: 17px; }
 /* Wer noch nicht geantwortet hat, steht blasser da - ohne dass man ihn
    suchen muesste. */
 .mitfahrer-punkt.wartet { opacity: 0.45; }
@@ -5576,8 +5632,6 @@ body.nav-modus .karten-knopf { display: none; }
 .etappe.ruhe .etappe-karte .ic.gross { width: 28px; height: 28px; opacity: 0.6; }
 .etappe.ruhe .del { position: absolute; top: var(--s2); right: var(--s2); }
 .etappe.ruhe .etappe-nummer { color: var(--muted); }
-/* Im Etappenprofil: ein schmaler Strich in Metall, kein gestrichelter Leerbalken. */
-.reise-profil-tag.ruhe { flex: 0 0 var(--s4); background: var(--glas-hell); }
 /* Der Eintrag "Neue Route erstellen" ganz oben im Blatt. */
 .reise-wahl-erstellen .saved-marke { color: var(--accent-hell); }
 

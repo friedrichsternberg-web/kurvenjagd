@@ -73,6 +73,21 @@
         Werkstattraum als Untergrund, siehe ENTSCHEIDUNGEN.md
         (20.08. und 05.09.2026).
 
+        DIE FORM EINER KARTE ist seit dem 10.09.2026 auch innen festgelegt,
+        und zwar mit vier Bausteinen aus style.css:
+
+          .widget-kopf     das Abzeichen und, wenn noetig, ein Link rechts
+          .widget-name     die eine grosse Zeile, die sagt, worum es geht
+          .widget-koerper  Werte (.widget-werte) oder ein Satz (.hint);
+                           nur dieser Teil waechst
+          .widget-knopf    die eine Handlung, am Fuss
+
+        Wer eine neue Karte baut, nimmt diese vier - dann stehen die
+        Knoepfe zweier nebeneinanderliegender Karten von selbst auf einer
+        Linie, und nichts muss von Hand nachgemessen werden. So gebaut
+        sind die Bike-Karte, die Reisekarte, die Kasse, die Mitfahrer und
+        die Tageskarten im Reiseplaner.
+
    RAL 5005 ist die EINZIGE Signalfarbe und wird sparsam eingesetzt. Wenn
    alles die Signalfarbe traegt, bedeutet sie nichts mehr.
    ============================================================ */

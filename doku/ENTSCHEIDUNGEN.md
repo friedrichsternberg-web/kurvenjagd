@@ -3679,3 +3679,68 @@ Nachbarn verlässt, ist eine Verabredung zwischen zwei Regeln, die keine
 von beiden aufschreibt. Wer eine davon ändert, bricht die andere. In
 `quer.css` steht die Begründung jetzt dabei.
 
+## 10.09.2026 (abends) — Die Kartenform wird zur Regel, und die Kasse löst sich vom Konto
+
+Fünf Rückmeldungen auf einmal, und zwei davon greifen tief.
+
+**Die Kasse gibt es jetzt auch ohne Mitfahrer, und ohne Konto.** Vorher
+hing sie am Server und erschien erst nach dem Teilen. Das war ein
+Widerspruch zum ersten Grundsatz aus `konto.js`: Anmelden ist freiwillig.
+Wer allein eine Reise plant, will genauso wissen, was sie kostet. Also
+zwei Ablagen — solange die Reise niemandem sonst gehört, liegen ihre
+Ausgaben in `reise.ausgaben` im Gerät; beim ersten Teilen ziehen sie mit
+um. Der Unterschied steckt in genau drei Funktionen (`ladeAusgabenNach`,
+`sichereAusgabe`, `werfeAusgabe`), alles andere rechnet mit einer Liste
+und weiß nicht, woher sie kommt.
+
+Allein blendet das Formular die ganze Aufteilung aus: Es gibt niemanden,
+auf den sich etwas verteilen ließe, und ein Formular mit einer einzigen
+Zeile „Du" darin wäre eine Frage ohne Antwortmöglichkeit. Übrig bleiben
+drei Felder — wofür, wieviel, welcher Tag. Die Karte zeigt dann andere
+Zahlen: Gesamt, Zahl der Posten, je Fahrtag, größter Posten.
+
+**Beim Übernehmen wird nicht geraten.** Eine Ausgabe, die entstand, als
+noch niemand dabei war, bekommt beim Teilen den eigenen Anteil in voller
+Höhe. Sie automatisch auf die neu Dazugekommenen zu verteilen wäre eine
+Behauptung: Ob die beim Hotel dabei waren, weiß nur der Mensch.
+
+**Die vier Bausteine einer Karte stehen jetzt in `design.css`** als Teil
+von Grundsatz 4: `.widget-kopf`, `.widget-name`, `.widget-koerper`,
+`.widget-knopf`. Der Körper ist der einzige Teil, der wächst — und genau
+deshalb stehen die Knöpfe zweier nebeneinanderliegender Karten von selbst
+auf einer Linie. Vorher hing das davon ab, welches Element gerade das
+letzte war, und die Knöpfe standen versetzt. Die Tageskarten im
+Reiseplaner tragen seitdem dieselbe Form.
+
+**Die grünen Balken sind ein beschriftetes Tagesband geworden.** Vorher
+waren es nackte Striche in der Kurvigkeitsfarbe: zwei grüne Balken ohne
+Zahl, ohne Legende, ohne Bedeutung für den, der sie zum ersten Mal sieht.
+Jetzt steht in jedem Stück die Tagesnummer, und wo das Stück mindestens
+ein Fünftel der Reise ausmacht, auch die Kilometer. Unter dieser Grenze
+wäre die Zahl abgeschnitten, und eine halbe Zahl liest sich schlechter
+als keine. Die Farbe bleibt als zweite, leisere Auskunft.
+
+**Die Rinne unter „Ø je Fahrtag" ist weg.** Ein Punkt auf einer Schiene,
+der zeigte, wo der Schnitt zwischen kürzester und längster Etappe liegt.
+Er sah aus wie ein Schieberegler, war keiner, und was er bedeutete,
+erschloss sich nicht. Jetzt stehen die Zahlen da, und jede führt per Tipp
+zu ihrem Tag.
+
+**Der Abstand unten war ein alter Fehler mit einer überraschenden
+Ursache.** `.listen-screen` streckt seine Kinder auf Fensterhöhe
+(`align-items: stretch`). Der Innenkasten ist damit genau so hoch wie das
+Fenster, sein Inhalt läuft darüber hinaus — und sein `padding-bottom`
+liegt irgendwo mitten im Gescrollten statt am Ende. Deshalb blieb jeder
+Versuch, unten Luft zu schaffen, wirkungslos. Mit `align-self: flex-start`
+wächst der Kasten mit seinem Inhalt, mit `min-height: 100%` füllt er
+trotzdem das Fenster, wenn wenig drinsteht. Dieselbe Lösung stand für das
+Querformat seit dem 07.09.2026 in `quer.css`, mit derselben Begründung —
+sie galt nur nicht überall.
+
+**Nebenbei, fürs nächste Mal:** Beim Prüfen im Browser reicht ein
+`?test=` an der Adresse nur für `index.html`. Die Skripte tragen `?v=` und
+kommen aus dem Zwischenspeicher — eine Änderung an einer JS-Datei war
+deshalb minutenlang unsichtbar, und ich habe an der falschen Stelle
+gesucht. Der Prüfserver liegt jetzt als `server.py` im Ablagefach der
+Sitzung und liefert alles mit `Cache-Control: no-store`.
+

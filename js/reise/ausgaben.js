@@ -17,13 +17,53 @@
 
 let reiseAusgaben = [];
 
-function ausgabenMoeglich(reise) {
+/* --- 0. Wo die Ausgaben liegen -------------------------------------------
+
+   Zwei Ablagen, eine Schnittstelle. Solange eine Reise niemandem sonst
+   gehoert, liegen ihre Ausgaben IM GERAET, in reise.ausgaben - genau wie
+   die Reise selbst. Erst wenn geteilt wird, wandern sie in die Datenbank,
+   weil dann mehrere dieselbe Zahl sehen muessen.
+
+   WARUM UEBERHAUPT ZWEI WEGE: Der erste Entwurf hatte nur den Server, und
+   damit gab es die Kasse erst nach dem Einladen. Wer allein eine Reise
+   plant, will aber genauso wissen, was sie kostet - und der erste
+   Grundsatz aus konto.js sagt, dass die App ohne Konto vollstaendig
+   laufen muss. Also beides.
+
+   Die drei Funktionen darunter sind die einzigen Stellen, an denen der
+   Unterschied auftaucht. Alles andere in dieser Datei rechnet mit einer
+   Liste und weiss nicht, woher sie kommt.                                */
+
+// Die Kennung des Zahlers, solange man allein plant. Ein fester Text statt
+// einer Nutzerkennung: Ohne Konto gibt es keine, und mit Konto waere sie
+// beim Teilen ohnehin dieselbe wie die eigene.
+const ICH_ALLEIN = 'ich';
+
+function kasseAufServer(reise) {
   return !!reise?.serverId && typeof mitfahrenMoeglich === 'function' && mitfahrenMoeglich();
+}
+
+/* Die Kasse gibt es immer, sobald es eine Reise gibt. */
+function ausgabenMoeglich(reise) {
+  return !!reise;
+}
+
+/* Wer sich die Ausgaben teilt. Allein ist das genau einer - und dann
+   blendet das Formular die ganze Aufteilung aus, weil es nichts zu
+   verteilen gibt. */
+function kasseLeute() {
+  const dabei = typeof reiseTeilnehmerJetzt === 'function' ? reiseTeilnehmerJetzt() : [];
+  return dabei.length ? dabei.map(person => person.nutzer_id) : [ICH_ALLEIN];
 }
 
 async function ladeAusgabenNach(reise) {
   reiseAusgaben = [];
-  if (!ausgabenMoeglich(reise)) return;
+  if (!reise) return;
+  if (!kasseAufServer(reise)) {
+    reiseAusgaben = Array.isArray(reise.ausgaben) ? reise.ausgaben : [];
+    if (typeof zeichneReise === 'function') zeichneReise();
+    return;
+  }
   const { data, error } = await backend
     .from('reise_ausgaben')
     .select('id, reise_id, erfasser_id, zahler_id, tag_id, wofuer, cent, aufteilung, anteile')
@@ -31,6 +71,63 @@ async function ladeAusgabenNach(reise) {
     .order('erstellt_am', { ascending: false });
   reiseAusgaben = error ? [] : (data || []);
   if (typeof zeichneReise === 'function') zeichneReise();
+}
+
+// Anlegen oder aendern. id leer heisst: eine neue.
+async function sichereAusgabe(reise, zeile, id) {
+  if (!kasseAufServer(reise)) {
+    aendereReise(reise.id, eintrag => {
+      const liste = Array.isArray(eintrag.ausgaben) ? [...eintrag.ausgaben] : [];
+      const stelle = liste.findIndex(ausgabe => String(ausgabe.id) === String(id));
+      // Die neueste zuerst, wie beim Server (order by erstellt_am desc).
+      if (stelle >= 0) liste[stelle] = { ...liste[stelle], ...zeile };
+      else liste.unshift({ id: `o${neueKennung()}`, ...zeile });
+      eintrag.ausgaben = liste;
+    });
+    return { ok: true };
+  }
+  const { error } = id
+    ? await backend.from('reise_ausgaben')
+        .update({ ...zeile, geaendert: new Date().toISOString() }).eq('id', id)
+    : await backend.from('reise_ausgaben').insert({ ...zeile, reise_id: reise.serverId });
+  return { ok: !error };
+}
+
+async function werfeAusgabe(reise, id) {
+  if (!kasseAufServer(reise)) {
+    aendereReise(reise.id, eintrag => {
+      eintrag.ausgaben = (eintrag.ausgaben || []).filter(ausgabe => String(ausgabe.id) !== String(id));
+    });
+    return { ok: true };
+  }
+  const { error } = await backend.from('reise_ausgaben').delete().eq('id', id);
+  return { ok: !error };
+}
+
+/* Beim ersten Teilen ziehen die oertlichen Ausgaben mit auf den Server.
+   mitfahrer.js ruft das, sobald die Reise dort angelegt ist.
+
+   Der Zahler wird man selbst, und der eigene Anteil steht auf "bezahlt" -
+   man hat es ja ausgelegt, als noch niemand sonst dabei war. Wer die
+   Kosten nachtraeglich auf die Gruppe verteilen will, oeffnet die Ausgabe
+   und hakt die anderen dazu. Das von selbst zu tun waere geraten: Ob die
+   spaeter Dazugekommenen beim Hotel dabei waren, weiss nur der Mensch. */
+async function uebernehmeOertlicheAusgaben(reise, serverId) {
+  const oertlich = Array.isArray(reise?.ausgaben) ? reise.ausgaben : [];
+  if (!oertlich.length || !angemeldeterNutzer) return;
+  const zeilen = oertlich.map(ausgabe => ({
+    reise_id: serverId,
+    erfasser_id: angemeldeterNutzer.id,
+    zahler_id: angemeldeterNutzer.id,
+    tag_id: ausgabe.tag_id || null,
+    wofuer: ausgabe.wofuer,
+    cent: ausgabe.cent,
+    aufteilung: 'auswahl',
+    anteile: [{ nutzer: angemeldeterNutzer.id, cent: ausgabe.cent, bezahlt: true }],
+  }));
+  const { error } = await backend.from('reise_ausgaben').insert(zeilen);
+  if (error) { showToast('Die Ausgaben blieben auf dem Gerät.'); return; }
+  aendereReise(reise.id, eintrag => { eintrag.ausgaben = []; });
 }
 
 
@@ -50,8 +147,9 @@ async function ladeAusgabenNach(reise) {
 
 function kassenWidgetHtml(reise) {
   if (!ausgabenMoeglich(reise)) return '';
-  const stand = rechneKasse(reiseAusgaben, reiseTeilnehmerJetzt().map(person => person.nutzer_id));
-  const ich = angemeldeterNutzer ? stand.jeNutzer[String(angemeldeterNutzer.id)] : null;
+  const leute = kasseLeute();
+  const stand = rechneKasse(reiseAusgaben, leute);
+  const allein = leute.length < 2;
 
   return `
     <div class="karte kasse-widget" data-kasse-oeffnen>
@@ -62,20 +160,46 @@ function kassenWidgetHtml(reise) {
           : ''}
       </div>
       <h3 class="widget-name">${stand.anzahl ? centZuText(stand.summeCent) : 'Noch leer'}</h3>
-      ${stand.anzahl
-        ? `<div class="widget-werte">
-             ${kassenZeile('kasse', 'Dein Anteil', centZuText(ich?.anteil || 0))}
-             ${kassenZeile('haken', 'Von dir offen',
-                 ich?.offen ? centZuText(ich.offen) : 'nichts', ich?.offen ? 'warnt' : '')}
-             ${kassenZeile('leute', 'Du bekommst',
-                 ich?.bekommt ? centZuText(ich.bekommt) : 'nichts')}
-           </div>`
-        : `<p class="hint">Wer etwas auslegt, tr&auml;gt es hier ein.
-             Aufgeteilt wird sofort, und Bezahltes hakst du ab.</p>`}
+      <div class="widget-koerper">
+        ${stand.anzahl ? kassenWerteHtml(reise, stand, allein) : `
+          <p class="hint">${allein
+            ? 'Trag ein, was die Reise kostet &ndash; Sprit, Hotel, Maut. Sobald jemand mitf&auml;hrt, teilt ihr die Posten auf.'
+            : 'Wer etwas auslegt, tr&auml;gt es hier ein. Aufgeteilt wird sofort, und Bezahltes hakst du ab.'}</p>`}
+      </div>
       <button type="button" class="btn ghost widget-knopf" data-ausgabe-neu>
         ${symbol('plus', 'klein')} Ausgabe eintragen
       </button>
     </div>`;
+}
+
+/* Drei Zeilen, und welche drei haengt davon ab, ob jemand mitfaehrt.
+
+   Allein sagen "dein Anteil" und "offen" nichts - man schuldet sich
+   nichts selbst. Dort zaehlt, was die Reise kostet und was das je Fahrtag
+   ausmacht. Zu mehreren zaehlt, wer wem was schuldet.                    */
+function kassenWerteHtml(reise, stand, allein) {
+  if (allein) {
+    const fahrtage = typeof reiseBilanz === 'function' ? reiseBilanz(reise).mitRoute : 0;
+    return `<div class="widget-werte">
+      ${kassenZeile('kasse', 'Ausgaben', `${stand.anzahl}`)}
+      ${kassenZeile('kalender', 'Je Fahrtag',
+          fahrtage ? centZuText(Math.round(stand.summeCent / fahrtage)) : '&ndash;')}
+      ${kassenZeile('route', 'Gr&ouml;&szlig;ter Posten', groessterPostenText())}
+    </div>`;
+  }
+  const ich = angemeldeterNutzer ? stand.jeNutzer[String(angemeldeterNutzer.id)] : null;
+  return `<div class="widget-werte">
+    ${kassenZeile('kasse', 'Dein Anteil', centZuText(ich?.anteil || 0))}
+    ${kassenZeile('haken', 'Von dir offen',
+        ich?.offen ? centZuText(ich.offen) : 'nichts', ich?.offen ? 'warnt' : '')}
+    ${kassenZeile('leute', 'Du bekommst', ich?.bekommt ? centZuText(ich.bekommt) : 'nichts')}
+  </div>`;
+}
+
+function groessterPostenText() {
+  const groesste = reiseAusgaben.reduce((bisher, ausgabe) =>
+    (!bisher || ausgabe.cent > bisher.cent) ? ausgabe : bisher, null);
+  return groesste ? escapeHtml(groesste.wofuer) : '&ndash;';
 }
 
 function kassenZeile(symbolName, beschriftung, wert, zusatz = '') {
@@ -103,7 +227,7 @@ function kassenZeile(symbolName, beschriftung, wert, zusatz = '') {
 function oeffneKassenBlatt() {
   const reise = reiseNach(offeneReiseId);
   if (!ausgabenMoeglich(reise)) return;
-  const stand = rechneKasse(reiseAusgaben, reiseTeilnehmerJetzt().map(person => person.nutzer_id));
+  const stand = rechneKasse(reiseAusgaben, kasseLeute());
   offeneAusgabeId = null;
   oeffneBlatt({
     titel: 'Kasse',
@@ -114,12 +238,17 @@ function oeffneKassenBlatt() {
 }
 
 function ausgleichHtml(stand) {
-  const wege = findeAusgleich(stand.jeNutzer);
-  if (!wege.length) {
-    return stand.anzahl
-      ? '<p class="kasse-quitt">Alles ausgeglichen.</p>'
-      : '<p class="hint">Noch keine Ausgabe. Wer etwas auslegt, trägt es hier ein – aufgeteilt wird sofort.</p>';
+  if (!stand.anzahl) {
+    return '<p class="hint">Noch keine Ausgabe. Trag ein, was die Reise kostet – aufgeteilt wird sofort.</p>';
   }
+  // Allein gibt es nichts auszugleichen; dann steht dort die Summe, und
+  // das ist die Zahl, die man in diesem Fall sucht.
+  if (kasseLeute().length < 2) {
+    return `<p class="kasse-quitt">${centZuText(stand.summeCent)} in ${stand.anzahl} ${
+      stand.anzahl === 1 ? 'Posten' : 'Posten'}.</p>`;
+  }
+  const wege = findeAusgleich(stand.jeNutzer);
+  if (!wege.length) return '<p class="kasse-quitt">Alles ausgeglichen.</p>';
   const zeilen = wege.map(weg => `
     <li class="kasse-weg">
       <span class="kasse-wer">${escapeHtml(nameZuNutzer(weg.von))}</span>
@@ -184,8 +313,7 @@ let offeneAusgabeId = null;
 let ausgabeAusKasse = false;
 
 function oeffneAusgabeBlatt(reise, ausgabeId = null, ausKasse = false) {
-  const dabei = reiseTeilnehmerJetzt();
-  if (!dabei.length) { showToast('Erst Mitfahrer einladen.'); return; }
+  const dabei = typeof reiseTeilnehmerJetzt === 'function' ? reiseTeilnehmerJetzt() : [];
   offeneAusgabeId = ausgabeId;
   ausgabeAusKasse = ausKasse;
   const ausgabe = ausgabeId
@@ -194,7 +322,11 @@ function oeffneAusgabeBlatt(reise, ausgabeId = null, ausKasse = false) {
 
   oeffneBlatt({
     titel: ausgabe ? 'Ausgabe' : 'Neue Ausgabe',
-    inhalt: ausgabeFormularHtml(reise, ausgabe, dabei) + anteileFormularHtml(ausgabe, dabei),
+    /* Ohne Mitfahrer faellt die ganze Aufteilung weg - es gibt niemanden,
+       auf den sich etwas verteilen liesse, und ein Formular mit einer
+       einzigen Zeile "Du" darin waere eine Frage ohne Antwortmoeglichkeit. */
+    inhalt: ausgabeFormularHtml(reise, ausgabe, dabei)
+      + (dabei.length > 1 ? anteileFormularHtml(ausgabe, dabei) : ''),
     fuss: `${ausgabe ? '<button class="linkbtn gefahr" data-ausgabe-weg>Löschen</button>' : ''}
            <button class="btn ghost" ${ausKasse ? 'data-kasse-zurueck' : 'data-blatt-zu'}>${
              ausKasse ? '&larr; Kasse' : 'Abbrechen'}</button>
@@ -217,8 +349,9 @@ function ausgabeFormularHtml(reise, ausgabe, dabei) {
     <label for="feldAusgabeBetrag">Betrag in Euro</label>
     <input id="feldAusgabeBetrag" type="text" inputmode="decimal" placeholder="0,00"
            value="${ausgabe ? centZuText(ausgabe.cent, false) : ''}">
-    <label for="feldAusgabeZahler">Wer hat ausgelegt?</label>
-    <select id="feldAusgabeZahler" class="search-input">${zahlerWahl}</select>
+    ${dabei.length > 1 ? `
+      <label for="feldAusgabeZahler">Wer hat ausgelegt?</label>
+      <select id="feldAusgabeZahler" class="search-input">${zahlerWahl}</select>` : ''}
     <label for="feldAusgabeTag">An welchem Tag? (freiwillig)</label>
     <select id="feldAusgabeTag" class="search-input">
       <option value="">Keinem bestimmten</option>${tageWahl}
@@ -303,8 +436,12 @@ async function speichereAusgabe() {
   if (!wofuer) { showToast('Wofür war das?'); return; }
   if (!cent) { showToast('Der Betrag fehlt.'); return; }
 
-  const zahlerId = document.getElementById('feldAusgabeZahler')?.value || null;
-  const anteile = anteileAusBlatt(cent, zahlerId);
+  const leute = kasseLeute();
+  const zahlerId = document.getElementById('feldAusgabeZahler')?.value || leute[0];
+  const anteile = leute.length > 1
+    ? anteileAusBlatt(cent, zahlerId)
+    // Allein: der ganze Betrag auf einen, und der ist beglichen.
+    : [{ nutzer: zahlerId, cent, bezahlt: true }];
   if (!anteile) return;
 
   // Wer beim Bearbeiten schon abgehakt war, bleibt abgehakt - sonst
@@ -315,35 +452,32 @@ async function speichereAusgabe() {
   });
 
   const zeile = {
-    reise_id: reise.serverId, erfasser_id: angemeldeterNutzer.id, zahler_id: zahlerId,
+    erfasser_id: angemeldeterNutzer ? angemeldeterNutzer.id : null,
+    zahler_id: zahlerId,
     tag_id: document.getElementById('feldAusgabeTag')?.value || null,
     wofuer, cent, anteile,
     aufteilung: document.getElementById('feldAusgabeNachMass')?.checked ? 'anteile'
-      : (anteile.length === reiseTeilnehmerJetzt().length ? 'gleich' : 'auswahl'),
+      : (anteile.length === leute.length ? 'gleich' : 'auswahl'),
   };
 
-  const { error } = offeneAusgabeId
-    ? await backend.from('reise_ausgaben')
-        .update({ ...zeile, geaendert: new Date().toISOString() }).eq('id', offeneAusgabeId)
-    : await backend.from('reise_ausgaben').insert(zeile);
-  if (error) { showToast('Die Ausgabe ließ sich nicht speichern.'); return; }
+  const ergebnis = await sichereAusgabe(reise, zeile, offeneAusgabeId);
+  if (!ergebnis.ok) { showToast('Die Ausgabe ließ sich nicht speichern.'); return; }
 
-  const zurueckZurKasse = ausgabeAusKasse;
-  schliesseBlatt();
-  await ladeAusgabenNach(reise);
-  if (zurueckZurKasse) oeffneKassenBlatt();
-}
-
-async function loescheAusgabe() {
-  if (!offeneAusgabeId) return;
-  const { error } = await backend.from('reise_ausgaben').delete().eq('id', offeneAusgabeId);
-  if (error) { showToast('Das hat nicht geklappt.'); return; }
   const zurueckZurKasse = ausgabeAusKasse;
   schliesseBlatt();
   await ladeAusgabenNach(reiseNach(offeneReiseId));
   if (zurueckZurKasse) oeffneKassenBlatt();
 }
 
+async function loescheAusgabe() {
+  if (!offeneAusgabeId) return;
+  const ergebnis = await werfeAusgabe(reiseNach(offeneReiseId), offeneAusgabeId);
+  if (!ergebnis.ok) { showToast('Das hat nicht geklappt.'); return; }
+  const zurueckZurKasse = ausgabeAusKasse;
+  schliesseBlatt();
+  await ladeAusgabenNach(reiseNach(offeneReiseId));
+  if (zurueckZurKasse) oeffneKassenBlatt();
+}
 
 
 /* Ein Haken wirkt sofort, nicht erst beim Speichern: Das Geld ist ja schon
@@ -356,10 +490,19 @@ async function loescheAusgabe() {
    in derselben Minute gesetzt hat. */
 async function hakeAnteilAb(nutzerId, bezahlt) {
   if (!offeneAusgabeId) return;
-  const { error } = await backend.rpc('anteil_abhaken', {
-    p_ausgabe: offeneAusgabeId, p_nutzer: nutzerId, p_bezahlt: !!bezahlt,
-  });
-  if (error) { showToast('Der Haken kam nicht durch.'); return; }
+  const reise = reiseNach(offeneReiseId);
+  if (kasseAufServer(reise)) {
+    const { error } = await backend.rpc('anteil_abhaken', {
+      p_ausgabe: offeneAusgabeId, p_nutzer: nutzerId, p_bezahlt: !!bezahlt,
+    });
+    if (error) { showToast('Der Haken kam nicht durch.'); return; }
+  } else {
+    aendereReise(reise.id, eintrag => {
+      const ausgabe = (eintrag.ausgaben || []).find(a => String(a.id) === String(offeneAusgabeId));
+      const anteil = (ausgabe?.anteile || []).find(a => String(a.nutzer) === String(nutzerId));
+      if (anteil) anteil.bezahlt = !!bezahlt;
+    });
+  }
   const ausgabe = reiseAusgaben.find(eintrag => String(eintrag.id) === String(offeneAusgabeId));
   const anteil = (ausgabe?.anteile || []).find(eintrag => String(eintrag.nutzer) === String(nutzerId));
   if (anteil) anteil.bezahlt = !!bezahlt;

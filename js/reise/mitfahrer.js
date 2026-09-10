@@ -53,6 +53,8 @@ function reiseTeilnehmerJetzt() {
    03-gemeinsame-reisen.sql, warum die Zeile trotzdem stehen bleibt. */
 function nameZuNutzer(kennung, ausSichtVon = null) {
   if (!kennung) return 'Ehemaliges Konto';
+  // Die Kennung, unter der ausgaben.js eintraegt, solange man allein plant.
+  if (kennung === 'ich') return 'Du';
   const ich = ausSichtVon || (angemeldeterNutzer && angemeldeterNutzer.id);
   if (ich && String(kennung) === String(ich)) return 'Du';
   const gefunden = mitfahrerListe.find(person => String(person.nutzer_id) === String(kennung));
@@ -134,6 +136,11 @@ async function ladeReiseHoch(reise) {
     eintrag.serverId = data;
     eintrag.besitzerId = angemeldeterNutzer.id;
   });
+  // Was bisher allein im Geraet lag, zieht mit um. Warum nicht von selbst
+  // auf alle verteilt wird, steht bei uebernehmeOertlicheAusgaben().
+  if (typeof uebernehmeOertlicheAusgaben === 'function') {
+    await uebernehmeOertlicheAusgaben(reiseNach(reise.id), data);
+  }
   return { ok: true, serverId: data };
 }
 
@@ -300,6 +307,35 @@ function mitfahrerBildHtml(person) {
              aria-label="${escapeHtml(name)}">${escapeHtml(name.slice(0, 1).toUpperCase())}</span>`;
 }
 
+/* Angedeutete Mitfahrer: gestrichelte Kreise mit einem Kopfsymbol darin.
+
+   Sie stehen da, wo noch niemand ist, und erklaeren die Funktion ohne
+   einen Satz: Hier ist Platz fuer Leute. Ein leerer Streifen sagte das
+   nicht, und ein Satz allein liest sich niemand durch. */
+function mitfahrerGeisterHtml(anzahl) {
+  return Array.from({ length: Math.max(0, anzahl) }, () =>
+    `<span class="mitfahrer-punkt geist" aria-hidden="true">${symbol('profil', 'klein')}</span>`).join('');
+}
+
+/* Das eigene Gesicht, auch bevor die Reise geteilt ist - sonst stuenden
+   dort nur Geister, und man selbst faehrt ja mit.
+
+   Ist das Profil noch nicht geladen, steht dort das Kopfsymbol und nicht
+   der erste Buchstabe von "Du": ein Kreis mit einem D darin sieht aus wie
+   ein Name und ist keiner. */
+function ichAlsPunktHtml() {
+  const profil = typeof eigenesProfil !== 'undefined' ? eigenesProfil : null;
+  if (!profil?.benutzername) {
+    return `<span class="mitfahrer-punkt" title="Du" aria-label="Du">${symbol('profil', 'klein')}</span>`;
+  }
+  return mitfahrerBildHtml({
+    nutzer_id: angemeldeterNutzer ? angemeldeterNutzer.id : null,
+    benutzername: profil.benutzername,
+    bild_pfad: profil.bild_pfad || null,
+    status: 'dabei',
+  });
+}
+
 /* Wer mitplant, in einem Satzstueck: "Nur du bisher", "Du und Anna",
    "Du und 2 andere". Namen erst ab zwei Leuten auszuschreiben lohnt nicht -
    bei dreien wird die Zeile laenger als die Karte breit ist. */
@@ -314,10 +350,15 @@ function mitfahrerNameText(dabei, offen) {
 }
 
 function mitfahrerWidgetHtml(reise) {
-  if (!mitfahrenMoeglich()) return '';
+  if (typeof backendVerfügbar !== 'function' || !backendVerfügbar()) return '';
+  if (!angemeldeterNutzer) return mitfahrerOhneKontoHtml();
+
   const geteilt = !!reise.serverId;
   const dabei = reiseTeilnehmerJetzt();
   const offen = mitfahrerListe.filter(person => person.status === 'eingeladen').length;
+  const punkte = geteilt && mitfahrerListe.length
+    ? mitfahrerListe.map(mitfahrerBildHtml).join('') + mitfahrerGeisterHtml(3 - mitfahrerListe.length)
+    : ichAlsPunktHtml() + mitfahrerGeisterHtml(2);
 
   return `
     <div class="karte mitfahrer-widget">
@@ -330,14 +371,33 @@ function mitfahrerWidgetHtml(reise) {
       <h3 class="widget-name">${geteilt
         ? escapeHtml(mitfahrerNameText(dabei, offen))
         : 'Allein unterwegs'}</h3>
-      ${geteilt && mitfahrerListe.length
-        ? `<div class="mitfahrer-punkte">${mitfahrerListe.map(mitfahrerBildHtml).join('')}</div>`
-        : ''}
-      <p class="hint">${geteilt
-        ? 'Such jemanden &uuml;ber seinen Benutzernamen &ndash; wer annimmt, plant mit und teilt die Kosten.'
-        : 'Diese Reise liegt nur auf deinem Ger&auml;t. Hol jemanden dazu, dann plant ihr zusammen und rechnet gemeinsam ab.'}</p>
+      <div class="widget-koerper">
+        <div class="mitfahrer-punkte">${punkte}</div>
+        <p class="hint">${geteilt
+          ? 'Such jemanden &uuml;ber seinen Benutzernamen &ndash; wer annimmt, plant mit und teilt die Kosten.'
+          : 'Hol jemanden dazu: Ihr plant dann an derselben Reise und teilt euch die Kosten.'}</p>
+      </div>
       <button type="button" class="btn ghost widget-knopf" id="${geteilt ? 'btnMitfahrerEinladen' : 'btnMitfahrer'}">
         ${symbol('leute', 'klein')} ${geteilt ? 'Freunde einladen' : 'Gemeinsam planen'}
+      </button>
+    </div>`;
+}
+
+/* Ohne Konto geht Mitfahren nicht - der Server muss ja wissen, wer wer
+   ist. Die Karte steht trotzdem da und sagt, was fehlt. Sie zu verstecken
+   hiesse, die Funktion vor dem zu verbergen, der sie noch nicht kennt. */
+function mitfahrerOhneKontoHtml() {
+  return `
+    <div class="karte mitfahrer-widget">
+      <div class="widget-kopf"><span class="abzeichen">Mitfahrer</span></div>
+      <h3 class="widget-name">Zu zweit planen</h3>
+      <div class="widget-koerper">
+        <div class="mitfahrer-punkte">${mitfahrerGeisterHtml(3)}</div>
+        <p class="hint">Mit einem Konto kannst du Freunde zu dieser Reise holen &ndash;
+          ihr plant dann gemeinsam und teilt euch die Kosten.</p>
+      </div>
+      <button type="button" class="btn ghost widget-knopf" id="btnMitfahrerKonto">
+        ${symbol('profil', 'klein')} Konto anlegen
       </button>
     </div>`;
 }
@@ -476,6 +536,7 @@ async function beiTippAufMitfahrer() {
 
 verkabele('reiseInner', 'click', ereignis => {
   if (ereignis.target.closest('#btnMitfahrer, #btnMitfahrerEinladen')) { beiTippAufMitfahrer(); return; }
+  if (ereignis.target.closest('#btnMitfahrerKonto')) { öffneKontoOderProfil(); return; }
   if (ereignis.target.closest('#btnReiseAussteigen')) steigeAus(reiseNach(offeneReiseId));
 });
 

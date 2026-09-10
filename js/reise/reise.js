@@ -518,19 +518,19 @@ function reiseZahlenHtml(reise, bilanz) {
   const teilweise = zahl => zahl < bilanz.mitRoute ? `aus ${zahl} von ${bilanz.mitRoute} Etappen` : '';
   const kacheln = [];
 
+  /* Frueher stand hier eine Rinne mit einem Punkt darauf, der zeigte, wo
+     der Schnitt zwischen kuerzester und laengster Etappe liegt. Er sagte
+     wenig und sah nach Bedienelement aus. Jetzt stehen die drei Zahlen
+     einfach nebeneinander - kuerzeste, Schnitt, laengste -, und jede
+     fuehrt per Tipp zu ihrem Tag. */
   if (bilanz.mitRoute >= 2) {
-    const spanne = Math.max(1, bilanz.laengsteKm - bilanz.kuerzesteKm);
-    const lage = Math.round((bilanz.schnittKm - bilanz.kuerzesteKm) / spanne * 100);
     kacheln.push(`
       <div class="stat breit">
         <span class="k">&Oslash; je Fahrtag</span>
         <span class="v">${bilanz.schnittKm}<i>km</i></span>
-        <div class="reise-bereich" aria-hidden="true">
-          <div class="reise-bereich-rinne"><span class="reise-bereich-marke" style="left: ${lage}%"></span></div>
-          <div class="reise-bereich-enden">
-            <button class="linkbtn" data-marke="${escapeHtml(bilanz.kuerzesteTagId)}">k&uuml;rzeste ${bilanz.kuerzesteKm} km <i>&middot;</i> ${tag(bilanz.kuerzesteStelle)}</button>
-            <button class="linkbtn" data-marke="${escapeHtml(bilanz.laengsteTagId)}">l&auml;ngste ${bilanz.laengsteKm} km <i>&middot;</i> ${tag(bilanz.laengsteStelle)}</button>
-          </div>
+        <div class="reise-spanne">
+          <button class="linkbtn" data-marke="${escapeHtml(bilanz.kuerzesteTagId)}">k&uuml;rzeste <b>${bilanz.kuerzesteKm} km</b> <i>&middot;</i> ${tag(bilanz.kuerzesteStelle)}</button>
+          <button class="linkbtn" data-marke="${escapeHtml(bilanz.laengsteTagId)}">l&auml;ngste <b>${bilanz.laengsteKm} km</b> <i>&middot;</i> ${tag(bilanz.laengsteStelle)}</button>
         </div>
       </div>`);
   }
@@ -575,24 +575,31 @@ function reiseZahlenHtml(reise, bilanz) {
    sind schmale gestrichelte Leerbalken. Man sieht auf einen Blick, welcher
    Tag der lange und welcher der harte ist. */
 function reiseProfilHtml(reise) {
-  const balken = reise.tage.map((tag, stelle) => {
+  const gesamt = reise.tage.reduce((summe, tag) => summe + ((routeZuTag(tag)?.distance) || 0), 0);
+  const stuecke = reise.tage.map((tag, stelle) => {
     const route = routeZuTag(tag);
     const kennung = `data-marke="${escapeHtml(tag.id)}" data-tag-id="${escapeHtml(tag.id)}"`;
     if (!route) {
-      return tagIstOffen(tag)
-        ? `<button class="reise-profil-tag leer" ${kennung} aria-label="Tag ${stelle + 1}: noch ohne Route" title="Tag ${stelle + 1}: noch ohne Route"></button>`
-        : `<button class="reise-profil-tag ruhe" ${kennung} aria-label="Tag ${stelle + 1}: ${escapeHtml(tag.titel)}" title="Tag ${stelle + 1}: ${escapeHtml(tag.titel)}"></button>`;
+      const ruhetag = !tagIstOffen(tag);
+      const was = ruhetag ? (tag.titel || 'Kein Fahrtag') : 'noch ohne Route';
+      return `<button class="reise-band-tag ${ruhetag ? 'ruhe' : 'leer'}" ${kennung}
+                      title="Tag ${stelle + 1}: ${escapeHtml(was)}"
+                      aria-label="Tag ${stelle + 1}: ${escapeHtml(was)}"><b>${stelle + 1}</b></button>`;
     }
-    const km = Math.max(1, Math.round((route.distance || 0) / 1000));
+    const km = Math.max(1, Math.round(route.distance / 1000));
     const grad = Math.round(route.curviness || 0);
     const text = `Tag ${stelle + 1}: ${km} km, ${grad} Grad/km`;
-    // Jeder Balken ist ein Knopf: ein Tipp waehlt den Tag, wie die Marke
-    // auf der Karte. Die Trefferflaeche macht das CSS groesser als den Strich.
-    return `<button class="reise-profil-tag ${kurvenStufe(grad)}" ${kennung} style="--km: ${km}"
-                    aria-label="${text}" title="${text}"></button>`;
+    /* Die Kilometer stehen nur in Stuecken, die wenigstens ein Fuenftel der
+       Reise ausmachen. Darunter waere die Zahl abgeschnitten, und eine
+       halbe Zahl liest sich schlechter als keine - die Nummer allein
+       reicht, der Rest steht in der Liste darunter. */
+    const kmText = gesamt && route.distance / gesamt >= 0.2 ? `<i>${km} km</i>` : '';
+    return `<button class="reise-band-tag ${kurvenStufe(grad)}" ${kennung} style="--km: ${km}"
+                    title="${text}" aria-label="${text}"><b>${stelle + 1}</b>${kmText}</button>`;
   }).join('');
-  return `<div class="reise-profil">${balken}</div>`;
+  return `<div class="reise-band">${stuecke}</div>`;
 }
+
 
 /* Alle Tage einer Reise auf EINER Karte. Erst alle Saeume, dann alle
    Linien - sonst schneidet der helle Saum von Tag 4 die Linie von Tag 3
@@ -707,7 +714,7 @@ function etappeHtml(reise, tag, stelle) {
     return `
     <li class="etappe ${fehlt ? 'fehlt' : (ruhetag ? 'ruhe' : 'leer')}" data-tag-id="${escapeHtml(tag.id)}">
       ${scheibe}
-      <div class="etappe-karte">
+      <div class="karte etappe-karte">
         <span class="label">${beschriftung}</span>
         ${symbol(ruhetag ? 'koffer' : 'route', 'gross')}
         <span class="etappe-leer-text">${fehlt ? 'Die Route wurde gel&ouml;scht' : (ruhetag ? 'Kein Fahrtag' : 'Noch keine Route')}</span>
@@ -727,7 +734,7 @@ function etappeHtml(reise, tag, stelle) {
   return `
     <li class="etappe" data-tag-id="${escapeHtml(tag.id)}">
       ${scheibe}
-      <div class="etappe-karte">
+      <div class="karte etappe-karte">
         ${vorschauBildHtml(route, werte)}
         <span class="label">${beschriftung}</span>
         <span class="etappe-name">${marke}<span class="saved-name">${escapeHtml(route.name)}</span></span>
@@ -750,14 +757,14 @@ function markiereAuswahl() {
   inner.querySelectorAll('.etappe[data-tag-id]').forEach(glied => {
     glied.classList.toggle('aktiv', glied.dataset.tagId === gewaehlt);
   });
-  inner.querySelectorAll('.reise-karte [data-tag-id], .reise-profil [data-tag-id]').forEach(pfad => {
+  inner.querySelectorAll('.reise-karte [data-tag-id], .reise-band [data-tag-id]').forEach(pfad => {
     pfad.classList.toggle('aktiv', pfad.dataset.tagId === gewaehlt);
   });
   inner.querySelectorAll('.reise-zahlen [data-marke]').forEach(kachel => {
     kachel.classList.toggle('aktiv', kachel.dataset.marke === gewaehlt);
   });
-  const profil = inner.querySelector('.reise-profil');
-  if (profil) profil.classList.toggle('mit-auswahl', gewaehlt !== null);
+  const band = inner.querySelector('.reise-band');
+  if (band) band.classList.toggle('mit-auswahl', gewaehlt !== null);
   const karte = inner.querySelector('.reise-karte');
   if (karte) karte.classList.toggle('mit-auswahl', gewaehlt !== null && !!inner.querySelector(`.reise-karte [data-tag-id="${CSS.escape(gewaehlt)}"]`));
 }
