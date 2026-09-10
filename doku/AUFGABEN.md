@@ -768,6 +768,53 @@ Datenschutzerklärung, siehe oben.
   hohen weißen Rahmen und ist darin klein. Hochformat bleibt, wie es ist.
   (05.09.2026)
 
+## Das Garagenfoto ist zu groß (offen seit 11.09.2026)
+
+Das Foto des eigenen Motorrads ist mit Abstand der dickste Brocken, den ein
+Nutzer erzeugt. Alles andere — Touren, Reisen, Merkliste, Reifenmaße —
+liegt zusammen im niedrigen zweistelligen Kilobyte-Bereich, **ein einziges
+Bike-Foto wiegt rund 1 MB.** Das ist die Größenordnung von etwa hundert
+gespeicherten Touren.
+
+Woher das kommt: `verkleinereFoto()` in `app.js` rechnet auf 1600 Punkte
+längste Kante bei Güte 0,92 herunter, der Freisteller in `garage.js`
+Zeile 192 speichert sein Ergebnis als WebP mit derselben Güte. Beides ist
+für eine Karte, die das Bild rund 300 Punkte breit zeigt, deutlich mehr als
+nötig.
+
+Warum es drückt:
+
+- **Auf dem Gerät.** Das Foto steht als Daten-URL im Browserspeicher, und
+  der ist je Adresse auf ungefähr 5 MB begrenzt. Drei, vier Motorräder mit
+  Foto, und die Garage stößt an die Wand — zusammen mit allem anderen, was
+  dort liegt.
+- **Im Konto.** Seit dem 11.09.2026 wandert das Bild beim Abgleich in den
+  Behälter `tourfotos` (`nutzerdaten.js`). Supabase gibt im kostenlosen
+  Tarif 1 GB her; das reicht für etwa tausend Fotos, also für etwa tausend
+  Nutzer mit je einem Motorrad. Das ist kein Problem für morgen, aber es ist
+  die erste Grenze, gegen die die App laufen wird.
+- **Beim Laden.** Bei jeder Anmeldung auf einem neuen Gerät kommt das
+  ganze Megabyte über die Leitung, bevor die Garage etwas zeigt.
+
+Mögliche Wege, noch nicht entschieden:
+
+1. **Kleiner rechnen.** 900 Punkte Kante bei Güte 0,8 als WebP dürfte bei
+   rund 120 KB landen, also ein Achtel. Vorher an einem echten Foto
+   nachmessen, nicht schätzen — die Karte zeigt das Bild auf einem Gerät
+   mit dreifacher Punktdichte immerhin mit rund 900 echten Bildpunkten.
+2. **Zwei Größen ablegen.** Eine kleine fürs Gerät und die Karte, die volle
+   nur im Behälter für die Detailansicht. Mehr Aufwand, dafür bleibt die
+   Bildqualität erhalten.
+3. **Gar nicht mehr auf dem Gerät.** Nur der Pfad im Behälter, das Bild
+   kommt beim Zeichnen. Kostet die Garage ihre Offline-Tauglichkeit, deshalb
+   der unwahrscheinlichste Weg.
+
+**Nebenbei aufgefallen und mitzuerledigen:** Der Abgleich lädt jedes
+Garagenbild als `<nutzer-id>/garage/<id>.jpg` mit `contentType:
+'image/jpeg'` hoch. Ein freigestelltes Foto ist aber WebP. Der Inhalt
+stimmt, Name und Typ lügen. Beim Ausliefern über eine echte Bildadresse
+(statt über die Daten-URL, die heute benutzt wird) fällt das auf.
+
 ## Vektorkacheln statt Rasterkacheln (offen seit 31.08.2026)
 
 Zwei Probleme mit einer Ursache, und beide lösen sich mit demselben Schritt:

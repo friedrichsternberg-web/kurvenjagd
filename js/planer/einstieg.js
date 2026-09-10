@@ -224,22 +224,16 @@ function garageReiseHtml(reise) {
 function garageReiseEinladungHtml() {
   return `
     <div class="karte reise-widget reise-einladung">
-      <div class="widget-kopf">
+      <div class="reise-einladung-text">
         <span class="abzeichen">N&auml;chste Reise</span>
+        <h3 class="widget-name">Noch keine Reise geplant</h3>
+        <button type="button" class="btn" data-reise-neu>
+          ${symbol('plus', 'klein')} Reise planen
+        </button>
       </div>
-      <h3 class="widget-name">Noch keine Reise geplant</h3>
-      <div class="widget-inhalt">
-        <span class="reise-bild">
-          <span class="tour-vorschau reise-leer-bild">${reiseLeerSvg(3, { breite: 340, hoehe: 440 })}</span>
-        </span>
-        <div class="widget-text">
-          <p class="hint">Mehrere Tage, eine Karte, jeder Tag eine Etappe.
-            Plan die ganze Reise hier &ndash; aus deinen Touren oder direkt auf der Karte.</p>
-          <button type="button" class="btn widget-knopf" data-reise-neu>
-            ${symbol('plus', 'klein')} Reise planen
-          </button>
-        </div>
-      </div>
+      <span class="reise-bild reise-einladung-bild">
+        <span class="tour-vorschau reise-leer-bild">${reiseLeerSvg(3, { breite: 340, hoehe: 440 })}</span>
+      </span>
     </div>`;
 }
 

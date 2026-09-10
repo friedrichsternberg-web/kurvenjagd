@@ -3043,21 +3043,38 @@ button.karte:active { transform: scale(0.985); }
    Werkstatt und Standardmaschine. Vorher war sie eine schlichte Spalte
    auf schwarzem Grund und sah damit aus wie ein Fehler statt wie ein
    Platz, der auf etwas wartet. */
+/* Die leere Karte hat keine Wertezeilen, dafuer einen Knopf mit langer
+   Aufschrift - sie darf sich mehr Textspalte nehmen als die gefuellte.
+   Die Marke steht auf der KARTE, weil das Raster und die linke Kante des
+   Werkstattraums sie dort ablesen. */
+.bike-leer { --bike-text-anteil: 0.56; }
 .bike-leer .bike-leer-text {
   grid-column: 1;
   grid-row: 1 / -1;
-  align-self: center;
+  /* "stretch" statt "center": Die Spalte ist damit so hoch wie die
+     Werkstatt daneben, und erst dadurch hat das "margin-top: auto" des
+     Knopfes einen Raum, in den es ihn nach unten schieben kann. */
+  align-self: stretch;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: var(--s3);
   position: relative;
-  z-index: 1;
+  /* Ueber der Werkstatt statt darunter: Der Knopf ragt auf schmalen
+     Geraeten ein Stueck in die zweite Spalte, und dort lag sonst das
+     Vorderrad davor. Die Buehne steht auf z-index 1. */
+  z-index: 3;
 }
 .bike-leer .abzeichen { margin-bottom: 0; }
 .bike-leer .widget-name { margin: 0; }
-.bike-leer .hint { margin: 0; }
-.bike-leer .btn { width: auto; flex: 0 0 auto; }
+/* "width: max-content" statt "auto": In einer Spalte mit
+   "align-items: flex-start" bekommt ein Kind hoechstens die Breite der
+   Spalte - und die ist hier 46 Prozent der Karte, auf einem 375 Punkte
+   breiten Geraet also 143. "Motorrad eintragen" braucht 194 und brach
+   dadurch auf zwei Zeilen um. Mit max-content nimmt der Knopf seine
+   natuerliche Breite und ragt ein Stueck in die ausgeblendete linke Kante
+   der Werkstatt hinein, wo nichts steht. */
+.bike-leer .btn { margin-top: auto; width: max-content; flex: 0 0 auto; }
 /* Die Buehne fuellt wie bei der gefuellten Karte die rechte Spalte ueber
    alle Zeilen. */
 .bike-leer .bike-buehne { grid-column: 2; grid-row: 1 / -1; }
@@ -3128,16 +3145,33 @@ button.karte:active { transform: scale(0.985); }
   background: none;
 }
 .reise-bild svg { display: block; width: 100%; height: 100%; }
-.reise-einladung .hint { margin: 0 0 var(--s3); }
-.reise-einladung .widget-knopf { width: auto; }
+/* Die Einladung, solange keine Reise geplant ist. Sie spiegelt die leere
+   Bike-Karte darueber: links Abzeichen, Name und der blaue Knopf, rechts
+   das Symbolbild. Dadurch stehen die beiden blauen Knoepfe der Startseite
+   untereinander an derselben Kante. */
+.reise-einladung {
+  display: grid;
+  grid-template-columns: minmax(0, 46%) minmax(0, 1fr);
+  column-gap: var(--s3);
+  align-items: stretch;
+}
+.reise-einladung-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s3);
+}
+.reise-einladung .abzeichen { margin-bottom: 0; }
+.reise-einladung .widget-name { margin: 0; }
+/* "margin-top: auto" schiebt den Knopf an den unteren Rand der Spalte, auf
+   die Hoehe der Bildunterkante. "flex: 0 0 auto" ist noetig, weil .btn
+   sonst mit flex: 1 die ganze Resthoehe fuellt. */
+.reise-einladung-text .btn { margin-top: auto; width: max-content; flex: 0 0 auto; }
 /* Das Symbolbild ist kein Knopf wie das Kartenbild einer echten Reise -
    es fuehrt nirgendwohin, es zeigt nur, was hier entstehen kann. Deshalb
    kein Zeigerwechsel und kein Druckeffekt. */
 .reise-einladung .reise-bild { cursor: default; display: block; }
 .reise-einladung .reise-bild:active { transform: none; }
-/* Der Text steht mittig neben dem Bild statt oben - ohne Wertezeilen
-   darunter haenge er sonst in der oberen Ecke. */
-.reise-einladung .widget-text { justify-content: center; }
 
 /* ---------- Das Fenster zum Anlegen und Aendern ----------
    Es liegt ueber allem, auch ueber der unteren Leiste (z-index hoeher als
