@@ -123,7 +123,7 @@ function ladeReifenKatalog() {
    TDDDG hier nicht - es bleibt die Uebertragung der IP-Adresse, und die
    traegt dieselbe Grundlage wie die Kartenkacheln von OpenStreetMap:
    Bereitstellung der angeforderten Funktion, Art. 6 Abs. 1 lit. b und f
-   DSGVO. Offengelegt ist sie in der Datenschutzerklaerung, Punkt 10.
+   DSGVO. Offengelegt ist sie in der Datenschutzerklaerung, Punkt 12.
 
    Der KLICK auf ein Angebot ist etwas anderes: Dort setzt awin1.com eine
    Kennung mit 30 Tagen Laufzeit, und dafuer fragt partner.js. */

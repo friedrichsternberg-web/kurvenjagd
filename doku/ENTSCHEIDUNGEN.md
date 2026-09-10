@@ -4162,3 +4162,49 @@ Schreib- und Lesevorgang als angemeldeter Nutzer (`set local role
 authenticated` in einer zurückgerollten Transaktion), das Zusammenführen in
 allen vier Fällen (beide Seiten voll, Gerät leer, Server leer, Felder), und
 dass die vier Speicherstellen den Haken auch wirklich auslösen.
+
+## 11.09.2026 — Das Rechtliche vor dem Push nachgezogen
+
+Die Datenschutzerklärung stand auf dem Stand vom 05.09.2026. Seitdem sind
+drei Dinge dazugekommen, von denen keines darin vorkam: **gemeinsam
+geplante Reisen** mit Nutzersuche und Kasse, **Teilen per Link**, und der
+**Abgleich von Garage, Reisen, Merkliste und Reifenmaß ins Konto**. Dazu
+behauptete Punkt 2 weiterhin „Das Abmelden löscht sie nicht", was seit dem
+Abmelde-Dialog vom selben Tag nur noch die halbe Wahrheit war.
+
+Im Kopf des Rechtliches-Abschnitts in `index.html` steht seit Langem der
+Satz, dass eine Erklärung, die etwas anderes behauptet als der Code tut,
+schlimmer ist als keine. Genau der Fall war eingetreten.
+
+**Was jetzt gilt:** zwei neue Punkte 8 (gemeinsame Reisen) und 9 (Teilen
+per Link), dadurch rücken Besuchszählung, öffentliche Touren,
+Partnerprogramme und Rechte auf 10 bis 13. Punkt 2 und Punkt 7 sind
+ergänzt. Die „Regeln fürs Teilen" gelten ausdrücklich für alle drei Wege,
+auf denen etwas aus der Hand geht, nicht mehr nur für den Schalter
+„öffentlich".
+
+**Drei Entscheidungen, die dabei bewusst gefallen sind:**
+
+- **Rechtsgrundlage für den Link ist Art. 6 Abs. 1 lit. b DSGVO, nicht die
+  Einwilligung.** Eine Einwilligung muss nach Art. 7 Abs. 3 jederzeit
+  widerrufbar sein – und einen Knopf, einen einzelnen Link
+  zurückzuziehen, gibt es noch nicht. Die Grundlage „Bereitstellung der von
+  dir angeforderten Funktion" trägt hier ehrlicher. Der Weg über Art. 17
+  (Mail an kontakt@, wir löschen die Zeile) steht in der Erklärung, die
+  fehlende Ansicht in `AUFGABEN.md`.
+- **Dass Ausgaben einer gemeinsamen Reise das Löschen eines Kontos
+  überleben, steht ausdrücklich in der Erklärung** – mit dem Grund. Das ist
+  eine Einschränkung des Löschanspruchs, und die verschweigt man nicht,
+  man begründet sie: Verschwinden die Beträge, ändert sich stillschweigend,
+  was die anderen einander schulden.
+- **Die Nutzersuche steht drin, obwohl sie niemandem wehtut.** Dass jeder
+  Angemeldete einen über den Benutzernamen finden kann, ist genau die Art
+  Auskunft, die man erwartet – deshalb muss sie dastehen, bevor jemand sie
+  bemerkt.
+
+**Nachgesehen statt angenommen:** dass `konto-loeschen` auch das
+Garagenfoto erwischt (die Funktion räumt alles unter `<nutzerkennung>/`
+ab, Ordner und Dateien – der Pfad `.../garage/...` fällt also mit
+darunter), dass `nutzer_daten` und `link_freigaben` per Fremdschlüssel am
+Konto hängen, und dass der Empfangsbildschirm den Urheber einer
+weitergeleiteten fremden Tour wirklich nennt (`teilen.js`, `daten.urheber`).

@@ -425,7 +425,14 @@ nächsten Abgleich kommt sie zurück.
   weiter oben in einem eigenen Abschnitt. Das gehört in die
   Datenschutzerklärung, weil es die Auskunft über das Recht auf Löschung
   konkret beantwortet.
-- **Die Besuchszählung** steht als Punkt 8 in der Erklärung. Rechtsgrundlage
+- **Die Erklärung ist am 11.09.2026 nachgezogen worden.** Neu sind Punkt 8
+  (gemeinsam geplante Reisen, Nutzersuche, Kasse) und Punkt 9 (Teilen per
+  Link). Dabei sind alle Punkte ab der Besuchszählung um zwei nach hinten
+  gerückt – wer irgendwo im Quelltext auf eine Nummer verweist, muss sie
+  mitziehen (`reifen.js` tut das). Ergänzt wurden außerdem Punkt 2 (die
+  Frage beim Abmelden) und Punkt 7 (Garage, Reisen, Merkliste und
+  Reifenmaß liegen jetzt im Konto).
+- **Die Besuchszählung** steht als Punkt 10 in der Erklärung. Rechtsgrundlage
   ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einer
   Reichweitenmessung), und sie trägt nur, solange kein Personenbezug
   entsteht. Wer der Zählung eines Tages eine Kennung, eine IP oder einen

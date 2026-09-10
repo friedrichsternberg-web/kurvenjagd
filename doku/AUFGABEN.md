@@ -768,6 +768,27 @@ Datenschutzerklärung, siehe oben.
   hohen weißen Rahmen und ist darin klein. Hochformat bleibt, wie es ist.
   (05.09.2026)
 
+## Einen geteilten Link zurückziehen können (offen seit 11.09.2026)
+
+Ein Link auf eine Tour oder Reise (`link_freigaben`) gilt, bis das Konto
+gelöscht wird. **Es gibt keinen Knopf, ihn wieder abzuschalten** – und
+keine Liste, die zeigt, welche Links man überhaupt schon vergeben hat.
+
+Das ist kein reines Bequemlichkeitsthema. Die Datenschutzerklärung nennt
+als Rechtsgrundlage Art. 6 Abs. 1 lit. b DSGVO (Bereitstellung der
+angeforderten Funktion) und nicht die Einwilligung – gerade weil eine
+Einwilligung nach Art. 7 Abs. 3 DSGVO jederzeit widerrufbar sein muss und
+das hier ohne Knopf nicht ginge. Der Weg über Art. 17 (Löschung auf
+Verlangen) steht in der Erklärung: eine Mail an kontakt@serpa-app.de,
+danach löschen wir die Zeile von Hand. Das trägt, solange es eine Handvoll
+Nutzer sind.
+
+Was fehlt, ist überschaubar: eine Liste „Meine Links" mit Name, Datum und
+Aufrufzahl, je Zeile ein Papierkorb. Die Löschregel dafür steht in
+`04-teilen-per-link.sql` bereits (`link_freigaben` gehört dem Ersteller),
+es fehlt nur die Ansicht. **Vor den Stores muss das da sein** – spätestens
+dann ist die Handarbeit keine Antwort mehr.
+
 ## Das Garagenfoto ist zu groß (offen seit 11.09.2026)
 
 Das Foto des eigenen Motorrads ist mit Abstand der dickste Brocken, den ein
