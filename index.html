@@ -2628,11 +2628,12 @@
         <button class="glas-rund klein" id="btnAbmeldenZu" title="Schlie&szlig;en" aria-label="Schlie&szlig;en">&times;</button>
       </header>
       <div class="garage-dialog-inhalt">
-        <p class="hint">Deine <b>Touren</b> liegen in deinem Konto und sind beim
-          n&auml;chsten Anmelden wieder da.</p>
-        <p class="hint">Nur auf diesem Ger&auml;t liegen dagegen deine <b>Garage</b>,
-          <b>ungeteilte Reisen</b> und die <b>Merkliste</b>. Wenn du das Ger&auml;t
-          leerst, sind die weg.</p>
+        <p class="hint">Touren, Reisen, deine Garage und die Merkliste liegen in
+          deinem <b>Konto</b>. Beim n&auml;chsten Anmelden ist alles wieder da &ndash;
+          auch auf einem anderen Ger&auml;t.</p>
+        <p class="hint">Auf einem Ger&auml;t, das du dir mit anderen teilst, r&auml;umst
+          du besser auf. Nur der <b>Fahrstil</b> bleibt in jedem Fall hier: Er wird
+          nie hochgeladen.</p>
       </div>
       <footer class="garage-dialog-fuss abmelden-fuss">
         <button class="btn" id="btnAbmeldenUndLeeren">Abmelden und Ger&auml;t leeren</button>
@@ -2748,6 +2749,10 @@
        schon jemand angemeldet ist, und schickt auf Wunsch in den Planer,
        zu Ride oder in die Ausruestung - alles Dinge, die vorher geladen
        sein muessen. -->
+  <!-- Garage, Reisen, Merkliste und Reifenmass ins Konto. Laedt NACH
+       garage.js, reise.js, merkliste.js und reifen.js, weil es deren
+       Speicher- und Zeichenfunktionen braucht. -->
+  <script src="js/konto/nutzerdaten.js?v=110"></script>
   <script src="js/grundlage/einfuehrung.js?v=110"></script>
   <!-- Der Einstieg in den Planer (Tour oder Reise?) und die Reisekarte in
        der Garage. Nach reise.js, dessen Reisen es zeigt. -->

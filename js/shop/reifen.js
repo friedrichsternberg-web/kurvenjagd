@@ -283,7 +283,10 @@ function merkeMass() {
   if (!geraet.schreib(REIFEN_SPEICHER, reifenMasse)) {
     reifenMasse = ladeReifenMasse();
     showToast('Der Gerätespeicher ist voll - die Reifengröße konnte nicht gemerkt werden.');
+    return;
   }
+  // Und ins Konto - siehe nutzerdaten.js.
+  if (typeof sichereBereich === 'function') sichereBereich('reifen');
 }
 
 

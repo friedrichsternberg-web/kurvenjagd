@@ -59,7 +59,10 @@ function ladeShopAblage() {
 // Gibt false zurueck, wenn der Geraetespeicher voll ist - der Aufrufer
 // muss das melden, stillschweigend nichts zu speichern waere das Schlimmste.
 function speichereShopAblage() {
-  return geraet.schreib(SHOP_SPEICHER, shopAblage);
+  if (!geraet.schreib(SHOP_SPEICHER, shopAblage)) return false;
+  // Und ins Konto - siehe nutzerdaten.js.
+  if (typeof sichereBereich === 'function') sichereBereich('merkliste');
+  return true;
 }
 
 

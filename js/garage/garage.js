@@ -87,7 +87,22 @@ function altesFormatUmschreiben(motorrad) {
 // das melden - stillschweigend nichts zu speichern waere das Schlimmste,
 // was hier passieren kann.
 function speichereGarage() {
-  return geraet.schreib(GARAGE_SPEICHER, garage);
+  if (!geraet.schreib(GARAGE_SPEICHER, garage)) return false;
+  // Und ab ins Konto, damit die Garage einen Geraetewechsel ueberlebt.
+  // nutzerdaten.js laedt spaeter und fehlt womoeglich ganz.
+  if (typeof sichereBereich === 'function') sichereBereich('garage');
+  return true;
+}
+
+/* Die Garage noch einmal aus dem Speicher lesen und neu zeichnen. Gebraucht
+   von nutzerdaten.js: Nach dem Abgleich mit dem Konto steht dort etwas
+   anderes als in der Variablen "garage", die beim Laden der Seite gefuellt
+   wurde - ohne diesen Weg zeigte die App den alten Stand, bis jemand die
+   Seite neu laedt. */
+function ladeGarageNeu() {
+  garage = ladeGarage();
+  if (aktivesMotorrad >= garage.motorräder.length) aktivesMotorrad = 0;
+  zeichneGarage();
 }
 
 let garage = ladeGarage();

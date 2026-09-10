@@ -345,14 +345,58 @@ zu entscheiden:
   hochgeladenes Profilbild werden aus dem Browserspeicher geworfen.
   Richtig auf einem geteilten Rechner.
 
-**Was dabei wiederkommt und was nicht:** Touren liegen im Konto und sind
-beim nächsten Anmelden wieder da. Garage, ungeteilte Reisen und Merkliste
-liegen **nur** auf dem Gerät – die App hat davon keine Kopie, und sie sind
-nach dem Leeren endgültig weg. Genau das steht auch im Fenster, bevor man
-sich entscheidet.
+**Seit dem 11.09.2026 kommt fast alles wieder** (siehe den Abschnitt
+darunter): Touren, Reisen, Garage, Merkliste und Reifenmaß liegen im Konto.
+Beim nächsten Anmelden sind sie da – auch auf einem anderen Gerät.
+
+**Was NICHT wiederkommt:** der **Fahrstil** und die
+**Partner-Einwilligung**. Beide werden absichtlich nie hochgeladen; die
+Begründung steht im Abschnitt darunter.
 
 Vorher blieb immer alles liegen, mit einem Hinweis im Toast. Die
 Begründung dafür und warum sie nicht mehr reicht: `SICHERHEIT.md`, C5.
+
+### Garage, Reisen, Merkliste und Reifenmaß im Konto (seit 11.09.2026)
+
+Bis dahin lagen diese vier Dinge ausschließlich im Browserspeicher —
+während die Touren längst im Konto lagen und nach einem Gerätewechsel
+wiederkamen. Dieser Unterschied ließ sich niemandem erklären, der gerade
+ein Konto angelegt hat.
+
+**Was hochgeht,** in die Tabelle `nutzer_daten` (eine Zeile je Bereich und
+Konto, nur für den Besitzer lesbar):
+
+| Bereich | Inhalt | Größe |
+|---|---|---|
+| `garage` | Marke, Modell, Baujahr, Hubraum, Leistung | unter 1 KB |
+| `reisen` | alle Reisen, auch die ungeteilten | 0,2 KB je Reise |
+| `merkliste` | gemerkte Teile mit Preisverlauf | ~2 KB bei 20 Teilen |
+| `reifen` | das Reifenmaß je Motorrad | wenige Bytes |
+
+**Die Garagenfotos gehen einen eigenen Weg.** Ein Foto wiegt rund ein
+Megabyte (1600 Punkte Kante, Güte 0,92 — nachgemessen am 11.09.2026) und
+gehört nicht in eine Datenbankzeile. Es liegt im Dateispeicher unter
+`<nutzerkennung>/garage/<motorradkennung>.jpg`, in der Zeile steht nur der
+Pfad. Der Behälter ist der vorhandene `tourfotos` — nicht wegen des Namens,
+sondern weil `konto-loeschen` genau diesen Behälter beim Löschen eines
+Kontos ausräumt. Ein eigener Behälter müsste dort erst eingetragen werden,
+und wird er vergessen, bleiben Fotos nach dem Löschen liegen.
+
+**Was ausdrücklich NICHT hochgeht:**
+
+- Der **Fahrstil**. Er wird aus den eigenen Fahrten gerechnet und sagt, wie
+  jemand fährt — das ist die heikelste Auskunft, die die App hat. Er bleibt
+  laut `CLAUDE.md` bewusst nur auf dem Gerät.
+- Die **Partner-Einwilligung**. Eine Einwilligung in Cookies und
+  Weiterleitungen gilt für diesen Browser, nicht für den Menschen. Sie
+  mitzunehmen hieße, sie auf einem Gerät zu behaupten, auf dem sie nie
+  gegeben wurde.
+
+**Abgeglichen wird nur zusammenführend, nie löschend.** Was auf einer der
+beiden Seiten steht, steht danach auf beiden; bei gleicher Kennung gewinnt
+die Fassung auf dem Gerät. Der Preis ist derselbe wie bei den Touren: Wer
+auf dem Handy eine Reise löscht, hat sie auf dem Rechner noch, und beim
+nächsten Abgleich kommt sie zurück.
 
 ---
 

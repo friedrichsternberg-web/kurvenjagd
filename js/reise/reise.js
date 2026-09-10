@@ -61,9 +61,14 @@ function ladeReisen() {
 
 // Die EINZIGE Stelle, die Reisen in den Geraetespeicher schreibt.
 function speichereReisen(liste) {
-  if (geraet.schreib(REISEN_SPEICHER, liste)) return true;
-  showToast('Der Gerätespeicher ist voll - die Reise konnte nicht gespeichert werden.');
-  return false;
+  if (!geraet.schreib(REISEN_SPEICHER, liste)) {
+    showToast('Der Gerätespeicher ist voll - die Reise konnte nicht gespeichert werden.');
+    return false;
+  }
+  // Und ins Konto, damit auch eine ungeteilte Reise einen Geraetewechsel
+  // ueberlebt. nutzerdaten.js laedt spaeter und fehlt womoeglich ganz.
+  if (typeof sichereBereich === 'function') sichereBereich('reisen');
+  return true;
 }
 
 function reiseNach(id) {

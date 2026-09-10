@@ -4088,3 +4088,77 @@ kein Band über das ganze Fenster ist — dort liegen jetzt zwei Masken
 übereinander (`mask-composite: intersect`, daneben die alte
 WebKit-Schreibweise `source-in`). **Ein Verlauf muss VOR dem Rand fertig
 sein, sonst sieht man den Rand trotzdem.**
+
+## 11.09.2026 (spätnachts) — Alles ins Konto, nicht nur die Touren
+
+Friedrich: „damit ich mich jederzeit anmelden und abmelden kann und alles
+habe". Das war die richtige Antwort auf die Abmelde-Frage von vorhin — die
+Rückfrage („Gerät leeren?") war nur ein Pflaster auf dem eigentlichen
+Mangel.
+
+**Der Mangel:** Touren wanderten seit dem 20.08.2026 ins Konto. Garage,
+Merkliste, Reifenmaß und ungeteilte Reisen lagen ausschließlich im
+Browserspeicher. Dieser Unterschied ließ sich niemandem erklären.
+
+**Erst gemessen, dann gebaut.** Die Größen entscheiden die Architektur:
+
+| Was | Größe |
+|---|---|
+| Geplante Tour, 150 km | ~53 KB |
+| Aufgezeichnete Ausfahrt, 3 h | ~188 KB |
+| Reise, 5 Tage, ungeteilt | 0,2 KB |
+| Reise, 5 Tage, geteilt | ~9 KB |
+| Merkliste, 20 Teile | ~2 KB |
+| Garage ohne Foto | 0,1 KB |
+| **Garagenfoto** | **~1 MB** |
+| Tourfoto | ~116 KB |
+| Profilbild | ~69 KB |
+
+Alles außer den Fotos ist winzig — eine ganze Garage samt Merkliste und
+Reisen wiegt weniger als ein einziges Foto. Daraus folgte: **eine Tabelle
+für die kleinen Sachen, der Dateispeicher für das Foto.**
+
+**Eine Tabelle und nicht vier.** Die vier Bereiche werden zusammen geholt
+und einzeln geschrieben, haben keine eigenen Abfragen und keine
+Verknüpfungen — sie sind vier Kisten mit Inhalt. Vier Tabellen wären vier
+Mal dieselben Zeilenregeln für denselben Zugriff. Ein fünfter Bereich ist
+jetzt ein Wort in der Prüfliste statt einer Migration.
+
+**Die Fotos liegen im Behälter `tourfotos`, obwohl der Name dann nicht mehr
+ganz stimmt.** Der Grund ist kein Geschmack, sondern das Löschen:
+`konto-loeschen` räumt genau zwei Behälter aus, und der Kommentar dort
+warnt ausdrücklich davor, dass ein vergessener Name Dateien liegen lässt,
+ohne dass es jemand merkt. Ein dritter Behälter hätte einen manuellen
+Schritt im Dashboard gebraucht — ein zu enger Behältername ist der
+kleinere Preis als ein Löschvorgang, der ein Foto übersieht.
+
+**Auf dem Gerät bleibt das Foto eine `data:`-Adresse**, auf dem Server steht
+nur der Pfad. Das ist nicht Bequemlichkeit: `zugeschnitten()` in `garage.js`
+beschneidet das Foto auf seinen Inhalt, und eine Zeichenfläche darf ein Bild
+von einem fremden Server nicht auslesen. Mit einer Serveradresse als Quelle
+fiele der Zuschnitt still aus.
+
+**Zusammenführen, nie löschen.** Was auf einer Seite steht, steht danach auf
+beiden; bei gleicher Kennung gewinnt das Gerät (nur dort liegt das Foto,
+und nur dort kann gerade bearbeitet worden sein). Dieselbe Regel wie bei
+`synchronisiereTouren()`. Der Preis ist bekannt: Wer auf dem Handy eine
+Reise löscht, hat sie auf dem Rechner noch. Die Alternative wären
+Grabsteine — mehr Maschinerie, als vier Kisten verdienen, und im Fehlerfall
+kann sie Daten vernichten. Zusammenführen kann das nie.
+
+**Zwei Dinge gehen ausdrücklich NICHT mit.** Der **Fahrstil** sagt, wie
+jemand fährt — die heikelste Auskunft der App, und laut `CLAUDE.md`
+bewusst nur auf dem Gerät. Die **Partner-Einwilligung** gilt für einen
+Browser, nicht für einen Menschen; sie mitzunehmen hieße, sie auf einem
+Gerät zu behaupten, auf dem sie nie gegeben wurde.
+
+**Die Abmelde-Frage von vorhin bleibt, sagt aber jetzt etwas anderes:**
+nicht mehr „das hier verlierst du", sondern „alles liegt im Konto, auf
+einem geteilten Gerät räumst du trotzdem besser auf". Aus einer Warnung ist
+eine Wahl geworden.
+
+**Nachgemessen statt geglaubt:** die Zeilenregel mit einem echten
+Schreib- und Lesevorgang als angemeldeter Nutzer (`set local role
+authenticated` in einer zurückgerollten Transaktion), das Zusammenführen in
+allen vier Fällen (beide Seiten voll, Gerät leer, Server leer, Felder), und
+dass die vier Speicherstellen den Haken auch wirklich auslösen.
