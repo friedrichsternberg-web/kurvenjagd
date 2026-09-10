@@ -203,18 +203,43 @@ function garageReiseHtml(reise) {
     </div>`;
 }
 
+/* Noch keine Reise geplant. Die Karte hat seit dem 11.09.2026 dasselbe
+   Raster wie die gefuellte - links das Bild, rechts Text und Knopf -,
+   damit sie nicht als halbe Karte neben der Bike-Karte steht.
+
+   Links steht dabei nicht nichts, sondern das Symbolbild, das die App
+   ohnehin fuer "Reise ohne Routen" benutzt: eine gestrichelte Linie mit
+   hohlen, nummerierten Scheiben (reiseLeerSvg in reise.js). Es zeigt die
+   FORM einer Reise - mehrere Tage an einem Faden - und ist damit die
+   Einladung, sie zu fuellen. Drei Scheiben, weil ein Wochenende der
+   haeufigste Fall ist.
+
+   Der Rahmen 340 zu 440 ist mit Bedacht gewaehlt: Das SVG wird mit
+   "slice" eingepasst, es fuellt das Fenster also und laesst ueberstehen,
+   was nicht hineinpasst. Im flachen Standardrahmen (640 zu 280) schnitt
+   das hochkant stehende Fenster links und rechts so viel weg, dass von
+   drei Scheiben nur die mittlere uebrig blieb; bei 420 zu 440 waren die
+   aeusseren noch angeschnitten. 340 zu 440 trifft das Verhaeltnis des
+   Fensters, damit steht die ganze Kette drin. */
 function garageReiseEinladungHtml() {
   return `
-    <div class="karte reise-karte reise-einladung">
+    <div class="karte reise-widget reise-einladung">
       <div class="widget-kopf">
         <span class="abzeichen">N&auml;chste Reise</span>
       </div>
       <h3 class="widget-name">Noch keine Reise geplant</h3>
-      <p class="hint">Mehrere Tage, eine Karte, jeder Tag eine Etappe.
-        Plan die ganze Reise hier &ndash; aus deinen Touren oder direkt auf der Karte.</p>
-      <button type="button" class="btn widget-knopf" data-reise-neu>
-        ${symbol('plus', 'klein')} Reise planen
-      </button>
+      <div class="widget-inhalt">
+        <span class="reise-bild">
+          <span class="tour-vorschau reise-leer-bild">${reiseLeerSvg(3, { breite: 340, hoehe: 440 })}</span>
+        </span>
+        <div class="widget-text">
+          <p class="hint">Mehrere Tage, eine Karte, jeder Tag eine Etappe.
+            Plan die ganze Reise hier &ndash; aus deinen Touren oder direkt auf der Karte.</p>
+          <button type="button" class="btn widget-knopf" data-reise-neu>
+            ${symbol('plus', 'klein')} Reise planen
+          </button>
+        </div>
+      </div>
     </div>`;
 }
 

@@ -4029,3 +4029,62 @@ geschrieben für die alte Zeilen-Karte, nahm der neuen Kopfzeile ihre
 Breite: Der Pfeil konnte mit seinem `margin-left: auto` nirgendwohin
 ausweichen und klebte am Abzeichen. **Wer die Form eines Elements ändert,
 muss nachsehen, was im Querformat für die alte Form geschrieben wurde.**
+
+## 11.09.2026 (nachts) — Abmelden räumt jetzt auf, und die leeren Karten sind keine mehr
+
+**Friedrichs Befund: „Wenn ich mich abmelde, sind trotzdem noch Reisen und
+Touren auf dem Gerät gespeichert und ich kann drauf zugreifen. Das darf
+nicht sein."** Er hat recht — auf einem geteilten Gerät sieht der Nächste
+alles.
+
+Das Verhalten war allerdings kein Versehen, sondern eine Entscheidung vom
+26.08.2026 mit Begründung (`SICHERHEIT.md`, C5): Die App läuft ohne Konto,
+und niemand sollte beim kurzen Abmelden seine Aufzeichnungen verlieren.
+
+**Warum ich es nicht einfach umgedreht habe:** Es wäre Datenverlust
+gewesen. Nachgesehen, was überhaupt im Konto liegt — **Touren: ja**,
+`synchronisiereTouren()` gleicht beide Richtungen ab. **Garage: nein.**
+**Reisen: nur die geteilten.** **Merkliste, Fahrstil, Reifenmaß: nein.**
+Wer sich abmeldet, hätte also seine Garage verloren, jedes Mal, ohne
+Vorwarnung.
+
+**Also wird gefragt.** Zwei Wege, beide klar beschriftet, das Leeren
+zuerst: „Abmelden und Gerät leeren" und darunter „Nur abmelden". Der Text
+darüber sagt, was der Unterschied ist. Genau diesen Schritt hatte C5 schon
+vorgezeichnet — dort stand er als „Produktentscheidung, keine
+Sicherheitsfrage". Sie ist jetzt getroffen.
+
+**Dabei fiel ein echter Fehler auf.** `lokaleSchlüssel()` in `konto.js`
+kannte den Schlüssel der Reisen nicht — `kurvenjagd.reisen` kam erst am
+04.09.2026 dazu, die Liste wurde nie nachgezogen. Damit blieben Reisen
+sogar beim **Konto löschen** liegen, dort, wo die App ausdrücklich
+verspricht, alles wegzuräumen. **Die Lehre: Wer einen neuen Speicherplatz
+anlegt, muss die Liste suchen, die alle aufzählt.** Es gibt genau eine.
+
+**Und die beiden leeren Karten auf dem Start sahen aus wie ein Fehler.**
+Ohne Motorrad stand dort Text auf schwarzem Grund, ohne Reise ebenso.
+Jetzt zeigt die Bike-Karte auch leer die Werkstatt und die
+Standardmaschine — genau wie eine eingetragene Maschine ohne eigenes Foto.
+Und die Reisekarte zeigt das Symbolbild, das die App ohnehin für „Reise
+ohne Routen" benutzt: eine gestrichelte Linie mit drei nummerierten
+Scheiben. Beide sind damit ein Platz, der auf etwas wartet, statt einer
+halben Karte.
+
+**Zweimal derselbe Fehler beim Einpassen des Symbolbildes:** Es wird mit
+`slice` eingepasst, füllt das Fenster also und lässt überstehen, was nicht
+hineinpasst. Im flachen Standardrahmen (640 zu 280) blieb von drei
+Scheiben nur die mittlere übrig, bei 420 zu 440 waren die äußeren
+angeschnitten. Erst 340 zu 440 trifft das Verhältnis des Fensters. **Ein
+SVG mit `slice` muss in dem Verhältnis gerechnet werden, in dem es auch
+angezeigt wird** — dieselbe Erkenntnis wie am 07.09.2026 bei der
+Reisekarte, nur an einer anderen Stelle.
+
+**Nebenbei:** Das Kopfbild des Planer-Einstiegs lief unten nicht sauber
+aus. Der Verlauf endete erst bei 96 Prozent, und weil die Straße unten im
+Bild hell ist, blieb ein grauer Streifen bis zur Kante stehen. Jetzt ist
+er bei 88 Prozent fertig. Im Querformat kamen zwei harte senkrechte
+Kanten dazu, weil der Inhalt dort in einer Lesespalte steht und das Bild
+kein Band über das ganze Fenster ist — dort liegen jetzt zwei Masken
+übereinander (`mask-composite: intersect`, daneben die alte
+WebKit-Schreibweise `source-in`). **Ein Verlauf muss VOR dem Rand fertig
+sein, sonst sieht man den Rand trotzdem.**

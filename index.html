@@ -575,14 +575,24 @@
       </section>
 
       <!-- Ohne Motorrad: dieselbe Karte als Einladung. -->
+      <!-- Noch kein Motorrad eingetragen. Die Karte zeigt trotzdem
+           Werkstatt und Standardmaschine - genau wie eine eingetragene
+           Maschine ohne eigenes Foto. So ist sie ein leerer Platz, der
+           auf etwas wartet, und keine halbe Karte (11.09.2026). -->
       <section id="garageOhneMotorrad" class="karte bike-karte bike-leer" hidden>
-        <span class="abzeichen">Mein Bike</span>
-        <h2 class="widget-name">Dein Motorrad fehlt noch</h2>
-        <p class="hint">Marke und Modell reichen &ndash; Hubraum und Leistung sucht Serpa dazu,
-          und ein Foto stellt es vom Hintergrund frei.</p>
-        <button class="btn" id="btnMotorradNeu">
-          <svg class="ic klein"><use href="#icon-plus"></use></svg> Motorrad eintragen
-        </button>
+        <span class="bike-raum" aria-hidden="true"></span>
+        <div class="bike-leer-text">
+          <span class="abzeichen">Mein Bike</span>
+          <h2 class="widget-name">Dein Motorrad fehlt noch</h2>
+          <p class="hint">Marke und Modell reichen &ndash; Hubraum und Leistung sucht Serpa dazu,
+            und ein Foto stellt es vom Hintergrund frei.</p>
+          <button class="btn" id="btnMotorradNeu">
+            <svg class="ic klein"><use href="#icon-plus"></use></svg> Motorrad eintragen
+          </button>
+        </div>
+        <div class="bike-buehne">
+          <img class="bike-bild ist-standard" src="img/bike-standard.webp?v=110" alt="" aria-hidden="true">
+        </div>
       </section>
 
       <!-- Die naechste Reise: Kopfzeile plus eine Karte mit Kartenbild,
@@ -2597,6 +2607,37 @@
       </header>
       <div class="garage-dialog-inhalt" id="reiseBlattInhalt"></div>
       <footer class="garage-dialog-fuss" id="reiseBlattFuss"></footer>
+    </div>
+  </div>
+
+  <!-- ===== Die Frage beim Abmelden =====
+       Abmelden trennt die Verbindung zum Server. Ob auch die Sachen auf
+       DIESEM Geraet verschwinden sollen, ist eine zweite Frage - und sie
+       muss gestellt werden, weil beide Antworten richtig sein koennen:
+       Auf dem eigenen Handy will man seine Garage behalten, auf einem
+       geteilten Rechner soll nichts liegenbleiben.
+
+       Warum ein eigenes Fenster und nicht der Garagendialog: Der hat fest
+       einen Knopf "Speichern", und hier gibt es zwei gleichwertige Wege.
+       Warum kein confirm(): Der Text erklaert, was genau verschwindet,
+       und das passt in kein Systemfenster. ===== -->
+  <div id="abmeldenDialog" class="garage-dialog" hidden>
+    <div class="garage-dialog-blatt glas">
+      <header class="garage-dialog-kopf">
+        <h3>Abmelden</h3>
+        <button class="glas-rund klein" id="btnAbmeldenZu" title="Schlie&szlig;en" aria-label="Schlie&szlig;en">&times;</button>
+      </header>
+      <div class="garage-dialog-inhalt">
+        <p class="hint">Deine <b>Touren</b> liegen in deinem Konto und sind beim
+          n&auml;chsten Anmelden wieder da.</p>
+        <p class="hint">Nur auf diesem Ger&auml;t liegen dagegen deine <b>Garage</b>,
+          <b>ungeteilte Reisen</b> und die <b>Merkliste</b>. Wenn du das Ger&auml;t
+          leerst, sind die weg.</p>
+      </div>
+      <footer class="garage-dialog-fuss abmelden-fuss">
+        <button class="btn" id="btnAbmeldenUndLeeren">Abmelden und Ger&auml;t leeren</button>
+        <button class="btn ghost" id="btnAbmeldenNur">Nur abmelden</button>
+      </footer>
     </div>
   </div>
 

@@ -666,23 +666,59 @@ verkabele('btnAnmeldenApple', 'click', async () => {
 });
 wendeAnbieterSchalterAn();
 
-verkabele('btnKontoAbmelden', 'click', async () => {
+/* --- Abmelden ---------------------------------------------------------------
+
+   Abmelden trennt die Verbindung zum Server. Ob auch die Sachen auf DIESEM
+   Gerät verschwinden sollen, ist eine zweite Frage - und sie wird seit dem
+   11.09.2026 gestellt, statt sie stillschweigend mit "nein" zu beantworten.
+
+   Vorher blieb alles liegen, mit einem Hinweis im Toast. Das war für ein
+   geteiltes Gerät zu wenig: Wer sich abmeldet, erwartet nicht, dass der
+   Nächste seine Reisen öffnen kann. Genau diesen nächsten Schritt hatte
+   SICHERHEIT.md unter C5 schon vorgezeichnet.
+
+   Beide Antworten sind richtig, deshalb wird gefragt: Auf dem eigenen Handy
+   will man seine Garage behalten - sie liegt NUR hier, ein Konto hat davon
+   keine Kopie. Auf einem fremden Rechner soll nichts liegenbleiben. */
+
+function zeigeAbmeldenFrage() {
+  const dialog = document.getElementById('abmeldenDialog');
+  if (!dialog) { abmeldenUndAufraeumen(false); return; }
+  dialog.hidden = false;
+  document.getElementById('btnAbmeldenUndLeeren').focus({ preventScroll: true });
+}
+
+function schliesseAbmeldenFrage() {
+  const dialog = document.getElementById('abmeldenDialog');
+  if (dialog) dialog.hidden = true;
+}
+
+async function abmeldenUndAufraeumen(leeren) {
+  schliesseAbmeldenFrage();
   await meldeAb();
+
+  /* Das Leeren kommt NACH dem Abmelden, nicht davor: Solange die Sitzung
+     steht, würde synchronisiereTouren() die eben gelöschten Touren vom
+     Server sofort wieder hereinholen. */
+  if (leeren) {
+    lokaleDatenLöschen();
+    zeichneNachDemLeeren();
+  }
+
   // Nach dem Abmelden gehört einem der Profilbildschirm nicht mehr.
   zeigeGarage();
+  showToast(leeren
+    ? 'Abgemeldet. Dieses Gerät ist leer.'
+    : 'Abgemeldet. Deine Sachen bleiben auf diesem Gerät.');
+}
 
-  /* Der Zusatz ist kein Geplauder, sondern eine Auskunft, die sonst niemand
-     bekommt: Abmelden trennt die Verbindung zum Server, räumt aber NICHT den
-     Speicher des Browsers. Touren und Garage bleiben liegen - gewollt, denn
-     die App funktioniert ohne Konto weiter und niemand soll beim Abmelden
-     versehentlich seine Aufzeichnungen verlieren.
-
-     Auf einem geteilten Gerät ist das aber genau das, was man wissen will:
-     Eine Tour ist eine Liste von Koordinaten mit Zeitstempeln, also die
-     Auskunft darüber, wo jemand war. Wer den Rechner mit anderen teilt,
-     bekommt hier den Hinweis, statt es selbst herausfinden zu müssen.
-     Siehe SICHERHEIT.md, Befund C5. */
-  showToast('Abgemeldet. Deine Touren bleiben auf diesem Gerät gespeichert.');
+verkabele('btnKontoAbmelden', 'click', zeigeAbmeldenFrage);
+verkabele('btnAbmeldenUndLeeren', 'click', () => abmeldenUndAufraeumen(true));
+verkabele('btnAbmeldenNur', 'click', () => abmeldenUndAufraeumen(false));
+verkabele('btnAbmeldenZu', 'click', schliesseAbmeldenFrage);
+// Ein Tipp neben das Fenster schließt es - wie beim Garagendialog auch.
+verkabele('abmeldenDialog', 'click', ereignis => {
+  if (ereignis.target.id === 'abmeldenDialog') schliesseAbmeldenFrage();
 });
 
 
@@ -1186,14 +1222,30 @@ function lokaleSchlüssel() {
   const schlüssel = [];
   try { schlüssel.push(STORE); } catch { /* app.js fehlt */ }
   try { schlüssel.push(GARAGE_SPEICHER); } catch { /* garage.js fehlt */ }
+  try { schlüssel.push(REISEN_SPEICHER); } catch { /* reise.js fehlt */ }
   try { schlüssel.push(SHOP_SPEICHER); } catch { /* merkliste.js fehlt */ }
   try { schlüssel.push(PARTNER_SPEICHER); } catch { /* partner.js fehlt */ }
   try { schlüssel.push(FAHRSTIL_SPEICHER); } catch { /* fahrstil.js fehlt */ }
   try { schlüssel.push(REIFEN_SPEICHER); } catch { /* reifen.js fehlt */ }
   // Ein noch nicht hochgeladenes Profilbild gehört ebenfalls weg - es wäre
-  // sonst das einzige, was ein gelöschtes Konto überlebt.
+  // sonst das einzige, was ein gelöschtes Konto überlebt. Dasselbe gilt für
+  // die offene Frage nach dem Motorrad.
   schlüssel.push(WARTENDES_BILD);
+  schlüssel.push(MOTORRAD_FRAGE_OFFEN);
   return schlüssel;
+}
+
+/* Nach dem Leeren muss die Oberfläche neu gezeichnet werden - sonst stehen
+   Garage, Touren und Reisen weiter da, obwohl der Speicher dahinter leer
+   ist. Jede Prüfung auf typeof, weil diese Datei vor allen anderen lädt. */
+function zeichneNachDemLeeren() {
+  if (typeof leereGarage === 'function') leereGarage();
+  if (typeof zeichneGarage === 'function') zeichneGarage();
+  if (typeof zeichneBeideRoutenListen === 'function') zeichneBeideRoutenListen();
+  if (typeof zeichneReisenListe === 'function') zeichneReisenListe();
+  if (typeof zeichneGarageReise === 'function') zeichneGarageReise();
+  if (typeof zeichneMerkliste === 'function') zeichneMerkliste();
+  if (typeof zeichneGarageMerkliste === 'function') zeichneGarageMerkliste();
 }
 
 /* Alles vom Gerät werfen. Wer "Konto löschen" drückt, erwartet nicht, dass

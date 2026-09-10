@@ -333,6 +333,27 @@ Anders als bei einer gemeinsamen Reise hängt hier nichts von anderen ab:
 Ein Link ist eine Kopie, kein Treffpunkt. Wer die Tour übernommen hat, hat
 sie in seinem Gerät und behält sie.
 
+### Was beim Abmelden passiert (seit 11.09.2026)
+
+Abmelden trennt die Verbindung zum Server. Ob auch die Sachen auf **diesem
+Gerät** verschwinden, fragt die App seitdem nach, statt es stillschweigend
+zu entscheiden:
+
+- **„Nur abmelden"** – alles bleibt liegen. Richtig auf dem eigenen Handy.
+- **„Abmelden und Gerät leeren"** – Touren, Reisen, Garage, Merkliste,
+  Fahrstil, Reifenmaß, die Partner-Einwilligung und ein noch nicht
+  hochgeladenes Profilbild werden aus dem Browserspeicher geworfen.
+  Richtig auf einem geteilten Rechner.
+
+**Was dabei wiederkommt und was nicht:** Touren liegen im Konto und sind
+beim nächsten Anmelden wieder da. Garage, ungeteilte Reisen und Merkliste
+liegen **nur** auf dem Gerät – die App hat davon keine Kopie, und sie sind
+nach dem Leeren endgültig weg. Genau das steht auch im Fenster, bevor man
+sich entscheidet.
+
+Vorher blieb immer alles liegen, mit einem Hinweis im Toast. Die
+Begründung dafür und warum sie nicht mehr reicht: `SICHERHEIT.md`, C5.
+
 ---
 
 ## Punkte, die in der Datenschutzerklärung stehen müssen

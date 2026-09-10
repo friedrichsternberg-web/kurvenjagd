@@ -409,6 +409,28 @@
   .planer-kopf-bild {
     margin-inline: calc(-1 * var(--s6));
     height: clamp(220px, 42vh, 420px);
+    /* ZWEI Masken, uebereinandergelegt: nach unten wie im Hochformat, und
+       zusaetzlich nach links und rechts.
+
+       Der Grund steht in derselben Regel darueber: Im Breiten steht der
+       Inhalt in einer Lesespalte (max-width), das Bild ist also KEIN Band
+       ueber das ganze Fenster, sondern ein Rechteck mit schwarzem Rand
+       daneben - und damit mit zwei harten senkrechten Kanten. Im
+       Hochformat gibt es die nicht, dort reicht das Bild ohnehin von Rand
+       zu Rand; deshalb steht diese Regel hier und nicht in style.css.
+
+       "intersect" heisst: sichtbar bleibt, was in BEIDEN Masken sichtbar
+       ist. Die alte WebKit-Schreibweise dafuer ist "source-in" und muss
+       daneben stehen, sonst faellt auf dem iPhone die zweite Maske aus
+       und das Bild verschwindet ganz. */
+    -webkit-mask-image:
+      linear-gradient(to bottom, black 30%, transparent 88%),
+      linear-gradient(to right, transparent 0%, black 7%, black 93%, transparent 100%);
+    mask-image:
+      linear-gradient(to bottom, black 30%, transparent 88%),
+      linear-gradient(to right, transparent 0%, black 7%, black 93%, transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
   }
 
   /* --- 9. Der Startfilm im Liegen ---------------------------------------------

@@ -3038,11 +3038,29 @@ button.karte:active { transform: scale(0.985); }
 @media (prefers-reduced-motion: reduce) {
   .buehne-hinweis, .hinweis-marke { animation: none; }
 }
-.bike-leer { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s3); }
+/* Die Karte ohne eingetragenes Motorrad. Sie benutzt seit dem 11.09.2026
+   dasselbe Raster wie die gefuellte (.bike-karte): links der Text, rechts
+   Werkstatt und Standardmaschine. Vorher war sie eine schlichte Spalte
+   auf schwarzem Grund und sah damit aus wie ein Fehler statt wie ein
+   Platz, der auf etwas wartet. */
+.bike-leer .bike-leer-text {
+  grid-column: 1;
+  grid-row: 1 / -1;
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s3);
+  position: relative;
+  z-index: 1;
+}
 .bike-leer .abzeichen { margin-bottom: 0; }
 .bike-leer .widget-name { margin: 0; }
 .bike-leer .hint { margin: 0; }
-.bike-leer .btn { width: auto; }
+.bike-leer .btn { width: auto; flex: 0 0 auto; }
+/* Die Buehne fuellt wie bei der gefuellten Karte die rechte Spalte ueber
+   alle Zeilen. */
+.bike-leer .bike-buehne { grid-column: 2; grid-row: 1 / -1; }
 
 /* ---------- Die Abschnitte ----------
    Kopfzeile (Titel links, "Alle ansehen" rechts) und darunter die Karten.
@@ -3112,6 +3130,14 @@ button.karte:active { transform: scale(0.985); }
 .reise-bild svg { display: block; width: 100%; height: 100%; }
 .reise-einladung .hint { margin: 0 0 var(--s3); }
 .reise-einladung .widget-knopf { width: auto; }
+/* Das Symbolbild ist kein Knopf wie das Kartenbild einer echten Reise -
+   es fuehrt nirgendwohin, es zeigt nur, was hier entstehen kann. Deshalb
+   kein Zeigerwechsel und kein Druckeffekt. */
+.reise-einladung .reise-bild { cursor: default; display: block; }
+.reise-einladung .reise-bild:active { transform: none; }
+/* Der Text steht mittig neben dem Bild statt oben - ohne Wertezeilen
+   darunter haenge er sonst in der oberen Ecke. */
+.reise-einladung .widget-text { justify-content: center; }
 
 /* ---------- Das Fenster zum Anlegen und Aendern ----------
    Es liegt ueber allem, auch ueber der unteren Leiste (z-index hoeher als
@@ -3333,6 +3359,14 @@ button.karte:active { transform: scale(0.985); }
   border-top: 1px solid var(--glas-hell);
 }
 .garage-dialog-fuss .btn.ghost { flex: 0 0 auto; color: var(--danger); }
+
+/* Der Fuss der Abmelde-Frage: zwei gleichwertige Wege untereinander statt
+   nebeneinander. "Abmelden und Geraet leeren" passt in keine halbe Zeile,
+   und der zweite Knopf ist kein Loeschen - deshalb bekommt er hier auch
+   nicht die Warnfarbe, die .garage-dialog-fuss .btn.ghost sonst setzt. */
+.abmelden-fuss { flex-direction: column; }
+.abmelden-fuss .btn { width: 100%; flex: 0 0 auto; }
+.abmelden-fuss .btn.ghost { color: var(--text); }
 
 /* ---------- Der Motorrad-Finder im Dialog ----------
    Marke als Knopfreihe, weil die Fahrzeugdatenbank 1684 Marken kennt und
@@ -5721,8 +5755,13 @@ body.nav-modus .karten-knopf { display: none; }
      im Bild etwas tiefer als die Mitte. Mit 50 Prozent war ihm der Helm
      abgeschnitten. */
   background: url("../img/planer-kopf.webp") center 52% / cover no-repeat;
-  -webkit-mask-image: linear-gradient(to bottom, black 42%, transparent 96%);
-  mask-image: linear-gradient(to bottom, black 42%, transparent 96%);
+  /* Der Verlauf beginnt frueh und ist bei 88 Prozent fertig - die letzten
+     zwoelf Prozent sind ganz durchsichtig. Er endete zuerst erst bei 96,
+     und weil die Strasse unten im Bild hell ist, blieb ein sichtbarer
+     grauer Streifen bis zur Kante stehen. Ein Verlauf muss VOR dem Rand
+     fertig sein, sonst sieht man den Rand trotzdem. */
+  -webkit-mask-image: linear-gradient(to bottom, black 30%, transparent 88%);
+  mask-image: linear-gradient(to bottom, black 30%, transparent 88%);
 }
 /* Der Titel rueckt in das ausgelaufene Ende des Bildes hinein - sonst
    klaffte unter dem Bild eine Luecke, in der nichts steht. */
