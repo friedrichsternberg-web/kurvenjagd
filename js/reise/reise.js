@@ -501,7 +501,10 @@ function reiseHeldHtml(reise) {
           <h2 class="reise-name">${escapeHtml(reise.name)}</h2>
           ${zeitraum ? `<span class="reise-held-zeitraum">${zeitraum}</span>` : ''}
         </div>
-        <button class="glas-rund klein" id="btnReiseName" title="Umbenennen" aria-label="Reise umbenennen">${symbol('stift', 'klein')}</button>
+        <span class="reise-held-werkzeug">
+          <button class="glas-rund klein" id="btnReiseTeilen" title="Reise als Link teilen" aria-label="Reise teilen">${symbol('teilen', 'klein')}</button>
+          <button class="glas-rund klein" id="btnReiseName" title="Umbenennen" aria-label="Reise umbenennen">${symbol('stift', 'klein')}</button>
+        </span>
       </header>
       <div class="reise-bilanz">
         <div class="reise-werte">
@@ -532,11 +535,9 @@ function reiseZahlenHtml(reise, bilanz) {
   const teilweise = zahl => zahl < bilanz.mitRoute ? `aus ${zahl} von ${bilanz.mitRoute} Etappen` : '';
   const kacheln = [];
 
-  /* Frueher stand hier eine Rinne mit einem Punkt darauf, der zeigte, wo
-     der Schnitt zwischen kuerzester und laengster Etappe liegt. Er sagte
-     wenig und sah nach Bedienelement aus. Jetzt stehen die drei Zahlen
-     einfach nebeneinander - kuerzeste, Schnitt, laengste -, und jede
-     fuehrt per Tipp zu ihrem Tag. */
+  /* Drei Zahlen nebeneinander - kuerzeste, Schnitt, laengste -, und jede
+     fuehrt per Tipp zu ihrem Tag. Warum hier kein Balken steht, obwohl
+     die Spanne danach verlangt: ENTSCHEIDUNGEN.md zum 10.09.2026. */
   if (bilanz.mitRoute >= 2) {
     kacheln.push(`
       <div class="stat breit">

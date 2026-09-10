@@ -299,6 +299,40 @@ gemeinsamen Ausfahrten oben, und aus demselben Grund:
 - Die **Teilnahme selbst verschwindet** (`ON DELETE CASCADE` auf
   `reise_teilnehmer`): Wer weg ist, steht nicht mehr in der Liste.
 
+### Teilen per Link (seit 10.09.2026)
+
+Ein Teilen-Knopf legt eine **Kopie** der Tour oder Reise auf dem Server ab
+und gibt einen Link darauf zurück: `serpa-app.de/#t=<token>`. Wer den
+Token hat, darf sehen; wer ihn nicht hat, kommt nicht heran. Der Token ist
+24 Zeichen aus dem Zufallsgenerator der Datenbank (96 Bit).
+
+**Der Token steht hinter dem Rautezeichen**, und das ist kein Zufall:
+Alles hinter der Raute schickt der Browser nicht an den Server. Der Token
+taucht damit in keinem Zugriffsprotokoll auf — weder bei uns noch beim
+Hoster der Seite.
+
+**Was in der Kopie steht:** bei einer Tour dasselbe wie beim öffentlichen
+Teilen, entschieden von `oeffentlicheTour()` in `kern.js` — also mit
+abgeschnittenen Enden bei einer Aufzeichnung. Bei einer Reise Name, erster
+Fahrtag und die Tage samt Routenabschrift. **Nicht** dabei: die Kasse und
+die Mitfahrer. Ein Link ist eine Ansicht, keine Einladung.
+
+**Wer den Link öffnet, braucht kein Konto.** `freigabe_holen()` ist die
+einzige Funktion im Projekt, die auch der nicht Angemeldete aufrufen darf.
+Das ist eine bewusste Ausnahme von der Regel bei `geteilte_tour_holen()`:
+Dort geht es um ein offenes Schaufenster, hier hat ein Mensch einem
+anderen etwas geschickt.
+
+**Mitgezählt wird nur die Zahl der Aufrufe** — damit der Absender sieht,
+ob sein Link jemanden erreicht hat. Es wird nichts gespeichert, woran sich
+ein Aufrufer wiedererkennen ließe: keine Adresse, keine Kennung, kein
+Zeitpunkt je Aufruf.
+
+**Beim Löschen des Kontos verschwinden die Links** (`ON DELETE CASCADE`).
+Anders als bei einer gemeinsamen Reise hängt hier nichts von anderen ab:
+Ein Link ist eine Kopie, kein Treffpunkt. Wer die Tour übernommen hat, hat
+sie in seinem Gerät und behält sie.
+
 ---
 
 ## Punkte, die in der Datenschutzerklärung stehen müssen

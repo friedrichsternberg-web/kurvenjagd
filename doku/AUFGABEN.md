@@ -143,8 +143,27 @@ Höhenmeter, kurvigster Etappe. Was als Nächstes kommt:
 6. **Der Speichern-Dialog des Planers** bekommt bei offener Reise die
    Vorbelegung „Als Tag 3 von Alpen 2027" – das schließt den Rückweg aus
    „Neue Route im Planer bauen" mit einem Feld statt fünf Tippern.
-7. **Die Reisekarte teilen**: als Bild, das man Freunden schickt. Das SVG
-   steht schon, es fehlt der Weg in ein PNG (Canvas) und `geraet.teilen()`.
+7. **Teilen per Link — GEBAUT am 10.09.2026, Datenbank eingespielt.**
+   Tour und Reise haben je einen Teilen-Knopf; er legt über
+   `freigabe_anlegen()` einen Link `serpa-app.de/#t=<token>` an und
+   öffnet das Teilen-Blatt des Systems (WhatsApp und der Rest). Wer den
+   Link öffnet, sieht die Strecke und wird dann gefragt: Konto anlegen
+   (groß) oder als Gast ansehen (klein). Beides endet damit, dass die
+   Tour im Gerät liegt.
+
+   **Was noch fehlt:**
+   - **Eine Übersicht der eigenen Links.** Die Tabelle zählt Aufrufe mit,
+     aber nichts zeigt sie an, und zurückziehen kann man einen Link nur
+     über das Dashboard. Gehört ins Profil: „Geteilte Links", je Zeile
+     Name, Datum, Aufrufe, ein Kreuz.
+   - **Eine Vorschau in der Nachricht.** WhatsApp zeigt zu einem Link
+     Titel und Bild, wenn die Seite `og:`-Angaben mitliefert. Die stehen
+     im HTML fest und können den Tourennamen nicht kennen — dafür
+     bräuchte es eine Seite, die der Server je Token erzeugt (Edge
+     Function). Ohne das steht in der Nachricht nur „Serpa".
+   - **Die Reisekarte als Bild** war die ältere Idee an dieser Stelle und
+     bleibt offen: ein PNG aus dem SVG (Canvas), das man auch dorthin
+     schicken kann, wo niemand die App hat.
 
 ## Vor der ersten Veröffentlichung in den Stores
 

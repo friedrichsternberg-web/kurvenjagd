@@ -3768,3 +3768,55 @@ gar nicht erst nach, sondern nimmt den alten Eintrag. Auch ein neues
 Prüfserver auf einem **anderen Port** starten. Ein anderer Ursprung hat
 einen leeren Zwischenspeicher.
 
+## 10.09.2026 (Nacht) — Touren per Link weitergeben
+
+„Schick mir mal die Strecke" ist die häufigste Frage unter
+Motorradfahrern, und die App konnte darauf bisher nur mit einer GPX-Datei
+antworten. Jetzt entsteht ein Link, den man in WhatsApp einwirft.
+
+**Warum das nicht über `geteilte_touren` läuft**, obwohl es dort schon
+etwas Ähnliches gibt: Das ist der öffentliche Feed — was dort steht,
+findet jeder über die Umkreissuche. Hier geht es um das Gegenteil: eine
+Tour genau einem Menschen zeigen, ohne sie in die Welt zu stellen. Zwei
+verschiedene Absichten, zwei Tabellen.
+
+**Der Token steht hinter dem Rautezeichen**, `serpa-app.de/#t=<token>`.
+Alles hinter der Raute schickt der Browser nicht an den Server. Der Token
+taucht damit in keinem Zugriffsprotokoll auf — weder bei uns noch beim
+Hoster. Das ist der Unterschied zwischen „nur wer den Link hat" und „nur
+wer den Link hat, und der Hoster liest mit". Er wird nach dem Öffnen aus
+der Adresszeile genommen, sonst landete er in jedem Lesezeichen.
+
+**`freigabe_holen()` darf als einzige Funktion im Projekt auch ohne
+Konto aufgerufen werden.** Das widerspricht scheinbar der Entscheidung
+vom 28.08.2026, `geteilte_tour_holen()` an eine Anmeldung zu binden — ist
+aber der andere Fall. Dort ging es um das offene Schaufenster, in dem
+jeder Krabbler die Strecken einsammeln könnte. Hier hat ein Mensch einem
+anderen etwas geschickt. Ihn an der Tür nach einem Konto zu fragen wäre
+genau die Hürde, wegen der niemand eine App weiterempfiehlt.
+
+**Die Frage am Ende ist bewusst ungleich gewichtet.** Der große Knopf legt
+ein Konto an, darunter steht klein „Als Gast ansehen". Kein versteckter
+Link, aber auch kein zweiter großer Knopf: Wer nur schauen will, findet
+es; wer unentschieden ist, bekommt eine Empfehlung. Wer schon angemeldet
+ist, wird gar nicht erst gefragt.
+
+**Beide Wege enden am selben Ort**, und das ist kein Versehen. Die App
+speichert im Gerät, und das kann sie ohne Konto genauso. Der Unterschied
+liegt woanders, und genau das sagt der Text: Mit Konto liegt es auch auf
+dem nächsten Gerät.
+
+**Ein Teilen-Knopf, nicht zwei.** Auf der Tourenkarte steht er neben dem
+Globus. Die beiden sehen ähnlich aus und meinen Verschiedenes — der Globus
+ist ein **Zustand** (blau heißt: steht öffentlich), der Teilen-Knopf eine
+**Handlung**. Deshalb leuchtet der eine und der andere bleibt still.
+
+**Zwei Fehler beim Bauen, beide von derselben Sorte:** Erst saß der
+Teilen-Knopf mitten in der Kopfzeile, weil `margin-left: auto` auf jedem
+Werkzeugknopf steht und zwei davon sich den Platz teilen. Und der
+Klick-Zuhörer musste in `app.js` sitzen, nicht in `teilen.js` — der
+dortige hängt am `<li>` und damit näher am Ziel, er käme zuerst und würde
+die Route laden, bevor `teilen.js` überhaupt gefragt wird. Beide Male gilt
+dasselbe: **Wer etwas an eine bestehende Zeile hängt, muss wissen, was
+dort schon hängt.**
+

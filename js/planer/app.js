@@ -3211,6 +3211,8 @@ function gespeicherteRouteHtml(r, mitTeilen = false) {
       <div class="widget-kopf">
         <span class="abzeichen">${r.aufgezeichnet ? 'Aufzeichnung' : 'Tour'}</span>
         ${datum ? `<span class="karte-datum">${datum}</span>` : ''}
+        <button class="teilen-knopf karte-teilen" data-teile-link="${escapeHtml(r.id)}"
+                title="Tour als Link teilen" aria-label="Tour teilen">${symbol('teilen', 'klein')}</button>
         ${teilen}
         <button class="del" data-del="${escapeHtml(r.id)}" title="Löschen">&times;</button>
       </div>
@@ -3305,11 +3307,22 @@ function verkabeleGespeicherteListe(list, { zeigePlanerBeimLaden }) {
       }
 
       const geteilt = e.target.closest('[data-teile]');
+      const perLink = e.target.closest('[data-teile-link]');
       const r = loadSaved().find(x => String(x.id) === li.dataset.id);
       if (!r) return;
 
       if (geteilt) {
         if (typeof öffneTeilenDialog === 'function') öffneTeilenDialog(r);
+        return;
+      }
+
+      /* Der Weg nach draussen: ein Link, den man in WhatsApp einwirft.
+         Er wird hier abgefangen und nicht in teilen.js, weil der Zuhoerer
+         am <li> naeher am Ziel sitzt als einer am Behaelter - er kaeme
+         zuerst und wuerde die Route laden, bevor teilen.js ueberhaupt
+         gefragt wird. */
+      if (perLink) {
+        if (typeof teileTourPerLink === 'function') teileTourPerLink(r);
         return;
       }
 
@@ -3594,12 +3607,15 @@ const BILDSCHIRME = [
   'rechtlichesScreen', 'reifenScreen', 'shopScreen', 'shopProduktScreen',
   'merklisteScreen',
   'kontoScreen', 'profilScreen', 'passwortNeuScreen', 'kontoLoeschenScreen',
+  // Der Bildschirm hinter einem geteilten Link. Er hat keinen Weg in der
+  // Leiste - man kommt nur ueber den Link dorthin.
+  'linkScreen',
 ];
 
 // Bildschirme, die die untere Leiste ausblenden: alles rund ums Konto.
 // Dort geht es um eine Sache, die man zu Ende bringt.
 const BILDSCHIRME_OHNE_LEISTE = ['kontoScreen', 'profilScreen', 'passwortNeuScreen',
-                                 'kontoLoeschenScreen', 'rechtlichesScreen'];
+                                 'kontoLoeschenScreen', 'rechtlichesScreen', 'linkScreen'];
 
 // Blendet genau einen Bildschirm ein und alle anderen aus, und bringt die
 // untere Leiste auf denselben Stand.

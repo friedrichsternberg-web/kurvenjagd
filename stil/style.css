@@ -1609,11 +1609,14 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 }
 /* Das Werkzeug rechts, und zwar auch dann, wenn kein Datum davorsteht:
    Der ERSTE Knopf schiebt sich nach rechts, jeder weitere rueckt nur noch
-   auf. Ohne die zweite Regel klebte alles am Abzeichen links. */
+   auf. Ohne die zweite Regel bekaeme JEDER sein margin-left: auto, und
+   dann verteilten sich zwei Knoepfe ueber die Zeile statt beieinander zu
+   stehen - genau so sass der Teilen-Knopf zuerst mitten im Kopf. */
 .widget-kopf .teilen-knopf,
 .widget-kopf .del { margin-left: auto; }
 .widget-kopf .karte-datum ~ .teilen-knopf,
 .widget-kopf .karte-datum ~ .del,
+.widget-kopf .teilen-knopf ~ .teilen-knopf,
 .widget-kopf .teilen-knopf ~ .del { margin-left: var(--s2); }
 .karte.tour-karte .widget-name { display: flex; align-items: center; gap: 8px; }
 .karte.tour-karte:active { transform: scale(0.99); }
@@ -5630,6 +5633,57 @@ body.nav-modus .karten-knopf { display: none; }
   color: var(--muted);
   cursor: pointer;
 }
+
+/* ---------- Teilen per Link ----------
+   Der Knopf auf der Tourenkarte und im Kopf der Reise, und der
+   Bildschirm, auf dem ein geteilter Link landet.                          */
+
+/* Zwei runde Knoepfe nebeneinander im Kopf der Reisekarte. Ohne den
+   Halter schoebe der zweite den ersten weg (margin-left: auto steht auf
+   beiden). */
+.reise-held-werkzeug { display: flex; gap: var(--s2); flex: 0 0 auto; }
+/* Der Teilen-Knopf ist eine Handlung, kein Zustand - deshalb bleibt er
+   still, bis man ihn beruehrt. Der Globus daneben LEUCHTET, wenn die Tour
+   oeffentlich steht, und sagt damit etwas ueber die Tour aus. Zwei
+   verschiedene Dinge, zwei verschiedene Auftritte. */
+.karte-teilen { color: var(--muted); }
+.karte-teilen:hover { color: var(--accent-hell); }
+
+/* ---------- Der Bildschirm hinter einem Link ---------- */
+.link-warten { margin: var(--s7) 0; text-align: center; }
+.link-empfang { display: flex; flex-direction: column; }
+/* Von wem der Link kommt - die erste Zeile, die der Empfaenger liest.
+   Sie steht ueber der Karte, weil "wer" vor "was" kommt: Man oeffnet den
+   Link ja, weil ein bestimmter Mensch ihn geschickt hat. */
+.link-absender {
+  margin: 0 0 var(--s4);
+  font-family: var(--schrift-display);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  text-align: center;
+}
+.link-karte { margin: 0 auto; width: 100%; max-width: 480px; }
+.link-karte .tour-vorschau { cursor: default; }
+
+.link-wahl {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s3);
+  margin: var(--s6) auto 0;
+  width: 100%;
+  max-width: 480px;
+}
+/* Der grosse Knopf traegt die Empfehlung. Er ist breit, weil er die
+   Antwort ist, mit der die meisten am besten fahren. */
+.link-hauptknopf { width: 100%; padding: 15px var(--s4); font-size: 16px; }
+.link-wahl .hint { margin: 0; text-align: center; }
+/* Und darunter der leise Weg. Kein zweiter grosser Knopf: Wer nur schauen
+   will, findet ihn - wer unentschieden ist, bekommt eine Empfehlung. */
+.link-gast { font-size: 14px; color: var(--muted); }
+.link-gast:hover { color: var(--accent-hell); }
 
 /* ---------- Das Blatt: Route waehlen ---------- */
 .reise-wahl { margin-top: var(--s2); }
