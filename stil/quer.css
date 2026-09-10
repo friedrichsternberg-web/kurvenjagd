@@ -393,7 +393,23 @@
      einer Reihe - und die Frage "Tour oder Reise?" liest sich dann als
      Entweder-oder, nicht als Liste. */
   .wahl-karten { grid-template-columns: 1fr 1fr; }
-  .wahl-karte { align-items: flex-start; }
+  /* Hier stand "align-items: flex-start" aus der Zeit, als die Karte eine
+     Zeile war (Symbol links, Text rechts). Seit dem 11.09.2026 ist sie
+     eine Spalte, und die Regel nahm der Kopfzeile ihre Breite: Der Pfeil
+     konnte mit seinem "margin-left: auto" nirgendwohin ausweichen und
+     klebte am Abzeichen. */
+
+  /* Der Listeninhalt hat im Breiten var(--s6) Innenabstand statt var(--s4)
+     - das Kopfbild muss also weiter herausgezogen werden, sonst bliebe
+     links und rechts ein Streifen stehen. */
+  /* Und hoeher als im Hochformat: Das Band ist hier gut dreimal so breit
+     wie hoch, und "cover" schneidet dann oben und unten so viel weg, dass
+     vom Fahrer nur noch der Rumpf uebrig bleibt. Mehr Hoehe gibt ihm
+     wieder Kopf und Vorderrad. */
+  .planer-kopf-bild {
+    margin-inline: calc(-1 * var(--s6));
+    height: clamp(220px, 42vh, 420px);
+  }
 
   /* --- 9. Der Startfilm im Liegen ---------------------------------------------
      Das liegende BILD des Films haengt an der Form des Fensters, nicht an

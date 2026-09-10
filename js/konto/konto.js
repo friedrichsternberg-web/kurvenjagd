@@ -254,6 +254,15 @@ let eigenesProfil = null;
    die erste Anmeldung durch ist. */
 const WARTENDES_BILD = 'kurvenjagd.profilbild.wartend';
 
+/* Merker: Hier hat gerade jemand ein Konto angelegt und ist noch nie nach
+   seinem Motorrad gefragt worden.
+
+   Warum das im Gerätespeicher steht und nicht in einer Variablen: Zwischen
+   dem Anlegen und der ersten Sitzung liegt in der Regel der Klick auf den
+   Bestätigungslink in der E-Mail - und der öffnet die Seite neu. Eine
+   Variable wäre bis dahin längst weg. */
+const MOTORRAD_FRAGE_OFFEN = 'kurvenjagd.motorradfrage';
+
 /* Erlaubt sind Buchstaben, Ziffern, Punkt, Strich und Unterstrich. Keine
    Leerzeichen: Ein Name mit Leerzeichen sieht in einer Liste aus wie zwei
    Namen, und beim Vorlesen weiß niemand, wo er aufhört. */
@@ -561,6 +570,13 @@ async function kontoFormularAbsenden() {
      denn vorher ist nicht sicher, dass das Konto überhaupt zustande kommt. */
   if (ergebnis.ok && kontoModus === 'registrieren' && gewähltesProfilbild) {
     geraet.schreib(WARTENDES_BILD, gewähltesProfilbild);
+  }
+
+  /* Und der Merker für die Frage nach dem Motorrad. Er wird hier gesetzt
+     und erst eingelöst, wenn es eine Sitzung gibt (siehe unten bei
+     onAuthStateChange) - dazwischen liegt meistens die Bestätigungsmail. */
+  if (ergebnis.ok && kontoModus === 'registrieren') {
+    geraet.schreib(MOTORRAD_FRAGE_OFFEN, true);
   }
 
   knopf.disabled = false;
@@ -910,6 +926,23 @@ if (backendVerfügbar()) {
       // typeof ist dieselbe Absicherung wie überall: touren.js wird NACH
       // dieser Datei geladen und könnte fehlen.
       if (typeof ladeGeteilteTouren === 'function') ladeGeteilteTouren();
+
+      /* Der letzte Schritt des Anlegens: die Frage nach dem eigenen
+         Motorrad. Sie steht bewusst HIER und nicht direkt nach dem
+         Absenden des Formulars - vorher gibt es keine Sitzung, und bei
+         eingeschalteter Mailbestätigung liegt dazwischen ein ganzer
+         Seitenaufruf.
+
+         Kurz verzögert, damit sie nicht mit dem Bildschirmwechsel in die
+         Garage kollidiert: Der Dialog rechnet beim Öffnen die Bühne des
+         Motorrads aus, und die misst sich an einem Bildschirm, der schon
+         zu sehen sein muss. */
+      if (geraet.lies(MOTORRAD_FRAGE_OFFEN, false)) {
+        geraet.wirfWeg(MOTORRAD_FRAGE_OFFEN);
+        window.setTimeout(() => {
+          if (typeof frageNachMotorrad === 'function') frageNachMotorrad();
+        }, 700);
+      }
     }
 
     /* Das Profil bei JEDER Anmeldung holen, auch beim bloßen Öffnen der

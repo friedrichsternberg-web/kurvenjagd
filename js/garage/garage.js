@@ -398,15 +398,32 @@ function motorradDialogHtml(vorhandenes) {
     `;
 }
 
-function öffneMotorradDialog(vorhandenes = null) {
+/* Der Gruss ueber dem Formular, wenn der Dialog direkt nach dem Anlegen
+   eines Kontos aufgeht. Er sagt in einem Satz, warum die App das wissen
+   will - und dass man ihn wegklicken darf. Ohne diesen Satz stuende nach
+   dem Anlegen unvermittelt ein Formular da, und niemand wuesste, ob er
+   hier durch muss. */
+function motorradWillkommenHtml() {
+  return `<p class="hint dialog-willkommen">Damit passen Reifengrößen, Vorschläge und
+    deine Stats zu deiner Maschine. Du kannst das auch später in der Garage
+    nachtragen.</p>`;
+}
+
+/* optionen.willkommen: Der Dialog kommt aus der Registrierung und traegt
+   dann eine Begruessung statt der nuechternen Ueberschrift. Sonst
+   unveraendert - es ist dasselbe Formular, und zwei davon zu pflegen
+   waere die schlechtere Antwort auf einen anderen Anlass. */
+function öffneMotorradDialog(vorhandenes = null, optionen = {}) {
   // Das Foto lebt waehrend des Dialogs hier und wandert erst beim Speichern
   // in die Garage. Wer abbricht, soll nichts veraendert haben.
   dialogFoto = vorhandenes?.bild || null;
   dialogFotoOriginal = dialogFoto;
 
   öffneDialog({
-    titel: vorhandenes ? 'Motorrad bearbeiten' : 'Motorrad hinzufügen',
-    felder: motorradDialogHtml(vorhandenes),
+    titel: optionen.willkommen ? 'Was fährst du?'
+         : (vorhandenes ? 'Motorrad bearbeiten' : 'Motorrad hinzufügen'),
+    felder: (optionen.willkommen ? motorradWillkommenHtml() : '')
+          + motorradDialogHtml(vorhandenes),
 
     beimSpeichern: () => {
       const datensatz = {
@@ -560,6 +577,19 @@ function sichereGarageWeg() {
    verkabele() meldet fehlende Kennungen in der Konsole und macht weiter.
    Die Funktion selbst steht in app.js, Abschnitt "Kleine Helfer" - konto.js
    braucht sie ebenfalls und wird vor dieser Datei geladen. */
+
+/* Der Weg aus der Registrierung hierher. konto.js ruft das, sobald ein
+   frisch angelegtes Konto seine erste Sitzung hat.
+
+   Wer schon ein Motorrad in der Garage stehen hat, wird nicht gefragt -
+   das ist der Fall, in dem jemand die App laengst benutzt und sich erst
+   jetzt ein Konto anlegt. Gibt zurueck, ob gefragt wurde, damit die
+   aufrufende Seite ihren Merker nur dann loeschen kann. */
+function frageNachMotorrad() {
+  if (motorradAktiv()) return false;
+  öffneMotorradDialog(null, { willkommen: true });
+  return true;
+}
 
 verkabele('btnMotorradNeu', 'click', () => öffneMotorradDialog(null));
 verkabele('btnMotorradBearbeiten', 'click', () => {

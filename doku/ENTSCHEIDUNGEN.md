@@ -3970,3 +3970,62 @@ wäre die Einführung immer sichtbar gewesen.
 
 Was mit dem Film im Fall eines Comebacks passiert, steht in der LIESMICH:
 beides hintereinander wäre zu viel vor der App.
+
+## 11.09.2026 (abends) — Der Planer-Einstieg, das Motorrad zur Registrierung, der Schimmer
+
+Vier kleine Sachen vor dem Push, aus Friedrichs Durchsicht.
+
+**Die erste Karte der Einführung trägt jetzt den Schriftzug.** Nur die
+erste: Sie ist die Begrüßung, auf den folgenden wäre er Wiederholung und
+nähme Platz vom Inhalt. Dasselbe Bild und dieselbe Zeile wie in der App,
+damit der Übergang stimmt.
+
+**Der Schimmer über der Merkliste ist weg.** Es war ein blauer Schein in
+der oberen linken Ecke – ein Rest aus der Zeit, als dieser Abschnitt eine
+eigene Platte mit Rand und Innenabstand war. Seit er ein schlichter
+`.start-abschnitt` ist, hatte der Verlauf nichts mehr, worin er liegen
+konnte, und lag als heller Schleier über Überschrift und Karte. Die
+Überschrift mit dem roten Herz reicht als Kennzeichnung.
+
+**Nach dem Anlegen eines Kontos kommt die Frage nach dem Motorrad.** Sie
+steht am Ende der Registrierung und nicht als eigener Schritt davor: Wer
+gerade ein Konto angelegt hat, ist bei der Sache; ein Formular mehr vor
+dem Absenden hätte abgeschreckt.
+
+Der Merker dafür liegt im Gerätespeicher (`kurvenjagd.motorradfrage`) und
+nicht in einer Variablen – zwischen dem Anlegen und der ersten Sitzung
+liegt in der Regel der Klick auf den Bestätigungslink in der E-Mail, und
+der öffnet die Seite neu. Eingelöst wird er in `onAuthStateChange`, dort
+wo auch der Tourenabgleich hängt. Wer schon ein Motorrad in der Garage
+hat, wird nicht gefragt: Das ist der Fall, in dem jemand die App längst
+benutzt und sich erst jetzt ein Konto anlegt.
+
+**Der Planer-Einstieg ist neu.** Vorher: zwei Zeilen-Karten mit je einem
+erklärenden Satz und einer Zählung, auf dem weichgezeichneten Foto hinter
+Glas. Jetzt: schwarzer Grund wie überall, oben ein Kopfbild, darunter zwei
+Karten in der Standardform mit nur noch einem Namen – „Plane eine Tour"
+und „Plane eine gesamte Reise". Wer auf „Planer" tippt, hat die Frage im
+Kopf und braucht keine Beschreibung dessen, was eine Tour ist.
+
+**Das Foto ist dasselbe, das vorher die Tapete war** – ein Motorradfahrer
+in einer Passkehre. Als weichgezeichneter Hintergrund war es Stimmung,
+hier ist es die Überschrift: Es zeigt genau das, worum es beim Planen
+geht. Neu gerechnet aus der Vorlage in voller Auflösung
+(`werkzeug/planer-bild.py`), unten ins Schwarz auslaufend, damit es Teil
+der Seite ist und kein aufgeklebtes Bild.
+
+**Damit wird die Herkunftsfrage dringend.** In `LIZENZ-bilder.txt` stand
+seit dem 01.09.2026, dass bei diesem Foto offen ist, ob Friedrich es selbst
+aufgenommen hat. Unscharf hinter Glas war das zu verschmerzen; scharf und
+groß im Vordergrund nicht mehr. Der Eintrag sagt das jetzt deutlich und
+nennt die drei Fälle. Ein Ersatz ist billig – anderes Bild in die Vorlage,
+Skript neu laufen lassen.
+
+**Zwei Fehler beim Bauen, beide im Querformat und beide von derselben
+Sorte:** `aspect-ratio` zusammen mit `max-height` schrumpft einen Kasten
+auch in der Breite – das Kopfbild saß als schmaler Streifen links statt
+über die volle Breite. Und `align-items: flex-start` aus `quer.css`,
+geschrieben für die alte Zeilen-Karte, nahm der neuen Kopfzeile ihre
+Breite: Der Pfeil konnte mit seinem `margin-left: auto` nirgendwohin
+ausweichen und klebte am Abzeichen. **Wer die Form eines Elements ändert,
+muss nachsehen, was im Querformat für die alte Form geschrieben wurde.**

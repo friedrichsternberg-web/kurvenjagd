@@ -50,6 +50,32 @@ hintergrund-weich.jpg
   laesst dieselbe Frage offen wie bei bike-standard.webp - selbst
   aufgenommen oder woanders gefunden?
 
+planer-kopf.webp
+  DASSELBE Foto wie hintergrund-weich.jpg, aber aus der Vorlage in voller
+  Aufloesung neu gerechnet: 16:9 zugeschnitten, 1200 Punkte breit, leicht
+  abgedunkelt. Gerechnet von werkzeug/planer-bild.py aus
+  arbeitsmaterial/inspiration/Dashboard/start-hintergrund.jpg. Seit dem
+  11.09.2026 das Kopfbild des Planer-Einstiegs.
+
+  DRINGENDER OFFEN ALS BISHER, und das ist der Grund fuer diesen eigenen
+  Eintrag: Bis zum 11.09.2026 lag dieses Foto nur weichgezeichnet als
+  Tapete hinter Glas - man erkannte kaum etwas. Jetzt steht es scharf und
+  gross im Vordergrund: Fahrer, Maschine, Kennzeichenbereich und Landschaft
+  sind deutlich zu sehen.
+
+  Damit zaehlt die Herkunftsfrage wirklich. Zu klaeren, BEVOR die App in
+  die Stores geht:
+    - Hat Friedrich das Foto selbst aufgenommen? Dann ist alles gut.
+    - Stammt es von woanders (Stockportal, Suchmaschine, Herstellerseite),
+      braucht es entweder eine Lizenz, eine Nennung oder einen Ersatz.
+    - Ist eine Person darauf erkennbar? Der Fahrer traegt einen
+      geschlossenen Helm, das Gesicht ist nicht zu sehen - eine
+      Einwilligung nach Kunsturhebergesetz duerfte damit entfallen.
+
+  Solange die Frage offen ist, ist das Bild nur ein Platzhalter. Ein
+  Ersatz ist billig: werkzeug/planer-bild.py neu laufen lassen, eine
+  andere Vorlage hineinlegen, fertig.
+
   Am 24.08.2026 entfernt, weil die Garage der Startbildschirm wurde und
   die Bilder damit niemand mehr anzeigt: start-hero.jpg,
   start-hintergrund.jpg (das Heldenfoto des alten Startbildschirms) und

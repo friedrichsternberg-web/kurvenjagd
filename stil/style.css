@@ -247,6 +247,16 @@
   .einfuehrung-inhalt { animation: none; }
 }
 
+/* Der Schriftzug ueber der ersten Karte. Etwas kleiner als sonst in der
+   App und mit einem Trennstrich darunter: Er begruesst, er ueberschreibt
+   nicht. Danach faengt der Inhalt an. */
+.einfuehrung-marke {
+  margin: 0 0 var(--s4);
+  padding-bottom: var(--s4);
+  border-bottom: 1px solid var(--glas-hell);
+}
+.einfuehrung-marke .wortmarke-bild { max-width: 168px; }
+
 /* Das grosse Zeichen: derselbe Glaskreis wie .widget-wert-symbol, nur
    doppelt so gross, weil er hier die Buehne ist und nicht die Beschriftung. */
 .einfuehrung-zeichen {
@@ -549,7 +559,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
    ueber dem verwischten Werkstattfoto wurden unruhig. Also Schwarz mit
    einem leisen Lichtkegel von oben - das gibt den Glaskanten etwas zu
    fangen, ohne mit den Fotos zu streiten. */
-#shopScreen, #merklisteScreen, #reiseScreen {
+#shopScreen, #merklisteScreen, #reiseScreen, #planerWahlScreen {
   background:
     radial-gradient(120% 55% at 50% -12%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 62%),
     var(--bg);
@@ -3197,6 +3207,15 @@ button.karte:active { transform: scale(0.985); }
 }
 @keyframes holen { 50% { opacity: 0.55; } }
 
+/* Der Gruss ueber dem Formular, wenn der Motorrad-Dialog aus der
+   Registrierung kommt. Abgesetzt durch einen Strich, damit klar ist: Das
+   ist die Einordnung, darunter faengt das Formular an. */
+.dialog-willkommen {
+  margin: 0 0 var(--s4);
+  padding-bottom: var(--s4);
+  border-bottom: 1px solid var(--glas-hell);
+}
+
 .dialog-paar { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); }
 .dialog-paar > div { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
 .dialog-paar label { margin-top: var(--s3); }
@@ -4105,17 +4124,13 @@ button.karte:active { transform: scale(0.985); }
    Raster aus achtundvierzig Karten an jeder gekennzeichnet ist. */
 .produkt-karte .badge.anzeige { font-size: 9px; padding: 0 6px; margin-top: 2px; }
 
-/* Die Merkliste in der Garage: dieselbe Platte wie die anderen, nur mit
-   der Signalfarbe im Rand und in der Ecke. Die eigenen Sachen duerfen
-   das eine Regal sein, das leuchtet. */
-.garage-merkliste {
-  border-color: color-mix(in srgb, var(--accent-hell) 38%, transparent);
-  background:
-    radial-gradient(ellipse 70% 60% at 0% 0%,
-      color-mix(in srgb, var(--accent) 24%, transparent) 0%,
-      transparent 70%),
-    linear-gradient(to bottom, var(--glas-hauch), var(--glas-hauch));
-}
+/* Die Merkliste auf dem Start. Hier stand bis zum 11.09.2026 ein blauer
+   Schein in der oberen linken Ecke - ein Rest aus der Zeit, als dieser
+   Abschnitt noch eine eigene Platte mit Rand und Innenabstand war. Seit
+   er ein schlichter .start-abschnitt ist, hatte der Verlauf nichts mehr,
+   worin er liegen konnte: Er lag als heller Schleier ueber Ueberschrift
+   und Karte. Weg damit - die Ueberschrift mit dem roten Herz reicht als
+   Kennzeichnung. */
 .garage-merkliste .produkt-karte { flex-basis: 172px; }
 .garage-merkliste-leer { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s3); }
 .garage-merkliste-leer .hint { margin: 0; }
@@ -5675,42 +5690,72 @@ body.nav-modus .karten-knopf { display: none; }
 
 /* ============================================================
    PLANER-EINSTIEG: Tour oder Reise?
-   Zwei grosse Glaskarten, jede ein Knopf. Das Symbol sitzt in derselben
-   Pille wie der aktive Eintrag der Leiste - dieselbe Sprache fuer
-   "hier geht es weiter". Gezeichnet von einstieg.js.
+   Ein Kopfbild und zwei Karten in der Standardform. Gezeichnet von
+   einstieg.js.
+
+   Der Bildschirm traegt seit dem 11.09.2026 KEIN Foto mehr hinter dem
+   Glas, sondern denselben schwarzen Grund wie die uebrigen Listen (siehe
+   die Regel bei #shopScreen weiter oben). Das Foto ist stattdessen nach
+   vorn geholt - siehe .planer-kopf-bild.
    ============================================================ */
+
+/* Das Kopfbild: randlos ueber die volle Breite, unten ins Schwarz
+   auslaufend. Die Maske macht daraus statt eines aufgeklebten Bildes einen
+   Anfang der Seite - dasselbe Mittel wie beim Werkstattraum der
+   Bike-Karte, nur senkrecht.
+
+   Die negativen Raender heben den Innenabstand von .start-screen-inner
+   auf; nach oben zusaetzlich der Abstand, damit das Bild wirklich an der
+   Oberkante beginnt. */
+.planer-kopf-bild {
+  margin: calc(-1 * var(--s5)) calc(-1 * var(--s4)) 0;
+  margin-top: calc(-1 * max(var(--s5), env(safe-area-inset-top) + var(--s3)));
+  /* Eine Hoehe, KEIN aspect-ratio. Mit "aspect-ratio: 16/9" und einer
+     Hoehengrenze schrumpft der Kasten auch in der Breite, sobald die
+     Grenze greift - das Bild sass dann als schmaler Streifen links statt
+     ueber die volle Breite. "cover" schneidet den Ausschnitt ohnehin
+     passend zu, eine Seitenverhaeltnis-Angabe braucht es also gar nicht. */
+  height: clamp(190px, 34vh, 360px);
+  /* 52 Prozent und nicht die Mitte: Im Breiten ist das Band sehr flach,
+     "cover" schneidet dann oben und unten viel weg - und der Fahrer sitzt
+     im Bild etwas tiefer als die Mitte. Mit 50 Prozent war ihm der Helm
+     abgeschnitten. */
+  background: url("../img/planer-kopf.webp") center 52% / cover no-repeat;
+  -webkit-mask-image: linear-gradient(to bottom, black 42%, transparent 96%);
+  mask-image: linear-gradient(to bottom, black 42%, transparent 96%);
+}
+/* Der Titel rueckt in das ausgelaufene Ende des Bildes hinein - sonst
+   klaffte unter dem Bild eine Luecke, in der nichts steht. */
+.planer-kopf-titel { margin: calc(-1 * var(--s7)) 0 var(--s5); }
+
 .wahl-karten {
   display: grid;
   gap: var(--s3);
   text-align: left;
 }
+/* Die ganze Karte ist der Knopf. Deshalb steht unten keiner: Ein Knopf im
+   Knopf waere nicht nur ungueltiges HTML, sondern auch eine zweite Antwort
+   auf dieselbe Frage. */
 .wahl-karte {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: var(--s3);
-  width: 100%;
-  padding: var(--s4);
-  text-align: left;
-  font: inherit;
-  color: var(--text);
+  border-radius: var(--r-xl);
   cursor: pointer;
-  border-radius: var(--r-lg);
-  border: 1px solid var(--glas-rand);
-  background: var(--glas-hell);
-  backdrop-filter: blur(22px) saturate(160%);
-  -webkit-backdrop-filter: blur(22px) saturate(160%);
-  box-shadow:
-    inset 0 1px 0 var(--glas-heller),
-    inset 0 -1px 0 var(--schatten-hauch),
-    0 12px 34px var(--schatten-mittel);
   transition: transform 0.15s cubic-bezier(0.2,0.8,0.2,1), background 0.15s ease;
 }
-.wahl-karte:hover { background: var(--glas-heller); }
+.wahl-karte:hover { background: var(--glas-rand); }
 .wahl-karte:active { transform: scale(0.985); }
+/* Der Kopf ist hier ein <span> und kein <div> - in einem <button> darf
+   kein Block stehen. Die Anordnung kommt trotzdem von .widget-kopf, nur
+   das display muss nachgereicht werden. */
+.wahl-karte .widget-kopf { display: flex; margin-bottom: 0; }
+.wahl-karte .widget-koerper { align-items: flex-start; }
+.wahl-karte .widget-name { margin: 0; }
 .wahl-symbol {
   flex: 0 0 auto;
-  width: 58px;
-  height: 58px;
+  width: 64px;
+  height: 64px;
   display: grid;
   place-items: center;
   border-radius: var(--r-md);
@@ -5719,20 +5764,8 @@ body.nav-modus .karten-knopf { display: none; }
   border: 1px solid color-mix(in srgb, var(--accent-hell) 35%, transparent);
   box-shadow: inset 0 1px 0 var(--glas-rand);
 }
-.wahl-symbol .ic { width: 30px; height: 30px; }
-.wahl-text { flex: 1 1 auto; min-width: 0; display: grid; gap: 3px; }
-.wahl-titel {
-  font-family: var(--schrift-display);
-  font-weight: 700;
-  font-size: 22px;
-  line-height: 1.1;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  color: var(--metall-glanz);
-}
-.wahl-satz { font-size: 14px; line-height: 1.45; color: var(--text); }
-.wahl-meta { font-size: 12.5px; color: var(--muted); }
-.wahl-pfeil { flex: 0 0 auto; font-size: 22px; color: var(--accent-hell); }
+.wahl-symbol .ic { width: 32px; height: 32px; }
+.wahl-pfeil { margin-left: auto; font-size: 22px; line-height: 1; color: var(--accent-hell); }
 
 /* ============================================================
    DIE REISEKARTE IN DER GARAGE

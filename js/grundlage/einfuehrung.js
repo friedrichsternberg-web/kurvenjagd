@@ -110,6 +110,22 @@ function einfuehrungPunkteHtml(aktiv, anzahl) {
   }</div>`;
 }
 
+/* Der Schriftzug ueber der ersten Karte. Er steht NUR dort: Die erste
+   Karte ist die Begruessung, und wer die App zum ersten Mal oeffnet, soll
+   zuerst sehen, wie sie heisst. Auf den folgenden Karten waere er
+   Wiederholung und wuerde nur Platz vom Inhalt nehmen.
+
+   Dasselbe Bild und dieselbe Zeile wie in der App (.wortmarke), damit der
+   Uebergang stimmt - der Schriftzug steht danach im Kopf des Starts. */
+function einfuehrungMarkeHtml() {
+  return `
+    <p class="wortmarke einfuehrung-marke">
+      <img class="wortmarke-bild" src="img/logo-serpa.webp?v=110" alt="Serpa"
+           width="800" height="155" fetchpriority="high">
+      <span class="wortmarke-sub">Deine Motorradapp</span>
+    </p>`;
+}
+
 function einfuehrungSchrittHtml(schritt, nummer) {
   const anzahl = EINFUEHRUNG_SCHRITTE.length + 1;
   return `
@@ -118,6 +134,7 @@ function einfuehrungSchrittHtml(schritt, nummer) {
       <button type="button" class="linkbtn" data-einfuehrung-weg>Überspringen</button>
     </div>
     <div class="einfuehrung-inhalt">
+      ${nummer === 0 ? einfuehrungMarkeHtml() : ''}
       <div class="einfuehrung-zeichen">${einfuehrungZeichen(schritt.zeichen)}</div>
       <h2 class="einfuehrung-titel">${schritt.titel}</h2>
       <p class="einfuehrung-text">${schritt.text}</p>

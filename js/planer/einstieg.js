@@ -26,48 +26,51 @@
 
 
 /* --- 1. Der Bildschirm "Was planst du?" -------------------------------------
-   Zwei grosse Karten, sonst nichts. Jede sagt in einem Satz, was sie
-   bedeutet, und in einer Zeile, wie viel davon schon da ist. Ein Bildschirm
-   mit zwei Knoepfen ist ein Umweg von einem Tipp - er lohnt sich nur, wenn
-   beide Wege gleich wichtig sind. Das sind sie: Die Reise ist kein Anhang
-   der Tour, sondern das, was man am Wochenende wirklich plant. */
+   Ein Kopfbild und zwei Karten, sonst nichts.
+
+   DAS KOPFBILD ist dasselbe Foto, das bis zum 11.09.2026 weichgezeichnet
+   hinter allen Startbildschirmen lag: ein Motorradfahrer in einer
+   Passkehre. Hier steht es scharf und im Vordergrund, denn es zeigt genau
+   das, worum es beim Planen geht - als Tapete hinter Glas war es nur
+   Stimmung, hier ist es die Ueberschrift. Unten laeuft es ins Schwarz des
+   Bildschirms aus, damit es Teil der Seite ist und kein aufgeklebtes Bild.
+
+   DIE ZWEI KARTEN tragen die Standardform (.karte mit Abzeichen und
+   grossem Namen) und sonst NICHTS: kein erklaerender Satz, keine Zaehlung.
+   Beide standen hier bis zum 11.09.2026 und waren zu viel - wer auf
+   "Planer" tippt, hat die Frage im Kopf und braucht keine Beschreibung
+   dessen, was eine Tour ist. Die ganze Karte ist der Knopf, deshalb steht
+   unten auch keiner. */
 
 function zeichnePlanerWahl() {
   const inner = document.getElementById('planerWahlInner');
   if (!inner) return;
-  const touren = typeof loadSaved === 'function' ? loadSaved().length : 0;
-  const reisen = typeof ladeReisen === 'function' ? ladeReisen().length : 0;
   inner.innerHTML = `
-    <h2>Planer</h2>
-    <p class="sub">Was hast du vor?</p>
+    <div class="planer-kopf-bild" aria-hidden="true"></div>
+    <h2 class="planer-kopf-titel">Was planst du?</h2>
     <div class="wahl-karten">
-      <button type="button" class="wahl-karte" data-wahl="tour">
-        <span class="wahl-symbol">${symbol('route', 'gross')}</span>
-        <span class="wahl-text">
-          <span class="wahl-titel">Eine Tour</span>
-          <span class="wahl-satz">Eine Strecke f&uuml;r heute oder morgen &ndash; so kurvig,
-            wie du willst, mit Karte und Navigation.</span>
-          <span class="wahl-meta">${zaehlText(touren, 'Tour', 'Touren')} gespeichert</span>
-        </span>
-        <span class="wahl-pfeil" aria-hidden="true">&rarr;</span>
-      </button>
-      <button type="button" class="wahl-karte" data-wahl="reise">
-        <span class="wahl-symbol">${symbol('berg', 'gross')}</span>
-        <span class="wahl-text">
-          <span class="wahl-titel">Eine Reise</span>
-          <span class="wahl-satz">Mehrere Tage am St&uuml;ck, jeder Tag eine Etappe &ndash;
-            aus deinen Touren oder direkt auf der Karte geplant.</span>
-          <span class="wahl-meta">${zaehlText(reisen, 'Reise', 'Reisen')} angelegt</span>
-        </span>
-        <span class="wahl-pfeil" aria-hidden="true">&rarr;</span>
-      </button>
+      ${wahlKarteHtml('tour', 'Tour', 'route', 'Plane eine Tour')}
+      ${wahlKarteHtml('reise', 'Reise', 'berg', 'Plane eine gesamte Reise')}
     </div>`;
 }
 
-// "1 Tour", "3 Touren", "keine Reise".
-function zaehlText(anzahl, einzahl, mehrzahl) {
-  if (!anzahl) return `keine ${einzahl}`;
-  return `${anzahl} ${anzahl === 1 ? einzahl : mehrzahl}`;
+/* Hier stand bis zum 11.09.2026 zaehlText() ("3 Touren", "keine Reise")
+   fuer die Zeile unter jeder Karte. Die Zeile ist weg, also auch der
+   Helfer - eine Funktion, die niemand ruft, ist kein Vorrat, sondern eine
+   Frage fuer den Naechsten, der sie liest. */
+
+function wahlKarteHtml(wahl, abzeichen, zeichen, name) {
+  return `
+    <button type="button" class="karte wahl-karte" data-wahl="${wahl}">
+      <span class="widget-kopf">
+        <span class="abzeichen">${abzeichen}</span>
+        <span class="wahl-pfeil" aria-hidden="true">&rarr;</span>
+      </span>
+      <span class="widget-koerper">
+        <span class="wahl-symbol">${symbol(zeichen)}</span>
+      </span>
+      <span class="widget-name">${name}</span>
+    </button>`;
 }
 
 function zeigePlanerWahl() {
