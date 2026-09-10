@@ -5330,31 +5330,43 @@ body.nav-modus .karten-knopf { display: none; }
 .reise-fuss .hint { margin: 0; }
 
 /* ---------- Mitfahrer und Kasse ----------
-   Zwei Zusaetze am Reisebildschirm, beide in der Handschrift, die schon da
-   ist: die Leiste borgt sich die runden Glasknoepfe der Kopfzeile, die
-   Kasse die Wertekacheln (.stat) von "Meine Stats". Nichts Eigenes
-   erfinden, wo die App die Form schon hat.                                 */
+   Zwei Karten im Kopf der Reise, in derselben Sprache wie die Bike-Karte
+   und die Reisekarte auf dem Start: .karte mit .widget-kopf,
+   .widget-name, .widget-werte und .widget-knopf. Hier steht nur, was sie
+   unterscheidet - nichts Eigenes erfinden, wo die App die Form schon hat.
 
-.mitfahrer-leiste {
-  display: flex;
-  align-items: center;
+   Das Raster braucht keine eigene Regel fuers Querformat: auto-fit legt
+   die beiden nebeneinander, sobald je 260 Punkte da sind, und sonst
+   untereinander. Auf dem Handy ist das immer eine Spalte, in der linken
+   Spalte des Querformats immer zwei.                                     */
+
+.reise-widgets {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: var(--s3);
+  /* Kein align-items: start. Nebeneinander sollen beide Karten gleich
+     hoch sein, damit ihre Knoepfe auf einer Linie stehen - das erledigt
+     das gestreckte Rasterkind zusammen mit dem flex:1 auf dem Inhalt. */
   margin: var(--s4) 0 0;
 }
-.mitfahrer-leiste .hint { margin: 0; }
+.kasse-widget, .mitfahrer-widget { border-radius: var(--r-xl); }
+/* Der Knopf sitzt unten und soll bei zwei verschieden hohen Karten auf
+   derselben Linie stehen. Deshalb die Karte selbst als Spalte, in der der
+   Text waechst und der Knopf am Fuss bleibt. */
+.kasse-widget, .mitfahrer-widget { display: flex; flex-direction: column; }
+.kasse-widget .widget-werte, .mitfahrer-widget .hint { flex: 1; }
+.kasse-widget .hint, .mitfahrer-widget .hint { margin: 0; }
+.kasse-widget .widget-knopf, .mitfahrer-widget .widget-knopf { margin-top: var(--s4); }
+/* Die Kasse traegt als Namen einen Betrag. Ziffern in gleicher Breite,
+   sonst huepft die Zahl bei jeder Aenderung. */
+.kasse-widget .widget-name { font-variant-numeric: tabular-nums; }
+/* Nur der offene Betrag faerbt sich, und nur wenn wirklich etwas offen
+   ist. Eine Null in Warnfarbe waere eine Warnung vor nichts. */
+.kasse-widget .wert.warnt { color: var(--danger-glanz); }
 
 /* Die Punkte ueberlappen sich leicht: So liest sich eine Gruppe als eine
-   Gruppe und nicht als eine Reihe einzelner Bilder. Der letzte, das Plus,
-   sitzt an derselben Stelle wie die anderen und traegt die Randfarbe der
-   Knoepfe - er ist die Bedienung, nicht ein weiterer Mensch. */
-.mitfahrer-punkte {
-  display: flex;
-  align-items: center;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
-}
+   Gruppe und nicht als eine Reihe einzelner Bilder. */
+.mitfahrer-punkte { display: flex; align-items: center; margin-bottom: var(--s3); }
 .mitfahrer-punkt {
   width: 34px;
   height: 34px;
@@ -5374,20 +5386,13 @@ body.nav-modus .karten-knopf { display: none; }
   color: var(--metall-glanz);
 }
 .mitfahrer-punkt img { width: 100%; height: 100%; object-fit: cover; }
-/* Die Ueberlappung gilt nur fuer die Gruppe in der Leiste. In einer Liste
-   steht je Zeile genau ein Mensch, und da soll der Name Luft haben. */
-.mitfahrer-treffer .mitfahrer-punkt,
-.mitfahrer-bestand .mitfahrer-punkt { margin-right: 0; }
 /* Wer noch nicht geantwortet hat, steht blasser da - ohne dass man ihn
    suchen muesste. */
 .mitfahrer-punkt.wartet { opacity: 0.45; }
-.mitfahrer-punkt.plus {
-  margin-right: 0;
-  border-style: dashed;
-  border-color: color-mix(in srgb, var(--accent-hell) 55%, transparent);
-  color: var(--accent-hell);
-}
-.mitfahrer-punkte:active .mitfahrer-punkt.plus { transform: scale(0.94); }
+/* Die Ueberlappung gilt nur fuer die Gruppe auf der Karte. In einer Liste
+   steht je Zeile genau ein Mensch, und da soll der Name Luft haben. */
+.mitfahrer-treffer .mitfahrer-punkt,
+.mitfahrer-bestand .mitfahrer-punkt { margin-right: 0; }
 
 .reise-eintrag-marke {
   flex: 0 0 auto;
@@ -5395,7 +5400,7 @@ body.nav-modus .karten-knopf { display: none; }
   color: var(--muted);
 }
 
-/* Das Blatt: Suche oben, Bestand unten. */
+/* Das Blatt "Mitfahrer": Suche oben, Bestand unten. */
 .mitfahrer-suchzeile { display: flex; gap: var(--s2); align-items: center; }
 .mitfahrer-suchzeile input { flex: 1; }
 .mitfahrer-treffer, .mitfahrer-bestand { list-style: none; margin: var(--s2) 0 0; padding: 0; }
@@ -5426,6 +5431,9 @@ body.nav-modus .karten-knopf { display: none; }
   letter-spacing: 0.06em;
   color: var(--muted);
 }
+/* Der erste Zwischentitel im Blatt braucht oben keinen Abstand - darueber
+   steht schon die Kopfzeile des Blatts. */
+#reiseBlattInhalt > .blatt-zwischentitel:first-child { margin-top: 0; }
 
 /* Einladungen ueber der Reiseliste. Blau umrandet, weil sie eine Antwort
    verlangen - alles andere in dieser Liste verlangt nichts. */
@@ -5437,28 +5445,13 @@ body.nav-modus .karten-knopf { display: none; }
   padding: var(--s3);
   border: 1px solid color-mix(in srgb, var(--accent-hell) 45%, transparent);
   border-radius: var(--r-md);
-  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
 }
 .einladung-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .einladung-knoepfe { display: flex; gap: var(--s2); flex: 0 0 auto; }
 
-/* ---------- Die Kasse ---------- */
-.reise-kasse { margin-top: var(--s6); }
-.kasse-zahlen { margin-top: var(--s2); }
-.kasse-zahlen .stat.breit { grid-column: 1 / -1; }
-.kasse-zahlen .stat .v i {
-  font-style: normal;
-  font-size: 0.6em;
-  font-weight: 600;
-  margin-left: 3px;
-  color: var(--muted);
-}
-/* Nur die eine Kachel faerbt sich, und nur wenn wirklich etwas offen ist.
-   Eine Null in Warnfarbe waere eine Warnung vor nichts. */
-.kasse-zahlen .stat.offen { border-color: color-mix(in srgb, var(--danger) 50%, transparent); }
-.kasse-zahlen .stat.offen .v { color: var(--danger-glanz); }
-
-.kasse-quitt { margin: var(--s3) 0 0; color: var(--good); font-size: 14px; }
+/* ---------- Das Blatt "Kasse" ---------- */
+.kasse-quitt { margin: 0; color: var(--good); font-size: 14px; }
 
 .kasse-wege { list-style: none; margin: var(--s2) 0 0; padding: 0; }
 .kasse-weg {
@@ -5473,7 +5466,7 @@ body.nav-modus .karten-knopf { display: none; }
 .kasse-pfeil { color: var(--muted); flex: 0 0 auto; }
 .kasse-betrag { margin-left: auto; font-variant-numeric: tabular-nums; }
 
-.kasse-liste { margin-top: var(--s3); }
+.kasse-liste { margin-top: var(--s2); }
 .kasse-zeile { display: flex; align-items: center; gap: var(--s3); cursor: pointer; }
 .kasse-zeile-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .kasse-zeile-wert {

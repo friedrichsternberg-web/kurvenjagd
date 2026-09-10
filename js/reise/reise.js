@@ -396,12 +396,12 @@ function zeichneReise() {
       <button class="btn ghost back-btn" id="btnReiseZurueck">&larr; Touren</button>
     </div>
     <div class="reise-held-halter">${reiseHeldHtml(reise)}${reiseZahlenHtml(reise, reiseBilanz(reise))}${
-      /* Die Mitfahrer gehoeren IN den Halter und nicht daneben: Im
-         Querformat ist #reiseInner ein Zweispalter, und ein weiteres
-         Kind landete in der falschen Spalte. So klebt die Leiste mit der
-         Reisekarte zusammen oben - wo sie hingehoert, denn wer mitplant,
-         ist Teil des Kopfes und nicht des Etappenfadens. */
-      typeof mitfahrerLeisteHtml === 'function' ? mitfahrerLeisteHtml(reise) : ''}</div>
+      /* Kasse und Mitfahrer gehoeren IN den Halter und nicht daneben: Im
+         Querformat ist #reiseInner ein Zweispalter, und ein weiteres Kind
+         landete in der falschen Spalte. Sie stehen damit im Kopf der
+         Reise, ueber den Tagen - denn wer mitplant und wer was bezahlt
+         hat, gehoert zur Reise und nicht ans Ende des Etappenfadens. */
+      reiseWidgetsHtml(reise)}</div>
     <div class="reise-faden">
       <div class="reise-tage-kopf">
         <h2 class="regal-titel">Tage</h2>
@@ -414,12 +414,29 @@ function zeichneReise() {
           <button class="btn ghost etappe-anhaengen" data-anhaengen>Tag hinzuf&uuml;gen</button>
         </li>
       </ol>
-      ${typeof ausgabenAbschnittHtml === 'function' ? ausgabenAbschnittHtml(reise) : ''}
       ${reiseFussHtml(reise)}
     </div>`;
   beobachteVorschauen(inner);
   markiereAuswahl();
 }
+
+/* Die beiden Karten im Kopf der Reise: die Kasse und die Mitfahrer.
+   Nebeneinander, sobald Platz ist - das erledigt das Raster in style.css
+   von selbst, ohne eine eigene Regel fuers Querformat.
+
+   Der Behaelter entsteht nur, wenn wenigstens eine Karte etwas hergibt.
+   Ohne Konto geben beide nichts zurueck, und ein leerer Kasten mit
+   Aussenabstand haette in der Reise eine Luecke gelassen, die niemand
+   erklaeren kann. Die Pruefung auf typeof ist dieselbe Absicherung wie
+   ueberall: Fehlt eine der beiden Dateien, fehlt eben ihre Karte. */
+function reiseWidgetsHtml(reise) {
+  const karten = [
+    typeof kassenWidgetHtml === 'function' ? kassenWidgetHtml(reise) : '',
+    typeof mitfahrerWidgetHtml === 'function' ? mitfahrerWidgetHtml(reise) : '',
+  ].filter(Boolean);
+  return karten.length ? `<div class="reise-widgets">${karten.join('')}</div>` : '';
+}
+
 
 /* Der Fuss unter dem Etappenfaden. Drei Faelle statt einem:
 

@@ -34,45 +34,83 @@ async function ladeAusgabenNach(reise) {
 }
 
 
-/* --- 1. Der Abschnitt im Reisebildschirm ---------------------------------
+/* --- 1. Das Kassen-Widget ------------------------------------------------
 
-   Vier Teile, in dieser Reihenfolge: die drei Zahlen, die die Kasse
-   zusammenfassen; was zwischen den Leuten offen ist; die Ausgaben selbst;
-   der Knopf fuer die naechste.
+   Die Kasse haengt nicht mehr unten am Bildschirm, sondern steht als
+   eigene Karte oben neben den Mitfahrern - in derselben Sprache wie die
+   Bike-Karte und die Reisekarte auf dem Start (.karte mit .widget-kopf,
+   .widget-name, .widget-werte, .widget-knopf). Der Grund ist einfach: Was
+   unten angehaengt ist, liest sich wie ein Nachtrag. Die Kasse ist aber
+   neben dem Plan die zweite Sache, wegen der man eine gemeinsame Reise
+   ueberhaupt oeffnet.
 
-   Warum "Wer schuldet wem" ueber der Liste steht: Das ist die Frage, wegen
-   der man die Kasse ueberhaupt oeffnet. Die einzelne Ausgabe sucht man erst,
-   wenn die Antwort einen wundert.                                          */
+   Auf der Karte stehen nur die drei Zahlen, die man im Vorbeigehen
+   wissen will. Alles Weitere - die Liste, wer wem was schuldet, das
+   Eintragen und Abhaken - liegt ein Tippen tiefer im Blatt.             */
 
-function ausgabenAbschnittHtml(reise) {
+function kassenWidgetHtml(reise) {
   if (!ausgabenMoeglich(reise)) return '';
-  const teilnehmer = reiseTeilnehmerJetzt().map(person => person.nutzer_id);
-  const stand = rechneKasse(reiseAusgaben, teilnehmer);
+  const stand = rechneKasse(reiseAusgaben, reiseTeilnehmerJetzt().map(person => person.nutzer_id));
   const ich = angemeldeterNutzer ? stand.jeNutzer[String(angemeldeterNutzer.id)] : null;
 
   return `
-    <div class="reise-kasse" id="reiseKasse">
-      <div class="reise-tage-kopf">
-        <h2 class="regal-titel">Kasse</h2>
-        <button class="btn ghost klein" data-ausgabe-neu>${symbol('plus', 'klein')} Ausgabe</button>
+    <div class="karte kasse-widget" data-kasse-oeffnen>
+      <div class="widget-kopf">
+        <span class="abzeichen">Kasse</span>
+        ${stand.anzahl
+          ? '<button type="button" class="linkbtn" data-kasse-oeffnen>Alle Ausgaben &rsaquo;</button>'
+          : ''}
       </div>
-      <div class="stats kasse-zahlen">
-        <div class="stat">
-          <span class="k">Gesamt</span>
-          <span class="v">${centZuText(stand.summeCent, false)}<i>&euro;</i></span>
-        </div>
-        <div class="stat">
-          <span class="k">Dein Anteil</span>
-          <span class="v">${centZuText(ich?.anteil || 0, false)}<i>&euro;</i></span>
-        </div>
-        <div class="stat breit${ich?.offen ? ' offen' : ''}">
-          <span class="k">${ich?.offen ? 'Du schuldest noch' : 'Von dir offen'}</span>
-          <span class="v">${centZuText(ich?.offen || 0, false)}<i>&euro;</i></span>
-        </div>
-      </div>
-      ${ausgleichHtml(stand)}
-      ${ausgabenListeHtml(reise)}
+      <h3 class="widget-name">${stand.anzahl ? centZuText(stand.summeCent) : 'Noch leer'}</h3>
+      ${stand.anzahl
+        ? `<div class="widget-werte">
+             ${kassenZeile('kasse', 'Dein Anteil', centZuText(ich?.anteil || 0))}
+             ${kassenZeile('haken', 'Von dir offen',
+                 ich?.offen ? centZuText(ich.offen) : 'nichts', ich?.offen ? 'warnt' : '')}
+             ${kassenZeile('leute', 'Du bekommst',
+                 ich?.bekommt ? centZuText(ich.bekommt) : 'nichts')}
+           </div>`
+        : `<p class="hint">Wer etwas auslegt, tr&auml;gt es hier ein.
+             Aufgeteilt wird sofort, und Bezahltes hakst du ab.</p>`}
+      <button type="button" class="btn ghost widget-knopf" data-ausgabe-neu>
+        ${symbol('plus', 'klein')} Ausgabe eintragen
+      </button>
     </div>`;
+}
+
+function kassenZeile(symbolName, beschriftung, wert, zusatz = '') {
+  return `
+    <div class="widget-wert">
+      <span class="widget-wert-symbol">${symbol(symbolName)}</span>
+      <span class="widget-wert-text">
+        <span class="label">${beschriftung}</span>
+        <span class="wert ${zusatz}">${wert}</span>
+      </span>
+    </div>`;
+}
+
+
+/* --- 2. Das Blatt "Kasse": alles auf einmal ------------------------------
+
+   Oben die drei Zahlen noch einmal gross, darunter was zwischen den Leuten
+   offen ist, darunter die Ausgaben selbst. Ein Tipp auf eine Ausgabe
+   oeffnet sie zum Aendern und Abhaken.
+
+   Warum "Wer schuldet wem" UEBER der Liste steht: Das ist die Frage, wegen
+   der man die Kasse oeffnet. Die einzelne Ausgabe sucht man erst, wenn die
+   Antwort einen wundert.                                                  */
+
+function oeffneKassenBlatt() {
+  const reise = reiseNach(offeneReiseId);
+  if (!ausgabenMoeglich(reise)) return;
+  const stand = rechneKasse(reiseAusgaben, reiseTeilnehmerJetzt().map(person => person.nutzer_id));
+  offeneAusgabeId = null;
+  oeffneBlatt({
+    titel: 'Kasse',
+    inhalt: ausgleichHtml(stand) + ausgabenListeHtml(reise),
+    fuss: `<button class="btn ghost" data-blatt-zu>Fertig</button>
+           <button class="btn" data-ausgabe-neu>Ausgabe eintragen</button>`,
+  });
 }
 
 function ausgleichHtml(stand) {
@@ -116,7 +154,8 @@ function ausgabenListeHtml(reise) {
         </span>
       </li>`;
   }).join('');
-  return `<ul class="saved-list kasse-liste">${zeilen}</ul>`;
+  return `<h4 class="blatt-zwischentitel">Ausgaben</h4>
+          <ul class="saved-list kasse-liste">${zeilen}</ul>`;
 }
 
 /* "Du hast gezahlt", aber "Anna hat gezahlt". nameZuNutzer() gibt fuer
@@ -135,15 +174,20 @@ function tagNummerZu(reise, tagId) {
 }
 
 
-/* --- 2. Das Blatt: eine Ausgabe eintragen oder aendern -------------------- */
+/* --- 3. Das Blatt: eine Ausgabe eintragen oder aendern -------------------- */
 
 // Welche Ausgabe das Blatt gerade zeigt. null heisst: eine neue.
 let offeneAusgabeId = null;
+/* Kam man aus dem Kassen-Blatt hierher? Dann fuehrt "Zurueck" dorthin und
+   nicht ins Nichts. Ein Blatt gibt es nur einmal, das zweite ersetzt das
+   erste - ohne diese Merkung waere der Weg zurueck der Bildschirm. */
+let ausgabeAusKasse = false;
 
-function oeffneAusgabeBlatt(reise, ausgabeId = null) {
+function oeffneAusgabeBlatt(reise, ausgabeId = null, ausKasse = false) {
   const dabei = reiseTeilnehmerJetzt();
   if (!dabei.length) { showToast('Erst Mitfahrer einladen.'); return; }
   offeneAusgabeId = ausgabeId;
+  ausgabeAusKasse = ausKasse;
   const ausgabe = ausgabeId
     ? reiseAusgaben.find(eintrag => String(eintrag.id) === String(ausgabeId))
     : null;
@@ -152,7 +196,8 @@ function oeffneAusgabeBlatt(reise, ausgabeId = null) {
     titel: ausgabe ? 'Ausgabe' : 'Neue Ausgabe',
     inhalt: ausgabeFormularHtml(reise, ausgabe, dabei) + anteileFormularHtml(ausgabe, dabei),
     fuss: `${ausgabe ? '<button class="linkbtn gefahr" data-ausgabe-weg>Löschen</button>' : ''}
-           <button class="btn ghost" data-blatt-zu>Abbrechen</button>
+           <button class="btn ghost" ${ausKasse ? 'data-kasse-zurueck' : 'data-blatt-zu'}>${
+             ausKasse ? '&larr; Kasse' : 'Abbrechen'}</button>
            <button class="btn" data-ausgabe-speichern>Speichern</button>`,
   });
 }
@@ -219,7 +264,7 @@ function anteileFormularHtml(ausgabe, dabei) {
 }
 
 
-/* --- 3. Speichern -------------------------------------------------------- */
+/* --- 4. Speichern -------------------------------------------------------- */
 
 // Liest das Blatt aus und macht daraus die Anteilsliste. Gibt null zurueck
 // und meldet selbst, wenn etwas nicht aufgeht.
@@ -283,16 +328,20 @@ async function speichereAusgabe() {
     : await backend.from('reise_ausgaben').insert(zeile);
   if (error) { showToast('Die Ausgabe ließ sich nicht speichern.'); return; }
 
+  const zurueckZurKasse = ausgabeAusKasse;
   schliesseBlatt();
   await ladeAusgabenNach(reise);
+  if (zurueckZurKasse) oeffneKassenBlatt();
 }
 
 async function loescheAusgabe() {
   if (!offeneAusgabeId) return;
   const { error } = await backend.from('reise_ausgaben').delete().eq('id', offeneAusgabeId);
   if (error) { showToast('Das hat nicht geklappt.'); return; }
+  const zurueckZurKasse = ausgabeAusKasse;
   schliesseBlatt();
   await ladeAusgabenNach(reiseNach(offeneReiseId));
+  if (zurueckZurKasse) oeffneKassenBlatt();
 }
 
 
@@ -319,19 +368,33 @@ async function hakeAnteilAb(nutzerId, bezahlt) {
   if (typeof zeichneReise === 'function') zeichneReise();
 }
 
-/* --- 4. Verkabelung ------------------------------------------------------- */
+/* --- 5. Verkabelung -------------------------------------------------------
+
+   Zwei Behaelter, zwei Zuhoerer: der Bildschirm mit dem Widget und das
+   Blatt. Beide bleiben stehen, waehrend ihr Inhalt neu gezeichnet wird -
+   deshalb hoeren sie zu und schauen, worauf getippt wurde, statt dass an
+   jedem Knopf ein eigener Zuhoerer haengt.                                */
 
 verkabele('reiseInner', 'click', ereignis => {
   const reise = typeof reiseNach === 'function' ? reiseNach(offeneReiseId) : null;
   if (!reise) return;
+  // Der Knopf zuerst, dann die Karte darum - sonst oeffnete jeder Tipp auf
+  // "Ausgabe eintragen" auch noch die Liste dahinter.
   if (ereignis.target.closest('[data-ausgabe-neu]')) { oeffneAusgabeBlatt(reise); return; }
-  const zeile = ereignis.target.closest('[data-ausgabe]');
-  if (zeile) oeffneAusgabeBlatt(reise, zeile.dataset.ausgabe);
+  if (ereignis.target.closest('[data-kasse-oeffnen]')) oeffneKassenBlatt();
 });
 
 verkabele('reiseBlatt', 'click', ereignis => {
-  if (ereignis.target.closest('[data-ausgabe-speichern]')) { speichereAusgabe(); return; }
-  if (ereignis.target.closest('[data-ausgabe-weg]')) loescheAusgabe();
+  const ziel = ereignis.target;
+  if (ziel.closest('[data-ausgabe-speichern]')) { speichereAusgabe(); return; }
+  if (ziel.closest('[data-ausgabe-weg]')) { loescheAusgabe(); return; }
+  if (ziel.closest('[data-kasse-zurueck]')) { oeffneKassenBlatt(); return; }
+  if (ziel.closest('[data-ausgabe-neu]')) {
+    oeffneAusgabeBlatt(reiseNach(offeneReiseId), null, true);
+    return;
+  }
+  const zeile = ziel.closest('[data-ausgabe]');
+  if (zeile) oeffneAusgabeBlatt(reiseNach(offeneReiseId), zeile.dataset.ausgabe, true);
 });
 
 /* Haken hoert auf "change" und nicht auf "click": Beide sitzen in einem

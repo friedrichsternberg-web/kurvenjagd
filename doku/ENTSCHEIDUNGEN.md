@@ -3644,3 +3644,38 @@ Nebenbei aufgefallen: Der Auslöser läuft nach dem Entzug weiter. Postgres
 prüft das Ausführungsrecht beim **Anlegen** des Auslösers, nicht bei jedem
 Feuern. Nachgesehen: alle drei stehen auf `tgenabled = 'O'`.
 
+## 10.09.2026 — Kasse und Mitfahrer werden Widgets
+
+Friedrichs Rückmeldung nach dem ersten Blick: Die Kasse hing unten am
+Bildschirm und las sich wie ein Nachtrag, die Mitfahrer waren ein
+schmaler Streifen und wirkten „versteckt und deplatziert". Im Querformat
+lief außerdem der Hinweissatz unter den Kacheln quer über die letzten
+beiden.
+
+**Beides steht jetzt als Karte im Kopf der Reise**, in derselben Sprache
+wie die Bike-Karte und die Reisekarte auf dem Start: `.karte` mit
+`.widget-kopf`, `.widget-name`, `.widget-werte`, `.widget-knopf`. Nichts
+Eigenes erfunden, wo die App die Form schon hat. Nebeneinander, sobald je
+260 Punkte da sind — das erledigt `repeat(auto-fit, minmax(260px, 1fr))`
+von selbst und braucht keine eigene Regel für `quer.css`.
+
+Auf der Kassenkarte stehen nur drei Zahlen: was die Reise gekostet hat,
+was davon auf einen selbst entfällt, was noch offen ist. Alles Weitere —
+die Liste, wer wem was schuldet, das Eintragen und Abhaken — liegt ein
+Tippen tiefer im Blatt „Kasse". Die Karte ist der Blick im Vorbeigehen,
+das Blatt die Arbeit.
+
+**Der Überlappungsfehler im Querformat** hatte eine Ursache, auf die man
+nicht von selbst kommt: `.reise-zahlen-hinweis` zieht sich mit einem
+NEGATIVEN oberen Abstand an die Kacheln heran. Im Hochformat hat der
+Kachelblock unten `var(--s5)` Luft, in die er hineinrutschen kann — die
+beiden Abstände fallen zusammen und ergeben `s5 - s3`. Im Querformat setzt
+`quer.css` diesen unteren Abstand auf null, und dann bleibt vom
+Zusammenfallen nur der negative Wert übrig: ein Überlappen um `s3`.
+Behoben mit einem positiven oberen Abstand im Querformat.
+
+**Die Lehre:** Ein negativer Außenabstand, der sich auf den positiven des
+Nachbarn verlässt, ist eine Verabredung zwischen zwei Regeln, die keine
+von beiden aufschreibt. Wer eine davon ändert, bricht die andere. In
+`quer.css` steht die Begründung jetzt dabei.
+

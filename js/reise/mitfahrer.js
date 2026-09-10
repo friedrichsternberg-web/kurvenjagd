@@ -273,12 +273,17 @@ function loescheReiseAufServer(serverId) {
 }
 
 
-/* --- 5. Die Mitfahrerleiste im Reisebildschirm ----------------------------
+/* --- 5. Das Mitfahrer-Widget im Reisebildschirm --------------------------
 
-   Sie steht unter der Reisekarte und ueber dem Etappenfaden: Wer mitfaehrt,
-   gehoert zum Kopf der Reise und nicht ans Ende. Solange die Reise nur im
-   Geraet liegt, steht dort ein einzelner Knopf - erst der Tipp darauf legt
-   sie auf dem Server an. Warum erst dann, steht im Kopf dieser Datei.      */
+   Es steht oben neben der Kasse, in derselben Sprache wie die Bike-Karte
+   und die Reisekarte auf dem Start (.karte mit .widget-kopf,
+   .widget-name, .widget-knopf). Vorher war es ein schmaler Streifen unter
+   den Kacheln - dort las es sich wie eine Fussnote, obwohl es der Weg zu
+   der Funktion ist, um die es bei einer gemeinsamen Reise geht.
+
+   Zwei Zustaende, und der Unterschied ist gross genug fuer zwei Texte:
+   Solange die Reise nur auf dem Geraet liegt, ist der Knopf eine
+   Einladung, sie zu teilen. Danach ist er die Verwaltung.               */
 
 function mitfahrerBildHtml(person) {
   const adresse = person.bild_pfad && typeof profilBildAdresse === 'function'
@@ -295,25 +300,48 @@ function mitfahrerBildHtml(person) {
              aria-label="${escapeHtml(name)}">${escapeHtml(name.slice(0, 1).toUpperCase())}</span>`;
 }
 
-function mitfahrerLeisteHtml(reise) {
-  if (!mitfahrenMoeglich()) return '';
-  if (!reise.serverId) {
-    return `<div class="mitfahrer-leiste">
-      <button class="btn ghost klein" id="btnMitfahrer">
-        ${symbol('leute', 'klein')} Gemeinsam planen
-      </button>
-      <span class="hint">Liegt nur auf diesem Ger&auml;t.</span>
-    </div>`;
+/* Wer mitplant, in einem Satzstueck: "Nur du bisher", "Du und Anna",
+   "Du und 2 andere". Namen erst ab zwei Leuten auszuschreiben lohnt nicht -
+   bei dreien wird die Zeile laenger als die Karte breit ist. */
+function mitfahrerNameText(dabei, offen) {
+  const andere = dabei.filter(person =>
+    !angemeldeterNutzer || String(person.nutzer_id) !== String(angemeldeterNutzer.id));
+  if (!andere.length) {
+    return offen ? `Du, ${offen} eingeladen` : 'Nur du bisher';
   }
-  const punkte = mitfahrerListe.map(mitfahrerBildHtml).join('');
-  const dabei = reiseTeilnehmerJetzt().length;
-  return `<div class="mitfahrer-leiste geteilt">
-    <button class="mitfahrer-punkte" id="btnMitfahrer" aria-label="Mitfahrer verwalten">
-      ${punkte}<span class="mitfahrer-punkt plus">${symbol('plus', 'klein')}</span>
-    </button>
-    <span class="hint">${dabei === 1 ? 'Nur du bisher' : `${dabei} planen mit`}</span>
-  </div>`;
+  if (andere.length === 1) return `Du und ${andere[0].benutzername || 'noch jemand'}`;
+  return `Du und ${andere.length} andere`;
 }
+
+function mitfahrerWidgetHtml(reise) {
+  if (!mitfahrenMoeglich()) return '';
+  const geteilt = !!reise.serverId;
+  const dabei = reiseTeilnehmerJetzt();
+  const offen = mitfahrerListe.filter(person => person.status === 'eingeladen').length;
+
+  return `
+    <div class="karte mitfahrer-widget">
+      <div class="widget-kopf">
+        <span class="abzeichen">Mitfahrer</span>
+        ${geteilt && mitfahrerListe.length
+          ? '<button type="button" class="linkbtn" id="btnMitfahrer">Verwalten &rsaquo;</button>'
+          : ''}
+      </div>
+      <h3 class="widget-name">${geteilt
+        ? escapeHtml(mitfahrerNameText(dabei, offen))
+        : 'Allein unterwegs'}</h3>
+      ${geteilt && mitfahrerListe.length
+        ? `<div class="mitfahrer-punkte">${mitfahrerListe.map(mitfahrerBildHtml).join('')}</div>`
+        : ''}
+      <p class="hint">${geteilt
+        ? 'Such jemanden &uuml;ber seinen Benutzernamen &ndash; wer annimmt, plant mit und teilt die Kosten.'
+        : 'Diese Reise liegt nur auf deinem Ger&auml;t. Hol jemanden dazu, dann plant ihr zusammen und rechnet gemeinsam ab.'}</p>
+      <button type="button" class="btn ghost widget-knopf" id="${geteilt ? 'btnMitfahrerEinladen' : 'btnMitfahrer'}">
+        ${symbol('leute', 'klein')} ${geteilt ? 'Freunde einladen' : 'Gemeinsam planen'}
+      </button>
+    </div>`;
+}
+
 
 /* Nachladen, was der Server weiss, und die Reise noch einmal zeichnen.
    oeffneReise() ruft das - die Leiste steht deshalb beim ersten Zeichnen
@@ -447,7 +475,7 @@ async function beiTippAufMitfahrer() {
 }
 
 verkabele('reiseInner', 'click', ereignis => {
-  if (ereignis.target.closest('#btnMitfahrer')) { beiTippAufMitfahrer(); return; }
+  if (ereignis.target.closest('#btnMitfahrer, #btnMitfahrerEinladen')) { beiTippAufMitfahrer(); return; }
   if (ereignis.target.closest('#btnReiseAussteigen')) steigeAus(reiseNach(offeneReiseId));
 });
 
