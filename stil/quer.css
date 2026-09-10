@@ -369,12 +369,6 @@
   /* Vier Spalten statt zwei: Der Block klebt zusammen mit der Karte, und
      mit drei Kachelzeilen waere er hoeher als das Fenster. */
   #reiseInner .reise-zahlen { margin-bottom: 0; grid-template-columns: repeat(4, 1fr); }
-  /* Der Hinweis unter den Kacheln zieht sich im Hochformat mit einem
-     NEGATIVEN oberen Abstand an sie heran - dort hat der Kachelblock
-     unten var(--s5) Luft, in die er hineinrutschen kann. Hier ist diese
-     Luft null, und der negative Abstand schob den Satz quer ueber die
-     letzten beiden Kacheln. Nachgemessen am 10.09.2026. */
-  #reiseInner .reise-zahlen-hinweis { margin-top: var(--s2); }
   #reiseInner .reise-zahlen .stat.breit { grid-column: span 2; }
   #reiseInner .reise-name { font-size: 32px; }
 

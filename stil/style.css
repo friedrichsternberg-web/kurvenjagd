@@ -5035,7 +5035,9 @@ body.nav-modus .karten-knopf { display: none; }
 .reise-band-tag {
   position: relative;
   flex: var(--km, 1) 1 0;
-  min-width: 26px;
+  /* Seit "Tag 1" statt "1" darinsteht, braucht das kleinste Stueck rund
+     44 Punkte - darunter waere schon die Beschriftung abgeschnitten. */
+  min-width: 46px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -5138,7 +5140,6 @@ body.nav-modus .karten-knopf { display: none; }
 .reise-spanne .linkbtn i { font-style: normal; opacity: 0.5; margin: 0 3px; }
 .reise-spanne .linkbtn:hover { color: var(--accent-hell); }
 .reise-spanne .linkbtn:hover b { color: var(--accent-hell); }
-.reise-zahlen-hinweis { margin: calc(-1 * var(--s3)) 0 var(--s5); }
 
 /* ---------- Was im SVG der Reisekarte liegt ----------
    Saum, Linie und Kacheln kommen aus dem Vorschaubild (.vorschau-*).
@@ -5296,6 +5297,28 @@ body.nav-modus .karten-knopf { display: none; }
   font-weight: 600;
   min-width: 0;
 }
+/* Die Kennzahlen eines Fahrtags: eine Zeile aus Symbol und Wert, die
+   umbricht, wenn die Karte schmal wird. Kein Raster - die Zahl der
+   Angaben schwankt, weil aeltere Routen weniger wissen. */
+.tag-fakten {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2) var(--s4);
+  margin-top: var(--s3);
+}
+.tag-fakt {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--schrift-display);
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+.tag-fakt .ic { width: 16px; height: 16px; opacity: 0.75; }
+
 .etappe-aktionen {
   display: flex;
   align-items: center;

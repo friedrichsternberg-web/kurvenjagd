@@ -202,7 +202,10 @@ function fahrzeitText(minuten) {
   if (!minuten) return '–';
   const stunden = Math.floor(minuten / 60), rest = Math.round(minuten % 60);
   if (stunden >= 10) return `${Math.round(minuten / 60)} h`;
-  return stunden ? `${stunden} h ${rest} min` : `${rest} min`;
+  if (!stunden) return `${rest} min`;
+  // "2 h" statt "2 h 0 min": Die Null sagt nichts und liest sich wie ein
+  // Fehler. Aufgefallen an einer Etappe mit genau zwei Stunden.
+  return rest ? `${stunden} h ${rest} min` : `${stunden} h`;
 }
 
 function datumKurz(datum) {
@@ -561,11 +564,12 @@ function reiseZahlenHtml(reise, bilanz) {
       <span class="v">${bilanz.mitRoute}<i>von ${bilanz.tage}</i></span>
       <span class="unter">${rest || 'alle Tage fahren'}</span>
     </div>`);
-  const hinweis = bilanz.mitZeit < bilanz.mitRoute || bilanz.mitHoehe < bilanz.mitRoute
-    ? `<p class="hint reise-zahlen-hinweis">Fahrzeit und H&ouml;henmeter kennt die App erst f&uuml;r Routen,
-         die seit dem 04.09.2026 gespeichert wurden. &Auml;ltere: im Planer &ouml;ffnen und neu speichern.</p>`
-    : '';
-  return `<div class="reise-zahlen">${kacheln.join('')}</div>${hinweis}`;
+  /* Hier stand bis zum 10.09.2026 ein Satz darueber, dass aeltere Routen
+     keine Fahrzeit und keine Hoehenmeter mitbringen. Er erklaerte einen
+     Umstand, den ausser uns niemand kennt, und stand bei jeder zweiten
+     Reise im Weg. Die Kacheln sagen mit "aus 1 von 2 Etappen" schon, dass
+     etwas fehlt - das genuegt. */
+  return `<div class="reise-zahlen">${kacheln.join('')}</div>`;
 }
 
 /* Das Etappenprofil: je Tag ein flacher Balken, Breite nach Kilometern,
@@ -584,7 +588,7 @@ function reiseProfilHtml(reise) {
       const was = ruhetag ? (tag.titel || 'Kein Fahrtag') : 'noch ohne Route';
       return `<button class="reise-band-tag ${ruhetag ? 'ruhe' : 'leer'}" ${kennung}
                       title="Tag ${stelle + 1}: ${escapeHtml(was)}"
-                      aria-label="Tag ${stelle + 1}: ${escapeHtml(was)}"><b>${stelle + 1}</b></button>`;
+                      aria-label="Tag ${stelle + 1}: ${escapeHtml(was)}"><b>Tag ${stelle + 1}</b></button>`;
     }
     const km = Math.max(1, Math.round(route.distance / 1000));
     const grad = Math.round(route.curviness || 0);
@@ -595,7 +599,7 @@ function reiseProfilHtml(reise) {
        reicht, der Rest steht in der Liste darunter. */
     const kmText = gesamt && route.distance / gesamt >= 0.2 ? `<i>${km} km</i>` : '';
     return `<button class="reise-band-tag ${kurvenStufe(grad)}" ${kennung} style="--km: ${km}"
-                    title="${text}" aria-label="${text}"><b>${stelle + 1}</b>${kmText}</button>`;
+                    title="${text}" aria-label="${text}"><b>Tag ${stelle + 1}</b>${kmText}</button>`;
   }).join('');
   return `<div class="reise-band">${stuecke}</div>`;
 }
@@ -729,7 +733,7 @@ function etappeHtml(reise, tag, stelle) {
   }
 
   const kmText = (route.distance / 1000).toFixed(route.distance < 10000 ? 1 : 0) + ' km';
-  const werte = `<span class="etappe-werte">${kmText} <i>&middot;</i> ${Math.round(route.curviness || 0)} &deg;/km</span>`;
+  const werte = `<span class="etappe-werte">${kmText}</span>`;
   const marke = route.aufgezeichnet ? `<span class="saved-marke" title="Aufgezeichnete Ausfahrt">${symbol('motorrad', 'klein')}</span>` : '';
   return `
     <li class="etappe" data-tag-id="${escapeHtml(tag.id)}">
@@ -738,6 +742,7 @@ function etappeHtml(reise, tag, stelle) {
         ${vorschauBildHtml(route, werte)}
         <span class="label">${beschriftung}</span>
         <span class="etappe-name">${marke}<span class="saved-name">${escapeHtml(route.name)}</span></span>
+        ${tagesFaktenHtml(route)}
         <div class="etappe-aktionen">
           <button class="linkbtn" data-waehle="${escapeHtml(tag.id)}">Route wechseln</button>
           <button class="glas-rund klein" data-planer="${escapeHtml(tag.id)}" title="Im Planer &ouml;ffnen" aria-label="Im Planer öffnen">${symbol('route', 'klein')}</button>
@@ -750,6 +755,25 @@ function etappeHtml(reise, tag, stelle) {
 
 /* Die Auswahl: was leuchtet, ist gewaehlt. Nur Klassen, kein Neuzeichnen -
    sonst blitzten bei jedem Tipp die Kacheln der Reisekarte grau auf. */
+/* Die Kennzahlen eines Fahrtags, direkt auf der Karte statt erst im
+   Planer: wie kurvig, wie lang unterwegs, wieviel bergauf. Die Kilometer
+   stehen schon auf dem Bild - sie sind die Ueberschrift, der Rest die
+   Einzelheiten.
+
+   Was die Route nicht weiss, faellt weg statt als Strich dazustehen.
+   Fahrzeit und Hoehenmeter kennt die App erst fuer Touren, die seit dem
+   04.09.2026 gespeichert wurden; eine Karte mit zwei Gedankenstrichen
+   saehe kaputt aus, eine mit einer Angabe weniger nicht. */
+function tagesFaktenHtml(route) {
+  const fakten = [
+    ['drehen', `${Math.round(route.curviness || 0)} &deg;/km`],
+    route.time ? ['kalender', fahrzeitText(Math.round(route.time / 60))] : null,
+    route.ascend ? ['berg', `${Math.round(route.ascend).toLocaleString('de-DE')} Hm`] : null,
+  ].filter(Boolean);
+  return `<div class="tag-fakten">${fakten.map(([zeichen, wert]) =>
+    `<span class="tag-fakt">${symbol(zeichen, 'klein')}${wert}</span>`).join('')}</div>`;
+}
+
 function markiereAuswahl() {
   const inner = document.getElementById('reiseInner');
   if (!inner) return;

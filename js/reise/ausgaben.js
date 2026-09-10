@@ -162,9 +162,7 @@ function kassenWidgetHtml(reise) {
       <h3 class="widget-name">${stand.anzahl ? centZuText(stand.summeCent) : 'Noch leer'}</h3>
       <div class="widget-koerper">
         ${stand.anzahl ? kassenWerteHtml(reise, stand, allein) : `
-          <p class="hint">${allein
-            ? 'Trag ein, was die Reise kostet &ndash; Sprit, Hotel, Maut. Sobald jemand mitf&auml;hrt, teilt ihr die Posten auf.'
-            : 'Wer etwas auslegt, tr&auml;gt es hier ein. Aufgeteilt wird sofort, und Bezahltes hakst du ab.'}</p>`}
+          <p class="hint">Erstelle eine detaillierte Kostenaufstellung deiner Reise.</p>`}
       </div>
       <button type="button" class="btn ghost widget-knopf" data-ausgabe-neu>
         ${symbol('plus', 'klein')} Ausgabe eintragen

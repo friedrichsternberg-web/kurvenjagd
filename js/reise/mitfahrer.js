@@ -373,9 +373,7 @@ function mitfahrerWidgetHtml(reise) {
         : 'Allein unterwegs'}</h3>
       <div class="widget-koerper">
         <div class="mitfahrer-punkte">${punkte}</div>
-        <p class="hint">${geteilt
-          ? 'Such jemanden &uuml;ber seinen Benutzernamen &ndash; wer annimmt, plant mit und teilt die Kosten.'
-          : 'Hol jemanden dazu: Ihr plant dann an derselben Reise und teilt euch die Kosten.'}</p>
+        <p class="hint">Lade deine Freunde ein, damit sie die Reise mitplanen k&ouml;nnen.</p>
       </div>
       <button type="button" class="btn ghost widget-knopf" id="${geteilt ? 'btnMitfahrerEinladen' : 'btnMitfahrer'}">
         ${symbol('leute', 'klein')} ${geteilt ? 'Freunde einladen' : 'Gemeinsam planen'}
@@ -393,8 +391,8 @@ function mitfahrerOhneKontoHtml() {
       <h3 class="widget-name">Zu zweit planen</h3>
       <div class="widget-koerper">
         <div class="mitfahrer-punkte">${mitfahrerGeisterHtml(3)}</div>
-        <p class="hint">Mit einem Konto kannst du Freunde zu dieser Reise holen &ndash;
-          ihr plant dann gemeinsam und teilt euch die Kosten.</p>
+        <p class="hint">Mit einem Konto kannst du Freunde einladen, damit sie
+          die Reise mitplanen k&ouml;nnen.</p>
       </div>
       <button type="button" class="btn ghost widget-knopf" id="btnMitfahrerKonto">
         ${symbol('profil', 'klein')} Konto anlegen
