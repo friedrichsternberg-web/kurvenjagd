@@ -357,6 +357,15 @@ Wegpunkten nur, wer angemeldet ist.
 zurückgerollten Transaktion: anlegen, schalten, Übersicht ohne Wegpunkte,
 Vollansicht mit Wegpunkten.
 
+**Melden gibt es auch hier** (Migration 07, 13.09.2026). Artikel 16 der
+Verordnung (EU) 2022/2065 verlangt einen Meldeweg für jeden fremden Inhalt,
+den wir öffentlich zeigen – eine Reise ist da nichts anderes als eine Tour.
+Die Tabelle `meldungen` hing mit einem Fremdschlüssel fest an
+`geteilte_touren`; sie nimmt jetzt beides auf, genau eines von beiden je
+Zeile. Gespeichert werden Kennung, Begründung und, falls angemeldet, das
+Konto des Melders. Gemeldet werden kann nur, was auch öffentlich steht –
+sonst wäre die Funktion ein Weg, die Existenz privater Reisen abzufragen.
+
 Punkt 11 der Datenschutzerklärung ist darauf erweitert.
 
 ### Was beim Abmelden passiert (seit 11.09.2026)

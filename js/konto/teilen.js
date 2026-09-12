@@ -358,6 +358,7 @@ async function zeigeOeffentlicheReise(id) {
       </ol>
       <div class="link-wahl">
         <button type="button" class="btn ghost link-hauptknopf" data-link-weiter>Zur&uuml;ck</button>
+        <button type="button" class="linkbtn geteilt-melden" data-melde-reise="${escapeHtml(id)}">Melden</button>
       </div>
     </div>`);
 }
@@ -369,6 +370,17 @@ async function zeigeOeffentlicheReise(id) {
    Versehen: Die App speichert im Geraet, und das kann sie ohne Konto
    genauso. Der Unterschied liegt woanders, und genau das sagt der Text
    auf dem Bildschirm - mit Konto liegt es auch auf dem naechsten Geraet.  */
+
+/* Der Meldeweg gilt auch hier: Wer eine Reise erst auf dem
+   Ansehen-Bildschirm als unpassend erkennt, soll sie nicht erst wieder
+   suchen muessen. Der Horcher haengt am Dokument, weil dieser Bildschirm
+   bei jedem Oeffnen neu gebaut wird. */
+document.addEventListener('click', ereignis => {
+  const knopf = ereignis.target.closest('#linkScreen [data-melde-reise]');
+  if (knopf && typeof meldeOeffentlicheReise === 'function') {
+    meldeOeffentlicheReise(knopf.dataset.meldeReise);
+  }
+});
 
 function uebernimmFreigabe() {
   if (!offeneFreigabe) { zeigeGarage(); return; }

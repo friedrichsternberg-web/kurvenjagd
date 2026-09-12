@@ -557,7 +557,31 @@ function oeffentlicheReiseHtml(zeile) {
         </div>
       </div>
       <button type="button" class="btn ghost widget-knopf" data-reise-ansehen="${escapeHtml(zeile.id)}">Reise ansehen</button>
+      <div class="widget-fuss-neben">
+        <button class="linkbtn geteilt-melden" data-melde-reise="${escapeHtml(zeile.id)}">Melden</button>
+      </div>
     </li>`;
+}
+
+/* Der Meldeweg fuer eine oeffentliche Reise. Zwilling von
+   meldeGeteilteTour(): Artikel 16 der Verordnung (EU) 2022/2065 verlangt
+   ihn fuer JEDEN fremden Inhalt, den wir oeffentlich zeigen - eine Reise
+   ist da nichts anderes als eine Tour. */
+async function meldeOeffentlicheReise(kennung) {
+  const grund = prompt('Was stimmt mit dieser Reise nicht?\n\n'
+    + 'Die Meldung geht an den Betreiber und wird von Hand angesehen.');
+  if (!grund || !grund.trim()) return;
+
+  if (!teilenMoeglich()) { showToast('Ohne Verbindung geht das nicht.'); return; }
+
+  const { error } = await backend.rpc('reise_melden', {
+    p_id: kennung,
+    p_grund: grund.trim().slice(0, 1000),
+  });
+
+  showToast(error
+    ? 'Die Meldung ließ sich nicht absenden. Schreib bitte an kontakt@serpa-app.de.'
+    : 'Danke. Wir sehen uns das an.');
 }
 
 
@@ -883,6 +907,8 @@ verkabele('serpaListe', 'click', ereignis => {
    angebunden werden - und wer das einmal vergisst, hat eine Liste, in der
    nichts mehr reagiert. */
 verkabele('entdeckenReisen', 'click', ereignis => {
+  const melden = ereignis.target.closest('[data-melde-reise]');
+  if (melden) { meldeOeffentlicheReise(melden.dataset.meldeReise); return; }
   const knopf = ereignis.target.closest('[data-reise-ansehen]');
   if (knopf && typeof zeigeOeffentlicheReise === 'function') zeigeOeffentlicheReise(knopf.dataset.reiseAnsehen);
 });

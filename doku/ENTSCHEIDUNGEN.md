@@ -4464,3 +4464,40 @@ beim Laden den Innenabstand des Bands wegscrollen, und „Alle" klebte an
 der Fensterkante. `scroll-padding-inline` sagt der Rastung, dass der
 Innenabstand mitzählt. Eine Zeile, und sie steht mit Begründung im CSS,
 damit niemand sie für Zierrat hält.
+
+## 13.09.2026 (später) — Der Meldeweg fehlte, und eine Messung log
+
+**Rechtsprüfung vor dem Push.** Die öffentlichen Reisen von heute Vormittag
+hatten keinen Meldeweg: Die Tabelle `meldungen` hängt mit einem
+Fremdschlüssel an `geteilte_touren` und kann gar keine Reise aufnehmen.
+Für einen Hostingdienst verlangt Artikel 16 der Verordnung (EU) 2022/2065
+aber einen Meldeweg für **jeden** fremden Inhalt, den er öffentlich zeigt.
+Migration 07 macht `tour_id` optional, stellt `reise_id` daneben und
+verlangt per Prüfregel genau eines von beiden — eine Meldung ist eine
+Meldung, egal woran sie hängt, und in zwei Tabellen übersieht man beim
+Durchsehen die eine Hälfte.
+
+`reise_melden()` nimmt nur Meldungen zu Reisen an, die **wirklich
+öffentlich** stehen, und schweigt sonst still. Mit einem Fehler statt
+Schweigen wäre die Funktion ein Weg, die Existenz privater Reisen
+abzufragen: Wer Kennungen durchprobiert, bekäme bei einer fremden privaten
+Reise eine andere Antwort als bei einer erfundenen.
+
+**Und eine Lehre über das Messen.** Der erste Test sagte: Meldung kommt
+nicht an, Zähler steht auf 0. Das war falsch — die Zeile war da. Der
+Zähl-`select` lief in derselben Transaktion noch als Rolle
+`authenticated`, und `meldungen` hat RLS **ohne eine einzige Regel**. Aus
+dieser Rolle heraus ist die Tabelle leer, immer. Erst `reset role` zeigte
+die Zeile.
+
+Das ist zweimal wertvoll: Es bestätigt, dass mit dem öffentlichen
+Schlüssel niemand an Meldungen herankommt — und es ist die Art Messung,
+die einen dazu bringt, funktionierenden Code zu "reparieren". Wer eine
+Tabelle mit Zeilenregeln prüft, muss wissen, als **wer** er hinsieht.
+
+**Sonst angepasst:** Die „Regeln fürs Teilen" sprachen nur von Touren —
+jetzt von Touren und Reisen, an sechs Stellen (wer teilen darf, was man
+zusichert, was uns erlaubt wird, Melden, Entfernen). Die Kurzfassung der
+Datenschutzerklärung nennt beide. Und die Kacheln „Direkt zum Shop" stehen
+jetzt ausdrücklich in Punkt 12: Auch sie führen über das Partnernetzwerk
+und brauchen dieselbe Einwilligung wie ein Angebot.
