@@ -2925,18 +2925,41 @@ button.karte:active { transform: scale(0.985); }
    als Licht gelesen wuerde. Er gibt dem Grund Tiefe, mehr nicht. */
 .bike-karte.zeigt-fahrer .bike-raum,
 .bike-karte.zeigt-fahrer .bike-bild,
-.bike-karte.zeigt-fahrer .buehne-hinweis,
-.bike-karte.zeigt-fahrer .bike-buehne::before { display: none; }
+.bike-karte.zeigt-fahrer .buehne-hinweis { display: none; }
+/* Die Tafel laeuft bis an die Kartenkanten oben, rechts und unten (die
+   negativen Margen heben den Innenabstand der Karte auf) und ist KEIN
+   Kasten: Ihr Grund liegt im ::before und laeuft ueber eine Maske nach
+   links in das Glas der Werte aus und oben und unten in die Kartenkante -
+   so, wie vorher der Werkstattraum. Die Maske liegt auf dem Grund, nicht
+   auf der Buehne selbst, sonst wuerde sie das Bild mit ausblenden. */
 .bike-karte.zeigt-fahrer .bike-buehne {
   justify-content: center;
-  padding-bottom: 0;
+  padding: var(--s4) 0 var(--s4) var(--s2);
+  margin: calc(-1 * var(--s4)) calc(-1 * var(--s4)) calc(-1 * var(--s4)) 0;
   overflow: hidden;
-  border-radius: var(--r-md);
+  min-height: 232px;
+}
+.bike-karte.zeigt-fahrer .bike-buehne::before {
+  content: "";
+  position: absolute;
+  /* inset und height heben die Masse des Kontaktschattens auf, der im
+     Bike-Modus in diesem Pseudo-Element wohnt. */
+  inset: 0;
+  height: auto;
+  border-radius: 0;
   background:
-    radial-gradient(circle at 50% 42%,
-      color-mix(in srgb, var(--accent) 30%, transparent),
-      transparent 60%),
+    radial-gradient(circle at 56% 44%,
+      color-mix(in srgb, var(--accent) 34%, transparent),
+      transparent 58%),
     var(--raum-dunkel);
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0%, black 38%),
+    linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%);
+  mask-image:
+    linear-gradient(to right, transparent 0%, black 38%),
+    linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
 }
 .fahrer-plakette {
   position: relative;
@@ -2952,14 +2975,20 @@ button.karte:active { transform: scale(0.985); }
 .fahrer-ringe {
   position: absolute;
   left: 50%; top: 50%;
-  width: 190%;
-  height: 190%;
+  width: 210%;
+  height: 210%;
   transform: translate(-50%, -50%);
   fill: none;
   stroke: currentColor;
   stroke-width: 0.9;
   opacity: 0.55;
   pointer-events: none;
+  /* Nach links laufen die Linien aus wie der Grund - sonst endeten sie
+     an der Spaltengrenze in einer geraden Kante, und die Tafel waere
+     doch wieder ein Kasten. Die Prozente sind auf das SVG bezogen, das
+     210 Prozent der Tafel breit ist: Die linke Tafelkante liegt bei 26. */
+  -webkit-mask-image: linear-gradient(to right, transparent 24%, black 42%);
+  mask-image: linear-gradient(to right, transparent 24%, black 42%);
 }
 .fahrer-plakette-inhalt {
   position: relative;
@@ -2971,8 +3000,13 @@ button.karte:active { transform: scale(0.985); }
   padding: var(--s4) 0;
 }
 .fahrer-bild {
-  width: 108px;
-  height: 108px;
+  /* Deutlich groesser als der erste Wurf (108): Das Bild ist der Grund,
+     aus dem es die Tafel gibt. Ueber die Breite der Tafel, damit es auf
+     jedem Geraet den Platz nimmt, den es hat; quer.css deckelt oben. */
+  width: 84%;
+  max-width: 156px;
+  aspect-ratio: 1 / 1;
+  height: auto;
   border-radius: 50%;
   object-fit: cover;
   object-position: center;

@@ -249,7 +249,8 @@
   .bike-bild { max-height: none; }
   /* Der Fahrer-Kreis darf im Breiten wachsen, aber nicht so weit wie die
      Maschine: Ein Portrait ueber 170 Punkte wird zum Poster. */
-  .fahrer-bild { width: 168px; height: 168px; }
+  .fahrer-bild { max-width: 236px; }
+  .bike-karte.zeigt-fahrer .bike-buehne { min-height: 340px; }
   .fahrer-name { font-size: 14px; }
   /* Im Breiten hat die Buehne mehr Hoehe, als Tafel und Maschine brauchen -
      die Tafel rueckt etwas hoch, damit sie nicht auf dem Lenker klebt. */
