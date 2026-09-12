@@ -4273,3 +4273,63 @@ gilt: Was im gelöschten Block steht, ist nicht automatisch Teil davon.
 Nachgemessen im Browser: Testfoto hinein, Maske geändert, übernommen —
 `dialogFoto` ist danach ein anderes Bild als vorher (WebP statt JPEG), und
 nach dem Speichern steht genau dieses Bild in der Garage.
+
+## 12.09.2026 — FC-Moto als sechster Partner, und ein direkter Weg in die Shops
+
+Webgains hat die Bewerbung bei **FC-Moto DE** angenommen (Programm 4028).
+Damit führt die App sechs Händler: zwei für Reifen, vier für Ausrüstung.
+
+**Provision 6 Prozent, nicht 4.** Der Werbetext des Händlers im
+Webgains-Konto nennt „4% Provision pro Sale". Die Provisionstabelle für
+unsere Stufe „Default" nennt **6 Prozent**. Dieselbe Falle wie bei POLO am
+05.09.2026, und dieselbe Entscheidung: Maßgeblich ist die Tabelle. Ein
+Fließtext ist Werbung, eine Tabelle ist die Abrechnung.
+
+**Ein eigenes Importskript statt eines Schalters in polo-import.py.** Die
+beiden Feeds sind fast baugleich (Google-Shopping-Felder, gleiches
+Bildschema), und trotzdem unterscheiden sie sich an vier Stellen, von denen
+jede einzeln ein stiller Fehler wäre: FC-Moto hat eine `item_group_id`,
+POLO nicht; die Produktadresse trägt keine Nummer; der Versandpreis bringt
+die Währung mit; die Ordnerstufen im Bildpfad sind nicht hexadezimal. Ein
+Skript mit vier Wenn-Zweigen wäre schwerer zu lesen als zwei Skripte, und
+die Entscheidung folgt dem, was motoin, POLO und Helmexpress schon vorgeben.
+
+**Der Fehler, der beim Nachmessen auffiel: `.jpg` ist nicht `.jpeg`.** Die
+Endungstabelle war von POLO übernommen, und dort bilden beide auf „jpg" ab
+— POLO führt nur `.jpg`, es machte keinen Unterschied. FC-Moto führt
+106.724 Bilder als `.jpg` **und 40.475 als `.jpeg`**. Gut ein Viertel aller
+Bildadressen antwortete deshalb mit 404. Auffällig war das nicht: Die
+Kachel füllt sich dann mit dem Ersatzsymbol und sieht vollständig aus.
+Gefunden wurde es nur, weil zwei Stichproben-Adressen von Hand abgefragt
+wurden und eine davon 404 sagte. **Nachgemessen statt geglaubt** heißt bei
+fremden Feeds: die gebaute Adresse abfragen, nicht die Regel ansehen.
+
+**Und ein zweiter, aus derselben Familie:** Die Content-Security-Policy
+kannte `www.fc-moto.com` nicht, die Bilder waren blockiert. Das ist kein
+Ärgernis, sondern der Zweck der Liste — sie hat gemeldet, dass eine neue
+fremde Adresse dazugekommen ist.
+
+### „Direkt zum Shop"
+
+Neu ist eine wischbare Zeile aus sechs Kacheln, ganz oben im Schaufenster
+der Ausrüstung. Sie beantwortet eine andere Frage als alles darunter: Wer
+schon weiß, wo er kaufen will, soll sich nicht erst durch Regale arbeiten.
+
+**Warum das nötig wurde:** Ein Katalog zeigt immer nur einen Ausschnitt —
+3.244 von 15.714 Artikeln bei FC-Moto, ähnlich bei den anderen. Wer sucht,
+was wir nicht führen, stand bisher vor einer Sackgasse.
+
+Drei Dinge waren dabei nicht verhandelbar:
+
+- **Jede Kachel ist ein Provisionslink und damit kennzeichnungspflichtig.**
+  Das Abzeichen „Anzeige" steht in der Kopfzeile, wie bei der Merkliste.
+- **Der Klick geht durch dieselbe Einwilligung wie jedes Angebot.** Kein
+  zweiter Weg nach draußen; `öffnePartnerLink()` bleibt der einzige.
+- **Bei einer Suche oder gewählten Welt tritt die Zeile zurück.** Dann will
+  jemand Treffer sehen, keine Läden.
+
+**Ein Spezifitäts-Konflikt hielt kurz auf:** `button.karte { width: 100% }`
+schlägt `.shop-kachel { width: 172px }` — Element plus Klasse gewinnt gegen
+Klasse allein. Jede Kachel war fensterbreit, von sechs Händlern sah man
+einen. Der Vorsatz `.shop-leiste-band` löst es. Dieselbe Sorte Fehler wie
+beim Vorschaubild der Tourenliste, und dieselbe Lösung.

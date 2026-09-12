@@ -4020,6 +4020,72 @@ button.karte:active { transform: scale(0.985); }
    EINE Karte fuer alles, was Produkte nebeneinander zeigt: die Leisten in
    der Garage, die Regale der Ausruestung, die Vorschlaege. Das HTML dazu
    baut produktKarte() in shop.js. */
+/* ---------- Der direkte Weg in die Shops ----------
+   Eine wischbare Zeile aus Karten, ganz oben im Schaufenster. Sie ist
+   BEWUSST keine Produktkarte: kein Bild, kein Preis, nur Name, Halbsatz
+   und Pfeil. Wer hier tippt, sucht kein Angebot, sondern einen Laden -
+   und soll die Zeile auf einen Blick ueberfliegen koennen.
+
+   Die Kacheln sind schmaler als eine Produktkarte und alle gleich breit,
+   damit die Zeile ruhig bleibt: Sechs Haendler mit unterschiedlich langen
+   Namen ergaeben sonst ein Zickzack. */
+.shop-leiste { margin-bottom: var(--s5); }
+.shop-leiste-band {
+  display: flex;
+  gap: var(--s2);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+  /* Luft fuer Schatten und Fokusrand, wie beim Produktband darunter. */
+  padding: 3px 3px var(--s2);
+  margin: 0 calc(-1 * var(--s1));
+}
+.shop-leiste-band::-webkit-scrollbar { display: none; }
+/* Der Vorsatz ".shop-leiste-band" ist noetig und kein Zierrat: Weiter oben
+   steht "button.karte { width: 100% }", und das ist ein Selektor aus
+   Element UND Klasse - er schlaegt ein blosses ".shop-kachel". Ohne den
+   Vorsatz war jede Kachel so breit wie das Fenster und von sechs
+   Haendlern sah man einen. */
+.shop-leiste-band .shop-kachel {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  width: 172px;
+  padding: var(--s3);
+  border-radius: var(--r-lg);
+  display: grid;
+  /* Drei Zeilen: Name oben, Satz darunter, Pfeil unten rechts. Die
+     mittlere waechst, damit der Pfeil bei allen Kacheln auf einer Hoehe
+     sitzt - auch bei einem Halbsatz, der nur eine Zeile braucht. */
+  grid-template-rows: auto 1fr auto;
+  gap: 4px;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s cubic-bezier(0.2,0.8,0.2,1), background 0.15s ease;
+}
+.shop-kachel:hover { background: var(--glas-heller); }
+.shop-kachel:active { transform: scale(0.97); }
+.shop-kachel-name {
+  font-family: var(--schrift-display);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--text);
+}
+.shop-kachel-satz {
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: var(--muted);
+}
+/* Blau, weil er das Anklickbare ist - dieselbe Rolle wie der Pfeil an der
+   Planer-Wahlkarte. */
+.shop-kachel-pfeil {
+  justify-self: end;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--accent-hell);
+}
+
 .produkt-band {
   display: flex;
   gap: var(--s2);

@@ -591,6 +591,30 @@ Repository-Secrets hinterlegt sind (`WEBGAINS_FEED_URL_MOTOIN`,
 `WEBGAINS_FEED_URL_POLO`). Die Adressen tragen den Zugang selbst und stehen
 nirgends im Repository.
 
+### FC-Moto: der sechste Partner (seit 12.09.2026)
+
+Im Bereich „Ausrüstung" zeigt die App zusätzlich Angebote von **FC-Moto**
+(FC-Moto GmbH & Co. KG, Avantisallee 90, 52072 Aachen), vermittelt über
+**Webgains** wie motoin und POLO: Klick über track.webgains.com (Programm
+4028), Fotos vom Händler selbst (`www.fc-moto.com`). Der Bildserver setzt
+**kein Cookie** (nachgemessen am 12.09.2026, Antwort ohne Set-Cookie); für
+die Datenverarbeitung gilt alles, was bei motoin steht. Provision 6
+Prozent, Cookie-Laufzeit 30 Tage – abgelesen in der Provisionstabelle, nicht
+im Werbetext des Händlers, der noch 4 Prozent nennt.
+
+Der Katalog ist `daten/fcmoto-katalog.js` aus `werkzeug/fcmoto-import.py`.
+Der Feed ist der größte, den das Projekt verarbeitet: 147.516 Zeilen,
+257 MB, rund 27.000 Produkte. Davon führt die App nur Ware am Körper;
+Gepäck und Anbauteile deckt POLO ab.
+
+**Der Preisvergleich** läuft wie bei POLO über die Strichcode-Nummern gegen
+motoin und Helmexpress. 98 Prozent der Feedzeilen tragen eine EAN, das ist
+die beste Abdeckung aller sechs Partner.
+
+**Der Preislauf** braucht ein weiteres Repository-Secret,
+`WEBGAINS_FEED_URL_FCMOTO`. Fehlt es, bleibt der Katalog einfach stehen –
+der Schritt bricht den Lauf nicht ab.
+
 ### Vorschläge aus den eigenen Fahrten (opt-in, seit 02.09.2026)
 
 Serpa kann aus den aufgezeichneten Ausfahrten einen groben Fahrstil

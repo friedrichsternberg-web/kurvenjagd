@@ -32,6 +32,7 @@
 
      id         Kurzname, taucht in den Katalogdateien wieder auf
      name       so heisst der Haendler in der Oberflaeche
+     kurz       ein Halbsatz, wofuer er steht - fuer die Shop-Leiste
      betreiber  wer dahintersteht - gehoert in die Offenlegung
      netz       Schluessel in NETZWERKE weiter unten, entscheidet den Linkbau
      kennung    was DIESES Netzwerk braucht, um den Klick uns zuzuordnen
@@ -65,6 +66,7 @@ const PARTNER = [
   {
     id: 'reifencom',
     name: 'reifen.com',
+    kurz: 'Motorradreifen, frachtfrei geliefert',
     betreiber: 'reifencom GmbH, Hannover',
     netz: 'awin',
     kennung: { publisher: AWIN_PUBLISHER, mid: '7605' },
@@ -77,6 +79,7 @@ const PARTNER = [
   {
     id: 'motoin',
     name: 'motoin',
+    kurz: 'Bekleidung, Helme, Teile',
     betreiber: 'motoin GmbH, Hamburg',
     netz: 'webgains',
     kennung: { kampagne: WEBGAINS_KAMPAGNE, programm: '1435' },
@@ -89,6 +92,7 @@ const PARTNER = [
   {
     id: 'reifentiefpreis',
     name: 'Reifentiefpreis',
+    kurz: 'Motorradreifen, oft der zweite Preis',
     betreiber: 'MD-Tuning, Mulda (Sachsen)',
     netz: 'awin',
     kennung: { publisher: AWIN_PUBLISHER, mid: '14701' },
@@ -101,6 +105,7 @@ const PARTNER = [
   {
     id: 'helmexpress',
     name: 'Helmexpress',
+    kurz: 'Helme und was dazugehört',
     betreiber: 'Loitz GmbH & Co KG, Lauterach (Österreich)',
     netz: 'awin',
     kennung: { publisher: AWIN_PUBLISHER, mid: '121690' },
@@ -128,12 +133,40 @@ const PARTNER = [
   {
     id: 'polo',
     name: 'POLO Motorrad',
+    kurz: 'Bekleidung, Helme, Zubehör',
     betreiber: 'POLO Motorrad und Sportswear GmbH, Jüchen',
     netz: 'webgains',
     kennung: { kampagne: WEBGAINS_KAMPAGNE, programm: '309425' },
     start: 'https://www.polo-motorrad.com/de-de/',
     cookieTage: 30,
     provision: '5 Prozent vom Warenwert',
+    versandfrei: null,
+    bilderErlaubt: true,
+  },
+  /* FC-Moto, seit dem 12.09.2026, ueber Webgains wie motoin und POLO.
+
+     Provision und Cookie-Frist am 12.09.2026 in der PROVISIONSTABELLE
+     abgelesen (Advertiser -> FC-Moto DE -> Provisionen): Event "Verkauf",
+     Stufe "Default", 6 Prozent, Cookie 30 Tage. Der Werbetext des
+     Haendlers auf derselben Seite nennt "4% Provision pro Sale" - das ist
+     veraltete Werbekopie. Dieselbe Falle wie bei POLO: Massgeblich ist die
+     Stufe, auf der wir stehen, nicht der Fliesstext.
+
+     Ebenfalls dort nachgelesen und fuer diese App entscheidend: Der
+     Marketingkanal "Preisvergleich" ist ausdruecklich freigegeben (gruener
+     Haken), ebenso "Redaktionelle Inhalte" und "Shopping-Guides".
+     Produktfeed und Deeplinks sind erlaubt. NICHT erlaubt sind
+     Gutscheincodes, Angebote, SEA und CSS - davon macht die App nichts. */
+  {
+    id: 'fcmoto',
+    name: 'FC-Moto',
+    kurz: 'Großes Lager, Bekleidung und Teile',
+    betreiber: 'FC-Moto GmbH & Co. KG, Aachen',
+    netz: 'webgains',
+    kennung: { kampagne: WEBGAINS_KAMPAGNE, programm: '4028' },
+    start: 'https://www.fc-moto.com/de-de/',
+    cookieTage: 30,
+    provision: '6 Prozent vom Warenwert',
     versandfrei: null,
     bilderErlaubt: true,
   },

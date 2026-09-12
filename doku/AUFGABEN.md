@@ -680,6 +680,51 @@ braucht deshalb den motoin-Feed unter `~/Downloads/products.csv`.
   Reifenkatalog ist damit 365 KB gepackt; alle vier Kataloge zusammen
   rund 665 KB. Budget neu vereinbaren, siehe oben.
 
+### FC-Moto: der sechste Partner (seit 12.09.2026)
+
+**Steht.** FC-Moto DE über Webgains (Programm 4028, Feed 17038, **6 Prozent**,
+Cookie 30 Tage), 15.714 erkannte Produkte, 3.244 davon im Katalog
+(`daten/fcmoto-katalog.js`, 260 KB gepackt). Der Feed ist der größte im
+Projekt: 147.516 Zeilen, 257 MB. 4.322 Produkte haben ein Gegenstück bei
+motoin, 334 bei Helmexpress.
+
+- **Das Secret fehlt noch, und nur Friedrich kann es setzen.** Ohne
+  `WEBGAINS_FEED_URL_FCMOTO` in den Repository-Einstellungen überspringt der
+  Preislauf FC-Moto stillschweigend, und der Katalog altert. Die Adresse
+  steht bei Webgains im Download-Dialog unter „Datenfeed-URL" („Code
+  kopieren"). Sie lautet nach dem Muster der beiden anderen
+  `platform-api.webgains.com/auth/publishers/1426402/campaigns/1749874/feeds/products?feedIds[]=17038&format=csv`.
+- **Provision 6 Prozent, nicht 4.** Der Werbetext des Händlers im
+  Webgains-Konto nennt „4% Provision pro Sale", die Provisionstabelle für
+  unsere Stufe „Default" nennt 6 Prozent. Maßgeblich ist die Tabelle,
+  dieselbe Falle wie bei POLO. Ändert der Händler die Stufe, ändert sich
+  die Offenlegung im Shop mit – dort steht die Zahl.
+- **Katalogbudget neu vereinbaren.** Mit FC-Moto sind es fünf Katalogdateien;
+  zusammen rund 925 KB gepackt. Die Grenze war ursprünglich für zwei
+  gedacht. Wer drücken will: FC-Moto auf die Ware mit Gegenstück plus eine
+  Auswahl beschneiden.
+- **Ein dritter Platz für den Preisvergleich.** Eine Produktzeile hat heute
+  zwei Plätze für Gegenstücke (motoin, Helmexpress). FC-Moto und POLO führen
+  beide ein breites Sortiment und überschneiden sich vermutlich stark – das
+  sieht heute niemand, weil kein Platz dafür da ist. Ein dritter Platz wäre
+  eine Änderung an allen fünf Katalogen und an `bauePoloProdukt()`.
+
+### Der Kanal „Preisvergleich": bei vier Programmen ungeprüft
+
+Serpa **ist** ein Preisvergleich, sobald zwei Händler dieselbe Ware führen –
+bei Helmen und Reifen ist das der Normalfall. Netzwerke führen diesen Kanal
+einzeln, und er kann gesperrt sein, auch wenn die Bewerbung angenommen wurde.
+Dann wird eine Provision im Zweifel storniert.
+
+Nachgesehen und **ausdrücklich freigegeben**: POLO Motorrad (05.09.2026) und
+FC-Moto (12.09.2026), beide Webgains, grüner Haken in der Kanalliste.
+
+**Ungeprüft sind die vier anderen:** reifen.com, Reifentiefpreis und
+Helmexpress (alle AWIN) sowie motoin (Webgains). Nachsehen lässt sich das in
+wenigen Minuten: AWIN → Programme → „Erlaubte Werbemethoden", bei Webgains
+unter den Programmbedingungen im Reiter „Bedingungen". Das Ergebnis gehört
+hierher, mit Datum.
+
 ### Wen als Nächstes beantragen
 
 - **Über AWIN**: POLO Motorrad (MID 11475, Programmbetreuung PeakLive,

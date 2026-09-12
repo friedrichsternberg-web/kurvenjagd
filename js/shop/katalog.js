@@ -478,6 +478,42 @@ meldeKatalog({
 });
 
 
+/* FC-Moto, seit dem 12.09.2026. Der Katalog hat DIESELBE Feldfolge wie der
+   von POLO - fcmoto-import.py schreibt sie absichtlich so. Drei Dinge
+   unterscheiden sich, und nur die stehen hier:
+
+     - die Produktadresse ist ein Slug OHNE Nummer (fc-moto.com/de-de/p/...),
+     - der Partner heisst anders, und daran haengt der Provisionslink,
+     - die Endungstabelle kennt "jpeg" als eigene Endung.
+
+   Das Letzte ist kein Schoenheitsfehler: FC-Moto fuehrt 106.724 Bilder
+   als .jpg und 40.475 als .jpeg. Mit der POLO-Tabelle, die beide auf
+   "jpg" abbildet, antwortete gut ein Viertel der Bildadressen mit 404.
+
+   Diese Funktion baut die POLO-Zeile und setzt danach die drei Felder um,
+   statt die ganze Zerlegung ein zweites Mal hinzuschreiben. Die
+   verworfenen Funktionen werden nie aufgerufen, sie kosten nichts. */
+const FCMOTO_BILDENDUNGEN = ['jpg', 'jpeg', 'png', 'webp'];
+
+function baueFcmotoProdukt(zeile, daten) {
+  const [, , , , , , , slug, bildpfad, bilddatei, bildendung] = zeile;
+  const produkt = bauePoloProdukt(zeile, daten, 'fcmoto');
+  produkt.partnerId = 'fcmoto';
+  produkt.ziel = () => `${daten.zielBasis}${slug}`;
+  produkt.bild = () =>
+    `${daten.bildBasis}${bildpfad}/${bilddatei}.${FCMOTO_BILDENDUNGEN[bildendung] || 'jpg'}`;
+  return produkt;
+}
+
+meldeKatalog({
+  id: 'fcmoto',
+  datei: 'daten/fcmoto-katalog.js',
+  holen: () => (typeof FCMOTO_KATALOG !== 'undefined' ? FCMOTO_KATALOG : null),
+  baueProdukt: baueFcmotoProdukt,
+  warengruppen: ['helm', 'jacke', 'hose', 'kombi', 'handschuh', 'stiefel', 'protektor', 'regen', 'airbag'],
+});
+
+
 /* --- 5. Verknuepfung: dasselbe Produkt bei zwei Haendlern -------------------
 
    Der Abgleich passiert NICHT hier, sondern im Importskript, ueber alle

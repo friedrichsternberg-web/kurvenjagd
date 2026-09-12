@@ -514,6 +514,38 @@ function zeichneRegale() {
   }).join('');
 }
 
+/* --- 6b. Der direkte Weg in die Shops ---------------------------------------
+
+   Die Reihenfolge ist NICHT die aus partner.js, sondern die fuer diesen
+   Bildschirm: erst die vier, die Ausruestung fuehren, dann die beiden
+   Reifenhaendler. Wer im Reifenbereich steht, findet die beiden dort
+   ohnehin an jedem Angebot.
+
+   Warum ueberhaupt: Ein Katalog zeigt immer nur einen Ausschnitt - 3.000
+   von 15.000 Artikeln bei FC-Moto, aehnlich bei den anderen. Wer sucht,
+   was wir nicht fuehren, stand bisher vor einer Sackgasse. */
+const SHOP_LEISTE_REIHE = ['motoin', 'polo', 'fcmoto', 'helmexpress',
+                           'reifencom', 'reifentiefpreis'];
+
+function shopKachelHtml(partner) {
+  return `
+    <button type="button" class="karte shop-kachel" data-shop="${escapeHtml(partner.id)}">
+      <span class="shop-kachel-name">${escapeHtml(partner.name)}</span>
+      <span class="shop-kachel-satz">${escapeHtml(partner.kurz || '')}</span>
+      <span class="shop-kachel-pfeil" aria-hidden="true">&rarr;</span>
+    </button>`;
+}
+
+function zeichneShopLinks() {
+  const abschnitt = document.getElementById('ausruestungShops');
+  const band = document.getElementById('shopLeisteBand');
+  if (!abschnitt || !band) return;
+  const partner = SHOP_LEISTE_REIHE.map(partnerNach).filter(Boolean);
+  band.innerHTML = partner.map(shopKachelHtml).join('');
+  abschnitt.hidden = partner.length === 0;
+}
+
+
 /* Der Stand des Katalogs, an jeder Uebersicht. Ein Preis ohne Zeitpunkt
    ist eine falsche Preisangabe - deshalb steht er hier und nicht nur auf
    der Produktseite. */
@@ -563,6 +595,7 @@ function zeichneAusruestung() {
   if (fenster) fenster.hidden = !schaufenster;
   if (treffer) treffer.hidden = schaufenster;
   if (schaufenster) {
+    zeichneShopLinks();
     zeichneHighlights();
     zeichneVorschläge();
     zeichneRegale();
@@ -641,6 +674,16 @@ verkabeleProduktBehaelter('weltKopf', 'ausruestung');
 verkabeleProduktBehaelter('weltRaster', 'ausruestung');
 verkabeleProduktBehaelter('ausruestungRegale', 'ausruestung');
 verkabeleProduktBehaelter('ausruestungHighlights', 'ausruestung');
+
+/* Der Klick auf eine Shop-Kachel geht denselben Weg wie jedes Angebot:
+   erst die Einwilligung, dann der Provisionslink. Ohne Ziel-Adresse baut
+   partnerDeepLink() den Link auf die Startseite des Haendlers. */
+verkabele('shopLeisteBand', 'click', ereignis => {
+  const kachel = ereignis.target.closest('[data-shop]');
+  if (!kachel) return;
+  const partner = partnerNach(kachel.dataset.shop);
+  if (partner) öffnePartnerLink(partnerDeepLink(partner), partner);
+});
 
 verkabele('btnAusruestungMerkliste', 'click', () => {
   ladeMerklistenKataloge().then(zeigeMerkliste);

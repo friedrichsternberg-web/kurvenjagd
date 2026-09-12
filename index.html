@@ -48,7 +48,8 @@
          Dateiauswahl, dazu die Kartenkacheln und der Bilderspeicher des
          Kontos. images2.productserve.com ist der Bildserver des
          Partnernetzwerks AWIN (Produktfotos im Reifen-Bereich),
-         www.motoin.de der des Haendlers motoin (Ausruestung). Beide
+         www.motoin.de, www.polo-motorrad.com und www.fc-moto.com sind
+         die der drei Ausruestungs-Haendler. Alle vier
          setzen nachweislich kein Cookie, deshalb laufen die Fotos ohne
          Einwilligung; die braucht nur der Klick auf ein Angebot, und
          darum kuemmert sich partner.js. Diese Zeile erlaubt die
@@ -96,7 +97,7 @@
     worker-src 'self' blob:;
     style-src 'self' 'unsafe-inline';
     font-src 'self';
-    img-src 'self' data: blob: https://tile.openstreetmap.org https://copydwpdqpnwjvknsakz.supabase.co https://images2.productserve.com https://www.motoin.de https://www.polo-motorrad.com;
+    img-src 'self' data: blob: https://tile.openstreetmap.org https://copydwpdqpnwjvknsakz.supabase.co https://images2.productserve.com https://www.motoin.de https://www.polo-motorrad.com https://www.fc-moto.com;
     connect-src 'self' https://brouter.de https://nominatim.openstreetmap.org
                 https://vpic.nhtsa.dot.gov https://de.wikipedia.org https://en.wikipedia.org
                 https://copydwpdqpnwjvknsakz.supabase.co https://cdn.jsdelivr.net;
@@ -1213,7 +1214,7 @@
             (Punkt 8); gibst du eine Tour per Link weiter, kann jeder sie
             ansehen, der den Link hat &ndash; auch ohne Konto (Punkt 9). In
             den Bereichen &bdquo;Reifen&ldquo; und &bdquo;Ausr&uuml;stung&ldquo;
-            zeigen wir Angebote von f&uuml;nf Partnershops und verdienen an
+            zeigen wir Angebote von sechs Partnershops und verdienen an
             vermittelten K&auml;ufen mit. Diese Angebote sind als
             &bdquo;Anzeige&ldquo; gekennzeichnet, und zum Shop selbst geht es
             erst, nachdem du zugestimmt hast (Punkt 12). Andere Werbung
@@ -1527,8 +1528,9 @@
             Partnernetzwerk <b>AWIN</b> (Awin AG, Eichhornstra&szlig;e 3,
             10785 Berlin).
             Im Bereich &bdquo;Ausr&uuml;stung&ldquo; zeigt sie Angebote von
-            <b>motoin</b> (motoin GmbH, Hamburg) und <b>POLO Motorrad</b>
-            (POLO Motorrad und Sportswear GmbH, J&uuml;chen), beide
+            <b>motoin</b> (motoin GmbH, Hamburg), <b>POLO Motorrad</b>
+            (POLO Motorrad und Sportswear GmbH, J&uuml;chen) und
+            <b>FC-Moto</b> (FC-Moto GmbH &amp; Co. KG, Aachen), alle drei
             vermittelt &uuml;ber <b>Webgains</b> (Webgains GmbH,
             Deutschland), und bei Helmen zus&auml;tzlich von
             <b>Helmexpress</b> (Loitz GmbH &amp; Co KG, Lauterach,
@@ -1551,14 +1553,15 @@
             Die Fotos der Reifen beider H&auml;ndler und der Helme von
             Helmexpress liegen beim Bilddienst des Netzwerks
             (images2.productserve.com, Awin), die
-            Fotos der Ausr&uuml;stung von motoin und POLO Motorrad beim
-            jeweiligen H&auml;ndler selbst (www.motoin.de,
-            www.polo-motorrad.com). Sie werden von dort
+            Fotos der Ausr&uuml;stung von motoin, POLO Motorrad und FC-Moto
+            beim jeweiligen H&auml;ndler selbst (www.motoin.de,
+            www.polo-motorrad.com, www.fc-moto.com). Sie werden von dort
             geladen, sobald du den jeweiligen Bereich &ouml;ffnest. Dabei
             wird deine IP-Adresse dorthin &uuml;bertragen &ndash; genau wie
-            beim Laden der Kartenbilder (Punkt 3). Alle drei setzen dabei
+            beim Laden der Kartenbilder (Punkt 3). Alle vier setzen dabei
             <strong>kein Cookie</strong> und lesen nichts von deinem
-            Ger&auml;t (nachgemessen am 01.09., 02.09. und 05.09.2026);
+            Ger&auml;t (nachgemessen am 01.09., 02.09., 05.09. und
+            12.09.2026);
             &sect; 25 TDDDG greift hier deshalb nicht. Rechtsgrundlage ist
             Art. 6 Abs. 1 lit. b und f DSGVO (Bereitstellung der von dir
             ge&ouml;ffneten Ansicht).
@@ -1974,6 +1977,23 @@
            weder gefiltert noch gesucht wird. Fuellen vorschlaege.js und
            shop.js. -->
       <div id="ausruestungSchaufenster">
+        <!-- Der direkte Weg in die Shops, seit dem 12.09.2026. Er steht
+             GANZ OBEN im Schaufenster, weil er eine andere Frage
+             beantwortet als alles darunter: Wer schon weiss, wo er kaufen
+             will, soll sich nicht erst durch Regale arbeiten. Bei einer
+             Suche oder einer gewaehlten Welt tritt er zurueck - dann will
+             jemand Treffer sehen, keine Shops.
+
+             Jeder dieser Knoepfe ist ein Provisionslink und damit
+             kennzeichnungspflichtig; das Abzeichen steht in der
+             Kopfzeile, wie bei der Merkliste. Der Klick geht durch
+             dieselbe Einwilligung wie jedes Angebot (partner.js). -->
+        <section class="shop-leiste" id="ausruestungShops" hidden>
+          <div class="garage-shop-kopf">
+            <h3>Direkt zum Shop <span class="badge anzeige">Anzeige</span></h3>
+          </div>
+          <div class="shop-leiste-band" id="shopLeisteBand"></div>
+        </section>
         <div id="ausruestungHighlights"></div>
         <div id="ausruestungVorschlaege"></div>
         <div id="ausruestungRegale"></div>
@@ -2001,17 +2021,18 @@
            Paragraf 5a Abs. 4 UWG. Die Mehrwertsteuer gehoert nach der
            Preisangabenverordnung an jede Stelle, an der Preise stehen. -->
       <p class="tiny">Angebote von <b>motoin</b> (motoin GmbH, Hamburg),
-        <b>POLO Motorrad</b> (POLO Motorrad und Sportswear GmbH, J&uuml;chen)
+        <b>POLO Motorrad</b> (POLO Motorrad und Sportswear GmbH, J&uuml;chen),
+        <b>FC-Moto</b> (FC-Moto GmbH &amp; Co. KG, Aachen)
         und <b>Helmexpress</b> (Loitz GmbH &amp; Co KG, Lauterach,
         &Ouml;sterreich); Reifen von <b>reifen.com</b> (reifencom GmbH,
         Hannover) und <b>Reifentiefpreis</b> (MD-Tuning, Mulda). Kaufst du
         dar&uuml;ber, bekommen wir eine Provision &ndash; 4 Prozent bei
-        motoin, je 5 Prozent bei POLO Motorrad und Helmexpress, 3 bis 5
-        Prozent bei reifen.com, 2 bis 3 Prozent
+        motoin, je 5 Prozent bei POLO Motorrad und Helmexpress, 6 Prozent
+        bei FC-Moto, 3 bis 5 Prozent bei reifen.com, 2 bis 3 Prozent
         bei Reifentiefpreis. F&uuml;r dich &auml;ndert sich am Preis nichts.
         Deshalb ist jedes Angebot als <b>Anzeige</b> gekennzeichnet.</p>
       <p class="tiny">Das ist <b>kein Marktvergleich</b>: Du siehst das
-        Sortiment f&uuml;nf ausgew&auml;hlter H&auml;ndler, nicht alle Anbieter. F&uuml;hren
+        Sortiment sechs ausgew&auml;hlter H&auml;ndler, nicht alle Anbieter. F&uuml;hren
         mehrere dieselbe Ware, zeigen wir alle Preise und den
         g&uuml;nstigsten zuerst. Preise inklusive Mehrwertsteuer, Versand wie
         angegeben. Ma&szlig;geblich ist der Preis, den der Shop beim Kauf
@@ -2040,7 +2061,8 @@
            Katalog. Wer die Merkliste aus der Garage oeffnet, sieht die
            Ausruestungsseite unter Umstaenden nie. -->
       <p class="tiny">Angebote unserer Partner-Shops reifen.com,
-        Reifentiefpreis, motoin, POLO Motorrad und Helmexpress, jedes als <b>Anzeige</b>
+        Reifentiefpreis, motoin, POLO Motorrad, FC-Moto und Helmexpress,
+        jedes als <b>Anzeige</b>
         gekennzeichnet. Kaufst du dar&uuml;ber, bekommen wir eine Provision;
         f&uuml;r dich &auml;ndert sich am Preis nichts. Preise inklusive
         Mehrwertsteuer. Ma&szlig;geblich ist der Preis, den der Shop beim
