@@ -120,7 +120,7 @@ function einfuehrungPunkteHtml(aktiv, anzahl) {
 function einfuehrungMarkeHtml() {
   return `
     <p class="wortmarke einfuehrung-marke">
-      <img class="wortmarke-bild" src="img/logo-serpa.webp?v=113" alt="Serpa"
+      <img class="wortmarke-bild" src="img/logo-serpa.webp?v=114" alt="Serpa"
            width="800" height="155" fetchpriority="high">
       <span class="wortmarke-sub">Deine Motorradapp</span>
     </p>`;
