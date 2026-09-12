@@ -2908,37 +2908,112 @@ button.karte:active { transform: scale(0.985); }
   object-position: center bottom;
   filter: drop-shadow(0 10px 8px var(--schatten-mittel));
 }
-/* Der Fahrer statt der Maschine (garage.js, BUEHNE_ZEIGT = 'fahrer'):
-   das Profilbild als Kreis auf dem Teller. Ein Kreis mit "cover" sieht bei
-   jedem Foto gleich aus - Hochkant, Querformat, Selfie, Gruppenbild -,
-   deshalb braucht er weder Freisteller noch Zuschnitt. Das war beim
-   Bike-Foto der Punkt, an dem es haekelte.
+/* ---------- Die Fahrer-Plakette ----------
+   garage.js, BUEHNE_ZEIGT = 'fahrer'. Die rechte Kartenhaelfte ist dann
+   keine Buehne fuer eine Maschine, sondern eine Tafel um den Fahrer:
+   Werkstattraum, Teller und Kontaktschatten gehen weg, es bleibt ein
+   tiefer Grund mit einem leisen blauen Schein, darauf Hoehenlinien wie
+   in der Gravur des Serpa-Schriftzugs, in der Mitte das Profilbild als
+   Kreis, darunter der Name in Versalien.
 
-   Groesse ueber die Breite der Buehne, gedeckelt: Der Kreis soll auf dem
-   Teller stehen und ihn noch sehen lassen, wie vorher die Maschine. Der
-   helle Ring ist die Glaskante, die ihn von der Werkstatt abhebt; darunter
-   bleibt der Kontaktschatten der Buehne (::before) und setzt ihn auf. */
-.bike-bild.ist-fahrer {
-  /* 66 statt 58 Prozent: Auf dem Handy ist die Buehne rund 155 Punkte
-     breit, und ein Gesicht unter 100 Punkten liest sich als Abzeichen,
-     nicht als Portrait. Im Breiten deckelt max-width. */
-  width: 66%;
-  max-width: 200px;
-  aspect-ratio: 1 / 1;
-  height: auto;
-  max-height: none;
-  margin-bottom: var(--s3);
+   Der Kreis mit "cover" sieht bei jedem Foto gleich aus - Hochkant,
+   Querformat, Selfie -, deshalb braucht er weder Freisteller noch
+   Zuschnitt. Genau da hakte es beim Bike-Foto.
+
+   Kein Neonleuchten (Grundsatz der Designsprache): Der Schein ist eine
+   Mischung aus der Signalfarbe und Durchsichtigkeit, weit unter dem, was
+   als Licht gelesen wuerde. Er gibt dem Grund Tiefe, mehr nicht. */
+.bike-karte.zeigt-fahrer .bike-raum,
+.bike-karte.zeigt-fahrer .bike-bild,
+.bike-karte.zeigt-fahrer .buehne-hinweis,
+.bike-karte.zeigt-fahrer .bike-buehne::before { display: none; }
+.bike-karte.zeigt-fahrer .bike-buehne {
+  justify-content: center;
+  padding-bottom: 0;
+  overflow: hidden;
+  border-radius: var(--r-md);
+  background:
+    radial-gradient(circle at 50% 42%,
+      color-mix(in srgb, var(--accent) 30%, transparent),
+      transparent 60%),
+    var(--raum-dunkel);
+}
+.fahrer-plakette {
+  position: relative;
+  width: 100%;
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  color: var(--metall);
+}
+/* Die Hoehenlinien liegen hinter dem Bild und laufen ueber den Rand der
+   Tafel hinaus - die Karte schneidet sie ab, wie eine Karte einen
+   Ausschnitt der Landschaft zeigt. */
+.fahrer-ringe {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 190%;
+  height: 190%;
+  transform: translate(-50%, -50%);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 0.9;
+  opacity: 0.55;
+  pointer-events: none;
+}
+.fahrer-plakette-inhalt {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s4) 0;
+}
+.fahrer-bild {
+  width: 108px;
+  height: 108px;
   border-radius: 50%;
   object-fit: cover;
   object-position: center;
+  /* Ein heller Ring als Glaskante, ein dunkler als Abstand zu den
+     Hoehenlinien, dann der Schatten, der den Kreis vom Grund loest. */
   box-shadow:
     0 0 0 3px var(--glas-heller),
-    0 0 0 4px var(--glas-rand),
-    0 14px 26px var(--schatten-mittel);
-  /* Der drop-shadow der Maschine folgte ihrer Silhouette; beim Kreis
-     macht das der box-shadow oben. */
-  filter: none;
+    0 0 0 7px var(--raum-dunkel),
+    0 14px 28px var(--schatten-tief);
+  background: var(--glas-hell);
 }
+/* Der leere Kreis: ein Knopf, kein Bild. Das Profilsymbol gross, in der
+   Metallfarbe der Beschriftung. */
+.fahrer-bild.fahrer-leer {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--glas-rand);
+  color: var(--metall);
+  cursor: pointer;
+  transition: transform 0.15s cubic-bezier(0.2,0.8,0.2,1), background 0.15s ease;
+}
+.fahrer-bild.fahrer-leer .ic { width: 44px; height: 44px; }
+.fahrer-bild.fahrer-leer:hover { background: var(--glas-heller); }
+.fahrer-bild.fahrer-leer:active { transform: scale(0.96); }
+/* Der Name wie ein Schild: Versalien, weit gesperrt, Metall - dieselbe
+   Handschrift wie "Deine Motorradapp" unter dem Logo. */
+.fahrer-name {
+  font-family: var(--schrift-display);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--metall);
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fahrer-name.fahrer-aufforderung { color: var(--accent-hell); }
 
 /* Das Standardmotorrad steht voll da. Hier lag einmal opacity: 0.8, damit
    es "zurueckritt" - es sah dadurch durchsichtig aus, besonders rechts vor

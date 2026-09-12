@@ -572,6 +572,11 @@
             </span>
           </button>
           <img id="motorradBild" class="bike-bild" alt="">
+          <!-- Die Fahrer-Plakette (garage.js, BUEHNE_ZEIGT = 'fahrer'):
+               Profilbild im Kreis, Hoehenlinien darum, Name darunter.
+               Gefuellt von zeichneFahrerPlakette(); im Bike-Modus leer
+               und versteckt. -->
+          <div class="fahrer-plakette" data-fahrer-plakette hidden></div>
         </div>
       </section>
 
@@ -591,6 +596,7 @@
         </div>
         <div class="bike-buehne">
           <img class="bike-bild ist-standard" src="img/bike-standard.webp?v=112" alt="" aria-hidden="true">
+          <div class="fahrer-plakette" data-fahrer-plakette hidden></div>
         </div>
       </section>
 

@@ -4375,3 +4375,46 @@ Nachgemessen mit vorgetäuschtem Profil und einem Querformat-Foto: Kreis
 `object-fit: cover`, Tafel weg; ohne Profil Standardmotorrad und die
 Tafel mit dem neuen Text. Mit einem echten Konto muss Friedrich es einmal
 selbst ansehen.
+
+## 12.09.2026 (später) — Die Bühne geht, die Fahrer-Plakette kommt
+
+Der Kreis auf dem Drehteller (Eintrag darüber) hielt keine Stunde:
+Friedrich wollte die Bühne ganz weg und stattdessen ein eigenes Design
+um das Profilbild. Ein Portrait auf einem Drehteller in einer Werkstatt
+war auch ein Kompromiss — die Werkstatt ist für eine Maschine gebaut, ein
+Gesicht steht dort wie ein Gast.
+
+**Was jetzt gilt: die Fahrer-Plakette.** Die rechte Kartenhälfte ist im
+Fahrer-Modus keine Bühne mehr, sondern eine eigene Tafel: tiefer Grund mit
+einem leisen blauen Schein, darauf fünf **Höhenlinien** um die Mitte — die
+Gravur des Serpa-Schriftzugs, nur hier als Landschaft um den Fahrer —, in
+der Mitte das Profilbild als Kreis mit Glaskante, darunter der Name in
+Versalien und Metall, derselbe Ton wie „Deine Motorradapp" unter dem Logo.
+
+Die Höhenlinien werden in `garage.js` gerechnet (`fahrerRingeSvg()`), nicht
+als Bild abgelegt: fünf geschlossene Pfade, deren Radius mit zwei
+überlagerten Sinuswellen leicht wackelt. Feste Zahlen, damit sie bei jedem
+Zeichnen gleich aussehen; die Farbe kommt über `currentColor` aus dem CSS,
+also aus einer Marke der Designsprache. Kein Asset, keine Lizenzfrage,
+themenfähig.
+
+**Kein Neonleuchten.** Der Schein hinter dem Bild ist `color-mix` aus der
+Signalfarbe und Durchsichtigkeit, weit unter dem, was als Licht gelesen
+würde. Er gibt dem Grund Tiefe. Wer ihn heller dreht, verstößt gegen den
+Grundsatz in `design.css`.
+
+**Die Plakette steht in BEIDEN Bike-Karten**, auch in der leeren: Wer noch
+kein Motorrad eingetragen hat, ist trotzdem schon ein Fahrer. Ohne
+Profilbild ein leerer Kreis mit dem Profilsymbol, als Knopf, der ins Profil
+führt — ohne Konto zur Anmeldung. Lässt sich das Bild nicht laden, steht
+derselbe leere Kreis da statt eines kaputten Bildsymbols.
+
+**Der Rückweg bleibt ein Wort.** `BUEHNE_ZEIGT = 'bike'` bringt
+Werkstattraum, Teller, Standardmotorrad, Tafel, Fotofeld und Freisteller
+zurück; `zeichneBikeBuehne()` ist der unveränderte alte Weg. Die Klasse
+`zeigt-fahrer` an der Karte schaltet im CSS um, ausgebaut ist nichts.
+
+Nachgemessen mit vorgetäuschtem Profil und Querformat-Foto: Kreis 108
+Punkte auf dem Handy, 168 im Breiten, Werkstatt und Tafel weg, Name da;
+ohne Profil der Knopf „Anmelden"; mit kaputter Bildadresse der leere Kreis
+statt des Bilds.

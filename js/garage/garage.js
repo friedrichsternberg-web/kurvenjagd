@@ -133,11 +133,12 @@ function zeichneGarage() {
 
 /* --- Was auf dem Teller steht: das Bike oder der Fahrer ---------------------
 
-   Seit dem 12.09.2026 steht auf dem Drehteller nicht mehr das eigene,
-   freigestellte Motorradfoto, sondern das PROFILBILD - rund beschnitten,
-   ohne Freisteller, ohne Zuschnitt. Ein Kreis mit "cover" sieht bei jedem
-   Foto gleich gut aus, egal wie es aufgenommen wurde; genau das war beim
-   Bike-Foto der wunde Punkt (Freisteller, Zuschnitt, Hintergrund).
+   Seit dem 12.09.2026 zeigt die rechte Kartenhaelfte nicht mehr die
+   Werkstatt mit dem eigenen, freigestellten Motorradfoto, sondern die
+   FAHRER-PLAKETTE: das Profilbild als Kreis, ohne Freisteller, ohne
+   Zuschnitt, Hoehenlinien darum, der Name darunter. Ein Kreis mit "cover"
+   sieht bei jedem Foto gleich gut aus, egal wie es aufgenommen wurde;
+   genau das war beim Bike-Foto der wunde Punkt.
 
    Der alte Weg ist NICHT ausgebaut, nur abgeschaltet. Ein Wort hier
    entscheidet, und alles andere - Foto waehlen, freistellen, zuschneiden,
@@ -145,8 +146,8 @@ function zeichneGarage() {
    sofort zurueck. Die gespeicherten Bike-Fotos bleiben in der Garage
    liegen und werden weiter ins Konto gesichert.
 
-     'fahrer'  Profilbild auf dem Teller; ohne Profilbild das
-               Standardmotorrad mit der Tafel "Dein Profilbild einfuegen"
+     'fahrer'  die Fahrer-Plakette: Profilbild im Kreis, Hoehenlinien
+               darum, kein Werkstattraum (zeichneFahrerPlakette)
      'bike'    das eigene Motorradfoto, wie bis zum 12.09.2026 */
 const BUEHNE_ZEIGT = 'fahrer';
 
@@ -173,35 +174,91 @@ function fahrerBildAdresse() {
    "Dein Bike einfuegen": Sie sagt, dass das nicht die eigene Maschine ist,
    und fuehrt mit einem Druck zur Fotoauswahl. */
 function zeichneMotorradBild() {
+  const karten = document.querySelectorAll('.bike-karte');
+  karten.forEach(karte => karte.classList.toggle('zeigt-fahrer', buehneZeigtFahrer()));
+  if (buehneZeigtFahrer()) zeichneFahrerPlakette();
+  else zeichneBikeBuehne();
+}
+
+/* Die Fahrer-Plakette: das Profilbild als Kreis, darum Hoehenlinien wie in
+   der Gravur des Serpa-Schriftzugs, darunter der Name. Keine Werkstatt,
+   kein Teller, kein Standardmotorrad - im Fahrer-Modus ist die rechte
+   Kartenhaelfte eine eigene Tafel, keine Buehne fuer eine Maschine.
+
+   Sie wird in JEDE Bike-Karte gezeichnet, auch in die leere: Wer noch kein
+   Motorrad eingetragen hat, ist trotzdem schon ein Fahrer. Ohne Profilbild
+   steht ein leerer Kreis mit dem Profilsymbol; ein Druck darauf fuehrt ins
+   Profil, ohne Konto zur Anmeldung. */
+function zeichneFahrerPlakette() {
+  const adresse = fahrerBildAdresse();
+  if (adresse !== fahrerBildZuletzt) { fahrerBildKaputt = false; fahrerBildZuletzt = adresse; }
+  const angemeldet = typeof angemeldeterNutzer !== 'undefined' && !!angemeldeterNutzer;
+  const name = (typeof eigenesProfil !== 'undefined' && eigenesProfil?.benutzername) || '';
+  const ringe = fahrerRingeSvg();
+
+  let mitte, zeile;
+  if (adresse && !fahrerBildKaputt) {
+    mitte = `<img class="fahrer-bild" src="${escapeHtml(adresse)}" alt="${escapeHtml(name)}">`;
+    zeile = `<span class="fahrer-name">${escapeHtml(name)}</span>`;
+  } else {
+    mitte = `
+      <button type="button" class="fahrer-bild fahrer-leer" data-fahrer-profil
+              aria-label="${angemeldet ? 'Profilbild einfügen' : 'Anmelden'}">
+        <svg class="ic"><use href="#icon-profil"></use></svg>
+      </button>`;
+    zeile = `<span class="fahrer-name fahrer-aufforderung">${angemeldet ? 'Profilbild einf&uuml;gen' : 'Anmelden'}</span>`;
+  }
+
+  document.querySelectorAll('[data-fahrer-plakette]').forEach(kasten => {
+    kasten.innerHTML = `${ringe}<div class="fahrer-plakette-inhalt">${mitte}${zeile}</div>`;
+    kasten.hidden = false;
+    // Laesst sich das Bild nicht laden, steht der leere Kreis da statt
+    // eines kaputten Bildsymbols. Einmal merken, dann neu zeichnen.
+    kasten.querySelector('img.fahrer-bild')?.addEventListener('error', () => {
+      if (fahrerBildKaputt) return;
+      fahrerBildKaputt = true;
+      zeichneFahrerPlakette();
+    });
+  });
+}
+
+// Wird zurueckgesetzt, sobald ein neues Bild hochgeladen wurde (konto.js
+// ruft danach zeichneMotorradBild) - deshalb haengt es an der Adresse.
+let fahrerBildKaputt = false;
+let fahrerBildZuletzt = null;
+
+/* Fuenf geschlossene Hoehenlinien um die Mitte, als SVG-Text. Der Radius
+   wackelt leicht (zwei ueberlagerte Sinuswellen), damit es Linien einer
+   Landkarte sind und keine Zielscheibe. Die Zahlen sind fest, damit die
+   Linien bei jedem Zeichnen gleich aussehen; die Farbe kommt ueber
+   currentColor aus dem CSS. Der Bereich ist 300 x 300, die Mitte 150. */
+function fahrerRingeSvg() {
+  const pfade = [];
+  for (let ring = 0; ring < 5; ring++) {
+    const grund = 62 + ring * 17;
+    const punkte = [];
+    for (let i = 0; i < 60; i++) {
+      const winkel = (i / 60) * Math.PI * 2;
+      const radius = grund
+        + 3.5 * Math.sin(3 * winkel + ring * 1.3)
+        + 2.0 * Math.sin(7 * winkel + ring * 0.7);
+      punkte.push(`${(150 + radius * Math.cos(winkel)).toFixed(1)} ${(150 + radius * Math.sin(winkel)).toFixed(1)}`);
+    }
+    pfade.push(`<path d="M${punkte.join(' L')} Z" style="opacity:${(0.9 - ring * 0.17).toFixed(2)}"/>`);
+  }
+  return `<svg class="fahrer-ringe" viewBox="0 0 300 300" aria-hidden="true" preserveAspectRatio="xMidYMid slice">${pfade.join('')}</svg>`;
+}
+
+/* Die Buehne mit der Maschine: der Weg bis zum 12.09.2026, unveraendert,
+   und mit BUEHNE_ZEIGT = 'bike' wieder der einzige. */
+function zeichneBikeBuehne() {
   const motorrad = motorradAktiv();
   const bild = document.getElementById('motorradBild');
   const hinweis = document.getElementById('buehneHinweis');
   if (!bild) return;
+  document.querySelectorAll('[data-fahrer-plakette]').forEach(k => { k.hidden = true; k.innerHTML = ''; });
 
-  /* Fahrer-Modus: das Profilbild, rund. Gibt es keines, laeuft es unten
-     weiter wie ohne eigenes Bike-Foto - Standardmotorrad und Tafel, nur
-     dass die Tafel dann zum Profilbild fuehrt (siehe Verkabelung). */
-  const fahrer = buehneZeigtFahrer() ? fahrerBildAdresse() : null;
-  bild.classList.toggle('ist-fahrer', !!fahrer);
-  if (hinweis) {
-    const text = hinweis.querySelector('.hinweis-text');
-    if (text) text.textContent = buehneZeigtFahrer() ? 'Dein Profilbild einfügen' : 'Dein Bike einfügen';
-  }
-  if (fahrer) {
-    if (hinweis) hinweis.hidden = true;
-    bild.classList.remove('ist-standard');
-    bild.onload = null;
-    bild.onerror = () => { bild.classList.remove('ist-fahrer'); bild.src = STANDARD_BILD; };
-    bild.alt = (typeof eigenesProfil !== 'undefined' && eigenesProfil?.benutzername) || '';
-    bild.hidden = false;
-    bild.src = fahrer;
-    return;
-  }
-
-  // Im Fahrer-Modus zaehlt das Bike-Foto nicht - es bleibt gespeichert,
-  // steht aber nicht auf dem Teller. Sonst saehe man je nach Anmeldung
-  // mal den Fahrer, mal die Maschine, und niemand wuesste, warum.
-  const adresse = buehneZeigtFahrer() ? STANDARD_BILD : bildAdresse(motorrad);
+  const adresse = bildAdresse(motorrad);
   const eigenes = adresse !== STANDARD_BILD;
   if (hinweis) hinweis.hidden = eigenes;
   bild.classList.toggle('ist-standard', !eigenes);
@@ -688,14 +745,17 @@ verkabele('btnMotorradWeiteres', 'click', () => öffneMotorradDialog(null));
    aufgeklappt - der Nutzer wollte ein Foto, also bekommt er das
    Foto-Fenster und nicht erst ein Formular. Ist noch gar keine Maschine
    da, wird eine angelegt; Marke und Modell traegt er hinterher ein. */
+/* Der leere Kreis der Fahrer-Plakette fuehrt ins Profil, dort wohnt das
+   Bild. Ohne Konto landet man auf der Anmeldung - auch richtig, denn ein
+   Profilbild gibt es nur mit Konto. Der Horcher haengt am Dokument, weil
+   die Plakette in beiden Bike-Karten steht und bei jedem Zeichnen neu
+   entsteht. */
+document.addEventListener('click', ereignis => {
+  if (!ereignis.target.closest('[data-fahrer-profil]')) return;
+  if (typeof öffneKontoOderProfil === 'function') öffneKontoOderProfil();
+});
+
 verkabele('buehneHinweis', 'click', () => {
-  // Im Fahrer-Modus fuehrt die Tafel zum Profil, dort wohnt das Bild.
-  // Ohne Konto landet man auf der Anmeldung - auch richtig, denn ein
-  // Profilbild gibt es nur mit Konto.
-  if (buehneZeigtFahrer()) {
-    if (typeof öffneKontoOderProfil === 'function') öffneKontoOderProfil();
-    return;
-  }
   const motorrad = motorradAktiv();
   öffneMotorradDialog(motorrad || null);
   const eingabe = document.getElementById('garageFotoEingabe');
