@@ -491,6 +491,12 @@ function aktualisiereKontoAnzeige() {
     ? (eigenesProfil ? eigenesProfil.benutzername : 'Mein Profil')
     : 'Anmelden';
   knopf.setAttribute('aria-label', knopf.title);
+
+  // Die Garage zeigt seit dem 12.09.2026 das Profilbild auf dem Teller
+  // (garage.js, BUEHNE_ZEIGT). Sie muss deshalb mit, wenn sich Anmeldung
+  // oder Profil aendern - und das ist genau der Moment, in dem diese
+  // Funktion laeuft. garage.js wird nach dieser Datei geladen.
+  if (typeof zeichneMotorradBild === 'function') zeichneMotorradBild();
 }
 
 /* Füllt den Profilbildschirm. Wird bei jedem Öffnen aufgerufen, damit nach
@@ -775,7 +781,10 @@ verkabele('profilBildEingabe', 'change', async ereignis => {
 
   // Frisch anzeigen. Der Zeitstempel hängt hinten an der Adresse, sonst
   // zeigt der Browser weiter das alte Bild aus seinem Zwischenspeicher.
-  const frisch = profilBildAdresse(eigenesProfil.bild_pfad, Date.now());
+  // Der Stand haengt am Profil, nicht an dieser Stelle: Auch die Garage
+  // baut die Adresse aus dem Profil und braucht denselben Stempel.
+  eigenesProfil.bild_stand = Date.now();
+  const frisch = profilBildAdresse(eigenesProfil.bild_pfad, eigenesProfil.bild_stand);
   const anzeige = document.getElementById('profilBildAnzeige');
   anzeige.src = frisch;
   anzeige.hidden = false;
@@ -784,6 +793,7 @@ verkabele('profilBildEingabe', 'change', async ereignis => {
   rund.src = frisch;
   rund.hidden = false;
   document.querySelector('#btnKontoRund .ic').hidden = true;
+  if (typeof zeichneMotorradBild === 'function') zeichneMotorradBild();
 });
 
 

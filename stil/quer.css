@@ -247,6 +247,9 @@
      Spalte, und die Maschine lief rechts aus der Karte. */
   .bike-buehne { min-height: 340px; }
   .bike-bild { max-height: none; }
+  /* Der Fahrer-Kreis darf im Breiten wachsen, aber nicht so weit wie die
+     Maschine: Ein Portrait ueber 260 Punkte wird zum Poster. */
+  .bike-bild.ist-fahrer { max-width: 260px; }
   /* Im Breiten hat die Buehne mehr Hoehe, als Tafel und Maschine brauchen -
      die Tafel rueckt etwas hoch, damit sie nicht auf dem Lenker klebt. */
   .buehne-hinweis { margin-bottom: var(--s7); }

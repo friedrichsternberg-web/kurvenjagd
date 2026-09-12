@@ -4333,3 +4333,45 @@ schlägt `.shop-kachel { width: 172px }` — Element plus Klasse gewinnt gegen
 Klasse allein. Jede Kachel war fensterbreit, von sechs Händlern sah man
 einen. Der Vorsatz `.shop-leiste-band` löst es. Dieselbe Sorte Fehler wie
 beim Vorschaubild der Tourenliste, und dieselbe Lösung.
+
+## 12.09.2026 — Auf dem Teller steht der Fahrer, nicht die Maschine
+
+Friedrich wollte statt des eigenen, freigestellten Bike-Fotos das
+**Profilbild** in der Garage-Karte — ohne Freisteller, ohne Zuschnitt, und
+so, dass es immer gut aussieht. Mit der Bedingung, dass der alte Weg
+jederzeit zurückkommen kann.
+
+**Die Form: ein Kreis.** Ein rundes Bild mit `object-fit: cover` sieht bei
+jedem Foto gleich aus — Hochkant, Querformat, Selfie, Gruppenbild. Genau da
+hakte es beim Bike-Foto: Es brauchte einen Freisteller, einen Zuschnitt auf
+den Inhalt, und selbst dann stand die Maschine mal groß, mal klein auf dem
+Teller. Der Kreis bekommt einen Glasring und einen weichen Schatten und
+steht damit auf dem Teller wie vorher die Maschine; der Kontaktschatten der
+Bühne bleibt darunter.
+
+**Der Umschalter ist ein Wort:** `BUEHNE_ZEIGT` in `garage.js`, heute
+`'fahrer'`. Mit `'bike'` kommt alles zurück — Fotofeld im Dialog,
+Freisteller, Zuschnitt, die Tafel „Dein Bike einfügen". Nichts davon wurde
+ausgebaut, es hängt nur an diesem einen Wort. Die gespeicherten Bike-Fotos
+bleiben in der Garage liegen und wandern weiter ins Konto.
+
+**Ohne Profilbild** (kein Konto, oder keines hochgeladen) zeigt die Bühne
+das Standardmotorrad und die Tafel sagt „Dein Profilbild einfügen"; ein
+Druck führt ins Profil, ohne Konto zur Anmeldung. Ein vorhandenes Bike-Foto
+zählt im Fahrer-Modus **nicht** — sonst sähe man je nach Anmeldung mal den
+Fahrer, mal die Maschine, und niemand wüsste, warum.
+
+**Im Dialog fehlt das Fotofeld im Fahrer-Modus.** Ein Foto, das nirgends
+erscheint, wäre ein Versprechen ohne Einlösung. Stattdessen ein Satz, wo
+das Bild herkommt.
+
+**Der Frischestempel hängt am Profil** (`eigenesProfil.bild_stand`), nicht
+mehr an der Stelle, die das Bild hochlädt: Auch die Garage baut die Adresse
+aus dem Profil und braucht denselben Stempel, sonst zeigt sie nach einem
+Bildwechsel das alte aus dem Browserspeicher.
+
+Nachgemessen mit vorgetäuschtem Profil und einem Querformat-Foto: Kreis
+168 Punkte im Breiten, rund 100 auf dem Handy, `border-radius: 50%`,
+`object-fit: cover`, Tafel weg; ohne Profil Standardmotorrad und die
+Tafel mit dem neuen Text. Mit einem echten Konto muss Friedrich es einmal
+selbst ansehen.

@@ -131,6 +131,40 @@ function zeichneGarage() {
   zeichneDatenblatt();
 }
 
+/* --- Was auf dem Teller steht: das Bike oder der Fahrer ---------------------
+
+   Seit dem 12.09.2026 steht auf dem Drehteller nicht mehr das eigene,
+   freigestellte Motorradfoto, sondern das PROFILBILD - rund beschnitten,
+   ohne Freisteller, ohne Zuschnitt. Ein Kreis mit "cover" sieht bei jedem
+   Foto gleich gut aus, egal wie es aufgenommen wurde; genau das war beim
+   Bike-Foto der wunde Punkt (Freisteller, Zuschnitt, Hintergrund).
+
+   Der alte Weg ist NICHT ausgebaut, nur abgeschaltet. Ein Wort hier
+   entscheidet, und alles andere - Foto waehlen, freistellen, zuschneiden,
+   die Tafel "Dein Bike einfuegen" - haengt daran und kommt mit 'bike'
+   sofort zurueck. Die gespeicherten Bike-Fotos bleiben in der Garage
+   liegen und werden weiter ins Konto gesichert.
+
+     'fahrer'  Profilbild auf dem Teller; ohne Profilbild das
+               Standardmotorrad mit der Tafel "Dein Profilbild einfuegen"
+     'bike'    das eigene Motorradfoto, wie bis zum 12.09.2026 */
+const BUEHNE_ZEIGT = 'fahrer';
+
+function buehneZeigtFahrer() {
+  return BUEHNE_ZEIGT === 'fahrer';
+}
+
+/* Die Adresse des Profilbilds, oder null. konto.js liefert Profil und
+   Adresse; es wird VOR dieser Datei geladen, kann aber ohne Server fehlen
+   - dann gibt es kein Profil, und die Buehne zeigt das Standardmotorrad.
+   bild_stand haengt konto.js nach einem Bildwechsel an, damit der Browser
+   nicht das alte Bild aus seinem Zwischenspeicher zeigt. */
+function fahrerBildAdresse() {
+  if (typeof profilBildAdresse !== 'function') return null;
+  if (typeof eigenesProfil === 'undefined' || !eigenesProfil?.bild_pfad) return null;
+  return profilBildAdresse(eigenesProfil.bild_pfad, eigenesProfil.bild_stand);
+}
+
 /* Das Motorrad in der Karte. Es steht auf dem Teller der Werkstatt, die als
    Bild hinter der rechten Kartenhaelfte liegt (.bike-raum in style.css) -
    Glas ueber etwas Echtem, Grundsatz 4 der Designsprache.
@@ -144,7 +178,30 @@ function zeichneMotorradBild() {
   const hinweis = document.getElementById('buehneHinweis');
   if (!bild) return;
 
-  const adresse = bildAdresse(motorrad);
+  /* Fahrer-Modus: das Profilbild, rund. Gibt es keines, laeuft es unten
+     weiter wie ohne eigenes Bike-Foto - Standardmotorrad und Tafel, nur
+     dass die Tafel dann zum Profilbild fuehrt (siehe Verkabelung). */
+  const fahrer = buehneZeigtFahrer() ? fahrerBildAdresse() : null;
+  bild.classList.toggle('ist-fahrer', !!fahrer);
+  if (hinweis) {
+    const text = hinweis.querySelector('.hinweis-text');
+    if (text) text.textContent = buehneZeigtFahrer() ? 'Dein Profilbild einfügen' : 'Dein Bike einfügen';
+  }
+  if (fahrer) {
+    if (hinweis) hinweis.hidden = true;
+    bild.classList.remove('ist-standard');
+    bild.onload = null;
+    bild.onerror = () => { bild.classList.remove('ist-fahrer'); bild.src = STANDARD_BILD; };
+    bild.alt = (typeof eigenesProfil !== 'undefined' && eigenesProfil?.benutzername) || '';
+    bild.hidden = false;
+    bild.src = fahrer;
+    return;
+  }
+
+  // Im Fahrer-Modus zaehlt das Bike-Foto nicht - es bleibt gespeichert,
+  // steht aber nicht auf dem Teller. Sonst saehe man je nach Anmeldung
+  // mal den Fahrer, mal die Maschine, und niemand wuesste, warum.
+  const adresse = buehneZeigtFahrer() ? STANDARD_BILD : bildAdresse(motorrad);
   const eigenes = adresse !== STANDARD_BILD;
   if (hinweis) hinweis.hidden = eigenes;
   bild.classList.toggle('ist-standard', !eigenes);
@@ -399,6 +456,21 @@ function motorradDialogHtml(vorhandenes) {
         Wikipedia-Infobox deines Modells (Lizenz CC BY-SA). Pr&uuml;f die
         Werte kurz &ndash; und was nicht stimmt, &uuml;berschreibst du einfach.</p>
 
+      ${fotoFeldHtml()}
+    `;
+}
+
+/* Das Fotofeld des Dialogs. Im Fahrer-Modus gibt es keins: Auf dem Teller
+   steht das Profilbild, und ein Foto, das nirgends erscheint, waere ein
+   Versprechen ohne Einloesung. Ein Satz sagt stattdessen, wo das Bild
+   herkommt. Das Feld selbst bleibt fuer den Bike-Modus erhalten. */
+function fotoFeldHtml() {
+  if (buehneZeigtFahrer()) {
+    return `
+      <p class="hint">Auf der Karte steht dein Profilbild. &Auml;ndern kannst du
+        es unter &bdquo;Mein Profil&ldquo;.</p>`;
+  }
+  return `
       <div class="foto-feld">
         <div class="foto-feld-kopf">
           <span class="label">Eigenes Foto</span>
@@ -408,9 +480,7 @@ function motorradDialogHtml(vorhandenes) {
         </div>
         <div class="foto-vorschau" id="fotoVorschau"></div>
         <p class="hint" id="fotoHinweis"></p>
-      </div>
-
-    `;
+      </div>`;
 }
 
 /* Der Gruss ueber dem Formular, wenn der Dialog direkt nach dem Anlegen
@@ -619,6 +689,13 @@ verkabele('btnMotorradWeiteres', 'click', () => öffneMotorradDialog(null));
    Foto-Fenster und nicht erst ein Formular. Ist noch gar keine Maschine
    da, wird eine angelegt; Marke und Modell traegt er hinterher ein. */
 verkabele('buehneHinweis', 'click', () => {
+  // Im Fahrer-Modus fuehrt die Tafel zum Profil, dort wohnt das Bild.
+  // Ohne Konto landet man auf der Anmeldung - auch richtig, denn ein
+  // Profilbild gibt es nur mit Konto.
+  if (buehneZeigtFahrer()) {
+    if (typeof öffneKontoOderProfil === 'function') öffneKontoOderProfil();
+    return;
+  }
   const motorrad = motorradAktiv();
   öffneMotorradDialog(motorrad || null);
   const eingabe = document.getElementById('garageFotoEingabe');

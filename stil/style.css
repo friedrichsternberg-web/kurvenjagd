@@ -2908,6 +2908,38 @@ button.karte:active { transform: scale(0.985); }
   object-position: center bottom;
   filter: drop-shadow(0 10px 8px var(--schatten-mittel));
 }
+/* Der Fahrer statt der Maschine (garage.js, BUEHNE_ZEIGT = 'fahrer'):
+   das Profilbild als Kreis auf dem Teller. Ein Kreis mit "cover" sieht bei
+   jedem Foto gleich aus - Hochkant, Querformat, Selfie, Gruppenbild -,
+   deshalb braucht er weder Freisteller noch Zuschnitt. Das war beim
+   Bike-Foto der Punkt, an dem es haekelte.
+
+   Groesse ueber die Breite der Buehne, gedeckelt: Der Kreis soll auf dem
+   Teller stehen und ihn noch sehen lassen, wie vorher die Maschine. Der
+   helle Ring ist die Glaskante, die ihn von der Werkstatt abhebt; darunter
+   bleibt der Kontaktschatten der Buehne (::before) und setzt ihn auf. */
+.bike-bild.ist-fahrer {
+  /* 66 statt 58 Prozent: Auf dem Handy ist die Buehne rund 155 Punkte
+     breit, und ein Gesicht unter 100 Punkten liest sich als Abzeichen,
+     nicht als Portrait. Im Breiten deckelt max-width. */
+  width: 66%;
+  max-width: 200px;
+  aspect-ratio: 1 / 1;
+  height: auto;
+  max-height: none;
+  margin-bottom: var(--s3);
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center;
+  box-shadow:
+    0 0 0 3px var(--glas-heller),
+    0 0 0 4px var(--glas-rand),
+    0 14px 26px var(--schatten-mittel);
+  /* Der drop-shadow der Maschine folgte ihrer Silhouette; beim Kreis
+     macht das der box-shadow oben. */
+  filter: none;
+}
+
 /* Das Standardmotorrad steht voll da. Hier lag einmal opacity: 0.8, damit
    es "zurueckritt" - es sah dadurch durchsichtig aus, besonders rechts vor
    dem hellen Teller. Dass es nicht die eigene Maschine ist, sagt die Tafel
