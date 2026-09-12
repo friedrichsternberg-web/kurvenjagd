@@ -4418,3 +4418,49 @@ Nachgemessen mit vorgetäuschtem Profil und Querformat-Foto: Kreis 108
 Punkte auf dem Handy, 168 im Breiten, Werkstatt und Tafel weg, Name da;
 ohne Profil der Knopf „Anmelden"; mit kaputter Bildadresse der leere Kreis
 statt des Bilds.
+
+## 13.09.2026 — Sechs Wünsche an einem Vormittag
+
+Friedrich hat nach dem Umbau der Fahrer-Plakette eine Liste geschickt.
+Was daraus geworden ist, und wo eine Entscheidung dahintersteckt:
+
+**Fahrer-Plakette: größer, weiter in die Karte.** Das Bild misst sich
+jetzt mit 92 Prozent an der Tafel (bis 184 Punkte auf dem Handy), die
+Textspalte rückt im Fahrer-Modus auf 40 Prozent, und die Tafel greift um
+eine Stufe nach links über die Spaltengrenze – dort läuft ihr Grund ohnehin
+aus, so beginnt das Auslaufen früher.
+
+**Planer: Planungsart, Kurvigkeit, Optionen vor die Ortssuche.** Sie
+bestimmen, *wie* gerechnet wird, und das entscheidet man, bevor man Orte
+tippt. Wer erst die Punkte setzt und dann die Rundtour entdeckt, fängt von
+vorn an. Reine Umstellung im HTML, kein Code angefasst.
+
+**Die Lupe wird zum Knopf „Suchen".** Beobachtung: Die App sucht bewusst
+nicht beim Tippen (siehe app.js), aber wer das nicht weiß, tippt, wartet,
+und nichts passiert. Sobald drei Zeichen im Feld stehen, wird aus der Lupe
+ein blauer Knopf mit dem Wort. Ein Horcher am Dokument statt je Feld, weil
+die Zwischenziel-Felder erst beim Tippen entstehen – und weil so auch das
+Feld unter „Entdecken" mitgeht, ohne dass jemand daran denken muss.
+
+**Touren-Bildschirm: „Touren", zwei eigene Reiter, „Entdecken" abgesetzt.**
+Die Überschrift hieß „Meine Touren", obwohl hinter „Entdecken" Fremdes
+liegt. Jetzt sagt der Reiter, wessen: „Meine Touren", „Meine Reisen", und
+ganz rechts hinter einem Strich mit Weltsymbol „Entdecken" – derselbe
+Globus, der an einer Tour sagt, dass sie öffentlich ist.
+
+**Reisen öffentlich stellen.** Der größte Punkt, mit Migration 06. Die
+Entscheidung darin: Das Schalten ist eine Datenbankfunktion, kein UPDATE
+über die Zeilenregel – die Regel „Reise ändern wenn dabei" ließe auch einen
+Mitfahrer die Reise veröffentlichen, und das darf nur der, dem sie gehört.
+Zwei Stufen wie bei den Touren: Übersicht für alle ohne Wegpunkte, Tage
+mit Wegpunkten nur angemeldet. Ansehen läuft über den Link-Bildschirm aus
+teilen.js, ohne die Frage „übernehmen?" – eine öffentliche Reise ist zum
+Ansehen da, das war die Vorgabe. Was hinausgeht und was nicht, steht in
+DATEN.md und in Punkt 11 der Datenschutzerklärung.
+
+**Der verrutschte Chip „Alle" im Shop.** Kein Abstand war falsch, sondern
+die Rastung: `scroll-snap-align: start` am ersten Chip ließ den Browser
+beim Laden den Innenabstand des Bands wegscrollen, und „Alle" klebte an
+der Fensterkante. `scroll-padding-inline` sagt der Rastung, dass der
+Innenabstand mitzählt. Eine Zeile, und sie steht mit Begründung im CSS,
+damit niemand sie für Zierrat hält.

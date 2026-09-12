@@ -1563,6 +1563,23 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
    unter der Ueberschrift, damit auf einen Blick klar ist, dass dieser
    Bildschirm zwei Inhalte hat - und nicht einen mit einer Zusatzleiste. */
 .touren-umschalter { margin: 0 0 var(--s4); }
+/* Der abgesetzte Reiter "Entdecken": ein schmaler Strich davor und das
+   Weltsymbol - derselbe Globus, der an einer Tour sagt, dass sie
+   oeffentlich ist. Die beiden Reiter links sind Eigenes, dieser eine ist
+   die Welt. */
+.touren-umschalter .seg-trenner {
+  flex: 0 0 1px;
+  align-self: stretch;
+  margin: 6px var(--s1);
+  background: var(--glas-rand);
+}
+.touren-umschalter .seg-abgesetzt {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.touren-umschalter .seg-abgesetzt .ic { width: 15px; height: 15px; }
 
 /* Der Satz ueber dem Entdecken-Teil. Er steht bewusst NUR dort: In der
    eigenen Liste hat er nichts zu suchen, dort weiss man schon, was man hat. */
@@ -2932,12 +2949,18 @@ button.karte:active { transform: scale(0.985); }
    links in das Glas der Werte aus und oben und unten in die Kartenkante -
    so, wie vorher der Werkstattraum. Die Maske liegt auf dem Grund, nicht
    auf der Buehne selbst, sonst wuerde sie das Bild mit ausblenden. */
+/* Im Fahrer-Modus bekommt die Tafel mehr von der Karte: Die Textspalte
+   rueckt auf 40 Prozent, und die Tafel greift zusaetzlich um eine Stufe
+   nach links UEBER die Spaltengrenze - dort laeuft ihr Grund ohnehin
+   schon aus, so beginnt das Auslaufen frueher und die Tafel wirkt wie ein
+   Teil der Karte statt wie ihre rechte Haelfte. */
+.bike-karte.zeigt-fahrer { --bike-text-anteil: 0.40; }
 .bike-karte.zeigt-fahrer .bike-buehne {
   justify-content: center;
-  padding: var(--s4) 0 var(--s4) var(--s2);
-  margin: calc(-1 * var(--s4)) calc(-1 * var(--s4)) calc(-1 * var(--s4)) 0;
+  padding: var(--s4) 0 var(--s4) var(--s5);
+  margin: calc(-1 * var(--s4)) calc(-1 * var(--s4)) calc(-1 * var(--s4)) calc(-1 * var(--s6));
   overflow: hidden;
-  min-height: 232px;
+  min-height: 248px;
 }
 .bike-karte.zeigt-fahrer .bike-buehne::before {
   content: "";
@@ -2953,10 +2976,10 @@ button.karte:active { transform: scale(0.985); }
       transparent 58%),
     var(--raum-dunkel);
   -webkit-mask-image:
-    linear-gradient(to right, transparent 0%, black 38%),
+    linear-gradient(to right, transparent 0%, black 44%),
     linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%);
   mask-image:
-    linear-gradient(to right, transparent 0%, black 38%),
+    linear-gradient(to right, transparent 0%, black 44%),
     linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%);
   -webkit-mask-composite: source-in;
   mask-composite: intersect;
@@ -3003,8 +3026,8 @@ button.karte:active { transform: scale(0.985); }
   /* Deutlich groesser als der erste Wurf (108): Das Bild ist der Grund,
      aus dem es die Tafel gibt. Ueber die Breite der Tafel, damit es auf
      jedem Geraet den Platz nimmt, den es hat; quer.css deckelt oben. */
-  width: 84%;
-  max-width: 156px;
+  width: 92%;
+  max-width: 184px;
   aspect-ratio: 1 / 1;
   height: auto;
   border-radius: 50%;
@@ -3884,6 +3907,11 @@ button.karte:active { transform: scale(0.985); }
   margin: 0 calc(-1 * var(--s4)) var(--s3);
   padding: 2px var(--s4) var(--s2);
   scroll-snap-type: x proximity;
+  /* Ohne das rastete der erste Chip ("Alle") beim Laden am Rand des
+     Rollbereichs ein und der Innenabstand links war weggescrollt - der
+     Chip klebte an der Fensterkante, waehrend alles darueber eingerueckt
+     stand. Die Rastung soll den Innenabstand mitrechnen. */
+  scroll-padding-inline: var(--s4);
 }
 .warengruppen-band::-webkit-scrollbar { display: none; }
 .warengruppen-band .marken-chip {
@@ -4536,6 +4564,31 @@ body.nav-modus .karten-knopf { display: none; }
   cursor: pointer;
 }
 .such-knopf:active { background: var(--glas-licht); }
+/* Sobald im Feld daneben etwas steht, wird aus der Lupe ein Knopf mit
+   Wort: "Suchen", blau. Der Grund ist eine Beobachtung, keine Zierde:
+   Die App sucht NICHT beim Tippen (siehe app.js, Ortssuche), und wer
+   das nicht weiss, tippt, wartet, und passiert nichts. Eine Lupe am
+   Rand sagt "hier kann man suchen" - ein blauer Knopf mit Wort sagt
+   "jetzt druecken". Das Wort haengt app.js beim Verkabeln in den Knopf. */
+.such-knopf .such-wort { display: none; }
+.such-knopf.bereit {
+  width: auto;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  padding-inline: var(--s3) var(--s4);
+  gap: 6px;
+  color: var(--accent-ink);
+  background: var(--accent);
+  border-color: var(--accent-glanz);
+  box-shadow: inset 0 1px 0 var(--accent-glanz), 0 6px 16px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+.such-knopf.bereit .such-wort {
+  display: inline;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
 .such-feld .search-input { padding-right: 48px; }
 
 /* Der Knopf, der die Route wirklich berechnet. */
@@ -5899,6 +5952,28 @@ body.nav-modus .karten-knopf { display: none; }
 }
 .link-karte { margin: 0 auto; width: 100%; max-width: 480px; }
 .link-karte .tour-vorschau { cursor: default; }
+/* Die Tage einer oeffentlichen Reise auf dem Ansehen-Bildschirm: Nummer,
+   Name, Laenge - eine Zeile je Tag, ruhig wie ein Fahrplan. */
+.reise-tage-liste { list-style: none; margin: var(--s4) 0 0; padding: 0; display: grid; gap: var(--s2); }
+.reise-tage-zeile {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--s3);
+  align-items: baseline;
+  padding: var(--s3) var(--s4);
+  border-radius: var(--r-md);
+  background: var(--glas-hauch);
+  border: 1px solid var(--glas-hell);
+}
+.reise-tage-nr { font-family: var(--schrift-display); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.reise-tage-name { color: var(--text); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.reise-tage-km { color: var(--muted); font-size: 13px; white-space: nowrap; }
+/* Der Globus im Reise-Kopf sagt einen Zustand, wie an der Tourenkarte:
+   blau heisst, die Reise steht oeffentlich. */
+.reise-held-werkzeug .oeffentlich {
+  color: var(--accent-hell);
+  border-color: color-mix(in srgb, var(--accent-hell) 50%, transparent);
+}
 
 .link-wahl {
   display: flex;

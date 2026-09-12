@@ -310,6 +310,59 @@ function linkReiseKarteHtml(zeile) {
 }
 
 
+/* --- 3b. Eine oeffentliche Reise ansehen (seit 13.09.2026) ---------------
+
+   Derselbe Bildschirm wie beim Link, nur ohne die Frage "uebernehmen?":
+   Eine oeffentliche Reise ist zum Ansehen da. Unter der Karte stehen die
+   Tage mit Name und Laenge. Wer nicht angemeldet ist, sieht die Karte
+   aus der Uebersicht und die Empfehlung fuers Konto - die Tage mit ihren
+   Wegpunkten gibt der Server nur Angemeldeten heraus, wie bei den Touren. */
+async function zeigeOeffentlicheReise(id) {
+  if (typeof holeOeffentlicheReise !== 'function') return;
+  zeigeLinkLaedt();
+  if (!angemeldeterNutzer) {
+    zeigeLinkInhalt(`
+      <div class="link-empfang">
+        <p class="link-absender">Eine Reise aus der Community</p>
+        <div class="karte link-karte">
+          <div class="widget-kopf"><span class="abzeichen">Reise</span></div>
+          <h3 class="widget-name">Die Tage siehst du mit Konto</h3>
+          <div class="widget-koerper">
+            <p class="hint">Die Etappen einer geteilten Reise gibt es nur f&uuml;r Angemeldete
+              &ndash; wie den Streckenverlauf einer Tour. Kostenlos.</p>
+          </div>
+        </div>
+        <div class="link-wahl">
+          <button type="button" class="btn link-hauptknopf" data-link-konto>Konto anlegen</button>
+          <button type="button" class="linkbtn link-gast" data-link-weiter>Zur&uuml;ck</button>
+        </div>
+      </div>`);
+    return;
+  }
+  const zeile = await holeOeffentlicheReise(id);
+  if (!zeile) { zeigeLinkFehlt(); return; }
+  const tage = Array.isArray(zeile.tage) ? zeile.tage : [];
+  const alsZeile = { art: 'reise', name: zeile.name, daten: { beginnt_am: zeile.beginnt_am, tage } };
+  const von = zeile.benutzername ? escapeHtml(zeile.benutzername) : 'Jemand';
+  zeigeLinkInhalt(`
+    <div class="link-empfang">
+      <p class="link-absender">${von} hat diese Reise geteilt &ndash; zum Ansehen</p>
+      ${linkReiseKarteHtml(alsZeile)}
+      <ol class="reise-tage-liste">
+        ${tage.map((tag, i) => `
+          <li class="reise-tage-zeile">
+            <span class="reise-tage-nr">Tag ${i + 1}</span>
+            <span class="reise-tage-name">${escapeHtml(tag.route?.name || tag.titel || 'Ohne Route')}</span>
+            <span class="reise-tage-km">${tag.route?.distance ? Math.round(tag.route.distance / 1000) + ' km' : ''}</span>
+          </li>`).join('')}
+      </ol>
+      <div class="link-wahl">
+        <button type="button" class="btn ghost link-hauptknopf" data-link-weiter>Zur&uuml;ck</button>
+      </div>
+    </div>`);
+}
+
+
 /* --- 4. Uebernehmen ------------------------------------------------------
 
    Angemeldet oder als Gast - der Weg ist derselbe. Das ist kein

@@ -1478,7 +1478,7 @@
             wird (&sect; 25 TDDDG).
           </p>
 
-          <p class="label">11. Touren, die du &ouml;ffentlich teilst</p>
+          <p class="label">11. Touren und Reisen, die du &ouml;ffentlich teilst</p>
           <p>
             Beim Speichern einer Tour und sp&auml;ter jederzeit &uuml;ber das
             Weltsymbol in deiner Liste kannst du sie &ouml;ffentlich stellen.
@@ -1513,6 +1513,20 @@
             deine H&ouml;chstgeschwindigkeit, deine gr&ouml;&szlig;te
             Schr&auml;glage und der Zeitpunkt der Fahrt. Serpa f&uuml;hrt
             bewusst keine Bestenliste.
+          </p>
+          <p>
+            <strong>Auch eine Reise kannst du &ouml;ffentlich stellen</strong>
+            (Weltsymbol im Reise-Bildschirm, seit dem 13.09.2026). Sichtbar
+            werden dann dein Benutzername, dein Profilbild, der Name der
+            Reise, der erste Fahrtag und die Tage mit ihrer Routenabschrift
+            &ndash; Name, L&auml;nge, Kurvigkeit, Wegpunkte und die
+            vereinfachte Linie. <strong>Nicht sichtbar</strong> werden die
+            Kasse, die Mitfahrer und die Einladungen. Die &Uuml;bersicht
+            sieht jeder, die Tage mit ihren Wegpunkten nur, wer angemeldet
+            ist. Zur&uuml;ckziehen geht mit demselben Symbol; die Reise ist
+            dann sofort wieder privat. Andere k&ouml;nnen eine
+            &ouml;ffentliche Reise ansehen, aber nicht mitplanen &ndash;
+            dazu m&uuml;sstest du sie einladen (Punkt 8).
           </p>
           <p>
             Damit du Touren in deiner N&auml;he findest, schickt die App den
@@ -1850,14 +1864,19 @@
            bleibt im HTML, damit die Verkabelung in app.js nicht ins Leere
            greift, ist aber ausgeblendet. -->
       <button class="btn ghost back-btn" id="btnTourenZurueck" hidden>&larr; Zurück</button>
-      <!-- "Meine Touren", nicht "Touren": Hier liegt, was man selbst hat -
-           die gespeicherten Touren und die Reisen. Geplant wird im Planer. -->
-      <h2>Meine Touren</h2>
+      <!-- "Touren" seit dem 13.09.2026: Der Bildschirm traegt Eigenes UND
+           Fremdes, deshalb sagt erst der Reiter, wessen. "Entdecken" steht
+           abgesetzt ganz rechts - es ist der eine Reiter, hinter dem nicht
+           die eigenen Sachen liegen. -->
+      <h2>Touren</h2>
 
       <div class="segmented touren-umschalter" id="tourenUmschalter">
-        <button class="seg active" data-touren-teil="meine">Meine</button>
-        <button class="seg" data-touren-teil="entdecken">Entdecken</button>
-        <button class="seg" data-touren-teil="reisen">Reisen</button>
+        <button class="seg active" data-touren-teil="meine">Meine Touren</button>
+        <button class="seg" data-touren-teil="reisen">Meine Reisen</button>
+        <span class="seg-trenner" aria-hidden="true"></span>
+        <button class="seg seg-abgesetzt" data-touren-teil="entdecken">
+          <svg class="ic klein"><use href="#icon-welt"></use></svg> Entdecken
+        </button>
       </div>
 
       <div id="tourenTeilMeine">
@@ -1922,6 +1941,15 @@
             hinstellst, ist eine mehr, die jemand am Wochenende fahren kann.
           </p>
           <ul id="entdeckenListe" class="geteilt-liste"></ul>
+
+          <!-- Oeffentlich gestellte Reisen, seit dem 13.09.2026. Zum
+               Ansehen, nicht zum Mitplanen - das bleibt der Einladung
+               vorbehalten. Fuellt touren.js (zeichneOeffentlicheReisen);
+               ohne eine einzige bleibt der Abschnitt versteckt. -->
+          <div id="entdeckenReisenAbschnitt" hidden>
+            <h3 class="geteilt-gruppe">Reisen aus der Community</h3>
+            <ul id="entdeckenReisen" class="geteilt-liste"></ul>
+          </div>
         </div>
       </div>
     </div>
@@ -2293,6 +2321,57 @@
       <button class="linkbtn" id="btnReisePlanungAbbrechen">Abbrechen</button>
     </div>
 
+    <!-- Seit dem 13.09.2026 stehen die drei Einstellungen VOR der
+         Ortssuche: Planungsart, Kurvigkeit, Optionen. Sie bestimmen, WIE
+         gerechnet wird, und das entscheidet man, bevor man Orte eintippt -
+         wer erst die Punkte setzt und dann die Rundtour entdeckt, faengt
+         von vorn an. -->
+    <!-- Planungsart: normale Route zwischen Punkten, oder Rundtour ab
+         einem Startpunkt zurück zu sich selbst -->
+    <section class="block">
+      <h2>Planungsart</h2>
+      <div class="segmented" id="planModeSwitch">
+        <button class="seg active" data-plan-mode="punkt">Punkt zu Punkt</button>
+        <button class="seg" data-plan-mode="rundtour">Rundtour</button>
+      </div>
+    </section>
+
+    <!-- Kurvigkeit: steuert, wie stark Umwege für mehr Kurven in Kauf
+         genommen werden. Ganz rechts (100) gewinnt immer die kurvigste
+         Variante, egal wie viel Umweg das bedeutet. -->
+    <section class="block">
+      <h2>Kurvigkeit</h2>
+      <input type="range" id="curveSlider" class="slider" min="0" max="100" value="100" step="1">
+      <p class="hint" id="modeHint">
+        Maximal kurvig - Umwege spielen keine Rolle.
+      </p>
+    </section>
+
+    <!-- Zusätzliche Routing-Einschränkungen, direkt an BRouter weitergereicht.
+         Als <details> statt <section>, damit der Abschnitt eingeklappt werden
+         kann - er ist zu selten in Benutzung, um dauerhaft Platz zu belegen. -->
+    <details class="block accordion">
+      <summary>Optionen</summary>
+      <div class="accordion-body">
+        <label class="checkbox-row">
+          <input type="checkbox" id="optStädte" checked>
+          <span>Städte vermeiden</span>
+        </label>
+        <!-- "checked" muss hier im HTML stehen UND als Standardwert in
+             state.optionen (app.js) - das Markup stellt den Haken, das
+             state entscheidet beim Rechnen. Laufen die beiden auseinander,
+             zeigt die Oberflaeche etwas anderes als die Route tut. -->
+        <label class="checkbox-row">
+          <input type="checkbox" id="optAutobahn" checked>
+          <span>Autobahnen vermeiden</span>
+        </label>
+        <label class="checkbox-row">
+          <input type="checkbox" id="optMaut">
+          <span>Mautstraßen vermeiden</span>
+        </label>
+      </div>
+    </details>
+
     <section class="block">
       <h2>Ort suchen</h2>
 
@@ -2354,52 +2433,6 @@
         <button class="btn ghost" id="btnClear">Alle Punkte löschen</button>
       </div>
     </section>
-
-    <!-- Planungsart: normale Route zwischen Punkten, oder Rundtour ab
-         einem Startpunkt zurück zu sich selbst -->
-    <section class="block">
-      <h2>Planungsart</h2>
-      <div class="segmented" id="planModeSwitch">
-        <button class="seg active" data-plan-mode="punkt">Punkt zu Punkt</button>
-        <button class="seg" data-plan-mode="rundtour">Rundtour</button>
-      </div>
-    </section>
-
-    <!-- Kurvigkeit: steuert, wie stark Umwege für mehr Kurven in Kauf
-         genommen werden. Ganz rechts (100) gewinnt immer die kurvigste
-         Variante, egal wie viel Umweg das bedeutet. -->
-    <section class="block">
-      <h2>Kurvigkeit</h2>
-      <input type="range" id="curveSlider" class="slider" min="0" max="100" value="100" step="1">
-      <p class="hint" id="modeHint">
-        Maximal kurvig - Umwege spielen keine Rolle.
-      </p>
-    </section>
-
-    <!-- Zusätzliche Routing-Einschränkungen, direkt an BRouter weitergereicht.
-         Als <details> statt <section>, damit der Abschnitt eingeklappt werden
-         kann - er ist zu selten in Benutzung, um dauerhaft Platz zu belegen. -->
-    <details class="block accordion">
-      <summary>Optionen</summary>
-      <div class="accordion-body">
-        <label class="checkbox-row">
-          <input type="checkbox" id="optStädte" checked>
-          <span>Städte vermeiden</span>
-        </label>
-        <!-- "checked" muss hier im HTML stehen UND als Standardwert in
-             state.optionen (app.js) - das Markup stellt den Haken, das
-             state entscheidet beim Rechnen. Laufen die beiden auseinander,
-             zeigt die Oberflaeche etwas anderes als die Route tut. -->
-        <label class="checkbox-row">
-          <input type="checkbox" id="optAutobahn" checked>
-          <span>Autobahnen vermeiden</span>
-        </label>
-        <label class="checkbox-row">
-          <input type="checkbox" id="optMaut">
-          <span>Mautstraßen vermeiden</span>
-        </label>
-      </div>
-    </details>
 
     <!-- Sehenswertes: von Hand zusammengestellte Liste bekannter
          Passstraßen (siehe PASS_DATEN in app.js). Früher kamen die Daten

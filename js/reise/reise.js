@@ -529,6 +529,9 @@ function reiseHeldHtml(reise) {
           ${zeitraum ? `<span class="reise-held-zeitraum">${zeitraum}</span>` : ''}
         </div>
         <span class="reise-held-werkzeug">
+          <button class="glas-rund klein${reise.oeffentlich ? ' oeffentlich' : ''}" id="btnReiseOeffentlich"
+                  title="${reise.oeffentlich ? 'Öffentlich unter „Entdecken“ – tippen zum Zurückziehen' : 'Öffentlich teilen: zum Ansehen für alle'}"
+                  aria-label="Reise öffentlich teilen">${symbol('welt', 'klein')}</button>
           <button class="glas-rund klein" id="btnReiseTeilen" title="Reise als Link teilen" aria-label="Reise teilen">${symbol('teilen', 'klein')}</button>
           <button class="glas-rund klein" id="btnReiseName" title="Umbenennen" aria-label="Reise umbenennen">${symbol('stift', 'klein')}</button>
         </span>
@@ -920,6 +923,12 @@ function beiTippImReiseBildschirm(ereignis) {
 
   if (trifft('#btnReiseZurueck')) { zurueckZuReisen(); return; }
   if (trifft('#btnReiseName')) { oeffneUmbenennen(); return; }
+  // Oeffentlich stellen oder zurueckziehen - der Weg liegt in mitfahrer.js,
+  // weil dort alles wohnt, was mit dem Server spricht.
+  if (trifft('#btnReiseOeffentlich')) {
+    if (typeof schalteReiseOeffentlich === 'function') schalteReiseOeffentlich(reiseNach(offeneReiseId));
+    return;
+  }
   if (trifft('#btnReiseLoeschen')) { oeffneLoeschen(); return; }
   if (trifft('#btnReiseSortieren')) { sortierModus = !sortierModus; zeichneReise(); return; }
   if (trifft('[data-zum-leeren]')) {

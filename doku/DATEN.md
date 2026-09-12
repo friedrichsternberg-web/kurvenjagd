@@ -333,6 +333,32 @@ Anders als bei einer gemeinsamen Reise hängt hier nichts von anderen ab:
 Ein Link ist eine Kopie, kein Treffpunkt. Wer die Tour übernommen hat, hat
 sie in seinem Gerät und behält sie.
 
+### Reisen öffentlich stellen (seit 13.09.2026)
+
+Eine Reise lässt sich wie eine Tour öffentlich stellen – Weltsymbol im
+Reise-Bildschirm. Sie erscheint dann unter „Entdecken → Community" als
+eigener Abschnitt, **zum Ansehen, nicht zum Mitplanen**. Mitplanen bleibt
+der Einladung vorbehalten.
+
+**Was hinausgeht:** Name, erster Fahrtag, die Tage mit ihrer
+Routenabschrift (Name, Länge, Kurvigkeit, Wegpunkte, ausgedünnte Linie),
+Benutzername und Profilbild des Besitzers. **Nicht:** Kasse, Mitfahrer,
+Einladungen – keine der beiden Lesefunktionen (`oeffentliche_reisen`,
+`oeffentliche_reise_holen`, Migration 06) fasst diese Tabellen an.
+
+**Zwei Stufen wie bei den Touren:** Die Übersicht (je Tag nur Länge und
+Linie, keine Wegpunkte) darf auch ein Gast abrufen; die Tage mit
+Wegpunkten nur, wer angemeldet ist.
+
+**Schalten darf nur der Besitzer** (`reise_veroeffentlichen`, prüft
+`besitzer_id = auth.uid()`). Ein Mitfahrer könnte über die Zeilenregel
+„Reise ändern wenn dabei" die Zeile ändern – deshalb läuft das Schalten
+über eine Funktion und nicht über ein UPDATE. Nachgemessen in einer
+zurückgerollten Transaktion: anlegen, schalten, Übersicht ohne Wegpunkte,
+Vollansicht mit Wegpunkten.
+
+Punkt 11 der Datenschutzerklärung ist darauf erweitert.
+
 ### Was beim Abmelden passiert (seit 11.09.2026)
 
 Abmelden trennt die Verbindung zum Server. Ob auch die Sachen auf **diesem

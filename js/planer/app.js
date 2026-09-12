@@ -841,6 +841,43 @@ function verkabeleOrtsFeld(feld) {
 
 document.querySelectorAll('.orts-feld').forEach(verkabeleOrtsFeld);
 
+/* Die Lupe wird zum Knopf "Suchen", sobald im Feld daneben etwas steht.
+
+   Warum ein Horcher am Dokument und nicht je Feld: Suchknoepfe gibt es
+   im Planer (Start, Ziel, jedes neue Zwischenziel) und unter "Entdecken"
+   - und die Zwischenziel-Felder entstehen erst beim Tippen. Ein Horcher,
+   der ueber das Ereignis zum Feld findet, deckt alle ab, auch die, die es
+   noch nicht gibt. Das Wort wird beim ersten Mal in den Knopf gehaengt,
+   damit das HTML keine sechs Kopien davon tragen muss. */
+function suchKnopfZu(feld) {
+  const wrap = feld.closest('.search-wrap');
+  const knopf = wrap && wrap.querySelector('.such-knopf');
+  if (!knopf) return null;
+  if (!knopf.querySelector('.such-wort')) {
+    const wort = document.createElement('span');
+    wort.className = 'such-wort';
+    wort.textContent = 'Suchen';
+    knopf.append(wort);
+  }
+  return knopf;
+}
+document.addEventListener('input', ereignis => {
+  const feld = ereignis.target;
+  if (!(feld instanceof HTMLInputElement) || !feld.classList.contains('search-input')) return;
+  const knopf = suchKnopfZu(feld);
+  if (knopf) knopf.classList.toggle('bereit', feld.value.trim().length >= 3);
+});
+// Nach dem Suchen (Klick oder Eingabetaste) ist die Aufforderung erledigt.
+document.addEventListener('click', ereignis => {
+  const knopf = ereignis.target.closest('.such-knopf');
+  if (knopf) knopf.classList.remove('bereit');
+});
+document.addEventListener('keydown', ereignis => {
+  if (ereignis.key !== 'Enter' || !(ereignis.target instanceof HTMLInputElement)) return;
+  const knopf = suchKnopfZu(ereignis.target);
+  if (knopf) knopf.classList.remove('bereit');
+});
+
 /* Ein neues, leeres Zwischenziel-Feld anhaengen. Gerufen wird das, sobald
    im letzten Zwischenziel-Feld wirklich ein Ort steht - dann bleibt der
    dort stehen und darunter wartet das naechste. Genau wie bei einem

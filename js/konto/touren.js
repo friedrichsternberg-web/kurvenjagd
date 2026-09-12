@@ -510,12 +510,54 @@ function zeichneEntdecken() {
 async function zeichneCommunityTouren() {
   const liste = document.getElementById('entdeckenListe');
   liste.innerHTML = '<li class="geteilt-leer">Wird geladen …</li>';
+  zeichneOeffentlicheReisen();
 
   const daten = await holeGeteilteTouren();
   liste.innerHTML = (daten && daten.length)
     ? daten.map(geteilteTourHtml).join('')
     : entdeckenLeerHtml();
   if (typeof beobachteVorschauen === 'function') beobachteVorschauen(liste);
+}
+
+/* --- 6c. Oeffentliche Reisen (seit 13.09.2026) -----------------------------
+
+   Unter den Touren der Community stehen die Reisen, die jemand
+   oeffentlich gestellt hat - zum Ansehen. Die Karte ist dieselbe wie bei
+   einer eigenen Reise; der Kopf traegt, wer sie geplant hat. Kein
+   "Speichern" und kein "Melden" an der Karte: Angesehen wird sie auf
+   einem eigenen Bildschirm (teilen.js), und dort steht beides. */
+async function zeichneOeffentlicheReisen() {
+  const abschnitt = document.getElementById('entdeckenReisenAbschnitt');
+  const liste = document.getElementById('entdeckenReisen');
+  if (!abschnitt || !liste || typeof holeOeffentlicheReisen !== 'function') return;
+  const daten = await holeOeffentlicheReisen();
+  if (!daten || !daten.length) { abschnitt.hidden = true; return; }
+  abschnitt.hidden = false;
+  liste.innerHTML = daten.map(oeffentlicheReiseHtml).join('');
+}
+
+function oeffentlicheReiseHtml(zeile) {
+  const tage = Array.isArray(zeile.tage) ? zeile.tage : [];
+  const alsReise = { id: zeile.id, name: zeile.name, start: zeile.beginnt_am || null, tage };
+  const karte = typeof reiseKartenSvg === 'function' ? reiseKartenSvg(alsReise, { marke: 12 }) : '';
+  const anzahl = zeile.tage_anzahl || tage.length;
+  return `
+    <li class="karte geteilt" data-reise-oeffentlich="${escapeHtml(zeile.id)}">
+      ${karte ? `<span class="tour-vorschau" aria-hidden="true">${karte}<span class="vorschau-osm">&copy; OpenStreetMap</span></span>` : ''}
+      <div class="widget-kopf geteilt-kopf">
+        ${nutzerBildHtml(zeile)}
+        <span class="geteilt-nutzer">${escapeHtml(zeile.benutzername || 'Ehemaliges Konto')}</span>
+        <span class="abzeichen">Reise</span>
+      </div>
+      <h3 class="widget-name">${escapeHtml(zeile.name)}</h3>
+      <div class="widget-koerper">
+        <div class="tag-fakten">
+          <span class="tag-fakt">${symbol('kalender', 'klein')}${anzahl} ${anzahl === 1 ? 'Tag' : 'Tage'}</span>
+          <span class="tag-fakt">${symbol('route', 'klein')}${Math.round((zeile.entfernung_m || 0) / 1000)} km</span>
+        </div>
+      </div>
+      <button type="button" class="btn ghost widget-knopf" data-reise-ansehen="${escapeHtml(zeile.id)}">Reise ansehen</button>
+    </li>`;
 }
 
 
@@ -840,6 +882,11 @@ verkabele('serpaListe', 'click', ereignis => {
    bei jeder Suche neu gebaut, einzelne Zuhoerer muessten jedes Mal wieder
    angebunden werden - und wer das einmal vergisst, hat eine Liste, in der
    nichts mehr reagiert. */
+verkabele('entdeckenReisen', 'click', ereignis => {
+  const knopf = ereignis.target.closest('[data-reise-ansehen]');
+  if (knopf && typeof zeigeOeffentlicheReise === 'function') zeigeOeffentlicheReise(knopf.dataset.reiseAnsehen);
+});
+
 verkabele('entdeckenListe', 'click', ereignis => {
   const knopf = ereignis.target.closest('button');
   if (!knopf) return;

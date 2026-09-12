@@ -144,6 +144,53 @@ async function ladeReiseHoch(reise) {
   return { ok: true, serverId: data };
 }
 
+/* --- 3b. Oeffentlich teilen (seit 13.09.2026) ----------------------------
+
+   Eine Reise oeffentlich stellen heisst: Sie erscheint unter "Entdecken"
+   fuer alle - zum Ansehen, nicht zum Mitplanen. Dafuer muss sie auf dem
+   Server liegen; wer sie noch nie geteilt hat, laedt sie mit demselben
+   Schritt hoch wie beim Einladen. Der Schalter selbst ist eine Funktion
+   in der Datenbank (reise_veroeffentlichen), weil nur der Besitzer das
+   darf - die Begruendung steht in Migration 06. */
+async function schalteReiseOeffentlich(reise) {
+  if (!reise) return;
+  if (!mitfahrenMoeglich()) { showToast('Dafür brauchst du ein Konto.'); return; }
+  if (reise.serverId && reise.besitzerId && reise.besitzerId !== angemeldeterNutzer.id) {
+    showToast('Nur wer die Reise angelegt hat, kann sie öffentlich stellen.');
+    return;
+  }
+  const hoch = await ladeReiseHoch(reise);
+  if (!hoch.ok) { showToast(hoch.meldung); return; }
+  const ziel = !reise.oeffentlich;
+  const { data, error } = await backend.rpc('reise_veroeffentlichen',
+    { p_reise: hoch.serverId, p_oeffentlich: ziel });
+  if (error) { showToast(error.message || 'Das hat nicht geklappt.'); return; }
+  aendereReise(reise.id, eintrag => { eintrag.oeffentlich = data === true; });
+  showToast(data === true
+    ? 'Deine Reise steht jetzt unter „Entdecken“ – zum Ansehen für alle.'
+    : 'Deine Reise ist wieder privat.');
+  if (typeof zeichneReise === 'function') zeichneReise();
+}
+
+async function holeOeffentlicheReisen() {
+  if (!mitfahrenMoeglichOhneKonto()) return null;
+  const { data, error } = await backend.rpc('oeffentliche_reisen', { p_grenze: 30 });
+  return error ? null : data;
+}
+
+async function holeOeffentlicheReise(id) {
+  if (!mitfahrenMoeglich()) return null;
+  const { data, error } = await backend.rpc('oeffentliche_reise_holen', { p_id: id });
+  const zeile = Array.isArray(data) ? data[0] : data;
+  return error ? null : (zeile || null);
+}
+
+// Die Uebersicht darf auch ein Gast sehen - wie bei den Touren. Nur der
+// Server muss erreichbar sein.
+function mitfahrenMoeglichOhneKonto() {
+  return typeof backendVerfügbar === 'function' && backendVerfügbar();
+}
+
 /* Jede Aenderung an einer geteilten Reise geht hier durch. aendereReise()
    in reise.js ruft das auf - eine Stelle, wie beim Speichern.
 
