@@ -4501,3 +4501,44 @@ zusichert, was uns erlaubt wird, Melden, Entfernen). Die Kurzfassung der
 Datenschutzerklärung nennt beide. Und die Kacheln „Direkt zum Shop" stehen
 jetzt ausdrücklich in Punkt 12: Auch sie führen über das Partnernetzwerk
 und brauchen dieselbe Einwilligung wie ein Angebot.
+
+## 13.09.2026 — Der versehentliche Browser-Zoom
+
+Friedrich: „mir passiert es oft, dass ich aus Versehen in der Browser-Version
+reinzoome". Der Fall ist immer derselbe: Man schiebt die Karte mit zwei
+Fingern über das Trackpad, kneift dabei ein bisschen — und statt der Karte
+zoomt die ganze Seite.
+
+**Die Entscheidung ist nicht „Zoom an oder aus", sondern welche Geste.**
+Es sind zwei, und sie unterscheiden sich genau darin, ob sie mit Absicht
+passieren:
+
+- **Kneifen auf dem Trackpad und Strg + Mausrad** melden sich beide als
+  `wheel` mit gedrückter Strg-Taste. Die passieren aus Versehen — die
+  werden abgefangen.
+- **Strg/Cmd mit Plus oder Minus** bleibt. Das ist die Geste, die jemand
+  bewusst macht, und für manche Menschen die einzige Art, kleine Schrift zu
+  lesen.
+
+**Warum nicht alles sperren.** WCAG 1.4.4 verlangt, dass sich Inhalt auf
+200 Prozent vergrößern lässt; eine App, die jeden Zoom blockiert, fällt
+durch. Dazu lassen die Browser die Tastenkürzel ohnehin nicht zuverlässig
+abfangen — man baute also eine halbe Sperre und eine ganze Barriere. Auf
+dem **Handy** wird gar nichts angefasst: Dort ist Kneifen die normale Art,
+etwas genauer anzusehen, und iOS ignoriert eine Sperre seit Version 10 aus
+demselben Grund.
+
+**Zwei Wege, weil Safari anders meldet.** Safari auf dem Mac schickt für
+die Kneifgeste eigene `gesture`-Ereignisse statt `wheel`. Beide stehen in
+`geraet.js`.
+
+**`passive: false` ist Pflicht und kein Zierrat.** Bei Rad-Ereignissen
+nehmen die Browser von sich aus an, dass niemand sie abfangen will, und
+ignorieren `preventDefault()` — ohne diesen Zusatz zoomt die Seite trotzdem,
+und man sucht den Fehler im eigenen Code.
+
+**Die Karte bleibt unberührt.** Der Horcher ruft nur `preventDefault()`,
+nie `stopPropagation()` — Leaflet bekommt jedes Rad-Ereignis weiter und
+zoomt wie bisher. Nachgemessen: Strg+Rad wird abgefangen, normales Scrollen
+geht durch, die Safari-Geste wird abgefangen, die Tastatur bleibt frei, und
+Rad- wie Kneifzoom der Karte sind weiter eingeschaltet.

@@ -292,3 +292,48 @@ const geraet = {
     if (kennung) window.removeEventListener('devicemotion', kennung);
   },
 };
+
+
+/* --- Der versehentliche Browser-Zoom ---------------------------------------
+
+   Auf dem Schreibtisch passiert es staendig: Man schiebt die Karte mit
+   zwei Fingern ueber das Trackpad, kneift dabei ein bisschen - und statt
+   der Karte zoomt die ganze Seite. Danach steht die App schief im Fenster,
+   und man muss erst wieder auf hundert Prozent zurueck.
+
+   ZWEI GESTEN, EIN UNTERSCHIED, UND GENAU DER IST DER PUNKT:
+
+     Die Kneifgeste auf dem Trackpad und Strg + Mausrad melden sich beide
+     als "wheel" mit gedrueckter Strg-Taste. Diese beiden passieren AUS
+     VERSEHEN - sie werden hier abgefangen.
+
+     Strg/Cmd mit Plus oder Minus bleibt. Das ist die Geste, die jemand
+     mit Absicht macht, und fuer manche Menschen die einzige Art, kleine
+     Schrift zu lesen. Sie zu blockieren waere ein Fehler in der
+     Barrierefreiheit (WCAG 1.4.4 verlangt, dass sich Inhalt auf 200
+     Prozent vergroessern laesst) - und die Browser lassen es ohnehin
+     nicht zuverlaessig zu.
+
+   Auf dem Handy wird NICHTS angefasst: Dort ist das Kneifen die normale
+   Art, etwas genauer anzusehen, und iOS ignoriert eine Sperre seit
+   Version 10 aus demselben Grund wie oben.
+
+   Safari auf dem Mac meldet die Kneifgeste nicht als "wheel", sondern als
+   eigene "gesture"-Ereignisse. Deshalb stehen beide Wege hier.
+
+   "passive: false" ist Pflicht und kein Zierrat: Bei Rad-Ereignissen
+   nehmen die Browser von sich aus an, dass niemand sie abfangen will, und
+   ignorieren dann preventDefault() - die Seite zoomt trotzdem. */
+
+(function sperreVersehentlichenZoom() {
+  const abfangen = ereignis => ereignis.preventDefault();
+
+  window.addEventListener('wheel', ereignis => {
+    if (ereignis.ctrlKey) ereignis.preventDefault();
+  }, { passive: false });
+
+  // Safari (macOS): eigene Ereignisse fuer die Kneifgeste.
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach(art => {
+    window.addEventListener(art, abfangen, { passive: false });
+  });
+})();
