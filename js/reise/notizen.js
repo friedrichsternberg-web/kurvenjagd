@@ -152,9 +152,7 @@ function notizenWidgetHtml(reise) {
       </div>
       <h3 class="widget-name">${anzahl ? `${anzahl} Zettel zur Reise` : 'Noch kein Zettel'}</h3>
       <div class="widget-koerper">
-        ${anzahl
-          ? `<ul class="notiz-liste">${zettel.map(notizZeileHtml).join('')}</ul>`
-          : '<p class="hint">Packliste, Hotelnummer, Treffpunkt &ndash; was alle wissen sollen. Jeder Tag hat dazu seine eigenen Notizen.</p>'}
+        ${anzahl ? `<ul class="notiz-liste">${zettel.map(notizZeileHtml).join('')}</ul>` : ''}
       </div>
       <button type="button" class="btn ghost widget-knopf" data-notiz-neu="">
         ${symbol('notiz', 'klein')} Notiz schreiben
@@ -199,8 +197,7 @@ function oeffneNotizBlatt(notizId = null, tagId = '') {
     titel: notiz ? 'Notiz' : 'Neue Notiz',
     inhalt: `
       <label for="feldNotizText">Was soll drinstehen?</label>
-      <textarea id="feldNotizText" rows="5" maxlength="2000"
-                placeholder="z. B. Tankstelle vor dem Pass, danach 90 km nichts">${escapeHtml(notiz?.text || '')}</textarea>
+      <textarea id="feldNotizText" rows="5" maxlength="2000">${escapeHtml(notiz?.text || '')}</textarea>
       <label for="feldNotizTag">Geh&ouml;rt zu</label>
       <select id="feldNotizTag" class="search-input">
         <option value="">Der ganzen Reise</option>${tageWahl}

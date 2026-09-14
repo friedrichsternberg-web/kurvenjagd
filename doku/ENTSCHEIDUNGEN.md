@@ -4592,3 +4592,44 @@ Lesefunktionen ausführen, die Auslöser niemand. Oberfläche im Browser mit
 1024 Punkten. Zu zweit live durchgespielt ist es noch nicht – dafür fehlt
 weiter das Zweitkonto.
 
+## 14.09.2026 (später) — Weniger Untertexte, eine Kachelform, das ganze Motorrad
+
+Friedrichs Ansage, und sie gilt ab jetzt als Regel: **keine erklärenden
+Untertexte unter Titeln und in Karten, außer sie sind unbedingt nötig.**
+Weg sind deshalb: der Satz unter „Ausfahrt aufzeichnen" (der Titel heißt
+jetzt „Ausfahrt per GPS aufzeichnen" und sagt es selbst), die
+Genauigkeitsangabe unter der Schräglage in der Auswertung, der
+Erklärsatz auf „Meine Stats" samt Knopf „Zur Aufzeichnung" (die Nullen
+erklären sich selbst, und „Ride" liegt eine Leiste weiter), die Hinweise
+in den Karten Kasse, Mitfahrer (geteilt), Chat und Notizen sowie der
+Beispieltext im Notizfeld. Geblieben ist nur, was einen Zustand erklärt,
+den man sonst nicht versteht: „Mit einem Konto kannst du Freunde
+einladen" und der Hinweis bei einer sehr kurzen Aufzeichnung.
+
+Die Schräglage bleibt eine Schätzung (Sensor etwa fünf Grad, aus dem GPS
+etwa zehn, kurze Spitzen fehlen). Das stand bisher als Satz unter der
+Kachel; jetzt steht es nur noch hier.
+
+**Eine Kachelform.** `.stat` (Ride-Auswertung, „Meine Stats", Reise-Zahlen)
+trägt jetzt dieselbe Hülle wie `.karte` auf dem Start: gleiches Glas,
+gleiche Kante, Radius `--r-lg`, Innenabstand `--s4`, Abstand im Raster
+`--s3`. Vorher war es eine kleinere, flachere Form mit eigenem Radius –
+zwei Handschriften für dieselbe Sache.
+
+**Symmetrie in der Ride-Auswertung.** Höhenmeter und Schräglage teilen
+sich eine Zeile, der Kurven-Score steht allein über die volle Breite –
+vorher stand die Schräglage als siebte Kachel allein unter dem
+Kurven-Score. Fehlt die Schräglage (alte Aufzeichnung), nimmt die
+Höhenmeter-Kachel die ganze Zeile; das macht `.stats:has(> [hidden]) >
+.stat-partner` in style.css. Ein langer Schräglagenwert („31° L / 28° R")
+brach in der halben Kachel um und ist deshalb 18 statt 22 Punkte groß.
+
+**„Meine Stats" auf Schwarz.** Bis heute lag dort das weichgezeichnete Foto
+hinter den Glasplatten; jetzt derselbe Grund wie bei Touren und Reifen.
+
+**Das Kopfbild des Planers** war unten abgeschnitten – die Räder lagen im
+Verlauf. Jetzt: höher (42 statt 34 vh im Hochformat, 52 im Breiten),
+Ausschnitt bei 60 statt 52 Prozent (vom Berg darf etwas fehlen, vom
+Motorrad nicht), und der Verlauf beginnt erst bei 78 Prozent statt bei
+30. Der Titel rückt entsprechend weniger ins Bild.
+

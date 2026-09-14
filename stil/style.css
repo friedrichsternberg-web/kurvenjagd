@@ -550,11 +550,11 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
    senkrecht zentriert, und ueber die volle Breite. Ein Formular in der
    Mitte wirkt ruhig, eine Liste in der Mitte wirkt verloren. */
 .listen-screen { align-items: stretch; justify-content: flex-start; text-align: left; overflow-y: auto; }
-/* Touren und Reifen sind Daten-Bildschirme - das Foto dahinter macht sie
-   nur unruhig. Rechtliches, Konto und seit dem 03.09.2026 auch die Stats
-   behalten es: Die Stats bestehen aus Glasplatten, und Glas ueber
-   blankem Schwarz bleibt tot (Grundsatz 4 in design.css). */
-#tourenScreen, #reifenScreen { background: var(--bg); }
+/* Touren, Reifen und seit dem 14.09.2026 auch die Stats sind
+   Daten-Bildschirme - das Foto dahinter macht sie nur unruhig, und
+   Friedrich will ueberall denselben dunklen Grund. Rechtliches und Konto
+   behalten das Foto. */
+#tourenScreen, #reifenScreen, #statsScreen { background: var(--bg); }
 /* Die Ausruestung und die Merkliste: Produktfotos auf weissen Karten
    ueber dem verwischten Werkstattfoto wurden unruhig. Also Schwarz mit
    einem leisen Lichtkegel von oben - das gibt den Glaskanten etwas zu
@@ -1827,22 +1827,33 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   text-align: center;
 }
 
-/* ---------- Statistik ---------- */
-.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+/* ---------- Statistik ----------
+   Die Wertekacheln tragen seit dem 14.09.2026 dieselbe Huelle wie die
+   Karten des Starts (.karte): gleiches Glas, gleiche Kante, gleicher
+   Radius, gleicher Innenabstand. Vorher waren sie eine kleinere, flachere
+   Form mit eigenem Radius - zwei Handschriften fuer dieselbe Sache. Der
+   Abstand im Raster ist derselbe wie zwischen den Karten der Reise. */
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); }
 .stat {
-  background: linear-gradient(to bottom, var(--glas-hauch), var(--glas-hauch));
-  backdrop-filter: blur(16px) saturate(150%);
-  -webkit-backdrop-filter: blur(16px) saturate(150%);
-  border: 1px solid var(--glas-hell);
-  border-radius: var(--r-sm);
-  padding: var(--s2) var(--s3);
+  background: var(--glas-hell);
+  backdrop-filter: var(--glas-filter);
+  -webkit-backdrop-filter: var(--glas-filter);
+  border: 1px solid var(--glas-rand);
+  border-radius: var(--r-lg);
+  padding: var(--s4);
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   box-shadow:
-    inset 0 1px 0 var(--glas-rand),
-    inset 0 -1px 0 var(--schatten-hauch);
+    inset 0 1px 0 var(--glas-heller),
+    inset 0 -1px 0 var(--schatten-hauch),
+    var(--glas-schatten);
 }
+/* Eine Kachel, deren Nachbar fehlen kann (die Schraeglage bei alten
+   Aufzeichnungen): Ist im selben Raster eine Kachel versteckt, nimmt sie
+   die ganze Zeile - sonst stuende sie allein links, und das Raster saehe
+   aus, als fehle etwas. */
+.stats:has(> [hidden]) > .stat-partner { grid-column: 1 / -1; }
 .stat .k {
   font-family: var(--schrift-display);
   font-size: 11px;
@@ -1858,6 +1869,9 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
 }
+/* Ein langer Wert in einer halben Kachel ("31° L / 28° R"): etwas kleiner
+   und ohne Umbruch, sonst rutschte das R in eine zweite Zeile. */
+.stat .v.eng { font-size: 18px; white-space: nowrap; }
 .stat.highlight { grid-column: 1 / -1; border: 1px solid var(--accent-hell); }
 .stat.highlight .v { color: var(--accent-hell); }
 
@@ -4635,9 +4649,9 @@ body.nav-modus .karten-knopf { display: none; }
   align-items: center;
   gap: var(--s2);
   padding: var(--s6) var(--s4);
-  margin: 0 0 var(--s3);
+  margin: 0 0 var(--s4);
   border-radius: var(--r-lg);
-  border: 1px solid var(--glas-hell);
+  border: 1px solid var(--glas-rand);
   background:
     radial-gradient(ellipse 90% 75% at 50% 115%,
       color-mix(in srgb, var(--accent) 32%, transparent) 0%,
@@ -4690,30 +4704,9 @@ body.nav-modus .karten-knopf { display: none; }
   color: var(--metall-glanz);
 }
 
-/* Der Satz, der die Nullen erklaert, solange noch nichts aufgezeichnet ist.
-   Eine ruhige Glasplatte, kein Warnkasten: Es ist nichts kaputt, es ist nur
-   noch nichts passiert. Deshalb auch Nebentextfarbe statt Signalfarbe - die
-   traegt allein der Knopf darunter, denn der ist das, was man tun kann. */
-.stats-hinweis {
-  margin: 0 0 var(--s4);
-  padding: var(--s4);
-  border-radius: var(--r-md);
-  background: var(--glas-hauch);
-  border: 1px solid var(--glas-hell);
-  box-shadow: inset 0 1px 0 var(--glas-rand);
-}
-.stats-hinweis p {
-  margin: 0 0 var(--s3);
-  font-size: 13.5px;
-  line-height: 1.55;
-  color: var(--muted);
-}
-.stats-hinweis .btn { width: auto; }
-
 /* Die Wertekacheln erben alles von .stat; hier steht nur der Abstand der
-   Gruppe selbst. */
-.stats-kacheln { margin: 0 0 var(--s3); gap: var(--s2); }
-.stats-kacheln .stat { padding: var(--s3) var(--s4); border-radius: var(--r-md); }
+   Gruppe selbst und die etwas groessere Zahl. */
+.stats-kacheln { margin: 0 0 var(--s4); }
 .stats-kacheln .stat .v { font-size: 26px; }
 .stat.stats-still { grid-column: 1 / -1; align-items: center; padding: var(--s4); }
 
@@ -6229,23 +6222,25 @@ body.nav-modus .karten-knopf { display: none; }
      Grenze greift - das Bild sass dann als schmaler Streifen links statt
      ueber die volle Breite. "cover" schneidet den Ausschnitt ohnehin
      passend zu, eine Seitenverhaeltnis-Angabe braucht es also gar nicht. */
-  height: clamp(190px, 34vh, 360px);
-  /* 52 Prozent und nicht die Mitte: Im Breiten ist das Band sehr flach,
-     "cover" schneidet dann oben und unten viel weg - und der Fahrer sitzt
-     im Bild etwas tiefer als die Mitte. Mit 50 Prozent war ihm der Helm
-     abgeschnitten. */
-  background: url("../img/planer-kopf.webp") center 52% / cover no-repeat;
-  /* Der Verlauf beginnt frueh und ist bei 88 Prozent fertig - die letzten
-     zwoelf Prozent sind ganz durchsichtig. Er endete zuerst erst bei 96,
-     und weil die Strasse unten im Bild hell ist, blieb ein sichtbarer
-     grauer Streifen bis zur Kante stehen. Ein Verlauf muss VOR dem Rand
-     fertig sein, sonst sieht man den Rand trotzdem. */
-  -webkit-mask-image: linear-gradient(to bottom, black 30%, transparent 88%);
-  mask-image: linear-gradient(to bottom, black 30%, transparent 88%);
+  height: clamp(230px, 42vh, 420px);
+  /* 60 Prozent und nicht die Mitte: Das Motorrad steht im unteren Teil des
+     Fotos, die Raeder enden bei etwa 89 Prozent seiner Hoehe. Wo "cover"
+     oben und unten beschneidet, soll es oben beschneiden - vom Berg
+     darf etwas fehlen, vom Motorrad nicht. Mit 52 Prozent (bis zum
+     14.09.2026) waren die Raeder abgeschnitten. */
+  background: url("../img/planer-kopf.webp") center 60% / cover no-repeat;
+  /* Der Verlauf beginnt erst bei 78 Prozent und endet am Rand: Darueber
+     bleibt das Bild ganz, damit das Motorrad bis zu den Raedern zu sehen
+     ist; darunter ist nur noch Strasse, und die darf ins Schwarz
+     auslaufen. Dass die Strasse hell ist, macht hier nichts mehr - bei
+     100 Prozent ist der Verlauf ganz durchsichtig, es bleibt kein Rand. */
+  -webkit-mask-image: linear-gradient(to bottom, black 78%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 78%, transparent 100%);
 }
-/* Der Titel rueckt in das ausgelaufene Ende des Bildes hinein - sonst
-   klaffte unter dem Bild eine Luecke, in der nichts steht. */
-.planer-kopf-titel { margin: calc(-1 * var(--s7)) 0 var(--s5); }
+/* Der Titel rueckt ein Stueck in das ausgelaufene Ende des Bildes hinein -
+   nur noch so weit, dass er auf der ausgeblendeten Strasse steht und nicht
+   auf dem Motorrad. */
+.planer-kopf-titel { margin: calc(-1 * var(--s4)) 0 var(--s5); }
 
 .wahl-karten {
   display: grid;

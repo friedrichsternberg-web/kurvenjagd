@@ -424,7 +424,6 @@ function mitfahrerWidgetHtml(reise) {
         : 'Allein unterwegs'}</h3>
       <div class="widget-koerper">
         <div class="mitfahrer-punkte">${punkte}</div>
-        <p class="hint">Lade deine Freunde ein, damit sie die Reise mitplanen k&ouml;nnen &ndash; mit Chat und gemeinsamen Notizen.</p>
       </div>
       <button type="button" class="btn ghost widget-knopf" id="${geteilt ? 'btnMitfahrerEinladen' : 'btnMitfahrer'}">
         ${symbol('leute', 'klein')} ${geteilt ? 'Freunde einladen' : 'Gemeinsam planen'}

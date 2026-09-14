@@ -63,10 +63,7 @@ function zeigeStats() {
     stats.monat = 11;
   }
 
-  /* Gezeichnet wird IMMER alles - ohne Ausfahrten eben ueberall mit
-     Nullen. Nur der erklaerende Satz kommt dazu, damit die Nullen nicht
-     wie ein Fehler aussehen. */
-  document.getElementById('statsLeer').hidden = stats.ausfahrten.length > 0;
+  // Gezeichnet wird IMMER alles - ohne Ausfahrten eben ueberall mit Nullen.
   zeichneStatsGesamt();
   zeichneStatsRueckblick();
   zeichneStatsLieblinge();
@@ -321,7 +318,6 @@ function zeichneRideStatsKarte() {
 
 verkabele('btnRideStats', 'click', zeigeStats);
 verkabele('btnStartStats', 'click', zeigeStats);
-verkabele('btnStatsZurAufnahme', 'click', () => zeigeRideScreen());
 // Zurueck zur Aufzeichnung, denn von dort kommt man her - und dort
 // leuchtet auch der Leisten-Eintrag, solange die Stats offen sind.
 verkabele('btnStatsZurueck', 'click', () => {

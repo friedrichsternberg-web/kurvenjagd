@@ -174,9 +174,7 @@ function gespraechWidgetHtml(reise) {
       </div>
       <h3 class="widget-name">${anzahl ? `${anzahl} ${anzahl === 1 ? 'Nachricht' : 'Nachrichten'}` : 'Noch still'}</h3>
       <div class="widget-koerper">
-        ${anzahl
-          ? `<ul class="gespraech-vorschau">${vorschau}</ul>`
-          : '<p class="hint">Sprecht euch hier ab: Treffpunkt, Abfahrt, wer was mitbringt.</p>'}
+        ${anzahl ? `<ul class="gespraech-vorschau">${vorschau}</ul>` : ''}
       </div>
       <button type="button" class="btn ghost widget-knopf" data-gespraech-oeffnen>
         ${symbol('sprechblase', 'klein')} Nachricht schreiben

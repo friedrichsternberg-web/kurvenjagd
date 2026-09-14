@@ -161,8 +161,7 @@ function kassenWidgetHtml(reise) {
       </div>
       <h3 class="widget-name">${stand.anzahl ? centZuText(stand.summeCent) : 'Noch leer'}</h3>
       <div class="widget-koerper">
-        ${stand.anzahl ? kassenWerteHtml(reise, stand, allein) : `
-          <p class="hint">Erstelle eine detaillierte Kostenaufstellung deiner Reise.</p>`}
+        ${stand.anzahl ? kassenWerteHtml(reise, stand, allein) : ''}
       </div>
       <button type="button" class="btn ghost widget-knopf" data-ausgabe-neu>
         ${symbol('plus', 'klein')} Ausgabe eintragen

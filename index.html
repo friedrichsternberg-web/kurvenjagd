@@ -971,20 +971,11 @@
       <h2>Meine Stats</h2>
 
       <!-- Der Bildschirm steht IMMER vollstaendig da, auch ohne eine
-           einzige Ausfahrt - dann eben ueberall mit Nullen. Ein leerer
-           Bildschirm mit einer Einladung darauf zeigt nicht, was einen
-           erwartet; eine Wand aus Nullen mit einem Satz daneben schon. -->
+           einzige Ausfahrt - dann eben ueberall mit Nullen. Der Satz, der
+           die Nullen erklaerte, stand hier bis zum 14.09.2026; die Nullen
+           erklaeren sich selbst. -->
       <div id="statsInhalt">
         <section class="stats-held" id="statsHeld" aria-label="Gesamtbilanz"></section>
-
-        <div class="stats-hinweis" id="statsLeer" hidden>
-          <p>Noch keine Ausfahrt aufgezeichnet &ndash; deshalb steht hier
-          &uuml;berall eine Null. Sobald du die erste Aufzeichnung beendest,
-          f&uuml;llt sich alles von selbst: Kilometer, Kurven,
-          Schr&auml;glage, dein Monats- und Jahresr&uuml;ckblick und die
-          Strecken, die du immer wieder f&auml;hrst.</p>
-          <button class="btn" id="btnStatsZurAufnahme">Zur Aufzeichnung</button>
-        </div>
 
         <div class="stats stats-kacheln" id="statsKacheln"></div>
 
@@ -2170,10 +2161,7 @@
            will. Sonst liefe das GPS schon, während man noch am Parkplatz
            steht, und die Fahrzeit würde mitzählen. -->
       <div id="rideBereit">
-        <h2 class="ride-titel">Ausfahrt aufzeichnen</h2>
-        <p class="hint">
-          Zeichnet deine tatsächlich gefahrene Strecke per GPS auf.
-        </p>
+        <h2 class="ride-titel">Ausfahrt per GPS aufzeichnen</h2>
         <!-- Schraeglage. Der Knopf steht VOR dem Starten, weil der
              Nullpunkt im Stand gesetzt werden muss - und weil die Erlaubnis
              fuer die Bewegungssensoren auf dem iPhone aus einer echten
@@ -2221,19 +2209,24 @@
         </div>
         <p class="hint ride-status" id="rideStatus">Warte auf GPS-Signal...</p>
 
+        <!-- Paarweise, damit das Raster symmetrisch bleibt: Hoehenmeter
+             und Schraeglage teilen sich eine Zeile, der Kurven-Score steht
+             allein ueber die volle Breite. Fehlt die Schraeglage (alte
+             Aufzeichnung, kein Sensor), nehmen die Hoehenmeter die ganze
+             Zeile - die Regel dazu steht bei .stat-partner in style.css.
+             Die Schraeglage ist bewusst klein und zwischen den anderen
+             Werten: Sie waehrend der Fahrt anzustarren waere genau das
+             Falsche. Die Auswertung kommt nach der Fahrt. -->
         <div class="stats">
-          <!-- Bewusst klein und zwischen den anderen Werten: Die Schraeglage
-               waehrend der Fahrt anzustarren waere genau das Falsche. Die
-               Auswertung kommt nach der Fahrt. -->
-          <div class="stat" id="rideNeigungKachel" hidden>
-            <span class="k">Schr&auml;glage</span><span class="v" id="rideNeigung">0&deg;</span>
-          </div>
           <div class="stat"><span class="k">Distanz</span><span class="v" id="rideDist">0,0 km</span></div>
           <div class="stat"><span class="k">Fahrzeit</span><span class="v" id="rideZeit">0 min</span></div>
           <div class="stat"><span class="k">&Oslash; Tempo</span><span class="v" id="rideSchnitt">0 km/h</span></div>
           <div class="stat"><span class="k">Max. Tempo</span><span class="v" id="rideMax">0 km/h</span></div>
-          <div class="stat"><span class="k">H&ouml;henmeter</span><span class="v" id="rideAufstieg">0 hm</span></div>
-          <div class="stat"><span class="k">Kurven-Score</span><span class="v" id="rideKurven">-</span></div>
+          <div class="stat stat-partner"><span class="k">H&ouml;henmeter</span><span class="v" id="rideAufstieg">0 hm</span></div>
+          <div class="stat" id="rideNeigungKachel" hidden>
+            <span class="k">Schr&auml;glage</span><span class="v" id="rideNeigung">0&deg;</span>
+          </div>
+          <div class="stat highlight"><span class="k">Kurven-Score</span><span class="v" id="rideKurven">-</span></div>
         </div>
 
         <div class="row">
@@ -2260,20 +2253,21 @@
           Sehr kurze Aufzeichnung. Speichern geht, die Auswertung sagt aber wenig aus.
         </p>
 
+        <!-- Dieselbe Ordnung wie waehrend der Fahrt, siehe oben. Der Satz
+             zur Genauigkeit der Schraeglage stand hier bis zum 14.09.2026
+             und ist auf Friedrichs Wunsch weg - die Zahl ist als Schaetzung
+             in ENTSCHEIDUNGEN.md beschrieben, nicht auf dem Bildschirm. -->
         <div class="stats">
           <div class="stat"><span class="k">Distanz</span><span class="v" id="rideEndDist">-</span></div>
           <div class="stat"><span class="k">Fahrzeit</span><span class="v" id="rideEndZeit">-</span></div>
           <div class="stat"><span class="k">&Oslash; Tempo</span><span class="v" id="rideEndSchnitt">-</span></div>
           <div class="stat"><span class="k">Max. Tempo</span><span class="v" id="rideEndMax">-</span></div>
-          <div class="stat"><span class="k">H&ouml;henmeter</span><span class="v" id="rideEndAufstieg">-</span></div>
-          <div class="stat highlight"><span class="k">Kurven-Score</span><span class="v" id="rideEndKurven">-</span></div>
+          <div class="stat stat-partner"><span class="k">H&ouml;henmeter</span><span class="v" id="rideEndAufstieg">-</span></div>
           <div class="stat" id="rideEndNeigungKachel" hidden>
-            <span class="k">Schr&auml;glage max.</span><span class="v" id="rideEndNeigung">-</span>
+            <span class="k">Schr&auml;glage max.</span><span class="v eng" id="rideEndNeigung">-</span>
           </div>
+          <div class="stat highlight"><span class="k">Kurven-Score</span><span class="v" id="rideEndKurven">-</span></div>
         </div>
-        <!-- Ehrlichkeit statt Bestwert-Jagd: Der Hinweis sagt, wie die Zahl
-             zustande kam und wie genau sie ist. -->
-        <p class="tiny" id="rideNeigungHinweis" hidden></p>
         <div class="curvebar"><div class="curvebar-fill" id="rideCurveFill"></div></div>
         <p class="hint" id="rideCurveWord"></p>
 

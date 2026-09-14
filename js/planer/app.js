@@ -2725,21 +2725,14 @@ function beendeRide() {
   document.getElementById('rideEndAufstieg').textContent = Math.round(s.aufstiegM) + ' hm';
   document.getElementById('rideEndKurven').textContent = Math.round(s.kurvigkeit) + ' Grad/km';
 
-  /* Die Schraeglage, und zwar mit Beipackzettel. Der Hinweis darunter ist
-     kein Kleingedrucktes, sondern der Punkt: Eine geschaetzte Zahl ohne
-     Angabe ihrer Genauigkeit lockt dazu, sie steigern zu wollen. */
+  /* Die Schraeglage - eine Schaetzung (Sensor etwa fuenf Grad genau, GPS
+     etwa zehn). Der Satz dazu stand bis zum 14.09.2026 unter den Kacheln;
+     siehe ENTSCHEIDUNGEN.md. */
   const nKachel = document.getElementById('rideEndNeigungKachel');
-  const nHinweis = document.getElementById('rideNeigungHinweis');
   nKachel.hidden = !s.neigung;
-  nHinweis.hidden = !s.neigung;
   if (s.neigung) {
     document.getElementById('rideEndNeigung').textContent =
       `${s.neigung.maxLinksGrad}° L / ${s.neigung.maxRechtsGrad}° R`;
-    nHinweis.textContent = s.neigung.quelle === 'sensor'
-      ? 'Aus den Bewegungssensoren geschätzt, Genauigkeit etwa fünf Grad. '
-        + 'Kein Messgerät - und kein Wert, den man steigern sollte.'
-      : 'Grob aus Tempo und Kursänderung geschätzt, Genauigkeit etwa zehn Grad. '
-        + 'Kurze Spitzen fehlen darin. Mit gesetztem Nullpunkt wird es genauer.';
   }
 
   const istKurz = ride.punkte.length < RIDE_KURZ_GRENZE;
