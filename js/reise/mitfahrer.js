@@ -141,6 +141,10 @@ async function ladeReiseHoch(reise) {
   if (typeof uebernehmeOertlicheAusgaben === 'function') {
     await uebernehmeOertlicheAusgaben(reiseNach(reise.id), data);
   }
+  // Die Zettel ebenso - notizen.js, gleiches Muster.
+  if (typeof uebernehmeOertlicheNotizen === 'function') {
+    await uebernehmeOertlicheNotizen(reiseNach(reise.id), data);
+  }
   return { ok: true, serverId: data };
 }
 
@@ -420,7 +424,7 @@ function mitfahrerWidgetHtml(reise) {
         : 'Allein unterwegs'}</h3>
       <div class="widget-koerper">
         <div class="mitfahrer-punkte">${punkte}</div>
-        <p class="hint">Lade deine Freunde ein, damit sie die Reise mitplanen k&ouml;nnen.</p>
+        <p class="hint">Lade deine Freunde ein, damit sie die Reise mitplanen k&ouml;nnen &ndash; mit Chat und gemeinsamen Notizen.</p>
       </div>
       <button type="button" class="btn ghost widget-knopf" id="${geteilt ? 'btnMitfahrerEinladen' : 'btnMitfahrer'}">
         ${symbol('leute', 'klein')} ${geteilt ? 'Freunde einladen' : 'Gemeinsam planen'}

@@ -414,6 +414,9 @@ function oeffneReise(id) {
   const reise = reiseNach(id);
   if (typeof ladeMitfahrerNach === 'function') ladeMitfahrerNach(reise);
   if (typeof ladeAusgabenNach === 'function') ladeAusgabenNach(reise);
+  // Chat und Notizen genauso - beide zeichnen nur neu, wenn es etwas gibt.
+  if (typeof ladeGespraechNach === 'function') ladeGespraechNach(reise);
+  if (typeof ladeNotizenNach === 'function') ladeNotizenNach(reise);
   zeigeBildschirm('reiseScreen');
   const bildschirm = document.getElementById('reiseScreen');
   if (bildschirm) bildschirm.scrollTop = 0;
@@ -461,19 +464,21 @@ function zeichneReise() {
   markiereAuswahl();
 }
 
-/* Die beiden Karten im Kopf der Reise: die Kasse und die Mitfahrer.
+/* Die Karten im Kopf der Reise: Kasse, Mitfahrer, Chat, Notizen.
    Nebeneinander, sobald Platz ist - das erledigt das Raster in style.css
    von selbst, ohne eine eigene Regel fuers Querformat.
 
    Der Behaelter entsteht nur, wenn wenigstens eine Karte etwas hergibt.
-   Ohne Konto geben beide nichts zurueck, und ein leerer Kasten mit
+   Ohne Konto gibt der Chat nichts zurueck, und ein leerer Kasten mit
    Aussenabstand haette in der Reise eine Luecke gelassen, die niemand
    erklaeren kann. Die Pruefung auf typeof ist dieselbe Absicherung wie
-   ueberall: Fehlt eine der beiden Dateien, fehlt eben ihre Karte. */
+   ueberall: Fehlt eine der Dateien, fehlt eben ihre Karte. */
 function reiseWidgetsHtml(reise) {
   const karten = [
     typeof kassenWidgetHtml === 'function' ? kassenWidgetHtml(reise) : '',
     typeof mitfahrerWidgetHtml === 'function' ? mitfahrerWidgetHtml(reise) : '',
+    typeof gespraechWidgetHtml === 'function' ? gespraechWidgetHtml(reise) : '',
+    typeof notizenWidgetHtml === 'function' ? notizenWidgetHtml(reise) : '',
   ].filter(Boolean);
   return karten.length ? `<div class="reise-widgets">${karten.join('')}</div>` : '';
 }
@@ -749,6 +754,9 @@ function etappeHtml(reise, tag, stelle) {
   const datum = datumKurz(tagesDatum(reise, stelle));
   const beschriftung = ['Tag ' + nummer, datum, tag.titel].filter(Boolean).map(escapeHtml).join(' <i>&middot;</i> ');
   const scheibe = `<button class="etappe-nummer" data-scheibe="${escapeHtml(tag.id)}" aria-label="Tag ${nummer}">${nummer}</button>`;
+  // Die Zettel des Tages und der Knopf dafuer kommen aus notizen.js.
+  const notizen = typeof etappenNotizenHtml === 'function' ? etappenNotizenHtml(reise, tag) : '';
+  const notizKnopf = typeof etappenNotizKnopfHtml === 'function' ? etappenNotizKnopfHtml(tag) : '';
   const pfeile = `
     <span class="etappe-pfeile">
       <button class="wp-knopf" data-hoch="${escapeHtml(tag.id)}" title="Nach oben" ${stelle === 0 ? 'disabled' : ''}>&#9650;</button>
@@ -767,7 +775,9 @@ function etappeHtml(reise, tag, stelle) {
         <span class="etappe-leer-knoepfe">
           <button class="btn ghost klein" data-waehle="${escapeHtml(tag.id)}">${fehlt ? 'Andere w&auml;hlen' : 'Route w&auml;hlen'}</button>
           <button class="btn klein" data-erstelle="${escapeHtml(tag.id)}">Route erstellen</button>
+          ${typeof etappenNotizKnopfHtml === 'function' ? etappenNotizKnopfHtml(tag, true) : ''}
         </span>
+        ${notizen}
         <button class="del" data-entferne="${escapeHtml(tag.id)}" title="Tag entfernen">&times;</button>
         ${pfeile}
       </div>
@@ -785,8 +795,10 @@ function etappeHtml(reise, tag, stelle) {
         <span class="label">${beschriftung}</span>
         <span class="etappe-name">${marke}<span class="saved-name">${escapeHtml(route.name)}</span></span>
         ${faktenHtml(route)}
+        ${notizen}
         <div class="etappe-aktionen">
           <button class="linkbtn" data-waehle="${escapeHtml(tag.id)}">Route wechseln</button>
+          ${notizKnopf}
           <button class="glas-rund klein" data-planer="${escapeHtml(tag.id)}" title="Im Planer &ouml;ffnen" aria-label="Im Planer öffnen">${symbol('route', 'klein')}</button>
           <button class="del" data-entferne="${escapeHtml(tag.id)}" title="Tag entfernen">&times;</button>
         </div>
@@ -923,6 +935,9 @@ function beiTippImReiseBildschirm(ereignis) {
 
   if (trifft('#btnReiseZurueck')) { zurueckZuReisen(); return; }
   if (trifft('#btnReiseName')) { oeffneUmbenennen(); return; }
+  // Zettel und ihr Knopf gehoeren notizen.js. Hier nur: nicht auch noch
+  // den Tag waehlen, auf dessen Karte sie liegen.
+  if (trifft('[data-notiz], [data-notiz-neu]')) return;
   // Oeffentlich stellen oder zurueckziehen - der Weg liegt in mitfahrer.js,
   // weil dort alles wohnt, was mit dem Server spricht.
   if (trifft('#btnReiseOeffentlich')) {

@@ -433,6 +433,19 @@
         <path d="M4 20h4L19.2 8.8a2.4 2.4 0 0 0-3.4-3.4L4.6 16.6 4 20Z"/>
         <path d="m14.8 6.6 3 3"/>
       </symbol>
+      <!-- Chat und Notizen einer Reise (seit 14.09.2026) -->
+      <symbol id="icon-sprechblase" viewBox="0 0 24 24">
+        <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.6 3.6V16A2.5 2.5 0 0 1 4 13.5v-8Z"/>
+        <path d="M8.5 8.5h7M8.5 12h4.5"/>
+      </symbol>
+      <symbol id="icon-notiz" viewBox="0 0 24 24">
+        <path d="M6 3.5h9.5L20 8v11a1.5 1.5 0 0 1-1.5 1.5h-12A1.5 1.5 0 0 1 5 19V5A1.5 1.5 0 0 1 6.5 3.5Z"/>
+        <path d="M15.5 3.5V8H20M8.5 12h7M8.5 15.5h5"/>
+      </symbol>
+      <symbol id="icon-senden" viewBox="0 0 24 24">
+        <path d="M3.5 11.5 20 4l-4.2 16-4.6-6.3-7.7-2.2Z"/>
+        <path d="m11.2 13.7 8.8-9.7"/>
+      </symbol>
       <symbol id="icon-drehen" viewBox="0 0 24 24">
         <path d="M4.2 12a7.8 7.8 0 0 1 13.3-5.5"/>
         <path d="M19.8 12a7.8 7.8 0 0 1-13.3 5.5"/>
@@ -1412,13 +1425,28 @@
             (Bereitstellung der von dir angeforderten Funktion).
           </p>
           <p>
+            <strong>Chat und Notizen</strong> (seit dem 14.09.2026): In
+            einer geteilten Reise k&ouml;nnt ihr euch Nachrichten schreiben
+            und Notizen an die Reise oder an einzelne Tage heften. Gespeichert
+            wird der Text, wer ihn geschrieben hat und wann. Lesen k&ouml;nnen
+            das nur die Mitfahrer genau dieser Reise. Eine Nachricht kannst du
+            selbst l&ouml;schen; eine Notiz darf jeder Mitfahrer &auml;ndern
+            oder l&ouml;schen, weil sie der Gruppe geh&ouml;rt. Wird die Reise
+            gel&ouml;scht, gehen Chat und Notizen mit. Notizen an einer Reise,
+            die du noch nicht geteilt hast, bleiben auf deinem Ger&auml;t und
+            im Konto (Punkt 7).
+          </p>
+          <p>
             <strong>L&ouml;schst du dein Konto</strong>, verschwindet deine
             Teilnahme, und dein Name und dein Bild stehen nirgends mehr.
-            <strong>Die Reise und die eingetragenen Ausgaben bleiben
-            aber</strong>, mit &bdquo;Ehemaliges Konto&ldquo; an deiner
-            Stelle. Sie verschwinden zu lassen w&uuml;rde stillschweigend
-            &auml;ndern, was die anderen einander schulden &ndash; deshalb
-            bleiben die Betr&auml;ge stehen und nur die Person geht.
+            <strong>Die Reise, die eingetragenen Ausgaben, deine Nachrichten
+            und Notizen bleiben aber</strong>, mit &bdquo;Ehemaliges
+            Konto&ldquo; an deiner Stelle. Sie verschwinden zu lassen
+            w&uuml;rde stillschweigend &auml;ndern, was die anderen einander
+            schulden oder abgesprochen haben &ndash; deshalb bleibt der
+            Inhalt stehen und nur die Person geht. Willst du, dass deine
+            Worte vorher weg sind, l&ouml;sche sie im Chat, bevor du das Konto
+            l&ouml;schst.
           </p>
 
           <p class="label">9. Touren und Reisen per Link weitergeben</p>
@@ -1657,7 +1685,7 @@
             das Recht auf Akteneinsicht Brandenburg.
           </p>
 
-          <p class="tiny">Stand: 13.09.2026</p>
+          <p class="tiny">Stand: 14.09.2026</p>
         </div>
       </details>
 
@@ -2950,6 +2978,10 @@
   <script src="js/reise/kasse.js?v=114"></script>
   <script src="js/reise/mitfahrer.js?v=114"></script>
   <script src="js/reise/ausgaben.js?v=114"></script>
+  <!-- Chat und Notizen der Reise (seit 14.09.2026). Beide NACH
+       mitfahrer.js: Sie fragen dort, ob die Reise geteilt ist. -->
+  <script src="js/reise/gespraech.js?v=114"></script>
+  <script src="js/reise/notizen.js?v=114"></script>
   <!-- Touren und Reisen per Link weitergeben. Laedt NACH reise.js, weil es
        beide Formen kennen muss, und nach konto.js wegen des Servers. -->
   <script src="js/konto/teilen.js?v=114"></script>

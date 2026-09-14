@@ -4542,3 +4542,53 @@ nie `stopPropagation()` — Leaflet bekommt jedes Rad-Ereignis weiter und
 zoomt wie bisher. Nachgemessen: Strg+Rad wird abgefangen, normales Scrollen
 geht durch, die Safari-Geste wird abgefangen, die Tastatur bleibt frei, und
 Rad- wie Kneifzoom der Karte sind weiter eingeschaltet.
+
+## 14.09.2026 — Chat und Notizen in der gemeinsamen Reise
+
+Friedrichs Wunsch: Die Bearbeiter einer Reise sollen sich Nachrichten
+schreiben können, und an jeder Etappe und an der Reise selbst sollen
+Notizen hängen. Drei Entscheidungen dabei:
+
+**Zwei Tabellen statt einer mit Spalte `art`.** Eine Nachricht ist ein
+gesagtes Wort: Nur der Autor darf sie löschen, niemand darf sie ändern.
+Eine Notiz ist ein gemeinsamer Zettel, der stimmen soll: Jeder Mitfahrer
+darf ihn korrigieren. Das sind zwei Besitzverhältnisse, und in einer
+Tabelle wären das Zeilenregeln mit Fallunterscheidung. Zwei Tabellen sind
+zwei einfache Regelsätze (`08-gespraech-und-notizen.sql`).
+
+**Notizen als Zeilen, nicht im JSON der Tage.** Es hätte nahegelegen, `tag.notiz`
+in die Spalte `tage` zu schreiben, die ohnehin hochgeht. Aber die Spalte wird
+als Ganzes zurückgeschrieben, Zeitstempel entscheidet – zwei Leute, die
+gleichzeitig je einen Zettel anheften, überschrieben einander. Als eigene
+Zeilen kann jeder seinen anhängen, ohne den des anderen zu berühren.
+Dieselbe Überlegung wie bei der Kasse. Für die ungeteilte Reise liegen
+die Zettel in `reise.notizen` im Gerät und ziehen beim Teilen um, genau wie
+die Ausgaben – die App muss ohne Konto vollständig laufen.
+
+**Nachfragen statt Live-Verbindung.** Der Chat fragt alle fünf Sekunden
+nach neuen Nachrichten, solange das Blatt offen ist, und holt dabei nur,
+was jünger als die letzte bekannte ist. Supabase Realtime wäre der ehrliche
+Weg, braucht aber die Publikation, einen Kanal je Reise und `wss://` in der
+CSP – und der Abgleich der Reise selbst hat dasselbe Problem. Beides
+zusammen, wenn es dran ist (AUFGABEN.md, Abschnitt gemeinsame Reisen).
+
+**Was der Chat nicht ist:** Er gibt es nur in geteilten Reisen. Allein gibt
+es niemanden, mit dem man reden könnte, und eine Ablage im Gerät für einen
+Chat mit sich selbst wäre ein eigener Speicherweg für nichts. Die
+Mitfahrer-Karte sagt in ihrem Hinweis, dass Chat und Notizen mit dem
+Einladen kommen.
+
+**Gelesen-Marke im Gerät, nicht auf dem Server.** `kurvenjagd.gespraechGelesen`
+merkt je Reise den Zeitstempel der zuletzt gesehenen Nachricht, daraus wird
+das „3 neu" auf der Karte. Ein Server-Vermerk je Leser wäre eine Tabelle für
+eine Zahl, die nur auf diesem Gerät stimmen muss.
+
+**Geprüft:** Migration eingespielt, in einer zurückgerollten Transaktion als
+angemeldeter Nutzer: Nachricht und Notiz kommen mit Autorennamen zurück, ein
+Fremder sieht nichts, eine Nachricht unter fremdem Namen wird abgewiesen
+(42501), leerer Text ebenso (23514). Nur `authenticated` darf die beiden
+Lesefunktionen ausführen, die Auslöser niemand. Oberfläche im Browser mit
+örtlicher Reise (Notizen) und nachgestelltem Verlauf (Chat) bei 375 und
+1024 Punkten. Zu zweit live durchgespielt ist es noch nicht – dafür fehlt
+weiter das Zweitkonto.
+

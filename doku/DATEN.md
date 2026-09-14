@@ -24,7 +24,8 @@ Gerät nicht, solange niemand angemeldet ist.
 |---|---|
 | `kurvenjagd.routen` | gespeicherte Touren: Wegpunkte, Streckenverlauf, Kurvigkeit, Fotos als Daten-URL |
 | `kurvenjagd.garage` | Motorräder (Marke, Modell, Baujahr, Hubraum, Leistung, Bild) und Ausrüstung |
-| `kurvenjagd.reisen` | geplante Reisen: Name, Startdatum, die Tage in Reihenfolge, je Tag ein Verweis auf eine gespeicherte Route (nur die Kennung, keine Kopie) und ein freier Titel wie „Anreise“. Seit dem 04.09.2026 |
+| `kurvenjagd.reisen` | geplante Reisen: Name, Startdatum, die Tage in Reihenfolge, je Tag ein Verweis auf eine gespeicherte Route (nur die Kennung, keine Kopie) und ein freier Titel wie „Anreise“. Seit dem 04.09.2026. Seit dem 14.09.2026 dazu die **Notizen** einer noch ungeteilten Reise (Text, Tag, Zeitstempel) – beim Teilen ziehen sie auf den Server um |
+| `kurvenjagd.gespraechGelesen` | je geteilter Reise der Zeitstempel der zuletzt gelesenen Chat-Nachricht, damit die Karte „3 neu“ zeigen kann. Nur auf dem Gerät, geht nie zum Server. Seit dem 14.09.2026 |
 | `kurvenjagd.shop` | Merkliste: Produkt-Schlüssel (`motoin:88484`), Datum, Marke und Name beim Merken, dazu die eigene Preisbeobachtung – höchstens zwölf Punkte je Eintrag |
 | `kurvenjagd.neigungBasis` | Nullpunkt für die Schräglage: die Einbaulage des Handys als drei Achsen, dazu der Ruhefehler des Gyroskops |
 | `kurvenjagd.reifenmass` | die eingetragene Reifengröße je Motorrad, getrennt für vorn und hinten – drei Zahlen, sonst nichts. Die **Serienbereifung** der gängigen Modelle steht daneben in `reifen-massen.js`, einer Datei der App – nachgeschlagen wird auf dem Gerät, dafür geht nichts ins Netz |
@@ -298,6 +299,22 @@ gemeinsamen Ausfahrten oben, und aus demselben Grund:
   diesen Stellen „Ehemaliges Konto" – ohne Namen, ohne Bild.
 - Die **Teilnahme selbst verschwindet** (`ON DELETE CASCADE` auf
   `reise_teilnehmer`): Wer weg ist, steht nicht mehr in der Liste.
+
+**Chat und Notizen (seit 14.09.2026, Migration 08).** Zwei Tabellen,
+`reise_nachrichten` und `reise_notizen`, beide hinter derselben Zeilenregel
+wie die Reise: lesbar nur für Mitfahrer mit Status „dabei". Gespeichert
+werden je Zeile der Text, der Autor und der Zeitstempel, bei Notizen
+zusätzlich der Reisetag (leer = die Reise selbst). Eine Nachricht kann nur
+ihr Autor löschen, ändern kann sie niemand; eine Notiz gehört der Gruppe
+und darf von jedem Mitfahrer geändert und gelöscht werden. Schreiben geht
+nur unter dem eigenen Namen (`autor_id = auth.uid()` in der Regel).
+Obergrenzen: 2000 Nachrichten und 200 Notizen je Reise. Die
+Lesefunktionen `reise_nachrichten_liste` und `reise_notizen_liste` hängen
+den Benutzernamen aus `profile` an – nur für Mitfahrer, nur Name und Bild.
+Beim Löschen des Kontos wird der Autor leer („Ehemaliges Konto"), der Text
+bleibt; beim Löschen der Reise geht alles mit (`CASCADE`). Der Chat fragt
+alle fünf Sekunden nach, solange das Blatt offen ist – keine
+Live-Verbindung, siehe AUFGABEN.md.
 
 ### Teilen per Link (seit 10.09.2026)
 

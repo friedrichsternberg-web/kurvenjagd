@@ -5746,20 +5746,161 @@ body.nav-modus .karten-knopf { display: none; }
    und zwar unabhaengig davon, wieviel darueber steht. Ohne diesen
    Zwischenkasten hing es davon ab, welches Element gerade das letzte
    war, und die Knoepfe standen versetzt. */
-.kasse-widget, .mitfahrer-widget {
+.kasse-widget, .mitfahrer-widget, .gespraech-widget, .notizen-widget {
   display: flex;
   flex-direction: column;
   border-radius: var(--r-xl);
 }
 .widget-koerper { flex: 1; display: flex; flex-direction: column; gap: var(--s3); }
-.kasse-widget .hint, .mitfahrer-widget .hint { margin: 0; }
-.kasse-widget .widget-knopf, .mitfahrer-widget .widget-knopf { margin-top: var(--s4); }
+.kasse-widget .hint, .mitfahrer-widget .hint,
+.gespraech-widget .hint, .notizen-widget .hint { margin: 0; }
+.kasse-widget .widget-knopf, .mitfahrer-widget .widget-knopf,
+.gespraech-widget .widget-knopf, .notizen-widget .widget-knopf { margin-top: var(--s4); }
 /* Die Kasse traegt als Namen einen Betrag. Ziffern in gleicher Breite,
    sonst huepft die Zahl bei jeder Aenderung. */
 .kasse-widget .widget-name { font-variant-numeric: tabular-nums; }
 /* Nur der offene Betrag faerbt sich, und nur wenn wirklich etwas offen
    ist. Eine Null in Warnfarbe waere eine Warnung vor nichts. */
 .kasse-widget .wert.warnt { color: var(--danger-glanz); }
+
+/* ---------- Die Karte "Chat" und das Blatt dahinter (seit 14.09.2026) ----------
+   Die Vorschau auf der Karte: zwei Zeilen, je eine Nachricht, abgeschnitten
+   mit Auslassungspunkten - sie soll sagen, dass sich etwas tut, nicht den
+   Verlauf ersetzen. */
+.gespraech-vorschau { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--s2); }
+.gespraech-vorschau li {
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gespraech-vorschau b { font-weight: 600; color: var(--text); }
+/* Ungelesene: gefuellt in Blau, denn das ist die eine Zahl auf der Karte,
+   die zum Handeln auffordert. */
+.gespraech-neu {
+  padding: 3px var(--s2);
+  border-radius: var(--r-pill);
+  font-family: var(--schrift-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--accent-ink);
+  background: var(--accent-hell);
+}
+
+/* Der Verlauf: eigene Blasen rechts in Blau, fremde links im Glas, Trenner
+   je Tag dazwischen. Die Blase ist hoechstens 84 % breit, damit die Seite,
+   auf der sie sitzt, lesbar bleibt - ohne die Luecke sieht man nicht, wer
+   spricht. */
+.gespraech-liste { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--s2); }
+.gespraech-leer { align-self: center; margin: var(--s4) 0; }
+.gespraech-tag {
+  align-self: center;
+  margin: var(--s2) 0;
+  font-family: var(--schrift-display);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.gespraech-blase {
+  max-width: 84%;
+  align-self: flex-start;
+  padding: var(--s2) var(--s3);
+  border-radius: var(--r-md);
+  border: 1px solid var(--glas-rand);
+  background: var(--glas-hell);
+}
+.gespraech-blase.meine {
+  align-self: flex-end;
+  border-color: color-mix(in srgb, var(--accent-hell) 40%, transparent);
+  background: color-mix(in srgb, var(--accent) 32%, transparent);
+}
+.gespraech-autor {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-hell);
+}
+/* pre-wrap: Zeilenumbrueche aus dem Feld bleiben; anywhere: ein langer
+   Link sprengt die Blase nicht. */
+.gespraech-text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.gespraech-zeit {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--s1);
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.gespraech-zeit .del { font-size: 14px; }
+
+/* Das Eingabefeld im Fuss des Blatts: Feld und Sendeknopf in einer Zeile,
+   das Feld waechst mit dem Text (gespraech.js setzt die Hoehe), aber nur
+   bis vier Zeilen - darueber rollt es. */
+.gespraech-eingabe { flex: 1; display: flex; gap: var(--s2); align-items: flex-end; }
+.gespraech-eingabe textarea {
+  flex: 1;
+  min-width: 0;
+  max-height: 120px;
+  padding: 10px 14px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--glas-rand);
+  background: var(--glas-hell);
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.4;
+  resize: none;
+}
+.gespraech-eingabe textarea:focus { outline: none; border-color: var(--accent-hell); }
+.gespraech-senden { flex: 0 0 auto; padding: 10px 13px; }
+.gespraech-senden .ic { width: 18px; height: 18px; }
+
+/* ---------- Notizen: die Zettel (seit 14.09.2026) ----------
+   Ein Zettel ist ein Knopf, weil ein Tipp ihn zum Aendern oeffnet. Der
+   Text bricht nach drei Zeilen ab - der ganze steht im Blatt. */
+.notiz-liste { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--s2); }
+.notiz-zettel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: var(--s2) var(--s3);
+  border: 1px solid var(--glas-rand);
+  border-radius: var(--r-md);
+  background: var(--glas-hell);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.notiz-zettel:hover { border-color: color-mix(in srgb, var(--accent-hell) 40%, transparent); }
+.notiz-text {
+  font-size: 14px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+.notiz-meta { font-size: 11px; color: var(--muted); }
+/* Auf der Tageskarte stehen die Zettel unter den Kennzahlen, mit etwas
+   Luft nach oben. */
+.etappe-notizen { margin-top: var(--s3); }
 
 /* Die Punkte ueberlappen sich leicht: So liest sich eine Gruppe als eine
    Gruppe und nicht als eine Reihe einzelner Bilder. */

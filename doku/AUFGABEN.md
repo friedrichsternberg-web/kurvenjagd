@@ -185,6 +185,11 @@ Höhenmeter, kurvigster Etappe. Was als Nächstes kommt:
      Reise und beim Wechsel auf den Reiter abgeglichen, Zeitstempel
      entscheidet. Wer gleichzeitig denselben Tag ändert, verliert eine der
      beiden Änderungen. Begründung in `ENTSCHEIDUNGEN.md` zum 07.09.2026.
+     Seit dem 14.09.2026 betrifft das auch den **Chat**: Er fragt alle
+     fünf Sekunden nach, solange das Blatt offen ist. Realtime würde beides
+     auf einmal lösen (Tabellen in die Publikation `supabase_realtime`
+     aufnehmen, `backend.channel()` je offener Reise, CSP um `wss://`
+     erweitern).
    - **Eine Nachricht, wenn jemand einlädt.** Heute sieht man die
      Einladung erst beim nächsten Öffnen von „Reisen". Push ist dafür der
      richtige Weg und hängt am selben Haken wie die spontanen Ausfahrten.
