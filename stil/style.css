@@ -2876,7 +2876,30 @@ button.karte:active { transform: scale(0.985); }
 }
 .widget-wert-symbol .ic { width: 18px; height: 18px; }
 .widget-wert-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-.widget-wert .wert { font-size: 17px; line-height: 1.25; color: var(--text); white-space: nowrap; }
+/* Einzeilig, und wenn es trotzdem nicht passt, mit Auslassungspunkten
+   statt mitten im Wort abgeschnitten. Ein halbes Wort ("Septem") liest
+   sich wie ein Fehler, "..." sagt: hier geht es weiter. Funktioniert nur,
+   weil .widget-wert-text darueber min-width: 0 traegt - ohne das waechst
+   die Spalte mit dem Text, und es gaebe nichts abzuschneiden. */
+.widget-wert .wert {
+  font-size: 17px;
+  line-height: 1.25;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Der Zeitraum der Reisekarte darf zwei Zeilen haben - an der einen
+   Stelle, die zeitraumKurz() in einstieg.js dafuer freigibt. Mehr als
+   zwei nie: Eine dritte schneidet line-clamp mit Auslassungspunkten ab.
+   Die Schreibweise mit -webkit- ist die, die alle heutigen Browser dafuer
+   verstehen. */
+.widget-wert .wert.wert-zeitraum {
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
 
 /* Die Buehne: unten die Maschine, darunter ein weicher Schatten als Boden.
    Der Schatten folgt ueber drop-shadow der Silhouette des freigestellten

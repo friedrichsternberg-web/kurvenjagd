@@ -122,30 +122,52 @@ function zeichneGarageReise() {
   if (letzte && typeof beobachteVorschauen === 'function') beobachteVorschauen(platte);
 }
 
-/* Der Zeitraum in EINER Zeile. datumKurz() liefert "So., 24.05." - zweimal
-   davon mit "bis" dazwischen brach in der Karte um und machte die Zeile
-   unruhig. Liegen Anfang und Ende im selben Monat, genuegt der Monat einmal:
-   "24. - 26. Mai 2026", mit Halbgeviert und schmalen Leerzeichen - das ist
-   die Schreibweise fuer Zeitspannen und spart gegenueber "bis" die Breite,
-   die in der schmalen Textspalte der Karte fehlt. */
+/* Der Zeitraum einer Reise fuer die schmale Textspalte der Reisekarte.
+
+   Die Spalte ist auf einem 375 Punkte breiten Handy nur 88 Punkte breit
+   (nachgemessen), und "24. - 26. Sept." braucht 114. Mit Monatsnamen passt
+   ein Zeitraum dort also in keine Zeile, egal wie man kuerzt - die Frage
+   ist nur, WO er umbricht. Ohne Vorgabe bricht der Browser an irgendeinem
+   Leerzeichen, und die Karte schneidet den Rest ab.
+
+   Deshalb gibt es genau EINE erlaubte Umbruchstelle: das normale
+   Leerzeichen vor dem Monat. Alle anderen Abstaende sind schmale
+   geschuetzte Leerzeichen ( ), an denen nie umgebrochen wird. Schmal
+   steht dann "24. - 26." und darunter "Sept." - wie auf einem
+   Kalenderblatt. Wo Platz ist, bleibt es eine Zeile.
+
+   Ueber einen Monatswechsel waeren zwei Monatsnamen fuer jede Aufteilung
+   zu breit. Dort steht die Zahlenform "29.9. - 3.10." - so schreibt man
+   einen Zeitraum auch auf einen Zettel.
+
+   Das Jahr nur, wenn die Reise nicht im laufenden Jahr endet - hinter
+   einem normalen Leerzeichen, damit es in die zweite Zeile rutscht statt
+   die erste zu sprengen. Beim Monatswechsel haengt es ohne Abstand am
+   Enddatum, siehe unten. */
 function zeitraumKurz(reise, tage) {
   const von = tagesDatum(reise, 0);
   const bis = tagesDatum(reise, Math.max(0, tage - 1));
   if (!von) return '';
-  /* Das Jahr nur, wenn es nicht das laufende ist - so schreibt man ein
-     Datum auch sonst, und in der schmalen Textspalte der Karte sind die
-     fuenf Zeichen der Unterschied zwischen einer und zwei Zeilen. */
-  const jahr = von.getFullYear() === new Date().getFullYear() ? {} : { year: 'numeric' };
-  const lang = { day: 'numeric', month: 'long', ...jahr };
+  const ende = bis || von;
+  const jahr = ende.getFullYear() === new Date().getFullYear() ? '' : ` ${ende.getFullYear()}`;
+  /* Eigene Abkuerzungen statt toLocaleDateString: Chrome schreibt "Sep",
+     Safari "Sept." - dieselbe Karte saehe auf zwei Handys verschieden aus. */
+  const monat = datum => MONAT_KURZ[datum.getMonth()];
+
   if (!bis || von.getTime() === bis.getTime()) {
-    return von.toLocaleDateString('de-DE', lang);
+    return `${von.getDate()}. ${monat(von)}${jahr}`;
   }
   if (von.getMonth() === bis.getMonth() && von.getFullYear() === bis.getFullYear()) {
-    return `${von.getDate()}.\u2009–\u2009${bis.toLocaleDateString('de-DE', lang)}`;
+    return `${von.getDate()}. – ${bis.getDate()}. ${monat(bis)}${jahr}`;
   }
-  return `${von.toLocaleDateString('de-DE', { day: 'numeric', month: 'long' })}`
-    + `\u2009–\u2009${bis.toLocaleDateString('de-DE', lang)}`;
+  /* Hinter dem Strich ein normales Leerzeichen, das Jahr ohne Abstand ans
+     Datum: "29.9. –" oben, "3.10.2027" unten. Mit dem Jahr hinter einem
+     Leerzeichen wurde es sonst eine dritte Zeile, und die schneidet die
+     Karte ab. */
+  return `${von.getDate()}.${von.getMonth() + 1}. – ${bis.getDate()}.${bis.getMonth() + 1}.${jahr.trim()}`;
 }
+
+const MONAT_KURZ = ['Jan.', 'Feb.', 'März', 'Apr.', 'Mai', 'Juni', 'Juli', 'Aug.', 'Sept.', 'Okt.', 'Nov.', 'Dez.'];
 
 /* Die Reisekarte ist der Zwilling der Bike-Karte: dieselbe Huelle
    (.karte), derselbe Kopf mit Abzeichen, derselbe grosse Name, dieselben
@@ -165,12 +187,12 @@ function garageReiseHtml(reise) {
      Zoom fuer genau dieses Fenster. */
   const karte = reiseKartenSvg(reise, { marke: 12, rahmen: { breite: 420, hoehe: 440 } });
   const zeitraum = zeitraumKurz(reise, bilanz.tage);
-  const zeile = (symbolName, beschriftung, wert) => `
+  const zeile = (symbolName, beschriftung, wert, wertKlasse = '') => `
     <div class="widget-wert">
       <span class="widget-wert-symbol">${symbol(symbolName)}</span>
       <span class="widget-wert-text">
         <span class="label">${beschriftung}</span>
-        <span class="wert">${wert}</span>
+        <span class="wert${wertKlasse ? ' ' + wertKlasse : ''}">${wert}</span>
       </span>
     </div>`;
   return `
@@ -191,7 +213,7 @@ function garageReiseHtml(reise) {
           <div class="widget-werte">
             ${zeile('kalender', 'Zeitraum', zeitraum
               ? escapeHtml(zeitraum)
-              : `${bilanz.tage} ${bilanz.tage === 1 ? 'Tag' : 'Tage'}`)}
+              : `${bilanz.tage} ${bilanz.tage === 1 ? 'Tag' : 'Tage'}`, 'wert-zeitraum')}
             ${zeile('route', 'Strecke', `${bilanz.km} km`)}
             ${zeile('berg', 'Etappen', `${bilanz.tage}${bilanz.offen ? `, ${bilanz.offen} offen` : ''}`)}
           </div>
