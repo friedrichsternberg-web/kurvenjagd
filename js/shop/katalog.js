@@ -510,7 +510,8 @@ meldeKatalog({
   datei: 'daten/fcmoto-katalog.js',
   holen: () => (typeof FCMOTO_KATALOG !== 'undefined' ? FCMOTO_KATALOG : null),
   baueProdukt: baueFcmotoProdukt,
-  warengruppen: ['helm', 'jacke', 'hose', 'kombi', 'handschuh', 'stiefel', 'protektor', 'regen', 'airbag'],
+  warengruppen: ['helm', 'jacke', 'hose', 'kombi', 'handschuh', 'stiefel', 'protektor', 'regen', 'airbag',
+                 'kommunikation'],
 });
 
 

@@ -53,6 +53,8 @@ const WARENGRUPPEN_NAMEN = [
   { schlüssel: 'koffer',    name: 'Gepäck',       fehlt: 'kein Gepäck steht' },
   { schlüssel: 'anbau',     name: 'Anbauteile' },
   { schlüssel: 'schloss',   name: 'Schlösser' },
+  // Headsets und Sprechanlagen (seit 15.09.2026, aus dem FC-Moto-Feed).
+  { schlüssel: 'kommunikation', name: 'Kommunikation' },
 ];
 
 // Nur die Arten, die in der Garage fehlen KOENNEN.
@@ -159,6 +161,8 @@ const WELTEN = [
     facetten: [['Art', 'unterart'], ['Marke', 'marke']] },
   { id: 'schloss',    name: 'Schlösser',   gruppen: ['schloss'],
     facetten: [['Marke', 'marke']] },
+  { id: 'kommunikation', name: 'Kommunikation', gruppen: ['kommunikation'],
+    facetten: [['Art', 'unterart'], ['Marke', 'marke']] },
 ];
 
 // Wie eine Unterart auf dem Chip heisst. Was hier fehlt, erscheint so,
@@ -176,6 +180,7 @@ const UNTERART_NAMEN = {
   sonstiges: 'Sonstiges', staender: 'Ständer', verkleidung: 'Verkleidung', schloss: 'Schlösser',
   antrieb: 'Antrieb', auspuff: 'Auspuff', bremse: 'Bremse', fahrwerk: 'Fahrwerk', spiegel: 'Spiegel',
   kennzeichen: 'Kennzeichen',
+  einzel: 'Einzelset', doppel: 'Doppelset',
 };
 
 function weltNach(id) {

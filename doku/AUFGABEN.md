@@ -1028,11 +1028,11 @@ Nebenbei konnte `index.html` von `leaflet-src.js` auf die kleinere
 
 ## Offen seit dem 15.09.2026
 
-- **Shop: Kommunikationsgeräte fehlen.** Sena, Cardo und Co. gibt es bei
-  FC-Moto, sie tauchen aber in keiner Warengruppe auf. Prüfen, wie die
-  Feedzeilen heißen (Kategorie „Kommunikation“/„Headset“?) und eine
-  Warengruppe dafür anlegen – in `werkzeug/fcmoto-import.py` und
-  `js/shop/shop.js`. Gemeldet von Friedrich am 14.09.2026.
+- ~~Shop: Kommunikationsgeräte fehlen.~~ Erledigt am 15.09.2026: Warengruppe
+  „Kommunikation“ (182 Artikel von Sena, Cardo, Nolan, Schuberth, HJC …),
+  siehe ENTSCHEIDUNGEN.md. Offen bleibt der **Preisvergleich**: motoin führt
+  Sena nur als Helme, POLO hat vier Sena-Zeilen – kein zweiter Händler für
+  Headsets, also steht dort nur FC-Moto.
 - **Freunde-Bereich zu zweit durchspielen.** Gruppe anlegen, einladen,
   annehmen, teilen, übernehmen, Chat – wie bei den Reisen fehlt dafür das
   Zweitkonto. Oberfläche mit nachgestellten Daten geprüft, Server per SQL.

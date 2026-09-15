@@ -106,6 +106,22 @@ KATEGORIE_ENDET_AUF = [
     ('Motorcycle Protective Clothing',      None),   # grob: der Titel entscheidet
 ]
 
+# Kommunikationssysteme (Sena, Cardo, Nolan N-Com ...) liegen im Feed unter
+# "Motor Vehicle Electronics" - zusammen mit Blinkern, Handyhalterungen,
+# Kameras und Navis, die wir nicht fuehren. Zwei stehen sogar unter den
+# Helmen. Deshalb entscheidet hier nicht die Kategorie, sondern Titel und
+# Marke: Was nach Headset klingt, ist Kommunikation. Nachgezaehlt am
+# 15.09.2026: 188 Artikel, 177 davon ohne item_group_id (jeder steht fuer
+# sich). Gemeldet von Friedrich: "Sena und Co. fehlen".
+# Unter "Motor Vehicle Electronics" reicht die Marke oder ein Stichwort;
+# unter "Motorcycle Helmets" nur ein eindeutiges Wort, denn dort gibt es
+# Sena-HELME, Nolan-Helme "mit N-Com" und den Scorpion "Exo-Combat" - die
+# sind alle Helme und bleiben es.
+KOMMUNIKATION_BREIT = re.compile(
+    r'\bsena\b|cardo|interphone|midland|intercom|headset|kommunikations|sprechanlage'
+    r'|gegensprech|packtalk|freecom|a-connect|pro speak', re.I)
+KOMMUNIKATION_ENG = re.compile(r'kommunikationssystem|intercom|headset', re.I)
+
 # In der groben Bekleidungskategorie: Stichwort im Titel -> Warengruppe.
 # Reihenfolge zaehlt, der erste Treffer gewinnt. "Regenkombi" ist Regen,
 # kein Kombi - deshalb steht Regen vorn.
@@ -165,6 +181,12 @@ UNTERART_AUS_TITEL = {
         (r'chopper|cruiser|western|biker', 'chopper'),
         (r'winter|thermo',                'winter'),
     ],
+    'kommunikation': [
+        (r'doppel|duo\b|dual|double|twin|2x', 'doppel'),
+        (r'einzel|single|einzelpack',      'einzel'),
+        (r'adapter|halter|klemm|kabel|zubeh|ersatz|akku|mikro|lautsprecher|speaker'
+         r'|hygiene|klebe|fernbedienung|kopfh|einbaukit|ladeger|pack\b|kit\b', 'zubehoer'),
+    ],
     'protektor': [
         (r'r[üu]cken|brust|chest|back|weste|jacke|hemd|shirt', 'ruecken'),
         (r'knie|knee|schien|shin',      'knie'),
@@ -178,24 +200,30 @@ UNTERART_AUS_TITEL = {
 }
 
 WARENGRUPPEN_REIHENFOLGE = ['helm', 'jacke', 'hose', 'kombi', 'handschuh', 'stiefel',
-                            'protektor', 'regen', 'airbag']
+                            'protektor', 'regen', 'airbag', 'kommunikation']
 
 # Was beim Kuerzen zuerst bleibt. Alle Gruppen sind hier Ware am Koerper,
 # also gleichrangig - entschieden wird ueber den Preisvergleich und die
 # Zahl der Groessen (siehe wichtigkeit()).
 GRUPPEN_RANG = {g: 0 for g in WARENGRUPPEN_REIHENFOLGE}
+# Gruppen, die beim Kuerzen nicht angefasst werden (siehe waehle_aus).
+GANZ_BEHALTEN = {'kommunikation'}
 
 
-def warengruppe(kategorie, titel):
+def warengruppe(kategorie, titel, marke=''):
     """Warengruppe und Unterart, oder None fuer 'nicht aufnehmen'."""
     gruppe = None
-    for endung, ziel in KATEGORIE_ENDET_AUF:
-        if kategorie.endswith(endung):
-            gruppe = ziel
-            break
-    else:
-        return None
     t = titel.lower()
+    if ((kategorie.endswith('Motor Vehicle Electronics') and KOMMUNIKATION_BREIT.search(f'{marke} {titel}'))
+            or (kategorie.endswith('Motorcycle Helmets') and KOMMUNIKATION_ENG.search(titel))):
+        gruppe = 'kommunikation'
+    else:
+        for endung, ziel in KATEGORIE_ENDET_AUF:
+            if kategorie.endswith(endung):
+                gruppe = ziel
+                break
+        else:
+            return None
     if gruppe is None:
         for muster, ziel in BEKLEIDUNG_AUS_TITEL:
             if re.search(muster, t):
@@ -276,7 +304,7 @@ def lies_produkte(text):
             continue
 
         titel = g('title')
-        einteilung = warengruppe(g('google_product_category_text'), titel)
+        einteilung = warengruppe(g('google_product_category_text'), titel, g('brand'))
         if not einteilung:
             uebersprungen['Warengruppe fuehren wir nicht'] += 1
             continue
@@ -433,7 +461,13 @@ def waehle_aus(produkte, grenze_bytes):
 
     def nimm(anteil):
         aus = []
-        for liste in nach_gruppe.values():
+        for gruppe, liste in nach_gruppe.items():
+            # Kleine Gruppen ohne Groessenvarianten bleiben ganz: 188
+            # Headsets wiegen zusammen weniger als zwanzig Helme mit ihren
+            # Groessen, und ein Fuenftel davon waere ein Zufallsausschnitt.
+            if gruppe in GANZ_BEHALTEN:
+                aus += liste
+                continue
             aus += liste[:max(MINDESTENS_JE_GRUPPE, int(len(liste) * anteil))]
         return aus
 

@@ -4683,3 +4683,33 @@ Oberfläche mit nachgestellten Daten bei 375 und 1024 Punkten; GPX auf
 allen drei Wegen mit einer erzeugten Datei, der Planer-Weg mit echter Route
 über BRouter.
 
+## 15.09.2026 — Warengruppe „Kommunikation" im Shop
+
+Friedrich: „Im Shop fehlen Kommunikationsgeräte (Sena und Co.), obwohl es
+die bei FC-Moto gibt." Stimmte, und der Grund lag im Import: Er nimmt nur
+Kategorien auf, die er kennt, und die Headsets stehen im Feed unter
+„Motor Vehicle Electronics" – zusammen mit Blinkern, Handyhalterungen,
+Kameras und Navis, die wir nicht führen. Zwei Systeme hängen sogar unter
+„Motorcycle Helmets".
+
+**Deshalb entscheidet hier nicht die Kategorie, sondern Titel und Marke.**
+Unter „Electronics" reicht ein breites Muster (Sena, Cardo, Interphone,
+Midland, Intercom, Headset, Kommunikations-, Packtalk, Freecom …). Unter
+„Helme" nur ein enges („Kommunikationssystem", „Intercom", „Headset"),
+denn dort gibt es Sena-**Helme**, dutzende Nolan-Helme „mit N-Com" und den
+Scorpion „Exo-Combat" – der erste Entwurf mit `n-com` und `exo-com` im
+Muster hätte 97 Helme zu Headsets gemacht. Nachgezählt am Feed: 188
+Treffer, 177 davon ohne `item_group_id`, jeder steht für sich.
+
+**Die Gruppe wird beim Kürzen nicht angefasst** (`GANZ_BEHALTEN`). Der
+Katalog nimmt sonst je Warengruppe ein Fünftel; 188 Headsets ohne
+Größenvarianten wiegen aber weniger als zwanzig Helme mit ihren Größen,
+und ein Fünftel davon wäre ein Zufallsausschnitt.
+
+**Unterarten:** Einzelset, Doppelset, Zubehör (Halterungen, Lautsprecher,
+Mikrofone, Akkus, Kabel). Eigene Welt „Kommunikation" im Shop mit Facetten
+Art und Marke. Kein Preisvergleich: motoin führt Sena nur als Helme.
+
+Der Katalog wurde dafür einmal von Hand aus dem Feed gebaut (Stand
+15.09.2026); ab jetzt macht es der Montagslauf mit.
+
