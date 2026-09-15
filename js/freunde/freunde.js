@@ -12,7 +12,7 @@
    EIN Zuhoerer am Behaelter zu und schaut, worauf getippt wurde - wie im
    Reisebildschirm.
 
-   Die Blaetter (neue Gruppe, Mitglieder, teilen, Chat) laufen ueber das
+   Die Blaetter (neue Gruppe, Mitglieder, teilen) laufen ueber das
    eine Blatt des Reiseplaners (#reiseBlatt, blatt.js). Es ist ein
    Fenster ueber allem und weiss nicht, wer es gerufen hat.
 
@@ -27,6 +27,7 @@
 
 function zeigeFreunde() {
   offeneGruppeId = null;
+  stoppeGruppenTakt();
   zeigeBildschirm('freundeScreen');
   zeichneFreunde();
   ladeFreundeNach();
@@ -133,22 +134,40 @@ function zeitpunktKurz(iso) {
 
 /* --- 3. Eine offene Gruppe --------------------------------------------------
 
-   Oben die Karte der Gruppe: Name, die Gesichter, drei Knoepfe (Leute,
-   Chat, Teilen). Darunter der Strom: je geteilte Tour oder Reise eine
-   Karte in derselben Form wie unter "Touren", mit dem Namen dessen, der
-   sie geteilt hat, und dem Knopf "Uebernehmen".                            */
+   Von oben nach unten: die Karte der Gruppe (Name, Gesichter, Stift fuer
+   den Gruender), das CHATFENSTER als feste Karte mit Verlauf und
+   Eingabefeld, dann "Geteilt": zuerst die grosse Plus-Kachel, die das
+   Teilen oeffnet, danach je geteilte Tour oder Reise eine Karte mit
+   ihrer eigenen KOMMENTARSPALTE darunter.
+
+   Warum der Chat fest steht und nicht hinter einem Knopf: Friedrich hat
+   es so gewollt, und es stimmt - in einer Gruppe ist das Gespraech kein
+   Nebenraum, sondern der Ort. Die Kommentare unter den Beitraegen sind
+   das Gespraech ueber genau diese eine Strecke.
+
+   Solange die Gruppe offen ist, fragt ein Takt alle fuenf Sekunden nach
+   neuen Nachrichten und Kommentaren und zeichnet NUR die betroffene Liste
+   neu - nicht die ganze Seite, sonst verloere das Feld den halb getippten
+   Satz.                                                                     */
+
+let gruppenTakt = null;
 
 async function oeffneGruppe(gruppeId) {
   offeneGruppeId = gruppeId;
   gruppenMitglieder = [];
   gruppenBeitraege = [];
   gruppenNachrichten = [];
+  gruppenKommentare = [];
   zeichneFreunde();
   await Promise.all([
-    ladeGruppenMitglieder(gruppeId), ladeGruppenBeitraege(gruppeId), ladeGruppenNachrichten(gruppeId),
+    ladeGruppenMitglieder(gruppeId), ladeGruppenBeitraege(gruppeId),
+    ladeGruppenNachrichten(gruppeId), ladeGruppenKommentare(gruppeId),
   ]);
-  if (String(offeneGruppeId) === String(gruppeId)) zeichneFreunde();
+  if (String(offeneGruppeId) !== String(gruppeId)) return;
+  merkeGelesen(gruppeId, gruppenNachrichten);
+  zeichneFreunde();
   document.getElementById('freundeScreen')?.scrollTo(0, 0);
+  starteGruppenTakt();
 }
 
 function gruppeHtml() {
@@ -158,15 +177,19 @@ function gruppeHtml() {
   return `
     <button class="btn ghost back-btn" data-gruppe-zurueck>&larr; Freunde</button>
     ${gruppenKopfHtml(gruppe)}
+    ${gruppenChatHtml()}
     <h2 class="regal-titel gruppen-strom-titel">Geteilt</h2>
     <ul class="saved-list gruppen-strom">
-      ${beitraege || '<li class="empty">Noch nichts geteilt. Stell die erste Tour oder Reise hinein.</li>'}
+      <li class="karte tour-karte gruppen-plus" data-gruppe-teilen role="button" tabindex="0"
+          aria-label="Tour oder Reise in die Gruppe stellen">
+        <span class="gruppen-plus-zeichen" aria-hidden="true">${symbol('plus')}</span>
+      </li>
+      ${beitraege}
     </ul>`;
 }
 
 function gruppenKopfHtml(gruppe) {
   const dabei = gruppenMitgliederJetzt();
-  const neue = ungeleseneAnzahl(gruppe.id, gruppenNachrichten);
   const punkte = gruppenMitglieder.length
     ? gruppenMitglieder.map(mitfahrerBildHtml).join('') + mitfahrerGeisterHtml(3 - gruppenMitglieder.length)
     : mitfahrerGeisterHtml(3);
@@ -185,25 +208,140 @@ function gruppenKopfHtml(gruppe) {
         <button type="button" class="gruppen-leute" data-gruppe-leute aria-label="Mitglieder">
           <span class="mitfahrer-punkte">${punkte}</span>
           <span class="gruppen-leute-text">${dabei.length} ${dabei.length === 1 ? 'Person' : 'Leute'}
-            ${gruppenMitglieder.length > dabei.length ? `<i>&middot;</i> ${gruppenMitglieder.length - dabei.length} eingeladen` : ''}</span>
-        </button>
-      </div>
-      <div class="gruppen-knoepfe">
-        <button type="button" class="btn ghost" data-gruppe-chat>
-          ${symbol('sprechblase', 'klein')} Chat${neue ? ` <span class="gespraech-neu">${neue}</span>` : ''}
-        </button>
-        <button type="button" class="btn" data-gruppe-teilen>
-          ${symbol('teilen', 'klein')} Teilen
+            ${gruppenMitglieder.length > dabei.length ? `<i>&middot;</i> ${gruppenMitglieder.length - dabei.length} eingeladen` : ''}
+            <i>&middot;</i> einladen</span>
         </button>
       </div>
     </div>`;
 }
 
+/* Das Chatfenster: Verlauf mit fester Hoehe, der von selbst unten steht,
+   darunter das Feld. Dieselben Blasen wie im Blatt (nachrichtenHtml aus
+   gespraech.js), nur nicht in einem Fenster ueber der Seite, sondern in
+   der Seite. */
+function gruppenChatHtml() {
+  return `
+    <div class="karte gruppen-chat">
+      <div class="widget-kopf"><span class="abzeichen">Chat</span></div>
+      <ol class="gespraech-liste gruppen-chat-liste" id="gruppenChatListe">${nachrichtenHtml(gruppenNachrichten)}</ol>
+      <div class="gespraech-eingabe">
+        <textarea id="feldGruppenChat" rows="1" maxlength="1000" placeholder="Nachricht &hellip;"
+                  aria-label="Nachricht an die Gruppe" autocomplete="off" data-chat-feld></textarea>
+        <button type="button" class="btn gespraech-senden" data-chat-senden
+                title="Senden" aria-label="Senden">${symbol('senden', 'klein')}</button>
+      </div>
+    </div>`;
+}
+
+function zeichneGruppenChat() {
+  const liste = document.getElementById('gruppenChatListe');
+  if (!liste) return;
+  liste.innerHTML = nachrichtenHtml(gruppenNachrichten);
+  liste.scrollTop = liste.scrollHeight;
+}
+
+async function sendeGruppenNachricht() {
+  const feld = document.getElementById('feldGruppenChat');
+  const gruppe = offeneGruppe();
+  if (!feld || !gruppe) return;
+  const quelle = gruppenGespraechQuelle(gruppe.id);
+  const ergebnis = await sendeNachricht(quelle, feld.value);
+  if (!ergebnis.ok) { showToast(ergebnis.meldung); return; }
+  feld.value = '';
+  feld.style.height = '';
+  await holeNachrichten(quelle, gruppenNachrichten);
+  merkeGelesen(gruppe.id, gruppenNachrichten);
+  zeichneGruppenChat();
+  feld.focus();
+}
+
+/* Die Kommentarspalte unter einem Beitrag: die Kommentare als Blasen, das
+   Feld darunter. Jede Spalte hat ihr eigenes Feld, damit man unter der
+   einen Tour schreibt und nicht "irgendwo". */
+function kommentareHtml(beitragId) {
+  const liste = kommentareZu(beitragId);
+  return `
+    <div class="kommentare" data-kommentare="${escapeHtml(beitragId)}">
+      <ol class="gespraech-liste kommentar-liste">${liste.length
+        ? liste.map(nachrichtHtml).join('')
+        : '<li class="hint gespraech-leer">Noch kein Kommentar.</li>'}</ol>
+      <div class="gespraech-eingabe">
+        <textarea rows="1" maxlength="1000" placeholder="Kommentar &hellip;" aria-label="Kommentar"
+                  autocomplete="off" data-kommentar-feld="${escapeHtml(beitragId)}"></textarea>
+        <button type="button" class="btn ghost gespraech-senden" data-kommentar-senden="${escapeHtml(beitragId)}"
+                title="Senden" aria-label="Kommentar senden">${symbol('senden', 'klein')}</button>
+      </div>
+    </div>`;
+}
+
+function zeichneKommentare(beitragId) {
+  const spalte = document.querySelector(`[data-kommentare="${CSS.escape(String(beitragId))}"] .kommentar-liste`);
+  if (!spalte) return;
+  const liste = kommentareZu(beitragId);
+  spalte.innerHTML = liste.length
+    ? liste.map(nachrichtHtml).join('')
+    : '<li class="hint gespraech-leer">Noch kein Kommentar.</li>';
+}
+
+async function sendeKommentar(beitragId) {
+  const feld = document.querySelector(`[data-kommentar-feld="${CSS.escape(String(beitragId))}"]`);
+  const gruppe = offeneGruppe();
+  if (!feld || !gruppe) return;
+  const ergebnis = await sendeNachricht(kommentarQuelle(beitragId), feld.value);
+  if (!ergebnis.ok) { showToast(ergebnis.meldung); return; }
+  feld.value = '';
+  feld.style.height = '';
+  await ladeGruppenKommentare(gruppe.id, true);
+  zeichneKommentare(beitragId);
+  feld.focus();
+}
+
+/* Ein Kreuz an einer eigenen Blase: im Chat oder in einer Kommentarspalte.
+   Woher die Nachricht stammt, sagt die Liste, in der ihre Kennung steht. */
+async function loescheAusGruppe(nachrichtId) {
+  const gruppe = offeneGruppe();
+  if (!gruppe) return;
+  if (gruppenNachrichten.some(n => String(n.id) === String(nachrichtId))) {
+    if (await loescheNachricht(gruppenGespraechQuelle(gruppe.id), gruppenNachrichten, nachrichtId)) zeichneGruppenChat();
+    return;
+  }
+  const kommentar = gruppenKommentare.find(k => String(k.id) === String(nachrichtId));
+  if (!kommentar) return;
+  if (await loescheNachricht(kommentarQuelle(kommentar.beitrag_id), gruppenKommentare, nachrichtId)) {
+    zeichneKommentare(kommentar.beitrag_id);
+  }
+}
+
+/* Der Takt: alle fuenf Sekunden nachsehen, solange die Gruppe offen und
+   der Bildschirm sichtbar ist. Neue Nachrichten landen im Chatfenster,
+   neue Kommentare in ihrer Spalte - sonst wird nichts angefasst. */
+function starteGruppenTakt() {
+  stoppeGruppenTakt();
+  gruppenTakt = setInterval(async () => {
+    const gruppe = offeneGruppe();
+    if (!gruppe || document.getElementById('freundeScreen')?.hidden) { stoppeGruppenTakt(); return; }
+    const [neueNachrichten, neueKommentare] = await Promise.all([
+      holeNachrichten(gruppenGespraechQuelle(gruppe.id), gruppenNachrichten),
+      ladeGruppenKommentare(gruppe.id, true),
+    ]);
+    if (neueNachrichten) { merkeGelesen(gruppe.id, gruppenNachrichten); zeichneGruppenChat(); }
+    if (neueKommentare) {
+      const betroffen = new Set(gruppenKommentare.slice(-neueKommentare).map(k => k.beitrag_id));
+      betroffen.forEach(zeichneKommentare);
+    }
+  }, NACHFRAGE_ALLE_MS);
+}
+
+function stoppeGruppenTakt() {
+  if (gruppenTakt) clearInterval(gruppenTakt);
+  gruppenTakt = null;
+}
+
 /* Ein Beitrag: eine Tour oder eine Reise als Karte. Die Daten sind eine
    Abschrift (tourFreigabe / reiseFreigabe in teilen.js), also dasselbe,
    was ein Link zeigt - und die Karte ist dieselbe wie dort, nur mit dem
-   Absender im Kopf. Loeschen darf der Absender, und der Besitzer der
-   Gruppe jeden Beitrag. */
+   Absender im Kopf und der Kommentarspalte darunter. Loeschen darf der
+   Absender, und der Besitzer der Gruppe jeden Beitrag. */
 function beitragKarteHtml(beitrag) {
   const meiner = angemeldeterNutzer && String(beitrag.autor_id) === String(angemeldeterNutzer.id);
   const darfWeg = meiner || istMeineGruppe(offeneGruppe());
@@ -226,6 +364,7 @@ function beitragKarteHtml(beitrag) {
       <button type="button" class="btn ghost widget-knopf" data-beitrag-uebernehmen="${escapeHtml(beitrag.id)}">
         ${istReise ? 'Reise' : 'Tour'} &uuml;bernehmen
       </button>
+      ${kommentareHtml(beitrag.id)}
     </li>`;
 }
 
@@ -445,11 +584,11 @@ function beiTippImFreundeBildschirm(ereignis) {
   if (trifft('[data-gruppe-name]')) { oeffneNeueGruppeBlatt(offeneGruppe()); return; }
   if (trifft('[data-gruppe-leute]')) { oeffneGruppenMitgliederBlatt(); return; }
   if (trifft('[data-gruppe-teilen]')) { oeffneTeilenInGruppeBlatt(); return; }
-  if (trifft('[data-gruppe-chat]')) {
-    const gruppe = offeneGruppe();
-    if (gruppe) oeffneGespraechBlatt(gruppenGespraechQuelle(gruppe.id), gruppenNachrichten, gruppe.name);
-    return;
-  }
+  if (trifft('[data-chat-senden]')) { sendeGruppenNachricht(); return; }
+  const kommentar = trifft('[data-kommentar-senden]');
+  if (kommentar) { sendeKommentar(kommentar.dataset.kommentarSenden); return; }
+  const blaseWeg = trifft('[data-nachricht-weg]');
+  if (blaseWeg) { loescheAusGruppe(blaseWeg.dataset.nachrichtWeg); return; }
   const ja = trifft('[data-gruppe-ja]');
   if (ja) { beantworteGruppenEinladung(ja.dataset.gruppeJa, true).then(ok => ok && ladeFreundeNach()); return; }
   const nein = trifft('[data-gruppe-nein]');
@@ -478,6 +617,29 @@ function beiTippImGruppenBlatt(ereignis) {
 }
 
 verkabele('freundeInner', 'click', beiTippImFreundeBildschirm);
+
+/* Eingabetaste schickt ab, Umschalt+Eingabe macht eine neue Zeile - im
+   Chatfenster wie in jeder Kommentarspalte. Das Feld waechst mit dem Text
+   (passeFeldHoeheAn aus gespraech.js). */
+verkabele('freundeInner', 'keydown', ereignis => {
+  const feld = ereignis.target;
+  if (!feld.matches('[data-chat-feld], [data-kommentar-feld]')) return;
+  if (ereignis.key !== 'Enter' || ereignis.shiftKey) return;
+  ereignis.preventDefault();
+  if (feld.dataset.kommentarFeld) sendeKommentar(feld.dataset.kommentarFeld);
+  else sendeGruppenNachricht();
+});
+verkabele('freundeInner', 'input', ereignis => {
+  if (ereignis.target.matches('[data-chat-feld], [data-kommentar-feld]')) passeFeldHoeheAn(ereignis.target);
+});
+/* Die Plus-Kachel ist ein <li> mit role="button"; Eingabe und Leertaste
+   sollen sie wie einen Knopf ausloesen. */
+verkabele('freundeInner', 'keydown', ereignis => {
+  if ((ereignis.key === 'Enter' || ereignis.key === ' ') && ereignis.target.matches('.gruppen-plus')) {
+    ereignis.preventDefault();
+    oeffneTeilenInGruppeBlatt();
+  }
+});
 verkabele('reiseBlatt', 'click', beiTippImGruppenBlatt);
 verkabele('reiseBlatt', 'keydown', ereignis => {
   if (ereignis.key === 'Enter' && ereignis.target.matches('[data-gruppe-feld]')) {

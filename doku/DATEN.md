@@ -320,8 +320,9 @@ Live-Verbindung, siehe AUFGABEN.md.
 
 Ein geschlossener Kreis: Wer dabei ist, sieht alles in der Gruppe, wer
 nicht, sieht nicht einmal, dass es sie gibt. Vier Tabellen (`gruppen`,
-`gruppen_mitglieder`, `gruppen_beitraege`, `gruppen_nachrichten`), alle
-hinter der Zeilenregel `ist_gruppen_mitglied`. **Was gespeichert wird:**
+`gruppen_mitglieder`, `gruppen_beitraege`, `gruppen_nachrichten`, dazu seit
+Migration 10 `gruppen_kommentare` – Kommentare unter einem Beitrag, sie
+gehen mit ihm), alle hinter der Zeilenregel `ist_gruppen_mitglied`. **Was gespeichert wird:**
 Name der Gruppe und ihr Gründer; je Mitglied Status (eingeladen, dabei,
 abgelehnt) und wer eingeladen hat; je Beitrag eine **Kopie** der Tour
 oder Reise – dieselbe Abschrift wie beim Link (`tourFreigabe`,

@@ -22,6 +22,7 @@ let offeneGruppeId = null;     // welche Gruppe gerade offen ist, null: die List
 let gruppenMitglieder = [];    // ... der offenen Gruppe
 let gruppenBeitraege = [];
 let gruppenNachrichten = [];
+let gruppenKommentare = [];    // alle Kommentare der offenen Gruppe, je mit beitrag_id
 
 
 /* --- 1. Grundlagen ---------------------------------------------------------- */
@@ -101,6 +102,33 @@ async function ladeGruppenBeitraege(gruppeId) {
 async function ladeGruppenNachrichten(gruppeId) {
   gruppenNachrichten = [];
   await holeNachrichten(gruppenGespraechQuelle(gruppeId), gruppenNachrichten);
+}
+
+/* Die Kommentare unter den Beitraegen kommen fuer die ganze Gruppe auf
+   einmal (Migration 10) und werden hier den Beitraegen zugeordnet. Mit
+   p_seit nur, was seit dem letzten Mal dazukam - wie beim Chat. Gibt die
+   Zahl der neuen zurueck. */
+async function ladeGruppenKommentare(gruppeId, nurNeue = false) {
+  const letzte = gruppenKommentare[gruppenKommentare.length - 1];
+  const { data, error } = await backend.rpc('gruppen_kommentare_liste', {
+    p_gruppe: gruppeId, p_seit: nurNeue && letzte ? letzte.erstellt_am : null,
+  });
+  if (error || !Array.isArray(data)) return 0;
+  if (!nurNeue) { gruppenKommentare = data; return data.length; }
+  const bekannt = new Set(gruppenKommentare.map(k => k.id));
+  const neue = data.filter(k => !bekannt.has(k.id));
+  gruppenKommentare.push(...neue);
+  return neue.length;
+}
+
+function kommentareZu(beitragId) {
+  return gruppenKommentare.filter(k => String(k.beitrag_id) === String(beitragId));
+}
+
+// Die Quelle fuer sendeNachricht() und loescheNachricht() aus gespraech.js:
+// ein Kommentar ist eine Nachricht, die an einem Beitrag haengt.
+function kommentarQuelle(beitragId) {
+  return { kennung: beitragId, tabelle: 'gruppen_kommentare', spalte: 'beitrag_id' };
 }
 
 function gruppenMitgliederJetzt() {

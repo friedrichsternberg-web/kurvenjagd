@@ -4713,3 +4713,33 @@ Art und Marke. Kein Preisvergleich: motoin führt Sena nur als Helme.
 Der Katalog wurde dafür einmal von Hand aus dem Feed gebaut (Stand
 15.09.2026); ab jetzt macht es der Montagslauf mit.
 
+## 15.09.2026 (später) — Gruppe: Chat fest, Plus statt Text, Kommentare je Beitrag
+
+Friedrichs Rückmeldung nach dem ersten Blick auf die Gruppe: Statt „Noch
+nichts geteilt" ein großes Plus, das Feld soll etwas tun; der Chat als
+festes Fenster in der Seite, nicht hinter einem Knopf; und jede geteilte
+Tour oder Reise bekommt ihre eigene Kommentarspalte.
+
+**Die Plus-Kachel steht immer an erster Stelle** im Strom, nicht nur wenn
+er leer ist: Teilen ist der eine Handgriff, den man in einer Gruppe
+braucht, und er soll nicht verschwinden, sobald der erste Beitrag da ist.
+Gestrichelt und leer wie ein Tag ohne Route, damit sie als Platz gelesen
+wird, nicht als Inhalt. Der Knopf „Teilen" im Kopf der Gruppe ist damit
+weg, ebenso „Chat".
+
+**Das Chatfenster** ist eine Karte zwischen Kopf und Strom: Verlauf mit
+fester Höhe (etwa ein Drittel des Handybildschirms, rollt in sich), Feld
+darunter. Dieselben Blasen wie im Blatt – `nachrichtenHtml()` aus
+gespraech.js –, nur in der Seite statt darüber.
+
+**Kommentare sind Nachrichten, die an einem Beitrag hängen** (Migration 10,
+`gruppen_kommentare`, CASCADE mit dem Beitrag). Senden und Löschen laufen
+über dieselben Funktionen wie der Chat, mit einer Quelle je Beitrag;
+geladen werden sie für die ganze Gruppe auf einmal und der App nach
+`beitrag_id` zugeordnet – ein Aufruf statt einer je Beitrag.
+
+**Der Takt zeichnet nur, was sich geändert hat.** Alle fünf Sekunden
+kommen neue Nachrichten und Kommentare; das Chatfenster und die betroffene
+Kommentarspalte werden neu gezeichnet, nichts sonst – sonst verlöre das
+Feld den halb getippten Satz.
+
