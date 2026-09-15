@@ -4743,3 +4743,27 @@ kommen neue Nachrichten und Kommentare; das Chatfenster und die betroffene
 Kommentarspalte werden neu gezeichnet, nichts sonst – sonst verlöre das
 Feld den halb getippten Satz.
 
+## 15.09.2026 (abends) — Beiträge in Freunde ansehen und bearbeiten
+
+Friedrich: Geteilte Touren und Reisen sollen direkt in Freunde angeschaut
+und bearbeitet werden können, und die Einladen-Ansicht soll viel größer
+werden, ohne die Karte zu vergrößern.
+
+**Ein Beitrag öffnet sich in Freunde**, nicht auf dem Link-Bildschirm:
+Karte groß, Kennzahlen, bei einer Reise die Tage, darunter die
+Kommentarspalte. Die Karten sind dieselben wie beim Link
+(`linkTourKarteHtml`, `linkReiseKarteHtml`) – eine Form für „jemand zeigt
+mir eine Strecke", egal woher.
+
+**Bearbeiten heißt bei einer Tour: im Planer öffnen, ohne zu speichern.**
+`ladeGespeicherteRoute()` nimmt die Abschrift wie eine gespeicherte Tour,
+die Route liegt dann auf der Karte und lässt sich anfassen; erst „Route
+speichern" macht sie zur eigenen. Vorher hätte jedes Ansehen die
+Tourenliste um eine Kopie verlängert. Bei einer Reise bleibt es beim
+Übernehmen und Öffnen im Reiseplaner – eine Reise gibt es nur als eigene.
+
+**Die Mitgliederzeile**: Gesichter 44 statt 34 Punkte, daneben der blaue
+Knopf „Einladen". Die Karte ist nicht höher geworden – die Zeile ersetzt
+die Textzeile „2 Leute · einladen", und der Knopf ist so hoch wie ein
+Gesicht.
+

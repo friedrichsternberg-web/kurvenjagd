@@ -5935,6 +5935,21 @@ body.nav-modus .karten-knopf { display: none; }
 }
 .gruppen-leute:hover { color: var(--text); }
 .gruppen-leute-text i { font-style: normal; opacity: 0.5; margin: 0 3px; }
+/* Die Mitgliederzeile: Gesichter gross (44 statt 34 Punkte), daneben der
+   Knopf "Einladen". Die Karte wird dadurch nicht hoeher - die Zeile
+   ersetzt die bisherige Textzeile, und der Knopf ist so hoch wie ein
+   Gesicht. */
+.gruppen-leute-zeile { display: flex; align-items: center; gap: var(--s3); }
+.gruppen-leute-zeile .gruppen-leute { flex: 1; min-width: 0; }
+.gruppen-leute-zeile .mitfahrer-punkt { width: 44px; height: 44px; font-size: 17px; }
+.gruppen-leute-zeile .mitfahrer-punkt .ic { width: 21px; height: 21px; }
+.gruppen-leute-zeile .gruppen-leute-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gruppen-einladen { flex: 0 0 auto; padding: 11px 16px; }
+/* Der offene Beitrag: die Knoepfe unter der Karte, das Kommentarfeld in
+   einer eigenen Karte. */
+.beitrag-knoepfe { display: flex; gap: var(--s2); margin: var(--s4) 0 var(--s5); }
+.beitrag-knoepfe .btn { flex: 1; }
+.beitrag-kommentare .kommentare { margin-top: 0; padding-top: 0; border-top: 0; }
 .gruppen-strom-titel { margin: 0 0 var(--s3); }
 /* Das Chatfenster: der Verlauf hat eine feste Hoehe und rollt in sich,
    das Feld steht darunter fest. Auf dem Handy etwa ein Drittel des

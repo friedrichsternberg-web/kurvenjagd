@@ -27,6 +27,7 @@
 
 function zeigeFreunde() {
   offeneGruppeId = null;
+  offenerBeitragId = null;
   stoppeGruppenTakt();
   zeigeBildschirm('freundeScreen');
   zeichneFreunde();
@@ -44,7 +45,7 @@ function zeichneFreunde() {
   const inner = document.getElementById('freundeInner');
   if (!inner) return;
   if (!angemeldeterNutzer || !gruppenMoeglich()) { inner.innerHTML = freundeOhneKontoHtml(); return; }
-  inner.innerHTML = offeneGruppeId ? gruppeHtml() : gruppenListeHtml();
+  inner.innerHTML = offenerBeitragId ? beitragHtml() : (offeneGruppeId ? gruppeHtml() : gruppenListeHtml());
   beobachteVorschauen(inner);
 }
 
@@ -154,6 +155,7 @@ let gruppenTakt = null;
 
 async function oeffneGruppe(gruppeId) {
   offeneGruppeId = gruppeId;
+  offenerBeitragId = null;
   gruppenMitglieder = [];
   gruppenBeitraege = [];
   gruppenNachrichten = [];
@@ -205,12 +207,19 @@ function gruppenKopfHtml(gruppe) {
       </div>
       <h3 class="widget-name">${escapeHtml(gruppe.name)}</h3>
       <div class="widget-koerper">
-        <button type="button" class="gruppen-leute" data-gruppe-leute aria-label="Mitglieder">
-          <span class="mitfahrer-punkte">${punkte}</span>
-          <span class="gruppen-leute-text">${dabei.length} ${dabei.length === 1 ? 'Person' : 'Leute'}
-            ${gruppenMitglieder.length > dabei.length ? `<i>&middot;</i> ${gruppenMitglieder.length - dabei.length} eingeladen` : ''}
-            <i>&middot;</i> einladen</span>
-        </button>
+        <!-- Die Gesichter gross, daneben der Knopf zum Einladen - der eine
+             Handgriff, mit dem eine Gruppe ueberhaupt erst eine wird. Ein
+             Tipp auf die Gesichter oeffnet dieselbe Liste. -->
+        <div class="gruppen-leute-zeile">
+          <button type="button" class="gruppen-leute" data-gruppe-leute aria-label="Mitglieder">
+            <span class="mitfahrer-punkte">${punkte}</span>
+            <span class="gruppen-leute-text">${dabei.length} ${dabei.length === 1 ? 'Person' : 'Leute'}${
+              gruppenMitglieder.length > dabei.length ? `<i>&middot;</i> ${gruppenMitglieder.length - dabei.length} eingeladen` : ''}</span>
+          </button>
+          <button type="button" class="btn gruppen-einladen" data-gruppe-leute>
+            ${symbol('plus', 'klein')} Einladen
+          </button>
+        </div>
       </div>
     </div>`;
 }
@@ -361,8 +370,8 @@ function beitragKarteHtml(beitrag) {
       </div>
       <h3 class="widget-name">${escapeHtml(beitrag.name)}</h3>
       <div class="widget-koerper">${istReise ? beitragReiseFaktenHtml(beitrag) : faktenHtml(beitrag.daten || {})}</div>
-      <button type="button" class="btn ghost widget-knopf" data-beitrag-uebernehmen="${escapeHtml(beitrag.id)}">
-        ${istReise ? 'Reise' : 'Tour'} &uuml;bernehmen
+      <button type="button" class="btn ghost widget-knopf" data-beitrag-oeffnen="${escapeHtml(beitrag.id)}">
+        ${istReise ? 'Reise' : 'Tour'} ansehen &rarr;
       </button>
       ${kommentareHtml(beitrag.id)}
     </li>`;
@@ -393,6 +402,77 @@ function beitragReiseFaktenHtml(beitrag) {
       <span class="tag-fakt">${symbol('kalender', 'klein')}${tage.length} ${tage.length === 1 ? 'Tag' : 'Tage'}</span>
       <span class="tag-fakt">${symbol('route', 'klein')}${Math.round(meter / 1000)} km</span>
     </div>`;
+}
+
+/* --- 3b. Ein Beitrag gross ----------------------------------------------------
+
+   Ein Tipp auf "ansehen" oeffnet den Beitrag IN Freunde, nicht anderswo:
+   die Karte gross, die Kennzahlen, bei einer Reise die Tage, darunter die
+   Kommentare. Die Karten sind dieselben wie auf dem Link-Bildschirm
+   (linkTourKarteHtml, linkReiseKarteHtml in teilen.js).
+
+   Bearbeiten heisst bei einer Tour: im Planer oeffnen. Dort liegt sie
+   dann als Route auf der Karte, laesst sich verschieben, umrechnen und
+   speichern - gespeichert wird erst, wenn man dort speichert. Bei einer
+   Reise heisst es: uebernehmen und im Reiseplaner oeffnen, denn eine
+   Reise gibt es nur als eigene.                                              */
+
+function oeffneBeitrag(beitragId) {
+  offenerBeitragId = beitragId;
+  zeichneFreunde();
+  document.getElementById('freundeScreen')?.scrollTo(0, 0);
+}
+
+function beitragHtml() {
+  const beitrag = gruppenBeitraege.find(eintrag => String(eintrag.id) === String(offenerBeitragId));
+  const gruppe = offeneGruppe();
+  if (!beitrag || !gruppe) { offenerBeitragId = null; return gruppeHtml(); }
+  const istReise = beitrag.art === 'reise';
+  const meiner = angemeldeterNutzer && String(beitrag.autor_id) === String(angemeldeterNutzer.id);
+  const wer = !beitrag.autor_id ? 'Ehemaliges Konto' : (meiner ? 'du' : (beitrag.benutzername || 'Ehemaliges Konto'));
+  const karte = istReise ? linkReiseKarteHtml(beitrag) : linkTourKarteHtml(beitrag);
+  return `
+    <button class="btn ghost back-btn" data-beitrag-zurueck>&larr; ${escapeHtml(gruppe.name)}</button>
+    <p class="link-absender">${escapeHtml(wer === 'du' ? 'Du hast' : wer + ' hat')} ${istReise ? 'diese Reise' : 'diese Tour'} geteilt
+      <i>&middot;</i> ${escapeHtml(zeitpunktKurz(beitrag.geaendert))}</p>
+    ${karte}
+    ${istReise ? beitragTageHtml(beitrag) : ''}
+    <div class="beitrag-knoepfe">
+      ${istReise
+        ? `<button type="button" class="btn" data-beitrag-uebernehmen="${escapeHtml(beitrag.id)}">
+             ${symbol('berg', 'klein')} &Uuml;bernehmen und planen</button>`
+        : `<button type="button" class="btn" data-beitrag-planer="${escapeHtml(beitrag.id)}">
+             ${symbol('route', 'klein')} Im Planer bearbeiten</button>
+           <button type="button" class="btn ghost" data-beitrag-uebernehmen="${escapeHtml(beitrag.id)}">
+             In meine Touren</button>`}
+    </div>
+    <h2 class="regal-titel gruppen-strom-titel">Kommentare</h2>
+    <div class="karte beitrag-kommentare">${kommentareHtml(beitrag.id)}</div>`;
+}
+
+function beitragTageHtml(beitrag) {
+  const tage = beitragReise(beitrag).tage;
+  if (!tage.length) return '';
+  return `<ol class="reise-tage-liste">
+    ${tage.map((tag, i) => `
+      <li class="reise-tage-zeile">
+        <span class="reise-tage-nr">Tag ${i + 1}</span>
+        <span class="reise-tage-name">${escapeHtml(tag.route?.name || tag.titel || 'Ohne Route')}</span>
+        <span class="reise-tage-km">${tag.route?.distance ? Math.round(tag.route.distance / 1000) + ' km' : ''}</span>
+      </li>`).join('')}
+  </ol>`;
+}
+
+/* Die Tour in den Planer legen, OHNE sie zu speichern: Sie liegt dann als
+   Route auf der Karte wie eine gerade geplante, und "Route speichern"
+   macht sie zur eigenen. So laesst sich eine geteilte Strecke ansehen,
+   anfassen und veraendern, ohne dass die Tourenliste wachsen muss. */
+function bearbeiteBeitragImPlaner(beitragId) {
+  const beitrag = gruppenBeitraege.find(eintrag => String(eintrag.id) === String(beitragId));
+  if (!beitrag || beitrag.art !== 'tour') return;
+  zeigePlaner();
+  ladeGespeicherteRoute({ ...(beitrag.daten || {}), id: `gruppe-${beitrag.id}`, name: beitrag.name });
+  showToast(`„${beitrag.name}“ liegt im Planer - speichern macht sie zu deiner.`);
 }
 
 /* Uebernehmen: derselbe Weg wie beim Link (teilen.js) - die Tour landet in
@@ -597,6 +677,11 @@ function beiTippImFreundeBildschirm(ereignis) {
   if (weg) { loescheBeitrag(weg.dataset.beitragWeg).then(ok => ok && zeichneFreunde()); return; }
   const uebernehmen = trifft('[data-beitrag-uebernehmen]');
   if (uebernehmen) { uebernimmBeitrag(uebernehmen.dataset.beitragUebernehmen); return; }
+  const oeffnen = trifft('[data-beitrag-oeffnen]');
+  if (oeffnen) { oeffneBeitrag(oeffnen.dataset.beitragOeffnen); return; }
+  const planer = trifft('[data-beitrag-planer]');
+  if (planer) { bearbeiteBeitragImPlaner(planer.dataset.beitragPlaner); return; }
+  if (trifft('[data-beitrag-zurueck]')) { offenerBeitragId = null; zeichneFreunde(); return; }
   const gruppe = trifft('[data-gruppe]');
   if (gruppe) oeffneGruppe(gruppe.dataset.gruppe);
 }

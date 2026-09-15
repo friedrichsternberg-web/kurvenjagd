@@ -23,6 +23,7 @@ let gruppenMitglieder = [];    // ... der offenen Gruppe
 let gruppenBeitraege = [];
 let gruppenNachrichten = [];
 let gruppenKommentare = [];    // alle Kommentare der offenen Gruppe, je mit beitrag_id
+let offenerBeitragId = null;   // welcher Beitrag gross offen ist, null: der Strom
 
 
 /* --- 1. Grundlagen ---------------------------------------------------------- */
