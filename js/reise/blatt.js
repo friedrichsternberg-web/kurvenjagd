@@ -145,6 +145,14 @@ function oeffneRoutenwahl(tagId) {
             <span class="saved-meta">Im Planer, kommt danach direkt in diesen Tag</span>
           </span>
         </li>
+        <!-- Den Tipp hierauf faengt import.js ab (data-gpx-fuer). -->
+        <li data-gpx-fuer="${escapeHtml(tag.id)}" class="reise-wahl-erstellen">
+          <span class="saved-marke">${symbol('notiz', 'klein')}</span>
+          <span class="saved-text">
+            <span class="saved-name">Aus GPX-Datei</span>
+            <span class="saved-meta">Eine Strecke vom Navi oder von einem Freund</span>
+          </span>
+        </li>
         <li data-route="" class="${tag.routeId == null ? 'aktuell' : ''}">
           <span class="saved-marke">${symbol('koffer', 'klein')}</span>
           <span class="saved-text">

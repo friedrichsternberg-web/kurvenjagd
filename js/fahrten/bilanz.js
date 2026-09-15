@@ -32,7 +32,10 @@
 function sammleAusfahrten(rohliste) {
   return (Array.isArray(rohliste) ? rohliste : [])
     .filter((eintrag) => eintrag && eintrag.aufgezeichnet === true
-                      && !eintrag.aufgenommenAm && !eintrag.geteiltVon)
+                      && !eintrag.aufgenommenAm && !eintrag.geteiltVon
+                      // Eine importierte GPX-Strecke (import.js) ist eine
+                      // fertige Linie, aber keine eigene Fahrt.
+                      && !eintrag.importiert)
     .map(bereiteAusfahrtAuf);
 }
 

@@ -171,6 +171,18 @@ const geraet = {
     URL.revokeObjectURL(url);
   },
 
+  /* Eine gewählte Textdatei lesen - fuer den GPX-Import. Im Browser kann
+     die Datei das selbst; nativ kommt sie später über einen anderen Weg
+     herein, und dann ist das hier die eine Stelle, die sich ändert. Bei
+     einem Lesefehler kommt ein leerer Text zurück, kein Absturz. */
+  async liesTextdatei(datei) {
+    try {
+      return await datei.text();
+    } catch {
+      return '';
+    }
+  },
+
   /* Eine Adresse aus einer Datei bauen, etwa um ein gewähltes Foto anzusehen.
      Wer sie benutzt, muss sie hinterher wieder freigeben - sonst bleibt das
      Bild im Speicher liegen, auch wenn es längst niemand mehr ansieht. */

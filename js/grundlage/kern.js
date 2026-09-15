@@ -1281,6 +1281,9 @@ function pruefeTour(rohdaten) {
   if (Number.isFinite(rohdaten.ascend))     sauber.ascend     = rohdaten.ascend;
   if (Number.isFinite(rohdaten.curveLevel)) sauber.curveLevel = rohdaten.curveLevel;
   if (typeof rohdaten.aufgezeichnet === 'boolean') sauber.aufgezeichnet = rohdaten.aufgezeichnet;
+  // Eine aus einer GPX-Datei uebernommene Strecke (import.js): keine
+  // eigene Fahrt, zaehlt nicht in "Meine Stats".
+  if (rohdaten.importiert === true) sauber.importiert = true;
 
   /* Die Werte einer Ausfahrt wandern mit - ohne sie waere der Rueckblick
      ("Meine Stats", bilanz.js) auf einem zweiten Geraet blind: kein Datum,
@@ -1444,11 +1447,18 @@ function oeffentlicheTour(tour) {
   if (!tour) return null;
 
   const aufgezeichnet = !!tour.aufgezeichnet;
-  const spur   = aufgezeichnet ? kuerzeSpurEnden(säubreSpur(tour.track), schutzAbstand()) : [];
+  const importiert = tour.importiert === true;
+  /* Die Enden werden nur bei einer EIGENEN Aufzeichnung gekappt - dort
+     liegen Start und Ziel meistens zu Hause. Eine importierte GPX-Datei
+     hat mit dem Zuhause des Nutzers nichts zu tun, und ihr die Enden zu
+     nehmen, hiesse, eine fremde Strecke zu verstuemmeln. */
+  const spur   = !aufgezeichnet ? []
+    : (importiert ? säubreSpur(tour.track) : kuerzeSpurEnden(säubreSpur(tour.track), schutzAbstand()));
   const punkte = aufgezeichnet ? [] : säubrePunkte(tour.waypoints);
   if (!spur.length && !punkte.length) return null;
 
   const oeffentlich = { aufgezeichnet, waypoints: punkte, track: spur };
+  if (importiert) oeffentlich.importiert = true;
 
   if (Number.isFinite(tour.distance))   oeffentlich.distance   = tour.distance;
   if (Number.isFinite(tour.curviness))  oeffentlich.curviness  = tour.curviness;

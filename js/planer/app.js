@@ -3208,7 +3208,11 @@ function gespeicherteRouteHtml(r, mitTeilen = false) {
   // Aufgezeichnete Ausfahrten stehen in derselben Liste wie geplante
   // Routen - das kleine Motorrad-Zeichen macht auf einen Blick klar,
   // welche davon wirklich gefahren wurde.
-  const marke = r.aufgezeichnet ? `<span class="saved-marke" title="Aufgezeichnete Ausfahrt">${symbol('motorrad', 'klein')}</span>` : '';
+  // Eine importierte GPX-Strecke ist auch eine fertige Linie, aber keine
+  // eigene Fahrt - sie traegt das Dateisymbol statt des Motorrads.
+  const marke = r.importiert
+    ? `<span class="saved-marke" title="Aus GPX-Datei">${symbol('notiz', 'klein')}</span>`
+    : (r.aufgezeichnet ? `<span class="saved-marke" title="Aufgezeichnete Ausfahrt">${symbol('motorrad', 'klein')}</span>` : '');
 
   // Die Messwerte stehen in einer eigenen Zeile unter dem Namen statt
   // dahinter. Bei langen Tournamen wurden sie vorher weggedrueckt, und
@@ -3256,7 +3260,7 @@ function gespeicherteRouteHtml(r, mitTeilen = false) {
     <li class="karte tour-karte" data-id="${escapeHtml(r.id)}">
       ${vorschauBildHtml(r, `<span class="etappe-werte">${kmText}</span>`)}
       <div class="widget-kopf">
-        <span class="abzeichen">${r.aufgezeichnet ? 'Aufzeichnung' : 'Tour'}</span>
+        <span class="abzeichen">${r.importiert ? 'GPX' : (r.aufgezeichnet ? 'Aufzeichnung' : 'Tour')}</span>
         ${datum ? `<span class="karte-datum">${datum}</span>` : ''}
         ${werkzeuge}
       </div>

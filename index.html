@@ -2369,6 +2369,14 @@
         <button class="seg active" data-plan-mode="punkt">Punkt zu Punkt</button>
         <button class="seg" data-plan-mode="rundtour">Rundtour</button>
       </div>
+      <!-- Der dritte Weg zu einer Route: eine GPX-Datei von einem Navi,
+           einer anderen App oder einem Freund. Steht hier oben, weil es
+           eine Planungsart ist und keine Einstellung. Was mit der Datei
+           passiert, entscheidet import.js. -->
+      <button type="button" class="btn ghost gpx-knopf" id="btnGpxImport">
+        <svg class="ic klein"><use href="#icon-notiz"></use></svg> GPX importieren
+      </button>
+      <input type="file" id="gpxEingabe" accept=".gpx,application/gpx+xml" hidden>
     </section>
 
     <!-- Kurvigkeit: steuert, wie stark Umwege für mehr Kurven in Kauf
@@ -2976,6 +2984,11 @@
        mitfahrer.js: Sie fragen dort, ob die Reise geteilt ist. -->
   <script src="js/reise/gespraech.js?v=114"></script>
   <script src="js/reise/notizen.js?v=114"></script>
+  <!-- GPX-Import: gpx.js liest und rechnet (grundlage, wie kern.js),
+       import.js bedient Planer und Reise. Beide NACH reise.js und
+       blatt.js, weil der Import auch fuer einen Reisetag laeuft. -->
+  <script src="js/grundlage/gpx.js?v=114"></script>
+  <script src="js/planer/import.js?v=114"></script>
   <!-- Touren und Reisen per Link weitergeben. Laedt NACH reise.js, weil es
        beide Formen kennen muss, und nach konto.js wegen des Servers. -->
   <script src="js/konto/teilen.js?v=114"></script>

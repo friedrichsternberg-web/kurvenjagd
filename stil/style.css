@@ -5895,6 +5895,21 @@ body.nav-modus .karten-knopf { display: none; }
    Luft nach oben. */
 .etappe-notizen { margin-top: var(--s3); }
 
+/* ---------- GPX-Import (seit 14.09.2026) ----------
+   Der Knopf unter der Planungsart, ueber die volle Breite wie der
+   Umschalter darueber. Die Kennzahlen im Blatt: eine Zeile, die sagt, was
+   in der Datei steckt, bevor man sich entscheidet. */
+.gpx-knopf { width: 100%; margin-top: var(--s3); }
+.gpx-zahlen {
+  margin: 0 0 var(--s2);
+  font-family: var(--schrift-display);
+  font-weight: 600;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  color: var(--metall-glanz);
+}
+.gpx-zahlen i { font-style: normal; opacity: 0.5; margin: 0 4px; }
+
 /* Die Punkte ueberlappen sich leicht: So liest sich eine Gruppe als eine
    Gruppe und nicht als eine Reihe einzelner Bilder. */
 .mitfahrer-punkte { display: flex; align-items: center; }
