@@ -3652,6 +3652,7 @@ function symbol(name, zusatz = '') {
    schwarze Flaeche, ohne einen Fehler zu melden. */
 const BILDSCHIRME = [
   'garageScreen', 'tourenScreen', 'reiseScreen', 'planerWahlScreen', 'app', 'rideScreen', 'statsScreen',
+  'freundeScreen',
   'rechtlichesScreen', 'reifenScreen', 'shopScreen', 'shopProduktScreen',
   'merklisteScreen',
   'kontoScreen', 'profilScreen', 'passwortNeuScreen', 'kontoLoeschenScreen',
@@ -4085,6 +4086,9 @@ document.querySelectorAll('.nav-tab').forEach(knopf => {
     if (ziel === 'app') { if (typeof zeigePlanerWahl === 'function') zeigePlanerWahl(); else zeigePlaner(); }
     else if (ziel === 'rideScreen') { zeigeRideScreen(); if (!ride.aktiv) rideZurücksetzen(); }
     else if (ziel === 'tourenScreen') zeigeMeineTouren();
+    // Der Bereich "Freunde" steht in freunde.js - fehlt die Datei, faellt
+    // der Eintrag in den Auffangzweig.
+    else if (ziel === 'freundeScreen' && typeof zeigeFreunde === 'function') zeigeFreunde();
     /* zeigeStats() steht in rueckblick.js - fehlt die Datei, faellt der
        Eintrag in den Auffangzweig und landet in der Garage, statt einen
        leeren Bildschirm zu zeigen. */

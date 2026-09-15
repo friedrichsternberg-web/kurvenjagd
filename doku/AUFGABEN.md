@@ -185,8 +185,9 @@ Höhenmeter, kurvigster Etappe. Was als Nächstes kommt:
      Reise und beim Wechsel auf den Reiter abgeglichen, Zeitstempel
      entscheidet. Wer gleichzeitig denselben Tag ändert, verliert eine der
      beiden Änderungen. Begründung in `ENTSCHEIDUNGEN.md` zum 07.09.2026.
-     Seit dem 14.09.2026 betrifft das auch den **Chat**: Er fragt alle
-     fünf Sekunden nach, solange das Blatt offen ist. Realtime würde beides
+     Seit dem 14.09.2026 betrifft das auch den **Chat** (Reise und seit
+     dem 15.09.2026 Gruppe): Er fragt alle fünf Sekunden nach, solange das
+     Blatt offen ist. Realtime würde beides
      auf einmal lösen (Tabellen in die Publikation `supabase_realtime`
      aufnehmen, `backend.channel()` je offener Reise, CSP um `wss://`
      erweitern).
@@ -1024,3 +1025,21 @@ Wegpunkte per Klick.
 
 Nebenbei konnte `index.html` von `leaflet-src.js` auf die kleinere
 `leaflet.js` zurück – die große Fassung war nur wegen des Plugins da.
+
+## Offen seit dem 15.09.2026
+
+- **Shop: Kommunikationsgeräte fehlen.** Sena, Cardo und Co. gibt es bei
+  FC-Moto, sie tauchen aber in keiner Warengruppe auf. Prüfen, wie die
+  Feedzeilen heißen (Kategorie „Kommunikation“/„Headset“?) und eine
+  Warengruppe dafür anlegen – in `werkzeug/fcmoto-import.py` und
+  `js/shop/shop.js`. Gemeldet von Friedrich am 14.09.2026.
+- **Freunde-Bereich zu zweit durchspielen.** Gruppe anlegen, einladen,
+  annehmen, teilen, übernehmen, Chat – wie bei den Reisen fehlt dafür das
+  Zweitkonto. Oberfläche mit nachgestellten Daten geprüft, Server per SQL.
+- **Teilen-Knopf an der Tour direkt in eine Gruppe.** Heute geht Teilen
+  in die Gruppe nur aus der Gruppe heraus („Teilen“ → eigene Liste). Der
+  Teilen-Knopf an der Tourenkarte führt weiter nur zum Link. Ein Blatt
+  „Link oder Gruppe?“ wäre der nächste Schritt.
+- **Ungelesene Nachrichten in der Gruppenliste.** Der Zähler steht nur in
+  der offenen Gruppe; die Liste müsste dafür je Gruppe die Nachrichten
+  laden. Mit Realtime oder einer Zählfunktion auf dem Server lösen.

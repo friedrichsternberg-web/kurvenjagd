@@ -1,43 +1,66 @@
 /* ============================================================================
-   Serpa - der Chat einer gemeinsamen Reise
+   Serpa - der Chat: in einer gemeinsamen Reise und in einer Gruppe
 
    Wer eine Reise zusammen plant, muss sich absprechen: Wo treffen wir uns,
    wer bucht das Hotel, faehrt jemand schon Freitag los? Bisher lief das
    nebenher in irgendeiner anderen App, und die Reise selbst wusste davon
-   nichts. Jetzt liegt das Gespraech bei der Reise.
+   nichts. Jetzt liegt das Gespraech bei der Reise - und seit dem 15.09.2026
+   genauso bei einer Gruppe im Bereich "Freunde".
 
-   DEN CHAT GIBT ES ERST, WENN DIE REISE GETEILT IST. Allein gibt es
+   EIN CHAT, ZWEI QUELLEN. Das Blatt mit dem Verlauf, das Senden, das
+   Nachfragen und die Gelesen-Marke sind fuer beide dieselben; nur woher
+   die Nachrichten kommen, unterscheidet sich (Tabelle, Spalte, Lese-
+   funktion). Das steckt in einer QUELLE - einem kleinen Objekt, das
+   reiseGespraechQuelle() oder gruppenGespraechQuelle() (freunde.js) baut.
+   Ohne diese Trennung staende der ganze Chat zweimal da.
+
+   DEN REISE-CHAT GIBT ES ERST, WENN DIE REISE GETEILT IST. Allein gibt es
    niemanden, mit dem man reden koennte, und die Nachrichten liegen auf dem
-   Server, nicht im Geraet - dieselbe Ueberlegung wie bei der Kasse in
-   ausgaben.js. Wer die Reise teilt, sieht die Karte "Chat" neben Kasse und
-   Mitfahrern.
+   Server, nicht im Geraet - dieselbe Ueberlegung wie bei der Kasse.
 
    KEINE LIVE-VERBINDUNG, sondern Nachfragen: Solange das Blatt offen ist,
    fragt die App alle fuenf Sekunden nach neuen Nachrichten - und nur nach
-   denen, die juenger sind als die letzte bekannte (p_seit in der
-   Datenbankfunktion). Das ist bewusst die einfache Loesung; die echte
-   Live-Verbindung (Supabase Realtime) steht in AUFGABEN.md, zusammen mit
-   dem Abgleich der Reise selbst, der dasselbe Problem hat.
+   denen, die juenger sind als die letzte bekannte (p_seit). Das ist
+   bewusst die einfache Loesung; Supabase Realtime steht in AUFGABEN.md.
 
    Laedt NACH mitfahrer.js und blatt.js: braucht mitfahrenMoeglich(),
-   mitfahrerBildHtml(), oeffneBlatt(), reiseNach(), offeneReiseId,
-   angemeldeterNutzer, escapeHtml(), symbol(), showToast(), geraet.
+   oeffneBlatt(), reiseNach(), offeneReiseId, angemeldeterNutzer,
+   escapeHtml(), symbol(), showToast(), geraet.
    ============================================================================ */
 
 // Die Nachrichten der gerade offenen Reise, aelteste zuerst.
 let reiseNachrichten = [];
+// Der Chat, der gerade im Blatt offen ist: { quelle, liste } oder null.
+let gespraechOffen = null;
 // Die Kennung des Nachfrage-Taktes, solange das Blatt offen ist.
 let gespraechNachfrage = null;
 
 const NACHFRAGE_ALLE_MS = 5000;
-/* Bis wohin man gelesen hat, je Reise - im Geraet, nicht auf dem Server.
-   Ein Server-Vermerk je Leser und Reise waere eine eigene Tabelle fuer eine
-   Zahl, die nur auf diesem Geraet stimmen muss. Derselbe Namensraum wie
-   alle Schluessel der App, siehe REISEN_SPEICHER in reise.js. */
+/* Bis wohin man gelesen hat, je Chat - im Geraet, nicht auf dem Server.
+   Ein Server-Vermerk je Leser waere eine eigene Tabelle fuer eine Zahl,
+   die nur auf diesem Geraet stimmen muss. Derselbe Namensraum wie alle
+   Schluessel der App, siehe REISEN_SPEICHER in reise.js. */
 const GELESEN_SPEICHER = 'kurvenjagd.gespraechGelesen';
 
 
-/* --- 1. Laden und Schreiben ----------------------------------------------- */
+/* --- 1. Die Quelle ---------------------------------------------------------
+
+   Eine Quelle sagt dem Chat, wo seine Nachrichten liegen:
+     kennung        die Reise oder Gruppe auf dem Server (uuid)
+     tabelle        in welche Tabelle geschrieben wird
+     spalte         wie die Kennung dort heisst (reise_id, gruppe_id)
+     funktion       die Lesefunktion mit Namen der Autoren
+     parameter      wie deren erstes Argument heisst
+     beimSchliessen was danach neu gezeichnet werden soll                  */
+
+function reiseGespraechQuelle(reise) {
+  return {
+    kennung: reise.serverId,
+    tabelle: 'reise_nachrichten', spalte: 'reise_id',
+    funktion: 'reise_nachrichten_liste', parameter: 'p_reise',
+    beimSchliessen: () => { if (typeof zeichneReise === 'function') zeichneReise(); },
+  };
+}
 
 function gespraechMoeglich(reise) {
   return !!reise?.serverId && typeof mitfahrenMoeglich === 'function' && mitfahrenMoeglich();
@@ -47,71 +70,74 @@ function istMeineNachricht(nachricht) {
   return !!angemeldeterNutzer && String(nachricht.autor_id) === String(angemeldeterNutzer.id);
 }
 
-/* Beim Oeffnen der Reise: den ganzen Verlauf holen. Neu gezeichnet wird
-   nur, wenn es etwas gibt - sonst blitzte der Bildschirm bei jeder leeren
-   Reise einmal mehr auf. */
-async function ladeGespraechNach(reise) {
-  reiseNachrichten = [];
-  if (!gespraechMoeglich(reise)) return;
-  const { data, error } = await backend.rpc('reise_nachrichten_liste', { p_reise: reise.serverId });
-  if (error || !Array.isArray(data)) return;
-  reiseNachrichten = data;
-  if (data.length && typeof zeichneReise === 'function') zeichneReise();
-}
 
-/* Nur, was seit der letzten bekannten Nachricht dazukam. Gibt die Zahl der
-   neuen zurueck. Doppelte werden herausgefiltert, weil die eigene, gerade
-   abgeschickte Nachricht sonst zweimal kaeme: einmal aus dem Senden, einmal
-   aus dem Nachfragen. */
-async function holeNeueNachrichten(reise) {
-  if (!gespraechMoeglich(reise)) return 0;
-  const letzte = reiseNachrichten[reiseNachrichten.length - 1];
-  const { data, error } = await backend.rpc('reise_nachrichten_liste', {
-    p_reise: reise.serverId, p_seit: letzte ? letzte.erstellt_am : null,
+/* --- 2. Laden und Schreiben, je Quelle ------------------------------------ */
+
+/* Holt, was seit der letzten bekannten Nachricht dazukam, und haengt es an
+   die Liste. Gibt die Zahl der neuen zurueck. Ohne bekannte Nachricht kommt
+   der ganze Verlauf. Doppelte werden herausgefiltert, weil die eigene,
+   gerade abgeschickte Nachricht sonst zweimal kaeme: einmal aus dem Senden,
+   einmal aus dem Nachfragen. */
+async function holeNachrichten(quelle, liste) {
+  if (!quelle?.kennung || typeof mitfahrenMoeglich !== 'function' || !mitfahrenMoeglich()) return 0;
+  const letzte = liste[liste.length - 1];
+  const { data, error } = await backend.rpc(quelle.funktion, {
+    [quelle.parameter]: quelle.kennung, p_seit: letzte ? letzte.erstellt_am : null,
   });
   if (error || !Array.isArray(data) || !data.length) return 0;
-  const bekannt = new Set(reiseNachrichten.map(nachricht => nachricht.id));
+  const bekannt = new Set(liste.map(nachricht => nachricht.id));
   const neue = data.filter(nachricht => !bekannt.has(nachricht.id));
-  reiseNachrichten.push(...neue);
+  liste.push(...neue);
   return neue.length;
 }
 
-async function sendeNachricht(reise, text) {
+async function sendeNachricht(quelle, text) {
   const sauber = (text || '').trim();
   if (!sauber) return { ok: false, meldung: 'Schreib erst etwas.' };
   if (sauber.length > 1000) return { ok: false, meldung: 'Höchstens 1000 Zeichen.' };
-  if (!gespraechMoeglich(reise)) return { ok: false, meldung: 'Der Chat ist gerade nicht erreichbar.' };
-  const { error } = await backend.from('reise_nachrichten').insert({
-    reise_id: reise.serverId, autor_id: angemeldeterNutzer.id, text: sauber,
+  if (!quelle?.kennung || !angemeldeterNutzer) return { ok: false, meldung: 'Der Chat ist gerade nicht erreichbar.' };
+  const { error } = await backend.from(quelle.tabelle).insert({
+    [quelle.spalte]: quelle.kennung, autor_id: angemeldeterNutzer.id, text: sauber,
   });
-  // Die Datenbank wirft verstaendliche deutsche Saetze (die Obergrenze je
-  // Reise); sie werden durchgereicht.
+  // Die Datenbank wirft verstaendliche deutsche Saetze (die Obergrenze);
+  // sie werden durchgereicht.
   if (error) return { ok: false, meldung: error.message || 'Die Nachricht kam nicht durch.' };
   return { ok: true };
 }
 
 /* Loeschen darf nur der Autor seine eigene - die Regel steht in Migration
    08, die Oberflaeche zeigt das Kreuz nur an eigenen Nachrichten. */
-async function loescheNachricht(id) {
-  const { error } = await backend.from('reise_nachrichten').delete().eq('id', id);
+async function loescheNachricht(quelle, liste, id) {
+  const { error } = await backend.from(quelle.tabelle).delete().eq('id', id);
   if (error) { showToast('Das hat nicht geklappt.'); return false; }
-  reiseNachrichten = reiseNachrichten.filter(nachricht => String(nachricht.id) !== String(id));
+  const stelle = liste.findIndex(nachricht => String(nachricht.id) === String(id));
+  if (stelle >= 0) liste.splice(stelle, 1);
   return true;
 }
 
-
-/* --- 2. Gelesen bis ------------------------------------------------------- */
-
-function gelesenBis(reise) {
-  const karte = geraet.lies(GELESEN_SPEICHER, {}) || {};
-  return karte[reise.serverId] || '';
+/* Beim Oeffnen der Reise: den ganzen Verlauf holen. Neu gezeichnet wird
+   nur, wenn es etwas gibt - sonst blitzte der Bildschirm bei jeder leeren
+   Reise einmal mehr auf. */
+async function ladeGespraechNach(reise) {
+  reiseNachrichten = [];
+  if (!gespraechMoeglich(reise)) return;
+  const neue = await holeNachrichten(reiseGespraechQuelle(reise), reiseNachrichten);
+  if (neue && typeof zeichneReise === 'function') zeichneReise();
 }
 
-function merkeGelesen(reise) {
-  const letzte = reiseNachrichten[reiseNachrichten.length - 1];
+
+/* --- 3. Gelesen bis ------------------------------------------------------- */
+
+function gelesenBis(kennung) {
+  const karte = geraet.lies(GELESEN_SPEICHER, {}) || {};
+  return karte[kennung] || '';
+}
+
+function merkeGelesen(kennung, liste) {
+  const letzte = liste[liste.length - 1];
   if (!letzte) return;
   const karte = geraet.lies(GELESEN_SPEICHER, {}) || {};
-  karte[reise.serverId] = letzte.erstellt_am;
+  karte[kennung] = letzte.erstellt_am;
   geraet.schreib(GELESEN_SPEICHER, karte);
 }
 
@@ -119,14 +145,13 @@ function merkeGelesen(reise) {
    deshalb reicht der Textvergleich - "2026-09-14T19:02" liegt im Alphabet
    hinter "2026-09-14T18:59". Eigene Nachrichten zaehlen nicht: Was man
    selbst geschrieben hat, hat man gelesen. */
-function ungeleseneAnzahl(reise) {
-  const bis = gelesenBis(reise);
-  return reiseNachrichten.filter(nachricht =>
-    nachricht.erstellt_am > bis && !istMeineNachricht(nachricht)).length;
+function ungeleseneAnzahl(kennung, liste) {
+  const bis = gelesenBis(kennung);
+  return liste.filter(nachricht => nachricht.erstellt_am > bis && !istMeineNachricht(nachricht)).length;
 }
 
 
-/* --- 3. Zeit als Text ----------------------------------------------------- */
+/* --- 4. Zeit als Text ----------------------------------------------------- */
 
 function uhrzeitKurz(iso) {
   const zeit = new Date(iso);
@@ -152,7 +177,7 @@ function autorName(nachricht) {
 }
 
 
-/* --- 4. Die Karte "Chat" im Kopf der Reise --------------------------------
+/* --- 5. Die Karte "Chat" im Kopf der Reise --------------------------------
 
    In derselben Sprache wie Kasse und Mitfahrer: Abzeichen, ein Name, der
    Koerper, unten der Knopf. Im Koerper die letzten zwei Nachrichten als
@@ -162,7 +187,7 @@ function autorName(nachricht) {
 function gespraechWidgetHtml(reise) {
   if (!gespraechMoeglich(reise)) return '';
   const anzahl = reiseNachrichten.length;
-  const neue = ungeleseneAnzahl(reise);
+  const neue = ungeleseneAnzahl(reise.serverId, reiseNachrichten);
   const vorschau = reiseNachrichten.slice(-2).map(nachricht => `
     <li><b>${escapeHtml(autorName(nachricht))}:</b> ${escapeHtml(nachricht.text)}</li>`).join('');
   return `
@@ -183,7 +208,7 @@ function gespraechWidgetHtml(reise) {
 }
 
 
-/* --- 5. Das Blatt "Chat" -------------------------------------------------
+/* --- 6. Das Blatt "Chat" -------------------------------------------------
 
    Der Verlauf im Inhalt, das Eingabefeld im Fuss - der Fuss bleibt stehen,
    waehrend der Verlauf darueber rollt. Eigene Nachrichten rechts in Blau,
@@ -191,12 +216,12 @@ function gespraechWidgetHtml(reise) {
    neu erfunden, so sehen alle Chats aus, und genau deshalb muss niemand
    nachdenken, wo er ist.                                                  */
 
-function oeffneGespraechBlatt() {
-  const reise = reiseNach(offeneReiseId);
-  if (!gespraechMoeglich(reise)) return;
+function oeffneGespraechBlatt(quelle, liste, titel = 'Chat') {
+  if (!quelle?.kennung) return;
+  gespraechOffen = { quelle, liste };
   oeffneBlatt({
-    titel: 'Chat',
-    inhalt: `<ol class="gespraech-liste" id="gespraechListe">${nachrichtenHtml()}</ol>`,
+    titel: escapeHtml(titel),
+    inhalt: `<ol class="gespraech-liste" id="gespraechListe">${nachrichtenHtml(liste)}</ol>`,
     fuss: `
       <div class="gespraech-eingabe">
         <textarea id="feldNachricht" rows="1" maxlength="1000" placeholder="Nachricht &hellip;"
@@ -205,18 +230,18 @@ function oeffneGespraechBlatt() {
                 title="Senden" aria-label="Senden">${symbol('senden', 'klein')}</button>
       </div>`,
   });
-  merkeGelesen(reise);
+  merkeGelesen(quelle.kennung, liste);
   rolleAnsEndeDesGespraechs();
   document.getElementById('feldNachricht')?.focus();
   starteNachfrage();
 }
 
-function nachrichtenHtml() {
-  if (!reiseNachrichten.length) {
+function nachrichtenHtml(liste) {
+  if (!liste.length) {
     return '<li class="hint gespraech-leer">Noch keine Nachricht. Schreib die erste.</li>';
   }
   let letzterTag = '';
-  return reiseNachrichten.map(nachricht => {
+  return liste.map(nachricht => {
     const tag = tagesText(nachricht.erstellt_am);
     const trenner = tag !== letzterTag ? `<li class="gespraech-tag">${escapeHtml(tag)}</li>` : '';
     letzterTag = tag;
@@ -241,8 +266,8 @@ function nachrichtHtml(nachricht) {
 // den Fokus und den halb getippten Satz.
 function zeichneNachrichten() {
   const liste = document.getElementById('gespraechListe');
-  if (!liste) return;
-  liste.innerHTML = nachrichtenHtml();
+  if (!liste || !gespraechOffen) return;
+  liste.innerHTML = nachrichtenHtml(gespraechOffen.liste);
   rolleAnsEndeDesGespraechs();
 }
 
@@ -253,14 +278,14 @@ function rolleAnsEndeDesGespraechs() {
 
 async function sendeAusBlatt() {
   const feld = document.getElementById('feldNachricht');
-  const reise = reiseNach(offeneReiseId);
-  if (!feld || !reise) return;
-  const ergebnis = await sendeNachricht(reise, feld.value);
+  if (!feld || !gespraechOffen) return;
+  const { quelle, liste } = gespraechOffen;
+  const ergebnis = await sendeNachricht(quelle, feld.value);
   if (!ergebnis.ok) { showToast(ergebnis.meldung); return; }
   feld.value = '';
   feld.style.height = '';
-  await holeNeueNachrichten(reise);
-  merkeGelesen(reise);
+  await holeNachrichten(quelle, liste);
+  merkeGelesen(quelle.kennung, liste);
   zeichneNachrichten();
   feld.focus();
 }
@@ -268,20 +293,22 @@ async function sendeAusBlatt() {
 /* Das Nachfragen laeuft nur, solange das Blatt mit dem Verlauf offen ist.
    Ob es das noch ist, prueft der Takt selbst - das Blatt kann auf vielen
    Wegen zugehen (Kreuz, Escape, Tipp daneben), und keiner davon weiss vom
-   Chat. Beim Schliessen wird die Reise einmal neu gezeichnet, damit die
-   Karte im Kopf den neuen Stand zeigt. */
+   Chat. Beim Schliessen wird der Bildschirm dahinter einmal neu gezeichnet,
+   damit die Karte im Kopf den neuen Stand zeigt. */
 function starteNachfrage() {
   stoppeNachfrage();
   gespraechNachfrage = setInterval(async () => {
     const offen = document.getElementById('gespraechListe') && !document.getElementById('reiseBlatt')?.hidden;
-    if (!offen) {
+    if (!offen || !gespraechOffen) {
       stoppeNachfrage();
-      if (typeof zeichneReise === 'function') zeichneReise();
+      const zu = gespraechOffen;
+      gespraechOffen = null;
+      if (zu?.quelle.beimSchliessen) zu.quelle.beimSchliessen();
       return;
     }
-    const reise = reiseNach(offeneReiseId);
-    if (await holeNeueNachrichten(reise)) {
-      merkeGelesen(reise);
+    const { quelle, liste } = gespraechOffen;
+    if (await holeNachrichten(quelle, liste)) {
+      merkeGelesen(quelle.kennung, liste);
       zeichneNachrichten();
     }
   }, NACHFRAGE_ALLE_MS);
@@ -299,17 +326,22 @@ function passeFeldHoeheAn(feld) {
 }
 
 
-/* --- 6. Verkabelung ------------------------------------------------------- */
+/* --- 7. Verkabelung ------------------------------------------------------- */
 
 verkabele('reiseInner', 'click', ereignis => {
-  if (ereignis.target.closest('[data-gespraech-oeffnen]')) oeffneGespraechBlatt();
+  if (!ereignis.target.closest('[data-gespraech-oeffnen]')) return;
+  const reise = reiseNach(offeneReiseId);
+  if (gespraechMoeglich(reise)) oeffneGespraechBlatt(reiseGespraechQuelle(reise), reiseNachrichten);
 });
 
 verkabele('reiseBlatt', 'click', async ereignis => {
   const ziel = ereignis.target;
   if (ziel.closest('[data-nachricht-senden]')) { sendeAusBlatt(); return; }
   const weg = ziel.closest('[data-nachricht-weg]');
-  if (weg && await loescheNachricht(weg.dataset.nachrichtWeg)) zeichneNachrichten();
+  if (weg && gespraechOffen
+      && await loescheNachricht(gespraechOffen.quelle, gespraechOffen.liste, weg.dataset.nachrichtWeg)) {
+    zeichneNachrichten();
+  }
 });
 
 /* Eingabetaste schickt ab, Umschalt+Eingabe macht eine neue Zeile - wie in

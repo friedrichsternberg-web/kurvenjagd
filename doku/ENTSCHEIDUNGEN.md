@@ -4633,3 +4633,53 @@ Ausschnitt bei 60 statt 52 Prozent (vom Berg darf etwas fehlen, vom
 Motorrad nicht), und der Verlauf beginnt erst bei 78 Prozent statt bei
 30. Der Titel rückt entsprechend weniger ins Bild.
 
+## 15.09.2026 — GPX-Import und der Bereich „Freunde“
+
+Friedrichs Wunsch: ein großer Freunde-Bereich, in dem eine Gruppe
+untereinander Touren und Reisen austauscht, dazu GPX-Import im Planer und
+in der Reise. Seine Entscheidungen: eigener Reiter zwischen Ride und
+Touren, mehrere Gruppen (wie in WhatsApp), geteilt wird eine Kopie.
+
+**GPX: zwei Wege, und die App fragt.** Eine Spur unverändert als Tour
+(gezeichnet, nicht gerechnet) oder Wegpunkte in den Planer (neu gerechnet,
+kann abweichen). Beides stumm zusammenzulegen ging nicht: Wer die Strecke
+eines Freundes genau so fahren will, darf nicht die Variante des
+Routendienstes bekommen; wer sie bearbeiten will, braucht Wegpunkte. Für
+einen Reisetag entfällt die Frage, dort zählt die fertige Strecke.
+
+**Importierte Strecken tragen `aufgezeichnet` UND `importiert`.** Keine
+dritte Form neben Tour und Aufzeichnung: `aufgezeichnet` sorgt dafür,
+dass der Planer sie als fertige Linie zeigt (vierzehn Stellen in app.js
+wissen das schon), `importiert` nimmt sie aus „Meine Stats“ heraus und
+verhindert in `oeffentlicheTour()`, dass ihre Enden gekappt werden – das
+Kappen schützt das Zuhause des Nutzers, und eine fremde Datei hat damit
+nichts zu tun. Abzeichen „GPX“ statt „Aufzeichnung“.
+
+**Sechs Reiter.** Friedrich wollte einen neuen Eintrag, keinen Ersatz.
+Schrift auf 10 Punkte, die Pille des Symbols schmaler – auf 360 Punkten
+bleiben je 60, „Ausrüstung“ braucht 56.
+
+**Ein Chat, zwei Quellen.** Statt den Reise-Chat für Gruppen zu kopieren,
+bekam er eine QUELLE (Tabelle, Spalte, Lesefunktion, was beim Schließen neu
+zu zeichnen ist). Blatt, Senden, Nachfragen und Gelesen-Marke sind für
+beide dieselben Funktionen. `gespraech.js` heißt weiter so und liegt weiter
+bei der Reise, weil dort sein erster Nutzer wohnt.
+
+**Kopie statt Verweis, aufgefrischt statt verdoppelt.** Ein Beitrag ist
+der Stand zum Zeitpunkt des Teilens (dieselbe Abschrift wie beim Link).
+Zweimal dieselbe Tour teilen ergibt denselben Beitrag mit frischen Daten
+(eindeutiger Index über Gruppe, Autor, Art, Kennung) – sonst sammelten sich
+drei Fassungen, von denen zwei veraltet sind.
+
+**Teilen aus der Gruppe heraus, nicht vom Teilen-Knopf der Tour.** Der
+Knopf an der Tourenkarte führt weiter zum Link. In der Gruppe wählt man aus
+der eigenen Liste. So blieb der bestehende Weg unangetastet; der Umbau des
+Knopfes zu „Link oder Gruppe?“ steht in AUFGABEN.md.
+
+**Geprüft:** Migration 09 in einer zurückgerollten Transaktion (Gruppe
+anlegen, zweimal teilen = ein Beitrag, Fremder sieht nichts, fremder Autor
+42501, unbekannter Name abgewiesen). Rechte: nur `authenticated`.
+Oberfläche mit nachgestellten Daten bei 375 und 1024 Punkten; GPX auf
+allen drei Wegen mit einer erzeugten Datei, der Planer-Weg mit echter Route
+über BRouter.
+

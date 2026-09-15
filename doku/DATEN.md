@@ -316,6 +316,30 @@ bleibt; beim Löschen der Reise geht alles mit (`CASCADE`). Der Chat fragt
 alle fünf Sekunden nach, solange das Blatt offen ist – keine
 Live-Verbindung, siehe AUFGABEN.md.
 
+### Gruppen – der Bereich „Freunde“ (seit 15.09.2026, Migration 09)
+
+Ein geschlossener Kreis: Wer dabei ist, sieht alles in der Gruppe, wer
+nicht, sieht nicht einmal, dass es sie gibt. Vier Tabellen (`gruppen`,
+`gruppen_mitglieder`, `gruppen_beitraege`, `gruppen_nachrichten`), alle
+hinter der Zeilenregel `ist_gruppen_mitglied`. **Was gespeichert wird:**
+Name der Gruppe und ihr Gründer; je Mitglied Status (eingeladen, dabei,
+abgelehnt) und wer eingeladen hat; je Beitrag eine **Kopie** der Tour
+oder Reise – dieselbe Abschrift wie beim Link (`tourFreigabe`,
+`reiseFreigabe`) –, Autor und Zeitpunkt; je Nachricht Text, Autor,
+Zeitpunkt. Zweimal dieselbe Tour teilen frischt den Beitrag auf, statt
+einen zweiten anzulegen. Einladen darf jedes Mitglied, entfernen der
+Gründer, austreten jeder. Beiträge entfernt der Autor oder der Gründer.
+Löschen der Gruppe: nur der Gründer, alles darin geht mit (`CASCADE`).
+Kontolöschung: Autor und Gründer werden leer („Ehemaliges Konto“), die
+Gruppe bleibt den anderen. Obergrenzen: 20 Gruppen je Konto, 30 Leute,
+300 Beiträge und 5000 Nachrichten je Gruppe. Kein Meldeweg nötig: Es gibt
+keine Öffentlichkeit, in die etwas gestellt würde.
+
+**GPX-Import** (seit 14.09.2026): Eine gewählte Datei wird im Gerät
+gelesen (`geraet.liesTextdatei`), nichts davon geht ins Netz. Wird die
+Strecke danach im Planer neu gerechnet, gehen wie immer die Wegpunkte an
+BRouter (Punkt 3 der Datenschutzerklärung).
+
 ### Teilen per Link (seit 10.09.2026)
 
 Ein Teilen-Knopf legt eine **Kopie** der Tour oder Reise auf dem Server ab

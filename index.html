@@ -1384,7 +1384,7 @@
             zweiten Ger&auml;t auch l&ouml;schst oder das Konto l&ouml;schst.
           </p>
 
-          <p class="label">8. Gemeinsam geplante Reisen</p>
+          <p class="label">8. Gemeinsam geplante Reisen und Gruppen</p>
           <p>
             Eine Reise liegt so lange nur auf deinem Ger&auml;t und in deinem
             Konto, bis du jemanden dazuholst. <strong>Erst dieser Schritt
@@ -1428,10 +1428,27 @@
             im Konto (Punkt 7).
           </p>
           <p>
+            <strong>Gruppen</strong> (seit dem 15.09.2026, Bereich
+            &bdquo;Freunde&ldquo;): Du kannst Gruppen anlegen und andere
+            &uuml;ber ihren Benutzernamen einladen; eine Einladung muss
+            angenommen werden. In einer Gruppe stellst du Touren und Reisen
+            als <strong>Kopie</strong> hinein &ndash; mit denselben Angaben
+            wie beim Teilen per Link (Punkt 9) &ndash;, und es gibt einen
+            Chat. Gespeichert werden Name der Gruppe, wer dabei ist, die
+            Kopien mit deinem Namen und Zeitpunkt sowie die Nachrichten.
+            Sehen kann das nur, wer in genau dieser Gruppe ist; andere
+            erfahren nicht einmal, dass es sie gibt. Eine Kopie kannst du
+            selbst entfernen, der Gr&uuml;nder der Gruppe jede. Wer
+            austritt, sieht nichts mehr; l&ouml;scht der Gr&uuml;nder die
+            Gruppe, ist alles darin weg. Rechtsgrundlage ist Art. 6 Abs. 1
+            lit. b DSGVO.
+          </p>
+          <p>
             <strong>L&ouml;schst du dein Konto</strong>, verschwindet deine
             Teilnahme, und dein Name und dein Bild stehen nirgends mehr.
             <strong>Die Reise, die eingetragenen Ausgaben, deine Nachrichten
-            und Notizen bleiben aber</strong>, mit &bdquo;Ehemaliges
+            und Notizen sowie deine Gruppen und was du dort geteilt hast
+            bleiben aber</strong>, mit &bdquo;Ehemaliges
             Konto&ldquo; an deiner Stelle. Sie verschwinden zu lassen
             w&uuml;rde stillschweigend &auml;ndern, was die anderen einander
             schulden oder abgesprochen haben &ndash; deshalb bleibt der
@@ -1676,7 +1693,7 @@
             das Recht auf Akteneinsicht Brandenburg.
           </p>
 
-          <p class="tiny">Stand: 14.09.2026</p>
+          <p class="tiny">Stand: 15.09.2026</p>
         </div>
       </details>
 
@@ -2002,6 +2019,14 @@
        Bildschirm in BILDSCHIRME (app.js) einen Partner hat. -->
   <div id="reiseScreen" class="start-screen listen-screen reise-screen" hidden>
     <div class="start-screen-inner reise-inner" id="reiseInner"></div>
+  </div>
+
+  <!-- ===== Freunde =====
+       Gruppen, in denen Freunde einander Touren und Reisen zeigen. Die
+       Liste und die offene Gruppe teilen sich diesen einen Behaelter;
+       freunde.js zeichnet, gruppen.js redet mit dem Server. -->
+  <div id="freundeScreen" class="start-screen listen-screen" hidden>
+    <div class="start-screen-inner" id="freundeInner"></div>
   </div>
 
   <!-- Der Bildschirm hinter einem geteilten Link. Er hat keinen Eintrag in
@@ -2755,6 +2780,13 @@
     <button class="nav-tab" data-ziel="rideScreen">
       <svg class="ic gross"><use href="#icon-aufnahme"></use></svg><span>Ride</span>
     </button>
+    <!-- Freunde (seit 15.09.2026): Gruppen, in denen Touren und Reisen
+         untereinander geteilt werden. Zwischen Ride und Touren, weil
+         Friedrich es so wollte - und weil es zum Fahren mit anderen
+         gehoert, nicht zum Verwalten der eigenen Sachen. -->
+    <button class="nav-tab" data-ziel="freundeScreen">
+      <svg class="ic gross"><use href="#icon-leute"></use></svg><span>Freunde</span>
+    </button>
     <button class="nav-tab" data-ziel="tourenScreen">
       <svg class="ic gross"><use href="#icon-touren"></use></svg><span>Touren</span>
     </button>
@@ -2989,6 +3021,11 @@
        blatt.js, weil der Import auch fuer einen Reisetag laeuft. -->
   <script src="js/grundlage/gpx.js?v=114"></script>
   <script src="js/planer/import.js?v=114"></script>
+  <!-- Freunde: gruppen.js redet mit dem Server, freunde.js zeichnet. Beide
+       NACH teilen.js (Abschriften, Uebernehmen), gespraech.js (Chat) und
+       mitfahrer.js (Nutzersuche, Gesichter). -->
+  <script src="js/freunde/gruppen.js?v=114"></script>
+  <script src="js/freunde/freunde.js?v=114"></script>
   <!-- Touren und Reisen per Link weitergeben. Laedt NACH reise.js, weil es
        beide Formen kennen muss, und nach konto.js wegen des Servers. -->
   <script src="js/konto/teilen.js?v=114"></script>

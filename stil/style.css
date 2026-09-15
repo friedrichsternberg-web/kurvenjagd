@@ -436,10 +436,10 @@
   cursor: pointer;
   padding: 0;
   font-family: var(--schrift-display);
-  /* Wie die Tab-Leiste von iOS: klein, gemischt, ohne Sperrung. Fuenf
-     Eintraege muessen auf 360 Punkte passen - "Ausrüstung" braucht so
-     rund 58 Punkte von 72. */
-  font-size: 10.5px;
+  /* Wie die Tab-Leiste von iOS: klein, gemischt, ohne Sperrung. Seit dem
+     15.09.2026 sind es sechs Eintraege auf 360 Punkte - je 60, und
+     "Ausrüstung" braucht bei dieser Groesse rund 56 davon. */
+  font-size: 10px;
   font-weight: 600;
   letter-spacing: 0;
   transition: color 0.15s ease, transform 0.15s cubic-bezier(0.2,0.8,0.2,1);
@@ -448,12 +448,12 @@
 /* Das Symbol sitzt in einer eigenen Pille. Unangetippt ist sie
    unsichtbar; beim aktiven Eintrag wird sie zur Glasflaeche mit der
    Signalfarbe darin - so zeigt die Leiste, WO man ist, nicht nur mit
-   einer anderen Schriftfarbe. Seit dem 03.09.2026 gibt es fuenf
-   Eintraege statt sechs, deshalb darf jeder mehr Raum haben. */
+   einer anderen Schriftfarbe. Die Pille ist seit dem sechsten Eintrag
+   (15.09.2026) schmaler, sonst stiessen zwei aktive Nachbarn aneinander. */
 .nav-tab .ic {
   width: 26px;
   height: 26px;
-  padding: 5px 14px;
+  padding: 5px 11px;
   box-sizing: content-box;
   border-radius: var(--r-pill);
   border: 1px solid transparent;
@@ -554,7 +554,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
    Daten-Bildschirme - das Foto dahinter macht sie nur unruhig, und
    Friedrich will ueberall denselben dunklen Grund. Rechtliches und Konto
    behalten das Foto. */
-#tourenScreen, #reifenScreen, #statsScreen { background: var(--bg); }
+#tourenScreen, #reifenScreen, #statsScreen, #freundeScreen { background: var(--bg); }
 /* Die Ausruestung und die Merkliste: Produktfotos auf weissen Karten
    ueber dem verwischten Werkstattfoto wurden unruhig. Also Schwarz mit
    einem leisen Lichtkegel von oben - das gibt den Glaskanten etwas zu
@@ -5909,6 +5909,38 @@ body.nav-modus .karten-knopf { display: none; }
   color: var(--metall-glanz);
 }
 .gpx-zahlen i { font-style: normal; opacity: 0.5; margin: 0 4px; }
+
+/* ---------- Freunde: Gruppen (seit 15.09.2026) ----------
+   Die Gruppenliste und der Strom einer Gruppe sind Karten wie unter
+   "Touren"; eigen ist nur der Kopf der offenen Gruppe. */
+/* Die Gruppenkarte traegt .tour-karte mit: Die Klasse hebt die Zeilenform
+   von .saved-list li auf (siehe dort) - ohne sie stuende der Name als
+   Buchstabenturm neben den Kennzahlen. */
+.gruppen-karte { cursor: pointer; }
+.gruppen-kopf { display: flex; flex-direction: column; margin-bottom: var(--s5); }
+/* Die Gesichter sind ein Knopf, der die Mitgliederliste oeffnet - so
+   braucht die Karte keinen vierten Knopf dafuer. */
+.gruppen-leute {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: left;
+}
+.gruppen-leute:hover { color: var(--text); }
+.gruppen-leute-text i { font-style: normal; opacity: 0.5; margin: 0 3px; }
+.gruppen-knoepfe { display: flex; gap: var(--s2); margin-top: var(--s4); }
+.gruppen-knoepfe .btn { flex: 1; }
+.gruppen-knoepfe .gespraech-neu { margin-left: var(--s1); }
+.gruppen-strom-titel { margin: 0 0 var(--s3); }
+.beitrag-karte .geteilt-kopf .karte-datum { margin-left: auto; }
+.beitrag-karte .geteilt-kopf .karte-werkzeuge { margin-left: 0; }
 
 /* Die Punkte ueberlappen sich leicht: So liest sich eine Gruppe als eine
    Gruppe und nicht als eine Reihe einzelner Bilder. */
