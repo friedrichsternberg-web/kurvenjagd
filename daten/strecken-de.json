@@ -23,7 +23,18 @@
     "art": "keine",
     "hinweis": "Sonder-Tempolimits beachten"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 48.05584,
+    "lon": 7.99843,
+    "von": [
+     48.09394,
+     7.96101
+    ],
+    "bis": [
+     48.01774,
+     8.03585
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -40,7 +51,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 48.61242,
+    "lon": 8.32557,
+    "von": [
+     48.76107,
+     8.23996
+    ],
+    "bis": [
+     48.46377,
+     8.41117
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -58,7 +80,18 @@
     "art": "keine",
     "hinweis": "Tempolimit"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 47.92359,
+    "lon": 7.87857,
+    "von": [
+     47.9353,
+     7.85847
+    ],
+    "bis": [
+     47.91188,
+     7.89866
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -75,7 +108,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 48.02949,
+    "lon": 8.15008,
+    "von": [
+     48.05122,
+     8.20738
+    ],
+    "bis": [
+     48.00776,
+     8.09277
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -92,7 +136,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 49.35873,
+    "lon": 8.87943,
+    "von": [
+     49.50575,
+     8.50758
+    ],
+    "bis": [
+     49.21171,
+     9.25127
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -109,7 +164,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 48.4484,
+    "lon": 9.34573,
+    "von": [
+     48.62304,
+     9.83567
+    ],
+    "bis": [
+     48.27375,
+     8.85579
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -126,7 +192,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 47.8188,
+    "lon": 8.25929,
+    "von": [
+     47.81902,
+     8.34155
+    ],
+    "bis": [
+     47.81859,
+     8.17704
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -145,7 +222,18 @@
     "hinweis": "Beschränkungen und Sperrzeiten - vor Freigabe in der App aktuell prüfen",
     "quelle": "BVDM"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 47.62327,
+    "lon": 11.35482,
+    "von": [
+     47.65311,
+     11.36319
+    ],
+    "bis": [
+     47.59344,
+     11.34646
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -165,7 +253,18 @@
     "quelle": "BVDM",
     "geprueft_am": "2026-09-14"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 47.92365,
+    "lon": 11.79518,
+    "von": [
+     47.6595,
+     11.97818
+    ],
+    "bis": [
+     48.1878,
+     11.61218
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -183,7 +282,18 @@
     "art": "keine",
     "hinweis": "Teilstücke einzeln prüfen"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 47.60295,
+    "lon": 11.3491,
+    "von": [
+     47.57287,
+     9.69619
+    ],
+    "bis": [
+     47.63302,
+     13.00201
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -193,7 +303,7 @@
    "bundesland": "BY",
    "strasse": "-",
    "von": "Berchtesgaden",
-   "bis": "Oberau",
+   "bis": "Oberau (Berchtesgaden)",
    "region": "Berchtesgadener Land",
    "beschreibung": "Höchste Panoramastraße Deutschlands, Ringstraße.",
    "grad_pro_km": 400,
@@ -201,7 +311,15 @@
     "art": "keine",
     "hinweis": "mautpflichtig"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 47.63302,
+    "lon": 13.00201,
+    "von": [
+     47.63302,
+     13.00201
+    ],
+    "bis": null
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -219,7 +337,18 @@
     "art": "beschraenkt",
     "hinweis": "zusammen mit der Sudelfeld-Sperrung prüfen"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 47.65403,
+    "lon": 12.07508,
+    "von": [
+     47.64856,
+     12.17199
+    ],
+    "bis": [
+     47.6595,
+     11.97818
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -236,7 +365,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 50.02711,
+    "lon": 11.78665,
+    "von": [
+     50.05411,
+     11.79836
+    ],
+    "bis": [
+     50.00011,
+     11.77495
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -253,7 +393,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 49.74565,
+    "lon": 11.20014,
+    "von": [
+     49.7123,
+     11.06643
+    ],
+    "bis": [
+     49.77901,
+     11.33385
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -270,7 +421,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 49.20112,
+    "lon": 12.54578,
+    "von": [
+     49.18442,
+     12.42518
+    ],
+    "bis": [
+     49.21782,
+     12.66638
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -287,7 +449,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 52.5545,
+    "lon": 14.07235,
+    "von": [
+     52.56722,
+     14.07615
+    ],
+    "bis": [
+     52.54177,
+     14.06856
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -304,7 +477,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 52.11968,
+    "lon": 12.50898,
+    "von": [
+     52.14056,
+     12.58659
+    ],
+    "bis": [
+     52.0988,
+     12.43137
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -321,7 +505,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 53.23583,
+    "lon": 13.46112,
+    "von": [
+     53.26334,
+     13.60576
+    ],
+    "bis": [
+     53.20833,
+     13.31648
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -338,7 +533,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 51.88681,
+    "lon": 14.02226,
+    "von": [
+     51.9419,
+     13.89638
+    ],
+    "bis": [
+     51.83172,
+     14.14813
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -355,7 +561,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 53.0482,
+    "lon": 13.62294,
+    "von": [
+     52.97706,
+     13.74533
+    ],
+    "bis": [
+     53.11935,
+     13.50056
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -373,7 +590,18 @@
     "art": "beschraenkt",
     "hinweis": "wiederkehrende Beschränkungsdebatte - vor Freigabe prüfen"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 50.10813,
+    "lon": 7.95056,
+    "von": [
+     50.0827,
+     7.8524
+    ],
+    "bis": [
+     50.13355,
+     8.04872
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -391,7 +619,18 @@
     "art": "beschraenkt",
     "hinweis": "Lärmpausen-Verkehrsversuch 2022; Ergebnisbericht gegen dauerhafte Sperrung - Lage prüfen"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 50.33355,
+    "lon": 9.20693,
+    "von": [
+     50.19513,
+     8.46282
+    ],
+    "bis": [
+     50.47196,
+     9.95104
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -408,7 +647,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 50.47371,
+    "lon": 9.91533,
+    "von": [
+     50.44977,
+     9.89437
+    ],
+    "bis": [
+     50.49765,
+     9.93629
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -425,7 +675,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 50.49921,
+    "lon": 9.19459,
+    "von": [
+     50.48726,
+     9.16192
+    ],
+    "bis": [
+     50.51115,
+     9.22725
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -442,7 +703,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 51.2135,
+    "lon": 8.96634,
+    "von": [
+     51.24251,
+     9.03812
+    ],
+    "bis": [
+     51.18449,
+     8.89456
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -459,7 +731,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 50.43639,
+    "lon": 8.16473,
+    "von": [
+     50.48474,
+     8.26592
+    ],
+    "bis": [
+     50.38804,
+     8.06353
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -476,7 +759,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 54.54703,
+    "lon": 13.43419,
+    "von": [
+     54.41727,
+     13.43056
+    ],
+    "bis": [
+     54.67678,
+     13.43782
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -493,7 +787,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 53.43867,
+    "lon": 12.87403,
+    "von": [
+     53.51562,
+     12.68506
+    ],
+    "bis": [
+     53.36172,
+     13.063
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -510,7 +815,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 54.34462,
+    "lon": 12.499,
+    "von": [
+     54.24333,
+     12.43197
+    ],
+    "bis": [
+     54.44591,
+     12.56602
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -527,7 +843,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 53.86204,
+    "lon": 13.98101,
+    "von": [
+     54.05365,
+     13.77578
+    ],
+    "bis": [
+     53.67044,
+     14.18624
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -544,7 +871,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 53.71772,
+    "lon": 12.72317,
+    "von": [
+     53.73826,
+     12.76442
+    ],
+    "bis": [
+     53.69718,
+     12.68193
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -561,7 +899,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 51.99421,
+    "lon": 10.48214,
+    "von": [
+     52.18495,
+     10.517
+    ],
+    "bis": [
+     51.80347,
+     10.44728
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -578,7 +927,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 51.7644,
+    "lon": 10.57325,
+    "von": [
+     51.80216,
+     10.53695
+    ],
+    "bis": [
+     51.72663,
+     10.60954
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -595,7 +955,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 51.76744,
+    "lon": 10.29363,
+    "von": [
+     51.72784,
+     10.25082
+    ],
+    "bis": [
+     51.80704,
+     10.33645
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -612,7 +983,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 52.2431,
+    "lon": 9.56267,
+    "von": [
+     52.20993,
+     9.55816
+    ],
+    "bis": [
+     52.27627,
+     9.56718
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -629,7 +1011,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 52.13065,
+    "lon": 9.35213,
+    "von": [
+     52.10399,
+     9.35616
+    ],
+    "bis": [
+     52.1573,
+     9.3481
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -646,7 +1039,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 53.03337,
+    "lon": 9.91819,
+    "von": [
+     52.98443,
+     9.8399
+    ],
+    "bis": [
+     53.0823,
+     9.99647
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -663,7 +1067,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 50.4006,
+    "lon": 6.72339,
+    "von": [
+     50.43679,
+     6.65074
+    ],
+    "bis": [
+     50.36441,
+     6.79603
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -681,7 +1096,18 @@
     "art": "beschraenkt",
     "hinweis": "Region mit mehreren Teilsperrungen - einzeln prüfen"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 51.14297,
+    "lon": 7.69263,
+    "von": [
+     51.10635,
+     7.6409
+    ],
+    "bis": [
+     51.17959,
+     7.74436
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -698,7 +1124,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 51.43888,
+    "lon": 8.08704,
+    "von": [
+     51.47752,
+     8.11348
+    ],
+    "bis": [
+     51.40024,
+     8.06059
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -715,7 +1152,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 51.15922,
+    "lon": 7.37252,
+    "von": [
+     51.11552,
+     7.38791
+    ],
+    "bis": [
+     51.20292,
+     7.35714
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -732,7 +1180,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 51.17296,
+    "lon": 8.4085,
+    "von": [
+     51.19334,
+     8.53341
+    ],
+    "bis": [
+     51.15259,
+     8.2836
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -749,7 +1208,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 51.16224,
+    "lon": 7.6403,
+    "von": [
+     51.21814,
+     7.6397
+    ],
+    "bis": [
+     51.10635,
+     7.6409
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -766,7 +1236,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 49.80099,
+    "lon": 7.4793,
+    "von": [
+     50.35333,
+     7.5944
+    ],
+    "bis": [
+     49.24865,
+     7.3642
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -793,7 +1274,15 @@
     "quelle": "Kreisverwaltung Rhein-Lahn-Kreis",
     "geprueft_am": "2026-09-14"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 50.28764,
+    "lon": 8.06163,
+    "von": [
+     50.28764,
+     8.06163
+    ],
+    "bis": null
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -810,7 +1299,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 50.05647,
+    "lon": 7.1193,
+    "von": [
+     49.75962,
+     6.64419
+    ],
+    "bis": [
+     50.35333,
+     7.5944
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -828,7 +1328,18 @@
     "art": "keine",
     "hinweis": "Baustellen im Zuge des Wiederaufbaus möglich"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 50.44964,
+    "lon": 6.96122,
+    "von": [
+     50.51695,
+     6.99205
+    ],
+    "bis": [
+     50.38233,
+     6.9304
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -845,7 +1356,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 49.33422,
+    "lon": 8.06873,
+    "von": [
+     49.61388,
+     8.18142
+    ],
+    "bis": [
+     49.05456,
+     7.95603
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -862,7 +1384,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 49.31943,
+    "lon": 7.76187,
+    "von": [
+     49.44322,
+     7.769
+    ],
+    "bis": [
+     49.19565,
+     7.75473
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -879,7 +1412,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 50.37791,
+    "lon": 7.83707,
+    "von": [
+     50.43622,
+     7.83025
+    ],
+    "bis": [
+     50.3196,
+     7.84388
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -896,7 +1440,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 49.49808,
+    "lon": 6.5624,
+    "von": [
+     49.49039,
+     6.59418
+    ],
+    "bis": [
+     49.50576,
+     6.53062
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -913,7 +1468,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 49.5571,
+    "lon": 6.85778,
+    "von": [
+     49.60595,
+     6.97084
+    ],
+    "bis": [
+     49.50825,
+     6.74471
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -930,7 +1496,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 49.52703,
+    "lon": 7.15633,
+    "von": [
+     49.58708,
+     7.14304
+    ],
+    "bis": [
+     49.46699,
+     7.16962
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -947,7 +1524,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 49.19152,
+    "lon": 7.23176,
+    "von": [
+     49.23709,
+     7.2599
+    ],
+    "bis": [
+     49.14596,
+     7.20362
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -964,7 +1552,15 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 49.49039,
+    "lon": 6.59418,
+    "von": [
+     49.49039,
+     6.59418
+    ],
+    "bis": null
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -981,7 +1577,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 50.50722,
+    "lon": 12.9796,
+    "von": [
+     50.43555,
+     12.94859
+    ],
+    "bis": [
+     50.57888,
+     13.01061
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -998,7 +1605,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 50.94251,
+    "lon": 14.07661,
+    "von": [
+     50.96028,
+     13.93792
+    ],
+    "bis": [
+     50.92474,
+     14.2153
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -1015,7 +1633,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 50.87593,
+    "lon": 14.77195,
+    "von": [
+     50.90978,
+     14.80089
+    ],
+    "bis": [
+     50.84209,
+     14.74301
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -1032,7 +1661,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 50.52757,
+    "lon": 12.17283,
+    "von": [
+     50.49506,
+     12.13465
+    ],
+    "bis": [
+     50.56009,
+     12.21101
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -1049,7 +1689,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 50.63175,
+    "lon": 12.6408,
+    "von": [
+     50.7185,
+     12.49393
+    ],
+    "bis": [
+     50.545,
+     12.78767
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -1066,7 +1717,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 51.7219,
+    "lon": 10.94648,
+    "von": [
+     51.75276,
+     11.03772
+    ],
+    "bis": [
+     51.69103,
+     10.85525
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -1083,7 +1745,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 51.79958,
+    "lon": 10.72295,
+    "von": [
+     51.83442,
+     10.78625
+    ],
+    "bis": [
+     51.76474,
+     10.65965
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -1100,7 +1773,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 51.64308,
+    "lon": 11.09112,
+    "von": [
+     51.67025,
+     11.13267
+    ],
+    "bis": [
+     51.61591,
+     11.04958
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -1117,7 +1801,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 51.18259,
+    "lon": 11.78981,
+    "von": [
+     51.15256,
+     11.80992
+    ],
+    "bis": [
+     51.21262,
+     11.7697
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -1134,7 +1829,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 51.9272,
+    "lon": 12.26542,
+    "von": [
+     51.88466,
+     12.45628
+    ],
+    "bis": [
+     51.96974,
+     12.07455
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -1151,7 +1857,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 54.14727,
+    "lon": 10.51681,
+    "von": [
+     54.15808,
+     10.41771
+    ],
+    "bis": [
+     54.13646,
+     10.61591
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -1168,7 +1885,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 54.38597,
+    "lon": 9.75125,
+    "von": [
+     54.30029,
+     9.66501
+    ],
+    "bis": [
+     54.47165,
+     9.83749
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -1185,7 +1913,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 54.39505,
+    "lon": 10.90036,
+    "von": [
+     54.32158,
+     10.66647
+    ],
+    "bis": [
+     54.46852,
+     11.13425
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -1202,7 +1941,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 54.40134,
+    "lon": 8.83964,
+    "von": [
+     54.48541,
+     9.05379
+    ],
+    "bis": [
+     54.31727,
+     8.62549
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -1220,7 +1970,15 @@
     "art": "keine",
     "hinweis": "Fährzeiten beachten"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 53.78793,
+    "lon": 9.42382,
+    "von": [
+     53.78793,
+     9.42382
+    ],
+    "bis": null
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -1237,7 +1995,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 50.69678,
+    "lon": 10.81999,
+    "von": [
+     50.68677,
+     10.91424
+    ],
+    "bis": [
+     50.70678,
+     10.72574
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -1257,7 +2026,15 @@
     "quelle": "BVDM",
     "geprueft_am": "2026-09-14"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 50.41665,
+    "lon": 11.11332,
+    "von": [
+     50.41665,
+     11.11332
+    ],
+    "bis": null
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -1274,7 +2051,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 50.63202,
+    "lon": 11.20756,
+    "von": [
+     50.68299,
+     11.27263
+    ],
+    "bis": [
+     50.58105,
+     11.14249
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -1291,7 +2079,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 51.38466,
+    "lon": 11.10459,
+    "von": [
+     51.35601,
+     11.10052
+    ],
+    "bis": [
+     51.41331,
+     11.10866
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -1308,7 +2107,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 50.63112,
+    "lon": 11.50586,
+    "von": [
+     50.64791,
+     11.361
+    ],
+    "bis": [
+     50.61432,
+     11.65071
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   },
@@ -1325,7 +2135,18 @@
    "sperrung": {
     "art": "keine"
    },
-   "koordinaten": null,
+   "koordinaten": {
+    "lat": 50.68997,
+    "lon": 10.32369,
+    "von": [
+     50.56761,
+     10.4153
+    ],
+    "bis": [
+     50.81232,
+     10.23208
+    ]
+   },
    "koordinaten_geprueft": false,
    "grad_pro_km_gemessen": null
   }
