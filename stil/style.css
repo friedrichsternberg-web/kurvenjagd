@@ -577,7 +577,17 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
    ueber dem verwischten Werkstattfoto wurden unruhig. Also Schwarz mit
    einem leisen Lichtkegel von oben - das gibt den Glaskanten etwas zu
    fangen, ohne mit den Fotos zu streiten. */
-#shopScreen, #merklisteScreen, #reiseScreen, #planerWahlScreen { background: var(--start-licht), var(--bg); }
+#shopScreen, #merklisteScreen, #reiseScreen { background: var(--start-licht), var(--bg); }
+/* Der Planer-Einstieg: Das Foto ist der GRUND des ganzen Bildschirms, nicht
+   ein Band darueber. Die Karten liegen als Glas auf der Strasse, das
+   Motorrad steht ueber ihnen; nach unten laeuft das Bild in die
+   Grundflaeche aus, damit die Leiste auf Ruhe steht. */
+#planerWahlScreen {
+  background:
+    linear-gradient(to bottom, transparent 42%, var(--bg) 88%),
+    url("../img/planer-kopf.webp") 62% 35% / cover no-repeat,
+    var(--bg);
+}
 .listen-screen .start-screen-inner {
   width: 100%;
   /* Unten deutlich mehr als oben: Der Bildschirm endet an der Unterkante
@@ -5944,7 +5954,13 @@ body.nav-modus .karten-knopf { display: none; }
 }
 .gespraech-eingabe textarea:focus { outline: none; border-color: var(--accent-hell); }
 .gespraech-senden { flex: 0 0 auto; padding: 10px 13px; }
-.gespraech-senden .ic { width: 18px; height: 18px; }
+/* Das Symbol ist hier der ganze Knopf - keine eigene Scheibe darin, wie
+   sonst beim ersten Symbol eines Knopfes (.btn > .ic:first-child). */
+.gespraech-senden > .ic:first-child {
+  width: 18px; height: 18px;
+  padding: 0; margin: 0;
+  border: 0; background: none; box-shadow: none;
+}
 
 /* ---------- Notizen: die Zettel (seit 14.09.2026) ----------
    Ein Zettel ist ein Knopf, weil ein Tipp ihn zum Aendern oeffnet. Der
@@ -6713,25 +6729,24 @@ body.nav-modus .karten-knopf { display: none; }
      Grenze greift - das Bild sass dann als schmaler Streifen links statt
      ueber die volle Breite. "cover" schneidet den Ausschnitt ohnehin
      passend zu, eine Seitenverhaeltnis-Angabe braucht es also gar nicht. */
-  height: clamp(230px, 42vh, 420px);
+  height: clamp(220px, 40vh, 420px);
   /* 60 Prozent und nicht die Mitte: Das Motorrad steht im unteren Teil des
      Fotos, die Raeder enden bei etwa 89 Prozent seiner Hoehe. Wo "cover"
      oben und unten beschneidet, soll es oben beschneiden - vom Berg
      darf etwas fehlen, vom Motorrad nicht. Mit 52 Prozent (bis zum
      14.09.2026) waren die Raeder abgeschnitten. */
-  background: url("../img/planer-kopf.webp") center 60% / cover no-repeat;
-  /* Der Verlauf beginnt erst bei 78 Prozent und endet am Rand: Darueber
-     bleibt das Bild ganz, damit das Motorrad bis zu den Raedern zu sehen
-     ist; darunter ist nur noch Strasse, und die darf ins Schwarz
-     auslaufen. Dass die Strasse hell ist, macht hier nichts mehr - bei
-     100 Prozent ist der Verlauf ganz durchsichtig, es bleibt kein Rand. */
-  -webkit-mask-image: linear-gradient(to bottom, black 78%, transparent 100%);
-  mask-image: linear-gradient(to bottom, black 78%, transparent 100%);
+  /* Seit dem 17.09.2026 nur noch ein Abstandhalter: Das Foto liegt als
+     Grund unter dem ganzen Bildschirm (#planerWahlScreen), dieser Kasten
+     haelt den Platz frei, damit Titel und Karten erst unter dem Motorrad
+     beginnen. */
+  background: none;
 }
-/* Der Titel rueckt ein Stueck in das ausgelaufene Ende des Bildes hinein -
-   nur noch so weit, dass er auf der ausgeblendeten Strasse steht und nicht
-   auf dem Motorrad. */
-.planer-kopf-titel { margin: calc(-1 * var(--s4)) 0 var(--s5); }
+/* Seit dem 17.09.2026 liegen Titel und Karten AUF dem Foto: Das Bild ist
+   hoeher und laeuft weiter unten aus, der Titel rueckt tief hinein, und
+   die Karten darunter sind Glas ueber dem Motorrad - der eine Fall neben
+   der Bike-Karte, in dem eine Karte den Filter traegt, weil etwas
+   Echtes unter ihr liegt. */
+.planer-kopf-titel { margin: calc(-1 * (var(--s8) + var(--s7))) 0 var(--s4); text-shadow: 0 1px 3px var(--schatten-stark); }
 
 .wahl-karten {
   display: grid;
@@ -6746,6 +6761,8 @@ body.nav-modus .karten-knopf { display: none; }
   flex-direction: column;
   gap: var(--s3);
   border-radius: var(--r-xl);
+  backdrop-filter: var(--glas-filter);
+  -webkit-backdrop-filter: var(--glas-filter);
   cursor: pointer;
   transition: transform 0.15s cubic-bezier(0.2,0.8,0.2,1), background 0.15s ease;
 }

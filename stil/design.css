@@ -214,9 +214,11 @@
   /* Der Rand einer Karte (und alles, was wie eine Karte steht: Umschalter,
      Zeilen in den Einstellungen). Kraeftiger als --glas-rand, denn er soll
      ABGRENZEN: Friedrich will jede Karte klar vom Grund unterscheiden
-     koennen, im Hellen wie im Dunklen. Im Hellen ist er deshalb dunkel -
-     weisse Kanten auf Hellgrau sieht niemand. */
-  --karten-rand: rgba(255, 255, 255, 0.30);
+     koennen, im Hellen wie im Dunklen. Seit dem 17.09.2026 abends in der
+     Signalfarbe, halb durchsichtig - ein blauer Saum, kein blauer Rahmen.
+     Das ist die eine Stelle, an der das Blau Beschriftung einer Flaeche
+     ist und nicht Bedienung; die Kante bleibt duenn, damit es so bleibt. */
+  --karten-rand: color-mix(in srgb, var(--accent-hell) 42%, transparent);
   /* Die Fuellung ist dunkel (0,055), Kante und Lichtkante sind kraeftig:
      Eine Scheibe erkennt man am Rand, nicht an der Flaeche. Friedrich
      wollte die Karten im Dunklen zweimal dunkler als die erste Fassung
@@ -434,7 +436,7 @@
   --glas-rand:   rgba(255, 255, 255, 0.90);
   --glas-heller: rgba(255, 255, 255, 0.82);
   --glas-licht:  rgba(255, 255, 255, 1.00);
-  --karten-rand: rgba(24, 34, 52, 0.20);
+  --karten-rand: color-mix(in srgb, var(--accent) 38%, transparent);
   --glas-schatten: 0 14px 38px var(--schatten-mittel);
 
   /* Schatten im Hellen: dieselben Rollen, ein Drittel der Dichte, und

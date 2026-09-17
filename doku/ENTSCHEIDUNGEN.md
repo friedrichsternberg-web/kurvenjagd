@@ -5147,3 +5147,21 @@ Auf Friedrichs Rückmeldungen am selben Abend:
   du …“ ist weg.
 - **Shop, „Direkt zum Shop“:** FC-Moto, Helmexpress, POLO, reifen.com,
   Reifentiefpreis, motoin – Friedrichs Reihenfolge.
+
+## 17.09.2026 – Dritter Nachtrag: Kartenrand in der Signalfarbe, Planer-Foto als Grund
+
+- **Kartenrand in der Signalfarbe.** `--karten-rand` ist jetzt ein halb
+  durchsichtiges Blau (dunkel: `--accent-hell` 42 %, hell: `--accent` 38 %)
+  – ein Saum, kein Rahmen. Damit trägt das Blau zum ersten Mal eine
+  Fläche, die nicht Bedienung ist; die Kante bleibt ein Pixel dünn, damit
+  es dabei bleibt. Friedrich wollte die Karten vor allem bei Touren klarer
+  abgegrenzt sehen.
+- **Planer-Einstieg:** Das Foto ist der Grund des ganzen Bildschirms
+  (`#planerWahlScreen`), nicht mehr ein Band darüber; die zwei Karten
+  liegen als Glas mit Filter auf der Straße, das Motorrad steht über
+  ihnen. `.planer-kopf-bild` ist nur noch ein Abstandhalter. Die Karten
+  sind neben der Bike-Karte der zweite begründete Fall für einen Filter
+  auf einer Karte: Etwas Echtes liegt darunter.
+- **Senden-Knopf im Chat** war durch die neue Regel „erstes Symbol im
+  Knopf bekommt eine eigene Scheibe“ zu einem Kreis im Kreis geworden;
+  `.gespraech-senden` nimmt die Regel zurück.
