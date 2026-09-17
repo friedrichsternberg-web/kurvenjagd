@@ -2378,13 +2378,13 @@ function frageNachNullpunkt() {
     titel: 'Schr&auml;glage messen?',
     inhalt: `
       <p class="ride-frage">Stell dein Motorrad senkrecht hin, klemm das Handy in die Halterung
-        und tippe auf &bdquo;Nullpunkt setzen&ldquo;. Ohne Nullpunkt kommt die Schr&auml;glage grob aus dem GPS.</p>
+        und tippe auf &bdquo;Nullpunkt setzen&ldquo; &ndash; danach geht es los. Ohne Nullpunkt kommt die Schr&auml;glage grob aus dem GPS.</p>
       <p class="hint" id="neigungBlattStatus" ${gesetzt ? '' : 'hidden'}>${gesetzt ? `Nullpunkt gesetzt am ${wann}. Hat sich die Halterung verstellt, setz ihn neu.` : ''}</p>`,
     fuss: gesetzt
       ? `<button class="btn ghost" data-ride-nullpunkt>Neu setzen</button>
          <button class="btn" data-ride-los>${symbol('motorrad', 'klein')} Los</button>`
       : `<button class="btn ghost" data-ride-los>Ohne Schr&auml;glage</button>
-         <button class="btn" data-ride-nullpunkt>${symbol('motorrad', 'klein')} Nullpunkt setzen und los</button>`,
+         <button class="btn" data-ride-nullpunkt>${symbol('motorrad', 'klein')} Nullpunkt setzen</button>`,
   });
 }
 
