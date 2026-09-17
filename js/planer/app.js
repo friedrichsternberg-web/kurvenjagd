@@ -3760,6 +3760,9 @@ function zeigeGarage() {
   // Und die Reisekarte aus einstieg.js - so steht nach dem Anlegen einer
   // Reise beim naechsten Besuch der Garage gleich die neue da.
   if (typeof zeichneGarageReise === 'function') zeichneGarageReise();
+  // Freunde auf dem Start (start.js): erst der letzte Stand, dann frisch
+  // vom Server - beides dort.
+  if (typeof zeichneGarageFreunde === 'function') { zeichneGarageFreunde(); ladeGarageFreundeNach(); }
 }
 
 /* Die Ausruestung. Der Bildschirm heisst im HTML weiter shopScreen, damit

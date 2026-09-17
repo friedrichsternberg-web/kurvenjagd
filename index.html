@@ -537,6 +537,13 @@
         </div>
       </header>
 
+      <!-- Das Fahrtband: nur da, wenn in einer der eigenen Gruppen gerade
+           jemand faehrt oder es demnaechst vorhat. Gefuellt von
+           js/freunde/start.js; ohne Konto oder ohne Fahrt bleibt es
+           verborgen. Steht ueber allem, weil es das Spontanste ist, was
+           der Start zu sagen hat. -->
+      <section id="garageFahrt" class="start-abschnitt garage-fahrt" hidden></section>
+
       <!-- Die Bike-Karte ist ein Raster aus zwei Spalten: links Abzeichen,
            Name, die Werte als Zeilen mit Symbol und der Knopf; rechts die
            Buehne, die ALLE Zeilen spannt - dadurch reicht die Werkstatt
@@ -620,6 +627,10 @@
            verborgen. Warum sie hier steht, obwohl die Kacheln am
            03.09.2026 gingen: Kopf von Abschnitt 3 in einstieg.js. -->
       <section id="garageReise" class="start-abschnitt garage-reise" hidden></section>
+
+      <!-- Die Freunde-Karte: die eigene Gruppe, oder die Einladung, eine
+           zu gruenden. Gefuellt von js/freunde/start.js. -->
+      <section id="garageFreunde" class="start-abschnitt garage-freunde" hidden></section>
 
       <!-- Die Merkliste: das Regal mit den eigenen Sachen. Jede Karte sagt,
            was der Preis seit dem Merken gemacht hat. Gefuellt von
@@ -3037,6 +3048,8 @@
   <!-- "Ich fahre" und "Fahrt planen" in der Gruppe. NACH freunde.js: haengt
        sich an dessen Bildschirm und Blatt. -->
   <script src="js/freunde/fahrten.js?v=114"></script>
+  <!-- Freunde auf dem Start: Fahrtband und Freunde-Karte. NACH fahrten.js. -->
+  <script src="js/freunde/start.js?v=114"></script>
   <!-- Touren und Reisen per Link weitergeben. Laedt NACH reise.js, weil es
        beide Formen kennen muss, und nach konto.js wegen des Servers. -->
   <script src="js/konto/teilen.js?v=114"></script>

@@ -327,7 +327,7 @@ gehen mit ihm –, und seit Migration 11 `gruppen_fahrten` und
 Zeitpunkt, wahlweise Tour (als Beitrag) und einem Satz; wer sich
 anschließt, steht als Zeile in `gruppen_mitfahrer`. **Kein Standort**, nur
 wann und was. Die Lesefunktion gibt Fahrten bis acht Stunden nach Beginn
-heraus, danach sind sie vorbei), alle hinter der Zeilenregel
+heraus, danach sind sie vorbei; `meine_fahrten` (Migration 12) fasst sie für den Start über alle eigenen Gruppen zusammen), alle hinter der Zeilenregel
 `ist_gruppen_mitglied`. **Was gespeichert wird:**
 Name der Gruppe und ihr Gründer; je Mitglied Status (eingeladen, dabei,
 abgelehnt) und wer eingeladen hat; je Beitrag eine **Kopie** der Tour

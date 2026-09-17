@@ -212,7 +212,16 @@
     #startInner .bike-karte,
     #startInner .bike-leer { grid-column: 1; grid-row: 1; }
     #startInner #garageReise { grid-column: 2; grid-row: 1; }
+    /* Das Fahrtband (seit 17.09.2026) steht ueber dem Paar, ueber die
+       volle Breite - und nur wenn es da ist, rueckt das Paar in Zeile
+       zwei. Ohne :has bliebe sonst eine leere erste Zeile mit ihrem
+       Abstand stehen. */
+    #startInner #garageFahrt { grid-column: 1 / -1; grid-row: 1; }
+    #startInner:has(#garageFahrt:not([hidden])) .bike-karte,
+    #startInner:has(#garageFahrt:not([hidden])) .bike-leer,
+    #startInner:has(#garageFahrt:not([hidden])) #garageReise { grid-row: 2; }
     /* Die Baender sind Reihen zum Wischen - sie nehmen die volle Breite. */
+    #startInner #garageFreunde,
     #startInner #garageMerkliste,
     #startInner #garageShop,
     #startInner #garageReifen,

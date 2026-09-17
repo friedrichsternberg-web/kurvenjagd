@@ -6021,6 +6021,41 @@ body.nav-modus .karten-knopf { display: none; }
 /* Tag und Uhrzeit nebeneinander im Blatt. */
 .fahrt-zeitzeile { display: flex; gap: var(--s2); }
 .fahrt-zeitzeile input { flex: 1; min-width: 0; }
+
+/* ---------- Freunde auf dem Start (seit 17.09.2026) ----------
+   Das Fahrtband: eine Zeile je Fahrt, blau umrandet wie eine Einladung,
+   weil es eine ist. Bei "jetzt" der gruene Puls. Die ganze Zeile fuehrt
+   in die Gruppe, der Knopf rechts schliesst an. */
+.garage-fahrt { gap: var(--s2); }
+.fahrt-band {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s3) var(--s4);
+  border-radius: var(--r-lg);
+  border-color: color-mix(in srgb, var(--accent-hell) 45%, transparent);
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  cursor: pointer;
+}
+.fahrt-band.jetzt {
+  border-color: color-mix(in srgb, var(--good) 50%, transparent);
+  background: color-mix(in srgb, var(--good) 14%, transparent);
+}
+.fahrt-band-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.fahrt-band-wer { display: inline-flex; align-items: center; font-size: 16px; }
+.fahrt-band-wer b { font-weight: 700; margin-right: 4px; }
+.fahrt-band-meta { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fahrt-band-meta i { font-style: normal; opacity: 0.5; margin: 0 3px; }
+.fahrt-band-dabei { flex: 0 0 auto; font-size: 13px; color: var(--muted); }
+.fahrt-band .btn.klein { flex: 0 0 auto; }
+/* Die Freunde-Karte: Standardform wie die Reisekarte. Die Geister-Gesichter
+   in der Einladung sind gross - sie sind das Bild der Karte. */
+.freunde-widget { display: flex; flex-direction: column; cursor: pointer; }
+.freunde-widget .widget-knopf { margin-top: var(--s4); }
+.freunde-einladung { cursor: default; }
+.freunde-geister .mitfahrer-punkt { width: 44px; height: 44px; }
+.freunde-geister .mitfahrer-punkt .ic { width: 21px; height: 21px; }
+.freunde-satz { margin: 0; font-size: 14px; line-height: 1.45; color: var(--muted); }
 .gruppen-strom-titel { margin: 0 0 var(--s3); }
 /* Das Chatfenster: der Verlauf hat eine feste Hoehe und rollt in sich,
    das Feld steht darunter fest. Auf dem Handy etwa ein Drittel des

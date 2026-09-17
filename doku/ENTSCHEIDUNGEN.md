@@ -4800,3 +4800,33 @@ die Karte nur neu, wenn sich etwas geändert hat (Vergleich als JSON).
 Offen: die Push-Nachricht („Anna fährt jetzt"), ohne die das Spontane nur
 sieht, wer die App gerade offen hat. Das ist der Punkt 2 aus AUFGABEN.md.
 
+## 17.09.2026 — Freunde auf dem Start: Fahrtband und Freunde-Karte
+
+Friedrich: Wenn jemand fährt, soll das präsent auf der Startseite stehen;
+dazu eine Karte mit der eigenen Gruppe, und ohne Gruppe die Einladung,
+eine zu gründen.
+
+**Das Fahrtband steht über allem**, auch über der Bike-Karte, und nur
+dann, wenn es etwas zu sagen hat: eine Zeile je Fahrt in einer meiner
+Gruppen, jetzt oder in den nächsten 36 Stunden, höchstens drei. Grün mit
+Puls für „jetzt", blau für geplant; „Ich bin dabei" direkt in der Zeile,
+die Zeile selbst führt in die Gruppe. Dafür eine eigene Lesefunktion
+über alle Gruppen (`meine_fahrten`, Migration 12) – der Start soll nicht
+jede Gruppe einzeln fragen.
+
+**Im Breiten** rückt das Paar aus Bike- und Reisekarte nur dann in Zeile
+zwei, wenn das Band da ist (`:has(#garageFahrt:not([hidden]))` in
+quer.css). Ohne diese Bedingung bliebe eine leere erste Zeile mit ihrem
+Abstand stehen.
+
+**Die Freunde-Karte** unter der Reise trägt die Standardform der Karten:
+mit Gruppe deren Name, Leute, Geteiltes und „Zur Gruppe" (plus „1 weitere
+›", wenn es mehrere gibt); ohne Gruppe „Gemeinsam fahren" mit dem Satz,
+den Friedrich wollte, und „Gruppe erstellen"; ohne Konto derselbe Satz
+mit „Konto anlegen". Der Satz ist eine bewusste Ausnahme von der Regel
+„keine Untertexte" vom 14.09.2026 – er ist hier die Erklärung einer
+Funktion, die es sonst nirgends zu sehen gibt.
+
+Gezeichnet wird sofort aus dem letzten Stand und noch einmal nach der
+Antwort des Servers, damit beim Öffnen der Garage nichts springt.
+
