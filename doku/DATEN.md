@@ -324,7 +324,10 @@ Region, Beschreibung, einem **geschätzten** Kurven-Score (`grad_pro_km`,
 zur Sortierung, kein Messwert; `grad_pro_km_gemessen` füllt sich später
 aus einem echten Routing) und dem Feld `sperrung`. Die Datei wird zur
 Laufzeit geladen (`fetch`, gleiche Herkunft, nichts geht nach draußen)
-und ist ohne Code-Änderung austauschbar.
+und ist ohne Code-Änderung austauschbar. Daneben liegt `daten/strecken-de.js`
+mit denselben Daten als Skript, erzeugt von `werkzeug/strecken-geocode.py`;
+die App nimmt sie nur, wenn die JSON nicht ladbar ist (App direkt als Datei
+geöffnet). Nach jeder Pflege der JSON das Skript laufen lassen.
 
 **Die Sperrangaben sind redaktionell gepflegt, nicht aus einer API.**
 Quellen: die Streckensperrungskarte des BVDM (bvdm.de) und die

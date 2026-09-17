@@ -2173,7 +2173,6 @@ function setPoiAktiv(aktiv) {
   poi.aktiv = aktiv;
   if (aktiv) {
     poi.marker = PASS_DATEN.map(zeichnePassMarker);
-    document.getElementById('poiHint').textContent = `${poi.marker.length} bekannte Passstraßen auf der Karte.`;
   } else {
     poi.marker.forEach(m => map.removeLayer(m));
     poi.marker = [];

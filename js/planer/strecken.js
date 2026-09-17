@@ -41,23 +41,48 @@ const strecken = {
 
 /* --- 1. Laden ---------------------------------------------------------------- */
 
+/* Zwei Wege zur Liste. Zuerst die JSON-Datei - die wird gepflegt und ist
+   ohne Code-Aenderung austauschbar. Geht das nicht (die App ist direkt als
+   Datei geoeffnet, dort verbietet der Browser fetch; oder ein Server
+   liefert die Datei nicht aus), dieselben Daten als Skript, das
+   werkzeug/strecken-geocode.py aus der JSON erzeugt. Ein Fehlschlag wird
+   NICHT gemerkt: Beim naechsten Haken wird es wieder versucht. */
 async function ladeStrecken() {
   if (strecken.daten) return strecken.daten;
+  strecken.daten = await ladeStreckenJson() || await ladeStreckenSkript();
+  return strecken.daten;
+}
+
+async function ladeStreckenJson() {
   try {
     const antwort = await fetch(STRECKEN_DATEI, { cache: 'no-cache' });
-    if (!antwort.ok) throw new Error(antwort.status);
-    strecken.daten = await antwort.json();
+    if (!antwort.ok) throw new Error(`HTTP ${antwort.status}`);
+    const daten = await antwort.json();
+    return Array.isArray(daten.strecken) && daten.strecken.length ? daten : null;
   } catch (fehler) {
-    console.warn('Streckenliste nicht geladen:', fehler);
-    strecken.daten = { strecken: [] };
+    console.warn('Streckenliste als JSON nicht geladen, versuche das Skript:', fehler);
+    return null;
   }
-  return strecken.daten;
+}
+
+function ladeStreckenSkript() {
+  if (typeof STRECKEN_DE !== 'undefined') return Promise.resolve(STRECKEN_DE);
+  return new Promise(fertig => {
+    const skript = document.createElement('script');
+    skript.src = STRECKEN_DATEI.replace(/\.json$/, '.js');
+    skript.onload = () => fertig(typeof STRECKEN_DE !== 'undefined' ? STRECKEN_DE : null);
+    skript.onerror = () => fertig(null);
+    document.head.appendChild(skript);
+  });
 }
 
 async function setStreckenAktiv(aktiv) {
   strecken.aktiv = aktiv;
-  if (!aktiv) { entferneStreckenMarker(); schreibeStreckenZeile(); return; }
-  await ladeStrecken();
+  if (!aktiv) { entferneStreckenMarker(); return; }
+  if (!(await ladeStrecken())) {
+    showToast('Die Streckenliste ließ sich nicht laden.');
+    return;
+  }
   zeichneStrecken();
 }
 
@@ -77,7 +102,6 @@ function zeichneStrecken() {
   strecken.marker = gezeigt
     .filter(strecke => strecke.koordinaten && Number.isFinite(strecke.koordinaten.lat))
     .map(strecke => streckenMarker(strecke, heute));
-  schreibeStreckenZeile(gezeigt, heute);
 }
 
 function streckenMarker(strecke, heute) {
@@ -124,21 +148,6 @@ function streckenPopupHtml(strecke, heute) {
 function datumDeutsch(iso) {
   const zeit = new Date(iso);
   return Number.isNaN(zeit.getTime()) ? iso : zeit.toLocaleDateString('de-DE');
-}
-
-/* Die Zeile unter den Schaltern: wie viele Strecken der Filter zeigt, wie
-   viele davon heute gesperrt sind und wie viele noch keine Lage haben. */
-function schreibeStreckenZeile(gezeigt = null, heute = new Date()) {
-  const zeile = document.getElementById('streckenHint');
-  if (!zeile) return;
-  if (!strecken.aktiv || !gezeigt) {
-    zeile.textContent = 'Rund 75 Strecken, Sperrungen für Motorräder markiert.';
-    return;
-  }
-  const gesperrt = gezeigt.filter(s => istGesperrt(s, heute).gesperrt).length;
-  const teile = [`${gezeigt.length} Strecken in Deutschland auf der Karte`];
-  if (gesperrt) teile.push(`${gesperrt} heute gesperrt`);
-  zeile.textContent = teile.join(', ') + '.';
 }
 
 /* --- 3. Verkabelung ---------------------------------------------------------- */

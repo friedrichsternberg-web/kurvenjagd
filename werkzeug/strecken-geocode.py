@@ -80,6 +80,23 @@ def main():
         json.dump(daten, datei, ensure_ascii=False, indent=1)
         datei.write('\n')
     print('geschrieben:', os.path.relpath(DATEI, PROJEKT))
+    schreibe_skript(daten)
+
+
+def schreibe_skript(daten):
+    """Dieselben Daten als Skript (daten/strecken-de.js). strecken.js nimmt
+    sie, wenn die JSON-Datei nicht geladen werden kann - etwa wenn die App
+    direkt als Datei geoeffnet ist, wo der Browser kein fetch erlaubt. Die
+    JSON bleibt die Quelle, die gepflegt wird; nach jeder Aenderung dieses
+    Skript laufen lassen (ohne offene Strecken fragt es Nominatim nicht)."""
+    ziel = os.path.join(PROJEKT, 'daten', 'strecken-de.js')
+    with open(ziel, 'w', encoding='utf-8') as datei:
+        datei.write('/* ERZEUGT von werkzeug/strecken-geocode.py aus daten/strecken-de.json -\n'
+                    '   nicht von Hand aendern, sondern die JSON pflegen und das Skript laufen lassen. */\n')
+        datei.write('var STRECKEN_DE = ')
+        json.dump(daten, datei, ensure_ascii=False, separators=(',', ':'))
+        datei.write(';\n')
+    print('geschrieben:', os.path.relpath(ziel, PROJEKT))
 
 
 if __name__ == '__main__':

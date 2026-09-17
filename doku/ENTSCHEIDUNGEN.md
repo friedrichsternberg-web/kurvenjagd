@@ -4900,3 +4900,15 @@ gleich wie bei den Pässen – ein Häkchen unter „Sehenswertes", direkt unter
 Strecken, gesperrte als gesperrt. `filtereStrecken()` bleibt im Kern und im
 Selbsttest, falls eine Auswahl später zurückkommt.
 
+**Zweiter Nachtrag, am selben Tag:** Bei Friedrich stand nach dem Haken
+„0 Strecken" – die JSON-Datei kam nicht an. Die wahrscheinlichste Ursache:
+die App war direkt als Datei geöffnet, und dort verbietet der Browser
+`fetch`; nebenbei lieferte Port 8000 an diesem Tag ein anderes Projekt aus.
+Zwei Folgen: Ein Fehlschlag wird nicht mehr als „leere Liste" gemerkt,
+sondern beim nächsten Haken neu versucht und sonst als Meldung gezeigt.
+Und es gibt einen Rückfall: `daten/strecken-de.js` mit denselben Daten als
+Skript, das erst nachgeladen wird, wenn die JSON scheitert – so lädt die
+Liste überall, ohne dass die App sie beim Start mitschleppt. Die JSON
+bleibt die gepflegte Quelle. Die beiden Hinweiszeilen unter den Häkchen
+(Pässe und Strecken) sind auf Friedrichs Wunsch weg.
+
