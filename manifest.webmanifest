@@ -1,7 +1,7 @@
 {
   "name": "Serpa",
   "short_name": "Serpa",
-  "description": "Kurvige Strecken finden, fahren, teilen. Deine Maschine, deine Ausrüstung, deine Touren.",
+  "description": "Kostenlose Motorrad-App: Routenplaner für kurvige Strecken, Reiseplaner mit Etappen und Kasse, Ausfahrten mit Freunden, Aufzeichnung deiner Fahrten.",
   "lang": "de",
   "dir": "ltr",
   "start_url": "./",

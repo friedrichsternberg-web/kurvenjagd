@@ -1,0 +1,108 @@
+/* ============================================================================
+   Serpa - die statischen Seiten (ueber/, motorrad-routenplaner/, ...)
+
+   Diese Seiten sind fuer Google, Bing und die KI-Suchen da: lesbarer Text
+   ueber die App, ohne dass ein Skript laufen muss. Die App selbst ist eine
+   einzige Seite, die ihren Inhalt erst per JavaScript baut - fuer einen
+   Crawler ist sie fast leer. Was hier steht, ist deshalb die Beschreibung
+   von Serpa in Worten, mit derselben Designsprache (design.css) und einer
+   Handvoll eigener Regeln fuer Fliesstext. Warum: doku/SEO.md.
+   ============================================================================ */
+
+* { box-sizing: border-box; }
+html { background: var(--bg); color: var(--text); font-family: var(--schrift-text); }
+body { margin: 0; line-height: 1.6; font-size: 17px; -webkit-font-smoothing: antialiased; }
+a { color: var(--accent-hell); }
+a:hover { color: var(--text); }
+
+.seite-kopf {
+  display: flex;
+  align-items: center;
+  gap: var(--s4);
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--s4);
+}
+.seite-marke { display: block; flex: 0 0 auto; }
+.seite-marke img { display: block; width: 120px; height: auto; }
+.seite-kopf nav { flex: 1; display: flex; flex-wrap: wrap; gap: var(--s2) var(--s4); font-size: 14px; }
+.seite-kopf nav a { color: var(--muted); text-decoration: none; }
+.seite-kopf nav a:hover, .seite-kopf nav a[aria-current] { color: var(--text); }
+/* Auf dem Handy: Marke und Knopf in der ersten Zeile, die Links darunter
+   in einer Reihe - statt vier Zeilen zwischen beiden. */
+@media (max-width: 640px) {
+  .seite-kopf { flex-wrap: wrap; }
+  .seite-kopf nav { flex: 1 1 100%; order: 3; }
+  .seite-knopf { margin-left: auto; }
+}
+
+.seite-knopf {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: 12px 18px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--glas-rand);
+  background: linear-gradient(to bottom, var(--accent-glanz), var(--accent-tief));
+  color: var(--accent-ink);
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.seite-knopf:hover { color: var(--accent-ink); filter: brightness(1.12); }
+.seite-knopf.ruhig { background: var(--glas-hell); color: var(--text); font-weight: 600; }
+
+main { max-width: 720px; margin: 0 auto; padding: var(--s5) var(--s4) var(--s8); }
+h1 {
+  margin: var(--s4) 0 var(--s3);
+  font-family: var(--schrift-display);
+  font-weight: 800;
+  font-size: clamp(30px, 6vw, 44px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--metall-glanz);
+}
+h2 {
+  margin: var(--s7) 0 var(--s3);
+  font-family: var(--schrift-display);
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: -0.01em;
+  color: var(--metall-glanz);
+}
+h3 { margin: var(--s5) 0 var(--s2); font-size: 18px; font-weight: 700; }
+p { margin: 0 0 var(--s4); }
+.lead { font-size: 20px; line-height: 1.5; color: var(--text); }
+ul { padding-left: 1.2em; }
+li { margin-bottom: var(--s2); }
+.seite-bild { display: block; width: 100%; height: auto; border-radius: var(--r-lg); margin: var(--s5) 0; }
+.hinweis { font-size: 15px; color: var(--muted); }
+
+.karten { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--s3); margin: var(--s4) 0; }
+.karten article {
+  padding: var(--s4);
+  border-radius: var(--r-md);
+  background: var(--glas-hell);
+  border: 1px solid var(--glas-rand);
+}
+.karten h3 { margin-top: 0; }
+.karten p { margin-bottom: 0; font-size: 15px; color: var(--muted); }
+
+.faq details { border-top: 1px solid var(--glas-rand); padding: var(--s3) 0; }
+.faq details:last-child { border-bottom: 1px solid var(--glas-rand); }
+.faq summary { cursor: pointer; font-weight: 700; font-size: 17px; }
+.faq details p { margin: var(--s3) 0 0; color: var(--muted); }
+
+.cta { margin: var(--s7) 0 0; display: flex; flex-wrap: wrap; gap: var(--s3); align-items: center; }
+
+.seite-fuss {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--s5) var(--s4) var(--s7);
+  border-top: 1px solid var(--glas-rand);
+  font-size: 14px;
+  color: var(--muted);
+}
+.seite-fuss nav { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s4); margin-bottom: var(--s3); }
+.seite-fuss a { color: var(--muted); text-decoration: none; }
+.seite-fuss a:hover { color: var(--text); }

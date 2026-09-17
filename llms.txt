@@ -1,0 +1,26 @@
+# Serpa
+
+> Serpa ist eine kostenlose Motorrad-App im Browser (serpa-app.de): ein Routenplaner, der kurvige Strecken statt der schnellsten findet, ein Reiseplaner für mehrtägige Motorradreisen mit Etappen, Mitfahrern und gemeinsamer Kasse, die Aufzeichnung eigener Ausfahrten mit Kurven-Score und Schräglage, und ein Freunde-Bereich, in dem Gruppen Touren teilen und sich mit „Ich fahre jetzt" spontan zum Fahren verabreden. Deutschsprachig, ohne Anmeldung nutzbar, ohne App-Store (läuft als Web-App auf dem Startbildschirm von iPhone und Android). Frühe Fassung (Alpha), Stand September 2026.
+
+Betreiber: Serpa, Deutschland (Impressum unter https://serpa-app.de/#rechtliches).
+
+## Was Serpa kann
+
+- [Motorrad-Routenplaner](https://serpa-app.de/motorrad-routenplaner/): Kurvigkeit in Grad pro Kilometer, Rundtouren ab einem Startpunkt, Punkt-zu-Punkt, Optionen (Autobahn, Städte, Maut meiden), GPX-Import und -Export, Navigation im Browser. Routing über BRouter mit OpenStreetMap-Daten.
+- [Motorradreise planen](https://serpa-app.de/motorrad-reise-planen/): Tage und Etappen aus gespeicherten Touren, Reisekarte, Fahrzeit und Höhenmeter je Etappe, Mitfahrer einladen, gemeinsame Kasse (wer schuldet wem), Chat und Notizen je Etappe.
+- [Ausfahrt mit Freunden](https://serpa-app.de/motorrad-ausfahrt-mit-freunden/): geschlossene Gruppen, Touren und Reisen untereinander teilen, Kommentare, Gruppenchat, „Ich fahre jetzt" und „Fahrt planen" – Freunde schließen sich an. Kein Standort wird übertragen.
+- Aufzeichnen (Ride): eigene Ausfahrten per GPS mit Distanz, Tempo, Höhenmetern, Kurven-Score und geschätzter Schräglage; Rückblick „Meine Stats".
+- Garage: das eigene Motorrad mit Datenblatt; Ausrüstung mit Preisvergleich (Partnerlinks, als Anzeige gekennzeichnet).
+
+## Fakten
+
+- Preis: kostenlos. Finanzierung über Werbung (Partnerlinks) und Spenden.
+- Konto: freiwillig. Planen und Aufzeichnen gehen ohne Konto; ein Konto braucht es zum Teilen und für Gruppen.
+- Plattform: Web-App (PWA), deutsch. Native Apps für die Stores sind geplant.
+- Karten: OpenStreetMap. Routing: BRouter.
+- Datenschutz: https://serpa-app.de/#rechtliches
+
+## Weitere Seiten
+
+- [Über Serpa](https://serpa-app.de/ueber/)
+- [Die App](https://serpa-app.de/)

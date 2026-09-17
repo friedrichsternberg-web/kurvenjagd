@@ -4830,3 +4830,25 @@ Funktion, die es sonst nirgends zu sehen gibt.
 Gezeichnet wird sofort aus dem letzten Stand und noch einmal nach der
 Antwort des Servers, damit beim Öffnen der Garage nichts springt.
 
+## 17.09.2026 — SEO und GEO: Serpa lesbar machen
+
+Friedrich: Serpa soll bei „Motorradapp", „Motorrad Routenplaner",
+„Motorrad Reise" früh erscheinen, und KI-Systeme sollen Serpa vorschlagen.
+Der Plan und die Liste dessen, was nur er selbst tun kann (Search Console,
+Bing, Foren), stehen in `doku/SEO.md`. Die eine Entscheidung dahinter:
+
+**Statische Seiten statt Tricks in der App.** Die App ist eine Seite,
+die ihren Inhalt per JavaScript baut – ein Crawler ohne JavaScript sah
+bis heute nur den Titel. Versteckten Text in die App zu legen wäre der
+falsche Weg (Google wertet das ab, und es wäre nicht ehrlich). Stattdessen
+vier echte Seiten unter eigenen Adressen, je eine Suchabsicht, mit Text,
+der die Funktion erklärt, FAQ und strukturierten Daten – dazu `llms.txt`,
+`robots.txt`, `sitemap.xml`, README und ein Absatz in Worten ganz unten
+auf dem Start. Aussehen aus derselben Designsprache (`stil/seiten.css`),
+damit die Seiten und die App eins sind.
+
+**Kein neues `?v=`-Konzept für die Seiten:** Sie laden `design.css` ohne
+Versionsnummer. Ändert sich die Designsprache, sehen Besucher der
+statischen Seiten den alten Stand bis zum Ablauf des Browser-Caches – für
+Textseiten hinnehmbar, und `pruefe.sh` Regel 6 bleibt bei index.html.
+

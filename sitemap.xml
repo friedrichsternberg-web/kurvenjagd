@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://serpa-app.de/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://serpa-app.de/ueber/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://serpa-app.de/motorrad-routenplaner/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://serpa-app.de/motorrad-reise-planen/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://serpa-app.de/motorrad-ausfahrt-mit-freunden/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+</urlset>

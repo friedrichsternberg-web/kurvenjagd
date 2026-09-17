@@ -1,0 +1,14 @@
+# Serpa - serpa-app.de
+# Alles darf gelesen werden, auch von den Crawlern der KI-Suchen: Wer Serpa
+# empfehlen soll, muss Serpa kennen. Warum: doku/SEO.md.
+
+User-agent: *
+Allow: /
+
+# Nur lokale Werkzeuge und Roh-Daten, nichts fuer die Suche.
+Disallow: /werkzeug/
+Disallow: /supabase/
+Disallow: /betrieb/
+Disallow: /abgelegt/
+
+Sitemap: https://serpa-app.de/sitemap.xml

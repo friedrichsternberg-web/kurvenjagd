@@ -342,6 +342,17 @@
    Webseite, aber bewusst NICHT unlesbar: Die Angaben muessen "leicht
    erkennbar" sein (§ 5 DDG). Wer sie kleiner oder blasser macht als hier,
    erzeugt genau die Angreifbarkeit, die er vermeiden wollte. */
+/* Der eine Absatz in Worten ueber Serpa, ganz unten auf dem Start - fuer
+   Crawler, aber lesbar. Leise wie der Fuss darunter. */
+.ueber-kurz {
+  margin: var(--s6) 0 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--muted);
+  text-align: center;
+}
+.ueber-kurz a { color: var(--muted); }
+.ueber-kurz a:hover { color: var(--text); }
 .rechts-fuss {
   margin: var(--s5) 0 var(--s3);
   text-align: center;

@@ -9,7 +9,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Serpa - Motorrad-Routenplaner</title>
+  <title>Serpa – Motorrad-App: Routenplaner für kurvige Strecken, Reisen und Ausfahrten mit Freunden</title>
 
   <!-- ===== Was diese Seite laden darf =====
        Eine Content-Security-Policy ist eine Erlaubnisliste: Alles, was hier
@@ -160,12 +160,24 @@
   <!-- Fuer die spaetere Webseite und geteilte Routen: So sieht der Link aus,
        wenn ihn jemand in WhatsApp oder Instagram einfuegt. Ohne das steht
        dort nur die nackte Adresse. -->
-  <meta property="og:title" content="Serpa">
+  <meta property="og:title" content="Serpa – die Motorrad-App für kurvige Strecken, Reisen und Freunde">
   <meta property="og:url" content="https://serpa-app.de/">
   <link rel="canonical" href="https://serpa-app.de/">
-  <meta property="og:description" content="Kurvige Strecken finden, fahren, teilen.">
+  <meta property="og:description" content="Kostenloser Motorrad-Routenplaner für kurvige Strecken, Reiseplaner mit Etappen und Kasse, Ausfahrten mit Freunden. Im Browser, ohne App-Store.">
   <meta property="og:type" content="website">
-  <meta name="description" content="Kurvige Strecken finden, fahren, teilen. Deine Maschine, deine Ausrüstung, deine Touren.">
+  <meta property="og:site_name" content="Serpa">
+  <meta property="og:locale" content="de_DE">
+  <meta property="og:image" content="https://serpa-app.de/img/teilen-bild.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Motorradfahrer in einer Passkehre">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="description" content="Kostenlose Motorrad-App: Routenplaner für kurvige Strecken, Reiseplaner mit Etappen und Kasse, Ausfahrten mit Freunden, Aufzeichnung deiner Fahrten. Im Browser, ohne App-Store.">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <!-- Strukturierte Daten fuer Google und die KI-Suchen: Was Serpa ist, in
+       einer Form, die Maschinen lesen. Kein ausfuehrbares Skript - die CSP
+       laesst es deshalb durch. Der Plan dazu: doku/SEO.md. -->
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebApplication", "@id": "https://serpa-app.de/#app", "name": "Serpa", "alternateName": ["Serpa Motorrad-App", "Serpa App"], "url": "https://serpa-app.de/", "applicationCategory": "TravelApplication", "operatingSystem": "Web (iOS, Android, Desktop)", "browserRequirements": "Moderner Browser mit JavaScript", "inLanguage": "de", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "description": "Kostenlose Motorrad-App: Routenplaner für kurvige Strecken (Kurvigkeit in Grad pro Kilometer, Rundtouren, GPX), Reiseplaner mit Etappen, Mitfahrern und gemeinsamer Kasse, Aufzeichnung eigener Ausfahrten und Gruppen, in denen sich Freunde mit „Ich fahre jetzt“ zum Fahren verabreden.", "featureList": ["Motorrad-Routenplaner mit Kurvigkeit in Grad pro Kilometer", "Rundtouren ab Startpunkt", "GPX-Import und GPX-Export", "Navigation im Browser", "Motorradreise planen mit Tagen und Etappen", "Mitfahrer, Reisekasse, Chat und Notizen", "Ausfahrten aufzeichnen: Distanz, Tempo, Kurven-Score, Schräglage", "Gruppen: Touren teilen, Kommentare, Chat", "„Ich fahre jetzt“ und „Fahrt planen“ mit Freunden"], "screenshot": "https://serpa-app.de/img/teilen-bild.jpg", "image": "https://serpa-app.de/img/icon-512.png", "author": {"@id": "https://serpa-app.de/#org"}, "publisher": {"@id": "https://serpa-app.de/#org"}}, {"@type": "Organization", "@id": "https://serpa-app.de/#org", "name": "Serpa", "url": "https://serpa-app.de/", "logo": "https://serpa-app.de/img/icon-512.png"}, {"@type": "WebSite", "@id": "https://serpa-app.de/#site", "url": "https://serpa-app.de/", "name": "Serpa – die Motorrad-App", "inLanguage": "de", "publisher": {"@id": "https://serpa-app.de/#org"}}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Was ist Serpa?", "acceptedAnswer": {"@type": "Answer", "text": "Serpa ist eine kostenlose Motorrad-App im Browser: ein Routenplaner, der kurvige Strecken statt der schnellsten findet, ein Reiseplaner für mehrtägige Motorradreisen mit Freunden und Kasse, die Aufzeichnung eigener Ausfahrten und Gruppen, in denen sich Freunde spontan zum Fahren verabreden."}}, {"@type": "Question", "name": "Was kostet Serpa?", "acceptedAnswer": {"@type": "Answer", "text": "Nichts. Serpa ist kostenlos, finanziert über gekennzeichnete Partnerlinks im Ausrüstungsbereich und Spenden."}}, {"@type": "Question", "name": "Brauche ich ein Konto?", "acceptedAnswer": {"@type": "Answer", "text": "Zum Planen und Aufzeichnen nicht. Ein Konto braucht es zum Teilen, für Reisen mit Mitfahrern und für Gruppen."}}, {"@type": "Question", "name": "Gibt es Serpa im App Store?", "acceptedAnswer": {"@type": "Answer", "text": "Noch nicht. Serpa läuft im Browser und lässt sich auf iPhone und Android auf den Startbildschirm legen. Native Apps sind geplant."}}]}]}</script>
 
   <!-- Leaflet ist die Kartenbibliothek. Wir laden sie von einem CDN,
        damit wir nichts installieren müssen. Hier stand früher die große,
@@ -678,6 +690,15 @@
         <div class="produkt-band" id="garageReifenBand"></div>
       </section>
 
+      <!-- Ein Absatz in Worten, was Serpa ist - der einzige Text auf dieser
+           Seite, den ein Crawler ohne JavaScript liest. Die Links fuehren
+           auf die statischen Seiten (doku/SEO.md). -->
+      <p class="ueber-kurz">
+        Serpa ist eine kostenlose Motorrad-App: <a href="motorrad-routenplaner/">Routenplaner
+        f&uuml;r kurvige Strecken</a>, <a href="motorrad-reise-planen/">Reiseplaner mit Etappen und
+        Kasse</a>, <a href="motorrad-ausfahrt-mit-freunden/">Ausfahrten mit Freunden</a> und die
+        Aufzeichnung deiner Fahrten. <a href="ueber/">Mehr &uuml;ber Serpa &rsaquo;</a>
+      </p>
       <!-- Die Pflichtangaben. Dezent im Fuss, wie auf jeder Webseite, aber
            lesbar und auf dem Startbildschirm. -->
       <p class="rechts-fuss">

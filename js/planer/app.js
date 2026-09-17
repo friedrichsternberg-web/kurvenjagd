@@ -4151,6 +4151,15 @@ verkabele('btnRegelnLesen', 'click', () => {
 });
 verkabele('btnRechtlichesProfil', 'click', () => zeigeRechtliches('profilScreen'));
 verkabele('btnRechtlichesZurueck', 'click', zurückVomRechtlichen);
+/* Die Rechtstexte haben seit dem 17.09.2026 eine Adresse:
+   serpa-app.de/#rechtliches. Die statischen Seiten (ueber/,
+   motorrad-routenplaner/ ...) verlinken dorthin - ein Impressum muss von
+   jeder Seite aus erreichbar sein. Die Raute wird danach entfernt, sonst
+   fuehrte jedes Neuladen wieder hierher. */
+if (window.location.hash === '#rechtliches') {
+  zeigeRechtliches('garageScreen');
+  history.replaceState(null, '', window.location.pathname + window.location.search);
+}
 // Den Zurueck-Knopf der Produktseite verkabelt shop.js selbst: Wohin er
 // fuehrt, haengt davon ab, ob man aus dem Shop oder aus der Garage kam -
 // und das weiss nur shop.js.
