@@ -11,8 +11,8 @@
    Browser gesetzt, also immer scharf, bei jeder Zoomstufe. Die Kacheln
    liefert OpenFreeMap (tiles.openfreemap.org): kostenlos, ohne Schluessel,
    ohne Obergrenze, gewerbliche Nutzung ausdruecklich erlaubt, Daten von
-   OpenStreetMap. Zwei Stile, je Erscheinung einer - im Dunklen eine dunkle
-   Karte, im Hellen die bunte "liberty", die aussieht wie die alte.
+   OpenStreetMap. Der Stil ist "liberty": bunt und klar, sieht aus wie die
+   alte Karte - nur scharf.
 
    DIE BRUECKE: Leaflet bleibt die Karte, mit allen Markern, Linien und
    Popups aus app.js. MapLibre zeichnet nur den Grund darunter, als eine
@@ -28,8 +28,14 @@
    app.js. Braucht aktivesThema() aus thema.js fuer den Stil.
    ============================================================================ */
 
+/* Ein Stil fuer beide Erscheinungen: "liberty", bunt und klar, so wie die
+   alte OSM-Karte aussah, nur scharf. Die dunklen Stile ("fiord", "dark")
+   waren kurz drin und sind raus - Friedrich fand den Blaustich zu stark,
+   und eine Landkarte ist zum Lesen da, nicht zum Passen zur Oberflaeche.
+   Die Marke bleibt je Erscheinung, falls es einmal einen dunklen Stil
+   gibt, der Strassen und Namen klar zeigt. */
 const KARTEN_STIL = {
-  dunkel: 'https://tiles.openfreemap.org/styles/fiord',
+  dunkel: 'https://tiles.openfreemap.org/styles/liberty',
   hell:   'https://tiles.openfreemap.org/styles/liberty',
 };
 const KARTEN_RASTER = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';

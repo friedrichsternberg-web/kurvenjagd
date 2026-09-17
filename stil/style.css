@@ -4588,7 +4588,9 @@ body.nav-modus .nav-fuss {
 .karten-knopf {
   position: absolute;
   right: var(--s4);
-  bottom: var(--s4);
+  /* Hoch genug, dass die Schublade mit ihrer runden Oberkante den Knopf
+     nicht anschneidet - sie ragt gut 40 Punkt in die Karte hinein. */
+  bottom: calc(var(--s7) + var(--s4));
   z-index: 400;
   width: 44px; height: 44px;
   display: grid;
@@ -6260,6 +6262,8 @@ body.nav-modus .karten-knopf { display: none; }
 .fahren-widget { display: flex; flex-direction: column; gap: var(--s3); }
 .fahren-widget .widget-kopf { margin-bottom: 0; }
 .fahren-widget .fahrt-jetzt-knopf { padding: 16px 14px; font-size: 17px; }
+.fahren-einladung .widget-name { margin: 0; }
+.fahren-satz { margin: 0; font-size: 14px; line-height: 1.45; color: var(--muted); }
 .start-standort-karte {
   height: 220px;
   border-radius: var(--r-lg);

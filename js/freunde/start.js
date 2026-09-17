@@ -66,9 +66,12 @@ function zeichneGarageFreunde() {
     zeichneStartStandortKarte(mitStandort);
     stelleStartTakt(mitStandort.length > 0);
   }
+  // Die Freunde-Karte nur mit Gruppe - ohne steht die Einladung schon
+  // oben im Widget "Jetzt", zweimal muss sie niemand lesen.
   if (karte) {
-    karte.innerHTML = freundeKarteHtml();
-    karte.hidden = false;
+    const html = angemeldeterNutzer && startGruppen[0] ? freundeKarteHtml() : '';
+    karte.innerHTML = html;
+    karte.hidden = !html;
   }
 }
 
@@ -83,6 +86,7 @@ function meineStartFahrtJetzt() {
 function fahrenWidgetHtml() {
   const laeuft = meineStartFahrtJetzt();
   const gruppe = startGruppen[0];
+  if (!gruppe) return fahrenEinladungHtml();
   return `
     <div class="karte fahren-widget">
       <div class="widget-kopf">
@@ -104,6 +108,21 @@ function fahrenWidgetHtml() {
                ${symbol('kalender', 'klein')} Fahrt planen
              </button>
            </div>`}
+    </div>`;
+}
+
+/* Ohne Gruppe (oder ohne Konto) sagt das Widget in einem Satz, wofuer
+   es da ist, und bietet den einen naechsten Schritt an. */
+function fahrenEinladungHtml() {
+  return `
+    <div class="karte fahren-widget fahren-einladung">
+      <div class="widget-kopf"><span class="abzeichen">Jetzt</span></div>
+      <h3 class="widget-name">Gemeinsam fahren</h3>
+      <p class="fahren-satz">Gr&uuml;nde eine Gruppe mit deinen Freunden: Touren und Reisen
+        zusammen planen, und alle sehen live, dass du f&auml;hrst &ndash; und wo.</p>
+      ${angemeldeterNutzer
+        ? `<button type="button" class="btn widget-knopf" data-start-gruppe-neu>${symbol('plus', 'klein')} Gruppe erstellen</button>`
+        : `<button type="button" class="btn widget-knopf" data-start-konto>${symbol('profil', 'klein')} Konto anlegen</button>`}
     </div>`;
 }
 

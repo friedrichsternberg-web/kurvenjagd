@@ -5107,3 +5107,17 @@ im HTML, weil `#neigungStatus` und der Knopf weiter die Meldungen tragen
 (`zeigeNeigungsMeldung` schreibt an beide Orte). Die Erlaubnis für die
 Bewegungssensoren braucht auf dem iPhone eine echte Fingerbewegung; der
 Tipp im Blatt ist eine.
+
+## 17.09.2026 – Nachtrag: Karte wieder bunt, Widget „Jetzt“ unter dem Bike
+
+Der dunkle Kartenstil („fiord“) war Friedrich zu blau. Jetzt ist es in
+beiden Erscheinungen „liberty“: bunt, klar, sieht aus wie die alte
+OSM-Karte, nur scharf. Eine Landkarte ist zum Lesen da, nicht zum Passen
+zur Oberfläche; die Marke je Erscheinung bleibt, falls es einmal einen
+dunklen Stil gibt, der Straßen und Namen klar zeigt. Das Widget „Jetzt“
+steht unter der Bike-Karte statt darüber; ohne Gruppe zeigt es die
+Einladung in einem Satz („Gründe eine Gruppe …“) mit „Gruppe erstellen“
+bzw. „Konto anlegen“, und die Freunde-Karte weiter unten bleibt dann weg,
+damit die Einladung nicht zweimal steht. Der Standort-Knopf auf der Karte
+sitzt 64 statt 16 Punkt über der Unterkante, weil die Schublade mit ihrer
+runden Oberkante rund 40 Punkt in die Karte ragt und ihn anschnitt.
