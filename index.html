@@ -174,10 +174,16 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="description" content="Kostenlose Motorrad-App: Routenplaner für kurvige Strecken, Reiseplaner mit Etappen und Kasse, Ausfahrten mit Freunden, Aufzeichnung deiner Fahrten. Im Browser, ohne App-Store.">
   <meta name="robots" content="index, follow, max-image-preview:large">
+  <!-- Die Schrift vorab laden und die Verbindungen zu Karten und Server
+       frueh aufbauen - beides spart beim ersten Bild Zeit, und die zaehlt
+       Google mit (doku/SEO.md). -->
+  <link rel="preload" href="fonts/inter-4.1-variable-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preconnect" href="https://tile.openstreetmap.org">
+  <link rel="preconnect" href="https://copydwpdqpnwjvknsakz.supabase.co">
   <!-- Strukturierte Daten fuer Google und die KI-Suchen: Was Serpa ist, in
        einer Form, die Maschinen lesen. Kein ausfuehrbares Skript - die CSP
        laesst es deshalb durch. Der Plan dazu: doku/SEO.md. -->
-  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebApplication", "@id": "https://serpa-app.de/#app", "name": "Serpa", "alternateName": ["Serpa Motorrad-App", "Serpa App"], "url": "https://serpa-app.de/", "applicationCategory": "TravelApplication", "operatingSystem": "Web (iOS, Android, Desktop)", "browserRequirements": "Moderner Browser mit JavaScript", "inLanguage": "de", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "description": "Kostenlose Motorrad-App: Routenplaner für kurvige Strecken (Kurvigkeit in Grad pro Kilometer, Rundtouren, GPX), Reiseplaner mit Etappen, Mitfahrern und gemeinsamer Kasse, Aufzeichnung eigener Ausfahrten und Gruppen, in denen sich Freunde mit „Ich fahre jetzt“ zum Fahren verabreden.", "featureList": ["Motorrad-Routenplaner mit Kurvigkeit in Grad pro Kilometer", "Rundtouren ab Startpunkt", "GPX-Import und GPX-Export", "Navigation im Browser", "Motorradreise planen mit Tagen und Etappen", "Mitfahrer, Reisekasse, Chat und Notizen", "Ausfahrten aufzeichnen: Distanz, Tempo, Kurven-Score, Schräglage", "Gruppen: Touren teilen, Kommentare, Chat", "„Ich fahre jetzt“ und „Fahrt planen“ mit Freunden"], "screenshot": "https://serpa-app.de/img/teilen-bild.jpg", "image": "https://serpa-app.de/img/icon-512.png", "author": {"@id": "https://serpa-app.de/#org"}, "publisher": {"@id": "https://serpa-app.de/#org"}}, {"@type": "Organization", "@id": "https://serpa-app.de/#org", "name": "Serpa", "url": "https://serpa-app.de/", "logo": "https://serpa-app.de/img/icon-512.png"}, {"@type": "WebSite", "@id": "https://serpa-app.de/#site", "url": "https://serpa-app.de/", "name": "Serpa – die Motorrad-App", "inLanguage": "de", "publisher": {"@id": "https://serpa-app.de/#org"}}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Was ist Serpa?", "acceptedAnswer": {"@type": "Answer", "text": "Serpa ist eine kostenlose Motorrad-App im Browser: ein Routenplaner, der kurvige Strecken statt der schnellsten findet, ein Reiseplaner für mehrtägige Motorradreisen mit Freunden und Kasse, die Aufzeichnung eigener Ausfahrten und Gruppen, in denen sich Freunde spontan zum Fahren verabreden."}}, {"@type": "Question", "name": "Was kostet Serpa?", "acceptedAnswer": {"@type": "Answer", "text": "Nichts. Serpa ist kostenlos, finanziert über gekennzeichnete Partnerlinks im Ausrüstungsbereich und Spenden."}}, {"@type": "Question", "name": "Brauche ich ein Konto?", "acceptedAnswer": {"@type": "Answer", "text": "Zum Planen und Aufzeichnen nicht. Ein Konto braucht es zum Teilen, für Reisen mit Mitfahrern und für Gruppen."}}, {"@type": "Question", "name": "Gibt es Serpa im App Store?", "acceptedAnswer": {"@type": "Answer", "text": "Noch nicht. Serpa läuft im Browser und lässt sich auf iPhone und Android auf den Startbildschirm legen. Native Apps sind geplant."}}]}]}</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebApplication", "@id": "https://serpa-app.de/#app", "name": "Serpa", "alternateName": ["Serpa Motorrad-App", "Serpa App"], "url": "https://serpa-app.de/", "applicationCategory": "TravelApplication", "operatingSystem": "Web (iOS, Android, Desktop)", "browserRequirements": "Moderner Browser mit JavaScript", "inLanguage": "de", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "description": "Kostenlose Motorrad-App: Routenplaner für kurvige Strecken (Kurvigkeit in Grad pro Kilometer, Rundtouren, GPX), Reiseplaner mit Etappen, Mitfahrern und gemeinsamer Kasse, Aufzeichnung eigener Ausfahrten und Gruppen, in denen sich Freunde mit „Ich fahre jetzt“ zum Fahren verabreden.", "featureList": ["Motorrad-Routenplaner mit Kurvigkeit in Grad pro Kilometer", "Rundtouren ab Startpunkt", "GPX-Import und GPX-Export", "Navigation im Browser", "Motorradreise planen mit Tagen und Etappen", "Mitfahrer, Reisekasse, Chat und Notizen", "Ausfahrten aufzeichnen: Distanz, Tempo, Kurven-Score, Schräglage", "Gruppen: Touren teilen, Kommentare, Chat", "„Ich fahre jetzt“ und „Fahrt planen“ mit Freunden"], "screenshot": "https://serpa-app.de/img/teilen-bild.jpg", "image": "https://serpa-app.de/img/icon-512.png", "author": {"@id": "https://serpa-app.de/#org"}, "publisher": {"@id": "https://serpa-app.de/#org"}}, {"@type": "Organization", "@id": "https://serpa-app.de/#org", "name": "Serpa", "url": "https://serpa-app.de/", "logo": "https://serpa-app.de/img/icon-512.png", "sameAs": ["https://github.com/friedrichsternberg-web/kurvenjagd"]}, {"@type": "WebSite", "@id": "https://serpa-app.de/#site", "url": "https://serpa-app.de/", "name": "Serpa – die Motorrad-App", "inLanguage": "de", "publisher": {"@id": "https://serpa-app.de/#org"}}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Was ist Serpa?", "acceptedAnswer": {"@type": "Answer", "text": "Serpa ist eine kostenlose Motorrad-App im Browser: ein Routenplaner, der kurvige Strecken statt der schnellsten findet, ein Reiseplaner für mehrtägige Motorradreisen mit Freunden und Kasse, die Aufzeichnung eigener Ausfahrten und Gruppen, in denen sich Freunde spontan zum Fahren verabreden."}}, {"@type": "Question", "name": "Was kostet Serpa?", "acceptedAnswer": {"@type": "Answer", "text": "Nichts. Serpa ist kostenlos, finanziert über gekennzeichnete Partnerlinks im Ausrüstungsbereich und Spenden."}}, {"@type": "Question", "name": "Brauche ich ein Konto?", "acceptedAnswer": {"@type": "Answer", "text": "Zum Planen und Aufzeichnen nicht. Ein Konto braucht es zum Teilen, für Reisen mit Mitfahrern und für Gruppen."}}, {"@type": "Question", "name": "Gibt es Serpa im App Store?", "acceptedAnswer": {"@type": "Answer", "text": "Noch nicht. Serpa läuft im Browser und lässt sich auf iPhone und Android auf den Startbildschirm legen. Native Apps sind geplant."}}]}]}</script>
 
   <!-- Leaflet ist die Kartenbibliothek. Wir laden sie von einem CDN,
        damit wir nichts installieren müssen. Hier stand früher die große,
@@ -533,12 +539,16 @@
            Ueberschrift daneben: Die Leiste sagt "Start", die Wortmarke ist
            der Titel, und die erste Karte darunter sagt, worum es geht. -->
       <header class="start-kopf nur-hoch">
-        <p class="wortmarke-garage">
+        <!-- Als <h1>, seit dem 17.09.2026: Die Wortmarke ist der Titel der
+             Seite, und Suchmaschinen sollen das als Ueberschrift lesen -
+             mit dem Alt-Text als dem, was sie sagt. Sieht aus wie vorher,
+             style.css nimmt dem h1 Groesse und Abstand. -->
+        <h1 class="wortmarke-garage">
           <span class="wortmarke-zeile">
-            <img class="wortmarke-bild" src="img/logo-serpa.webp?v=114" alt="Serpa" width="800" height="155">
+            <img class="wortmarke-bild" src="img/logo-serpa.webp?v=114" alt="Serpa – Motorrad-App für kurvige Strecken, Reisen und Ausfahrten mit Freunden" width="800" height="155">
             <span class="alpha-schild" title="Fr&uuml;he Fassung: Es wird noch gebaut, Funktionen k&ouml;nnen sich &auml;ndern.">Alpha</span>
           </span>
-        </p>
+        </h1>
         <div class="kopf-knoepfe">
           <button class="glas-rund" id="btnKontoRund" title="Konto" aria-label="Konto">
             <!-- Ist ein Profilbild da, tritt es an die Stelle des Symbols
@@ -2404,9 +2414,9 @@
              Planer, an dem die Marke ueberhaupt auftritt - dann soll sie
              dieselbe sein wie ueberall sonst. Im Querformat blendet quer.css
              ihn aus, dort steht der Schriftzug schon in der Leiste darueber. -->
-        <h1 class="wortmarke-kopf">
+        <p class="wortmarke-kopf">
           <img class="wortmarke-bild" src="img/logo-serpa.webp?v=114" alt="Serpa" width="800" height="155">
-        </h1>
+        </p>
         <p class="sub">Routenplaner</p>
       </div>
       <button class="back-to-start" id="btnZumStartmenü" title="Zur Garage">&larr;</button>

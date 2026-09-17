@@ -2637,7 +2637,7 @@ body.nav-modus .leaflet-control-container { display: none; }
      und Karte aneinanderkleben; zusammen sind es jetzt 40 Punkte. */
   margin-bottom: var(--s3);
 }
-.start-kopf .wortmarke-garage { margin: 0; }
+.start-kopf .wortmarke-garage { margin: 0; font-size: inherit; font-weight: inherit; line-height: inherit; }
 /* 172 Punkte: gut drei Viertel der Anmeldegroesse (220). Die alte Regel
    "klein, damit es nicht mit Meine Garage streitet" ist mit dieser
    Ueberschrift gegangen - das Logo IST jetzt der Titel der Seite. */

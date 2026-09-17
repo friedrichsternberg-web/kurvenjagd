@@ -57,6 +57,12 @@ nicht empfohlen.**
 
 8. **`serpa-app.de/#rechtliches`** als Adresse fürs Impressum, damit die
    statischen Seiten darauf verlinken können.
+9. **Feinschliff** (17.09.2026, zweiter Durchgang): die Wortmarke auf dem
+   Start ist jetzt ein `<h1>` mit sprechendem Alt-Text (die einzige
+   Hauptüberschrift des Dokuments; der Planer-Kopf ist ein `<p>`); Schrift
+   vorab geladen und Verbindungen zu Karten und Server früh aufgebaut
+   (`preload`, `preconnect`); `404.html` für alte Links; `sameAs` auf das
+   GitHub-Repository; `lastmod` in der Sitemap; `id` im Manifest.
 
 ## Was Friedrich selbst tun muss (kostenlos, je einmal)
 

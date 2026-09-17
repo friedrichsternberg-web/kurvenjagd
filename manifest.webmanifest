@@ -4,6 +4,7 @@
   "description": "Kostenlose Motorrad-App: Routenplaner für kurvige Strecken, Reiseplaner mit Etappen und Kasse, Ausfahrten mit Freunden, Aufzeichnung deiner Fahrten.",
   "lang": "de",
   "dir": "ltr",
+  "id": "/",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
