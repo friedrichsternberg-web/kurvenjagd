@@ -5950,6 +5950,77 @@ body.nav-modus .karten-knopf { display: none; }
 .beitrag-knoepfe { display: flex; gap: var(--s2); margin: var(--s4) 0 var(--s5); }
 .beitrag-knoepfe .btn { flex: 1; }
 .beitrag-kommentare .kommentare { margin-top: 0; padding-top: 0; border-top: 0; }
+
+/* ---------- Fahrten in der Gruppe (seit 15.09.2026) ----------
+   Der grosse Knopf "Ich fahre jetzt" traegt die Signalfarbe, "Fahrt
+   planen" steht als Glas daneben. Eine laufende Fahrt hat einen kleinen
+   pulsierenden Punkt - das eine Zeichen fuer "gerade jetzt". */
+.fahrten-karte { display: flex; flex-direction: column; gap: var(--s3); margin-bottom: var(--s5); }
+.fahrten-karte .widget-kopf { margin-bottom: 0; }
+.fahrten-knoepfe { display: flex; gap: var(--s2); }
+.fahrten-knoepfe .fahrt-jetzt-knopf { flex: 1.4; }
+.fahrt-laeuft {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s3);
+  border-radius: var(--r-md);
+  border: 1px solid color-mix(in srgb, var(--accent-hell) 45%, transparent);
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.fahrt-laeuft-text { flex: 1; min-width: 0; font-weight: 600; }
+.fahrt-laeuft-text i, .fahrt-kopf i { font-style: normal; opacity: 0.5; margin: 0 3px; }
+.fahrt-puls {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 6px;
+  border-radius: var(--r-pill);
+  background: var(--good);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--good) 60%, transparent);
+  animation: fahrtPuls 1.6s ease-out infinite;
+}
+@keyframes fahrtPuls {
+  to { box-shadow: 0 0 0 8px transparent; }
+}
+.fahrt-liste { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--s2); }
+.fahrt {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+  padding: var(--s3);
+  border-radius: var(--r-md);
+  border: 1px solid var(--glas-rand);
+  background: var(--glas-hell);
+}
+.fahrt.jetzt { border-color: color-mix(in srgb, var(--good) 45%, transparent); }
+.fahrt-kopf { display: flex; align-items: center; gap: var(--s2); }
+.fahrt-wer { font-weight: 600; }
+.fahrt-wann { margin-left: auto; font-size: 13px; color: var(--muted); white-space: nowrap; display: inline-flex; align-items: center; }
+.fahrt-tour {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s2) var(--s3);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--glas-rand);
+  background: var(--glas-hauch);
+  color: var(--accent-hell);
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.fahrt-tour span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fahrt-tour i { font-style: normal; opacity: 0.6; }
+.fahrt-text { margin: 0; font-size: 14px; line-height: 1.4; }
+.fahrt-fuss { display: flex; align-items: center; gap: var(--s3); }
+.fahrt-dabei-text { flex: 1; min-width: 0; font-size: 13px; color: var(--muted); }
+.fahrt-fuss .mitfahrer-punkt { width: 28px; height: 28px; font-size: 12px; }
+.fahrt-fuss .mitfahrer-punkt .ic { width: 14px; height: 14px; }
+/* Tag und Uhrzeit nebeneinander im Blatt. */
+.fahrt-zeitzeile { display: flex; gap: var(--s2); }
+.fahrt-zeitzeile input { flex: 1; min-width: 0; }
 .gruppen-strom-titel { margin: 0 0 var(--s3); }
 /* Das Chatfenster: der Verlauf hat eine feste Hoehe und rollt in sich,
    das Feld steht darunter fest. Auf dem Handy etwa ein Drittel des

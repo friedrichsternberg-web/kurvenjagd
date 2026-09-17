@@ -4767,3 +4767,36 @@ Knopf „Einladen". Die Karte ist nicht höher geworden – die Zeile ersetzt
 die Textzeile „2 Leute · einladen", und der Knopf ist so hoch wie ein
 Gesicht.
 
+## 15.09.2026 (nachts) — „Ich fahre" und „Fahrt planen" in der Gruppe
+
+Das Hauptmerkmal aus CLAUDE.md, zuerst im geschlossenen Kreis einer
+Gruppe, weil dort Sichtbarkeit und Vertrauen schon geregelt sind. Zwei
+Arten in einer Karte (Migration 11, `gruppen_fahrten` und
+`gruppen_mitfahrer`):
+
+**„Ich fahre jetzt"** ist der große blaue Knopf. Solange die Fahrt läuft,
+steht statt des Knopfes „Du fährst gerade" mit „Beenden" – zwei laufende
+Fahrten derselben Person gäben keinen Sinn. **„Fahrt planen"** fragt Tag,
+Uhrzeit (Vorgabe morgen 10:00), Tour und einen Satz.
+
+**Die Tour einer Fahrt ist ein Beitrag der Gruppe.** Wer eine eigene Tour
+wählt, stellt sie damit in die Gruppe (teileInGruppe liefert seit heute die
+Kennung zurück). So hat die Strecke ihre Karte und ihre Kommentare dort,
+wo alle sie sehen, und die Fahrt verweist nur darauf.
+
+**Kein Standort.** Eine Fahrt sagt wann und was, nicht wo jemand gerade
+ist. Der Treffpunkt steht im Satz oder im Chat. Das steht so auch in der
+Datenschutzerklärung (Punkt 8).
+
+**Vorbei von selbst:** Die Lesefunktion gibt Fahrten bis acht Stunden nach
+Beginn heraus. Niemand muss aufräumen, und eine „Ich fahre jetzt" von
+gestern steht morgen nicht mehr da. Der Fahrer kann vorher beenden oder
+absagen, der Gründer jede Fahrt entfernen.
+
+**Anschließen** ist eine Zeile je Person und Fahrt; „Doch nicht" löscht sie.
+Der Takt der Gruppe holt die Fahrten alle fünf Sekunden mit und zeichnet
+die Karte nur neu, wenn sich etwas geändert hat (Vergleich als JSON).
+
+Offen: die Push-Nachricht („Anna fährt jetzt"), ohne die das Spontane nur
+sieht, wer die App gerade offen hat. Das ist der Punkt 2 aus AUFGABEN.md.
+

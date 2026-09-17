@@ -1043,3 +1043,13 @@ Nebenbei konnte `index.html` von `leaflet-src.js` auf die kleinere
 - **Ungelesene Nachrichten in der Gruppenliste.** Der Zähler steht nur in
   der offenen Gruppe; die Liste müsste dafür je Gruppe die Nachrichten
   laden. Mit Realtime oder einer Zählfunktion auf dem Server lösen.
+- **Push für Fahrten.** Seit dem 15.09.2026 gibt es „Ich fahre jetzt" und
+  „Fahrt planen" in der Gruppe – aber nur, wer die App gerade offen hat,
+  sieht es. Web Push (auch auf dem iPhone, sobald die App auf dem
+  Startbildschirm liegt) ist der nächste Schritt: „Anna fährt jetzt",
+  „Bernd hat sich angeschlossen", „neue Nachricht in Alpen-Crew".
+- **Fahrten außerhalb von Gruppen.** Heute nur im geschlossenen Kreis. Das
+  Konzept sieht auch „öffentlich im Umkreis" vor – dafür braucht es den
+  ungefähren Ort einer Fahrt und einen Meldeweg (DSA), wie bei den
+  öffentlichen Touren.
+

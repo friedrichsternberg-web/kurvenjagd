@@ -176,12 +176,12 @@ async function loescheGruppe(gruppeId) {
 async function teileInGruppe(gruppeId, freigabe) {
   if (!freigabe) return { ok: false, meldung: 'Da ist nichts zum Teilen.' };
   if (!gruppenMoeglich()) return { ok: false, meldung: 'Dafür brauchst du ein Konto.' };
-  const { error } = await backend.rpc('gruppen_beitrag_teilen', {
+  const { data, error } = await backend.rpc('gruppen_beitrag_teilen', {
     p_gruppe: gruppeId, p_art: freigabe.art, p_quelle_id: freigabe.quelle_id,
     p_name: freigabe.name, p_daten: freigabe.daten,
   });
   if (error) return { ok: false, meldung: error.message || 'Das Teilen hat nicht geklappt.' };
-  return { ok: true, meldung: `„${freigabe.name}“ ist in der Gruppe.` };
+  return { ok: true, id: data, meldung: `„${freigabe.name}“ ist in der Gruppe.` };
 }
 
 async function loescheBeitrag(beitragId) {
