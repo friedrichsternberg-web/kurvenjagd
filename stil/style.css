@@ -1130,14 +1130,17 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
    und die Signalfarbe steckt in Schrift und Symbol des aktiven Segments -
    nicht in einer gefuellten Flaeche. So bleibt die Farbe ein Zeichen und
    wird keine Deko. */
+/* Der Umschalter ist seit dem 17.09.2026 dieselbe Scheibe wie eine Karte:
+   Glasfuellung, Kante, Lichtkante oben. Der aktive Reiter ist eine
+   Glaspille mit dem Blau darunter - dieselbe Sprache wie der Knopf. */
 .segmented {
   display: flex;
-  background: var(--schatten-hauch);
-  border: 1px solid var(--glas-hell);
+  background: var(--glas-hell);
+  border: 1px solid var(--karten-rand);
   border-radius: var(--r-pill);
   padding: 4px;
   gap: 4px;
-  box-shadow: inset 0 2px 6px var(--schatten-weich);
+  box-shadow: inset 0 1px 0 var(--glas-licht), 0 4px 14px var(--schatten-weich);
 }
 .seg {
   flex: 1;
@@ -1155,11 +1158,14 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   transition: color 0.14s ease, background 0.14s ease;
 }
 .seg.active {
-  background: var(--glas-heller);
-  border-color: var(--glas-rand);
-  color: var(--accent-hell);
+  background:
+    linear-gradient(to bottom, var(--glas-heller), var(--glas-hauch)),
+    color-mix(in srgb, var(--accent) 42%, transparent);
+  border-color: var(--glas-licht);
+  color: var(--text);
   box-shadow:
     inset 0 1px 0 var(--glas-licht),
+    0 0 0 1px color-mix(in srgb, var(--accent-hell) 40%, transparent),
     0 3px 10px var(--schatten-weich);
 }
 
@@ -1239,9 +1245,10 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
      gibt (Grundsatz 1 in design.css, dritter Fall). */
   background:
     linear-gradient(to bottom, var(--glas-heller), var(--glas-hauch)),
-    color-mix(in srgb, var(--accent) 22%, transparent);
+    color-mix(in srgb, var(--accent) 42%, transparent);
   backdrop-filter: var(--glas-filter);
   -webkit-backdrop-filter: var(--glas-filter);
+  border-color: var(--glas-licht);
   color: var(--text);
   font-family: var(--schrift-text);
   font-size: 15px;
@@ -1250,8 +1257,8 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   box-shadow:
     inset 0 1px 0 var(--glas-licht),
     inset 0 -1px 0 var(--schatten-hauch),
-    0 0 0 1px color-mix(in srgb, var(--accent-hell) 28%, transparent),
-    0 0 18px color-mix(in srgb, var(--accent-hell) 22%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--accent-hell) 45%, transparent),
+    0 0 22px color-mix(in srgb, var(--accent-hell) 35%, transparent),
     0 8px 22px var(--schatten-weich);
   transition: filter 0.12s ease, transform 0.14s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
@@ -1595,24 +1602,25 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
    Der Umschalter ist derselbe .segmented wie im Planer. Er steht direkt
    unter der Ueberschrift, damit auf einen Blick klar ist, dass dieser
    Bildschirm zwei Inhalte hat - und nicht einen mit einer Zusatzleiste. */
-.touren-umschalter { margin: 0 0 var(--s4); }
-/* Der abgesetzte Reiter "Entdecken": ein schmaler Strich davor und das
+/* Die Leiste ueber den Touren: links der Umschalter fuer das Eigene
+   (Touren, Reisen), rechts ganz fuer sich der Reiter "Entdecken" mit dem
    Weltsymbol - derselbe Globus, der an einer Tour sagt, dass sie
-   oeffentlich ist. Die beiden Reiter links sind Eigenes, dieser eine ist
-   die Welt. */
-.touren-umschalter .seg-trenner {
-  flex: 0 0 1px;
-  align-self: stretch;
-  margin: 6px var(--s1);
-  background: var(--glas-rand);
-}
-.touren-umschalter .seg-abgesetzt {
+   oeffentlich ist. Eigenes und die Welt sind zwei Scheiben, keine. */
+.touren-leiste { display: flex; align-items: stretch; gap: var(--s2); margin: 0 0 var(--s4); }
+.touren-leiste .touren-umschalter { flex: 1; margin: 0; }
+.entdecken-reiter {
+  flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
+  padding: 9px 16px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--karten-rand);
+  background: var(--glas-hell);
+  box-shadow: inset 0 1px 0 var(--glas-licht), 0 4px 14px var(--schatten-weich);
 }
-.touren-umschalter .seg-abgesetzt .ic { width: 15px; height: 15px; }
+.entdecken-reiter .ic { width: 15px; height: 15px; }
 
 /* Der Satz ueber dem Entdecken-Teil. Er steht bewusst NUR dort: In der
    eigenen Liste hat er nichts zu suchen, dort weiss man schon, was man hat. */
@@ -1831,7 +1839,13 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 /* Der kleine Umschalter zwischen den Herkuenften. Schmaler als der grosse
    Reiter-Umschalter darueber, damit die Rangordnung sichtbar bleibt:
    erst Meine/Entdecken, darunter die Herkunft. */
-.quellen-umschalter { margin: var(--s3) 0 var(--s4); }
+.quellen-umschalter { max-width: 380px; margin: var(--s4) auto; }
+/* Die Suche im Entdecken-Teil als eigene Karte, damit sie wie ein Widget
+   steht und nicht wie loses Zubehoer ueber der Liste. */
+.entdecken-filter { margin-bottom: var(--s4); }
+.entdecken-filter .such-feld { margin-bottom: var(--s3); }
+.entdecken-filter .entdecken-zeile { margin-top: 0; }
+.entdecken-filter .hint:empty { display: none; }
 .quellen-umschalter .seg { padding: 6px 0; font-size: 12.5px; }
 
 /* Die Zwischenzeile, wenn die Serpa-Liste nach Bundesland geordnet ist.
@@ -2715,7 +2729,7 @@ body.nav-modus .leaflet-control-container { display: none; }
     var(--glas-hell);
   /* Kein backdrop-filter: Karten sind Inhalt, nicht Bedienschicht - siehe
      "Wo das Glas wirklich Glas ist" in design.css. */
-  border: 1px solid var(--glas-rand);
+  border: 1px solid var(--karten-rand);
   box-shadow:
     inset 0 1px 0 var(--glas-licht),
     inset 0 -1px 0 var(--schatten-hauch),
@@ -6061,7 +6075,7 @@ body.nav-modus .karten-knopf { display: none; }
   gap: var(--s2);
   padding: var(--s3);
   border-radius: var(--r-md);
-  border: 1px solid var(--glas-rand);
+  border: 1px solid var(--karten-rand);
   background: var(--glas-hell);
 }
 .fahrt.jetzt { border-color: color-mix(in srgb, var(--good) 45%, transparent); }
@@ -6111,7 +6125,7 @@ body.nav-modus .karten-knopf { display: none; }
   gap: var(--s2);
   padding: var(--s3);
   border-radius: var(--r-md);
-  border: 1px solid var(--glas-rand);
+  border: 1px solid var(--karten-rand);
   background: var(--glas-hell);
 }
 .umfrage .fahrt-kopf .umfrage-weg { margin-left: auto; }
@@ -6225,7 +6239,7 @@ body.nav-modus .karten-knopf { display: none; }
   gap: var(--s3);
   padding: var(--s3) var(--s4);
   border-radius: var(--r-lg);
-  border: 1px solid var(--glas-rand);
+  border: 1px solid var(--karten-rand);
   background: var(--glas-hell);
   box-shadow: inset 0 1px 0 var(--glas-licht), var(--glas-schatten);
   color: var(--text);
@@ -6250,7 +6264,8 @@ body.nav-modus .karten-knopf { display: none; }
 .einstellungen-name { font-weight: 600; }
 .einstellungen-meta { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .einstellungen-pfeil { color: var(--muted); font-size: 22px; line-height: 1; }
-.einstellungen-titel { margin: 0 0 var(--s2); }
+.einstellungen-karte { display: flex; flex-direction: column; gap: var(--s3); }
+.einstellungen-karte .widget-kopf { margin-bottom: 0; }
 
 /* ---------- Freunde auf dem Start (seit 17.09.2026) ----------
    Ganz oben das Widget "Jetzt" mit dem grossen Knopf "Ich fahre jetzt" -

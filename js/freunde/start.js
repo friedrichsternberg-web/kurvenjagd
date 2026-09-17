@@ -119,7 +119,7 @@ function fahrenEinladungHtml() {
       <div class="widget-kopf"><span class="abzeichen">Jetzt</span></div>
       <h3 class="widget-name">Gemeinsam fahren</h3>
       <p class="fahren-satz">Gr&uuml;nde eine Gruppe mit deinen Freunden: Touren und Reisen
-        zusammen planen, und alle sehen live, dass du f&auml;hrst &ndash; und wo.</p>
+        zusammen planen, und alle sehen live, dass du f&auml;hrst &ndash; und wo du gerade bist.</p>
       ${angemeldeterNutzer
         ? `<button type="button" class="btn widget-knopf" data-start-gruppe-neu>${symbol('plus', 'klein')} Gruppe erstellen</button>`
         : `<button type="button" class="btn widget-knopf" data-start-konto>${symbol('profil', 'klein')} Konto anlegen</button>`}

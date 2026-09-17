@@ -522,15 +522,14 @@ function zeichneRegale() {
 /* --- 6b. Der direkte Weg in die Shops ---------------------------------------
 
    Die Reihenfolge ist NICHT die aus partner.js, sondern die fuer diesen
-   Bildschirm: erst die vier, die Ausruestung fuehren, dann die beiden
-   Reifenhaendler. Wer im Reifenbereich steht, findet die beiden dort
-   ohnehin an jedem Angebot.
+   Bildschirm, von Friedrich am 17.09.2026 so festgelegt: FC-Moto,
+   Helmexpress, POLO, die beiden Reifenhaendler, motoin am Ende.
 
    Warum ueberhaupt: Ein Katalog zeigt immer nur einen Ausschnitt - 3.000
    von 15.000 Artikeln bei FC-Moto, aehnlich bei den anderen. Wer sucht,
    was wir nicht fuehren, stand bisher vor einer Sackgasse. */
-const SHOP_LEISTE_REIHE = ['motoin', 'polo', 'fcmoto', 'helmexpress',
-                           'reifencom', 'reifentiefpreis'];
+const SHOP_LEISTE_REIHE = ['fcmoto', 'helmexpress', 'polo',
+                           'reifencom', 'reifentiefpreis', 'motoin'];
 
 function shopKachelHtml(partner) {
   return `

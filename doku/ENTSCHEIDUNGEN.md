@@ -5121,3 +5121,29 @@ bzw. „Konto anlegen“, und die Freunde-Karte weiter unten bleibt dann weg,
 damit die Einladung nicht zweimal steht. Der Standort-Knopf auf der Karte
 sitzt 64 statt 16 Punkt über der Unterkante, weil die Schublade mit ihrer
 runden Oberkante rund 40 Punkt in die Karte ragt und ihn anschnitt.
+
+## 17.09.2026 – Zweiter Nachtrag zum Design: Ränder, Umschalter, Touren-Leiste
+
+Auf Friedrichs Rückmeldungen am selben Abend:
+
+- **Kräftigere Knöpfe.** Das Blau unter der Glaspille von 22 auf 42 %, die
+  Kante auf der Lichtstufe, Ring und Schein kräftiger. Der Knopf liest sich
+  jetzt wieder klar als Knopf, bleibt aber Glas.
+- **Klare Kartenränder** über eine neue Marke `--karten-rand` (dunkel: Weiß
+  30 %, hell: Blaugrau 20 %). Vorher hatten Karten `--glas-rand`, und der ist
+  im Hellen weiß – auf Hellgrau sieht das niemand. Die Marke tragen `.karte`,
+  der Umschalter, der Entdecken-Reiter, die Zeilen in den Einstellungen,
+  Fahrten und Umfragen.
+- **Umschalter im Kartendesign:** dieselbe Scheibe wie eine Karte, der
+  aktive Reiter eine Glaspille mit Blau darunter – dieselbe Sprache wie der
+  Knopf. Gilt überall, auch bei „Erscheinung“ in den Einstellungen, die
+  jetzt selbst eine Karte ist.
+- **Touren-Leiste:** links der Umschalter „Meine Touren | Meine Reisen“,
+  rechts „Entdecken“ als eigene Scheibe – Eigenes und die Welt sind zwei
+  Dinge. Beides bleibt in einem Behälter (`#tourenUmschalter`), weil
+  touren.js dort auf `.seg` hört. „Neue Tour planen“ steht wie bei den
+  Reisen über der eigenen Liste; die Suche im Entdecken-Teil ist eine
+  Karte, „Von Serpa | Community“ steht mittig; der Satz „Ohne Ort siehst
+  du …“ ist weg.
+- **Shop, „Direkt zum Shop“:** FC-Moto, Helmexpress, POLO, reifen.com,
+  Reifentiefpreis, motoin – Friedrichs Reihenfolge.

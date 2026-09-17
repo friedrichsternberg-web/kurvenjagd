@@ -350,12 +350,9 @@ function zeigeLage() {
   const zeile = document.getElementById('entdeckenLage');
   if (!zeile) return;
   // textContent, nicht innerHTML: Der Ortsname kommt von Nominatim.
-  if (!entdeckenMitte) {
-    zeile.textContent = entdeckenQuelle === 'serpa'
-      ? 'Ohne Ort siehst du alle Touren, nach Bundesland geordnet.'
-      : 'Ohne Ort siehst du die zuletzt geteilten Touren.';
-    return;
-  }
+  // Ohne Ort steht hier nichts - die Liste darunter erklaert sich selbst.
+  if (!entdeckenMitte) { zeile.textContent = ''; zeile.hidden = true; return; }
+  zeile.hidden = false;
   zeile.textContent = entdeckenMitte.name
     ? `Touren, die in der Nähe von ${entdeckenMitte.name} starten.`
     : 'Touren, die in deiner Nähe starten.';
@@ -872,6 +869,8 @@ verkabele('tourenUmschalter', 'click', ereignis => {
   const knopf = ereignis.target.closest('.seg');
   if (knopf) zeigeTourenTeil(knopf.dataset.tourenTeil);
 });
+// "Neue Tour planen" ueber der eigenen Liste: derselbe Weg wie der Reiter Planer.
+verkabele('btnTourNeu', 'click', () => zeigePlaner());
 
 verkabele('btnEntdeckenSuche', 'click', sucheEntdeckenOrt);
 verkabele('entdeckenOrt', 'keydown', ereignis => {

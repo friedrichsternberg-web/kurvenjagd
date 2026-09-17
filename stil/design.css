@@ -211,6 +211,12 @@
   --glas-rand:   rgba(255, 255, 255, 0.20);   /* die uebliche Kante */
   --glas-heller: rgba(255, 255, 255, 0.22);   /* gedrueckt / hervorgehoben */
   --glas-licht:  rgba(255, 255, 255, 0.45);   /* obere Lichtkante (inset) */
+  /* Der Rand einer Karte (und alles, was wie eine Karte steht: Umschalter,
+     Zeilen in den Einstellungen). Kraeftiger als --glas-rand, denn er soll
+     ABGRENZEN: Friedrich will jede Karte klar vom Grund unterscheiden
+     koennen, im Hellen wie im Dunklen. Im Hellen ist er deshalb dunkel -
+     weisse Kanten auf Hellgrau sieht niemand. */
+  --karten-rand: rgba(255, 255, 255, 0.30);
   /* Die Fuellung ist dunkel (0,055), Kante und Lichtkante sind kraeftig:
      Eine Scheibe erkennt man am Rand, nicht an der Flaeche. Friedrich
      wollte die Karten im Dunklen zweimal dunkler als die erste Fassung
@@ -428,6 +434,7 @@
   --glas-rand:   rgba(255, 255, 255, 0.90);
   --glas-heller: rgba(255, 255, 255, 0.82);
   --glas-licht:  rgba(255, 255, 255, 1.00);
+  --karten-rand: rgba(24, 34, 52, 0.20);
   --glas-schatten: 0 14px 38px var(--schatten-mittel);
 
   /* Schatten im Hellen: dieselben Rollen, ein Drittel der Dichte, und

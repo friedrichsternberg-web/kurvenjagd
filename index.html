@@ -774,11 +774,15 @@
           </button>
         </li>
       </ul>
-      <h3 class="label einstellungen-titel">Erscheinung</h3>
+      <!-- Die Erscheinung als Karte wie die Zeilen darueber, mit dem
+           Umschalter darin. -->
+      <div class="karte einstellungen-karte">
+        <div class="widget-kopf"><span class="abzeichen">Erscheinung</span></div>
       <div class="segmented" id="themaWahl" role="group" aria-label="Erscheinung">
         <button type="button" class="seg" data-thema-wahl="geraet">Ger&auml;t</button>
         <button type="button" class="seg" data-thema-wahl="hell">Hell</button>
         <button type="button" class="seg" data-thema-wahl="dunkel">Dunkel</button>
+      </div>
       </div>
     </div>
   </div>
@@ -2031,16 +2035,22 @@
            die eigenen Sachen liegen. -->
       <h2>Touren</h2>
 
-      <div class="segmented touren-umschalter" id="tourenUmschalter">
-        <button class="seg active" data-touren-teil="meine">Meine Touren</button>
-        <button class="seg" data-touren-teil="reisen">Meine Reisen</button>
-        <span class="seg-trenner" aria-hidden="true"></span>
-        <button class="seg seg-abgesetzt" data-touren-teil="entdecken">
+      <!-- Eigenes links im Umschalter, "Entdecken" rechts als eigene Scheibe.
+           Beides in EINEM Behaelter, weil touren.js dort auf .seg hoert. -->
+      <div class="touren-leiste" id="tourenUmschalter">
+        <div class="segmented touren-umschalter">
+          <button class="seg active" data-touren-teil="meine">Meine Touren</button>
+          <button class="seg" data-touren-teil="reisen">Meine Reisen</button>
+        </div>
+        <button class="seg entdecken-reiter" data-touren-teil="entdecken">
           <svg class="ic klein"><use href="#icon-welt"></use></svg> Entdecken
         </button>
       </div>
 
       <div id="tourenTeilMeine">
+        <button class="btn reise-neu" id="btnTourNeu">
+          <svg class="ic klein"><use href="#icon-plus"></use></svg> Neue Tour planen
+        </button>
         <ul id="tourenList" class="saved-list"></ul>
       </div>
 
@@ -2057,6 +2067,7 @@
         <!-- Gesucht wird mit derselben Ortssuche wie im Planer (Nominatim),
              nur mit eigener Verkabelung: Dort setzt ein Treffer einen
              Wegpunkt, hier verschiebt er den Mittelpunkt der Umkreissuche. -->
+        <div class="karte entdecken-filter">
         <div class="such-feld search-wrap">
           <span class="label">Wo suchst du?</span>
           <input type="text" id="entdeckenOrt" class="search-input"
@@ -2081,6 +2092,7 @@
         </div>
 
         <p class="hint" id="entdeckenLage"></p>
+        </div>
 
         <!-- Zwei Herkuenfte, sauber getrennt: die redaktionellen Touren von
              Serpa selbst und das, was Nutzer geteilt haben. Getrennt, weil
