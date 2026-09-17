@@ -6042,8 +6042,11 @@ body.nav-modus .karten-knopf { display: none; }
   background: color-mix(in srgb, var(--good) 14%, transparent);
 }
 .fahrt-band-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.fahrt-band-wer { display: inline-flex; align-items: center; font-size: 16px; }
-.fahrt-band-wer b { font-weight: 700; margin-right: 4px; }
+/* Als Fliesstext, nicht als Flex-Zeile: "Bernd faehrt morgen 15:00" soll an
+   Wortgrenzen umbrechen, nicht als Block neben dem Namen. */
+.fahrt-band-wer { display: block; font-size: 16px; line-height: 1.3; }
+.fahrt-band-wer b { font-weight: 700; margin-right: 2px; }
+.fahrt-band-wer .fahrt-puls { vertical-align: middle; margin-bottom: 2px; }
 .fahrt-band-meta { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fahrt-band-meta i { font-style: normal; opacity: 0.5; margin: 0 3px; }
 .fahrt-band-dabei { flex: 0 0 auto; font-size: 13px; color: var(--muted); }
