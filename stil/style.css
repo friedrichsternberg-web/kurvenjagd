@@ -3405,10 +3405,20 @@ button.karte:active { transform: scale(0.985); }
    dadurch auf zwei Zeilen um. Mit max-content nimmt der Knopf seine
    natuerliche Breite und ragt ein Stueck in die ausgeblendete linke Kante
    der Werkstatt hinein, wo nichts steht. */
-.bike-leer .btn { margin-top: auto; width: max-content; flex: 0 0 auto; }
+.bike-leer .btn { margin-top: auto; width: max-content; flex: 0 0 auto; white-space: nowrap; padding: 10px 14px; font-size: 14px; }
 /* Die Buehne fuellt wie bei der gefuellten Karte die rechte Spalte ueber
    alle Zeilen. */
 .bike-leer .bike-buehne { grid-column: 2; grid-row: 1 / -1; }
+/* Angemeldet, aber noch ohne Motorrad: Dann steht rechts die Fahrer-Tafel
+   statt der Werkstatt, und der Knopf "Motorrad eintragen" ragte auf dem
+   Handy in sie hinein (gesehen am 17.09.2026 auf einem iPhone 13). Die
+   Tafel ist hier deshalb kleiner, die Textspalte breiter, und die
+   Aufforderung "Profilbild einfuegen" entfaellt - der Kreis selbst ist der
+   Knopf dafuer und traegt die Beschriftung fuer Vorleser. */
+.bike-leer.zeigt-fahrer { --bike-text-anteil: 0.5; }
+.bike-leer.zeigt-fahrer .bike-buehne { min-height: 200px; }
+.bike-leer.zeigt-fahrer .fahrer-bild { max-width: 128px; }
+.bike-leer.zeigt-fahrer .fahrer-aufforderung { display: none; }
 
 /* ---------- Die Abschnitte ----------
    Kopfzeile (Titel links, "Alle ansehen" rechts) und darunter die Karten.
@@ -6333,6 +6343,10 @@ body.nav-modus .karten-knopf { display: none; }
    steht darunter die kleine Karte. */
 .fahren-widget { display: flex; flex-direction: column; gap: var(--s3); }
 .fahren-widget .widget-kopf { margin-bottom: 0; }
+/* Die zwei Knoepfe untereinander, beide ueber die volle Breite: "Ich
+   fahre jetzt" soll gross sein, und nebeneinander brach "Fahrt planen"
+   auf dem Handy in zwei Zeilen. */
+.fahren-widget .fahrten-knoepfe { flex-direction: column; }
 .fahren-widget .fahrt-jetzt-knopf { padding: 16px 14px; font-size: 17px; }
 .fahren-einladung .widget-name { margin: 0; }
 .fahren-satz { margin: 0; font-size: 14px; line-height: 1.45; color: var(--muted); }
