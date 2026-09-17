@@ -2344,15 +2344,24 @@ body.nav-modus .leaflet-control-zoom { display: none; }
    weil sich während der Navigation ja die ganze Karte mit der Fahrtrichtung
    mitdreht (siehe setzeKartenDrehung() in app.js), nicht der Marker selbst. */
 .you-are-here {
-  width: 22px; height: 22px;
+  width: 30px; height: 46px;
   display: flex; align-items: center; justify-content: center;
   color: var(--gps);
-  font-size: 22px;
-  text-shadow: 0 0 3px var(--bg), 0 0 3px var(--bg), 0 0 3px var(--bg);
+  /* Ein Schatten statt einer Kontur: Auf hellen wie dunklen Kacheln hebt
+     er das Motorrad ab, ohne dass die Form dicker wird. */
+  filter: drop-shadow(0 1px 2px var(--schatten-voll)) drop-shadow(0 0 1px var(--schatten-voll));
   /* Dieser eine Marker folgt der Kartendrehung weich statt zu springen -
      als einziger, siehe die Begruendung im Marker-Abschnitt weiter unten. */
   transition: transform 1s linear;
 }
+/* Das Motorrad von oben: Raeder und Lenker dunkel, Rumpf in der
+   Standortfarbe, der Helm hell - dieselben drei Toene, die der Punkt beim
+   Start benutzt, nur als Form. */
+.you-are-here svg { width: 100%; height: 100%; display: block; }
+.you-are-here .rad, .you-are-here .lenker { fill: var(--surface-2); }
+.you-are-here .rumpf, .you-are-here .schultern { fill: currentColor; }
+.you-are-here .schultern { opacity: 0.75; }
+.you-are-here .helm { fill: var(--accent-ink); }
 
 /* Eigener Standort beim Start: schlichter blauer Punkt, ohne Blickrichtung -
    im Unterschied zur Spitze (.you-are-here) während der Navigation. */

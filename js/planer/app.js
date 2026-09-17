@@ -1759,16 +1759,29 @@ window.addEventListener('resize', () => {
 });
 
 
-// Zeichnet den eigenen Standort als Spitze, die IMMER nach oben zeigt - denn
-// nicht der Marker dreht sich in Fahrtrichtung, sondern die ganze Karte
-// (siehe setzeKartenDrehung() in aufPositionsUpdate).
+// Zeichnet den eigenen Standort als Motorrad von oben, das IMMER nach oben
+// zeigt - denn nicht der Marker dreht sich in Fahrtrichtung, sondern die
+// ganze Karte (siehe setzeKartenDrehung() in aufPositionsUpdate). Vorderrad
+// oben, Helm in der Mitte, Hinterrad unten: so liegt es auf der Karte wie
+// die Karte selbst, in der Draufsicht.
+function motorradMarkerSvg() {
+  return `<svg viewBox="0 0 24 40" aria-hidden="true">
+      <rect class="rad" x="9.2" y="0.8" width="5.6" height="9" rx="2.8"/>
+      <rect class="rad" x="9.2" y="30.2" width="5.6" height="9" rx="2.8"/>
+      <rect class="lenker" x="2.5" y="9.6" width="19" height="2.4" rx="1.2"/>
+      <rect class="rumpf" x="7.6" y="10.5" width="8.8" height="21" rx="4.2"/>
+      <ellipse class="schultern" cx="12" cy="22.5" rx="6.6" ry="3.4"/>
+      <circle class="helm" cx="12" cy="18.6" r="4.1"/>
+    </svg>`;
+}
+
 function zeichnePositionsMarker(lat, lon, accuracy) {
   if (!nav.marker) {
     const icon = L.divIcon({
       className: '',
-      html: `<div class="you-are-here">&#9650;</div>`,
-      iconSize: [22, 22],
-      iconAnchor: [11, 11],
+      html: `<div class="you-are-here">${motorradMarkerSvg()}</div>`,
+      iconSize: [30, 46],
+      iconAnchor: [15, 23],
     });
     nav.marker = L.marker([lat, lon], { icon, zIndexOffset: 1000 }).addTo(map);
     nav.genauigkeitskreis = L.circle([lat, lon], {

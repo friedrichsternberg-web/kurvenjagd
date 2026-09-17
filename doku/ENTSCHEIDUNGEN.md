@@ -5036,3 +5036,14 @@ Zahl der Reiter (sechs) unangetastet; beides steht in AUFGABEN.md.
   Dunkel werden gespeichert. Apples Einwand gegen App-eigene Schalter ist
   damit halb beantwortet: Der Weg zurück zur Systemeinstellung ist ein Tipp.
   Der Sonne/Mond-Knopf im Kopf ist weg.
+
+## 17.09.2026 – Ein Motorrad statt der Spitze im Navi
+
+Der eigene Standort während der Navigation war ein Dreieck (▲). Jetzt ist
+es ein Motorrad in der Draufsicht (Vorderrad oben, Helm in der Mitte,
+Hinterrad unten), als SVG in `motorradMarkerSvg()` in `app.js`, gefärbt
+über `.you-are-here` in `style.css`: Räder und Lenker in `--surface-2`,
+Rumpf in `--gps`, Helm in `--accent-ink`. Die Logik bleibt: Nicht der
+Marker dreht sich, die Karte – das Motorrad zeigt immer nach oben. 30 × 46
+Punkt statt 22 × 22, damit die Form auf der Karte lesbar ist; der
+Ankerpunkt liegt in der Mitte, dort, wo der Fahrer sitzt.
