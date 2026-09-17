@@ -2565,34 +2565,13 @@
           <span>Bekannte Passstraßen anzeigen</span>
         </label>
         <p class="hint" id="poiHint">Rund 60 bekannte Alpen- und Mittelgebirgspässe.</p>
-      </div>
-    </details>
-
-    <!-- Kuratierte Strecken in Deutschland (seit 17.09.2026), eigene Ebene
-         aus daten/strecken-de.json. Was sie von den Paessen unterscheidet:
-         Sperrungen fuer Motorraeder werden geprueft und sichtbar markiert,
-         nicht ausgeblendet. Gezeichnet von strecken.js, gerechnet von
-         strecken-kern.js. -->
-    <details class="block accordion">
-      <summary>Strecken in Deutschland</summary>
-      <div class="accordion-body">
+        <!-- Kuratierte Strecken in Deutschland (strecken.js). Gesperrte
+             Strecken erscheinen als gesperrt markiert, nicht ausgeblendet. -->
         <label class="checkbox-row">
           <input type="checkbox" id="optStrecken">
-          <span>Kuratierte Strecken anzeigen</span>
+          <span>Kurvige Strecken in Deutschland anzeigen</span>
         </label>
-        <label for="streckenBundesland">Bundesland</label>
-        <select id="streckenBundesland" class="search-input">
-          <option value="">Alle Bundesländer</option>
-        </select>
-        <label for="streckenMindestGrad">Mindestens <span id="streckenMindestGradWert">0</span> Grad/km</label>
-        <input type="range" id="streckenMindestGrad" class="slider" min="0" max="400" step="50" value="0">
-        <!-- Standardmaessig AUS: Sichtbar als gesperrt ist die ehrlichere
-             Voreinstellung als weg. -->
-        <label class="checkbox-row">
-          <input type="checkbox" id="optStreckenOhneGesperrte">
-          <span>Gesperrte Strecken ausblenden</span>
-        </label>
-        <p class="hint" id="streckenHint">Kuratierte Strecken, Sperrungen redaktionell gepflegt.</p>
+        <p class="hint" id="streckenHint">Rund 75 Strecken, Sperrungen für Motorräder markiert.</p>
       </div>
     </details>
 

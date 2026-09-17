@@ -4893,3 +4893,10 @@ Bedingung beim Rechnen), Zusammenführung mit den Pässen, Bilder,
 Feiertagskalender, echte Score-Messung, Meldefunktion – alle in
 AUFGABEN.md.
 
+**Nachtrag, am selben Tag:** Die Bedienung ist auf Friedrichs Wunsch
+gleich wie bei den Pässen – ein Häkchen unter „Sehenswertes", direkt unter
+„Bekannte Passstraßen". Der eigene Block mit Bundesland, Kurven-Regler und
+„Gesperrte ausblenden" ist wieder raus; die Karte zeigt immer alle
+Strecken, gesperrte als gesperrt. `filtereStrecken()` bleibt im Kern und im
+Selbsttest, falls eine Auswahl später zurückkommt.
+

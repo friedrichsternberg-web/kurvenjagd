@@ -18,12 +18,19 @@
    Dorf statt auf der Strecke liegen. Strecken ohne Koordinaten haben noch
    keinen Marker und werden in der Zeile unter den Schaltern gezaehlt.
 
+   Bedient wird die Ebene wie die Paesse: ein Haekchen unter
+   "Sehenswertes" im Planer.
+
    Laedt NACH app.js (map, symbol, escapeHtml, verkabele) und NACH
    strecken-kern.js.
    ============================================================================ */
 
 const STRECKEN_DATEI = 'daten/strecken-de.json';
 
+/* Der Filter ist fest: alle Bundeslaender, jeder Kurven-Score, gesperrte
+   Strecken sichtbar. Die Karte zeigt die Strecken wie die Paesse - ein
+   Haekchen, sonst nichts (ENTSCHEIDUNGEN.md, 17.09.2026). Die Filter-
+   funktion in strecken-kern.js bleibt, fuer eine spaetere Auswahl. */
 const strecken = {
   aktiv: false,
   daten: null,        // der Inhalt der JSON-Datei, einmal geladen
@@ -51,7 +58,6 @@ async function setStreckenAktiv(aktiv) {
   strecken.aktiv = aktiv;
   if (!aktiv) { entferneStreckenMarker(); schreibeStreckenZeile(); return; }
   await ladeStrecken();
-  fuelleBundeslandWahl();
   zeichneStrecken();
 }
 
@@ -126,45 +132,15 @@ function schreibeStreckenZeile(gezeigt = null, heute = new Date()) {
   const zeile = document.getElementById('streckenHint');
   if (!zeile) return;
   if (!strecken.aktiv || !gezeigt) {
-    zeile.textContent = 'Kuratierte Strecken, Sperrungen redaktionell gepflegt.';
+    zeile.textContent = 'Rund 75 Strecken, Sperrungen für Motorräder markiert.';
     return;
   }
   const gesperrt = gezeigt.filter(s => istGesperrt(s, heute).gesperrt).length;
-  const ohneLage = gezeigt.filter(s => !s.koordinaten).length;
-  const teile = [`${gezeigt.length} Strecken`];
+  const teile = [`${gezeigt.length} Strecken in Deutschland auf der Karte`];
   if (gesperrt) teile.push(`${gesperrt} heute gesperrt`);
-  if (ohneLage) teile.push(`${ohneLage} noch ohne Lage`);
-  const stand = strecken.daten && strecken.daten._stand ? ` · Stand ${datumDeutsch(strecken.daten._stand)}` : '';
-  zeile.textContent = teile.join(', ') + stand;
+  zeile.textContent = teile.join(', ') + '.';
 }
-
-function fuelleBundeslandWahl() {
-  const wahl = document.getElementById('streckenBundesland');
-  if (!wahl || wahl.options.length > 1) return;
-  Object.keys(BUNDESLAENDER).sort((a, b) => BUNDESLAENDER[a].localeCompare(BUNDESLAENDER[b], 'de'))
-    .forEach(kuerzel => {
-      const option = document.createElement('option');
-      option.value = kuerzel;
-      option.textContent = BUNDESLAENDER[kuerzel];
-      wahl.appendChild(option);
-    });
-}
-
 
 /* --- 3. Verkabelung ---------------------------------------------------------- */
 
 verkabele('optStrecken', 'change', ereignis => setStreckenAktiv(ereignis.target.checked));
-verkabele('streckenBundesland', 'change', ereignis => {
-  strecken.filter.bundesland = ereignis.target.value;
-  zeichneStrecken();
-});
-verkabele('streckenMindestGrad', 'input', ereignis => {
-  strecken.filter.mindestGrad = Number(ereignis.target.value) || 0;
-  const wert = document.getElementById('streckenMindestGradWert');
-  if (wert) wert.textContent = String(strecken.filter.mindestGrad);
-  zeichneStrecken();
-});
-verkabele('optStreckenOhneGesperrte', 'change', ereignis => {
-  strecken.filter.ohneGesperrte = ereignis.target.checked;
-  zeichneStrecken();
-});
