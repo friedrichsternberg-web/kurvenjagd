@@ -53,7 +53,7 @@ const EINFUEHRUNG_SCHRITTE = [
         + 'werden zur <b>Reise</b>, mit Freunden geplant und gemeinsam abgerechnet.',
     bild: () => `
       <div class="einfuehrung-foto">
-        <img src="img/planer-kopf.webp?v=114" alt="" width="1200" height="675">
+        <img src="img/planer-kopf.webp?v=115" alt="" width="1200" height="675">
         <span class="einfuehrung-chip">${einfuehrungZeichen('route')} 223 °/km <i>&middot;</i> 122 km</span>
       </div>`,
     zielText: 'Gleich ausprobieren', ziel: () => zeigePlaner(),
@@ -163,7 +163,7 @@ function einfuehrungPunkteHtml(aktiv, anzahl) {
 function einfuehrungMarkeHtml() {
   return `
     <p class="wortmarke einfuehrung-marke">
-      <img class="wortmarke-bild" src="img/logo-serpa.webp?v=114" alt="Serpa"
+      <img class="wortmarke-bild" src="img/logo-serpa.webp?v=115" alt="Serpa"
            width="800" height="155" fetchpriority="high">
       <span class="wortmarke-sub">Deine Motorradapp</span>
     </p>`;
