@@ -2933,7 +2933,10 @@ button.karte:active { transform: scale(0.985); }
   white-space: nowrap;
   font-size: 14px;
 }
-.widget-kopf .motorrad-umschalter { margin-left: auto; }
+.widget-kopf .motorrad-umschalter { margin-left: auto; padding: 3px; gap: 3px; }
+/* Im Kopf der Bike-Karte ist der Umschalter ein Nebending: kleiner als die
+   grossen Umschalter der Listen, sonst frisst er die Zeile. */
+.widget-kopf .motorrad-umschalter .seg { padding: 5px 10px; font-size: 12px; letter-spacing: 0.03em; }
 .widget-kopf .glas-rund.klein { margin-left: auto; }
 /* :not([hidden]) ist noetig: Der Umschalter steht auch bei einer Maschine
    im HTML, nur versteckt - und "+" sieht ihn trotzdem. */
