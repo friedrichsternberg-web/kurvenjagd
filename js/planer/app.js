@@ -1058,6 +1058,47 @@ function hideSearchResults() {
    wohin Zwischenstände gehen), aus den nackten Zahlen des Ergebnisses
    Sätze machen und die Route zeichnen.                                    */
 
+/* --- Rundtour nach Zeit -----------------------------------------------------
+   "Zwei Stunden" oder "um 18 Uhr zurueck" wird in Kilometer uebersetzt:
+   rund 55 km je Stunde auf kurviger Landstrasse, Pausen eingerechnet.
+   Die Zahl ist eine Faustregel, keine Messung - deshalb steht das Ergebnis
+   sichtbar im Kilometerfeld und laesst sich dort aendern. Aendert man es,
+   ist keine Zeit mehr gewaehlt. */
+const RUNDTOUR_KM_JE_STUNDE = 55;
+
+function setzeRundtourStunden(stunden) {
+  const km = Math.max(10, Math.round(stunden * RUNDTOUR_KM_JE_STUNDE / 5) * 5);
+  document.getElementById('roundtripKm').value = km;
+  document.querySelectorAll('#rundtourZeit .seg').forEach(seg => {
+    seg.classList.toggle('active', Number(seg.dataset.rundtourStunden) === stunden);
+  });
+}
+
+// "Zurueck um 18:00": die Stunden bis dahin, mindestens eine halbe.
+function rundtourAusZurueckZeit() {
+  const wert = document.getElementById('rundtourZurueck').value;
+  if (!wert) return;
+  const [h, m] = wert.split(':').map(Number);
+  const zurueck = new Date();
+  zurueck.setHours(h, m, 0, 0);
+  if (zurueck <= new Date()) zurueck.setDate(zurueck.getDate() + 1);
+  const stunden = Math.max(0.5, (zurueck - new Date()) / 3600000);
+  setzeRundtourStunden(Math.round(stunden * 2) / 2);
+  document.querySelectorAll('#rundtourZeit .seg').forEach(seg => seg.classList.remove('active'));
+  showToast(`Bis ${wert} Uhr: etwa ${Math.round(stunden * 10) / 10} Stunden, rund ${document.getElementById('roundtripKm').value} km.`);
+}
+
+verkabele('rundtourZeit', 'click', ereignis => {
+  const seg = ereignis.target.closest('[data-rundtour-stunden]');
+  if (!seg) return;
+  document.getElementById('rundtourZurueck').value = '';
+  setzeRundtourStunden(Number(seg.dataset.rundtourStunden));
+});
+verkabele('rundtourZurueck', 'change', rundtourAusZurueckZeit);
+verkabele('roundtripKm', 'input', () => {
+  document.querySelectorAll('#rundtourZeit .seg').forEach(seg => seg.classList.remove('active'));
+});
+
 async function generateRoundTrip() {
   if (state.waypoints.length === 0) {
     showToast('Erst einen Startpunkt setzen.');

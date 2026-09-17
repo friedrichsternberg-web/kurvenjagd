@@ -2710,6 +2710,23 @@
     <!-- Rundtour: nur im Rundtour-Modus sichtbar -->
     <section class="block" id="roundtripBlock" hidden>
       <h2>Rundtour</h2>
+      <!-- Zeit statt Kilometer (seit 17.09.2026): "Zwei Stunden" oder
+           "um 18 Uhr zurueck" ist die Frage, die man sich wirklich stellt.
+           Die Chips rechnen mit rund 55 km je Stunde auf kurviger
+           Landstrasse in das Kilometerfeld darunter; wer die Zahl selbst
+           aendert, loest die Wahl wieder (app.js, rundtourZeit). -->
+      <span class="label">Wie lange?</span>
+      <div class="segmented rundtour-zeit" id="rundtourZeit" role="group" aria-label="Dauer der Rundtour">
+        <button type="button" class="seg" data-rundtour-stunden="1">1 h</button>
+        <button type="button" class="seg" data-rundtour-stunden="2">2 h</button>
+        <button type="button" class="seg" data-rundtour-stunden="3">3 h</button>
+        <button type="button" class="seg" data-rundtour-stunden="4">4 h</button>
+      </div>
+      <div class="rundtour-zurueck">
+        <label for="rundtourZurueck">oder zur&uuml;ck um</label>
+        <input type="time" id="rundtourZurueck" class="search-input">
+      </div>
+      <span class="label">Ungef&auml;hre L&auml;nge</span>
       <input type="number" id="roundtripKm" class="search-input" min="10" step="5" value="150"
              placeholder="Ziel-Distanz in km">
       <select id="roundtripRichtung" class="search-input richtung-select">
