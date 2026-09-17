@@ -68,6 +68,13 @@ const geraet = {
     }
   },
 
+  // Ruft zurueck, wenn das System zwischen Hell und Dunkel wechselt.
+  beiFarbschemaWechsel(rueckruf) {
+    try {
+      window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => rueckruf(this.farbschema()));
+    } catch { /* dann eben nicht - die Wahl beim naechsten Start stimmt trotzdem */ }
+  },
+
 
   /* --- Standort ------------------------------------------------------------
      Absichtlich mit Rückrufen statt mit Promises: Genau so ruft die App es

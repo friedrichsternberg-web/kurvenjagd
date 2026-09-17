@@ -30,7 +30,7 @@ Gerät nicht, solange niemand angemeldet ist.
 | `kurvenjagd.neigungBasis` | Nullpunkt für die Schräglage: die Einbaulage des Handys als drei Achsen, dazu der Ruhefehler des Gyroskops |
 | `kurvenjagd.reifenmass` | die eingetragene Reifengröße je Motorrad, getrennt für vorn und hinten – drei Zahlen, sonst nichts. Die **Serienbereifung** der gängigen Modelle steht daneben in `reifen-massen.js`, einer Datei der App – nachgeschlagen wird auf dem Gerät, dafür geht nichts ins Netz |
 | `kurvenjagd.partner` | die Einwilligung in Partner-Angebote: `ja` oder `nein`, der Zeitpunkt und **für welche Händler** sie gilt. **Keine Klicks, keine angesehenen Produkte** |
-| `kurvenjagd.thema` | die gewählte Erscheinung, `hell` oder `dunkel`; fehlt der Eintrag, gilt die Systemeinstellung |
+| `kurvenjagd.thema` | die gewählte Erscheinung, `hell` oder `dunkel`; fehlt der Eintrag („Gerät“), folgt die App der Systemeinstellung |
 | `kurvenjagd.fahrstil` | die Einwilligung, aufgezeichnete Fahrten für Vorschläge auszuwerten: `ja` oder `nein` und der Zeitpunkt. Das Ergebnis selbst wird **nicht** gespeichert, es wird bei Bedarf neu gerechnet |
 
 Aufgezeichnete Fotos liegen **verkleinert im Speicher selbst**, nicht als

@@ -246,6 +246,10 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .einfuehrung-inhalt { animation: none; }
+  /* Der Puls "faehrt jetzt" steht dann still, aber deutlich: ein fester
+     Ring statt der Welle. Das Wort daneben traegt die Bedeutung ohnehin. */
+  .fahrt-puls { animation: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--good) 45%, transparent); }
+  .karte, button.karte, .btn, .glas-rund { transition: none; }
 }
 
 /* Der Schriftzug ueber der ersten Karte. Etwas kleiner als sonst in der
@@ -568,7 +572,7 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
    behalten das Foto. */
 /* Auch die Listenbildschirme bekommen den Lichtkegel (Grundsatz 4 in
    design.css): Glas ueber blanker Flaeche bleibt tot. */
-#tourenScreen, #reifenScreen, #statsScreen, #freundeScreen { background: var(--start-licht), var(--bg); }
+#tourenScreen, #reifenScreen, #statsScreen, #freundeScreen, #einstellungenScreen { background: var(--start-licht), var(--bg); }
 /* Die Ausruestung und die Merkliste: Produktfotos auf weissen Karten
    ueber dem verwischten Werkstattfoto wurden unruhig. Also Schwarz mit
    einem leisen Lichtkegel von oben - das gibt den Glaskanten etwas zu
@@ -2681,8 +2685,8 @@ body.nav-modus .leaflet-control-container { display: none; }
   background:
     linear-gradient(135deg, var(--glas-heller) 0%, transparent 45%, transparent 75%, var(--glas-hauch) 100%),
     var(--glas-hell);
-  backdrop-filter: var(--glas-filter);
-  -webkit-backdrop-filter: var(--glas-filter);
+  /* Kein backdrop-filter: Karten sind Inhalt, nicht Bedienschicht - siehe
+     "Wo das Glas wirklich Glas ist" in design.css. */
   border: 1px solid var(--glas-rand);
   box-shadow:
     inset 0 1px 0 var(--glas-licht),
@@ -2740,6 +2744,9 @@ button.karte:active { transform: scale(0.985); }
   border-radius: var(--r-xl);
   overflow: hidden;
   isolation: isolate;
+  /* Die eine Karte mit Filter: Ihr Foto liegt in ihr, nicht dahinter. */
+  backdrop-filter: var(--glas-filter);
+  -webkit-backdrop-filter: var(--glas-filter);
   /* Zwei Spalten, vier Zeilen. Links Kopf, Name, Werte, Knopf; rechts die
      Buehne, die ALLE Zeilen spannt - so reicht die Werkstatt dahinter von
      der Ober- bis zur Unterkante der Karte, wie in der Vorlage. Bis zum
@@ -6154,6 +6161,44 @@ body.nav-modus .karten-knopf { display: none; }
   box-shadow: 0 1px 4px var(--schatten-weich);
 }
 .standort-fahrer-name i { font-style: normal; opacity: 0.5; }
+
+/* ---------- Einstellungen (seit 17.09.2026) ----------
+   Ein Bildschirm hinter dem Zahnrad oben rechts: Profil, Rechtliches und
+   die Erscheinung. Zeilen wie Karten, nur flach - eine Liste, kein Regal. */
+.einstellungen-liste { list-style: none; margin: 0 0 var(--s5); padding: 0; display: flex; flex-direction: column; gap: var(--s3); }
+.einstellungen-zeile {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s3) var(--s4);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--glas-rand);
+  background: var(--glas-hell);
+  box-shadow: inset 0 1px 0 var(--glas-licht), var(--glas-schatten);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s cubic-bezier(0.2,0.8,0.2,1), background 0.15s ease;
+}
+.einstellungen-zeile:hover { background: var(--glas-heller); }
+.einstellungen-zeile:active { transform: scale(0.985); }
+.einstellungen-bild {
+  position: relative;
+  overflow: hidden;
+  width: 44px; height: 44px;
+  flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--glas-rand);
+  background: var(--glas-hauch);
+}
+.einstellungen-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.einstellungen-name { font-weight: 600; }
+.einstellungen-meta { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.einstellungen-pfeil { color: var(--muted); font-size: 22px; line-height: 1; }
+.einstellungen-titel { margin: 0 0 var(--s2); }
 
 /* ---------- Freunde auf dem Start (seit 17.09.2026) ----------
    Das Fahrtband: eine Zeile je Fahrt, blau umrandet wie eine Einladung,

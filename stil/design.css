@@ -206,21 +206,21 @@
      Weisswerte zwischen 0.02 und 1.0. Kein Mensch sieht den Unterschied
      zwischen 0.12 und 0.14, aber jeder sieht, wenn eine Flaeche aus der
      Reihe faellt. Weniger Stufen heisst mehr Einheit. */
-  --glas-hauch:  rgba(255, 255, 255, 0.06);   /* Schachbrett, vertiefte Flaechen */
-  --glas-hell:   rgba(255, 255, 255, 0.13);   /* die uebliche Fuellung */
+  --glas-hauch:  rgba(255, 255, 255, 0.04);   /* Schachbrett, vertiefte Flaechen */
+  --glas-hell:   rgba(255, 255, 255, 0.08);   /* die uebliche Fuellung */
   --glas-rand:   rgba(255, 255, 255, 0.20);   /* die uebliche Kante */
-  --glas-heller: rgba(255, 255, 255, 0.28);   /* gedrueckt / hervorgehoben */
-  --glas-licht:  rgba(255, 255, 255, 0.48);   /* obere Lichtkante (inset) */
-  /* Seit dem 17.09.2026 eine gute Stufe kraeftiger als am Anfang: Das Glas
-     soll sichtbar Glas sein - Kante, Lichtkante und Fuellung deutlich,
-     nicht nur erahnbar. */
+  --glas-heller: rgba(255, 255, 255, 0.22);   /* gedrueckt / hervorgehoben */
+  --glas-licht:  rgba(255, 255, 255, 0.45);   /* obere Lichtkante (inset) */
+  /* Die Fuellung ist dunkel (0,08), Kante und Lichtkante sind kraeftig:
+     Eine Scheibe erkennt man am Rand, nicht an der Flaeche. Friedrich
+     wollte die Karten im Dunklen dunkler als die erste Fassung (0,13). */
 
   /* Der Filter und der Schatten jeder Glaskarte, als Marken - in style.css
      standen einmal zwoelf verschiedene Blur-Radien nebeneinander. Eine
      Karte hat GENAU EINEN backdrop-filter; was in ihr liegt (Kacheln,
      Zeilen), bekommt Fuellung und Kante, aber keinen zweiten Filter -
      der Browser rechnet jeden davon je Bild. */
-  --glas-filter:   blur(30px) saturate(190%);
+  --glas-filter:   blur(30px) saturate(150%);
   --glas-schatten: 0 14px 38px var(--schatten-mittel);
 
   /* Der Untergrund fuer Bildschirme ohne eigenes Bild: ein leiser
@@ -230,13 +230,21 @@
      zu streiten. Grundsatz 1 nennt ihn ausdruecklich. */
   --start-licht:
     radial-gradient(120% 58% at 50% -12%, color-mix(in srgb, var(--accent) 30%, transparent), transparent 66%),
-    radial-gradient(60% 40% at 100% 85%, color-mix(in srgb, var(--accent-hell) 14%, transparent), transparent 70%),
-    radial-gradient(50% 35% at -10% 60%, color-mix(in srgb, var(--metall) 10%, transparent), transparent 70%);
-  /* Seit dem 17.09.2026 drei Lichter statt einem: der Kegel von oben, ein
-     blauer Schein unten rechts, ein metallischer links. Nicht als Deko -
-     Glas zeigt sich erst, wenn unter ihm etwas ist, das es verwischen
-     kann. Ein einziger Verlauf sieht durch 30 Pixel Unschaerfe aus wie
-     keiner. */
+    radial-gradient(60% 40% at 100% 85%, color-mix(in srgb, var(--accent-hell) 14%, transparent), transparent 70%);
+  /* Zwei Lichter: der Kegel von oben und ein blauer Schein unten rechts.
+     Sie geben der Bedienschicht (Leiste, Bedienfeld) etwas zu verwischen.
+     Ein dritter, metallischer links war kurz da und ist gestrichen - unter
+     der Unschaerfe blieb davon ein Grauhauch, mehr nicht. */
+
+  /* WO DAS GLAS WIRKLICH GLAS IST (seit dem 17.09.2026, nach der Pruefung
+     gegen Apples Richtlinien): Den Filter, der den Untergrund verwischt,
+     tragen nur die schwebenden Bedienflaechen - Leiste, Bedienfeld des
+     Planers, Blatt, Toast, runde Knoepfe - und die Bike-Karte, weil ihr
+     Foto in ihr liegt. Inhaltskarten (.karte) behalten Fuellung, Kante,
+     Lichtkante und Glanz, aber keinen Filter: Der Browser rechnet jeden
+     Filter je Bild, und Glas auf Glas verwischt die Ebene, die das Material
+     erst schafft. Wer eine neue Bedienflaeche baut, nimmt --glas-filter;
+     wer eine Karte baut, nimmt .karte und laesst den Filter weg. */
 
   /* Metall. Die Wortmarke ist gerendertes, gebuerstetes Metall - vollstaendig
      neutral, ohne jeden Farbstich (gemessene Saettigung 0,03). Text und
@@ -403,12 +411,13 @@
   --accent-hell: #005387;
   --accent-dk:   #004470;
 
-  --good:        #168A44;
+  /* Alle als Text tauglich: mindestens 4,5:1 auf der hellen Karte (#F6F7F9). */
+  --good:        #11703A;   /* 5,6:1 */
   --gps:         #1D6FD1;
   --skala-wenig:  #1FA356;
-  --skala-mittel: #C99700;
-  --skala-viel:   #E85D04;
-  --danger:       #D93A32;
+  --skala-mittel: #8A6A00;  /* 5,1:1 - als Balken weiter gelb genug */
+  --skala-viel:   #D45400;
+  --danger:       #C42D26;  /* 5,2:1 */
   --danger-glanz: #F0554B;
   --danger-tief:  #B2281F;
   --danger-ink:   #FFFFFF;
@@ -446,6 +455,36 @@
     radial-gradient(120% 58% at 50% -12%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 66%),
     radial-gradient(60% 40% at 100% 85%, color-mix(in srgb, var(--accent-hell) 12%, transparent), transparent 70%),
     radial-gradient(50% 35% at -10% 60%, color-mix(in srgb, var(--metall) 12%, transparent), transparent 70%);
+}
+
+/* ============================================================
+   WAS DAS SYSTEM VERLANGT
+
+   Drei Einstellungen, die Leute am Geraet treffen und die die App
+   beantworten muss - hier ueber die Marken, damit style.css nichts davon
+   wissen muss:
+
+     Transparenz reduzieren   kein Filter, deckende Flaechen statt Glas
+     Kontrast erhoehen        kraeftigere Kanten und dunklerer Nebentext
+     Bewegung reduzieren      steht in style.css bei den Animationen selbst
+   ============================================================ */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --glas-filter: none;
+    --glas-hell: var(--surface);
+    --glas-hauch: var(--surface);
+    --feld-glas: var(--surface);
+  }
+}
+@media (prefers-contrast: more) {
+  :root {
+    --glas-rand: rgba(255, 255, 255, 0.45);
+    --muted: #B8C0CC;
+  }
+  :root[data-thema="hell"] {
+    --glas-rand: rgba(24, 34, 52, 0.45);
+    --muted: #3F4756;
+  }
 }
 
 * { box-sizing: border-box; }

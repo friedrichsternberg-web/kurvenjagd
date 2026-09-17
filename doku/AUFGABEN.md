@@ -1053,6 +1053,15 @@ Nebenbei konnte `index.html` von `leaflet-src.js` auf die kleinere
   ungefähren Ort einer Fahrt und einen Meldeweg (DSA), wie bei den
   öffentlichen Touren.
 
+## Aus der Design-Prüfung (17.09.2026), bewusst nicht umgesetzt
+
+- **Leistenbeschriftung 10 px.** Apples Minimum sind 11 pt. Friedrich will
+  die Schriftgrößen vorerst behalten; mit sechs Reitern wird 11 px eng.
+  Beides zusammen entscheiden: Reiter reduzieren (Ausrüstung auf den Start,
+  oder Touren und Reisen unter Planer), dann 11 px.
+- **Textgröße vom System.** Alle Größen in px; im Browser wirkt der
+  Seitenzoom, Dynamic Type nicht. Erst mit Capacitor relevant.
+
 ## Freunde: Umfrage, Kalender, Standort (seit 17.09.2026)
 
 - **Standort im Hintergrund.** Der Browser liefert ihn nur, solange die

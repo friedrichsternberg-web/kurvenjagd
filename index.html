@@ -319,6 +319,10 @@
       <symbol id="icon-mond" viewBox="0 0 24 24">
         <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>
       </symbol>
+      <symbol id="icon-zahnrad" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>
+      </symbol>
       <symbol id="icon-profil" viewBox="0 0 24 24">
         <circle cx="12" cy="8" r="3.8"/>
         <path d="M4.5 20c0-3.6 3.4-5.6 7.5-5.6s7.5 2 7.5 5.6"/>
@@ -558,14 +562,10 @@
           </span>
         </h1>
         <div class="kopf-knoepfe">
-          <button class="glas-rund" data-thema-knopf title="Hell" aria-label="Erscheinung wechseln">
-            <svg class="ic gross"><use href="#icon-sonne"></use></svg>
-          </button>
-          <button class="glas-rund" id="btnKontoRund" title="Konto" aria-label="Konto">
-            <!-- Ist ein Profilbild da, tritt es an die Stelle des Symbols
-                 und fuellt den Knopf ganz aus. konto.js schaltet um. -->
-            <img id="kontoRundBild" class="rund-bild" alt="" hidden>
-            <svg class="ic gross"><use href="#icon-profil"></use></svg>
+          <!-- Das Zahnrad fuehrt zu den Einstellungen: Profil, Rechtliches,
+               Erscheinung (js/konto/einstellungen.js). -->
+          <button class="glas-rund" id="btnEinstellungen" title="Einstellungen" aria-label="Einstellungen">
+            <svg class="ic gross"><use href="#icon-zahnrad"></use></svg>
           </button>
         </div>
       </header>
@@ -732,6 +732,49 @@
   <!-- ===== Konto: Anmelden und Registrieren teilen sich ein Formular,
        weil beide dieselben zwei Felder brauchen. Welcher Fall gemeint ist,
        merkt sich konto.js in der Variable kontoModus. ===== -->
+  <!-- ===== Einstellungen =====
+       Hinter dem Zahnrad oben rechts. Drei Dinge: der Weg zum Profil (oder
+       zur Anmeldung), Rechtliches, und die Erscheinung - Geraet, Hell oder
+       Dunkel. Gefuellt von js/konto/einstellungen.js, die Erscheinung
+       schaltet js/grundlage/thema.js. -->
+  <div id="einstellungenScreen" class="start-screen listen-screen" hidden>
+    <div class="start-screen-inner">
+      <button class="btn ghost back-btn" id="btnEinstellungenZurueck">&larr; Zur&uuml;ck</button>
+      <h2>Einstellungen</h2>
+      <ul class="einstellungen-liste">
+        <li>
+          <!-- Traegt weiter die Kennungen btnKontoRund und kontoRundBild:
+               konto.js setzt dort das Profilbild ein und blendet die Zeile
+               aus, wenn kein Server eingetragen ist. -->
+          <button type="button" class="einstellungen-zeile" id="btnKontoRund">
+            <span class="einstellungen-bild">
+              <img id="kontoRundBild" class="rund-bild" alt="" hidden>
+              <svg class="ic gross"><use href="#icon-profil"></use></svg>
+            </span>
+            <span class="einstellungen-text">
+              <span class="einstellungen-name" id="einstellungenProfilName">Profil</span>
+              <span class="einstellungen-meta" id="einstellungenProfilMeta">Nicht angemeldet</span>
+            </span>
+            <span class="einstellungen-pfeil" aria-hidden="true">&rsaquo;</span>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="einstellungen-zeile" id="btnEinstellungenRechtliches">
+            <span class="einstellungen-bild"><svg class="ic gross"><use href="#icon-notiz"></use></svg></span>
+            <span class="einstellungen-text"><span class="einstellungen-name">Rechtliches</span></span>
+            <span class="einstellungen-pfeil" aria-hidden="true">&rsaquo;</span>
+          </button>
+        </li>
+      </ul>
+      <h3 class="label einstellungen-titel">Erscheinung</h3>
+      <div class="segmented" id="themaWahl" role="group" aria-label="Erscheinung">
+        <button type="button" class="seg" data-thema-wahl="geraet">Ger&auml;t</button>
+        <button type="button" class="seg" data-thema-wahl="hell">Hell</button>
+        <button type="button" class="seg" data-thema-wahl="dunkel">Dunkel</button>
+      </div>
+    </div>
+  </div>
+
   <div id="kontoScreen" class="start-screen" hidden>
     <div class="start-screen-inner">
       <button class="btn ghost back-btn" id="btnKontoZurueck">&larr; Zurück</button>
@@ -2862,11 +2905,8 @@
     <span class="nav-rechts nur-quer">
       <!-- Derselbe Weg wie der runde Konto-Knopf im Garagenkopf; beide
            rufen oeffneKontoOderProfil() in konto.js. -->
-      <button class="glas-rund klein" data-thema-knopf title="Hell" aria-label="Erscheinung wechseln">
-        <svg class="ic"><use href="#icon-sonne"></use></svg>
-      </button>
-      <button class="glas-rund klein" id="btnKontoLeiste" title="Konto" aria-label="Konto">
-        <svg class="ic"><use href="#icon-profil"></use></svg>
+      <button class="glas-rund klein" id="btnEinstellungenLeiste" title="Einstellungen" aria-label="Einstellungen">
+        <svg class="ic"><use href="#icon-zahnrad"></use></svg>
       </button>
     </span>
   </nav>
@@ -3047,6 +3087,8 @@
   <!-- Nach app.js, weil konto.js beim Verkabeln showToast() und
        zeigeBildschirm() von dort benutzt. -->
   <script src="js/konto/konto.js?v=114"></script>
+  <!-- Der Bildschirm hinter dem Zahnrad. NACH konto.js: zeigt dessen Profil. -->
+  <script src="js/konto/einstellungen.js?v=114"></script>
   <!-- Die Garage in drei Teilen. Die Reihenfolge ist nicht beliebig:
 
        finder.js       zuerst, weil zeichneGarage() am Ende von garage.js

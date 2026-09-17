@@ -641,9 +641,14 @@ function öffneKontoOderProfil() {
   zeigeBildschirm('kontoScreen');
 }
 verkabele('btnKontoRund', 'click', öffneKontoOderProfil);
-verkabele('btnKontoLeiste', 'click', öffneKontoOderProfil);
 
-verkabele('btnProfilZurueck', 'click', zeigeGarage);
+// Zurueck fuehrt dorthin, wo man herkam: seit dem 17.09.2026 in die
+// Einstellungen, denn dort steht der Weg zum Profil.
+function zurueckVomKonto() {
+  if (typeof zeigeEinstellungen === 'function') zeigeEinstellungen();
+  else zeigeGarage();
+}
+verkabele('btnProfilZurueck', 'click', zurueckVomKonto);
 
 /* Die Anbieter-Knöpfe. Sie stehen im HTML, werden aber nur eingeblendet,
    wenn der Anbieter oben eingeschaltet ist - sonst schickte der Knopf den
@@ -829,7 +834,7 @@ verkabele('btnProfilNameSpeichern', 'click', async () => {
   showToast(ergebnis.meldung);
 });
 
-verkabele('btnKontoZurueck', 'click', zeigeGarage);
+verkabele('btnKontoZurueck', 'click', zurueckVomKonto);
 
 verkabele('btnKontoWechseln', 'click', () => {
   setzeKontoModus(kontoModus === 'anmelden' ? 'registrieren' : 'anmelden');

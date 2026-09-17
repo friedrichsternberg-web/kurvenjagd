@@ -3651,7 +3651,7 @@ function symbol(name, zusatz = '') {
    schwarze Flaeche, ohne einen Fehler zu melden. */
 const BILDSCHIRME = [
   'garageScreen', 'tourenScreen', 'reiseScreen', 'planerWahlScreen', 'app', 'rideScreen', 'statsScreen',
-  'freundeScreen',
+  'freundeScreen', 'einstellungenScreen',
   'rechtlichesScreen', 'reifenScreen', 'shopScreen', 'shopProduktScreen',
   'merklisteScreen',
   'kontoScreen', 'profilScreen', 'passwortNeuScreen', 'kontoLoeschenScreen',
@@ -3793,6 +3793,7 @@ function zeigeRechtliches(herkunft) {
 function zurückVomRechtlichen() {
   if (rechtlichesHerkunft === 'profilScreen') { zeigeProfil(); return; }
   if (rechtlichesHerkunft === 'kontoScreen') { zeigeBildschirm('kontoScreen'); return; }
+  if (rechtlichesHerkunft === 'einstellungenScreen' && typeof zeigeEinstellungen === 'function') { zeigeEinstellungen(); return; }
   zeigeGarage();
 }
 

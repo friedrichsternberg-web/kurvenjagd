@@ -5001,3 +5001,38 @@ Geprüft im Browser in beiden Erscheinungen: Start, Touren, Planer-Wahl,
 Planer mit Karte, Ride, Freunde, ein Blatt mit Feldern, ein Toast; Hoch-
 und Querformat. Offen: Die Landing-Seiten (`ueber/` …) kennen keinen
 Schalter und bleiben dunkel, bis `thema.js` auch dort eingebunden ist.
+
+## 17.09.2026 – Nach der Prüfung gegen Apples Richtlinien: Einstellungen, Glas nur auf der Bedienschicht
+
+Eine Prüfung der beiden Erscheinungen gegen die Human Interface Guidelines
+(Skill `apple-design`) ergab neun Punkte. Friedrich hat alles freigegeben,
+was reines Design ist – Anordnung, Schriftart und Schriftgrößen bleiben.
+Deshalb bleiben die Leistenbeschriftung (10 px, Apple-Minimum 11) und die
+Zahl der Reiter (sechs) unangetastet; beides steht in AUFGABEN.md.
+
+**Umgesetzt:**
+- **Glas nur auf der Bedienschicht.** `.karte` hat keinen `backdrop-filter`
+  mehr; den Filter tragen Leiste, Bedienfeld, Blatt, Toast, runde Knöpfe
+  und als einzige Karte die Bike-Karte, weil ihr Foto in ihr liegt. Apples
+  Regel: „Don’t use Liquid Glass in the content layer.“ Sichtbar ändert
+  sich wenig (unter den Karten liegt nur der Lichtkegel), gewonnen sind
+  eine klare Ebene und weniger Rechenlast. Die Sättigung des Filters von
+  190 auf 150 %, das dritte Licht im Untergrund ist gestrichen.
+- **Karten im Dunklen dunkler.** Füllung von 0,13 auf 0,08 Weiß; Kante und
+  Lichtkante bleiben kräftig. Eine Scheibe erkennt man am Rand.
+- **Transparenz reduzieren, Kontrast erhöhen, Bewegung reduzieren.** Zwei
+  Media-Blöcke in `design.css` (Filter aus, deckende Flächen; kräftigere
+  Kanten, dunklerer Nebentext) und der Puls „fährt jetzt“ steht bei
+  reduzierter Bewegung als fester Ring.
+- **Messfarben im Hellen als Text tauglich:** Grün 5,6:1, Gelb 5,1:1,
+  Rot 5,2:1 auf der hellen Karte (vorher 4,1 / 2,5 / 4,3).
+- **Ein Einstellungen-Bildschirm hinter dem Zahnrad** oben rechts, an der
+  Stelle des Profilknopfs: Profil (oder Anmelden), Rechtliches, Erscheinung.
+  Die Zeile „Profil“ trägt weiter die Kennungen `btnKontoRund` und
+  `kontoRundBild`, damit `konto.js` das Bild wie bisher einsetzt. Zurück
+  vom Konto und vom Profil führt in die Einstellungen.
+- **Erscheinung dreistufig:** Gerät, Hell, Dunkel. „Gerät“ ist die Vorgabe
+  und folgt dem System auch, wenn es sich abends umstellt; nur Hell und
+  Dunkel werden gespeichert. Apples Einwand gegen App-eigene Schalter ist
+  damit halb beantwortet: Der Weg zurück zur Systemeinstellung ist ein Tipp.
+  Der Sonne/Mond-Knopf im Kopf ist weg.
