@@ -5081,3 +5081,29 @@ im Blatt, wenn man in mehreren Gruppen ist – heute nimmt es die erste.
 Blätter ist 48 Punkt groß mit großem Zeichen; „Meinen Standort mit der
 Gruppe teilen“ ist eine eigene Zeile mit großem Haken, die sich beim
 Setzen blau färbt.
+
+## 17.09.2026 – Glaspillen statt blauer Knöpfe, Nullpunkt-Frage erst beim Start
+
+**Knöpfe.** Friedrich hat einen Entwurf geschickt: „Einladen“ als
+Glaspille, helle Kante, Plus in einer eigenen kleinen Glasscheibe, weiße
+Schrift, ein blauer Hauch darunter. Alle `.btn` sehen jetzt so aus – der
+blau gefüllte Knopf ist Geschichte. Was den Hauptknopf vom Glas-Knopf
+(`.ghost`) unterscheidet: die hellere Kante, ein Schein in der Signalfarbe
+und das Blau unter dem Glas. Das erste Symbol im Knopf sitzt in seiner
+eigenen Scheibe (`.btn > .ic:first-child`). Die Signalfarbe trägt damit
+weniger Fläche als vorher; sie bleibt an Umschaltern, aktiven Reitern,
+Abzeichen und dem Schein der Knöpfe.
+
+**Karten im Dunklen noch einmal dunkler:** Füllung 0,055 statt 0,08, der
+Glanz quer über die Scheibe endet früher (38 % statt 45 %) und beginnt
+auf der Kantenstufe. Damit ist die Karte fast Schwarz mit Rand.
+
+**Nullpunkt.** Der Block „Schräglage messen? Nullpunkt setzen“ stand
+offen auf dem Ride-Bildschirm, bevor überhaupt jemand fahren wollte.
+Jetzt fragt ein Blatt erst nach dem Tipp auf „Aufzeichnung starten“:
+„Nullpunkt setzen und los“ oder „Ohne Schräglage“; ist ein Nullpunkt
+gesetzt, heißt es „Los“ oder „Neu setzen“. Der alte Block bleibt versteckt
+im HTML, weil `#neigungStatus` und der Knopf weiter die Meldungen tragen
+(`zeigeNeigungsMeldung` schreibt an beide Orte). Die Erlaubnis für die
+Bewegungssensoren braucht auf dem iPhone eine echte Fingerbewegung; der
+Tipp im Blatt ist eine.

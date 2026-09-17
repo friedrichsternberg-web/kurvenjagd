@@ -2356,12 +2356,48 @@ function rideZurücksetzen() {
   zeigeRideZustand('bereit');
 }
 
+/* Der Tipp auf "Aufzeichnung starten" fragt zuerst nach der Schraeglage:
+   Der Nullpunkt muss im Stand gesetzt werden, also jetzt oder gar nicht.
+   Ein Blatt mit zwei Wegen - mit Nullpunkt, oder ohne (dann kommt die
+   Schraeglage grob aus dem GPS). Gibt es das Blatt nicht (blatt.js fehlt),
+   geht es direkt los. */
 function starteRide() {
   if (!geraet.standortDa()) {
     showToast('Dieses Gerät oder dieser Browser unterstützt keine Standortermittlung.');
     return;
   }
+  if (typeof oeffneBlatt !== 'function') { starteRideWirklich(); return; }
+  frageNachNullpunkt();
+}
 
+function frageNachNullpunkt() {
+  if (!ride.neigung.basis) ride.neigung.basis = geraet.lies(NEIGUNG_BASIS);
+  const gesetzt = !!ride.neigung.basis?.u;
+  const wann = gesetzt ? new Date(ride.neigung.basis.angelegtAm).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }) : '';
+  oeffneBlatt({
+    titel: 'Schr&auml;glage messen?',
+    inhalt: `
+      <p class="ride-frage">Stell dein Motorrad senkrecht hin, klemm das Handy in die Halterung
+        und tippe auf &bdquo;Nullpunkt setzen&ldquo;. Ohne Nullpunkt kommt die Schr&auml;glage grob aus dem GPS.</p>
+      <p class="hint" id="neigungBlattStatus" ${gesetzt ? '' : 'hidden'}>${gesetzt ? `Nullpunkt gesetzt am ${wann}. Hat sich die Halterung verstellt, setz ihn neu.` : ''}</p>`,
+    fuss: gesetzt
+      ? `<button class="btn ghost" data-ride-nullpunkt>Neu setzen</button>
+         <button class="btn" data-ride-los>${symbol('motorrad', 'klein')} Los</button>`
+      : `<button class="btn ghost" data-ride-los>Ohne Schr&auml;glage</button>
+         <button class="btn" data-ride-nullpunkt>${symbol('motorrad', 'klein')} Nullpunkt setzen und los</button>`,
+  });
+}
+
+// Nullpunkt setzen dauert zwei Sekunden; die Meldung dazu steht im Blatt.
+async function nullpunktSetzenUndLos() {
+  document.querySelectorAll('#reiseBlattFuss .btn').forEach(knopf => { knopf.disabled = true; });
+  await neigungNullpunktSetzen();
+  await new Promise(fertig => setTimeout(fertig, 900));   // die Meldung noch kurz lesen lassen
+  schliesseBlatt();
+  starteRideWirklich();
+}
+
+function starteRideWirklich() {
   rideZurücksetzen(); // sauber bei null anfangen, auch nach einer vorherigen Fahrt
 
   ride.aktiv = true;
@@ -2583,10 +2619,14 @@ function starteNeigungsMessung() {
    Ohne Text bleibt sie WEG statt leer stehenzubleiben: Ein leerer Absatz
    nimmt trotzdem seinen Abstand mit und reisst ein Loch in den Kasten. */
 function zeigeNeigungsMeldung(text) {
-  const meldung = document.getElementById('neigungStatus');
-  if (!meldung) return;
-  meldung.textContent = text || '';
-  meldung.hidden = !text;
+  // Dieselbe Meldung an beiden Orten: im (versteckten) Block des
+  // Ride-Bildschirms und im Blatt, das vor dem Start fragt.
+  ['neigungStatus', 'neigungBlattStatus'].forEach(kennung => {
+    const meldung = document.getElementById(kennung);
+    if (!meldung) return;
+    meldung.textContent = text || '';
+    meldung.hidden = !text;
+  });
 }
 
 function neigungStatusAnzeigen() {
@@ -4183,6 +4223,10 @@ document.getElementById('btnZumStartmenü').addEventListener('click', () => {
 // liefe das GPS schon, während man noch am Parkplatz steht.
 document.getElementById('btnRideStart').addEventListener('click', starteRide);
 document.getElementById('btnNeigungNullpunkt').addEventListener('click', neigungNullpunktSetzen);
+verkabele('reiseBlatt', 'click', ereignis => {
+  if (ereignis.target.closest('[data-ride-nullpunkt]')) { nullpunktSetzenUndLos(); return; }
+  if (ereignis.target.closest('[data-ride-los]')) { schliesseBlatt(); starteRideWirklich(); }
+});
 document.getElementById('btnRidePause').addEventListener('click', pausiereRideUmschalten);
 document.getElementById('btnRideStop').addEventListener('click', beendeRide);
 document.getElementById('btnRideSpeichern').addEventListener('click', speichereRide);

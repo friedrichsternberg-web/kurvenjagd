@@ -2298,14 +2298,15 @@
            steht, und die Fahrzeit würde mitzählen. -->
       <div id="rideBereit">
         <h2 class="ride-titel">Ausfahrt per GPS aufzeichnen</h2>
-        <!-- Schraeglage. Der Knopf steht VOR dem Starten, weil der
-             Nullpunkt im Stand gesetzt werden muss - und weil die Erlaubnis
-             fuer die Bewegungssensoren auf dem iPhone aus einer echten
-             Fingerbewegung heraus erfragt werden muss. Wer ihn ueberspringt,
-             zeichnet trotzdem auf; die Schraeglage kommt dann grob aus dem
-             GPS - das steht bewusst nicht mehr dabei, weil es niemanden zu
-             einer Entscheidung braucht. -->
-        <div class="neigung-block">
+        <!-- Schraeglage. Seit dem 17.09.2026 fragt die App erst NACH dem
+             Tipp auf "Aufzeichnung starten" in einem Blatt, ob der
+             Nullpunkt gesetzt werden soll (frageNachNullpunkt in app.js) -
+             vorher stand der Block hier offen. Er bleibt versteckt im HTML,
+             weil #neigungStatus und der Knopf weiter die Meldungen tragen.
+             Die Erlaubnis fuer die Bewegungssensoren muss auf dem iPhone aus
+             einer echten Fingerbewegung heraus erfragt werden; der Tipp im
+             Blatt ist eine. -->
+        <div class="neigung-block" hidden>
           <p class="hint">
             <strong>Schr&auml;glage messen?</strong> Stell dein Motorrad senkrecht
             hin, klemm das Handy in die Halterung und tippe auf

@@ -206,14 +206,15 @@
      Weisswerte zwischen 0.02 und 1.0. Kein Mensch sieht den Unterschied
      zwischen 0.12 und 0.14, aber jeder sieht, wenn eine Flaeche aus der
      Reihe faellt. Weniger Stufen heisst mehr Einheit. */
-  --glas-hauch:  rgba(255, 255, 255, 0.04);   /* Schachbrett, vertiefte Flaechen */
-  --glas-hell:   rgba(255, 255, 255, 0.08);   /* die uebliche Fuellung */
+  --glas-hauch:  rgba(255, 255, 255, 0.03);   /* Schachbrett, vertiefte Flaechen */
+  --glas-hell:   rgba(255, 255, 255, 0.055);  /* die uebliche Fuellung */
   --glas-rand:   rgba(255, 255, 255, 0.20);   /* die uebliche Kante */
   --glas-heller: rgba(255, 255, 255, 0.22);   /* gedrueckt / hervorgehoben */
   --glas-licht:  rgba(255, 255, 255, 0.45);   /* obere Lichtkante (inset) */
-  /* Die Fuellung ist dunkel (0,08), Kante und Lichtkante sind kraeftig:
+  /* Die Fuellung ist dunkel (0,055), Kante und Lichtkante sind kraeftig:
      Eine Scheibe erkennt man am Rand, nicht an der Flaeche. Friedrich
-     wollte die Karten im Dunklen dunkler als die erste Fassung (0,13). */
+     wollte die Karten im Dunklen zweimal dunkler als die erste Fassung
+     (0,13, dann 0,08). */
 
   /* Der Filter und der Schatten jeder Glaskarte, als Marken - in style.css
      standen einmal zwoelf verschiedene Blur-Radien nebeneinander. Eine

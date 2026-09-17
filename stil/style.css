@@ -1226,17 +1226,23 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   align-items: center;
   justify-content: center;
   gap: var(--s2);
-  padding: 12px 14px;
-  border: 1px solid var(--glas-rand);
-  border-radius: var(--r-sm);
-  /* Die Woelbung: oben heller, unten dunkler, dazu Lichtkante und ein
-     weicher Schein in der Knopffarbe. Zusammen liest sich das als
-     gewoelbtes Glas mit Farbe DARUNTER - nicht als angemalte Flaeche.
-     Die beiden Farben kommen aus der Designsprache statt fest eingetragen
-     zu sein. Frueher standen hier zwei Orangetoene - beim Wechsel auf
-     RAL 5005 waere der Knopf dadurch halb orange geblieben. */
-  background: linear-gradient(to bottom, var(--accent-glanz), var(--accent) 55%, var(--accent-tief));
-  color: var(--accent-ink);
+  padding: 12px 18px;
+  border: 1px solid var(--glas-heller);
+  border-radius: var(--r-pill);
+  /* DER KNOPF IST EINE GLASPILLE (seit dem 17.09.2026, vorher ein blau
+     gefuellter Knopf): eine helle Scheibe mit Lichtkante oben, einem
+     Hauch der Signalfarbe darunter und einem weichen Schein am Rand.
+     Weisse Schrift, kein Farbfeld - so wollte Friedrich es, nach dem
+     Vorbild seines Entwurfs "Einladen". Was ihn vom Glas-Knopf (.ghost)
+     unterscheidet: die hellere Kante, der Schein und das Blau darunter.
+     Der Schein ist ein Verlauf, aber einer, der Glas einen Untergrund
+     gibt (Grundsatz 1 in design.css, dritter Fall). */
+  background:
+    linear-gradient(to bottom, var(--glas-heller), var(--glas-hauch)),
+    color-mix(in srgb, var(--accent) 22%, transparent);
+  backdrop-filter: var(--glas-filter);
+  -webkit-backdrop-filter: var(--glas-filter);
+  color: var(--text);
   font-family: var(--schrift-text);
   font-size: 15px;
   font-weight: 600;
@@ -1244,15 +1250,28 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
   box-shadow:
     inset 0 1px 0 var(--glas-licht),
     inset 0 -1px 0 var(--schatten-hauch),
-    0 6px 18px color-mix(in srgb, var(--accent) 40%, transparent);
+    0 0 0 1px color-mix(in srgb, var(--accent-hell) 28%, transparent),
+    0 0 18px color-mix(in srgb, var(--accent-hell) 22%, transparent),
+    0 8px 22px var(--schatten-weich);
   transition: filter 0.12s ease, transform 0.14s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .btn:hover { filter: brightness(1.12); }
 .btn:active { transform: scale(0.97); }
+/* Ein Symbol im Knopf sitzt in einer eigenen kleinen Glasscheibe - das
+   Plus in "Einladen" aus dem Entwurf. Nur das erste Symbol; ein Pfeil am
+   Ende bleibt, was er ist. */
+.btn > .ic:first-child {
+  width: 30px; height: 30px;
+  padding: 6px;
+  margin-left: -6px;
+  border-radius: 50%;
+  border: 1px solid var(--glas-rand);
+  background: var(--glas-hell);
+  box-shadow: inset 0 1px 0 var(--glas-licht);
+}
+.btn.klein > .ic:first-child { width: 24px; height: 24px; padding: 4px; margin-left: -4px; }
 .btn.ghost {
   background: var(--glas-hauch);
-  backdrop-filter: blur(14px) saturate(150%);
-  -webkit-backdrop-filter: blur(14px) saturate(150%);
   border-color: var(--glas-rand);
   color: var(--text);
   font-weight: 500;
@@ -2692,7 +2711,7 @@ body.nav-modus .leaflet-control-container { display: none; }
      quer darueber"): ein Verlauf von der linken oberen Ecke, der nach der
      Mitte verschwindet - Grundsatz 1, dritter Fall. Darunter die Fuellung. */
   background:
-    linear-gradient(135deg, var(--glas-heller) 0%, transparent 45%, transparent 75%, var(--glas-hauch) 100%),
+    linear-gradient(135deg, var(--glas-rand) 0%, transparent 38%),
     var(--glas-hell);
   /* Kein backdrop-filter: Karten sind Inhalt, nicht Bedienschicht - siehe
      "Wo das Glas wirklich Glas ist" in design.css. */
@@ -4615,6 +4634,7 @@ body.nav-modus .karten-knopf { display: none; }
   background: var(--glas-hell);
 }
 .neigung-block .hint { margin: 0 0 var(--s2); }
+.ride-frage { margin: 0 0 var(--s3); line-height: 1.5; }
 .neigung-block .hint:last-child { margin: var(--s2) 0 0; }
 
 /* Die Namensnennung waehrend der Navigation. Klein und dezent, aber
