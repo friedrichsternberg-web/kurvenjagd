@@ -53,7 +53,8 @@ der Datenschutzerklärung).
 | Dienst | Wofür | Was mitgeht | Sitz |
 |---|---|---|---|
 | **brouter.de** | Routenberechnung | Wegpunkte als Koordinaten | Deutschland |
-| **tile.openstreetmap.org** | Kartenbilder, auch als Vorschaubild auf den Tourenkarten (seit 30.08.2026) | Kartenausschnitt, damit indirekt der Aufenthaltsort | EU |
+| **tiles.openfreemap.org** | die Grundkarte in Planer, Ride, Freunde und auf dem Start als Vektorkacheln (seit 17.09.2026; Betreiber: OpenFreeMap, eine Einzelperson, Server bei Hetzner in Deutschland; kein Schlüssel, kein Cookie) | Kartenausschnitt, damit indirekt der Aufenthaltsort | Deutschland |
+| **tile.openstreetmap.org** | Kartenbilder als Vorschaubild auf den Tourenkarten (seit 30.08.2026); außerdem Rückfall für die Grundkarte, wenn der Browser kein WebGL kann | Kartenausschnitt, damit indirekt der Aufenthaltsort | EU |
 | **nominatim.openstreetmap.org** | Ortssuche | der eingetippte Suchbegriff | EU |
 | **vpic.nhtsa.dot.gov** | Motorradmodelle im Finder | Marke und Baujahr, keine Nutzerdaten | USA |
 | **Supabase** (`copydwpdqpnwjvknsakz`) | Konten, Profile, geteilte Touren, Fotos | E-Mail, Benutzername, Profilbild, Touren, Fotos | EU (Schweden, `eu-north-1`) |

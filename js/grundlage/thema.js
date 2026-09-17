@@ -41,6 +41,8 @@ function wendeThemaAn(wahl) {
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.content = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#000000';
   zeichneThemaWahl();
+  // Wer mithoeren will (der Kartengrund stellt seinen Stil um), hoert hier.
+  document.dispatchEvent(new CustomEvent('thema-gewechselt', { detail: { thema } }));
 }
 
 function setzeThema(wahl) {

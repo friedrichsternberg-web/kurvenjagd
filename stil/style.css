@@ -3466,6 +3466,9 @@ button.karte:active { transform: scale(0.985); }
   font-size: 21px;
   text-transform: uppercase;
 }
+/* Das Kreuz zum Schliessen: so gross wie ein Daumen, mit einem Zeichen,
+   das man sieht - Friedrich fand es ueberall zu klein. */
+.garage-dialog-kopf .glas-rund.klein { width: 48px; height: 48px; font-size: 30px; line-height: 1; }
 
 .garage-dialog-inhalt {
   flex: 1;
@@ -6125,7 +6128,25 @@ body.nav-modus .karten-knopf { display: none; }
 .umfrage-termin-felder { list-style: none; margin: 0 0 var(--s2); padding: 0; display: flex; flex-direction: column; gap: var(--s2); }
 
 /* ---------- Standort einer Fahrt (seit 17.09.2026) ---------- */
-.standort-wahl { margin-top: var(--s3); }
+/* Die Wahl "Standort teilen" im Blatt "Ich fahre jetzt": eine eigene
+   Zeile mit grossem Haken, die sich beim Setzen blau faerbt - sie ist
+   die eine Entscheidung in diesem Blatt, die etwas ueber einen verraet. */
+.standort-wahl {
+  margin-top: var(--s4);
+  padding: var(--s3) var(--s4);
+  gap: var(--s3);
+  border-radius: var(--r-md);
+  border: 1px solid var(--glas-rand);
+  background: var(--glas-hell);
+  font-size: 15px;
+  font-weight: 600;
+}
+.standort-wahl input[type="checkbox"] { width: 26px; height: 26px; }
+.standort-wahl span { display: inline-flex; align-items: center; gap: var(--s2); }
+.standort-wahl:has(input:checked) {
+  border-color: color-mix(in srgb, var(--accent-hell) 60%, transparent);
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+}
 .standort-schalter {
   display: flex;
   align-items: center;
@@ -6210,9 +6231,22 @@ body.nav-modus .karten-knopf { display: none; }
 .einstellungen-titel { margin: 0 0 var(--s2); }
 
 /* ---------- Freunde auf dem Start (seit 17.09.2026) ----------
-   Das Fahrtband: eine Zeile je Fahrt, blau umrandet wie eine Einladung,
-   weil es eine ist. Bei "jetzt" der gruene Puls. Die ganze Zeile fuehrt
-   in die Gruppe, der Knopf rechts schliesst an. */
+   Ganz oben das Widget "Jetzt" mit dem grossen Knopf "Ich fahre jetzt" -
+   immer da, auch ohne Konto (dann fuehrt er zum Konto). Darunter das
+   Fahrtband: eine Zeile je Fahrt, blau umrandet wie eine Einladung, weil
+   es eine ist. Bei "jetzt" der gruene Puls. Die ganze Zeile fuehrt in die
+   Gruppe, der Knopf rechts schliesst an. Zeigt jemand seinen Standort,
+   steht darunter die kleine Karte. */
+.fahren-widget { display: flex; flex-direction: column; gap: var(--s3); }
+.fahren-widget .widget-kopf { margin-bottom: 0; }
+.fahren-widget .fahrt-jetzt-knopf { padding: 16px 14px; font-size: 17px; }
+.start-standort-karte {
+  height: 220px;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  border: 1px solid var(--glas-rand);
+  background: var(--raum-dunkel);
+}
 .garage-fahrt { gap: var(--s2); }
 .fahrt-band {
   display: flex;

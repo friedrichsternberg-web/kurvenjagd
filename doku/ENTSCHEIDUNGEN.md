@@ -5047,3 +5047,37 @@ Rumpf in `--gps`, Helm in `--accent-ink`. Die Logik bleibt: Nicht der
 Marker dreht sich, die Karte – das Motorrad zeigt immer nach oben. 30 × 46
 Punkt statt 22 × 22, damit die Form auf der Karte lesbar ist; der
 Ankerpunkt liegt in der Mitte, dort, wo der Fahrer sitzt.
+
+## 17.09.2026 – Vektorkacheln von OpenFreeMap, das Widget „Jetzt“ auf dem Start
+
+**Kartengrund.** Friedrich wollte eine schönere Karte als die
+OSM-Rasterkacheln, notfalls Satellit. Satellit ist zum Fahren schlecht
+(Straßen und Namen verschwinden) und rechtlich grau; die eigentliche
+Schwäche war ohnehin die Schärfe. Also der seit dem 31.08.2026 offene
+Schritt: **MapLibre GL mit Vektorkacheln von OpenFreeMap**, über die
+Brücke `leaflet-maplibre-gl`, damit `app.js` unangetastet bleibt. Geprüft
+vorher: OpenFreeMap erlaubt gewerbliche Nutzung ausdrücklich, ohne
+Schlüssel, ohne Obergrenze, Daten von OpenStreetMap; die Server stehen bei
+Hetzner in Deutschland. Bibliotheken liegen in `extern/maplibre` (1 MB, mit
+Lizenztexten), nicht auf einem fremden Server – wie Leaflet. Die CSP kennt
+`tiles.openfreemap.org` in `connect-src`. Zwei Stile: `fiord` im Dunklen
+(dunkelblau, die orange Route springt heraus), `liberty` im Hellen (bunt,
+sieht aus wie die alte Karte, nur scharf). Ein Themenwechsel stellt alle
+offenen Karten um (`thema-gewechselt`-Ereignis). Ohne WebGL kommen die
+Rasterkacheln wie vorher. Die Vorschaubilder der Touren bleiben Raster.
+Was bleibt: Die Navi-Drehung läuft weiter über CSS; das Bild darunter ist
+jetzt scharf, der zweite Umrechnungsschritt bleibt (AUFGABEN.md).
+
+**Das Widget „Jetzt“.** „Ich fahre jetzt“ steht jetzt immer ganz oben auf
+dem Start, auch ohne Konto (führt dann zum Konto) und ohne Gruppe (führt
+zum Anlegen). Mit Gruppe öffnet es direkt das Blatt in der zuletzt bewegten
+Gruppe. Läuft die eigene Fahrt, steht dort „Du fährst gerade“ mit
+„Beenden“ und dem Standort-Schalter. Zeigt jemand seinen Standort, folgt
+unter dem Fahrtband eine kleine Karte mit allen, die ihn zeigen; sie holt
+alle 20 Sekunden nach, solange der Start offen ist. Offen: ein Gruppenwahl
+im Blatt, wenn man in mehreren Gruppen ist – heute nimmt es die erste.
+
+**Kleinigkeiten auf Friedrichs Wunsch:** Das Kreuz zum Schließen der
+Blätter ist 48 Punkt groß mit großem Zeichen; „Meinen Standort mit der
+Gruppe teilen“ ist eine eigene Zeile mit großem Haken, die sich beim
+Setzen blau färbt.

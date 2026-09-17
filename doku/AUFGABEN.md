@@ -954,7 +954,21 @@ Garagenbild als `<nutzer-id>/garage/<id>.jpg` mit `contentType:
 stimmt, Name und Typ lügen. Beim Ausliefern über eine echte Bildadresse
 (statt über die Daten-URL, die heute benutzt wird) fällt das auf.
 
-## Vektorkacheln statt Rasterkacheln (offen seit 31.08.2026)
+## Vektorkacheln statt Rasterkacheln — ERLEDIGT am 17.09.2026 (Brücke)
+
+Umgesetzt über die **Brücke** (`extern/maplibre`, `js/planer/kartengrund.js`):
+Leaflet bleibt, MapLibre zeichnet den Grund aus OpenFreeMap-Vektorkacheln.
+Zwei Stile, je Erscheinung einer. Offen bleibt Punkt 2 unten: Die Drehung
+im Navi läuft weiter über das CSS-`rotate` – nur ist jetzt das Bild darunter
+scharf. Der Umzug ganz auf MapLibre (ohne Leaflet) bleibt eine Option,
+wenn die Brücke Ärger macht. Der Text darunter ist der Stand vor der
+Entscheidung.
+
+**Für Friedrich:** Punkt 3 der Datenschutzerklärung nennt die Kartenbilder
+von OpenStreetMap. Er muss OpenFreeMap (tiles.openfreemap.org, Hetzner,
+Deutschland) dazu nennen – siehe DATEN.md.
+
+### Der Stand vor dem 17.09.2026
 
 Zwei Probleme mit einer Ursache, und beide lösen sich mit demselben Schritt:
 

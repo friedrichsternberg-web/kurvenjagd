@@ -1,13 +1,19 @@
 /* ============================================================================
    Serpa - Freunde auf dem Startbildschirm
 
-   Zwei Dinge holt der Bereich "Freunde" auf den Start:
+   Drei Dinge holt der Bereich "Freunde" auf den Start:
 
-     Das FAHRTBAND ganz oben, sobald in einer meiner Gruppen jemand faehrt -
+     Das WIDGET "JETZT" ganz oben, immer: der grosse Knopf "Ich fahre
+     jetzt" (und "Fahrt planen" daneben). Ohne Konto fuehrt er zum Konto,
+     ohne Gruppe zum Anlegen einer, sonst direkt ins Blatt der zuletzt
+     bewegten Gruppe. Faehrt man gerade, steht statt des Knopfes "Du
+     faehrst gerade" mit "Beenden" und dem Schalter fuer den Standort.
+
+     Das FAHRTBAND darunter, sobald in einer meiner Gruppen jemand faehrt -
      jetzt, oder in den naechsten 36 Stunden. "Anna faehrt jetzt · Alpen-
-     Crew", mit "Ich bin dabei". Es steht ueber der Bike-Karte, weil es
-     das Spontanste ist, was die App zu sagen hat, und weil es verschwindet,
-     sobald niemand faehrt.
+     Crew", mit "Ich bin dabei". Zeigt jemand seinen Standort, folgt die
+     kleine KARTE mit allen, die ihn zeigen - alle 20 Sekunden frisch,
+     solange der Start offen ist.
 
      Die FREUNDE-KARTE unter der Reise: die eigene Gruppe (die zuletzt
      bewegte) mit dem Weg hinein - oder, solange es keine gibt, die
@@ -27,6 +33,8 @@
 
 let startGruppen = [];
 let startFahrten = [];
+let startKarte = null;      // die kleine Leaflet-Karte unter dem Fahrtband
+let startTakt = null;       // holt die Standorte nach, solange der Start offen ist
 
 
 /* --- 1. Laden --------------------------------------------------------------- */
@@ -50,13 +58,94 @@ function zeichneGarageFreunde() {
   const karte = document.getElementById('garageFreunde');
   if (band) {
     const fahrten = angemeldeterNutzer ? startFahrten.slice(0, 3) : [];
-    band.innerHTML = fahrten.map(startFahrtHtml).join('');
-    band.hidden = !fahrten.length;
+    const mitStandort = angemeldeterNutzer
+      ? startFahrten.filter(fahrt => fahrt.art === 'jetzt' && fahrt.lat != null && fahrt.lon != null) : [];
+    band.innerHTML = fahrenWidgetHtml() + fahrten.map(startFahrtHtml).join('')
+      + (mitStandort.length ? '<div class="start-standort-karte" id="startStandortKarte" aria-label="Wo sie gerade sind"></div>' : '');
+    band.hidden = false;
+    zeichneStartStandortKarte(mitStandort);
+    stelleStartTakt(mitStandort.length > 0);
   }
   if (karte) {
     karte.innerHTML = freundeKarteHtml();
     karte.hidden = false;
   }
+}
+
+// Meine laufende Fahrt "jetzt" aus der Sicht des Starts, falls es eine gibt.
+function meineStartFahrtJetzt() {
+  if (!angemeldeterNutzer) return null;
+  return startFahrten.find(fahrt => fahrt.art === 'jetzt' && String(fahrt.fahrer_id) === String(angemeldeterNutzer.id)) || null;
+}
+
+/* Das Widget "Jetzt": der grosse Knopf, oder der Zustand "Du faehrst
+   gerade". Rechts im Kopf die Gruppe, in der die Fahrt landet. */
+function fahrenWidgetHtml() {
+  const laeuft = meineStartFahrtJetzt();
+  const gruppe = startGruppen[0];
+  return `
+    <div class="karte fahren-widget">
+      <div class="widget-kopf">
+        <span class="abzeichen">Jetzt</span>
+        ${gruppe ? `<button type="button" class="linkbtn" data-start-gruppe="${escapeHtml(gruppe.id)}">${escapeHtml(gruppe.name)} &rsaquo;</button>` : ''}
+      </div>
+      ${laeuft
+        ? `<div class="fahrt-laeuft">
+             <span class="fahrt-puls" aria-hidden="true"></span>
+             <span class="fahrt-laeuft-text">Du f&auml;hrst gerade${laeuft.beitrag_name ? ` <i>&middot;</i> ${escapeHtml(laeuft.beitrag_name)}` : ''}</span>
+             <button type="button" class="btn ghost klein" data-start-fahrt-beenden="${escapeHtml(laeuft.id)}">Beenden</button>
+           </div>
+           ${typeof standortSchalterHtml === 'function' ? standortSchalterHtml(laeuft) : ''}`
+        : `<div class="fahrten-knoepfe">
+             <button type="button" class="btn fahrt-jetzt-knopf" data-start-fahrt-jetzt>
+               ${symbol('motorrad', 'klein')} Ich fahre jetzt
+             </button>
+             <button type="button" class="btn ghost" data-start-fahrt-planen>
+               ${symbol('kalender', 'klein')} Fahrt planen
+             </button>
+           </div>`}
+    </div>`;
+}
+
+/* Die kleine Karte unter dem Band: je Fahrer mit Standort ein Marker,
+   derselbe wie in der Gruppe (standortMarkerIcon aus standort.js). Die
+   Karte wird mit dem Band jedes Mal neu gebaut - vorher die alte weg,
+   sonst hinge sie an einem Element, das es nicht mehr gibt. */
+function zeichneStartStandortKarte(fahrten) {
+  if (startKarte) { startKarte.remove(); startKarte = null; }
+  const kasten = document.getElementById('startStandortKarte');
+  if (!kasten || !fahrten.length || typeof standortMarkerIcon !== 'function') return;
+  startKarte = L.map(kasten, { zoomControl: false, attributionControl: true, dragging: false, scrollWheelZoom: false });
+  fuegeKartenGrundHinzu(startKarte);
+  fahrten.forEach(fahrt => L.marker([fahrt.lat, fahrt.lon], { icon: standortMarkerIcon(fahrt) }).addTo(startKarte));
+  if (fahrten.length > 1) startKarte.fitBounds(fahrten.map(fahrt => [fahrt.lat, fahrt.lon]), { padding: [40, 40], maxZoom: 13 });
+  else startKarte.setView([fahrten[0].lat, fahrten[0].lon], 12);
+  setTimeout(() => startKarte && startKarte.invalidateSize(), 60);
+}
+
+// Alle 20 Sekunden nachsehen, solange jemand seinen Standort zeigt und
+// der Start sichtbar ist. Sonst kein Takt - der Server soll nicht fuer
+// nichts gefragt werden.
+function stelleStartTakt(an) {
+  if (startTakt) clearInterval(startTakt);
+  startTakt = null;
+  if (!an) return;
+  startTakt = setInterval(() => {
+    if (document.getElementById('garageScreen')?.hidden) { stelleStartTakt(false); return; }
+    ladeGarageFreundeNach();
+  }, 20000);
+}
+
+/* "Ich fahre jetzt" vom Start aus: ohne Konto zum Konto, ohne Gruppe zum
+   Anlegen, sonst in die zuletzt bewegte Gruppe und dort gleich ins Blatt.
+   Das Blatt gehoert fahrten.js und braucht die offene Gruppe. */
+async function starteFahrtVomStart(art) {
+  if (!angemeldeterNutzer) { öffneKontoOderProfil(); return; }
+  if (!startGruppen.length) { zeigeFreunde(); oeffneNeueGruppeBlatt(); return; }
+  zeigeFreunde();
+  gruppenListe = startGruppen;
+  await oeffneGruppe(startGruppen[0].id);
+  oeffneFahrtBlatt(art);
 }
 
 /* Eine Zeile im Fahrtband. "Du" statt des eigenen Namens, und bei der
@@ -132,6 +221,20 @@ async function beiTippAufStartFreunde(ereignis) {
   if (trifft('[data-start-konto]')) { öffneKontoOderProfil(); return; }
   if (trifft('[data-start-freunde]')) { zeigeFreunde(); return; }
   if (trifft('[data-start-gruppe-neu]')) { zeigeFreunde(); oeffneNeueGruppeBlatt(); return; }
+  if (trifft('[data-start-fahrt-jetzt]')) { starteFahrtVomStart('jetzt'); return; }
+  if (trifft('[data-start-fahrt-planen]')) { starteFahrtVomStart('geplant'); return; }
+  const beenden = trifft('[data-start-fahrt-beenden]');
+  if (beenden) {
+    if (await beendeFahrt(beenden.dataset.startFahrtBeenden)) ladeGarageFreundeNach();
+    return;
+  }
+  const schalter = trifft('[data-standort-schalter]');
+  if (schalter) {
+    if (schalter.dataset.an) await stoppeStandortTeilen(true);
+    else await starteStandortTeilen(schalter.dataset.standortSchalter);
+    ladeGarageFreundeNach();
+    return;
+  }
   const dabei = trifft('[data-start-dabei]');
   if (dabei) {
     if (await schliesseMichAn(dabei.dataset.startDabei, true)) {

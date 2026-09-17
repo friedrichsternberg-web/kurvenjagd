@@ -100,7 +100,8 @@
     img-src 'self' data: blob: https://tile.openstreetmap.org https://copydwpdqpnwjvknsakz.supabase.co https://images2.productserve.com https://www.motoin.de https://www.polo-motorrad.com https://www.fc-moto.com;
     connect-src 'self' https://brouter.de https://nominatim.openstreetmap.org
                 https://vpic.nhtsa.dot.gov https://de.wikipedia.org https://en.wikipedia.org
-                https://copydwpdqpnwjvknsakz.supabase.co https://cdn.jsdelivr.net;
+                https://copydwpdqpnwjvknsakz.supabase.co https://cdn.jsdelivr.net
+                https://tiles.openfreemap.org;
     ">
 
   <!-- ===== Die App als App =====
@@ -207,6 +208,12 @@
        bzw. Ordner mit angefasst. -->
   <link rel="stylesheet" href="extern/leaflet/leaflet.css">
   <script src="extern/leaflet/leaflet.js"></script>
+  <!-- MapLibre GL zeichnet den Kartengrund aus Vektorkacheln, die Bruecke
+       haengt ihn als Leaflet-Schicht ein (js/planer/kartengrund.js). Beide
+       liegen hier im Ordner, nicht auf einem fremden Server. -->
+  <link rel="stylesheet" href="extern/maplibre/maplibre-gl.css">
+  <script src="extern/maplibre/maplibre-gl.js"></script>
+  <script src="extern/maplibre/leaflet-maplibre-gl.js"></script>
 
   <!-- Supabase: unser Server für Konten und (später) geteilte Routen und
        Ausfahrten. Die Bibliothek stellt das globale Objekt "supabase"
@@ -571,11 +578,11 @@
       </header>
 
       <!-- Das Fahrtband: nur da, wenn in einer der eigenen Gruppen gerade
-           jemand faehrt oder es demnaechst vorhat. Gefuellt von
-           js/freunde/start.js; ohne Konto oder ohne Fahrt bleibt es
-           verborgen. Steht ueber allem, weil es das Spontanste ist, was
-           der Start zu sagen hat. -->
-      <section id="garageFahrt" class="start-abschnitt garage-fahrt" hidden></section>
+           jemand faehrt oder es demnaechst vorhat, und seit dem 17.09.2026
+           immer das Widget "Jetzt" mit dem Knopf "Ich fahre jetzt" davor.
+           Gefuellt von js/freunde/start.js. Steht ueber allem, weil es das
+           Spontanste ist, was der Start zu sagen hat. -->
+      <section id="garageFahrt" class="start-abschnitt garage-fahrt"></section>
 
       <!-- Die Bike-Karte ist ein Raster aus zwei Spalten: links Abzeichen,
            Name, die Werte als Zeilen mit Symbol und der Knopf; rechts die
@@ -3080,6 +3087,8 @@
        daneben statt darin, weil kern.js die Zeilengrenze laengst
        reisst. Vor app.js, das die Bilder in die Listen setzt. -->
   <script src="js/planer/vorschau.js?v=114"></script>
+  <!-- Der Kartengrund (Vektorkacheln von OpenFreemap, sonst Raster). VOR app.js. -->
+  <script src="js/planer/kartengrund.js?v=114"></script>
   <!-- Auswertung der Ausfahrten - reine Rechnerei wie kern.js und
        vorschau.js, laeuft im selben Selbsttest (pruefe-kern.js). -->
   <script src="js/fahrten/bilanz.js?v=114"></script>

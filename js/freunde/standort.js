@@ -156,10 +156,7 @@ function oeffneStandortKarte(fahrtId) {
   });
   schliesseStandortKarte();
   standortKarte = L.map('fahrtKarte', { zoomControl: false, attributionControl: true }).setView([49.8, 9.9], 6);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>',
-  }).addTo(standortKarte);
+  fuegeKartenGrundHinzu(standortKarte);
   standortKartenMarker = new Map();
   zeichneStandortKarte(fahrtId);
   setTimeout(() => standortKarte && standortKarte.invalidateSize(), 60);

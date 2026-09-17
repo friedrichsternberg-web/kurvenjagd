@@ -103,12 +103,10 @@ const map = L.map('map', {
   zoomControl: true,
 }).setView([49.8, 9.9], 8); // Spessart/Franken
 
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 19,
-  // Pflichtangabe, siehe Nutzungsbedingungen von OpenStreetMap. Sie
-  // gehoert AN DIE KARTE, nicht in einen Fuss, den man wegscrollen kann.
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>',
-}).addTo(map);
+// Der Grund unter der Karte: Vektorkacheln von OpenFreeMap, sonst Raster -
+// siehe kartengrund.js. Der Hinweis auf die Datenquelle gehoert AN DIE
+// KARTE, nicht in einen Fuss, den man wegscrollen kann.
+fuegeKartenGrundHinzu(map);
 
 /* Einmalig den eigenen Standort abfragen und die Karte dorthin zentrieren -
    reine Orientierungshilfe, im Unterschied zu "Aktueller Standort" in der
@@ -2299,8 +2297,7 @@ function rideKarte() {
   if (rideKarteInstanz) return rideKarteInstanz;
 
   rideKarteInstanz = L.map('rideMap', { zoomControl: true }).setView([49.8, 9.9], 8);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>' })
-    .addTo(rideKarteInstanz);
+  fuegeKartenGrundHinzu(rideKarteInstanz);
   return rideKarteInstanz;
 }
 
