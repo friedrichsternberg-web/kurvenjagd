@@ -4852,3 +4852,44 @@ Versionsnummer. Ändert sich die Designsprache, sehen Besucher der
 statischen Seiten den alten Stand bis zum Ablauf des Browser-Caches – für
 Textseiten hinnehmbar, und `pruefe.sh` Regel 6 bleibt bei index.html.
 
+## 17.09.2026 — Kuratierte Strecken: gesperrt heißt sichtbar gesperrt
+
+76 Strecken in Deutschland als eigene Ebene auf der Karte, neben den 62
+Pässen in app.js. Der eigentliche Punkt ist das Sperrfeld: Es gibt kein
+bundesweites Motorradfahrverbot, aber zunehmend regionale Sperrungen
+(Sudelfeld B307 dauerhaft, L1152 im Landkreis Sonneberg dauerhaft, B274
+„Die Schliem" an Wochenenden und Feiertagen ab dem 1. April).
+
+**Gesperrte Strecken werden nicht ausgeblendet, sondern als gesperrt
+markiert.** Eine App, die eine gesperrte Strecke als Highlight vorschlägt,
+ist schlechter als eine, die sie nicht kennt – aber eine, die sie
+verschweigt, ist auch nicht besser: Wer die Strecke aus einem Forum
+kennt, sucht sie und findet sie nicht, oder fährt hin und steht vor dem
+Schild. Sichtbar rot mit Grund, Quelle und Prüfdatum ist ehrlicher. Der
+Schalter „Gesperrte Strecken ausblenden" gibt es, standardmäßig aus.
+Kurviger und Calimoto behandeln Sperrungen bisher nicht als Bedingung;
+hier ist es ein echter Unterschied.
+
+**Zwei Dateien statt einer Ergänzung in app.js** (die liegt über ihrer
+Grenze): `strecken-kern.js` rechnet – Sperrprüfung nach Datum, Filter –
+und läuft im Selbsttest unter jsc mit 22 Fällen; `strecken.js` zeichnet.
+Die Sperrlogik hängt vom Datum ab und ist damit genau die Art Code, die
+ohne Test irgendwann still falsch rechnet.
+
+**Vier Marker-Zustände**, Farbe bedeutet Zustand: grün frei, gelb mit
+Beschränkung, rot gesperrt (auf der Kurvigkeitsskala von design.css), und
+das neutrale Schild mit gestrichelter Kante für „Lage ungeprüft" –
+Koordinaten aus der automatischen Ortssuche, noch nicht von Hand
+bestätigt. Die Sperre schlägt die ungeprüfte Lage.
+
+**Die Liste wird zur Laufzeit geladen**, nicht eingebettet: Sie wird
+mehrmals pro Saison gepflegt und soll ohne Code-Änderung austauschbar
+sein. Umlaute: Die Vorlage kam in ASCII („Ruegen"); im Datensatz stehen
+sie ausgeschrieben, die Ersetzung wurde Wort für Wort geprüft (Cloef,
+aktuell, Wasserkuppe, Hasselfelde, Kessel bleiben).
+
+**Nicht in diesem Auftrag:** Routing-Integration (Sperrungen als
+Bedingung beim Rechnen), Zusammenführung mit den Pässen, Bilder,
+Feiertagskalender, echte Score-Messung, Meldefunktion – alle in
+AUFGABEN.md.
+

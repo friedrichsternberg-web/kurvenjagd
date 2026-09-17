@@ -1053,3 +1053,25 @@ Nebenbei konnte `index.html` von `leaflet-src.js` auf die kleinere
   ungefähren Ort einer Fahrt und einen Meldeweg (DSA), wie bei den
   öffentlichen Touren.
 
+## Kuratierte Strecken (seit 17.09.2026)
+
+- **Feiertagskalender nach Bundesland.** Die Wochenendsperren gelten auch
+  an gesetzlichen Feiertagen; `istGesperrt()` in `strecken-kern.js`
+  rechnet heute nur Samstag und Sonntag und nennt die Feiertage im Text.
+  Ein Kalender je Land (feste und bewegliche Feiertage, Ostern) ist ein
+  eigener Auftrag – ohne Bibliothek vom CDN, als reine Rechnerei mit Test.
+- **Echte Kurven-Messung.** `grad_pro_km` ist geschätzt. Sobald eine
+  Strecke einmal über `kern.js` geroutet wurde, soll der gemessene Wert in
+  `grad_pro_km_gemessen` stehen und die Schätzung ersetzen (die App zieht
+  ihn schon vor, wenn er da ist).
+- **Meldefunktion für neue Verbotsschilder.** Nutzer sehen Sperrungen
+  vor uns. Ein Knopf „Sperrung melden" am Popup, der Strecke, Datum und
+  einen Satz an den Server schickt – mit Meldeweg wie bei den Touren.
+- **Koordinaten von Hand prüfen.** Alle 76 stehen auf
+  `koordinaten_geprueft: false` (Mittelpunkt zwischen `von` und `bis` aus
+  Nominatim). Je Strecke einmal auf der Karte nachsehen, den Punkt auf die
+  Strecke schieben, das Feld auf `true` setzen.
+- **Routing-Integration.** Gesperrte Strecken als Bedingung beim Rechnen,
+  nicht nur als Anzeige. Und die Entscheidung, ob die 62 Pässe aus app.js
+  und diese Liste eines werden.
+

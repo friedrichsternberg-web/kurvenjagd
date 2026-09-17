@@ -2568,6 +2568,34 @@
       </div>
     </details>
 
+    <!-- Kuratierte Strecken in Deutschland (seit 17.09.2026), eigene Ebene
+         aus daten/strecken-de.json. Was sie von den Paessen unterscheidet:
+         Sperrungen fuer Motorraeder werden geprueft und sichtbar markiert,
+         nicht ausgeblendet. Gezeichnet von strecken.js, gerechnet von
+         strecken-kern.js. -->
+    <details class="block accordion">
+      <summary>Strecken in Deutschland</summary>
+      <div class="accordion-body">
+        <label class="checkbox-row">
+          <input type="checkbox" id="optStrecken">
+          <span>Kuratierte Strecken anzeigen</span>
+        </label>
+        <label for="streckenBundesland">Bundesland</label>
+        <select id="streckenBundesland" class="search-input">
+          <option value="">Alle Bundesländer</option>
+        </select>
+        <label for="streckenMindestGrad">Mindestens <span id="streckenMindestGradWert">0</span> Grad/km</label>
+        <input type="range" id="streckenMindestGrad" class="slider" min="0" max="400" step="50" value="0">
+        <!-- Standardmaessig AUS: Sichtbar als gesperrt ist die ehrlichere
+             Voreinstellung als weg. -->
+        <label class="checkbox-row">
+          <input type="checkbox" id="optStreckenOhneGesperrte">
+          <span>Gesperrte Strecken ausblenden</span>
+        </label>
+        <p class="hint" id="streckenHint">Kuratierte Strecken, Sperrungen redaktionell gepflegt.</p>
+      </div>
+    </details>
+
     <!-- Ortssuche: je ein eigenes Feld fuer Start, Zwischenziel und Ziel.
          Nicht EIN Feld, das der Reihe nach Wegpunkte anhaengt - dann wuesste
          niemand, welcher Punkt gerade gesetzt wird. So sagt das Feld selbst,
@@ -3071,6 +3099,10 @@
        blatt.js, weil der Import auch fuer einen Reisetag laeuft. -->
   <script src="js/grundlage/gpx.js?v=114"></script>
   <script src="js/planer/import.js?v=114"></script>
+  <!-- Kuratierte Strecken: strecken-kern.js rechnet (Sperrpruefung, Filter,
+       laeuft auch im Selbsttest), strecken.js zeichnet. NACH app.js. -->
+  <script src="js/grundlage/strecken-kern.js?v=114"></script>
+  <script src="js/planer/strecken.js?v=114"></script>
   <!-- Freunde: gruppen.js redet mit dem Server, freunde.js zeichnet. Beide
        NACH teilen.js (Abschriften, Uebernehmen), gespraech.js (Chat) und
        mitfahrer.js (Nutzersuche, Gesichter). -->

@@ -2501,6 +2501,19 @@ body.nav-modus .leaflet-control-container { display: none; }
    seine Farbe ueber currentColor holt, muss hier eine dunkle Textfarbe
    stehen - sonst waere die Strichzeichnung weiss auf hellem Grund. */
 .poi-marker.pass { background: var(--pass-schild); color: var(--pass-schild-ink); }
+/* Die kuratierten Strecken (strecken.js): Farbe, die einen Zustand
+   bedeutet, auf derselben Skala wie die Kurvigkeit - gruen frei, gelb mit
+   Beschraenkung, rot gesperrt. Ungepruefte Lage: das neutrale Schild mit
+   gestrichelter Kante, damit der Unterschied sichtbar bleibt. */
+.poi-marker.strecke.frei { background: var(--skala-wenig); color: var(--pass-schild-ink); }
+.poi-marker.strecke.beschraenkt { background: var(--skala-mittel); color: var(--pass-schild-ink); }
+.poi-marker.strecke.gesperrt { background: var(--danger); color: var(--accent-ink); }
+.poi-marker.strecke.ungeprueft { background: var(--pass-schild); color: var(--pass-schild-ink); border-style: dashed; }
+.strecke-popup-meta { color: var(--muted); font-size: 12px; }
+.strecke-popup-score { font-weight: 600; }
+.strecke-popup-sperre { display: inline-block; margin-top: 4px; }
+.strecke-popup-sperre.gesperrt { color: var(--danger); font-weight: 600; }
+.strecke-popup-sperre.beschraenkt { color: var(--skala-mittel); }
 
 .poi-popup { font-size: 13px; line-height: 1.5; }
 .poi-popup .poi-popup-titel { font-weight: 700; }

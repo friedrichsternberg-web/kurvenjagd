@@ -1,0 +1,1333 @@
+{
+ "_hinweis": "Kuratierte Streckenliste Deutschland. Koordinaten werden einmalig geocodiert (werkzeug/strecken-geocode.py) und muessen von Hand geprueft werden - bis dahin koordinaten_geprueft: false. grad_pro_km ist eine SCHAETZUNG zur Sortierung, kein gemessener Wert; grad_pro_km_gemessen fuellt sich, sobald eine Strecke durch kern.js geroutet wurde (spaeterer Auftrag). Sperrangaben sind redaktionell gepflegt, nicht aus einer Schnittstelle - siehe doku/DATEN.md.",
+ "_stand": "2026-09-14",
+ "_quelle_sperrungen": "BVDM-Streckensperrungskarte (bvdm.de), TOURENFAHRER-Uebersichtskarte",
+ "_sperrarten": {
+  "keine": "frei befahrbar",
+  "beschraenkt": "Tempolimits, Teilsperrungen oder laufende Debatte - Hinweis, keine Sperre",
+  "wochenende": "nur an den genannten Tagen (sa, so, feiertag), wahlweise saisonal (saison_von, saison_bis als MM-TT)",
+  "komplett": "dauerhaftes Fahrverbot"
+ },
+ "strecken": [
+  {
+   "id": "de-bw-kandel",
+   "name": "Kandel-Straße",
+   "bundesland": "BW",
+   "strasse": "L186",
+   "von": "Waldkirch",
+   "bis": "St. Peter",
+   "region": "Schwarzwald",
+   "beschreibung": "Enge Kehren, unter deutschen Fahrern eine Legende. Hohe Kontrolldichte.",
+   "grad_pro_km": 350,
+   "sperrung": {
+    "art": "keine",
+    "hinweis": "Sonder-Tempolimits beachten"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-bw-b500",
+   "name": "Schwarzwaldhochstraße",
+   "bundesland": "BW",
+   "strasse": "B500",
+   "von": "Baden-Baden",
+   "bis": "Freudenstadt",
+   "region": "Nordschwarzwald",
+   "beschreibung": "60 km Höhenstraße über den Kamm.",
+   "grad_pro_km": 200,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-bw-schauinsland",
+   "name": "Schauinslandstraße",
+   "bundesland": "BW",
+   "strasse": "L124",
+   "von": "Horben",
+   "bis": "Schauinsland",
+   "region": "bei Freiburg",
+   "beschreibung": "Ehemalige Bergrennstrecke, 11 km, rund 170 Kurven.",
+   "grad_pro_km": 420,
+   "sperrung": {
+    "art": "keine",
+    "hinweis": "Tempolimit"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-bw-hexenloch",
+   "name": "Hexenlochstraße",
+   "bundesland": "BW",
+   "strasse": "L173",
+   "von": "Furtwangen",
+   "bis": "St. Märgen",
+   "region": "Mittlerer Schwarzwald",
+   "beschreibung": "Schmal, waldig, sehr kurvig.",
+   "grad_pro_km": 330,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-bw-nibelungen",
+   "name": "Nibelungenstraße",
+   "bundesland": "BW",
+   "strasse": "B47",
+   "von": "Worms",
+   "bis": "Amorbach",
+   "region": "Odenwald",
+   "beschreibung": "Klassiker quer durch den Odenwald.",
+   "grad_pro_km": 190,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-bw-albaufstiege",
+   "name": "Albaufstiege",
+   "bundesland": "BW",
+   "strasse": "div. L",
+   "von": "Geislingen",
+   "bis": "Balingen",
+   "region": "Schwäbische Alb",
+   "beschreibung": "Kurze knackige Anstiege mit Kehren (Geislinger Steige, Lochenpass).",
+   "grad_pro_km": 280,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-bw-wutachtal",
+   "name": "Wutachtal und Schluchsee-Runde",
+   "bundesland": "BW",
+   "strasse": "B315/B500",
+   "von": "Bonndorf",
+   "bis": "Schluchsee",
+   "region": "Südschwarzwald",
+   "beschreibung": "Talstrecke kombiniert mit Seenrunde.",
+   "grad_pro_km": 240,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-by-kesselberg",
+   "name": "Kesselbergstraße",
+   "bundesland": "BY",
+   "strasse": "B11",
+   "von": "Kochel am See",
+   "bis": "Walchensee",
+   "region": "Oberbayern",
+   "beschreibung": "Die bekannteste Kurvenstrecke Deutschlands.",
+   "grad_pro_km": 400,
+   "sperrung": {
+    "art": "beschraenkt",
+    "hinweis": "Beschränkungen und Sperrzeiten - vor Freigabe in der App aktuell prüfen",
+    "quelle": "BVDM"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-by-sudelfeld",
+   "name": "Sudelfeld",
+   "bundesland": "BY",
+   "strasse": "B307",
+   "von": "Bayrischzell",
+   "bis": "Tatzelwurm",
+   "region": "Bayerische Alpen",
+   "beschreibung": "Kehrenstrecke am Alpenrand.",
+   "grad_pro_km": 380,
+   "sperrung": {
+    "art": "komplett",
+    "hinweis": "Fahrverbot als Erprobungsmaßnahme; Klage dagegen vom VG München abgewiesen",
+    "quelle": "BVDM",
+    "geprueft_am": "2026-09-14"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-by-alpenstrasse",
+   "name": "Deutsche Alpenstraße",
+   "bundesland": "BY",
+   "strasse": "B308",
+   "von": "Lindau",
+   "bis": "Berchtesgaden",
+   "region": "Alpenrand",
+   "beschreibung": "450 km Gesamtroute - in Etappen anlegen, nicht als eine Strecke.",
+   "grad_pro_km": 260,
+   "sperrung": {
+    "art": "keine",
+    "hinweis": "Teilstücke einzeln prüfen"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-by-rossfeld",
+   "name": "Roßfeld-Panoramastraße",
+   "bundesland": "BY",
+   "strasse": "-",
+   "von": "Berchtesgaden",
+   "bis": "Oberau",
+   "region": "Berchtesgadener Land",
+   "beschreibung": "Höchste Panoramastraße Deutschlands, Ringstraße.",
+   "grad_pro_km": 400,
+   "sperrung": {
+    "art": "keine",
+    "hinweis": "mautpflichtig"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-by-tatzelwurm",
+   "name": "Tatzelwurmstraße",
+   "bundesland": "BY",
+   "strasse": "-",
+   "von": "Oberaudorf",
+   "bis": "Bayrischzell",
+   "region": "Oberbayern",
+   "beschreibung": "Enge Waldkehren.",
+   "grad_pro_km": 360,
+   "sperrung": {
+    "art": "beschraenkt",
+    "hinweis": "zusammen mit der Sudelfeld-Sperrung prüfen"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-by-ochsenkopf",
+   "name": "Fichtelgebirgs-Runde",
+   "bundesland": "BY",
+   "strasse": "B303",
+   "von": "Bischofsgrün",
+   "bis": "Warmensteinach",
+   "region": "Oberfranken",
+   "beschreibung": "Mittelgebirge, wenig Verkehr.",
+   "grad_pro_km": 230,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-by-fraenkische",
+   "name": "Fränkische Schweiz",
+   "bundesland": "BY",
+   "strasse": "B470",
+   "von": "Forchheim",
+   "bis": "Behringersmühle",
+   "region": "Oberfranken",
+   "beschreibung": "Felsentäler, Wiesenttal.",
+   "grad_pro_km": 250,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-by-arber",
+   "name": "Bayerischer Wald / Arber",
+   "bundesland": "BY",
+   "strasse": "B85",
+   "von": "Regen",
+   "bis": "Cham",
+   "region": "Niederbayern",
+   "beschreibung": "Deutsche Ferienroute, ruhig.",
+   "grad_pro_km": 210,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-bb-maerkische-schweiz",
+   "name": "Märkische Schweiz",
+   "bundesland": "BB",
+   "strasse": "L34/L35",
+   "von": "Buckow",
+   "bis": "Waldsieversdorf",
+   "region": "Märkisch-Oderland",
+   "beschreibung": "Echte Kurven im flachen Land, Seen und Hügel.",
+   "grad_pro_km": 160,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-bb-flaeming",
+   "name": "Hoher Fläming",
+   "bundesland": "BB",
+   "strasse": "L85",
+   "von": "Bad Belzig",
+   "bis": "Wiesenburg",
+   "region": "Potsdam-Mittelmark",
+   "beschreibung": "Sanfte Hügel, Alleen.",
+   "grad_pro_km": 110,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-bb-uckermark",
+   "name": "Uckermark-Runde",
+   "bundesland": "BB",
+   "strasse": "B198/L23",
+   "von": "Boitzenburg",
+   "bis": "Lychen",
+   "region": "Nordbrandenburg",
+   "beschreibung": "Alleen, fast kein Verkehr.",
+   "grad_pro_km": 120,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-bb-spreewald",
+   "name": "Spreewald-Runde",
+   "bundesland": "BB",
+   "strasse": "B115/L49",
+   "von": "Lübben",
+   "bis": "Burg",
+   "region": "Dahme-Spreewald",
+   "beschreibung": "Flach, landschaftlich, Fähren.",
+   "grad_pro_km": 100,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-bb-schorfheide",
+   "name": "Schorfheide",
+   "bundesland": "BB",
+   "strasse": "B198",
+   "von": "Joachimsthal",
+   "bis": "Templin",
+   "region": "Barnim/Uckermark",
+   "beschreibung": "Lange Waldalleen.",
+   "grad_pro_km": 90,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-he-wispertal",
+   "name": "Wispertal",
+   "bundesland": "HE",
+   "strasse": "L3033",
+   "von": "Lorch",
+   "bis": "Bad Schwalbach",
+   "region": "Rheingau-Taunus",
+   "beschreibung": "Enges Tal, eine der bekanntesten Bikerstrecken Hessens.",
+   "grad_pro_km": 320,
+   "sperrung": {
+    "art": "beschraenkt",
+    "hinweis": "wiederkehrende Beschränkungsdebatte - vor Freigabe prüfen"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-he-feldberg",
+   "name": "Großer Feldberg",
+   "bundesland": "HE",
+   "strasse": "B8/L3024",
+   "von": "Königstein",
+   "bis": "Feldberg",
+   "region": "Hochtaunus",
+   "beschreibung": "Klassiker vor den Toren Frankfurts.",
+   "grad_pro_km": 300,
+   "sperrung": {
+    "art": "beschraenkt",
+    "hinweis": "Lärmpausen-Verkehrsversuch 2022; Ergebnisbericht gegen dauerhafte Sperrung - Lage prüfen"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-he-hochrhoen",
+   "name": "Hochrhönstraße",
+   "bundesland": "HE",
+   "strasse": "B278/L3258",
+   "von": "Gersfeld",
+   "bis": "Wasserkuppe",
+   "region": "Rhön",
+   "beschreibung": "Hochebene, weite Sicht.",
+   "grad_pro_km": 240,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-he-vogelsberg",
+   "name": "Vogelsberg / Hoherodskopf",
+   "bundesland": "HE",
+   "strasse": "B276",
+   "von": "Schotten",
+   "bis": "Hoherodskopf",
+   "region": "Mittelhessen",
+   "beschreibung": "Vulkankegel-Runde.",
+   "grad_pro_km": 260,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-he-edersee",
+   "name": "Edersee-Runde",
+   "bundesland": "HE",
+   "strasse": "B252/L3084",
+   "von": "Waldeck",
+   "bis": "Herzhausen",
+   "region": "Waldeck-Frankenberg",
+   "beschreibung": "Seeumrundung mit Kurven.",
+   "grad_pro_km": 250,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-he-lahntal",
+   "name": "Lahntal",
+   "bundesland": "HE",
+   "strasse": "B417/B49",
+   "von": "Weilburg",
+   "bis": "Limburg",
+   "region": "Mittelhessen",
+   "beschreibung": "Flusstal, gleichmäßiger Fluss.",
+   "grad_pro_km": 180,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-mv-ruegen",
+   "name": "Rügen-Alleenstraße",
+   "bundesland": "MV",
+   "strasse": "B96/B196",
+   "von": "Bergen auf Rügen",
+   "bis": "Kap Arkona",
+   "region": "Rügen",
+   "beschreibung": "Alleenklassiker, Königsstuhl, Kap Arkona.",
+   "grad_pro_km": 110,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-mv-seenplatte",
+   "name": "Mecklenburgische Seenplatte",
+   "bundesland": "MV",
+   "strasse": "B192/B198",
+   "von": "Waren",
+   "bis": "Neustrelitz",
+   "region": "Müritz",
+   "beschreibung": "Seen, Alleen, sehr entspannt.",
+   "grad_pro_km": 100,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-mv-darss",
+   "name": "Fischland-Darss-Zingst",
+   "bundesland": "MV",
+   "strasse": "L21",
+   "von": "Ribnitz-Damgarten",
+   "bis": "Prerow",
+   "region": "Vorpommern",
+   "beschreibung": "Ostseehalbinsel, Sackgassen-Charakter.",
+   "grad_pro_km": 95,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-mv-usedom",
+   "name": "Usedom-Küstenstraße",
+   "bundesland": "MV",
+   "strasse": "B110/L266",
+   "von": "Wolgast",
+   "bis": "Ahlbeck",
+   "region": "Usedom",
+   "beschreibung": "Seebäder, Grenze nach Polen.",
+   "grad_pro_km": 105,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-mv-mecklenburgische-schweiz",
+   "name": "Mecklenburgische Schweiz",
+   "bundesland": "MV",
+   "strasse": "L204/L20",
+   "von": "Malchin",
+   "bis": "Basedow",
+   "region": "Landkreis Rostock",
+   "beschreibung": "Ueberraschend hügelig für MV.",
+   "grad_pro_km": 150,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-ni-okertal",
+   "name": "Okertalstraße",
+   "bundesland": "NI",
+   "strasse": "B498",
+   "von": "Oker",
+   "bis": "Altenau",
+   "region": "Westharz",
+   "beschreibung": "Der Harz-Klassiker entlang der Talsperre.",
+   "grad_pro_km": 340,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-ni-harzhochstrasse",
+   "name": "Harzhochstraße",
+   "bundesland": "NI",
+   "strasse": "B242",
+   "von": "Torfhaus",
+   "bis": "Braunlage",
+   "region": "Harz",
+   "beschreibung": "Querung des Oberharzes.",
+   "grad_pro_km": 250,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-ni-soesetal",
+   "name": "Sösetalsperre und Innerstetal",
+   "bundesland": "NI",
+   "strasse": "L519/B241",
+   "von": "Osterode",
+   "bis": "Clausthal-Zellerfeld",
+   "region": "Westharz",
+   "beschreibung": "Ruhiger als die B498.",
+   "grad_pro_km": 280,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-ni-deister",
+   "name": "Deister-Runde",
+   "bundesland": "NI",
+   "strasse": "L391",
+   "von": "Springe",
+   "bis": "Wennigsen",
+   "region": "bei Hannover",
+   "beschreibung": "Nahziel-Strecke an der Hügelkante.",
+   "grad_pro_km": 200,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-ni-weserbergland",
+   "name": "Weserbergland",
+   "bundesland": "NI",
+   "strasse": "B83",
+   "von": "Hameln",
+   "bis": "Höxter",
+   "region": "Weserbergland",
+   "beschreibung": "Flusstal und Höhenrücken.",
+   "grad_pro_km": 190,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-ni-heide",
+   "name": "Lüneburger Heide",
+   "bundesland": "NI",
+   "strasse": "B209/L211",
+   "von": "Soltau",
+   "bis": "Bispingen",
+   "region": "Nordheide",
+   "beschreibung": "Flach, aber landschaftlich. Heideblüte August/September.",
+   "grad_pro_km": 110,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-nw-hocheifel",
+   "name": "Hocheifel-Runde",
+   "bundesland": "NW",
+   "strasse": "B258/B412",
+   "von": "Blankenheim",
+   "bis": "Adenau",
+   "region": "Eifel",
+   "beschreibung": "Wallfahrtsstrecke, Nordschleife in Reichweite.",
+   "grad_pro_km": 300,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-nw-nordhelle",
+   "name": "Nordhelle / Ebbegebirge",
+   "bundesland": "NW",
+   "strasse": "L707/B54",
+   "von": "Meinerzhagen",
+   "bis": "Herscheid",
+   "region": "Sauerland",
+   "beschreibung": "Dichte Kurvenkombi, Ausflugsklassiker.",
+   "grad_pro_km": 320,
+   "sperrung": {
+    "art": "beschraenkt",
+    "hinweis": "Region mit mehreren Teilsperrungen - einzeln prüfen"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-nw-moehnesee",
+   "name": "Möhnesee-Runde",
+   "bundesland": "NW",
+   "strasse": "L745/B516",
+   "von": "Möhnesee",
+   "bis": "Arnsberg",
+   "region": "Sauerland",
+   "beschreibung": "Seeumrundung, Arnsberger Wald.",
+   "grad_pro_km": 230,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-nw-bergisches-land",
+   "name": "Bergisches Land",
+   "bundesland": "NW",
+   "strasse": "B237/L284",
+   "von": "Wipperfürth",
+   "bis": "Radevormwald",
+   "region": "Bergisches Land",
+   "beschreibung": "Dichte Kurvenfolge, viele Talsperren.",
+   "grad_pro_km": 270,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-nw-kahler-asten",
+   "name": "Kahler Asten / Rothaargebirge",
+   "bundesland": "NW",
+   "strasse": "B236/B480",
+   "von": "Winterberg",
+   "bis": "Schmallenberg",
+   "region": "Hochsauerland",
+   "beschreibung": "Höchster Punkt Nordrhein-Westfalens.",
+   "grad_pro_km": 260,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-nw-volmetal",
+   "name": "Volmetal und Lennetal",
+   "bundesland": "NW",
+   "strasse": "B54/B236",
+   "von": "Lüdenscheid",
+   "bis": "Meinerzhagen",
+   "region": "Märkischer Kreis",
+   "beschreibung": "Flusstäler mit Kurven.",
+   "grad_pro_km": 210,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-rp-hunsrueckhoehenstrasse",
+   "name": "Hunsrückhöhenstraße",
+   "bundesland": "RP",
+   "strasse": "B327",
+   "von": "Koblenz",
+   "bis": "Zweibrücken",
+   "region": "Hunsrück",
+   "beschreibung": "Rund 100 km Höhenstraße, weite Kurven.",
+   "grad_pro_km": 220,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-rp-schliem",
+   "name": "Die Schliem",
+   "bundesland": "RP",
+   "strasse": "B274",
+   "von": "Zollhaus",
+   "bis": "Abzweig Allendorf",
+   "region": "Rhein-Lahn-Kreis",
+   "beschreibung": "Rund 5 km mit etwa zehn Kurven durch Waldgebiet.",
+   "grad_pro_km": 330,
+   "sperrung": {
+    "art": "wochenende",
+    "tage": [
+     "sa",
+     "so",
+     "feiertag"
+    ],
+    "saison_von": "04-01",
+    "ganztags": true,
+    "hinweis": "Seit 01.08.2025 gesperrt, ab 01.04.2026 erneut an Wochenenden und Feiertagen ganztags",
+    "quelle": "Kreisverwaltung Rhein-Lahn-Kreis",
+    "geprueft_am": "2026-09-14"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-rp-mosel",
+   "name": "Moselweinstraße",
+   "bundesland": "RP",
+   "strasse": "B53",
+   "von": "Trier",
+   "bis": "Koblenz",
+   "region": "Mosel",
+   "beschreibung": "Flussschleifen, sehr fließend.",
+   "grad_pro_km": 200,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-rp-ahrtal",
+   "name": "Ahrtal",
+   "bundesland": "RP",
+   "strasse": "B257/B267",
+   "von": "Altenahr",
+   "bis": "Adenau",
+   "region": "Eifel",
+   "beschreibung": "Weinberge und Kehren.",
+   "grad_pro_km": 290,
+   "sperrung": {
+    "art": "keine",
+    "hinweis": "Baustellen im Zuge des Wiederaufbaus möglich"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-rp-weinstrasse",
+   "name": "Deutsche Weinstraße",
+   "bundesland": "RP",
+   "strasse": "B271",
+   "von": "Bockenheim",
+   "bis": "Schweigen-Rechtenbach",
+   "region": "Pfalz",
+   "beschreibung": "Flacher, dafür Genussstrecke.",
+   "grad_pro_km": 140,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-rp-johanniskreuz",
+   "name": "Pfälzerwald / Johanniskreuz",
+   "bundesland": "RP",
+   "strasse": "B48",
+   "von": "Kaiserslautern",
+   "bis": "Hinterweidenthal",
+   "region": "Pfalz",
+   "beschreibung": "Großer Treffpunkt, Waldkurven.",
+   "grad_pro_km": 250,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-rp-gelbachtal",
+   "name": "Gelbachtal",
+   "bundesland": "RP",
+   "strasse": "L318",
+   "von": "Montabaur",
+   "bis": "Weinähr",
+   "region": "Westerwald",
+   "beschreibung": "Enges Tal, gilt als Ausweichstrecke für die gesperrte Schliem.",
+   "grad_pro_km": 300,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-sl-saarschleife",
+   "name": "Saarschleife-Runde",
+   "bundesland": "SL",
+   "strasse": "B51/L177",
+   "von": "Mettlach",
+   "bis": "Orscholz",
+   "region": "Merzig-Wadern",
+   "beschreibung": "Aussichtspunkt Cloef, kurvige Zufahrten.",
+   "grad_pro_km": 230,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-sl-hochwald",
+   "name": "Nationalpark Hunsrück-Hochwald",
+   "bundesland": "SL",
+   "strasse": "B268/B269",
+   "von": "Nonnweiler",
+   "bis": "Losheim",
+   "region": "Nordsaarland",
+   "beschreibung": "Höhenstrecke, wenig Verkehr.",
+   "grad_pro_km": 220,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-sl-bostalsee",
+   "name": "Bostalsee-Runde",
+   "bundesland": "SL",
+   "strasse": "L319/B41",
+   "von": "Nohfelden",
+   "bis": "St. Wendel",
+   "region": "St. Wendel",
+   "beschreibung": "Seerunde, guter Kaffeestopp.",
+   "grad_pro_km": 180,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-sl-bliesgau",
+   "name": "Bliesgau",
+   "bundesland": "SL",
+   "strasse": "L201/B423",
+   "von": "Blieskastel",
+   "bis": "Gersheim",
+   "region": "Saarpfalz",
+   "beschreibung": "Sanfte Hügel, Biosphärenreservat.",
+   "grad_pro_km": 160,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-sl-saartal",
+   "name": "Saartal Mettlach bis Saarburg",
+   "bundesland": "SL",
+   "strasse": "B51",
+   "von": "Mettlach",
+   "bis": "Saarburg",
+   "region": "Saar",
+   "beschreibung": "Flussstrecke Richtung Rheinland-Pfalz.",
+   "grad_pro_km": 190,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-sn-erzgebirgskamm",
+   "name": "Erzgebirgs-Kammstraße",
+   "bundesland": "SN",
+   "strasse": "B101/S258",
+   "von": "Oberwiesenthal",
+   "bis": "Annaberg-Buchholz",
+   "region": "Erzgebirge",
+   "beschreibung": "Fichtelberg, Grenze zu Tschechien.",
+   "grad_pro_km": 260,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-sn-saechsische-schweiz",
+   "name": "Sächsische Schweiz",
+   "bundesland": "SN",
+   "strasse": "B172/S165",
+   "von": "Pirna",
+   "bis": "Bad Schandau",
+   "region": "Elbsandstein",
+   "beschreibung": "Elbtal, Bastei, Hohnstein.",
+   "grad_pro_km": 240,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-sn-zittauer-gebirge",
+   "name": "Zittauer Gebirge / Oybin",
+   "bundesland": "SN",
+   "strasse": "S132/B178",
+   "von": "Zittau",
+   "bis": "Oybin",
+   "region": "Oberlausitz",
+   "beschreibung": "Dreiländereck DE/CZ/PL.",
+   "grad_pro_km": 250,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-sn-vogtland",
+   "name": "Vogtland / Talsperre Pöhl",
+   "bundesland": "SN",
+   "strasse": "B92/S298",
+   "von": "Plauen",
+   "bis": "Pöhl",
+   "region": "Vogtland",
+   "beschreibung": "Talsperrenrunde.",
+   "grad_pro_km": 210,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-sn-silberstrasse",
+   "name": "Silberstraße",
+   "bundesland": "SN",
+   "strasse": "B93/B101",
+   "von": "Zwickau",
+   "bis": "Schwarzenberg",
+   "region": "Westerzgebirge",
+   "beschreibung": "Historische Route durch die Bergbaustädte.",
+   "grad_pro_km": 200,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-st-rappbode",
+   "name": "Rappbodetalsperre und Hexentanzplatz",
+   "bundesland": "ST",
+   "strasse": "B81/L96",
+   "von": "Thale",
+   "bis": "Hasselfelde",
+   "region": "Ostharz",
+   "beschreibung": "Talsperrenkurven, Bodetal.",
+   "grad_pro_km": 300,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-st-harz-ost",
+   "name": "Harzhochstraße Ost",
+   "bundesland": "ST",
+   "strasse": "B244/L100",
+   "von": "Wernigerode",
+   "bis": "Schierke",
+   "region": "Harz",
+   "beschreibung": "Brocken-Umfeld.",
+   "grad_pro_km": 270,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-st-selketal",
+   "name": "Selketal",
+   "bundesland": "ST",
+   "strasse": "L230/L239",
+   "von": "Mägdesprung",
+   "bis": "Strassberg",
+   "region": "Unterharz",
+   "beschreibung": "Ruhig, schmal, kaum befahren.",
+   "grad_pro_km": 280,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-st-saale-unstrut",
+   "name": "Saale-Unstrut-Weinstraße",
+   "bundesland": "ST",
+   "strasse": "B180/L205",
+   "von": "Naumburg",
+   "bis": "Freyburg",
+   "region": "Burgenlandkreis",
+   "beschreibung": "Weinberge, Burgen, Flusstal.",
+   "grad_pro_km": 170,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-st-flaeming",
+   "name": "Fläming-Höhenzug",
+   "bundesland": "ST",
+   "strasse": "B107/L51",
+   "von": "Coswig",
+   "bis": "Zerbst",
+   "region": "Wittenberg",
+   "beschreibung": "Alleen, flach-hügelig.",
+   "grad_pro_km": 110,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-sh-holsteinische-schweiz",
+   "name": "Holsteinische Schweiz",
+   "bundesland": "SH",
+   "strasse": "B76/L306",
+   "von": "Plön",
+   "bis": "Eutin",
+   "region": "Ostholstein",
+   "beschreibung": "Die kurvigste Ecke des Landes, Seenkette.",
+   "grad_pro_km": 170,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-sh-huettener-berge",
+   "name": "Hüttener Berge",
+   "bundesland": "SH",
+   "strasse": "B203/L265",
+   "von": "Rendsburg",
+   "bis": "Eckernförde",
+   "region": "Rendsburg-Eckernförde",
+   "beschreibung": "Ueberraschende Steigungen, Aschberg.",
+   "grad_pro_km": 140,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-sh-ostseekueste",
+   "name": "Ostseeküstenstraße",
+   "bundesland": "SH",
+   "strasse": "B202/L217",
+   "von": "Hohwacht",
+   "bis": "Fehmarn",
+   "region": "Ostküste",
+   "beschreibung": "Küstenpanorama, Fehmarnsundbrücke.",
+   "grad_pro_km": 110,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-sh-eiderstedt",
+   "name": "Eiderstedt und Nordseeküste",
+   "bundesland": "SH",
+   "strasse": "B5/L32",
+   "von": "Husum",
+   "bis": "St. Peter-Ording",
+   "region": "Nordfriesland",
+   "beschreibung": "Deichstraßen. Wind einplanen.",
+   "grad_pro_km": 80,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-sh-elbfaehre",
+   "name": "Elbfähre Glückstadt - Wischhafen",
+   "bundesland": "SH",
+   "strasse": "B431",
+   "von": "Glückstadt",
+   "bis": "Wischhafen",
+   "region": "Elbmarsch",
+   "beschreibung": "Fähre als Etappenpunkt, Verbindung nach Niedersachsen.",
+   "grad_pro_km": 70,
+   "sperrung": {
+    "art": "keine",
+    "hinweis": "Fährzeiten beachten"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-th-rennsteig",
+   "name": "Rennsteig-Begleitstrecken",
+   "bundesland": "TH",
+   "strasse": "B88/B4",
+   "von": "Ilmenau",
+   "bis": "Oberhof",
+   "region": "Thüringer Wald",
+   "beschreibung": "Kammlage über Stützerbach.",
+   "grad_pro_km": 280,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-th-l1152",
+   "name": "L1152",
+   "bundesland": "TH",
+   "strasse": "L1152",
+   "von": "Landkreis Sonneberg",
+   "bis": "-",
+   "region": "Südthüringen",
+   "beschreibung": "Ehemals beliebte Kurvenstrecke.",
+   "grad_pro_km": 320,
+   "sperrung": {
+    "art": "komplett",
+    "hinweis": "Gesperrt; VG Meiningen hält die Sperrbegründung des Kreises für ausreichend, BVDM erwägt weitere Schritte",
+    "quelle": "BVDM",
+    "geprueft_am": "2026-09-14"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-th-schwarzatal",
+   "name": "Schwarzatal",
+   "bundesland": "TH",
+   "strasse": "L1112/B88",
+   "von": "Bad Blankenburg",
+   "bis": "Oberweißbach",
+   "region": "Thüringer Wald",
+   "beschreibung": "Enges Flusstal.",
+   "grad_pro_km": 290,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-th-kyffhaeuser",
+   "name": "Kyffhäuser-Runde",
+   "bundesland": "TH",
+   "strasse": "L1034/B85",
+   "von": "Bad Frankenhausen",
+   "bis": "Kyffhäuserdenkmal",
+   "region": "Nordthüringen",
+   "beschreibung": "Serpentinen-Auffahrt zum Denkmal.",
+   "grad_pro_km": 310,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-th-hohenwarte",
+   "name": "Hohenwarte-Stausee",
+   "bundesland": "TH",
+   "strasse": "L1110/L1112",
+   "von": "Saalfeld",
+   "bis": "Ziegenrück",
+   "region": "Saale",
+   "beschreibung": "Thüringer Meer, sehr kurvige Stauseerunde.",
+   "grad_pro_km": 330,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  },
+  {
+   "id": "de-th-werratal",
+   "name": "Werratal",
+   "bundesland": "TH",
+   "strasse": "B19/B62",
+   "von": "Meiningen",
+   "bis": "Bad Salzungen",
+   "region": "Südthüringen",
+   "beschreibung": "Flussstrecke Richtung Rhön.",
+   "grad_pro_km": 180,
+   "sperrung": {
+    "art": "keine"
+   },
+   "koordinaten": null,
+   "koordinaten_geprueft": false,
+   "grad_pro_km_gemessen": null
+  }
+ ]
+}

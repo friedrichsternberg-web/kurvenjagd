@@ -19,6 +19,7 @@
 if (typeof sucheRundtour === 'undefined') load('js/grundlage/kern.js');
 if (typeof kartenBild === 'undefined') load('js/planer/vorschau.js');
 if (typeof sammleAusfahrten === 'undefined') load('js/fahrten/bilanz.js');
+if (typeof istGesperrt === 'undefined') load('js/grundlage/strecken-kern.js');
 
 // jsc kennt print(), der Browser kennt console.log(). Auf print() darf hier
 // nicht geprüft werden: Im Browser gibt es das auch, dort öffnet es aber
@@ -664,3 +665,57 @@ prüfeFall('ohne Punkte gibt es keinen Startpunkt',
     uebernommen.aufgenommenAm === '2026-07-01T10:00:00.000Z'
     && uebernommen.geteiltVon === 'Jemand');
 })();
+
+
+/* --- Strecken: die Sperrpruefung (strecken-kern.js) -------------------------
+   Datumsabhaengig, deshalb mit festen Tagen: Der 19.09.2026 ist ein
+   Samstag, der 21.09.2026 ein Montag, der 21.03.2026 ein Samstag vor der
+   Saison. */
+(function () {
+  function prüfeFall(was, bedingung) { stimmt(bedingung, 'Strecken: ' + was); }
+  const samstagSaison = new Date(2026, 8, 19);
+  const montagSaison  = new Date(2026, 8, 21);
+  const samstagVorher = new Date(2026, 2, 21);
+
+  const schliem = { name: 'Schliem', koordinaten_geprueft: true, grad_pro_km: 330,
+    sperrung: { art: 'wochenende', tage: ['sa', 'so', 'feiertag'], saison_von: '04-01', hinweis: 'ganztags' } };
+  prüfeFall('Wochenendsperre greift am Samstag in der Saison', istGesperrt(schliem, samstagSaison).gesperrt === true);
+  prüfeFall('Wochenendsperre greift nicht am Montag', istGesperrt(schliem, montagSaison).gesperrt === false);
+  prüfeFall('Wochenendsperre greift nicht vor der Saison', istGesperrt(schliem, samstagVorher).gesperrt === false);
+  prüfeFall('der Grund nennt die Feiertage', /Feiertagen/.test(istGesperrt(schliem, montagSaison).grund));
+  prüfeFall('der Grund nennt den Saisonbeginn', /ab dem 1\.4\./.test(istGesperrt(schliem, montagSaison).grund));
+
+  const mitEnde = { sperrung: { art: 'wochenende', tage: ['sa', 'so'], saison_von: '04-01', saison_bis: '08-31' } };
+  prüfeFall('mit saison_bis endet die Sperre', istGesperrt(mitEnde, samstagSaison).gesperrt === false);
+  const winter = { sperrung: { art: 'wochenende', tage: ['sa'], saison_von: '11-01', saison_bis: '03-31' } };
+  prüfeFall('eine Saison ueber den Jahreswechsel gilt im Maerz', istGesperrt(winter, samstagVorher).gesperrt === true);
+  prüfeFall('... und nicht im September', istGesperrt(winter, samstagSaison).gesperrt === false);
+
+  const sudelfeld = { koordinaten_geprueft: true, grad_pro_km: 380, sperrung: { art: 'komplett', hinweis: 'Fahrverbot' } };
+  prüfeFall('komplett ist immer gesperrt', istGesperrt(sudelfeld, montagSaison).gesperrt === true);
+  prüfeFall('komplett ergibt den Zustand gesperrt', streckenZustand(sudelfeld, montagSaison) === 'gesperrt');
+
+  const kessel = { koordinaten_geprueft: true, grad_pro_km: 400, sperrung: { art: 'beschraenkt', hinweis: 'pruefen' } };
+  prüfeFall('beschraenkt sperrt nicht', istGesperrt(kessel, samstagSaison).gesperrt === false);
+  prüfeFall('beschraenkt ergibt den Zustand beschraenkt', streckenZustand(kessel) === 'beschraenkt');
+  const frei = { koordinaten_geprueft: true, grad_pro_km: 200, sperrung: { art: 'keine' } };
+  prüfeFall('ohne Sperrung frei', streckenZustand(frei) === 'frei');
+  prüfeFall('ohne Sperrfeld frei', istGesperrt({ name: 'x' }).gesperrt === false);
+  prüfeFall('ungepruefte Lage ergibt ungeprueft', streckenZustand({ grad_pro_km: 1, sperrung: { art: 'keine' } }) === 'ungeprueft');
+  prüfeFall('die Sperre schlaegt die ungepruefte Lage',
+    streckenZustand({ sperrung: { art: 'komplett' } }) === 'gesperrt');
+
+  const liste = [
+    Object.assign({ bundesland: 'BY' }, sudelfeld), Object.assign({ bundesland: 'BY' }, kessel),
+    Object.assign({ bundesland: 'RP' }, schliem), Object.assign({ bundesland: 'SH', grad_pro_km_gemessen: 500 }, frei),
+  ];
+  prüfeFall('Filter nach Bundesland', filtereStrecken(liste, { bundesland: 'BY' }).length === 2);
+  prüfeFall('Filter nach Kurven-Score', filtereStrecken(liste, { mindestGrad: 350 }).length === 3);
+  prüfeFall('gemessener Wert schlaegt die Schaetzung', kurvenScore(liste[3]) === 500);
+  prüfeFall('gesperrte ausblenden am Samstag nimmt zwei weg',
+    filtereStrecken(liste, { ohneGesperrte: true, datum: samstagSaison }).length === 2);
+  prüfeFall('gesperrte ausblenden am Montag nimmt eine weg',
+    filtereStrecken(liste, { ohneGesperrte: true, datum: montagSaison }).length === 3);
+  prüfeFall('Bundeslandname', bundeslandName('RP') === 'Rheinland-Pfalz' && bundeslandName('XX') === 'XX');
+})();
+

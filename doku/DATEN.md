@@ -316,6 +316,32 @@ bleibt; beim Löschen der Reise geht alles mit (`CASCADE`). Der Chat fragt
 alle fünf Sekunden nach, solange das Blatt offen ist – keine
 Live-Verbindung, siehe AUFGABEN.md.
 
+### Kuratierte Strecken Deutschland (seit 17.09.2026)
+
+`daten/strecken-de.json`: 76 von Hand zusammengestellte Motorradstrecken in
+allen 13 Flächenländern, je mit Name, Bundesland, Straße, `von` → `bis`,
+Region, Beschreibung, einem **geschätzten** Kurven-Score (`grad_pro_km`,
+zur Sortierung, kein Messwert; `grad_pro_km_gemessen` füllt sich später
+aus einem echten Routing) und dem Feld `sperrung`. Die Datei wird zur
+Laufzeit geladen (`fetch`, gleiche Herkunft, nichts geht nach draußen)
+und ist ohne Code-Änderung austauschbar.
+
+**Die Sperrangaben sind redaktionell gepflegt, nicht aus einer API.**
+Quellen: die Streckensperrungskarte des BVDM (bvdm.de) und die
+TOURENFAHRER-Übersichtskarte, Stand `_stand` in der Datei. Vier Arten:
+`keine`, `beschraenkt` (Hinweis, keine Sperre), `wochenende` (Tage und
+Saison, datumsabhängig geprüft in `strecken-kern.js`), `komplett`. Je
+Sperrung stehen Quelle und `geprueft_am` dabei und im Popup – die Lage
+ändert sich mehrmals pro Saison. Gesetzliche Feiertage werden noch nicht
+gerechnet (AUFGABEN.md).
+
+**Koordinaten** stammen aus einem einmaligen Lauf von
+`werkzeug/strecken-geocode.py` über Nominatim (eine Anfrage je Sekunde,
+eigener User-Agent) und sind Mittelpunkte zwischen `von` und `bis` – ein
+Entwurf. `koordinaten_geprueft: false` heißt: noch nicht von Hand
+bestätigt, die App zeigt den Marker als „Lage ungeprüft". Zur Laufzeit
+fragt die App Nominatim dafür nicht.
+
 ### Gruppen – der Bereich „Freunde“ (seit 15.09.2026, Migration 09)
 
 Ein geschlossener Kreis: Wer dabei ist, sieht alles in der Gruppe, wer
