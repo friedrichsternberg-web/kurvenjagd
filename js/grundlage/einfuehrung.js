@@ -3,8 +3,10 @@
 
    Fuenf Karten, eine nach der anderen an derselben Stelle: vier Dinge, die
    die App kann, und zum Schluss die Empfehlung, sich ein Konto anzulegen.
-   Jede Karte ist ein Satz und ein Zeichen - wer mehr wissen will, tippt
-   auf "Gleich ausprobieren" und landet direkt in der Funktion.
+   Jede Karte ist ein Satz und ein Bild aus der App - wer mehr wissen will,
+   tippt auf "Gleich ausprobieren" und landet direkt in der Funktion.
+   Nachsehen kann man sie jederzeit in den Einstellungen ("Einfuehrung
+   ansehen", einstellungen.js ruft zeigeEinfuehrung()).
 
    WANN SIE ERSCHEINT, und das ist der ganze Verstand darin:
 
@@ -35,35 +37,76 @@ const EINFUEHRUNG_SPEICHER = 'kurvenjagd.einfuehrung';
 
 /* Vier Karten. Der Titel ist das Versprechen, der Text der eine Satz, der
    es einloest. Fett steht das Wort, das man sich merken soll. "ziel" ist
-   die Funktion, die "Gleich ausprobieren" oeffnet. */
+   die Funktion, die "Gleich ausprobieren" oeffnet.
+
+   Das BILD jeder Karte ist seit dem 17.09.2026 ein Stueck der App selbst:
+   dieselben Bausteine mit denselben Klassen (Fahrtband, Stat-Kacheln,
+   Umfrage-Zeile, Knopf), nur mit Beispielinhalt. Kein Screenshot, der
+   veraltet, sobald sich eine Farbe aendert - das Bild folgt Erscheinung
+   und Design von selbst. Es ist nicht antippbar (pointer-events in
+   style.css); der Knopf darunter fuehrt in die echte Funktion. */
 const EINFUEHRUNG_SCHRITTE = [
   {
     zeichen: 'route', abzeichen: 'Planen',
     titel: 'Kurven statt Kilometer',
-    text: 'Der Planer sucht die <b>kurvige</b> Strecke, nicht die schnelle. '
-        + 'Mehrere Tage werden zur <b>Reise</b> – mit Freunden geplant und gemeinsam abgerechnet.',
+    text: 'Der Planer sucht die <b>kurvige</b> Strecke, nicht die schnelle. Mehrere Tage '
+        + 'werden zur <b>Reise</b>, mit Freunden geplant und gemeinsam abgerechnet.',
+    bild: () => `
+      <div class="einfuehrung-foto">
+        <img src="img/planer-kopf.webp?v=114" alt="" width="1200" height="675">
+        <span class="einfuehrung-chip">${einfuehrungZeichen('route')} 223 °/km <i>&middot;</i> 122 km</span>
+      </div>`,
     zielText: 'Gleich ausprobieren', ziel: () => zeigePlaner(),
   },
   {
     zeichen: 'aufnahme', abzeichen: 'Ride',
     titel: 'Fahren und festhalten',
-    text: 'Navigation mit <b>mitdrehender Karte</b>. Deine Ausfahrt wird aufgezeichnet – '
-        + 'Strecke, Kurven, <b>Schräglage</b>.',
+    text: 'Navigation mit <b>mitdrehender Karte</b>. Deine Ausfahrt wird aufgezeichnet: '
+        + 'Strecke, Kurven-Score, <b>Schräglage</b>. Alles landet in <b>Meine Stats</b>.',
+    bild: () => `
+      <div class="einfuehrung-stats">
+        <div class="stat"><span class="k">Distanz</span><span class="v">186 km</span></div>
+        <div class="stat"><span class="k">Kurven-Score</span><span class="v">312</span></div>
+        <div class="stat"><span class="k">Schr&auml;glage</span><span class="v">41&deg;</span></div>
+        <div class="stat"><span class="k">H&ouml;henmeter</span><span class="v">2.140 hm</span></div>
+      </div>`,
     zielText: 'Zu Ride', ziel: () => zeigeBildschirm('rideScreen'),
   },
   {
-    zeichen: 'teilen', abzeichen: 'Teilen',
-    titel: '„Schick mir mal die Strecke"',
-    text: 'Jede Tour und jede Reise als <b>Link</b>, den du in WhatsApp wirfst. '
-        + 'Oder öffentlich, damit andere sie in ihrer Nähe <b>entdecken</b>.',
-    zielText: 'Zu meinen Touren', ziel: () => zeigeBildschirm('tourenScreen'),
+    zeichen: 'leute', abzeichen: 'Freunde',
+    titel: 'Gemeinsam fahren',
+    text: 'Gr&uuml;nde eine <b>Gruppe</b>: Touren und Reisen teilen, Termine abstimmen, '
+        + '<b>„Ich fahre jetzt“</b> tippen. Wer will, zeigt der Gruppe live, wo er gerade ist.',
+    bild: () => `
+      <div class="einfuehrung-live">
+        <div class="karte fahrt-band jetzt">
+          <span class="geteilt-buchstabe" aria-hidden="true">A</span>
+          <span class="fahrt-band-text">
+            <span class="fahrt-band-wer"><span class="fahrt-puls" aria-hidden="true"></span><b>Anna</b> f&auml;hrt jetzt</span>
+            <span class="fahrt-band-meta">Alpen-Crew <i>&middot;</i> ${einfuehrungZeichen('standort')} live</span>
+          </span>
+          <span class="btn klein">Ich bin dabei</span>
+        </div>
+        <span class="btn fahrt-jetzt-knopf">${einfuehrungZeichen('motorrad')} Ich fahre jetzt</span>
+      </div>`,
+    zielText: 'Zu Freunde', ziel: () => zeigeBildschirm('freundeScreen'),
   },
   {
-    zeichen: 'herz', abzeichen: 'Ausrüstung',
-    titel: 'Merken statt suchen',
-    text: 'Helme, Kleidung, Reifen mit <b>Preisvergleich</b>. Das Herz legt ein Teil auf die '
-        + '<b>Merkliste</b> – und die zeigt dir, wie sich der Preis entwickelt.',
-    zielText: 'Zur Ausrüstung', ziel: () => zeigeBildschirm('shopScreen'),
+    zeichen: 'welt', abzeichen: 'Entdecken',
+    titel: 'Strecken finden, Ausr&uuml;stung merken',
+    text: 'Unter <b>Entdecken</b> liegen Touren von Serpa und aus der Community in deiner N&auml;he. '
+        + 'Unter <b>Ausr&uuml;stung</b> Helme, Kleidung und Reifen mit Preisvergleich und Merkliste.',
+    bild: () => `
+      <div class="einfuehrung-entdecken">
+        <div class="touren-leiste">
+          <div class="segmented touren-umschalter">
+            <span class="seg">Meine Touren</span><span class="seg">Meine Reisen</span>
+          </div>
+          <span class="seg entdecken-reiter active">${einfuehrungZeichen('welt')} Entdecken</span>
+        </div>
+        <div class="segmented quellen-umschalter"><span class="seg active">Von Serpa</span><span class="seg">Community</span></div>
+      </div>`,
+    zielText: 'Zu Entdecken', ziel: () => zeigeBildschirm('tourenScreen'),
   },
 ];
 
@@ -135,7 +178,9 @@ function einfuehrungSchrittHtml(schritt, nummer) {
     </div>
     <div class="einfuehrung-inhalt">
       ${nummer === 0 ? einfuehrungMarkeHtml() : ''}
-      <div class="einfuehrung-zeichen">${einfuehrungZeichen(schritt.zeichen)}</div>
+      ${schritt.bild
+        ? `<div class="einfuehrung-bild" aria-hidden="true">${schritt.bild()}</div>`
+        : `<div class="einfuehrung-zeichen">${einfuehrungZeichen(schritt.zeichen)}</div>`}
       <h2 class="einfuehrung-titel">${schritt.titel}</h2>
       <p class="einfuehrung-text">${schritt.text}</p>
     </div>

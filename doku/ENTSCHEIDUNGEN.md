@@ -5165,3 +5165,28 @@ Auf Friedrichs Rückmeldungen am selben Abend:
 - **Senden-Knopf im Chat** war durch die neue Regel „erstes Symbol im
   Knopf bekommt eine eigene Scheibe“ zu einem Kreis im Kreis geworden;
   `.gespraech-senden` nimmt die Regel zurück.
+
+## 17.09.2026 – Hell als Vorgabe, Einführung mit Bildern aus der App, Ride-Feld halbe Höhe
+
+- **Hell ist die Vorgabe.** Ohne gespeicherte Wahl startet die App hell;
+  „Gerät“ ist eine ausdrückliche Wahl und wird gespeichert wie Hell und
+  Dunkel. `design.css` behält Dunkel als CSS-Vorgabe (`:root`), weil das
+  Attribut ohnehin vor dem ersten Zeichnen von `thema.js` gesetzt wird.
+- **Einführung.** Vier Karten (Planen, Ride, Freunde, Entdecken) und die
+  Konto-Karte. Das Bild jeder Karte ist ein Stück der App selbst, mit
+  denselben Klassen und Beispielinhalt (Fahrtband „Anna fährt jetzt“,
+  Stat-Kacheln, Touren-Leiste) – keine Screenshots, die veralten, sobald
+  sich eine Farbe ändert; das Bild folgt Erscheinung und Design von
+  selbst. Sie läuft weiter genau einmal je Gerät; wer sie noch einmal
+  sehen will, findet sie in den Einstellungen („Einführung ansehen“).
+  Friedrichs Wunsch „oder wenn jemand nicht angemeldet ist“ habe ich
+  bewusst nicht als „bei jedem Start“ gebaut – das wäre bei jedem Öffnen
+  eine Hürde vor der Karte; die Einstellungen sind der Weg.
+- **Ride-Feld vor dem Start** nimmt die halbe Höhe: großer Knopf, die
+  Stats-Karte füllt den Rest.
+- **Rechtstexte** nachgezogen (Stand 17.09.2026): Punkt 3 nennt OpenFreeMap
+  (Hetzner, Deutschland) und den Raster-Rückfall; Punkt 4 den Standort in
+  der Gruppe; Punkt 8 das Standortteilen (Einwilligung per Haken, kein
+  Verlauf, Widerruf per Schalter, Art. 6 Abs. 1 lit. a), die Terminumfragen
+  und die Kalenderdatei; die Kurzfassung einen Satz dazu; die Regeln fürs
+  Teilen gelten jetzt auch für Gruppen, Chat und Kommentare.

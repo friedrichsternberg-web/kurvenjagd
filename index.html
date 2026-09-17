@@ -767,6 +767,13 @@
           </button>
         </li>
         <li>
+          <button type="button" class="einstellungen-zeile" id="btnEinstellungenEinfuehrung">
+            <span class="einstellungen-bild"><svg class="ic gross"><use href="#icon-route"></use></svg></span>
+            <span class="einstellungen-text"><span class="einstellungen-name">Einf&uuml;hrung ansehen</span></span>
+            <span class="einstellungen-pfeil" aria-hidden="true">&rsaquo;</span>
+          </button>
+        </li>
+        <li>
           <button type="button" class="einstellungen-zeile" id="btnEinstellungenRechtliches">
             <span class="einstellungen-bild"><svg class="ic gross"><use href="#icon-notiz"></use></svg></span>
             <span class="einstellungen-text"><span class="einstellungen-name">Rechtliches</span></span>
@@ -1330,7 +1337,10 @@
             Stats&ldquo; rechnet allein dein Ger&auml;t aus (Punkt 2). Holst
             du Freunde zu einer Reise dazu, sehen sie die Reise und die Kasse
             (Punkt 8); gibst du eine Tour per Link weiter, kann jeder sie
-            ansehen, der den Link hat &ndash; auch ohne Konto (Punkt 9). In
+            ansehen, der den Link hat &ndash; auch ohne Konto (Punkt 9).
+            Deinen Standort zeigt die App anderen nur, wenn du das bei einer
+            Fahrt ausdr&uuml;cklich einschaltest, und nur deiner Gruppe
+            (Punkt 8). In
             den Bereichen &bdquo;Reifen&ldquo; und &bdquo;Ausr&uuml;stung&ldquo;
             zeigen wir Angebote von sechs Partnershops und verdienen an
             vermittelten K&auml;ufen mit. Diese Angebote sind als
@@ -1379,15 +1389,22 @@
             &uuml;bertragen; gez&auml;hlt werden nur Ausfahrten, die du
             selbst aufgezeichnet hast, nicht die aus der Community
             &uuml;bernommenen. Die Kartenbilder zu den Lieblingsstrecken
-            kommen wie alle Karten von OpenStreetMap (Punkt 3).
+            kommen wie die Vorschaubilder der Touren von OpenStreetMap
+            (Punkt 3).
           </p>
 
           <p class="label">3. Karte, Routenberechnung, Ortssuche</p>
           <p>
-            Zum Anzeigen der Karte l&auml;dt die App Kartenbilder von
-            OpenStreetMap (openstreetmap.org, EU). Der angefragte
-            Kartenausschnitt kann dabei mittelbar deinen Aufenthaltsort
-            erkennen lassen. F&uuml;r die Routenberechnung gehen die von dir
+            Zum Anzeigen der Karte l&auml;dt die App Kartendaten von
+            OpenFreeMap (tiles.openfreemap.org; ein Dienst ohne Konto,
+            Schl&uuml;ssel oder Cookie, Server bei Hetzner in Deutschland)
+            und f&uuml;r die kleinen Vorschaubilder deiner Touren
+            Kartenbilder von OpenStreetMap (openstreetmap.org, EU). Kann
+            dein Browser die Kartendaten nicht zeichnen, kommen auch die
+            Karten von OpenStreetMap. Der angefragte Kartenausschnitt kann
+            dabei mittelbar deinen Aufenthaltsort erkennen lassen. Die
+            Kartendaten stammen in beiden F&auml;llen von OpenStreetMap.
+            F&uuml;r die Routenberechnung gehen die von dir
             gesetzten Wegpunkte an BRouter (brouter.de, Deutschland).
             F&uuml;r die Ortssuche geht der eingetippte Suchbegriff an
             Nominatim (openstreetmap.org, EU). Rechtsgrundlage jeweils
@@ -1407,8 +1424,9 @@
             Deinen GPS-Standort fragt die App nur, wenn du eine Funktion
             startest, die ihn braucht: beim ersten &Ouml;ffnen des Planers
             (einmalig, um die Karte auf deine Gegend zu zentrieren), bei der
-            Navigation und beim Aufzeichnen. Beim blo&szlig;en Aufrufen der
-            Seite fragt sie nicht. Die Freigabe erteilst du im Browser
+            Navigation, beim Aufzeichnen und wenn du bei einer Fahrt
+            deinen Standort mit deiner Gruppe teilst (Punkt 8). Beim
+            blo&szlig;en Aufrufen der Seite fragt sie nicht. Die Freigabe erteilst du im Browser
             beziehungsweise Betriebssystem und kannst sie dort jederzeit
             entziehen. Aufgezeichnete Strecken bleiben auf dem Ger&auml;t
             beziehungsweise in deinem Konto (Punkt 7).
@@ -1546,12 +1564,39 @@
             der Gruppe sagen, dass du <strong>jetzt f&auml;hrst</strong> oder
             eine <strong>Fahrt planst</strong> (Tag, Uhrzeit, wahlweise Tour
             und ein Satz), und andere k&ouml;nnen sich anschlie&szlig;en.
-            Dabei wird <strong>kein Standort</strong> &uuml;bertragen &ndash;
-            nur, dass du f&auml;hrst, wann und welche Strecke. Eine Fahrt
-            verschwindet acht Stunden nach ihrem Beginn von selbst.
-            Gespeichert werden Name der Gruppe, wer dabei ist, die Kopien
-            mit deinem Namen und Zeitpunkt, Nachrichten und Kommentare sowie
-            Fahrten und wer sich angeschlossen hat.
+            Eine Fahrt verschwindet acht Stunden nach ihrem Beginn von
+            selbst. Gespeichert werden Name der Gruppe, wer dabei ist, die
+            Kopien mit deinem Namen und Zeitpunkt, Nachrichten und
+            Kommentare sowie Fahrten und wer sich angeschlossen hat.
+          </p>
+          <p>
+            <strong>Standort bei einer Fahrt</strong> (seit dem 17.09.2026):
+            Sagst du &bdquo;Ich fahre jetzt&ldquo;, kannst du einen Haken
+            setzen: <em>Meinen Standort mit der Gruppe teilen</em>. Nur
+            dann schickt dein Ger&auml;t etwa alle 20 Sekunden deine
+            aktuelle Position (Breite, L&auml;nge, Zeitpunkt) an deine Fahrt.
+            Es gibt <strong>keinen Verlauf</strong>: Jeder neue Punkt
+            ersetzt den vorigen. Sehen kann ihn nur, wer in genau dieser
+            Gruppe ist, auf einer Karte in der Gruppe und auf dem
+            Startbildschirm. Du beendest das Teilen jederzeit mit dem
+            Schalter unter &bdquo;Du f&auml;hrst gerade&ldquo; &ndash; der
+            Punkt wird dann sofort gel&ouml;scht &ndash;, und mit dem Ende
+            der Fahrt (&bdquo;Beenden&ldquo; oder acht Stunden nach dem
+            Start) ist er ebenfalls weg. Der Haken ist von sich aus leer.
+            Rechtsgrundlage ist deine Einwilligung (Art. 6 Abs. 1 lit. a
+            DSGVO), die du mit dem Haken erteilst und mit dem Schalter
+            widerrufst.
+          </p>
+          <p>
+            <strong>Terminumfragen</strong> (seit dem 17.09.2026): In einer
+            Gruppe kannst du eine Frage mit zwei bis sechs Terminen stellen;
+            gespeichert werden Frage, Termine, wer gefragt hat und wer
+            welchen Termin angetippt hat. Sichtbar nur in der Gruppe; vorbei
+            ist eine Umfrage einen Tag nach ihrem letzten Termin oder wenn
+            der Fragende sie beendet. <strong>&bdquo;In den
+            Kalender&ldquo;</strong> an einer geplanten Fahrt erzeugt eine
+            Kalenderdatei auf deinem Ger&auml;t; dabei geht nichts an einen
+            Server.
             Sehen kann das nur, wer in genau dieser Gruppe ist; andere
             erfahren nicht einmal, dass es sie gibt. Eine Kopie kannst du
             selbst entfernen, der Gr&uuml;nder der Gruppe jede. Wer
@@ -1809,7 +1854,7 @@
             das Recht auf Akteneinsicht Brandenburg.
           </p>
 
-          <p class="tiny">Stand: 15.09.2026</p>
+          <p class="tiny">Stand: 17.09.2026</p>
         </div>
       </details>
 
@@ -1836,13 +1881,14 @@
         <div class="rechts-text">
           <p>
             Diese Regeln gelten f&uuml;r alles, was du in Serpa aus der Hand
-            gibst: Tournamen, Beschreibungen, Reisenamen und die Touren und
-            Reisen selbst. Es gibt daf&uuml;r drei Wege, und die Regeln
-            gelten f&uuml;r alle drei &ndash; du stellst eine <b>Tour oder
-            eine Reise &ouml;ffentlich</b>, du gibst sie <b>per Link</b>
-            weiter, oder du holst <b>Mitfahrer</b> zu einer Reise dazu. Wer
-            nur plant, aufzeichnet und nichts davon tut, den betreffen sie
-            nicht.
+            gibst: Tournamen, Beschreibungen, Reisenamen, die Touren und
+            Reisen selbst und alles, was du in einer Gruppe schreibst. Es
+            gibt daf&uuml;r vier Wege, und die Regeln gelten f&uuml;r alle
+            vier &ndash; du stellst eine <b>Tour oder eine Reise
+            &ouml;ffentlich</b>, du gibst sie <b>per Link</b> weiter, du
+            holst <b>Mitfahrer</b> zu einer Reise dazu, oder du teilst und
+            schreibst in einer <b>Gruppe</b>. Wer nur plant, aufzeichnet
+            und nichts davon tut, den betreffen sie nicht.
           </p>
 
           <p class="label">Wer teilen darf</p>
@@ -1870,7 +1916,8 @@
 
           <p class="label">Was nicht geht</p>
           <p>
-            Beleidigungen, Hetze, Werbung, offensichtlich erfundene Touren.
+            Beleidigungen, Hetze, Werbung, offensichtlich erfundene Touren
+            &ndash; auch im Chat und in den Kommentaren einer Gruppe.
             Routen, die absichtlich &uuml;ber gesperrte oder verbotene Wege
             f&uuml;hren, und alles, was zum Rasen auffordert. Serpa
             ver&ouml;ffentlicht deshalb nie deine H&ouml;chstgeschwindigkeit
@@ -1936,7 +1983,7 @@
             Verordnung).
           </p>
 
-          <p class="tiny">Stand: 13.09.2026</p>
+          <p class="tiny">Stand: 17.09.2026</p>
         </div>
       </details>
 

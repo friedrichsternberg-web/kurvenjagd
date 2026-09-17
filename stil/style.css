@@ -278,6 +278,33 @@
   color: var(--metall-glanz);
 }
 .einfuehrung-zeichen .ic { width: 38px; height: 38px; }
+/* Das Bild einer Einfuehrungskarte: echte Bausteine der App in klein,
+   nicht antippbar. Die Hoehe ist begrenzt, damit die Karte auf einem
+   kleinen Handy samt Text und Knopf ins Fenster passt. */
+.einfuehrung-bild { margin: 0 0 var(--s4); pointer-events: none; text-align: left; }
+.einfuehrung-bild .btn { cursor: default; }
+.einfuehrung-foto { position: relative; border-radius: var(--r-md); overflow: hidden; border: 1px solid var(--karten-rand); }
+.einfuehrung-foto img { display: block; width: 100%; height: 150px; object-fit: cover; object-position: 60% 60%; }
+.einfuehrung-chip {
+  position: absolute; left: var(--s3); bottom: var(--s3);
+  display: inline-flex; align-items: center; gap: var(--s1);
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  background: var(--feld-glas);
+  color: var(--text);
+  font-size: 13px; font-weight: 600;
+}
+.einfuehrung-chip i { font-style: normal; opacity: 0.5; }
+.einfuehrung-chip .ic { width: 14px; height: 14px; }
+.einfuehrung-stats { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); }
+.einfuehrung-live { display: flex; flex-direction: column; gap: var(--s2); }
+.einfuehrung-live .fahrt-band { padding: var(--s2) var(--s3); }
+.einfuehrung-live .fahrt-jetzt-knopf { width: 100%; }
+.einfuehrung-entdecken { display: flex; flex-direction: column; gap: var(--s2); }
+.einfuehrung-entdecken .touren-leiste { margin: 0; }
+.einfuehrung-entdecken .quellen-umschalter { margin: 0; }
+.einfuehrung-entdecken .seg { font-size: 12px; padding: 7px 0; }
+.einfuehrung-entdecken .entdecken-reiter { padding: 7px 12px; }
 /* Beim Konto leuchtet der Kreis blau: Das ist der eine Schritt, bei dem
    die App etwas will. */
 .einfuehrung-zeichen.konto {
@@ -2039,9 +2066,20 @@ body.mit-nav { --nav-raum: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
 /* Laeuft die Aufzeichnung gerade nicht, soll das auf einen Blick klar sein. */
 .ride-panel.pausiert .ride-tempo-wert { color: var(--muted); }
 
-/* Vor dem Start darf das Feld ruhig etwas mehr Platz nehmen - da steht
-   erklaerender Text, und die Karte ist noch nicht wichtig. */
-.ride-panel.bereit { max-height: 70dvh; }
+/* Vor dem Start nimmt das Feld die halbe Hoehe: Der Knopf und die
+   Stats-Karte sind gross, die Karte ist noch nicht wichtig (Friedrich,
+   17.09.2026). Der Inhalt verteilt sich auf die Hoehe, statt oben zu
+   kleben. */
+.ride-panel.bereit { min-height: 50dvh; max-height: 70dvh; display: flex; flex-direction: column; }
+.ride-panel.bereit #rideBereit { flex: 1; display: flex; flex-direction: column; gap: var(--s4); }
+.ride-panel.bereit .ride-titel { margin-bottom: 0; }
+.ride-panel.bereit #btnRideStart { padding: 20px 18px; font-size: 18px; }
+/* Die Stats-Karte fuellt den Rest der Hoehe - sie ist das zweite Ding auf
+   diesem Bildschirm, nicht ein Anhang. */
+.ride-panel.bereit .ride-stats-karte { flex: 1; margin: 0; padding: var(--s4) var(--s5); }
+.ride-panel.bereit .ride-stats-symbol { width: 56px; height: 56px; }
+.ride-panel.bereit .ride-stats-symbol .ic { width: 28px; height: 28px; }
+.ride-panel.bereit .ride-stats-titel { font-size: 20px; }
 
 /* Die Stats-Karte im Bedienfeld vor dem Start: links die Gesamtzahl
    gross, rechts der Pfeil. Dieselbe Glasplatte wie der Kopf des

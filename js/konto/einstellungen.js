@@ -39,3 +39,5 @@ verkabele('btnEinstellungen', 'click', zeigeEinstellungen);
 verkabele('btnEinstellungenLeiste', 'click', zeigeEinstellungen);
 verkabele('btnEinstellungenZurueck', 'click', zeigeGarage);
 verkabele('btnEinstellungenRechtliches', 'click', () => zeigeRechtliches('einstellungenScreen'));
+// Die Einfuehrung noch einmal - einfuehrung.js laedt als Letztes, beim Tipp ist sie da.
+verkabele('btnEinstellungenEinfuehrung', 'click', () => { if (typeof zeigeEinfuehrung === 'function') zeigeEinfuehrung(); });

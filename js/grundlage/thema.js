@@ -8,9 +8,9 @@
    fragt danach - die Marken in design.css erledigen den Rest.
 
    DREI WAHLEN, ZWEI ERSCHEINUNGEN. Gewaehlt wird in den Einstellungen:
-   "Geraet" (die Vorgabe: was das System eingestellt hat, und die App folgt
-   ihm, auch wenn es sich abends umstellt), "Hell" oder "Dunkel". Nur die
-   beiden festen Wahlen werden gespeichert; "Geraet" heisst: kein Eintrag.
+   "Hell" (die Vorgabe), "Dunkel" oder "Geraet" (was das System eingestellt
+   hat, und die App folgt ihm, auch wenn es sich abends umstellt). Die Wahl
+   wird gespeichert; ohne Eintrag ist es Hell.
    So raet Apple es (Dark Mode: eine App-eigene Wahl soll nicht die
    Systemeinstellung ueberdecken), und Friedrich wollte trotzdem waehlen
    koennen - der dritte Zustand ist der Weg zurueck zur Vorgabe.
@@ -22,10 +22,12 @@
 
 const THEMA_MERKER = 'kurvenjagd.thema';
 
-// 'hell', 'dunkel' oder 'geraet' - was der Nutzer gewaehlt hat.
+// 'hell', 'dunkel' oder 'geraet' - was der Nutzer gewaehlt hat. Ohne
+// Eintrag gilt HELL (seit dem 17.09.2026 auf Friedrichs Wunsch die Vorgabe);
+// "Geraet" ist eine ausdrueckliche Wahl und wird als solche gespeichert.
 function gewaehltesThema() {
   const wahl = geraet.lies(THEMA_MERKER);
-  return wahl === 'hell' || wahl === 'dunkel' ? wahl : 'geraet';
+  return wahl === 'hell' || wahl === 'dunkel' || wahl === 'geraet' ? wahl : 'hell';
 }
 
 function aktivesThema() {
@@ -46,8 +48,7 @@ function wendeThemaAn(wahl) {
 }
 
 function setzeThema(wahl) {
-  if (wahl === 'hell' || wahl === 'dunkel') geraet.schreib(THEMA_MERKER, wahl);
-  else geraet.wirfWeg(THEMA_MERKER);
+  geraet.schreib(THEMA_MERKER, wahl === 'hell' || wahl === 'dunkel' ? wahl : 'geraet');
   wendeThemaAn(wahl);
 }
 
