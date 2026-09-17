@@ -56,6 +56,18 @@ const geraet = {
     return window.devicePixelRatio || 1;
   },
 
+  /* --- Hell oder Dunkel am Geraet ------------------------------------------
+     Was das System eingestellt hat: 'hell' oder 'dunkel'. Die App nimmt das
+     als Vorgabe, solange der Nutzer nicht selbst geschaltet hat (thema.js).
+     Nativ kommt derselbe Wert spaeter aus der Huelle - deshalb hier. */
+  farbschema() {
+    try {
+      return window.matchMedia('(prefers-color-scheme: light)').matches ? 'hell' : 'dunkel';
+    } catch {
+      return 'dunkel';
+    }
+  },
+
 
   /* --- Standort ------------------------------------------------------------
      Absichtlich mit Rückrufen statt mit Promises: Genau so ruft die App es

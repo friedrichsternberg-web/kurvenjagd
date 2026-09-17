@@ -146,7 +146,7 @@
 
   <!-- Faerbt die Statusleiste des Handys in die Grundflaeche der App, damit
        oben kein fremder heller Streifen stehen bleibt. -->
-  <meta name="theme-color" content="#0F1216">
+  <meta name="theme-color" content="#000000">
 
   <!-- Apple wertet das Manifest bis heute nur teilweise aus und braucht seine
        eigenen Angaben daneben. "black-translucent" laesst den Inhalt bis unter
@@ -310,6 +310,14 @@
            Diagramm auf dem Bildschirm dahinter. -->
       <symbol id="icon-stats" viewBox="0 0 24 24">
         <path d="M5 20V13.5M12 20V7M19 20v-9.5"/>
+      </symbol>
+      <!-- Hell und Dunkel: der Schalter fuer die Erscheinung (thema.js). -->
+      <symbol id="icon-sonne" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+      </symbol>
+      <symbol id="icon-mond" viewBox="0 0 24 24">
+        <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>
       </symbol>
       <symbol id="icon-profil" viewBox="0 0 24 24">
         <circle cx="12" cy="8" r="3.8"/>
@@ -550,6 +558,9 @@
           </span>
         </h1>
         <div class="kopf-knoepfe">
+          <button class="glas-rund" data-thema-knopf title="Hell" aria-label="Erscheinung wechseln">
+            <svg class="ic gross"><use href="#icon-sonne"></use></svg>
+          </button>
           <button class="glas-rund" id="btnKontoRund" title="Konto" aria-label="Konto">
             <!-- Ist ein Profilbild da, tritt es an die Stelle des Symbols
                  und fuellt den Knopf ganz aus. konto.js schaltet um. -->
@@ -2851,6 +2862,9 @@
     <span class="nav-rechts nur-quer">
       <!-- Derselbe Weg wie der runde Konto-Knopf im Garagenkopf; beide
            rufen oeffneKontoOderProfil() in konto.js. -->
+      <button class="glas-rund klein" data-thema-knopf title="Hell" aria-label="Erscheinung wechseln">
+        <svg class="ic"><use href="#icon-sonne"></use></svg>
+      </button>
       <button class="glas-rund klein" id="btnKontoLeiste" title="Konto" aria-label="Konto">
         <svg class="ic"><use href="#icon-profil"></use></svg>
       </button>
@@ -3014,6 +3028,9 @@
        gesamte Zugriff aufs Geraet - Standort, Speicher, Dateien. Beim Umzug
        in die Stores ist das die einzige Datei, die sich aendert. -->
   <script src="js/grundlage/geraet.js?v=114"></script>
+  <!-- Hell oder Dunkel: setzt das Attribut am <html>, so frueh wie moeglich,
+       damit die Seite nicht erst dunkel und dann hell wird. -->
+  <script src="js/grundlage/thema.js?v=114"></script>
   <!-- Der Rechenteil: Kurvigkeit, Sackgassen, Rundtour-Punkte, GPX. Muss VOR
        app.js stehen, weil app.js diese Funktionen beim Routen aufruft. Die
        spaetere Webseite im Querformat laedt genau diese Datei ebenfalls und

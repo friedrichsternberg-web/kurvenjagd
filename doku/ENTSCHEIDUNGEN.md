@@ -4952,43 +4952,52 @@ Geprüft mit nachgestelltem Server und nachgestelltem GPS im Browser, der
 Server per SQL als Nutzer und als Fremder. `pruefe.sh` prüft die Freunde-
 Dateien seit heute überhaupt erst mit – sie fehlten in seinen Listen.
 
-## 17.09.2026 – Graphit statt Schwarz: die App eine Stufe heller
+## 17.09.2026 – Hell und Dunkel: zwei Erscheinungen, und das Glas sichtbar
 
-Friedrichs Wunsch: das Design etwas heller, mit Blick auf die Ästhetik.
-Kein Hellmodus, keine neue Farbe – dieselbe Sprache, mehr Licht darin.
+**Der erste Anlauf ist verworfen.** Auf „etwas heller" hatte ich die
+Grundfläche von Schwarz auf Graphit gehoben (#0F1216) und alle Flächen
+mitgezogen – zu zaghaft, und nicht das, was Friedrich meinte. Sein Wunsch:
+ein echter dunkler und ein echter heller Modus, vom Nutzer schaltbar, und
+das Liquid Glass deutlich mehr zur Geltung. Was vom ersten Anlauf blieb:
+der Lichtkegel auch unter den Listenbildschirmen, die Marke statt der
+Abschrift im Shop, der hellere Nebentext und das hellere Akzentblau.
 
-**Das Konzept in vier Sätzen.** Erstens: Die Grundfläche ist nicht mehr
-reines Schwarz (#000000), sondern ein tiefes Graphit mit kaltem Stich
-(#0F1216, Blau 210°, kaum gesättigt) – dieselbe Familie wie der
-Werkstattraum (`--raum-dunkel`) und die Nachtseite. Zweitens: Alle Flächen
-darüber (`--surface`, `--surface-2`, `--line`) sind im selben Maß
-mitgezogen, damit die Staffelung bleibt. Drittens: Die fünf Glasstufen sind
-um rund ein Viertel angehoben (0,05→0,06, 0,10→0,13, 0,14→0,18, 0,20→0,25,
-0,32→0,40), weil Glas auf einer helleren Fläche mehr Weiß braucht, um als
-Scheibe zu lesen. Viertens: Der Lichtkegel `--start-licht` ist etwas
-kräftiger und länger, und er liegt jetzt auch unter Touren, Stats, Reifen und
-Freunde – die standen bisher auf blanker Fläche, was Grundsatz 4 in
-`design.css` ausdrücklich als „tot" bezeichnet.
+**Wie die zwei Erscheinungen gebaut sind.** `design.css` trägt in `:root`
+die dunkle Fassung (die Vorgabe, Schwarz wie vorher) und unter
+`:root[data-thema="hell"]` NUR die Marken, die im Hellen anders sind –
+rund vierzig Zeilen: Flächen, Schrift, weißes Glas, blaugraue Schatten,
+dunklere Mess- und Zustandsfarben (auf Weiß leuchtet Grün nicht, es
+verschwindet: 2,1:1), und `--accent-hell` ist im Hellen die Signalfarbe
+selbst. `style.css` fragt nirgends nach dem Thema, das ist die Regel:
+Wer dort einen `[data-thema]`-Selektor braucht, hat die Marke an der
+falschen Stelle. Zwei Beispiele, wie das aufgeht: Das Metall-Logo wäre auf
+Hellgrau unsichtbar – `--logo-filter` dunkelt es im Hellen ab, im Dunklen
+ist die Marke `none`. Der Werkstattraum hinter dem Motorrad (`--raum-dunkel`)
+ist im Hellen ein kühles Hellgrau, sonst stünde auf jeder Karte ein Loch.
 
-**Was mitgezogen werden musste, damit Lesbarkeit nicht leidet:**
-`--muted` von #8B929E auf #9AA3B0 (5,4:1 auf `--surface-2`), und
-`--accent-hell` von #0084D6 auf #1F95E5 – auf einer Glaskarte über Graphit
-käme der alte Ton auf 3,1:1, der neue auf 3,8:1; auf der Grundfläche 5,7:1.
-Der Schlagschatten der Karten ist von `--schatten-mittel` auf
-`--schatten-weich` zurückgenommen: Auf Graphit sähen die alten Schatten wie
-Löcher aus. `theme-color` in `index.html` und die beiden Farben im Manifest
-tragen den neuen Grund.
+**Eine neue Marke war nötig:** `--feld-glas`, das Feld über der Landkarte
+(Leiste, Bedienfeld, Manövertafel, Toast, Einführung). Bisher stand dort
+`--schatten-tief` – dunkles Glas, weil ein weißer Schleier über einer
+hellen Karte unlesbar ist. Im Hellen muss genau dieses Feld weiß werden,
+ein Schatten aber Schatten bleiben. Sechs Fundstellen umgestellt.
 
-**Warum keine hellere Fassung:** Das Motorradbild und die Karte sind der
-Untergrund der App, beides ist dunkel; Karten und Bedienfeld müssen sich
-davon abheben, ohne sie zu überstrahlen. Ein Schritt weiter (Grau um #20)
-ließe das Glas auf Fotos milchig werden. Wer später mehr will, hebt die
-fünf Glasstufen an, nicht die Grundfläche.
+**Wer schaltet:** `js/grundlage/thema.js`, direkt nach `geraet.js`, damit
+das Attribut steht, bevor die Seite gezeichnet ist. Vorgabe ist die
+Systemeinstellung (`geraet.farbschema()`, `prefers-color-scheme`); der
+Sonne/Mond-Knopf im Kopf (Hochformat) und in der Leiste (Querformat)
+schaltet um und merkt die Wahl im Gerät (`kurvenjagd.thema`). `theme-color`
+folgt der Grundfläche, damit die Statusleiste auf dem Handy mitgeht.
 
-**Nebenbefund:** In `style.css` stand der Lichtkegel für Shop, Merkliste,
-Reise und Planer-Wahl noch als Abschrift, obwohl `design.css` seit dem
-05.09.2026 behauptet, das gebe es nicht mehr. Jetzt benutzen alle die Marke.
+**Das Glas:** Filter von 22 auf 30 Pixel Unschärfe und 190 % Sättigung,
+die fünf Stufen kräftiger (Kante 0,20, Lichtkante 0,48), die Lichtkante der
+Karte auf der stärksten Stufe, dazu der Glanz quer über die Scheibe als
+Verlauf von links oben (Grundsatz 1, dritter Fall – die Designsprache nennt
+ihn seit dem 18.08.2026, gebaut war er nie). Und drei Lichter unter den
+Bildschirmen statt einem: Glas zeigt sich erst, wenn unter ihm etwas ist,
+das es verwischen kann; ein einziger weicher Verlauf sieht durch 30 Pixel
+Unschärfe aus wie keiner.
 
-Geprüft im Browser: Start, Touren, Planer, Ride im Hochformat, Start im
-Querformat. `pruefe.sh` Regel 2 unverändert (die zwei Treffer sind die
-Maskenverläufe, kein Farbwert).
+Geprüft im Browser in beiden Erscheinungen: Start, Touren, Planer-Wahl,
+Planer mit Karte, Ride, Freunde, ein Blatt mit Feldern, ein Toast; Hoch-
+und Querformat. Offen: Die Landing-Seiten (`ueber/` …) kennen keinen
+Schalter und bleiben dunkel, bis `thema.js` auch dort eingebunden ist.
