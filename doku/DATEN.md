@@ -354,8 +354,7 @@ Migration 10 `gruppen_kommentare` – Kommentare unter einem Beitrag, sie
 gehen mit ihm –, und seit Migration 11 `gruppen_fahrten` und
 `gruppen_mitfahrer`: „Ich fahre jetzt" oder eine geplante Fahrt mit
 Zeitpunkt, wahlweise Tour (als Beitrag) und einem Satz; wer sich
-anschließt, steht als Zeile in `gruppen_mitfahrer`. **Kein Standort**, nur
-wann und was. Die Lesefunktion gibt Fahrten bis acht Stunden nach Beginn
+anschließt, steht als Zeile in `gruppen_mitfahrer`. Die Lesefunktion gibt Fahrten bis acht Stunden nach Beginn
 heraus, danach sind sie vorbei; `meine_fahrten` (Migration 12) fasst sie für den Start über alle eigenen Gruppen zusammen), alle hinter der Zeilenregel
 `ist_gruppen_mitglied`. **Was gespeichert wird:**
 Name der Gruppe und ihr Gründer; je Mitglied Status (eingeladen, dabei,
@@ -370,6 +369,33 @@ Kontolöschung: Autor und Gründer werden leer („Ehemaliges Konto“), die
 Gruppe bleibt den anderen. Obergrenzen: 20 Gruppen je Konto, 30 Leute,
 300 Beiträge und 5000 Nachrichten je Gruppe. Kein Meldeweg nötig: Es gibt
 keine Öffentlichkeit, in die etwas gestellt würde.
+
+**Standort einer laufenden Fahrt** (seit 17.09.2026, Migration 13): Wer
+„Ich fahre jetzt" sagt, kann ein Häkchen setzen: Meinen Standort mit der
+Gruppe teilen. Vorgabe ist leer. Dann gehen alle 20 Sekunden Breite, Länge
+und Zeitpunkt an die eigene Zeile in `gruppen_fahrten` (`lat`, `lon`,
+`standort_am`); jeder Punkt überschreibt den vorigen, **es gibt keinen
+Verlauf**. Nur die Mitglieder der Gruppe lesen ihn, nur der Fahrer selbst
+schreibt ihn (Regel „Fahrt aendern"). Aus: der Schalter unter „Du fährst
+gerade" leert die drei Spalten sofort; mit dem Ende der Fahrt („Beenden"
+oder acht Stunden) ist die Zeile weg. Der Browser liefert den Standort nur,
+solange die App vorn ist; die App hält deshalb den Bildschirm wach
+(dieselbe Sperre wie beim Aufzeichnen) und merkt sich im Gerät
+(`kurvenjagd.fahrtStandort`), welche Fahrt sie zeigt, um nach einem Neuladen
+weiterzumachen. Wer die Karte „Wo sind sie?" öffnet, fragt sein Gerät einmal
+nach dem eigenen Standort für den blauen Punkt; der geht **nicht** ins Netz.
+
+**Terminumfrage** (seit 17.09.2026, Migration 13): `gruppen_umfragen`
+(Frage, zwei bis sechs Zeitpunkte, Autor) und `gruppen_stimmen` (wer hat
+welchen Zeitpunkt angetippt). Sichtbar nur in der Gruppe. Der Autor oder
+der Gründer beendet die Umfrage; wird aus dem Gewinner eine Fahrt, geht die
+Umfrage automatisch weg. Vorbei ist sie einen Tag nach ihrem spätesten
+Termin. Obergrenze: 10 offene je Gruppe.
+
+**Kalender-Datei** (seit 17.09.2026): „In den Kalender" an einer geplanten
+Fahrt baut eine `.ics`-Datei **im Gerät** (Zeitpunkt, drei Stunden Dauer,
+wer fährt, Tour, der Satz, Gruppenname) und bietet sie zum Speichern an.
+Nichts davon geht an einen Server.
 
 **GPX-Import** (seit 14.09.2026): Eine gewählte Datei wird im Gerät
 gelesen (`geraet.liesTextdatei`), nichts davon geht ins Netz. Wird die

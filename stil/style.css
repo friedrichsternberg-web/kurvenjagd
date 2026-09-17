@@ -6046,6 +6046,109 @@ body.nav-modus .karten-knopf { display: none; }
 .fahrt-zeitzeile { display: flex; gap: var(--s2); }
 .fahrt-zeitzeile input { flex: 1; min-width: 0; }
 
+/* Der Weg in den Kalender bzw. auf die Karte, als schlichte Zeile unter
+   dem Satz einer Fahrt. */
+.fahrt-zusatz { align-self: flex-start; display: inline-flex; align-items: center; gap: var(--s1); font-size: 13px; }
+.fahrt-zusatz i { font-style: normal; opacity: 0.5; margin: 0 3px; }
+
+/* ---------- Terminumfrage (seit 17.09.2026) ----------
+   Je Termin eine Zeile zum Antippen: Haken links, der wird sichtbar, wenn
+   man selbst gestimmt hat; die Gesichter derer, die koennen; die Zahl
+   rechts. Der fuehrende Termin traegt den Akzentrand. */
+.umfragen-karte { display: flex; flex-direction: column; gap: var(--s3); margin-bottom: var(--s5); }
+.umfragen-karte .widget-kopf { margin-bottom: 0; }
+.umfrage-liste { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--s3); }
+.umfrage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+  padding: var(--s3);
+  border-radius: var(--r-md);
+  border: 1px solid var(--glas-rand);
+  background: var(--glas-hell);
+}
+.umfrage .fahrt-kopf .umfrage-weg { margin-left: auto; }
+.umfrage-frage { margin: 0; font-weight: 600; line-height: 1.4; }
+.umfrage-termine { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--s1); }
+.umfrage-termin {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s2) var(--s3);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--glas-rand);
+  background: var(--glas-hauch);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.umfrage-termin.fuehrt { border-color: color-mix(in srgb, var(--accent-hell) 55%, transparent); }
+.umfrage-termin.gewaehlt { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+.umfrage-haken {
+  width: 20px; height: 20px;
+  flex: 0 0 auto;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--glas-rand);
+  color: transparent;
+}
+.umfrage-termin.gewaehlt .umfrage-haken { background: var(--accent); border-color: var(--accent); color: var(--text); }
+.umfrage-termin-text { flex: 1; min-width: 0; }
+.umfrage-termin .mitfahrer-punkt { width: 24px; height: 24px; font-size: 11px; }
+.umfrage-termin .mitfahrer-punkt .ic { width: 12px; height: 12px; }
+.umfrage-zahl { min-width: 1.5em; text-align: right; font-weight: 700; color: var(--muted); }
+.umfrage-planen { align-self: flex-start; }
+.umfrage-termin-felder { list-style: none; margin: 0 0 var(--s2); padding: 0; display: flex; flex-direction: column; gap: var(--s2); }
+
+/* ---------- Standort einer Fahrt (seit 17.09.2026) ---------- */
+.standort-wahl { margin-top: var(--s3); }
+.standort-schalter {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: 0 var(--s3);
+  font-size: 13px;
+  color: var(--muted);
+}
+.standort-schalter-text { flex: 1; min-width: 0; display: inline-flex; align-items: center; gap: var(--s1); }
+/* Die Karte im Blatt: fest hoch, sonst haette Leaflet nichts zu fuellen. */
+.fahrt-karte {
+  height: min(60vh, 420px);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  border: 1px solid var(--glas-rand);
+}
+/* Ein Fahrer auf der Karte: das Gesicht rund, der Name als Schild rechts
+   daneben. Blass, wenn der Punkt aelter als eine Viertelstunde ist. */
+.standort-fahrer { position: relative; width: 36px; height: 36px; }
+.standort-fahrer.alt { opacity: 0.55; }
+.standort-fahrer-bild {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px;
+  border-radius: var(--r-pill);
+  border: 2px solid var(--accent-hell);
+  background: var(--bg);
+  overflow: hidden;
+  box-shadow: 0 2px 8px var(--schatten-mittel);
+}
+.standort-fahrer-bild .geteilt-bild, .standort-fahrer-bild .geteilt-buchstabe { width: 100%; height: 100%; }
+.standort-fahrer-name {
+  position: absolute;
+  left: 42px; top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  padding: 2px var(--s2);
+  border-radius: var(--r-pill);
+  background: var(--glas-dunkel);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 1px 4px var(--schatten-weich);
+}
+.standort-fahrer-name i { font-style: normal; opacity: 0.5; }
+
 /* ---------- Freunde auf dem Start (seit 17.09.2026) ----------
    Das Fahrtband: eine Zeile je Fahrt, blau umrandet wie eine Einladung,
    weil es eine ist. Bei "jetzt" der gruene Puls. Die ganze Zeile fuehrt

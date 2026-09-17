@@ -38,6 +38,7 @@ async function ladeGarageFreundeNach() {
   ]);
   startGruppen = gruppen.error ? [] : (gruppen.data || []);
   startFahrten = fahrten.error ? [] : (fahrten.data || []);
+  if (typeof setzeStandortTeilenFort === 'function') setzeStandortTeilenFort(startFahrten);
   zeichneGarageFreunde();
 }
 
@@ -75,7 +76,8 @@ function startFahrtHtml(fahrt) {
         <span class="fahrt-band-wer">${jetzt ? '<span class="fahrt-puls" aria-hidden="true"></span>' : ''}<b>${escapeHtml(wer)}</b> ${escapeHtml(wann)}</span>
         <span class="fahrt-band-meta">${escapeHtml(fahrt.gruppe_name)}${
           fahrt.beitrag_name ? ` <i>&middot;</i> ${escapeHtml(fahrt.beitrag_name)}` : ''}${
-          fahrt.dabei ? ` <i>&middot;</i> ${fahrt.dabei} dabei` : ''}</span>
+          fahrt.dabei ? ` <i>&middot;</i> ${fahrt.dabei} dabei` : ''}${
+          jetzt && fahrt.lat != null ? ` <i>&middot;</i> ${symbol('standort', 'klein')} live` : ''}</span>
       </span>
       ${knopf}
     </div>`;

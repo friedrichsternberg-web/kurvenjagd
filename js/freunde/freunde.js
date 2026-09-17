@@ -160,12 +160,14 @@ async function oeffneGruppe(gruppeId) {
   gruppenBeitraege = [];
   gruppenNachrichten = [];
   gruppenKommentare = [];
+  if (typeof gruppenUmfragen !== 'undefined') gruppenUmfragen = [];
   zeichneFreunde();
   await Promise.all([
     ladeGruppenMitglieder(gruppeId), ladeGruppenBeitraege(gruppeId),
     ladeGruppenNachrichten(gruppeId), ladeGruppenKommentare(gruppeId),
     // Die Fahrten stehen in fahrten.js - fehlt die Datei, fehlt ihre Karte.
     typeof ladeGruppenFahrten === 'function' ? ladeGruppenFahrten(gruppeId) : Promise.resolve(),
+    typeof ladeGruppenUmfragen === 'function' ? ladeGruppenUmfragen(gruppeId) : Promise.resolve(),
   ]);
   if (String(offeneGruppeId) !== String(gruppeId)) return;
   merkeGelesen(gruppeId, gruppenNachrichten);
@@ -182,6 +184,7 @@ function gruppeHtml() {
     <button class="btn ghost back-btn" data-gruppe-zurueck>&larr; Freunde</button>
     ${gruppenKopfHtml(gruppe)}
     ${typeof fahrtenHtml === 'function' ? fahrtenHtml() : ''}
+    ${typeof umfragenHtml === 'function' ? umfragenHtml() : ''}
     ${gruppenChatHtml()}
     <h2 class="regal-titel gruppen-strom-titel">Geteilt</h2>
     <ul class="saved-list gruppen-strom">
@@ -332,13 +335,15 @@ function starteGruppenTakt() {
   gruppenTakt = setInterval(async () => {
     const gruppe = offeneGruppe();
     if (!gruppe || document.getElementById('freundeScreen')?.hidden) { stoppeGruppenTakt(); return; }
-    const [neueNachrichten, neueKommentare, neueFahrten] = await Promise.all([
+    const [neueNachrichten, neueKommentare, neueFahrten, neueUmfragen] = await Promise.all([
       holeNachrichten(gruppenGespraechQuelle(gruppe.id), gruppenNachrichten),
       ladeGruppenKommentare(gruppe.id, true),
       typeof ladeGruppenFahrten === 'function' ? ladeGruppenFahrten(gruppe.id) : false,
+      typeof ladeGruppenUmfragen === 'function' ? ladeGruppenUmfragen(gruppe.id) : false,
     ]);
     if (neueNachrichten) { merkeGelesen(gruppe.id, gruppenNachrichten); zeichneGruppenChat(); }
     if (neueFahrten && !offenerBeitragId) zeichneFahrten();
+    if (neueUmfragen && !offenerBeitragId) zeichneUmfragen();
     if (neueKommentare) {
       const betroffen = new Set(gruppenKommentare.slice(-neueKommentare).map(k => k.beitrag_id));
       betroffen.forEach(zeichneKommentare);

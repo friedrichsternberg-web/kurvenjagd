@@ -4912,3 +4912,42 @@ Liste überall, ohne dass die App sie beim Start mitschleppt. Die JSON
 bleibt die gepflegte Quelle. Die beiden Hinweiszeilen unter den Häkchen
 (Pässe und Strecken) sind auf Friedrichs Wunsch weg.
 
+
+## 17.09.2026 – Terminumfrage, Kalender-Datei, Standort einer Fahrt
+
+Drei Wünsche von Friedrich für den Bereich „Freunde", alle in
+`13-umfragen-und-standort.sql` und zwei neuen Dateien (`umfragen.js`,
+`standort.js`); `fahrten.js` bekam nur die Fugen dafür.
+
+**Terminumfrage statt Chat.** „Samstag oder Sonntag?" mit Antippen, mehrere
+Termine je Person erlaubt (wie Doodle), der Gewinner wird mit einem Tipp
+zur geplanten Fahrt, und die Umfrage geht dabei weg – eine beantwortete
+Frage braucht keine Karte mehr. Die Termine liegen als JSON-Liste in der
+Umfrage, die Stimmen daneben als Zeilen mit der Stelle in der Liste. Ein
+Text, der kein Zeitpunkt ist, wird vom Trigger mit demselben klaren Satz
+abgewiesen wie eine zu kurze Liste; die erste Fassung ließ den Cast-Fehler
+der Datenbank durch (22007 statt check_violation).
+
+**Kalender als Datei, nicht als Dienst.** `.ics` ist das eine Format, das
+jeder Kalender liest; die Datei entsteht im Gerät und geht über
+`geraet.dateiAnbieten` hinaus wie eine GPX. Dauer fest drei Stunden, weil
+eine Fahrt kein Ende kennt. Kein Google-Kalender-Link: der bräuchte eine
+Adresse mit Parametern und wäre nur für einen Anbieter.
+
+**Standort nur als Haken beim Losfahren, nur der Fahrer, kein Verlauf.**
+Friedrichs Wunsch war „damit die mich finden" – also der Fahrer zeigt sich,
+nicht die Gruppe einander. Drei Spalten an der Fahrt statt einer eigenen
+Tabelle mit Verlauf: Ein Punkt, der den vorigen überschreibt, ist alles,
+was „finden" braucht, und alles, was man mit gutem Gewissen speichert.
+Alle 20 Sekunden statt bei jedem GPS-Punkt (Akku, Server). Die Karte
+„Wo sind sie?" ist ein eigenes kleines Leaflet im Blatt und wird beim
+Schließen weggeräumt – eine Karte an einem Element, das es nicht mehr gibt,
+ist die Sorte Fehler, die man erst beim zweiten Öffnen sieht.
+
+**Ehrlich zum Browser:** Hintergrund gibt es nicht (`geraet.standortImHintergrund`),
+also Bildschirm wach halten und nach einem Neuladen wieder anknüpfen. Push
+bleibt offen (AUFGABEN.md) – heute sieht die Fahrt nur, wer die App offen hat.
+
+Geprüft mit nachgestelltem Server und nachgestelltem GPS im Browser, der
+Server per SQL als Nutzer und als Fremder. `pruefe.sh` prüft die Freunde-
+Dateien seit heute überhaupt erst mit – sie fehlten in seinen Listen.

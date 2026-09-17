@@ -15,7 +15,11 @@
    waehlt, stellt sie damit in die Gruppe (teileInGruppe) - so hat die
    Strecke ihre Karte und ihre Kommentare dort, wo alle sie sehen.
 
-   Kein Standort: Eine Fahrt sagt wann und was, nicht wo jemand gerade ist.
+   Der Standort ist Sache von standort.js: Wer "jetzt" faehrt, kann ihn
+   der Gruppe zeigen - freiwillig, nur solange die Fahrt laeuft.
+
+   Eine geplante Fahrt laesst sich als Kalendereintrag mitnehmen (.ics,
+   Abschnitt 4b) - die Datei oeffnet auf dem Handy den Kalender.
 
    Laedt NACH freunde.js: haengt sich an dessen Bildschirm und Blatt.
    Braucht offeneGruppe(), gruppenBeitraege, teileInGruppe(), oeffneBlatt(),
@@ -26,6 +30,7 @@
 
 let gruppenFahrten = [];   // die offenen Fahrten der offenen Gruppe
 let fahrtBlattArt = null;  // 'jetzt' oder 'geplant', solange das Blatt offen ist
+let fahrtBlattVorgabe = null;  // womit das Blatt gefuellt wurde, etwa aus einer Umfrage
 
 
 /* --- 1. Server -------------------------------------------------------------- */
@@ -34,22 +39,25 @@ async function ladeGruppenFahrten(gruppeId) {
   const { data, error } = await backend.rpc('gruppen_fahrten_liste', { p_gruppe: gruppeId });
   const vorher = JSON.stringify(gruppenFahrten);
   gruppenFahrten = error ? [] : (data || []);
+  if (typeof setzeStandortTeilenFort === 'function') setzeStandortTeilenFort(gruppenFahrten);
   return JSON.stringify(gruppenFahrten) !== vorher;
 }
 
 async function kuendigeFahrtAn(gruppeId, { art, beginntAm, text, beitragId }) {
   if (!angemeldeterNutzer) return { ok: false, meldung: 'Dafür brauchst du ein Konto.' };
-  const { error } = await backend.from('gruppen_fahrten').insert({
+  const { data, error } = await backend.from('gruppen_fahrten').insert({
     gruppe_id: gruppeId, fahrer_id: angemeldeterNutzer.id, art,
     beginnt_am: beginntAm, text: text || null, beitrag_id: beitragId || null,
-  });
+  }).select('id').single();
   if (error) return { ok: false, meldung: error.message || 'Das hat nicht geklappt.' };
-  return { ok: true };
+  return { ok: true, id: data?.id || null };
 }
 
 async function beendeFahrt(fahrtId) {
   const { error } = await backend.from('gruppen_fahrten').delete().eq('id', fahrtId);
   if (error) { showToast('Das hat nicht geklappt.'); return false; }
+  // Mit der Fahrt ist auch der Standort weg - das Geraet darf aufhoeren.
+  if (typeof teileStandortGerade === 'function' && teileStandortGerade(fahrtId)) stoppeStandortTeilen(false);
   return true;
 }
 
@@ -120,7 +128,8 @@ function fahrtenHtml() {
              <span class="fahrt-puls" aria-hidden="true"></span>
              <span class="fahrt-laeuft-text">Du f&auml;hrst gerade${laeuft.beitrag_name ? ` <i>&middot;</i> ${escapeHtml(laeuft.beitrag_name)}` : ''}</span>
              <button type="button" class="btn ghost klein" data-fahrt-beenden="${escapeHtml(laeuft.id)}">Beenden</button>
-           </div>`
+           </div>
+           ${typeof standortSchalterHtml === 'function' ? standortSchalterHtml(laeuft) : ''}`
         : `<div class="fahrten-knoepfe">
              <button type="button" class="btn fahrt-jetzt-knopf" data-fahrt-jetzt>
                ${symbol('motorrad', 'klein')} Ich fahre jetzt
@@ -157,6 +166,7 @@ function fahrtZeileHtml(fahrt) {
           <span>${escapeHtml(fahrt.beitrag_name || 'Tour')}</span> <i>&rsaquo;</i>
         </button>` : ''}
       ${fahrt.text ? `<p class="fahrt-text">${escapeHtml(fahrt.text)}</p>` : ''}
+      ${fahrtZusatzHtml(fahrt)}
       <div class="fahrt-fuss">
         <span class="mitfahrer-punkte">${punkte || mitfahrerGeisterHtml(1)}</span>
         <span class="fahrt-dabei-text">${leute.length ? `${leute.length} dabei` : 'noch niemand dabei'}</span>
@@ -165,8 +175,20 @@ function fahrtZeileHtml(fahrt) {
     </li>`;
 }
 
+/* Unter dem Satz: bei einer geplanten Fahrt der Weg in den Kalender, bei
+   einer laufenden mit Standort der Weg auf die Karte (standort.js). */
+function fahrtZusatzHtml(fahrt) {
+  if (fahrt.art === 'geplant') {
+    return `<button type="button" class="linkbtn fahrt-zusatz" data-fahrt-kalender="${escapeHtml(fahrt.id)}">
+      ${symbol('kalender', 'klein')} In den Kalender</button>`;
+  }
+  if (typeof standortZeileHtml === 'function') return standortZeileHtml(fahrt);
+  return '';
+}
+
 // Nur die Karte neu, nicht die ganze Seite - der Takt ruft das.
 function zeichneFahrten() {
+  if (typeof zeichneStandortKarte === 'function') zeichneStandortKarte();
   const alt = document.querySelector('#freundeInner .fahrten-karte');
   if (!alt) return;
   const huelle = document.createElement('div');
@@ -177,11 +199,12 @@ function zeichneFahrten() {
 
 /* --- 4. Das Blatt: jetzt oder geplant ----------------------------------------- */
 
-function oeffneFahrtBlatt(art) {
+function oeffneFahrtBlatt(art, vorgabe = null) {
   const gruppe = offeneGruppe();
   if (!gruppe) return;
   fahrtBlattArt = art;
-  const vorgabe = morgenZehnUhr();
+  fahrtBlattVorgabe = vorgabe;
+  vorgabe = { ...morgenZehnUhr(), ...(vorgabe || {}) };
   oeffneBlatt({
     titel: art === 'jetzt' ? 'Ich fahre jetzt' : 'Fahrt planen',
     inhalt: `
@@ -194,8 +217,9 @@ function oeffneFahrtBlatt(art) {
       <label for="feldFahrtTour">Welche Tour?</label>
       <select id="feldFahrtTour" class="search-input">${fahrtTourWahlHtml()}</select>
       <label for="feldFahrtText">Ein Satz dazu (freiwillig)</label>
-      <input id="feldFahrtText" type="text" maxlength="200" autocomplete="off"
-             placeholder="${art === 'jetzt' ? 'Treffpunkt, Richtung, Tempo' : 'Treffpunkt, wie lang, wie schnell'}">`,
+      <input id="feldFahrtText" type="text" maxlength="200" autocomplete="off" value="${escapeHtml(vorgabe.text || '')}"
+             placeholder="${art === 'jetzt' ? 'Treffpunkt, Richtung, Tempo' : 'Treffpunkt, wie lang, wie schnell'}">
+      ${art === 'jetzt' && typeof standortWahlHtml === 'function' ? standortWahlHtml() : ''}`,
     fuss: `<button class="btn ghost" data-blatt-zu>Abbrechen</button>
            <button class="btn" data-fahrt-los>${art === 'jetzt' ? 'Los!' : 'Ank&uuml;ndigen'}</button>`,
   });
@@ -229,10 +253,19 @@ async function fahrtAusBlatt() {
 
   const ergebnis = await kuendigeFahrtAn(gruppe.id, { art, beginntAm, text, beitragId });
   if (!ergebnis.ok) { showToast(ergebnis.meldung); return; }
+  const standortTeilen = !!document.getElementById('feldFahrtStandort')?.checked;
+  const vorgabe = fahrtBlattVorgabe;
   fahrtBlattArt = null;
+  fahrtBlattVorgabe = null;
   schliesseBlatt();
   showToast(art === 'jetzt' ? 'Gute Fahrt! Deine Freunde sehen es jetzt.' : 'Angekündigt.');
-  await Promise.all([ladeGruppenFahrten(gruppe.id), ladeGruppenBeitraege(gruppe.id)]);
+  // Kam die Fahrt aus einer Umfrage, ist die Umfrage damit beantwortet.
+  if (vorgabe?.umfrageId && typeof loescheUmfrage === 'function') await loescheUmfrage(vorgabe.umfrageId);
+  if (standortTeilen && ergebnis.id && typeof starteStandortTeilen === 'function') starteStandortTeilen(ergebnis.id);
+  await Promise.all([
+    ladeGruppenFahrten(gruppe.id), ladeGruppenBeitraege(gruppe.id),
+    typeof ladeGruppenUmfragen === 'function' ? ladeGruppenUmfragen(gruppe.id) : Promise.resolve(),
+  ]);
   zeichneFreunde();
 }
 
@@ -250,6 +283,52 @@ async function fahrtTourAufloesen(gruppe, wahl) {
 }
 
 
+/* --- 4b. In den Kalender --------------------------------------------------------
+
+   Eine geplante Fahrt als .ics-Datei: Das ist das eine Format, das jeder
+   Kalender liest - auf dem iPhone oeffnet die Datei direkt "Kalender",
+   auf Android und am Rechner das, was dort Kalender ist. Kein Dienst
+   dazwischen, kein Konto: eine Textdatei mit festem Aufbau.               */
+
+// Ein Zeitpunkt in der Schreibweise des Kalenderformats: 20260918T080000Z.
+function kalenderZeit(datum) {
+  return datum.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+}
+
+// Im Kalenderformat sind Backslash, Semikolon, Komma und Zeilenumbruch
+// Steuerzeichen und muessen im Text mit einem Backslash geschuetzt werden.
+function kalenderText(text) {
+  return String(text || '').replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+}
+
+function fahrtAlsKalender(fahrt, gruppenName) {
+  const beginn = new Date(fahrt.beginnt_am);
+  const ende = new Date(beginn.getTime() + 3 * 60 * 60 * 1000);
+  const wer = fahrt.benutzername ? `${fahrt.benutzername} f\u00e4hrt` : 'Ausfahrt';
+  const titel = fahrt.beitrag_name ? `${wer}: ${fahrt.beitrag_name}` : `${wer} \u00b7 ${gruppenName}`;
+  const beschreibung = [fahrt.text, `Gruppe ${gruppenName} in Serpa`].filter(Boolean).join('\n');
+  return [
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Serpa//Fahrt//DE',
+    'BEGIN:VEVENT',
+    `UID:fahrt-${fahrt.id}@serpa-app.de`,
+    `DTSTAMP:${kalenderZeit(new Date())}`,
+    `DTSTART:${kalenderZeit(beginn)}`,
+    `DTEND:${kalenderZeit(ende)}`,
+    `SUMMARY:${kalenderText(titel)}`,
+    `DESCRIPTION:${kalenderText(beschreibung)}`,
+    'URL:https://serpa-app.de/',
+    'END:VEVENT', 'END:VCALENDAR', '',
+  ].join('\r\n');
+}
+
+function bieteKalenderAn(fahrtId) {
+  const fahrt = gruppenFahrten.find(eintrag => String(eintrag.id) === String(fahrtId));
+  const gruppe = offeneGruppe();
+  if (!fahrt || !gruppe || Number.isNaN(new Date(fahrt.beginnt_am).getTime())) return;
+  geraet.dateiAnbieten('serpa-fahrt.ics', fahrtAlsKalender(fahrt, gruppe.name), 'text/calendar');
+}
+
+
 /* --- 5. Verkabelung ---------------------------------------------------------- */
 
 async function beiTippAufFahrt(ereignis) {
@@ -259,6 +338,8 @@ async function beiTippAufFahrt(ereignis) {
   if (!gruppe) return;
   if (trifft('[data-fahrt-jetzt]')) { oeffneFahrtBlatt('jetzt'); return; }
   if (trifft('[data-fahrt-planen]')) { oeffneFahrtBlatt('geplant'); return; }
+  const kalender = trifft('[data-fahrt-kalender]');
+  if (kalender) { bieteKalenderAn(kalender.dataset.fahrtKalender); return; }
   const dabei = trifft('[data-fahrt-dabei]');
   const raus = trifft('[data-fahrt-raus]');
   const beenden = trifft('[data-fahrt-beenden]');

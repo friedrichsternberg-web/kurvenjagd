@@ -1053,6 +1053,21 @@ Nebenbei konnte `index.html` von `leaflet-src.js` auf die kleinere
   ungefähren Ort einer Fahrt und einen Meldeweg (DSA), wie bei den
   öffentlichen Touren.
 
+## Freunde: Umfrage, Kalender, Standort (seit 17.09.2026)
+
+- **Standort im Hintergrund.** Der Browser liefert ihn nur, solange die
+  App vorn ist – in der Tasche hört das Teilen auf. Erst die native Hülle
+  (Abschnitt 4) löst das; bis dahin hält die App den Bildschirm wach.
+- **Mitfahrer auf der Karte.** Heute zeigt nur der Fahrer seinen Standort.
+  Ob auch die, die „dabei" sind, sich zeigen wollen, wäre eine eigene
+  Zeile je Mitfahrer – dann mit Verlauf-Frage von vorn.
+- **Termin aus der Umfrage auch für Nicht-Autoren.** „… planen" sieht nur,
+  wer gefragt hat; der Gründer der Gruppe könnte es auch dürfen.
+- **Kalender-Abo statt Datei.** Eine Adresse, die alle geplanten Fahrten
+  einer Gruppe als Kalender liefert (`.ics` per Server-Funktion), dann
+  aktualisiert sich der Kalender von selbst. Braucht einen Zugriffsschlüssel
+  je Gruppe.
+
 ## Kuratierte Strecken (seit 17.09.2026)
 
 - **Feiertagskalender nach Bundesland.** Die Wochenendsperren gelten auch
