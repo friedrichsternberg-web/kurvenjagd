@@ -64,7 +64,7 @@
      4. JEDE Flaeche ist Glas, auch Knoepfe, Eingabefelder und Umschalter.
         Inhaltskarten sind EINE Form (.karte in style.css): eine dunkle
         Scheibe in --glas-hell mit Lichtkante oben, wie die gruppierten
-        Karten von iOS auf Schwarz. Damit das Glas lebt, liegt unter jedem
+        Karten von iOS auf Dunkel. Damit das Glas lebt, liegt unter jedem
         Bildschirm etwas, das durchscheinen kann: --start-licht, eine
         Karte, ein Foto oder das eigene Motorrad - Glas ueber blankem
         Schwarz bleibt tot. Wo eine Karte ein eigenes Bild hat (die
@@ -123,14 +123,22 @@
 }
 
 :root {
-  /* Flaechen, von dunkel nach hell gestaffelt */
-  --bg:         #000000;   /* Grundflaeche, reines Schwarz */
-  --surface:    #181818;   /* Karten und Bedienfeld */
-  --surface-2:  #212121;   /* Vertiefungen: Eingabefelder, Messwerte */
-  --line:       #2E2E2E;   /* Kanten */
+  /* Flaechen, von dunkel nach hell gestaffelt.
+
+     GRAPHIT STATT SCHWARZ (seit 17.09.2026, ENTSCHEIDUNGEN.md): Die
+     Grundflaeche war reines Schwarz, und Glas ueber Schwarz bleibt tot -
+     das steht schon in Grundsatz 4. Jetzt ist sie ein tiefes Graphit mit
+     kaltem Stich (Blau 210 Grad, kaum gesaettigt), dieselbe Familie wie
+     --raum-dunkel und die Nachtseite. Alle Flaechen darueber sind im
+     selben Mass mitgezogen, damit die Staffelung erhalten bleibt: Jede
+     Stufe ist weiter eine Stufe heller als die darunter. */
+  --bg:         #0F1216;   /* Grundflaeche, Graphit */
+  --surface:    #1B1F25;   /* Karten und Bedienfeld */
+  --surface-2:  #252A31;   /* Vertiefungen: Eingabefelder, Messwerte */
+  --line:       #343A44;   /* Kanten */
 
   --text:       #F2F3F5;
-  --muted:      #8B929E;   /* Nebentext und Beschriftungen */
+  --muted:      #9AA3B0;   /* Nebentext und Beschriftungen; 5,4:1 noch auf --surface-2 */
 
   /* Die Signalfarbe ist RAL 5005 "Signalblau".
 
@@ -149,7 +157,11 @@
      Wer eine der beiden aendert, sollte die andere mitziehen - sie sind
      zwei Ansichten derselben Farbe, keine zwei Farben. */
   --accent:      #005387;   /* RAL 5005 Signalblau, RGB 0 83 135 */
-  --accent-hell: #0084D6;   /* aufgehellt: Text und Symbole auf Dunkel */
+  --accent-hell: #1F95E5;   /* aufgehellt: Text und Symbole auf Dunkel.
+                               Seit Graphit eine Stufe heller als davor
+                               (#0084D6): Auf einer Glaskarte ueber Graphit
+                               kaeme der alte Ton auf 3,1:1, dieser auf 3,8:1;
+                               auf der Grundflaeche 5,7:1. */
   --accent-glanz:#0068A8;   /* obere Kante der Knopfwoelbung */
   --accent-tief: #003F66;   /* untere Kante der Knopfwoelbung */
   --accent-dk:   #005E99;   /* Zustand beim Ueberfahren. Heller statt
@@ -195,11 +207,14 @@
      Weisswerte zwischen 0.02 und 1.0. Kein Mensch sieht den Unterschied
      zwischen 0.12 und 0.14, aber jeder sieht, wenn eine Flaeche aus der
      Reihe faellt. Weniger Stufen heisst mehr Einheit. */
-  --glas-hauch:  rgba(255, 255, 255, 0.05);   /* Schachbrett, vertiefte Flaechen */
-  --glas-hell:   rgba(255, 255, 255, 0.10);   /* die uebliche Fuellung */
-  --glas-rand:   rgba(255, 255, 255, 0.14);   /* die uebliche Kante */
-  --glas-heller: rgba(255, 255, 255, 0.20);   /* gedrueckt / hervorgehoben */
-  --glas-licht:  rgba(255, 255, 255, 0.32);   /* obere Lichtkante (inset) */
+  --glas-hauch:  rgba(255, 255, 255, 0.06);   /* Schachbrett, vertiefte Flaechen */
+  --glas-hell:   rgba(255, 255, 255, 0.13);   /* die uebliche Fuellung */
+  --glas-rand:   rgba(255, 255, 255, 0.18);   /* die uebliche Kante */
+  --glas-heller: rgba(255, 255, 255, 0.25);   /* gedrueckt / hervorgehoben */
+  --glas-licht:  rgba(255, 255, 255, 0.40);   /* obere Lichtkante (inset) */
+  /* Mit Graphit sind alle fuenf Stufen um etwa ein Viertel angehoben: Auf
+     der helleren Grundflaeche braucht Glas mehr Weiss, um ueberhaupt als
+     Scheibe zu lesen - dieselbe Scheibe, nur mehr Licht darin. */
 
   /* Der Filter und der Schatten jeder Glaskarte, als Marken - in style.css
      standen einmal zwoelf verschiedene Blur-Radien nebeneinander. Eine
@@ -207,14 +222,14 @@
      Zeilen), bekommt Fuellung und Kante, aber keinen zweiten Filter -
      der Browser rechnet jeden davon je Bild. */
   --glas-filter:   blur(22px) saturate(160%);
-  --glas-schatten: 0 12px 34px var(--schatten-mittel);
+  --glas-schatten: 0 12px 34px var(--schatten-weich);   /* auf Graphit weicher als auf Schwarz, sonst Loecher */
 
   /* Der Untergrund fuer Bildschirme ohne eigenes Bild: ein leiser
      Lichtkegel von oben in der Signalfarbe, der bis gut zur Haelfte
      auslaeuft - darunter ist die Flaeche reines Schwarz. Er gibt den
      Glaskanten etwas zu fangen (Grundsatz 4), ohne mit Fotos oder Karten
      zu streiten. Grundsatz 1 nennt ihn ausdruecklich. */
-  --start-licht: radial-gradient(120% 55% at 50% -12%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 62%);
+  --start-licht: radial-gradient(120% 58% at 50% -12%, color-mix(in srgb, var(--accent) 28%, transparent), transparent 68%);
 
   /* Metall. Die Wortmarke ist gerendertes, gebuerstetes Metall - vollstaendig
      neutral, ohne jeden Farbstich (gemessene Saettigung 0,03). Text und
@@ -228,7 +243,7 @@
      bleibt allein zustaendig fuer alles, was man antippen kann. Wer das
      aufweicht, nimmt der Signalfarbe ihre Bedeutung (siehe oben) und dem
      Nutzer die Auskunft, was ueberhaupt bedienbar ist. */
-  --metall:       #9D9997;   /* Beschriftung mit Markenbezug, 7,4:1 auf Schwarz */
+  --metall:       #9D9997;   /* Beschriftung mit Markenbezug, 6,4:1 auf Graphit */
   --metall-glanz: #DDD9D9;   /* Ueberschriften und Lichtkanten, 15:1 */
   --metall-tief:  #726E6C;   /* nur Grosses und Dekoratives, 4,2:1 */
 
