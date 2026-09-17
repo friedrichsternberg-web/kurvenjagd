@@ -6746,7 +6746,22 @@ body.nav-modus .karten-knopf { display: none; }
    die Karten darunter sind Glas ueber dem Motorrad - der eine Fall neben
    der Bike-Karte, in dem eine Karte den Filter traegt, weil etwas
    Echtes unter ihr liegt. */
-.planer-kopf-titel { margin: calc(-1 * (var(--s8) + var(--s7))) 0 var(--s4); text-shadow: 0 1px 3px var(--schatten-stark); }
+/* Der Titel steht auf dem Foto - auf einer eigenen kleinen Glasscheibe,
+   damit er in beiden Erscheinungen lesbar bleibt: Die Scheibe traegt die
+   Grundflaeche halb durchsichtig, also im Dunklen dunkel unter heller
+   Schrift, im Hellen hell unter dunkler. Ein Schatten allein reichte im
+   Hellen nicht (dunkle Schrift auf grauem Fels). */
+.planer-kopf-titel {
+  display: inline-block;
+  margin: calc(-1 * (var(--s8) + var(--s7))) 0 var(--s4);
+  padding: var(--s2) var(--s4);
+  border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--bg) 55%, transparent);
+  backdrop-filter: var(--glas-filter);
+  -webkit-backdrop-filter: var(--glas-filter);
+  border: 1px solid var(--glas-rand);
+  box-shadow: inset 0 1px 0 var(--glas-licht);
+}
 
 .wahl-karten {
   display: grid;
@@ -6761,6 +6776,13 @@ body.nav-modus .karten-knopf { display: none; }
   flex-direction: column;
   gap: var(--s3);
   border-radius: var(--r-xl);
+  /* Durchsichtiger als eine gewoehnliche Karte, damit das Foto durch sie
+     hindurch zu sehen bleibt: die Grundflaeche zu 40 Prozent, darueber
+     der Glanz. Der Filter verwischt das Bild darunter, damit die Schrift
+     auf ruhigem Grund steht - lesbar in beiden Erscheinungen. */
+  background:
+    linear-gradient(135deg, var(--glas-rand) 0%, transparent 38%),
+    color-mix(in srgb, var(--bg) 40%, transparent);
   backdrop-filter: var(--glas-filter);
   -webkit-backdrop-filter: var(--glas-filter);
   cursor: pointer;
