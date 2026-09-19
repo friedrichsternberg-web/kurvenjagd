@@ -65,6 +65,18 @@
       0 8px 24px var(--schatten-weich);
   }
 
+  /* Kein Saum, wenn die Leiste oben haengt. Der Saum in style.css sitzt
+     auf top: 100% und fuellt damit den Streifen UNTER der Leiste - im
+     Hochformat also ausserhalb des Bildes, ausser auf den iPhones, wegen
+     derer er am 17.09.2026 eingebaut wurde. Hier oben zeigt dasselbe
+     top: 100% nach unten in den Inhalt: 120 Punkte Glas quer ueber jede
+     Seite, die den Anfang des Inhalts ueberdecken. Mit
+     pointer-events: none blieb alles bedienbar, und Overlays liegen
+     darueber - deshalb sah es nach einem Fehler der Seite aus und nicht
+     nach einem Element. Oben braucht es ihn nicht: Die Leiste reicht mit
+     padding-top: env(safe-area-inset-top) bis an die Kante. */
+  .haupt-nav::after { content: none; }
+
   /* Aus den gestapelten Daumen-Tabs werden Reiheneintraege: Symbol und
      Wort nebeneinander, nur so breit wie ihr Inhalt. Schrift und Symbole
      sind auf die hoehere Leiste abgestimmt - die 11px-Beschriftung der
