@@ -24,13 +24,13 @@ reines HTML, CSS und JavaScript ohne Build-Schritt.
 | `daten/` | die drei Produktkataloge und die Serienbereifung. Reine Daten, von Hand nicht anfassen |
 | `werkzeug/` | `pruefe.sh`, der Selbsttest und die Skripte, die Kataloge und Bilder bauen |
 | `doku/` | die fünf Papiere: Aufgaben, Daten, Entscheidungen, Shop-Konzept, Sicherheit |
-| `AGENTS.md` | wie hier gearbeitet wird: Issues lesen, nach Priorität vorschlagen, über `Fixes #Nummer` schließen. Für KI-Agenten, im Stamm |
 | `betrieb/` | das Betreiber-Dashboard, nur lokal |
 | `img/` `fonts/` | was ausgeliefert wird |
 | `extern/` `modell/` | fremde Bibliotheken und das Freisteller-Modell, jeweils mit Lizenz |
 | `supabase/` | die Serverfunktionen und die Datenbankschritte |
 | `arbeitsmaterial/` | alles, woraus etwas gemacht wurde. Nicht im Repository |
 | `.github/` | der wöchentliche Preislauf |
+| `AGENTS.md` | wie hier gearbeitet wird, für KI-Agenten: Issues lesen, nach Priorität vorschlagen, über `Fixes #Nummer` schließen. Im Stamm, neben `LIESMICH.md` |
 
 ## Vor jedem Commit
 

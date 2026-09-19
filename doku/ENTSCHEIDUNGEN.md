@@ -5191,10 +5191,12 @@ Auf Friedrichs Rückmeldungen am selben Abend:
   und die Kalenderdatei; die Kurzfassung einen Satz dazu; die Regeln fürs
   Teilen gelten jetzt auch für Gruppen, Chat und Kommentare.
 
-## 18.09.2026 – Issues bekommen Prioritäten, Agenten bekommen eine Anweisung
+## 19.09.2026 – Issues bekommen Prioritäten, Agenten bekommen eine Anweisung
 
-**Von tyl3rde angeregt**, nachdem er fünf Fehler und Wünsche gemeldet hatte
-(#2 bis #6). Bis dahin gab es im Repository keine offenen Issues – gemeldet
+**Angelegt von tyl3rde**, nachdem er fünf Fehler und Wünsche gemeldet hatte
+(#2 bis #6). Labels, Issues und der Text dieses Eintrags stammen von ihm,
+nicht von Friedrich – wer den Merge macht, übernimmt sie damit als eigene
+Entscheidung. Bis dahin gab es im Repository keine offenen Issues; gemeldet
 wurde per Zuruf, sortiert wurde im Kopf.
 
 - **Drei Prioritätsstufen** als Label: `prio: hoch` (blockiert Nutzung oder
@@ -5212,10 +5214,24 @@ nur lokal – das Repository ist öffentlich, weil GitHub Pages die App daraus
 ausliefert, und die persönlichen Projektnotizen gehören nicht hinein
 (`.gitignore` sagt das seit dem Anfang). Eine `CLAUDE.md` im Repository
 hätte beim nächsten `git pull` mit genau dieser lokalen Datei kollidiert.
-`AGENTS.md` ist der herstellerneutrale Name für dasselbe, wird von Claude
-Code und anderen Werkzeugen gelesen und steht in keiner Ignorierliste. Die
-Trennung bleibt damit sauber: Was jeder wissen darf, steht öffentlich in
-`AGENTS.md`; was nur Friedrich angeht, bleibt in `CLAUDE.md`.
+`AGENTS.md` ist der herstellerneutrale Name für dasselbe und steht in keiner
+Ignorierliste. Die Trennung bleibt damit sauber: Was jeder wissen darf,
+steht öffentlich in `AGENTS.md`; was nur den Einzelnen angeht, bleibt in
+seiner lokalen `CLAUDE.md`.
+
+**Ein Haken, der dazugehört.** Claude Code liest `AGENTS.md` von sich aus
+nur, wenn *keine* `CLAUDE.md` im Arbeitsverzeichnis oder darüber liegt –
+und in Friedrichs Arbeitskopie liegt genau eine. Dort gewinnt `CLAUDE.md`,
+`AGENTS.md` bliebe ungelesen. Behoben wird das mit einer Zeile `@AGENTS.md`
+am Anfang der lokalen `CLAUDE.md`; mitliefern lässt sie sich nicht, eben
+weil die Datei nicht im Repository liegt. Ohne diesen einen Handgriff ist
+die Anweisung da, wirkt aber nicht.
+
+**Offen geblieben und bewusst nicht entschieden:** ob Commits in diesem
+Projekt weiter einen `Co-authored-by`-Eintrag fürs Werkzeug tragen.
+Friedrichs Commits tun das durchgehend (60 von 60 am 19.09.2026), tyl3rde
+will ihn in seinen nicht. `AGENTS.md` hält beides nebeneinander fest, statt
+das eine zum Standard zu erklären – das ist Friedrichs Entscheidung.
 
 **Der eigentliche Grund für beides:** Solange eine Person allein am Projekt
 arbeitet, ist „was steht an" eine Frage an sich selbst. Sobald eine zweite
