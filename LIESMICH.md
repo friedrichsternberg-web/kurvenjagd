@@ -30,6 +30,7 @@ reines HTML, CSS und JavaScript ohne Build-Schritt.
 | `supabase/` | die Serverfunktionen und die Datenbankschritte |
 | `arbeitsmaterial/` | alles, woraus etwas gemacht wurde. Nicht im Repository |
 | `.github/` | der wöchentliche Preislauf |
+| `AGENTS.md` | wie hier gearbeitet wird, für KI-Agenten: Issues lesen, nach Priorität vorschlagen, über `Fixes #Nummer` schließen. Im Stamm, neben `LIESMICH.md` |
 
 ## Vor jedem Commit
 
