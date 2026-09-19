@@ -24,6 +24,7 @@ reines HTML, CSS und JavaScript ohne Build-Schritt.
 | `daten/` | die drei Produktkataloge und die Serienbereifung. Reine Daten, von Hand nicht anfassen |
 | `werkzeug/` | `pruefe.sh`, der Selbsttest und die Skripte, die Kataloge und Bilder bauen |
 | `doku/` | die fünf Papiere: Aufgaben, Daten, Entscheidungen, Shop-Konzept, Sicherheit |
+| `AGENTS.md` | wie hier gearbeitet wird: Issues lesen, nach Priorität vorschlagen, über `Fixes #Nummer` schließen. Für KI-Agenten, im Stamm |
 | `betrieb/` | das Betreiber-Dashboard, nur lokal |
 | `img/` `fonts/` | was ausgeliefert wird |
 | `extern/` `modell/` | fremde Bibliotheken und das Freisteller-Modell, jeweils mit Lizenz |
