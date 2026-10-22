@@ -297,8 +297,11 @@ function kalenderZeit(datum) {
 
 // Im Kalenderformat sind Backslash, Semikolon, Komma und Zeilenumbruch
 // Steuerzeichen und muessen im Text mit einem Backslash geschuetzt werden.
+// Ein Umbruch ist jede der drei Schreibweisen, auch ein einzelnes \r: Manche
+// Kalender lesen schon das als neue Zeile, und dann begaenne im Text des
+// Absenders eine eigene Kalender-Eigenschaft.
 function kalenderText(text) {
-  return String(text || '').replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+  return String(text || '').replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r\n|\r|\n/g, '\\n');
 }
 
 function fahrtAlsKalender(fahrt, gruppenName) {

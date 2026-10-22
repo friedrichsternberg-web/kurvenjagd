@@ -394,7 +394,7 @@ function beitragTourBildHtml(beitrag) {
 }
 
 function beitragReise(beitrag) {
-  const tage = Array.isArray(beitrag.daten?.tage) ? beitrag.daten.tage : [];
+  const tage = säubreTage(beitrag.daten?.tage);
   return { id: `beitrag-${beitrag.id}`, name: beitrag.name, start: beitrag.daten?.beginnt_am || null, tage };
 }
 
@@ -476,13 +476,17 @@ function beitragTageHtml(beitrag) {
 /* Die Tour in den Planer legen, OHNE sie zu speichern: Sie liegt dann als
    Route auf der Karte wie eine gerade geplante, und "Route speichern"
    macht sie zur eigenen. So laesst sich eine geteilte Strecke ansehen,
-   anfassen und veraendern, ohne dass die Tourenliste wachsen muss. */
+   anfassen und veraendern, ohne dass die Tourenliste wachsen muss.
+   Den Beitrag hat ein anderes Mitglied geschrieben: Er geht durch dieselbe
+   Pruefung wie jede fremde Tour (pruefeTour() in kern.js). */
 function bearbeiteBeitragImPlaner(beitragId) {
   const beitrag = gruppenBeitraege.find(eintrag => String(eintrag.id) === String(beitragId));
   if (!beitrag || beitrag.art !== 'tour') return;
+  const tour = pruefeTour({ ...(beitrag.daten || {}), id: `gruppe-${beitrag.id}`, name: beitrag.name });
+  if (!tour) { showToast('Diese Tour lässt sich nicht öffnen.'); return; }
   zeigePlaner();
-  ladeGespeicherteRoute({ ...(beitrag.daten || {}), id: `gruppe-${beitrag.id}`, name: beitrag.name });
-  showToast(`„${beitrag.name}“ liegt im Planer - speichern macht sie zu deiner.`);
+  ladeGespeicherteRoute(tour);
+  showToast(`„${tour.name}“ liegt im Planer - speichern macht sie zu deiner.`);
 }
 
 /* Uebernehmen: derselbe Weg wie beim Link (teilen.js) - die Tour landet in
