@@ -69,7 +69,14 @@ async function ladeAusgabenNach(reise) {
     .select('id, reise_id, erfasser_id, zahler_id, tag_id, wofuer, cent, aufteilung, anteile')
     .eq('reise_id', reise.serverId)
     .order('erstellt_am', { ascending: false });
-  reiseAusgaben = error ? [] : (data || []);
+  // anteile ist freies JSON, das jeder Teilnehmer schreiben darf. Was keine
+  // Liste von Objekten ist, faellt hier weg - sonst bricht die Kasse beim
+  // Rechnen ab, und zwar bei allen.
+  reiseAusgaben = error ? [] : (data || []).map(ausgabe => ({
+    ...ausgabe,
+    anteile: Array.isArray(ausgabe.anteile)
+      ? ausgabe.anteile.filter(anteil => anteil && typeof anteil === 'object') : [],
+  }));
   if (typeof zeichneReise === 'function') zeichneReise();
 }
 

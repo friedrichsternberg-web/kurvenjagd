@@ -289,7 +289,7 @@ function linkTourKarteHtml(zeile) {
 }
 
 function linkReiseKarteHtml(zeile) {
-  const tage = Array.isArray(zeile.daten?.tage) ? zeile.daten.tage : [];
+  const tage = säubreTage(zeile.daten?.tage);
   const meter = tage.reduce((summe, tag) => summe + ((tag.route?.distance) || 0), 0);
   // Die Karte zeichnet reise.js aus einer Reise - also wird hier eine
   // gebaut, statt die Zeichnung ein zweites Mal zu schreiben.
@@ -341,7 +341,7 @@ async function zeigeOeffentlicheReise(id) {
   }
   const zeile = await holeOeffentlicheReise(id);
   if (!zeile) { zeigeLinkFehlt(); return; }
-  const tage = Array.isArray(zeile.tage) ? zeile.tage : [];
+  const tage = säubreTage(zeile.tage);
   const alsZeile = { art: 'reise', name: zeile.name, daten: { beginnt_am: zeile.beginnt_am, tage } };
   const von = zeile.benutzername ? escapeHtml(zeile.benutzername) : 'Jemand';
   zeigeLinkInhalt(`
@@ -389,15 +389,26 @@ function uebernimmFreigabe() {
   offeneFreigabe = null;
 }
 
+/* Was ueber einen Link oder aus einer Gruppe kommt, hat ein anderer
+   geschrieben - und die Freigabe nimmt jeden Inhalt an, nicht nur den, den
+   tourFreigabe() baut. Deshalb geht es durch dieselbe Pruefung wie eine
+   Tour aus der Community (pruefeTour() in kern.js) und wird danach genauso
+   zur eigenen: eigene Kennung, Datum der Uebernahme. Die Linie fuers Bild
+   laesst pruefeTour() liegen; sie kommt gesaeubert dazu, damit die Tour in
+   der Liste sofort ihr Bild hat. */
 function uebernimmTour(zeile) {
-  const tour = { ...(zeile.daten || {}), id: Date.now(), name: zeile.name };
+  const geprueft = pruefeTour({ ...(zeile.daten || {}), id: String(zeile.id), name: zeile.name });
+  if (!geprueft) { showToast('Diese Tour lässt sich nicht übernehmen.'); return; }
+  const tour = { ...geprueft, id: Date.now(), aufgenommenAm: new Date().toISOString() };
+  const vorschau = säubreSpur(zeile.daten?.vorschau);
+  if (vorschau.length > 1) tour.vorschau = vorschau;
   const liste = loadSaved();
   liste.unshift(tour);
   if (!speichereListe(liste)) return;
   zeichneBeideRoutenListen();
   zeigePlaner();
   ladeGespeicherteRoute(tour);
-  showToast(`„${zeile.name}" liegt jetzt in deinen Touren.`);
+  showToast(`„${tour.name}" liegt jetzt in deinen Touren.`);
 }
 
 function uebernimmReise(zeile) {
@@ -406,7 +417,7 @@ function uebernimmReise(zeile) {
     id: typeof neueKennung === 'function' ? neueKennung() : Date.now(),
     name: zeile.name,
     start: zeile.daten?.beginnt_am || null,
-    tage: Array.isArray(zeile.daten?.tage) ? zeile.daten.tage : [],
+    tage: säubreTage(zeile.daten?.tage),
     erstellt: jetzt,
     geaendert: jetzt,
   };
