@@ -210,10 +210,15 @@
   <script src="extern/leaflet/leaflet.js"></script>
   <!-- MapLibre GL zeichnet den Kartengrund aus Vektorkacheln, die Bruecke
        haengt ihn als Leaflet-Schicht ein (js/planer/kartengrund.js). Beide
-       liegen hier im Ordner, nicht auf einem fremden Server. -->
+       liegen hier im Ordner, nicht auf einem fremden Server: MapLibre GL
+       6.15.0, die Bruecke @maplibre/maplibre-gl-leaflet 0.1.4.
+       MapLibre gibt es nur als ES-Modul. js/planer/maplibre-modul.js holt
+       es und legt das globale maplibregl an; die Bruecke braucht das schon
+       beim Laden und laeuft deshalb mit defer DAHINTER - Module und
+       defer-Skripte laufen nach dem Lesen der Seite, in dieser Reihenfolge. -->
   <link rel="stylesheet" href="extern/maplibre/maplibre-gl.css">
-  <script src="extern/maplibre/maplibre-gl.js"></script>
-  <script src="extern/maplibre/leaflet-maplibre-gl.js"></script>
+  <script type="module" src="js/planer/maplibre-modul.js?v=118"></script>
+  <script defer src="extern/maplibre/leaflet-maplibre-gl.js"></script>
 
   <!-- Supabase: unser Server für Konten und (später) geteilte Routen und
        Ausfahrten. Die Bibliothek stellt das globale Objekt "supabase"

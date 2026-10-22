@@ -20,12 +20,14 @@
    dafuer haengen zwei Kartenbibliotheken im Speicher. Die Abwaegung steht
    in AUFGABEN.md ("Vektorkacheln statt Rasterkacheln").
 
-   RUECKFALL: Kann der Browser kein WebGL (sehr alte Geraete, abgeschaltete
-   Beschleunigung), kommen die Rasterkacheln wie vorher. Die Vorschaubilder
-   der Touren (vorschau.js) bleiben ohnehin Raster - sie sind Standbilder.
+   RUECKFALL: Kann der Browser kein WebGL2 (sehr alte Geraete, abgeschaltete
+   Beschleunigung) oder das ES-Modul von MapLibre nicht laden, kommen die
+   Rasterkacheln wie vorher. Die Vorschaubilder der Touren (vorschau.js)
+   bleiben ohnehin Raster - sie sind Standbilder.
 
-   Laedt NACH leaflet.js, maplibre-gl.js und leaflet-maplibre-gl.js, VOR
-   app.js. Braucht aktivesThema() aus thema.js fuer den Stil.
+   Laedt NACH leaflet.js, VOR app.js. Braucht aktivesThema() aus thema.js
+   fuer den Stil. MapLibre und die Bruecke kommen erst nach dem Lesen der
+   Seite dazu (maplibre-modul.js) - siehe fuegeKartenGrundHinzu().
    ============================================================================ */
 
 /* Ein Stil fuer beide Erscheinungen: "liberty", bunt und klar, so wie die
@@ -48,13 +50,14 @@ const KARTEN_HINWEIS_RASTER = '&copy; <a href="https://www.openstreetmap.org/cop
 const kartenGruende = [];   // alle Vektor-Schichten, damit ein Themenwechsel sie umstellt
 let webglGeprueft = null;   // einmal pruefen, dann merken
 
-// Kann dieser Browser WebGL - und ist die Bruecke geladen?
+// Kann dieser Browser WebGL2 - und ist die Bruecke geladen? WebGL1 reicht
+// nicht: MapLibre ab Version 6 zeichnet nur mit WebGL2.
 function kartenGrundMoeglich() {
   if (typeof L === 'undefined' || typeof L.maplibreGL !== 'function' || typeof maplibregl === 'undefined') return false;
   if (webglGeprueft === null) {
     try {
       const leinwand = document.createElement('canvas');
-      webglGeprueft = !!(leinwand.getContext('webgl2') || leinwand.getContext('webgl'));
+      webglGeprueft = !!leinwand.getContext('webgl2');
     } catch {
       webglGeprueft = false;
     }
@@ -68,9 +71,24 @@ function kartenStilAdresse() {
 }
 
 /* Legt den Grund unter eine Leaflet-Karte. Gibt die Schicht zurueck, wer
-   sie braucht. Der Hinweis auf die Datenquelle gehoert AN die Karte, das
-   verlangen OpenStreetMap und OpenFreeMap gleichermassen. */
+   sie braucht - oder null, solange der Grund noch wartet.
+
+   Warten muss er, wenn die Karte beim Lesen der Seite entsteht (app.js legt
+   die Planer-Karte so an): MapLibre kommt als ES-Modul, und Module laufen
+   erst danach. Bei DOMContentLoaded sind alle Module gelaufen - fehlt
+   maplibregl dann noch, konnte der Browser das Modul nicht laden (zu alt,
+   Netz weg), und es kommt Raster. */
 function fuegeKartenGrundHinzu(karte) {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => legeKartenGrund(karte), { once: true });
+    return null;
+  }
+  return legeKartenGrund(karte);
+}
+
+// Der Hinweis auf die Datenquelle gehoert AN die Karte, das verlangen
+// OpenStreetMap und OpenFreeMap gleichermassen.
+function legeKartenGrund(karte) {
   if (!kartenGrundMoeglich()) {
     return L.tileLayer(KARTEN_RASTER, { maxZoom: 19, attribution: KARTEN_HINWEIS_RASTER }).addTo(karte);
   }
