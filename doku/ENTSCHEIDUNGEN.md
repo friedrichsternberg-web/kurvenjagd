@@ -5190,3 +5190,12 @@ Auf Friedrichs Rückmeldungen am selben Abend:
   Verlauf, Widerruf per Schalter, Art. 6 Abs. 1 lit. a), die Terminumfragen
   und die Kalenderdatei; die Kurzfassung einen Satz dazu; die Regeln fürs
   Teilen gelten jetzt auch für Gruppen, Chat und Kommentare.
+
+## 13.11.2026 – Impressum vorübergehend ohne Name und Anschrift
+
+Auf Friedrichs Wunsch zeigen Impressum, MStV-Absatz, DSA-Kontaktstelle und
+der „Verantwortliche“ der Datenschutzerklärung nur noch „Serpa“ und
+kontakt@serpa-app.de. Bewusst vorübergehend: Die Rechtslage steht in
+AUFGABEN.md, Abschnitt „Impressum wieder vollständig machen“. Die alten
+Angaben stehen absichtlich nirgends als Kommentar – HTML-Kommentare sind
+im Quelltext der Seite für jeden lesbar.

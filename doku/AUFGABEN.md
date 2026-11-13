@@ -236,6 +236,17 @@ Höhenmeter, kurvigster Etappe. Was als Nächstes kommt:
 
 ## Vor der ersten Veröffentlichung in den Stores
 
+### 0. Impressum wieder vollständig machen — OFFEN seit 13.11.2026
+
+Auf Friedrichs Wunsch stehen im Impressum und beim „Verantwortlichen“ der
+Datenschutzerklärung vorübergehend nur „Serpa“ und die Mailadresse, ohne
+Namen und Anschrift. § 5 DDG verlangt beides, sobald die Seite
+geschäftsmäßig ist, und das ist sie wegen der Partnerlinks. Art. 13 DSGVO
+verlangt den Namen des Verantwortlichen. Vor dem Store-Eintrag (Apple
+prüft Kontaktangaben) und vor jeder Werbung muss das zurück – mit der
+eigenen Anschrift oder einer ladungsfähigen Zustelladresse (Impressum-
+oder c/o-Dienst), die die Wohnadresse ersetzt.
+
 ### 1. Konto löschen in der App — ERLEDIGT, bis auf einen Handgriff
 
 Gebaut am 20.08.2026. Der Weg liegt im Profil neben "Abmelden" und führt
