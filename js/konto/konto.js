@@ -231,7 +231,7 @@ async function setzeNeuesPasswort(neuesPasswort) {
 
    Warum überhaupt ein Benutzername, wo es doch die E-Mail-Adresse gibt: Die
    Adresse geht niemanden etwas an. Wer sich zu einer Ausfahrt verabredet,
-   soll "kurvenfritze" sehen und nicht "friedrich.sternberg@…".
+   soll "kurvenfritze" sehen und nicht "vorname.nachname@…".
 
    Der Name ist EINDEUTIG, und zwar ohne Rücksicht auf Groß- und
    Kleinschreibung. Abgesichert wird das in der Datenbank durch einen

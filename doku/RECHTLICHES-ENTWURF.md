@@ -16,7 +16,7 @@ Shop-Demo) deckt er die Pflichten aus § 5 DDG und Art. 13 DSGVO ab.
 
 **Was Friedrich liefern muss, damit es live gehen kann:**
 
-1. Vor- und Nachname (steht fest: Friedrich Sternberg)
+1. Vor- und Nachname (steht fest)
 2. **Ladungsfähige Anschrift** – die Privatadresse, oder eine
    Impressum-Service-Adresse (ab ca. 10–15 €/Monat, schützt die
    Privatadresse; für eine öffentliche App mit späterem Store-Gang

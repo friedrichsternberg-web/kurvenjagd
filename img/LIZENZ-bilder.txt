@@ -7,7 +7,7 @@ eine geklaerte Herkunft haben.
 
 bike-raum.webp
   Die Werkstatt hinter dem Motorrad auf dem Startbildschirm. Ausschnitt aus
-  Friedrich Sternbergs eigenem KI-Bild "NEUE WERKSTATT V2" vom September
+  einem eigenen KI-Bild des Betreibers, "NEUE WERKSTATT V2" vom September
   2026 (dunkle Werkstatt mit Drehteller), gerechnet von
   werkzeug/bike-raum.py: seitlich auf den Teller beschnitten, unten so, dass
   die Aufsetzlinie der Raeder bei 90 Prozent der Hoehe liegt, auf 960 Punkte
@@ -23,7 +23,7 @@ garage-werkstatt.webp, garage-werkstatt-standard.webp
 
 bike-standard.webp
   Das Standardmotorrad in der Bike-Karte, solange kein eigenes Foto da ist.
-  Freigestellt geliefert von Friedrich Sternberg am 06.09.2026; das Skript
+  Freigestellt geliefert vom Betreiber am 06.09.2026; das Skript
   werkzeug/bike-standard.py beschneidet es nur auf den sichtbaren Inhalt und
   verkleinert es. Die Vorlage liegt in arbeitsmaterial/vorlagen/ als
   "Motorrad neu.png".
@@ -43,7 +43,7 @@ bike-standard.webp
   mit u2netp freizustellen - das Ergebnis war an den Kanten nicht gut genug.
 
 hintergrund-weich.jpg
-  Eigenes Foto von Friedrich Sternberg beziehungsweise von ihm geliefertes
+  Eigenes Foto des Betreibers beziehungsweise von ihm geliefertes
   Bild, verkleinert und weichgezeichnet.
 
   OFFEN, geprueft am 01.09.2026: "beziehungsweise von ihm geliefertes Bild"
@@ -88,7 +88,7 @@ planer-kopf.webp
 
 icon-*.png, apple-touch-icon.png, favicon-32.png, app-icon-quelle.png
   Das App-Symbol: eine gebuerstete Metallplatte mit Hoehenlinien, darin ein
-  dunkles Naked Bike auf kurviger Strasse. Entworfen von Friedrich Sternberg
+  dunkles Naked Bike auf kurviger Strasse. Entworfen vom Betreiber
   im August 2026 mit einem KI-Bildgenerator, ueberarbeitet am 26.08.2026.
   Alle Groessen sind aus derselben Vorlage gerechnet; app-icon-quelle.png
   ist die Quelle in vollen Farben (1024 Punkte, das Mass fuer den App
@@ -101,7 +101,7 @@ icon-*.png, apple-touch-icon.png, favicon-32.png, app-icon-quelle.png
 
 logo-serpa.webp, logo-quelle.png
   Der Schriftzug "SERPA" als gerendertes, gebuerstetes Metall mit derselben
-  Hoehenlinien-Gravur wie das Symbol. Entworfen von Friedrich Sternberg im
+  Hoehenlinien-Gravur wie das Symbol. Entworfen vom Betreiber im
   August 2026 mit einem KI-Bildgenerator. Keine fremde Schriftlizenz
   beruehrt: Die Buchstaben sind Teil des gerenderten Bildes, nicht mit einer
   Schriftdatei gesetzt.

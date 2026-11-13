@@ -1677,7 +1677,7 @@ stimmt, was `img/LIZENZ-bilder.txt` behauptet.
 Tankverkleidung, Vierfach-Krümmer, Scheinwerferform und die blaue Lackierung
 ähneln sehr deutlich einem real erhältlichen Modell (dem Augenschein nach der
 Kawasaki-Z-Reihe). Fremde Schriftzüge sind keine darauf. Die Lizenzdatei sagt
-dazu nur „aus einem von Friedrich Sternberg gelieferten Bild" – das ist die
+dazu nur „aus einem vom Betreiber gelieferten Bild" – das ist die
 einzige unklare Herkunft im ganzen Ordner, und sie sitzt an der
 ungeeignetsten Stelle: Seit heute ist dieses Bild nicht mehr nur ein Rückfall
 auf der Bühne, sondern steht als Hintergrund auf der Kachel „Meine Stats".
@@ -3875,7 +3875,7 @@ außen an dieselbe Hülle.
 
 Beim ersten Ausprobieren bot der Teilen-Dialog dies zum Verschicken an:
 
-    file:///Users/friedrichsternberg/Documents/motorrad-app/index.html#t=…
+    file:///Users/…/motorrad-app/index.html#t=…
 
 Der Link selbst war in Ordnung — der Token stand da, `freigabe_anlegen()`
 lief also durch. Falsch war der Anfang: `teilenBasis()` baute die Adresse
