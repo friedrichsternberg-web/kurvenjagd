@@ -121,8 +121,12 @@ function pruefeAnteile(cent, anteile) {
    ist geflossen, die Sache ist erledigt. Im "anteil" bleibt er stehen, denn
    gekostet hat es trotzdem.                                                */
 
+/* jeNutzer hat keinen Prototyp: Die Schluessel sind Kennungen aus den
+   Anteilen, und die darf jeder Teilnehmer frei schreiben. Mit einem
+   gewoehnlichen {} waere "__proto__" kein neuer Eintrag, sondern
+   Object.prototype - und die Rechnung schriebe auf jedes Objekt der Seite. */
 function rechneKasse(ausgaben, teilnehmerIds = []) {
-  const jeNutzer = {};
+  const jeNutzer = Object.create(null);
   const merke = kennung => {
     const schluessel = String(kennung ?? 'unbekannt');
     if (!jeNutzer[schluessel]) {

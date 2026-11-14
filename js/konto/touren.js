@@ -534,7 +534,7 @@ async function zeichneOeffentlicheReisen() {
 }
 
 function oeffentlicheReiseHtml(zeile) {
-  const tage = Array.isArray(zeile.tage) ? zeile.tage : [];
+  const tage = säubreTage(zeile.tage);
   const alsReise = { id: zeile.id, name: zeile.name, start: zeile.beginnt_am || null, tage };
   const karte = typeof reiseKartenSvg === 'function' ? reiseKartenSvg(alsReise, { marke: 12 }) : '';
   const anzahl = zeile.tage_anzahl || tage.length;

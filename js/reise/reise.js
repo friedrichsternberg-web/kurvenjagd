@@ -56,7 +56,18 @@ const REISEN_SPEICHER = 'kurvenjagd.reisen';
 
 function ladeReisen() {
   const liste = geraet.lies(REISEN_SPEICHER, []);
-  return Array.isArray(liste) ? liste : [];
+  if (!Array.isArray(liste)) return [];
+  liste.forEach(reise => { if (reise && typeof reise === 'object') reise.tage = säubreTage(reise.tage); });
+  return liste;
+}
+
+/* Die Tage einer Reise, wie sie von aussen kommen: vom Server, ueber einen
+   Link oder aus einer Gruppe. reisen.tage darf jeder Mitfahrer schreiben,
+   und ein einziges null darin braeche das Zeichnen der Reise ab - bei
+   allen, die sie sehen. Was kein Objekt ist, ist kein Tag und faellt weg. */
+function säubreTage(tage) {
+  if (!Array.isArray(tage)) return [];
+  return tage.filter(tag => tag && typeof tag === 'object' && !Array.isArray(tag));
 }
 
 // Die EINZIGE Stelle, die Reisen in den Geraetespeicher schreibt.
@@ -929,6 +940,21 @@ function tagAusAttribut(element, name) {
   return Number.isFinite(Number(wert)) ? Number(wert) : wert;
 }
 
+/* Die Route eines Tages in den Planer legen. Die Abschrift einer
+   gemeinsamen Reise (tag.route) kann ein Mitfahrer geschrieben haben: Sie
+   geht durch dieselbe Pruefung wie jede fremde Tour (pruefeTour() in
+   kern.js). Die eigene Tour aus der Liste bleibt, wie sie ist. */
+function oeffneTagImPlaner(tagId) {
+  const reise = reiseNach(offeneReiseId);
+  const tag = reise?.tage.find(t => String(t.id) === String(tagId));
+  const route = routeZuTag(tag);
+  if (!route) return;
+  const tour = route === tag.route ? pruefeTour({ ...route, id: String(tag.id) }) : route;
+  if (!tour) { showToast('Diese Etappe lässt sich nicht im Planer öffnen.'); return; }
+  zeigePlaner();
+  ladeGespeicherteRoute(tour);
+}
+
 function beiTippImReiseBildschirm(ereignis) {
   const ziel = ereignis.target;
   const trifft = auswahl => ziel.closest(auswahl);
@@ -974,13 +1000,7 @@ function beiTippImReiseBildschirm(ereignis) {
     return;
   }
   const planer = trifft('[data-planer]');
-  if (planer) {
-    const reise = reiseNach(offeneReiseId);
-    const tag = reise?.tage.find(t => String(t.id) === planer.dataset.planer);
-    const route = routeZuTag(tag);
-    if (route) { zeigePlaner(); ladeGespeicherteRoute(route); }
-    return;
-  }
+  if (planer) { oeffneTagImPlaner(planer.dataset.planer); return; }
   const waehle = trifft('[data-waehle]');
   if (waehle) { oeffneRoutenwahl(tagAusAttribut(waehle, 'waehle')); return; }
   const erstelle = trifft('[data-erstelle]');

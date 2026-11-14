@@ -3080,7 +3080,7 @@ function zeigeAufzeichnungsExtras(r) {
   const galerie = document.getElementById('aufzeichnungFotos');
 
   const notizen = r && r.notizen ? r.notizen : '';
-  const fotos = r && Array.isArray(r.fotos) ? r.fotos : [];
+  const fotos = r && Array.isArray(r.fotos) ? r.fotos.filter(f => f && typeof f === 'object') : [];
 
   if (!notizen && fotos.length === 0) {
     block.hidden = true;
@@ -3107,7 +3107,9 @@ function zeigeAufzeichnungsExtras(r) {
     const bildElement = galerie.querySelector(`img[data-nr="${i}"]`);
     if (!bildElement) return;
 
-    let quelle = f.bild;
+    // Dieselbe Pruefung wie in zeichneFotoGalerie(): Eine Adresse, die
+    // nicht von hier stammt, wird nicht gesetzt.
+    let quelle = istErlaubteBildquelle(f.bild) ? f.bild : null;
     if (!quelle && f.pfad && typeof fotoAnzeigeUrl === 'function') {
       quelle = await fotoAnzeigeUrl(f.pfad);
     }
@@ -3589,14 +3591,20 @@ function verkabele(kennung, ereignisart, tun) {
                 sondern ihr Geruest - aber es zeigt immerhin, wohin es
                 geht, und ist besser als eine leere Flaeche.
 
-   Herausgegeben wird durchgehend [Laenge, Breite], das Format der Spur. */
+   Herausgegeben wird durchgehend [Laenge, Breite], das Format der Spur.
+
+   Jede Linie geht vorher durch säubreSpur() bzw. säubrePunkte() aus
+   kern.js: Die Vorschau einer geteilten Tour oder einer gemeinsamen Reise
+   hat ein anderer geschrieben, und ein einziger Punkt "null" darin braeche
+   sonst das Zeichnen der ganzen Liste ab - bei jedem, der sie sieht. */
 function tourLinie(tour) {
   if (!tour) return [];
-  if (Array.isArray(tour.vorschau) && tour.vorschau.length > 1) return tour.vorschau;
-  if (Array.isArray(tour.track) && tour.track.length > 1) return tour.track;
-  if (Array.isArray(tour.waypoints) && tour.waypoints.length > 1) {
-    return tour.waypoints.map(w => [w.lon, w.lat]);
-  }
+  const vorschau = säubreSpur(tour.vorschau);
+  if (vorschau.length > 1) return vorschau;
+  const spur = säubreSpur(tour.track);
+  if (spur.length > 1) return spur;
+  const punkte = säubrePunkte(tour.waypoints);
+  if (punkte.length > 1) return punkte.map(w => [w.lon, w.lat]);
   return [];
 }
 

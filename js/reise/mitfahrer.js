@@ -235,7 +235,7 @@ async function gleicheReisenAb() {
       oertlich.push({
         id: vomServer.id, serverId: vomServer.id, besitzerId: vomServer.besitzer_id,
         name: vomServer.name, start: vomServer.beginnt_am,
-        tage: Array.isArray(vomServer.tage) ? vomServer.tage : [],
+        tage: säubreTage(vomServer.tage),
         erstellt: vomServer.geaendert, geaendert: vomServer.geaendert,
       });
       geaendert = true;
@@ -245,7 +245,7 @@ async function gleicheReisenAb() {
     if (new Date(vomServer.geaendert) > new Date(daheim.geaendert || 0)) {
       daheim.name = vomServer.name;
       daheim.start = vomServer.beginnt_am;
-      daheim.tage = Array.isArray(vomServer.tage) ? vomServer.tage : [];
+      daheim.tage = säubreTage(vomServer.tage);
       daheim.geaendert = vomServer.geaendert;
       geaendert = true;
     } else if (new Date(daheim.geaendert || 0) > new Date(vomServer.geaendert)) {
